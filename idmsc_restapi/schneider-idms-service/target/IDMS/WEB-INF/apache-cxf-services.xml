@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:sec="http://cxf.apache.org/configuration/security"
+  xmlns:http="http://cxf.apache.org/transports/http/configuration"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xmlns:jaxrs-client="http://cxf.apache.org/jaxrs-client"
+	xmlns:jaxrs="http://cxf.apache.org/jaxrs" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	xmlns:p="http://www.springframework.org/schema/p"
+
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans 		http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context 		http://www.springframework.org/schema/context/spring-context.xsd
+	http://cxf.apache.org/configuration/security
+    http://cxf.apache.org/schemas/configuration/security.xsd
+    http://cxf.apache.org/transports/http/configuration
+    http://cxf.apache.org/schemas/configuration/http-conf.xsd
+	http://cxf.apache.org/jaxrs 						http://cxf.apache.org/schemas/jaxrs.xsd 	
+	http://cxf.apache.org/jaxws 						http://cxf.apache.org/schemas/jaxws.xsd
+	http://www.springframework.org/schema/util 			http://www.springframework.org/schema/util/spring-util-2.0.xsd
+	http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+	
+	<!-- these are for configuring ssl support -->
+	<http:conduit name="https://identity-int.schneider-electric.com/.*">
+	    <http:tlsClientParameters disableCNCheck="true">
+	      <sec:trustManagers>
+	        <sec:keyStore type="JKS" password="${jksPassword}" file="${jksFilePath}"/>
+	      </sec:trustManagers>
+	    </http:tlsClientParameters>
+	</http:conduit> 
+	
+	<http:conduit name="https://godigital-sqe2.cn.schneider-electric.com/.*">
+	    <http:tlsClientParameters disableCNCheck="true">
+	      <sec:trustManagers>
+	        <sec:keyStore type="JKS" password="${jksPassword}" file="${jksFilePath}"/>
+	      </sec:trustManagers>
+	    </http:tlsClientParameters>
+	</http:conduit>
+	
+
+	<!-- these are included in the dependency jar -->
+	<import resource="classpath:META-INF/cxf/cxf.xml"/>
+	<import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
+	<!-- to turn on annotation wiring == turns on only the registered beans 
+		through ApplicationContext -->
+
+	<cache:annotation-driven />		
+	<context:annotation-config />
+	
+	
+	<import resource="classpath:config/product-service-client-beans.xml" />
+	<!-- <import resource="classpath:resources/ehcache.xml" /> -->
+	<!-- <import resource="classpath:config/logback.xml" /> -->
+	
+	<context:property-placeholder ignore-resource-not-found="true"
+								  location="classpath:config/properties/application.properties" />
+
+	<!-- scans and register beans using annotation-config (metadata) -->
+	<context:component-scan base-package="com.idms.*,com.se.idms.*" />
+
+	<bean name="defaultMapper" class="ma.glasnost.orika.impl.ConfigurableMapper" />
+
+	<!-- CXFServlet configured in web.xml sends requests here -->
+	<jaxrs:server id="idmsService" address="/">
+		<jaxrs:serviceBeans>
+			<ref bean="userService" />
+			<ref bean="goDigitalUserService" />
+			<ref bean="uimsAccessManagerSoapService"/>
+			<ref bean="uimsAuthUserManagSoapService"/>
+			<ref bean="uimsCompManagSoapService"/>
+			<ref bean="uimsUserManagSoapService"/>
+		</jaxrs:serviceBeans>
+		<jaxrs:providers>
+			<!-- TODO: Since allowOrigins is not set, all origins are allowed - i.e. "Access-Control-Allow-Origin:*" -->
+			<!-- <bean class="org.apache.cxf.rs.security.cors.CrossOriginResourceSharingFilter"/> -->
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
+		</jaxrs:providers>
+		<!-- <jaxrs:features>
+			<bean class="org.apache.cxf.jaxrs.validation.JAXRSBeanValidationFeature"/>
+		</jaxrs:features> -->
+	</jaxrs:server>
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="${smtpHost}" />
+		<property name="port" value="${smtpPort}" />
+		<property name="username" value="${smtpUserName}"/>
+		<property name="password" value="${smtpPassword}" />
+ 
+		<!-- The name of the property, following JavaBean naming conventions -->
+		<property name="javaMailProperties">
+			<props>
+				<prop key="mail.transport.protocol">smtp</prop>
+				<prop key="mail.smtp.auth">true</prop>
+				<prop key="mail.smtp.starttls.enable">true</prop>
+				<prop key="mail.debug">true</prop>
+				<prop key="mail.mime.charset">UTF-8</prop>
+			</props>
+		</property>
+	</bean>
+	<bean id="emailService" class="com.idms.service.SendEmail"/>
+	<!-- Spring Cache library setup -->
+	<!-- <bean class="org.springframework.cache.support.SimpleCacheManager" id="cacheManager">
+    <property name="caches">
+      <set>
+        <bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="default" />
+        <bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="iPlanetToken" />
+      </set>
+    </property>
+  </bean> -->
+  
+  <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+        <property name="cacheManager" ref="ehcache"/>
+    </bean>
+    <bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+        <property name="configLocation" value="classpath:config/ehcacheToken.xml"/>
+        <!-- <property name="shared" value="true"/> -->
+    </bean>
+</beans>
