@@ -403,6 +403,7 @@ public class UserConstants {
 	public static final String ERROR_RESET_PR= "Error in Reset Password.";
 	public static final String GLOBAL_USER_BOOLEAN = "Globaluser value should be boolean";
 	public static final String UIMS = "UIMS";
+	public static final String PRM = "PRM";
 	public static final String PACE = "PACE";
 	public static final String AMLB_COOKIE = "AWSELB=";
 	public static final String UIMS_VERSION = "1";

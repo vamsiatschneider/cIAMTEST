@@ -903,9 +903,14 @@ public class UserServiceImpl implements UserService {
 						/*PRODUCT_JSON_STRING = sendOtp(UserConstants.HOTP_EMAIL, userName,
 							openAmReq.getInput().getUser().getUserPassword(), UserConstants.CREATE_USER_SERVICE);*/
 					
+					//if Registration source is not PRM then send mail
+					if (null != userRequest.getUserRecord().getIDMS_Registration_Source__c() && !UserConstants.PRM
+							.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())) {
+					
+					
 					String otp = sendEmail.generateOtp(userName);	
 					sendEmail.sendOpenAmEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName ,userRequest.getUserRecord().getIDMS_Registration_Source__c());
-					
+					}
 					/**
 					 * To update authId in openAM extended attribute
 					 */
