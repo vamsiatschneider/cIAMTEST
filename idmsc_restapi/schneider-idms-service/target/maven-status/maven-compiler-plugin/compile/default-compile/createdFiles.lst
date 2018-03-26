@@ -13,8 +13,6 @@ com\uims\authenticatedUsermanager\IMSServiceSecurityCallNotAllowedException.clas
 com\idms\service\digital\impl\GoDigitalUserServiceImpl.class
 com\uims\companymanager\IMSServiceSecurityCallNotAllowedException_Exception.class
 com\uims\accessmanager\IMSBadApplicationException.class
-com\se\uims\usermanager\ActivateIdentityWithMobileNoPasswordResponse.class
-com\uims\companymanager\CompanyManagerUIMSV2.class
 com\idms\model\UpdateUserResponse.class
 com\idms\model\ConfirmPinRequest.class
 com\se\uims\usermanager\AcceptUserMergeResponse.class
@@ -22,7 +20,6 @@ com\idms\service\UIMSUserManagerSoapService$1.class
 com\se\idms\dto\AILResponse.class
 com\se\uims\usermanager\InvalidImsServiceMethodArgumentException_Exception.class
 com\se\uims\usermanager\UpdateUserResponse.class
-com\se\uims\usermanager\UpdatePhoneId.class
 com\idms\service\UIMSAccessManagerSoapService$1.class
 com\se\idms\dto\UserServiceResponse.class
 com\uims\accessmanager\AccessTree$AccessList.class
@@ -38,7 +35,6 @@ com\uims\companymanager\CreateCompanyResponse.class
 com\uims\authenticatedUsermanager\CreateIdentityWithPasswordForceIdmsIdResponse.class
 com\se\uims\usermanager\InactiveUserImsException.class
 com\se\uims\usermanager\AccessElement.class
-com\se\uims\usermanager\ActivateIdentityWithMobileNoPassword.class
 com\uims\companymanager\package-info.class
 com\idms\service\UserService.class
 com\uims\authenticatedUsermanager\InactiveUserImsException_Exception.class
@@ -53,8 +49,10 @@ com\idms\model\TokenCallBacks.class
 com\idms\service\UIMSUserManagerSoapService$2.class
 com\uims\authenticatedUsermanager\CreateIdentityForceIdmsId.class
 com\se\uims\usermanager\ProgramLevel.class
+com\uims\companymanager\AuthenticatedCompanyManagementV2.class
 com\se\uims\usermanager\SetPasswordResponse.class
-com\uims\companymanager\RejectCompanyMergeResponse.class
+com\uims\companymanager\SearchPublicCompany.class
+com\uims\companymanager\AuthenticatedCompanyManagerUIMSV2.class
 com\se\uims\usermanager\UnexpectedLdapResponseException_Exception.class
 com\uims\companymanager\CompanyV3.class
 com\uims\companymanager\LdapTemplateNotReadyException.class
@@ -63,6 +61,7 @@ com\uims\accessmanager\UIMSV2UserAccessManagement.class
 com\se\idms\dto\IDMSUserAIL.class
 com\se\idms\util\LangSupportUtil.class
 com\uims\companymanager\GetCompany.class
+com\uims\companymanager\SearchPublicCompanyResponse.class
 com\se\idms\dto\SocialLoginResponse.class
 com\se\uims\usermanager\UnexpectedRuntimeImsException.class
 com\se\uims\usermanager\GetUserResponse.class
@@ -75,7 +74,6 @@ com\uims\authenticatedUsermanager\ResetPassword.class
 com\uims\accessmanager\AccessElement.class
 com\uims\accessmanager\GetAccessControlByUser.class
 com\uims\authenticatedUsermanager\UIMSV22UserAuthenticatedManagement.class
-com\se\uims\usermanager\RequestPhoneIdChangeResponse.class
 com\idms\model\IdmsIdpChainingRequest.class
 com\se\idms\dto\UpdatePasswordResponse.class
 com\uims\authenticatedUsermanager\CreateIdentityWithPhoneId.class
@@ -90,18 +88,13 @@ com\idms\model\TransliteratorListResponse.class
 com\se\idms\dto\SetPasswordResponse.class
 com\uims\companymanager\RequestedEntryNotExistsException.class
 com\uims\authenticatedUsermanager\ObjectFactory.class
-com\se\uims\usermanager\UIMSV22UserManagement.class
 com\se\uims\usermanager\RequestEmailChangeResponse.class
-com\se\uims\usermanager\UpdatePhoneIdResponse.class
 com\se\uims\usermanager\InvalidImsServiceMethodArgumentException.class
 com\uims\companymanager\GetCompanyByInvitationUid.class
 com\uims\accessmanager\ObjectFactory.class
-com\uims\companymanager\RemovePrimaryContactResponse.class
-com\se\uims\usermanager\RequestPhoneIdChange.class
 com\uims\authenticatedUsermanager\CreateIdentityWithPhoneIdResponse.class
 com\se\uims\usermanager\OfficialsIds$Ids$Entry.class
 com\uims\accessmanager\UserAccessManagerUIMSV2.class
-com\uims\companymanager\AcceptCompanyMergeResponse.class
 com\se\uims\usermanager\SecuredImsException_Exception.class
 com\idms\service\UserServiceImpl.class
 com\se\idms\util\SamlAssertionTokenGenerator.class
@@ -130,6 +123,7 @@ com\idms\model\IFWUser.class
 com\se\uims\usermanager\UpdatePasswordResponse.class
 com\se\uims\usermanager\GetAccessControlResponse.class
 com\se\uims\usermanager\UnexpectedLdapResponseException.class
+com\se\uims\usermanager\UserManagerUIMSV2.class
 com\uims\companymanager\UnexpectedRuntimeImsException.class
 com\idms\service\UIMSUserManagerSoapService.class
 com\uims\authenticatedUsermanager\ResetPasswordWithSmsResponse.class
@@ -163,7 +157,6 @@ com\se\uims\usermanager\UnexpectedRuntimeImsException_Exception.class
 com\se\uims\usermanager\UpdatePassword.class
 com\idms\service\UIMSUserManagerSoapService$4.class
 com\se\uims\usermanager\Program.class
-com\se\uims\usermanager\ValidateEmailAndSetPassword.class
 com\se\uims\usermanager\Type.class
 com\uims\accessmanager\UnexpectedLdapResponseException.class
 com\se\uims\usermanager\ActivateIdentityNoPassword.class
@@ -193,7 +186,6 @@ com\uims\accessmanager\UnexpectedRuntimeImsException_Exception.class
 com\idms\model\ActivateUser.class
 com\uims\authenticatedUsermanager\InvalidImsServiceMethodArgumentException_Exception.class
 com\uims\accessmanager\InactiveUserImsException_Exception.class
-com\se\uims\usermanager\UserManagerUIMSV22.class
 com\uims\authenticatedUsermanager\ForcedFidAlreadyExistException_Exception.class
 com\idms\model\TokenPrompt.class
 com\se\uims\usermanager\RejectUserMergeResponse.class
@@ -221,10 +213,8 @@ com\uims\accessmanager\InactiveUserImsException.class
 com\idms\model\UpdateUserRequest.class
 com\se\uims\usermanager\AccessElement$Childs.class
 com\idms\model\digital\Authentication.class
-com\uims\companymanager\RemovePrimaryContact.class
 com\idms\model\IDMSUserResponse.class
 com\uims\authenticatedUsermanager\ResetPasswordResponse.class
-com\se\uims\usermanager\SetPasswordWithSmsResponse.class
 com\uims\accessmanager\LdapTemplateNotReadyException_Exception.class
 com\uims\authenticatedUsermanager\SearchUserByPhoneIdResponse.class
 com\uims\authenticatedUsermanager\InvalidImsPropertiesFileException.class
@@ -234,11 +224,9 @@ com\se\uims\usermanager\GetProgramsResponse.class
 com\se\idms\dto\ParseValuesByOauthHomeWorkContextDto.class
 com\idms\model\UIMSCompanyRequest.class
 com\uims\companymanager\RequestedEntryNotExistsException_Exception.class
-com\uims\companymanager\RejectCompanyMerge.class
 com\se\uims\usermanager\GetPrograms.class
 com\se\uims\usermanager\GetAccessControl.class
 com\idms\model\AuthenticateRequest.class
-com\se\uims\usermanager\SetPasswordWithSms.class
 com\se\uims\usermanager\RequestedEntryNotExistsException.class
 com\uims\authenticatedUsermanager\CreateIdentityWithMobileWithPassword.class
 com\uims\authenticatedUsermanager\CreateIdentityWithPassword.class
@@ -256,7 +244,6 @@ com\uims\companymanager\GetCompanyByGoldenId.class
 com\uims\companymanager\UpdateCompanyResponse.class
 com\idms\model\SendInvitationRequest.class
 com\uims\accessmanager\LdapTemplateNotReadyException.class
-com\uims\companymanager\AcceptCompanyMerge.class
 com\se\idms\util\UserConstants.class
 com\uims\accessmanager\InvalidImsServiceMethodArgumentException.class
 com\uims\authenticatedUsermanager\OfficialsIds$Ids$Entry.class
@@ -265,15 +252,14 @@ com\idms\service\UIMSUserManagerSoapService$5.class
 com\uims\authenticatedUsermanager\RequestedInternalUserException_Exception.class
 com\uims\authenticatedUsermanager\InvalidImsServiceMethodArgumentException.class
 com\uims\accessmanager\SecuredImsException_Exception.class
-com\uims\companymanager\CompanyManagementV2.class
 com\uims\authenticatedUsermanager\RequestedEntryNotExistsException.class
 com\idms\model\ResendRegEmailRequest.class
 com\se\idms\dto\CompanyDetails.class
 com\uims\authenticatedUsermanager\package-info.class
 com\se\uims\usermanager\OfficialsIds.class
 com\se\idms\util\PhoneValidator.class
+com\se\uims\usermanager\UIMSV2UserManagement.class
 com\uims\authenticatedUsermanager\OfficialsIds$Ids.class
-com\se\uims\usermanager\UserV6.class
 com\uims\authenticatedUsermanager\LdapTemplateNotReadyException_Exception.class
 com\idms\service\UIMSAuthenticatedUserManagerSoapService.class
 com\uims\accessmanager\Type.class
@@ -295,7 +281,6 @@ com\idms\model\BaseEntity.class
 com\se\idms\util\UimsConstants.class
 com\se\sync\CustomAsyncExceptionHandler.class
 com\idms\service\digital\GoDigitalUserService.class
-com\se\uims\usermanager\ValidateEmailAndSetPasswordResponse.class
 com\se\uims\usermanager\OfficialsIds$Ids.class
 com\idms\service\UIMSUserManagerSoapService$7.class
 com\se\uims\usermanager\IMSServiceSecurityCallNotAllowedException_Exception.class

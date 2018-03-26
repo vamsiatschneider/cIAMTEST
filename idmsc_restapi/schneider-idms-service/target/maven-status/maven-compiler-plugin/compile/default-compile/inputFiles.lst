@@ -1,16 +1,14 @@
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\IMSServiceSecurityCallNotAllowedException.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms\model\BaseEntity.java
+C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\UserManagerUIMSV2.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms\model\TransliteratorListResponse.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\authenticatedUsermanager\CreateIdentityWithPasswordResponse.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms\model\UpdateUserResponse.java
-C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\UserManagerUIMSV22.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\SecuredImsException.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\authenticatedUsermanager\CreateIdentityWithPasswordForceIdmsId.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\InactiveUserImsException.java
-C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\AcceptCompanyMerge.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\accessmanager\SecuredImsException.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\idms\dto\PasswordRecoveryResponse.java
-C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\RequestPhoneIdChange.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\authenticatedUsermanager\GetUser.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms\service\MailService.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms\model\ActivateUserRequest.java
@@ -74,7 +72,6 @@ C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\authenticatedUsermanager\LdapTemplateNotReadyException_Exception.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\SecuredImsException.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms\model\ResendEmailChangeRequest.java
-C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\CompanyManagementV2.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\SetPassword.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\idms\util\JsonConstants.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\ObjectFactory.java
@@ -84,8 +81,6 @@ C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\Identity.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\accessmanager\AccessTree.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\idms\dto\GetUserHomeByOauthResponse.java
-C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\UIMSV22UserManagement.java
-C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\SetPasswordWithSms.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\accessmanager\ObjectFactory.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\OfficialsIds.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\authenticatedUsermanager\CreateIdentityWithMobileWithPasswordResponse.java
@@ -93,11 +88,7 @@ C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\RequestedInternalUserException.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\LdapTemplateNotReadyException.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\InvalidImsServiceMethodArgumentException.java
-C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\ValidateEmailAndSetPassword.java
-C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\SetPasswordWithSmsResponse.java
-C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\RejectCompanyMerge.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\authenticatedUsermanager\IMSServiceSecurityCallNotAllowedException_Exception.java
-C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\RejectCompanyMergeResponse.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\UpdateEmail.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\SearchCompanyResponse.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms\service\UIMSCompanyManagerSoapService.java
@@ -108,7 +99,6 @@ C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\u
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\authenticatedUsermanager\AuthenticatedUserManagerUIMSV22.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\RequestedEntryNotExistsException_Exception.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\AccessElement.java
-C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\AcceptCompanyMergeResponse.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms\model\TransliteratorRequest.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\RequestedEntryNotExistsException_Exception.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\idms\util\PhoneValidator.java
@@ -116,14 +106,11 @@ C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms\model\TransliteratorListRequest.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\UpdateCompany.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\authenticatedUsermanager\SecuredImsException.java
-C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\ActivateIdentityWithMobileNoPassword.java
-C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\UserV6.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\idms\dto\IDMSUserRecord.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\authenticatedUsermanager\InvalidImsServiceMethodArgumentException.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\idms\dto\UpdatePasswordResponse.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\authenticatedUsermanager\ImsMailerException.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\authenticatedUsermanager\RequestedEntryNotExistsException.java
-C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\UpdatePhoneIdResponse.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\UnexpectedRuntimeImsException.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\accessmanager\UIMSV2UserAccessManagement.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\authenticatedUsermanager\ImsMailerException_Exception.java
@@ -149,15 +136,15 @@ C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\u
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\authenticatedUsermanager\InvalidImsPropertiesFileException.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms\model\CreateUserRequest.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms\service\ActivateUsers.java
-C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\RemovePrimaryContact.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\LdapTemplateNotReadyException_Exception.java
-C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\RemovePrimaryContactResponse.java
+C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\UIMSV2UserManagement.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\GetUserResponse.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\ImsMailerException_Exception.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\authenticatedUsermanager\InvalidImsServiceMethodArgumentException_Exception.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\idms\util\UserConstants.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\ActivateIdentity.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\authenticatedUsermanager\UnexpectedLdapResponseException_Exception.java
+C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\AuthenticatedCompanyManagementV2.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\idms\util\PropertiesLoader.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\UnexpectedLdapResponseException_Exception.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms\model\ConfirmPinErrorResponse.java
@@ -166,6 +153,7 @@ C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms\model\ConfirmPinRequest.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms\model\ResendRegEmailRequest.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\GetCompanyByGoldenId.java
+C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\SearchPublicCompanyResponse.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\accessmanager\LdapTemplateNotReadyException_Exception.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\authenticatedUsermanager\ForcedFidAlreadyExistException.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms\model\UpdateUserRequest.java
@@ -173,7 +161,6 @@ C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\i
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms\model\CreateUserResponse.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\AcceptUserMerge.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\UnexpectedRuntimeImsException_Exception.java
-C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\CompanyManagerUIMSV2.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\accessmanager\InactiveUserImsException.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\authenticatedUsermanager\RequestedInternalUserException.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\accessmanager\GetAccessControlByUser.java
@@ -181,7 +168,6 @@ C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\u
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\idms\dto\IDMSUserAIL.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\ActivateIdentityResponse.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\RequestedEntryNotExistsException.java
-C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\RequestPhoneIdChangeResponse.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms\model\UserRecord.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\RequestEmailChange.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\idms\dto\AILResponse.java
@@ -215,7 +201,6 @@ C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\i
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\authenticatedUsermanager\SearchUserByPhoneIdResponse.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms\model\PasswordRecoveryRequest.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\RequestedInternalUserException.java
-C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\UpdatePhoneId.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms\model\digital\Authentication.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\accessmanager\SecuredImsException_Exception.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\idms\dto\GetUserWorkByOauthResponse.java
@@ -228,7 +213,6 @@ C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\i
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\accessmanager\AccessElement.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\idms\dto\UserExistsResponse.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\idms\dto\IFWCustomAttributesForHome.java
-C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\ActivateIdentityWithMobileNoPasswordResponse.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\authenticatedUsermanager\package-info.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\idms\dto\UserServiceResponse.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms\service\SendEmail.java
@@ -242,6 +226,7 @@ C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\sync\CustomAsyncExceptionHandler.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\authenticatedUsermanager\Identity.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\authenticatedUsermanager\SearchUser.java
+C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\SearchPublicCompany.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\idms\dto\SetPasswordErrorResponse.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\RejectUserMerge.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\authenticatedUsermanager\CreatedIdentityReport.java
@@ -269,7 +254,7 @@ C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\InvalidImsServiceMethodArgumentException.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms\model\UIMSCompany.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\ObjectFactory.java
-C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\ValidateEmailAndSetPasswordResponse.java
+C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\companymanager\AuthenticatedCompanyManagerUIMSV2.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\se\uims\usermanager\GetProgramsResponse.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\uims\accessmanager\RequestedEntryNotExistsException_Exception.java
 C:\China_IDMS\latest\idmsc_restapi\schneider-idms-service\src\main\java\com\idms\model\TokenCallBacks.java

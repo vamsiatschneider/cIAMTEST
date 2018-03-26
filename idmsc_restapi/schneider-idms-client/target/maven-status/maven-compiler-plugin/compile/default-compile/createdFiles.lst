@@ -15,4 +15,5 @@ com\idms\product\client\OpenAMProvisionalService.class
 com\idms\product\model\OAuthAuthorize.class
 com\idms\product\client\IFWService.class
 com\idms\product\model\OpenAMGetUserHomeResponse.class
+com\idms\product\client\SmsService.class
 com\idms\product\model\OpenUserReponse.class

@@ -22,7 +22,7 @@
 	http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
 	
 	<!-- these are for configuring ssl support -->
-	<http:conduit name="https://identity-int.schneider-electric.com/.*">
+	<http:conduit name="https://openam-stg.schneider-electric.com/.*">
 	    <http:tlsClientParameters disableCNCheck="true">
 	      <sec:trustManagers>
 	        <sec:keyStore type="JKS" password="${jksPassword}" file="${jksFilePath}"/>
