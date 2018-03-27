@@ -266,7 +266,23 @@ public class SendEmail {
 		return pin;
 	}
 	
-	
+	public void storePRMOtp(String userId, String hashedPin) throws Exception {
+
+		// Proper Exception handling
+		String product_json_string = "";
+		LOGGER.info("hexa string is " + hashedPin);
+		
+		LocalDateTime currentDatenTime = LocalDateTime.now();
+		long currentDatenTimeInMillisecs = currentDatenTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+		
+		hashedPin = hashedPin+":"+currentDatenTimeInMillisecs;
+		// open Attribute AuthID and Timestamp
+		product_json_string = "{" + "\"authId\": \"" + hashedPin + "\"}";
+		// update hashkey in openAM.
+		productService.updateUser(UserConstants.CHINA_IDMS_TOKEN+userService.getSSOToken(), userId,
+				product_json_string);
+
+	}
 	
 	public boolean validatePin(String otp,String userId)throws Exception {
 		boolean validatePin = false;

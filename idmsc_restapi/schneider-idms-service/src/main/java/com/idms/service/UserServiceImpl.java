@@ -287,6 +287,7 @@ public class UserServiceImpl implements UserService {
 		userResponse = new UserServiceResponse();
 		appList = new ArrayList<String>();
 		appList.add("PACE");
+		appList.add("PRM");
 	}
 	
 	 
@@ -910,6 +911,11 @@ public class UserServiceImpl implements UserService {
 					
 					String otp = sendEmail.generateOtp(userName);	
 					sendEmail.sendOpenAmEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName ,userRequest.getUserRecord().getIDMS_Registration_Source__c());
+					} else if (null != userRequest.getUserRecord().getIDMS_Registration_Source__c() && UserConstants.PRM
+							.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())) {
+						
+						//AboutMe field is to store the hashed pin which comes from global IDMS
+						sendEmail.storePRMOtp(userName, userRequest.getUserRecord().getAboutMe());
 					}
 					/**
 					 * To update authId in openAM extended attribute

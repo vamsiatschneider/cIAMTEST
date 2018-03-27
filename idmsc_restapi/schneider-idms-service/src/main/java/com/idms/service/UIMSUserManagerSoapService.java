@@ -449,6 +449,10 @@ public class UIMSUserManagerSoapService {
 							&& (null != userRequest.getUserRecord().getAdminCompanyFederatedId()
 									&& !userRequest.getUserRecord().getAdminCompanyFederatedId().isEmpty())) {
 						createdCompanyFedId = userRequest.getUserRecord().getAdminCompanyFederatedId();
+					} else if (null != userRequest.getUserRecord().getIDMS_Registration_Source__c() 
+							&& UserConstants.PRM.equals(userRequest.getUserRecord().getIDMS_Registration_Source__c())){
+						//if registration source is PRM then accept and force the company FederatedId from IFW/IDMS global
+						createdCompanyFedId = userRequest.getUserRecord().getCompanyFederatedId();
 					} else {
 
 						createdCompanyFedId = companyManagerSoapService.createUIMSCompany(createdFedId,
