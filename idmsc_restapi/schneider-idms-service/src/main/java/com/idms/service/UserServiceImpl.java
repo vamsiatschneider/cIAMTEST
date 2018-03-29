@@ -2375,6 +2375,7 @@ public class UserServiceImpl implements UserService {
 		String hotpMobileVerification = null;
 		String openamVnew=null;
 		Integer vNewCntValue=0;
+		String ifwAccessToken = null;
 		boolean validPinStatus = false;
 		ObjectMapper objMapper=new ObjectMapper();
 		try {
@@ -2794,6 +2795,31 @@ public class UserServiceImpl implements UserService {
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (NotFoundException e) {
 			e.printStackTrace();
+			//logic for PRM set password, if the user not found, call the Global get user api 
+			//and retrieve the user details and pass it to create user 
+			if(null != confirmRequest.getIDMS_Profile_update_source() 
+					&& UserConstants.PRM.equals(confirmRequest.getIDMS_Profile_update_source())){
+				ifwAccessToken = ifwService.getIFWToken(UserConstants.CONTENT_TYPE_URL_FROM,
+						UserConstants.IFW_GRANT_TYPE, ifwClientId, ifwClientSecret);
+				productDocCtx = JsonPath.using(conf).parse(ifwAccessToken);
+				String accessToken = productDocCtx.read("$.access_token");
+
+				LOGGER.info("getSalesForceToken : => " + "PASSWORD_GRANT_TYPE : " + UserConstants.PR_GRANT_TYPE
+						+ " salesForceClientId: " + salesForceClientId + " salesForceClientSecret :"
+						+ salesForceClientSecret + " salesForceUserName: " + salesForceUserName
+						+ " salesForcePassword :" + salesForcePassword);
+				String bfoAuthorization = salesForceService.getSalesForceToken(
+						UserConstants.CONTENT_TYPE_URL_FROM, UserConstants.PR_GRANT_TYPE, salesForceClientId,
+						salesForceClientSecret, salesForceUserName, salesForcePassword);
+				conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+				productDocCtx = JsonPath.using(conf).parse(bfoAuthorization);
+				String bfoAuthorizationToken = productDocCtx.read("$.access_token");
+
+				String authorization = "Bearer " + accessToken;
+
+				Response globalGetUserResponse = ifwService.getUser(authorization, bfoAuthorizationToken, UserConstants.ACCEPT_TYPE_APP_JSON, "", "", "", "", confirmRequest.getId());
+				LOGGER.info("globalGetUserResponse : " + globalGetUserResponse.getEntity());
+			}
 			response.setStatus(errorStatus);
 			response.setMessage("404 Not Found");
 			response.setId(confirmRequest.getId());
