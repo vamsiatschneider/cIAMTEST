@@ -212,6 +212,18 @@ public class IFWUser extends BaseEntity {
 	@JsonProperty
 	private String trustedAdmin;
 	
+	@JsonProperty
+	private String IDMSHashedToken;
+	
+	@JsonProperty("IDMSHashedToken")
+	public String getIDMSHashedToken() {
+		return IDMSHashedToken;
+	}
+
+	public void setIDMSHashedToken(String iDMSHashedToken) {
+		IDMSHashedToken = iDMSHashedToken;
+	}
+
 	public Attributes getAttributes() {
 		return attributes;
 	}

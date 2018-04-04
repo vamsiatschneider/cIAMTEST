@@ -13,6 +13,7 @@ import com.idms.model.UserRegistrationInfoRequest;
 import com.idms.product.model.OpenAMPasswordRecoveryInput;
 import com.idms.product.model.OpenAmUserRequest;
 import com.idms.product.model.UimsUserRequest;
+import com.se.idms.dto.IFWCustomAttributesForWork;
 import com.se.idms.util.UserConstants;
 import com.uims.authenticatedUsermanager.UserV6;
 import com.uims.companymanager.CompanyV3;
@@ -37,6 +38,7 @@ public class IdmsMapper extends ConfigurableMapper{
     	configureIFWUserRequestToGoDigitalUserRequest(mapperFactory);
     	
     	configureIFWUserRequestToIDMSUserRecord(mapperFactory);
+    	configureIFWGetUserResponseToIDMSCreateUserRequest(mapperFactory);
     }
     
    
@@ -611,7 +613,80 @@ public class IdmsMapper extends ConfigurableMapper{
 	
 	
 	
-	
+	private void configureIFWGetUserResponseToIDMSCreateUserRequest(MapperFactory mapperFactory){
+		mapperFactory.classMap(IFWCustomAttributesForWork.class, CreateUserRequest.class)
+		 .field("userId", "userRecord.id")
+		 .field("contactId", "userRecord.id")
+		 .field("accountId", "userRecord.accountId")
+		.field("uimsFederatedId", "userRecord.IDMS_Federated_ID__c")
+		 .field("idmsFederatedId", "userRecord.IDMS_Federated_ID__c")
+		 .field("userContext", "userRecord.IDMS_User_Context__c")
+		 .field("salutation", "userRecord.IDMSSalutation__c")
+		 .field("firstName", "userRecord.firstName")
+		 .field("middleName", "userRecord.IDMSMiddleName__c")
+		 .field("lastName", "userRecord.lastName")
+		 .field("countryCode", "userRecord.country")
+		 .field("email", "userRecord.email")
+		 .field("mobilePhone", "userRecord.mobilePhone")
+		 .field("languageCode", "userRecord.IDMS_PreferredLanguage__c")
+		 .field("emailOptIn", "userRecord.IDMS_Email_opt_in__c")
+		 .field("aboutMe", "userRecord.aboutMe")
+		 
+		   .field("street", "userRecord.street")
+		 .field("city", "userRecord.city")
+		 .field("zipCode", "userRecord.postalCode")
+		 .field("stateOrProvinceCode", "userRecord.state")
+		 .field("county", "userRecord.IDMS_County__c")
+		 .field("pOBox", "userRecord.IDMS_POBox__c")
+		 .field("additionalAddress", "userRecord.IDMS_AdditionalAddress__c")
+		 .field("suffix", "userRecord.IDMSSuffix__c")
+		 .field("homePhone", "userRecord.phone")
+		 .field("fax", "userRecord.fax")
+		  .field("trustStatus", "userRecord.IDMS_TrustStatus__c")
+//		 .field("trustLevel", "")
+		 .field("rejectionReason", "userRecord.IDMS_RejectionReason__c")
+		 .field("rejectionComment", "userRecord.IDMS_RejectionComments__c")
+		 .field("registrationSource", "userRecord.IDMS_Registration_Source__c")
+		 .field("profileLastUpdateSource", "userRecord.IDMS_Profile_update_source__c")
+		 .field("delegatedIdp", "userRecord.IDMSDelegatedIdp__c")
+		 .field("identityType", "userRecord.IDMSIdentityType__c")
+//		 .field("isInternal", "")
+//		 .field("ail", "")
+//		 .field("ailApplications", "")		 
+//		 .field("ailFeatures", "")
+//		 .field("ailPrograms", "")
+		 .field("currency", "userRecord.defaultCurrencyIsoCode")
+		 .field("companyName", "userRecord.companyName")
+		 .field("companyStreet", "userRecord.street")
+		 .field("companyCity", "userRecord.company_City__c")
+		 .field("companyZipCode", "userRecord.company_Postal_Code__c")
+		 .field("companyStateOrProvinceCode", "userRecord.company_State__c")
+		 .field("companyPOBox", "userRecord.IDMSCompanyPoBox__c")
+		 .field("companyCounty", "userRecord.IDMSCompanyCounty__c")
+		 .field("companyCountryCode", "userRecord.company_Country__c")
+		 .field("companyAdditionalAddress", "userRecord.company_Address2__c")
+		 .field("companyWebsite", "userRecord.company_Website__c")
+		 .field("classLevel1", "userRecord.IDMSClassLevel1__c")
+		 .field("classLevel2", "userRecord.IDMSClassLevel2__c")
+		 .field("marketSegment", "userRecord.IDMSMarketSegment__c")
+		 
+		 .field("marketSubSegment", "userRecord.IDMSMarketSubSegment__c")
+		 .field("marketServed", "userRecord.IDMSCompanyMarketServed__c")
+		 .field("employeeSize", "userRecord.IDMSCompanyNbrEmployees__c")
+		 .field("department", "userRecord.department")
+//		 .field("division", "")
+//		 .field("title", "")
+//		 .field("businessUnit", "")
+		 .field("headquarter", "userRecord.IDMSCompanyHeadquarters__c")
+		 .field("annualRevenue", "userRecord.IDMSAnnualRevenue__c")
+		 .field("taxIdentificationNumber", "userRecord.IDMSTaxIdentificationNumber__c")
+		 .field("jobTitle", "userRecord.job_Title__c")
+		 .field("jobFunction", "userRecord.job_Function__c")
+		 .field("jobDescription", "userRecord.IDMSJobDescription__c")
+		 .field("workPhone", "userRecord.phone")
+	        .byDefault()
+	        .register();
+	}
 	
 	
 	

@@ -137,7 +137,37 @@ public class IFWCustomAttributesForWork {
 	private String workPhone;
 	
 	private String trustedAdmin;
+	
+	private String uimsFederatedId;
+	
+	private String userStatus;
+	
+	private String companyFederatedId;
+	
+	
+	public String getCompanyFederatedId() {
+		return companyFederatedId;
+	}
 
+	public void setCompanyFederatedId(String companyFederatedId) {
+		this.companyFederatedId = companyFederatedId;
+	}
+
+	public String getUserStatus() {
+		return userStatus;
+	}
+
+	public void setUserStatus(String userStatus) {
+		this.userStatus = userStatus;
+	}
+
+	public String getUimsFederatedId() {
+		return uimsFederatedId;
+	}
+
+	public void setUimsFederatedId(String uimsFederatedId) {
+		this.uimsFederatedId = uimsFederatedId;
+	}
 
 	public String getCurrency() {
 		return currency;

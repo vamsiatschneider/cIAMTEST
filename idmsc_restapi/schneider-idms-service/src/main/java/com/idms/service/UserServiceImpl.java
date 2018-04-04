@@ -110,6 +110,7 @@ import com.se.idms.dto.IDMSUserAIL;
 import com.se.idms.dto.IDMSUserRecord;
 import com.se.idms.dto.IDMSUserRecordUpdatePassword;
 import com.se.idms.dto.IDMSUser__r;
+import com.se.idms.dto.IFWCustomAttributesForWork;
 import com.se.idms.dto.ParseValuesByOauthHomeWorkContextDto;
 import com.se.idms.dto.PasswordRecoveryResponse;
 import com.se.idms.dto.SetPasswordErrorResponse;
@@ -914,8 +915,8 @@ public class UserServiceImpl implements UserService {
 					} else if (null != userRequest.getUserRecord().getIDMS_Registration_Source__c() && UserConstants.PRM
 							.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())) {
 						
-						//AboutMe field is to store the hashed pin which comes from global IDMS
-						sendEmail.storePRMOtp(userName, userRequest.getUserRecord().getAboutMe());
+						//HashedToken field is to store the hashed pin which comes from global IDMS
+						sendEmail.storePRMOtp(userName, userRequest.getUserRecord().getIDMSHashedToken());
 					}
 					/**
 					 * To update authId in openAM extended attribute
@@ -2817,8 +2818,20 @@ public class UserServiceImpl implements UserService {
 
 				String authorization = "Bearer " + accessToken;
 
-				Response globalGetUserResponse = ifwService.getUser(authorization, bfoAuthorizationToken, UserConstants.ACCEPT_TYPE_APP_JSON, "", "", "", "", confirmRequest.getId());
-				LOGGER.info("globalGetUserResponse : " + globalGetUserResponse.getEntity());
+				Response globalGetUserResponse = ifwService.getUser(authorization, bfoAuthorizationToken, UserConstants.ACCEPT_TYPE_APP_JSON, "", "", "", "",confirmRequest.getIDMS_Federated_ID__c());
+				productDocCtx = JsonPath.using(conf).parse(globalGetUserResponse);
+				String responseAsString = globalGetUserResponse.readEntity(String.class);
+				LOGGER.info("globalGetUserResponse : " + responseAsString);
+				try {
+					IFWCustomAttributesForWork idmsUser = objMapper.readValue(responseAsString,IFWCustomAttributesForWork.class);
+					CreateUserRequest iDMSUser = mapper.map(idmsUser, CreateUserRequest.class);
+					LOGGER.info("iDMSUser : " + iDMSUser);
+					//creating the user
+					userRegistration("", "", iDMSUser);
+				} catch (IOException e1) {
+					ERROR_LOGGER.error("Executing while creating the User :: -> " + e.getMessage());
+					e1.printStackTrace();
+				}
 			}
 			response.setStatus(errorStatus);
 			response.setMessage("404 Not Found");
