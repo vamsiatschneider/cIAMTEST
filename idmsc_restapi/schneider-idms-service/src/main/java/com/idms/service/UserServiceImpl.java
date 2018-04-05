@@ -2828,6 +2828,17 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info("iDMSUser : " + iDMSUser);
 					//creating the user
 					userRegistration("", "", iDMSUser);
+					//confirm the user
+					ConfirmPinRequest confirmPinRequest = new ConfirmPinRequest();
+					confirmPinRequest.setId(confirmRequest.getId());
+					confirmPinRequest.setIDMS_Email_opt_in__c("Y");
+					confirmPinRequest.setIDMS_Federated_ID__c(confirmRequest.getIDMS_Federated_ID__c());
+					confirmPinRequest.setIDMS_Profile_update_source(confirmRequest.getIDMS_Profile_update_source());
+					confirmPinRequest.setOperation(confirmRequest.getOperation());
+					confirmPinRequest.setPassword(confirmRequest.getOperation());
+					confirmPinRequest.setTncFlag("true");
+					userPinConfirmation(confirmPinRequest);
+					
 				} catch (IOException e1) {
 					ERROR_LOGGER.error("Executing while creating the User :: -> " + e.getMessage());
 					e1.printStackTrace();
