@@ -26,6 +26,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -822,7 +823,8 @@ public class UserServiceImpl implements UserService {
 				 */
 				//
 				if((!UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c()))
-					&& ( !appList.contains(userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase()))	){
+					&& (!appList.contains(userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase()))
+					&& (null == userRequest.getUserRecord().getIDMS_Federated_ID__c()|| userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty())){
 					
 					userName = UserConstants.UID_PREFIX + UUID.randomUUID().toString();
 				} else {
@@ -5600,6 +5602,7 @@ public class UserServiceImpl implements UserService {
 		Response response = null;
 		String token = null;
 		StringBuffer prefix = new StringBuffer();
+		String valueToFind="goto=";
 		try {
 
 			if ((null == startUrl || startUrl.isEmpty())) {
@@ -5645,9 +5648,12 @@ public class UserServiceImpl implements UserService {
 				NewCookie newCookie = new NewCookie(cookie);
 				rb.cookie(newCookie);
 				
+				//startUrl = startUrl.substring(0, startUrl.indexOf(valueToFind)+valueToFind.length()).concat(URLEncoder.encode(valueToFind.substring(valueToFind.indexOf(valueToFind)+5, valueToFind.length()), "UTF-8" ));
+				
 				prefix.append(prefixStartUrl)
 					  .append("/ui/#!")
-					  .append(startUrl);
+					  .append(startUrl.substring(0, startUrl.indexOf(valueToFind)+valueToFind.length()))
+					  .append(URLEncoder.encode(startUrl.substring(startUrl.indexOf(valueToFind)+valueToFind.length(), startUrl.length()), "UTF-8" ));
 				
         
 				response = rb.header("Location", prefix.toString()).build(); 
