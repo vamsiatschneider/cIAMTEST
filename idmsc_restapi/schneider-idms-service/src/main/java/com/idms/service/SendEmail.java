@@ -279,6 +279,7 @@ public class SendEmail {
 		// open Attribute AuthID and Timestamp
 		product_json_string = "{" + "\"authId\": \"" + hashedPin + "\"}";
 		// update hashkey in openAM.
+		LOGGER.info("hashedPin is " + hashedPin);
 		productService.updateUser(UserConstants.CHINA_IDMS_TOKEN+userService.getSSOToken(), userId,
 				product_json_string);
 
@@ -328,7 +329,7 @@ public class SendEmail {
 			}
 		return validatePin;
 	}
-	
+
 	private String emailContentTemplate(String to, String subject, String lang,String hotpOperationType)  {
 		String filePath;
 		boolean chineseLangCheck = (lang != null && lang.equals(EmailConstants.HOTP_LAN_CN)) || (hotpLanguage != null && hotpLanguage.equals(EmailConstants.HOTP_LAN_CN));

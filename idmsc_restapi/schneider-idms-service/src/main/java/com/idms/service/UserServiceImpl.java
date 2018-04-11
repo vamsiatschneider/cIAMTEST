@@ -868,7 +868,9 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 					+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_REGISTRATION_CALL + userAction + AUDIT_LOG_CLOSURE);
 			
-			if (appList.contains(userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase())) {
+			if (appList.contains(userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase()) && 
+					!UserConstants.PRM.contains(userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase())) {
+				
 				LOGGER.info(
 						"UserServiceImpl:userRegistration -> productService.userRegistration :  Request -> " + json);
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userName, json);
@@ -1823,7 +1825,7 @@ public class UserServiceImpl implements UserService {
 					userRequest.getIDMSCompanyNbrEmployees__c())) {
 				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_COMPANY_NBR_EMPLOYEES_C);
 				return true;
-			}
+			} 
 		}
 
 		/**
@@ -2621,7 +2623,7 @@ public class UserServiceImpl implements UserService {
 						amlbcookieValue, hotpService, UserConstants.HOTP_SERVICE, productDocCtx.jsonString(),
 						userService);
 				if (UserConstants.USER_REGISTRATION.equalsIgnoreCase(confirmRequest.getOperation())) {
-					validPinStatus = sendEmail.validatePin(confirmRequest.getPinCode(), confirmRequest.getId());
+						 validPinStatus = sendEmail.validatePin(confirmRequest.getPinCode(), confirmRequest.getId());
 				} else {
 					/*executeHotpCall(amlbcookieValue, hotpService, UserConstants.HOTP_SERVICE,
 							productDocCtx.jsonString(), userService);*/
@@ -2835,7 +2837,8 @@ public class UserServiceImpl implements UserService {
 					confirmPinRequest.setIDMS_Federated_ID__c(confirmRequest.getIDMS_Federated_ID__c());
 					confirmPinRequest.setIDMS_Profile_update_source(confirmRequest.getIDMS_Profile_update_source());
 					confirmPinRequest.setOperation(confirmRequest.getOperation());
-					confirmPinRequest.setPassword(confirmRequest.getOperation());
+					confirmPinRequest.setPassword(confirmRequest.getPassword());
+					confirmPinRequest.setPinCode(confirmRequest.getPinCode());
 					confirmPinRequest.setTncFlag("true");
 					userPinConfirmation(confirmPinRequest);
 					
