@@ -445,4 +445,6 @@ public class UserConstants {
 	
 	public static final String SE_TRUSTED_ADMIN = "SE_TRUSTED_ADMIN";
 	
+	public static final String SOCIAL_LOGIN_PREFIX="cn01";
+	
 }

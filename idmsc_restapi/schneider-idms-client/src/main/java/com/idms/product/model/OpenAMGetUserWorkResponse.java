@@ -233,6 +233,8 @@ public class OpenAMGetUserWorkResponse {
 	
 	private String trustedAdmin;
 	
+	private String isActivated;
+	
 	@JsonProperty("IDMSCompanyFederationIdentifier__c")
 	public String getIDMSCompanyFederationIdentifier__c() {
 		return IDMSCompanyFederationIdentifier__c;
@@ -1009,6 +1011,14 @@ public class OpenAMGetUserWorkResponse {
 	public void setTrustedAdmin(String trustedAdmin) {
 		this.trustedAdmin = trustedAdmin;
 	}
-	
-	
+
+	@JsonProperty("isActivated")
+	public String getIsActivated() {
+		return isActivated;
+	}
+
+	@JsonProperty("isActivated")
+	public void setIsActivated(String isActivated) {
+		this.isActivated = isActivated;
+	}
 }

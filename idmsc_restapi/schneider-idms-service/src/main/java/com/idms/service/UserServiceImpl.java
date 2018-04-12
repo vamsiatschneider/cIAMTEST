@@ -788,7 +788,11 @@ public class UserServiceImpl implements UserService {
 				openAmReq.getInput().getUser()
 						.setTmp_password(new String(Base64.encodeBase64(userRequest.getPassword().getBytes())));
 			} else {
-				openAmReq.getInput().getUser().setUserPassword(generateRamdomPassWord());
+				if (null != userRequest.getUserRecord().getIDMS_Federated_ID__c() && !userRequest.getUserRecord().getIDMS_Federated_ID__c().startsWith(UserConstants.SOCIAL_LOGIN_PREFIX)) {
+					openAmReq.getInput().getUser().setUserPassword(generateRamdomPassWord());
+				}else if(null == userRequest.getUserRecord().getIDMS_Federated_ID__c()){
+					openAmReq.getInput().getUser().setUserPassword(generateRamdomPassWord());
+				}
 			}
 
 			//new logic
@@ -797,7 +801,8 @@ public class UserServiceImpl implements UserService {
 					"mail eq " + "\"" + loginIdentifier + "\" or mobile eq " + "\"" + loginIdentifier + "\""); 
 			productDocCtxCheck = JsonPath.using(conf).parse(userExistsInOpenam);
 			Integer resultCountCheck = productDocCtxCheck.read(JsonConstants.RESULT_COUNT);
-			if (resultCountCheck.intValue() > 0) {
+			if ((resultCountCheck.intValue() > 0) && ((null == userRequest.getUserRecord().getIDMS_Federated_ID__c()
+					|| userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty()))) {
 				//deleting already existing id in openam
 				
 				String userIdFromOpenam =  productDocCtxCheck.read("$.result[0].username");
@@ -820,8 +825,10 @@ public class UserServiceImpl implements UserService {
 				// Step 4:
 				/**
 				 * Generate Random login ID and map it to Open AM Username attribute
+				 * Condition added for social login issue // (null == userRequest.getUserRecord().getIDMS_Federated_ID__c()|| userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty())){
+				 * 
 				 */
-				//
+				
 				if((!UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c()))
 					&& (!appList.contains(userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase()))
 					&& (null == userRequest.getUserRecord().getIDMS_Federated_ID__c()|| userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty())){
@@ -868,7 +875,17 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 					+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_REGISTRATION_CALL + userAction + AUDIT_LOG_CLOSURE);
 			
-			if (appList.contains(userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase())) {
+			/**
+			 * The below or condition added for social login scenario for update user
+			 * 
+			 * */
+			
+			if (appList.contains(userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase())
+					|| ((null != userRequest.getUserRecord().getIDMS_Federated_ID__c()&& !userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty())
+						&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c()))) {
+				//openAmReq.getInput().getUser().setUsername(null);
+				json = objMapper.writeValueAsString(openAmReq.getInput().getUser());
+				json = json.replace("\"\"", "[]");
 				LOGGER.info(
 						"UserServiceImpl:userRegistration -> productService.userRegistration :  Request -> " + json);
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userName, json);
@@ -1236,8 +1253,8 @@ public class UserServiceImpl implements UserService {
 		userResponse.setStatus(errorStatus);
 		
 		
-		if ((appList.contains(userRequest.getIDMS_Registration_Source__c().toUpperCase()))
-				|| (UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c()))) {
+		if (null != userRequest.getIDMS_Registration_Source__c() && (appList.contains(userRequest.getIDMS_Registration_Source__c().toUpperCase())
+				|| UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c()))) {
 
 			if ((checkMandatoryFields)
 					&& (null == userRequest.getIDMS_Federated_ID__c() || userRequest.getIDMS_Federated_ID__c().isEmpty())) {
@@ -2675,6 +2692,15 @@ public class UserServiceImpl implements UserService {
 					PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
 							.concat(",\"tncFlag\":\"" + confirmRequest.getTncFlag() + "\"}");
 				}
+				
+				
+				/**
+				 * For User Activation
+				 * 
+				 * */
+				
+				PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
+						.concat(",\"isActivated\":\"true\"}");
 				
 				if (null != emailOrMobile && !emailOrMobile.isEmpty()) {
 					LOGGER.info(AUDIT_REQUESTING_USER + confirmRequest.getId() + AUDIT_IMPERSONATING_USER
