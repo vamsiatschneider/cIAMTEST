@@ -135,6 +135,8 @@ public class OpenAMGetUserHomeResponse {
 	
 	private String trustedAdmin;
 	
+	private String isActivated;
+	
 	@JsonProperty("IDMSTaxIdentificationNumber__c")
 	public String getIDMSTaxIdentificationNumber__c() {
 		return IDMSTaxIdentificationNumber__c;
@@ -586,5 +588,14 @@ public class OpenAMGetUserHomeResponse {
 		this.trustedAdmin = trustedAdmin;
 	}
 	
+	@JsonProperty("isActivated")
+	public String getIsActivated() {
+		return isActivated;
+	}
+
+	@JsonProperty("isActivated")
+	public void setIsActivated(String isActivated) {
+		this.isActivated = isActivated;
+	}
 	
 }

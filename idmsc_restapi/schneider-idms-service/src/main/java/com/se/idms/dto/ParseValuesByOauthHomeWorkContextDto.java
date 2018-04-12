@@ -190,6 +190,9 @@ public class ParseValuesByOauthHomeWorkContextDto {
 		userResponse.getCustomAttributes().setTrustedAdmin(null != userProductDocCtx.read("$.trustedAdmin")
 				? getValue(userProductDocCtx.read("$.trustedAdmin").toString()) : getDelimeter());
 		
+		userResponse.getCustomAttributes().setTrustedAdmin(null != userProductDocCtx.read("$.isActivated")
+				? getValue(userProductDocCtx.read("$.isActivated").toString()) : getDelimeter());
+		
 	}
 	
 	public void parseValuesByOauthHomeContext(GetUserHomeByOauthResponse userResponse,
@@ -277,6 +280,9 @@ public class ParseValuesByOauthHomeWorkContextDto {
 		
 		userResponse.getCustomAttributes().setTrustedAdmin(null != userProductDocCtx.read("$.trustedAdmin")
 				? getValue(userProductDocCtx.read("$.trustedAdmin").toString()) : getDelimeter());
+		
+		userResponse.getCustomAttributes().setTrustedAdmin(null != userProductDocCtx.read("$.isActivated")
+				? getValue(userProductDocCtx.read("$.isActivated").toString()) : getDelimeter());
 	}
 	
 	public void parseValuesHomeContext(OpenAMGetUserHomeResponse userResponse, DocumentContext userProductDocCtx) {
@@ -417,6 +423,9 @@ public class ParseValuesByOauthHomeWorkContextDto {
 		
 		userResponse.setTrustedAdmin(null != userProductDocCtx.read("$.trustedAdmin")
 				? getValue(userProductDocCtx.read("$.trustedAdmin").toString()) : getDelimeter());
+		
+		userResponse.setIsActivated(null != userProductDocCtx.read("$.isActivated")
+				? getValue(userProductDocCtx.read("$.isActivated").toString()) : getDelimeter());
 
 	}
 	
@@ -649,6 +658,9 @@ public class ParseValuesByOauthHomeWorkContextDto {
 		
 		userResponse.setTrustedAdmin(null != userProductDocCtx.read("$.trustedAdmin")
 				? getValue(userProductDocCtx.read("$.trustedAdmin").toString()) : getDelimeter());
+		
+		userResponse.setIsActivated(null != userProductDocCtx.read("$.isActivated")
+				? getValue(userProductDocCtx.read("$.isActivated").toString()) : getDelimeter());
 	}
 
 	

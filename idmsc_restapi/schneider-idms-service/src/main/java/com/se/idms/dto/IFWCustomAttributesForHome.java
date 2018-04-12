@@ -82,6 +82,8 @@ public class IFWCustomAttributesForHome {
 	private String ailPrograms;
 	
 	private String trustedAdmin;
+	
+	private String isActivated;
 
 	public String getUserId() {
 		return userId;
@@ -403,5 +405,11 @@ public class IFWCustomAttributesForHome {
 		this.trustedAdmin = trustedAdmin;
 	}
 
+	public String getIsActivated() {
+		return isActivated;
+	}
 
+	public void setIsActivated(String isActivated) {
+		this.isActivated = isActivated;
+	}
 }

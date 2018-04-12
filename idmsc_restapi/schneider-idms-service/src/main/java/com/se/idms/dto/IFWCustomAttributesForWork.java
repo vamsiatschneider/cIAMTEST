@@ -144,6 +144,7 @@ public class IFWCustomAttributesForWork {
 	
 	private String companyFederatedId;
 	
+	private String isActivated;
 	
 	public String getCompanyFederatedId() {
 		return companyFederatedId;
@@ -152,6 +153,7 @@ public class IFWCustomAttributesForWork {
 	public void setCompanyFederatedId(String companyFederatedId) {
 		this.companyFederatedId = companyFederatedId;
 	}
+
 
 	public String getUserStatus() {
 		return userStatus;
@@ -713,5 +715,11 @@ public class IFWCustomAttributesForWork {
 		this.trustedAdmin = trustedAdmin;
 	}
 
+	public String getIsActivated() {
+		return isActivated;
+	}
 
+	public void setIsActivated(String isActivated) {
+		this.isActivated = isActivated;
+	}
 }
