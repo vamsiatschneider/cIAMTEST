@@ -5692,6 +5692,7 @@ public class UserServiceImpl implements UserService {
 		String token = null;
 		StringBuffer prefix = new StringBuffer();
 		String valueToFind="goto=";
+		Response.ResponseBuilder rb = null;
 		try {
 
 			if ((null == startUrl || startUrl.isEmpty())) {
@@ -5725,13 +5726,14 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Time taken by UserServiceImpl.idmsDirectLogin() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 			}else {
-
+				
+				rb = Response.status(Response.Status.MOVED_PERMANENTLY);
+				
 				String tokenResponse = productService.authenticateUser(idToken1, idToken2, UserConstants.SE_REALM);
 				conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 				DocumentContext productDocCtx = JsonPath.using(conf).parse(tokenResponse);
 				token = productDocCtx.read(JsonConstants.TOKEN_ID);
 
-				Response.ResponseBuilder rb = Response.status(Response.Status.MOVED_PERMANENTLY);
 
 				Cookie cookie = new Cookie("iPlanetDirectoryPro", token,"/",".schneider-electric.com");
 				NewCookie newCookie = new NewCookie(cookie);
@@ -5754,7 +5756,12 @@ public class UserServiceImpl implements UserService {
 			e.printStackTrace();
 			jsonObject.put("error_code", "code_01");
 			jsonObject.put("error_message","Invalid username or password");
-			return Response.status(Response.Status.UNAUTHORIZED).entity(jsonObject).build();
+			prefix.append(UserConstants.redirectUrl_Option3)
+				  .append("?startUrl=")
+				  .append(startUrl)
+				  .append("&login_error=code_01");
+			response = rb.header("Location", prefix.toString()).build();
+			//return Response.status(Response.Status.UNAUTHORIZED).entity(jsonObject).build();
 		}
 		return response;
 	}

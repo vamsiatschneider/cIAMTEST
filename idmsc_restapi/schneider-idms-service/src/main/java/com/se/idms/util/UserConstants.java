@@ -448,4 +448,6 @@ public class UserConstants {
 	
 	public static final String SOCIAL_LOGIN_PREFIX="cn01";
 	
+	public static final String redirectUrl_Option3 = "https://10.194.157.89/login.jsp";
+	
 }
