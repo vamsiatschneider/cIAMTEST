@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 
 import com.idms.model.AILRequest;
 import com.idms.model.ActivateUserRequest;
+import com.idms.model.CheckUserExistsRequest;
 import com.idms.model.ConfirmPinRequest;
 import com.idms.model.CreateUserRequest;
 import com.idms.model.PasswordRecoveryRequest;
@@ -69,6 +70,11 @@ public interface UserService {
 	@GET
 	@Path("/apexrest/IDMSUser/{loginIdentifier}")
 	Response checkUserExists(@PathParam("loginIdentifier") String loginIdentifier,@QueryParam("WithGlobalUsers") String withGlobalUsers);
+	
+	@POST
+	@Path("/apexrest/IDMSCheckUser")
+	Response idmsCheckUserExists(@Valid CheckUserExistsRequest request);
+	
 	
 	@GET
 	@Path("/apexrest/oauth2")

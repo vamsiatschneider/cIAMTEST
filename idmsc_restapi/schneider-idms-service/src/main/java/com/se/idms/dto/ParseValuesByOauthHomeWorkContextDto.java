@@ -193,6 +193,9 @@ public class ParseValuesByOauthHomeWorkContextDto {
 		userResponse.getCustomAttributes().setTrustedAdmin(null != userProductDocCtx.read("$.isActivated")
 				? getValue(userProductDocCtx.read("$.isActivated").toString()) : getDelimeter());
 		
+		userResponse.getCustomAttributes().setCompanyFederatedId(null != userProductDocCtx.read("$.companyFederatedID")
+				? getValue(userProductDocCtx.read("$.companyFederatedID").toString()) : getDelimeter());
+		
 	}
 	
 	public void parseValuesByOauthHomeContext(GetUserHomeByOauthResponse userResponse,
@@ -426,6 +429,9 @@ public class ParseValuesByOauthHomeWorkContextDto {
 		
 		userResponse.setIsActivated(null != userProductDocCtx.read("$.isActivated")
 				? getValue(userProductDocCtx.read("$.isActivated").toString()) : getDelimeter());
+		
+		userResponse.setIDMS_Federated_ID__c(null != userProductDocCtx.read("$.federationID")
+				? getValue(userProductDocCtx.read("$.federationID").toString()) : getDelimeter());
 
 	}
 	

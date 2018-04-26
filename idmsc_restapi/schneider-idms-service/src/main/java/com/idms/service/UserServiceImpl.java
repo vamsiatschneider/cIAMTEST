@@ -69,6 +69,7 @@ import com.idms.mapper.IdmsMapper;
 import com.idms.model.AILRequest;
 import com.idms.model.ActivateUser;
 import com.idms.model.ActivateUserRequest;
+import com.idms.model.CheckUserExistsRequest;
 import com.idms.model.ConfirmPinErrorResponse;
 import com.idms.model.ConfirmPinRequest;
 import com.idms.model.ConfirmPinResponse;
@@ -842,8 +843,10 @@ public class UserServiceImpl implements UserService {
 	
 			}
 			openAmReq.getInput().getUser().setUsername(userName);
-			
-
+			/**
+			 * Adding below line for R4 Release
+			 * */
+			openAmReq.getInput().getUser().setFederationID(userName);
 			
 			openAmReq.getInput().getUser().setIdmsail_c("[]");
 			openAmReq.getInput().getUser().setIdmsail_Applications_c("[]");
@@ -936,7 +939,7 @@ public class UserServiceImpl implements UserService {
 							.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())) {
 						
 						//HashedToken field is to store the hashed pin which comes from global IDMS
-						sendEmail.storePRMOtp(userName, userRequest.getUserRecord().getIDMSHashedToken());
+						sendEmail.storePRMOtp(userName, userRequest.getUserRecord().getIdmsHashedToken());
 					}
 					/**
 					 * To update authId in openAM extended attribute
@@ -5764,5 +5767,133 @@ public class UserServiceImpl implements UserService {
 			//return Response.status(Response.Status.UNAUTHORIZED).entity(jsonObject).build();
 		}
 		return response;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Response idmsCheckUserExists(CheckUserExistsRequest request) {
+
+
+
+		ERROR_LOGGER.info("UserServiceImpl:checkUserExists -> Request :  -> ", request);
+		UserExistsResponse userResponse = new UserExistsResponse();
+		DocumentContext productDocCtx = null;
+		String iPlanetDirectoryKey = null;
+		String ifwAccessToken = null;
+		JSONObject response = new JSONObject();
+		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
+		long elapsedTime;
+		Response ifwResponse = null;
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+
+		try {
+
+			if ((null != request.getWithGlobalUsers() && !request.getWithGlobalUsers().isEmpty()) && (!UserConstants.TRUE.equalsIgnoreCase(request.getWithGlobalUsers())
+					&& !UserConstants.FALSE.equalsIgnoreCase(request.getWithGlobalUsers()))) {
+
+				response.put(UserConstants.STATUS, errorStatus);
+				response.put(UserConstants.MESSAGE, UserConstants.GLOBAL_USER_BOOLEAN);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by UserServiceImpl.checkUserExists() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+			}
+
+			iPlanetDirectoryKey = getSSOToken();
+
+			if (null != request.getLoginID()&& !request.getLoginID().isEmpty()) {
+				LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
+						+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + request.getLoginID() + AUDIT_LOG_CLOSURE);
+				String userExists = productService.checkUserExistsWithEmailMobile(
+						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\"" + request.getLoginID() + "\"");
+
+				productDocCtx = JsonPath.using(conf).parse(userExists);
+				Integer resultCount = productDocCtx.read("$.resultCount");
+				if (resultCount.intValue() > 0) {
+					userResponse.setMessage(UserConstants.TRUE);
+					return Response.status(Response.Status.OK).entity(userResponse).build();
+
+				} else {
+					if (UserConstants.TRUE.equalsIgnoreCase(request.getWithGlobalUsers())) {
+
+						ERROR_LOGGER.info("UserServiceImpl:checkUserExists -> ifwService.getIFWToken : Request :  -> " ,UserConstants.CONTENT_TYPE_URL_FROM,
+								UserConstants.IFW_GRANT_TYPE, ifwClientId, ifwClientSecret);
+						ifwAccessToken = ifwService.getIFWToken(UserConstants.CONTENT_TYPE_URL_FROM,
+								UserConstants.IFW_GRANT_TYPE, ifwClientId, ifwClientSecret);
+
+						productDocCtx = JsonPath.using(conf).parse(ifwAccessToken);
+						String accessToken = productDocCtx.read("$.access_token");
+
+						LOGGER.info("getSalesForceToken : => " + "PASSWORD_GRANT_TYPE : " + UserConstants.PR_GRANT_TYPE
+								+ " salesForceClientId: " + salesForceClientId + " salesForceClientSecret :"
+								+ salesForceClientSecret + " salesForceUserName: " + salesForceUserName
+								+ " salesForcePassword :" + salesForcePassword);
+						String bfoAuthorization = salesForceService.getSalesForceToken(
+								UserConstants.CONTENT_TYPE_URL_FROM, UserConstants.PR_GRANT_TYPE, salesForceClientId,
+								salesForceClientSecret, salesForceUserName, salesForcePassword);
+						conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+						productDocCtx = JsonPath.using(conf).parse(bfoAuthorization);
+						String bfoAuthorizationToken = productDocCtx.read("$.access_token");
+
+						String authorization = "Bearer " + accessToken;
+
+						if (emailValidator.validate(request.getLoginID())) {
+							ifwResponse = ifwService.checkUserExistsWithEmail(bfoAuthorizationToken,
+									UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE,
+									UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID, authorization,
+									request.getLoginID(), UserConstants.FALSE);
+						} else if (legthValidator.validate(UserConstants.MOBILE_PHONE,request.getLoginID())) {
+							ifwResponse = ifwService.checkUserExistsWithMobile(bfoAuthorizationToken,
+									UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE,
+									UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID, authorization,
+									request.getLoginID(), UserConstants.FALSE);
+						}
+						
+						if (null != ifwResponse && 200 == ifwResponse.getStatus()) {
+							userResponse.setMessage(UserConstants.TRUE);
+							return Response.status(ifwResponse.getStatus()).entity(userResponse).build();
+						}
+					}
+				}
+				userResponse.setMessage(UserConstants.FALSE);
+			}
+		} catch (BadRequestException e) {
+			e.printStackTrace();
+			response.put(UserConstants.STATUS, errorStatus);
+			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by UserServiceImpl.checkUserExists() : " + elapsedTime);
+			ERROR_LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage());
+			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+		} catch (NotAuthorizedException e) {
+			e.printStackTrace();
+			response.put(UserConstants.STATUS, errorStatus);
+			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by UserServiceImpl.checkUserExists() : " + elapsedTime);
+			ERROR_LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage());
+			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
+			return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
+		} catch (NotFoundException e) {
+			e.printStackTrace();
+			response.put(UserConstants.STATUS, errorStatus);
+			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by UserServiceImpl.ActivateUser() : " + elapsedTime);
+			ERROR_LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage());
+			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
+			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			response.put(UserConstants.STATUS, errorStatus);
+			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by UserServiceImpl.checkUserExists() : " + elapsedTime);
+			ERROR_LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage());
+			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+		}
+		//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
+		return Response.status(Response.Status.NOT_FOUND).entity(userResponse).build();		
 	}
 }

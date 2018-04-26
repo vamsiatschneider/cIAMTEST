@@ -3,9 +3,7 @@ package com.idms.mapper;
 import javax.inject.Named;
 
 import com.idms.model.CreateUserRequest;
-import com.idms.model.CreateUserResponse;
 import com.idms.model.IDMSUserResponse;
-import com.idms.model.IFWUser;
 import com.idms.model.PasswordRecoveryRequest;
 import com.idms.model.UIMSCompanyRequest;
 import com.idms.model.UpdateUserRequest;
