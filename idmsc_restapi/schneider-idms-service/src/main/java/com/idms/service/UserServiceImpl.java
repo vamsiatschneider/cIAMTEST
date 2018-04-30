@@ -97,6 +97,7 @@ import com.idms.product.model.OpenAMGetUserWorkResponse;
 import com.idms.product.model.OpenAMPasswordRecoveryInput;
 import com.idms.product.model.OpenAmUser;
 import com.idms.product.model.OpenAmUserRequest;
+import com.idms.service.util.ChinaIdmsUtil;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -313,9 +314,16 @@ public class UserServiceImpl implements UserService {
 			System.out.println("cacahe NotNull");
 			// cache.evictExpiredElements();
 		}
-		Response authenticateResponse = productService.authenticateIdmsChinaUser(userName, password, realm);
+		//Response authenticateResponse = productService.authenticateIdmsChinaUser(userName, password, realm);
+		
 		try {
-			if (401 == authenticateResponse.getStatus()) {
+			Response authenticateResponse = ChinaIdmsUtil.executeHttpClient(prefixStartUrl, realm, userName, password);
+			successResponse = (String) authenticateResponse.getEntity();
+			if(401 == authenticateResponse.getStatus() && successResponse.contains(UserConstants.ACCOUNT_BLOCKED)){
+				jsonObject.put("message", UserConstants.ACCOUNT_BLOCKED);
+				return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
+				
+			}else if (401 == authenticateResponse.getStatus()) {
 				checkUserExistsResponse = checkUserExists(userName, UserConstants.FALSE);
 
 				checkUserExistsFlag = (UserExistsResponse)checkUserExistsResponse.getEntity();
@@ -338,7 +346,7 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 
-			successResponse = IOUtils.toString((InputStream) authenticateResponse.getEntity());
+			//successResponse = IOUtils.toString((InputStream) authenticateResponse.getEntity());
 		} catch (Exception e) {
 			e.printStackTrace();
 			jsonObject.put("user_store", "None");
