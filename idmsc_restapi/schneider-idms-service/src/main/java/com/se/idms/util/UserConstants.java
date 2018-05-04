@@ -280,6 +280,8 @@ public class UserConstants {
 	
 	public static final String MANDATORY_ID = "Id is Mandatory";
 	
+	public static final String PASSWORD_NOT_ALLOWED = "Operation blocked. Set password is not allowed.";
+	
 	public static final String PROFILE_UPDATE_SOURCE = "Profile update source is Mandatory.";
 	
 	public static final String INVALID_PINCODE = "PIN Entered is not correct";
@@ -449,5 +451,7 @@ public class UserConstants {
 	public static final String SOCIAL_LOGIN_PREFIX="cn01";
 	
 	public static final String redirectUrl_Option3 = "https://10.194.157.89/login.jsp";
+	
+	public static final String ACCOUNT_BLOCKED = "Your account has been locked.";
 	
 }
