@@ -97,6 +97,7 @@ import com.idms.product.model.OpenAMGetUserWorkResponse;
 import com.idms.product.model.OpenAMPasswordRecoveryInput;
 import com.idms.product.model.OpenAmUser;
 import com.idms.product.model.OpenAmUserRequest;
+import com.idms.service.util.ChinaIdmsUtil;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -885,18 +886,22 @@ public class UserServiceImpl implements UserService {
 			 * 
 			 * */
 			
-			if (appList.contains(userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase()) 
-					&& !UserConstants.PRM.contains(userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase())
-					|| ((null != userRequest.getUserRecord().getIDMS_Federated_ID__c()&& !userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty())
-						&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c()))) {
-				//openAmReq.getInput().getUser().setUsername(null);
-				json = objMapper.writeValueAsString(openAmReq.getInput().getUser());
-				json = json.replace("\"\"", "[]");
-				LOGGER.info(
-						"UserServiceImpl:userRegistration -> productService.userRegistration :  Request -> " + json);
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userName, json);
+			if (!UserConstants.PRM
+					.contains(userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase())) {
+				if (appList.contains(userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase())
+						|| ((null != userRequest.getUserRecord().getIDMS_Federated_ID__c()
+								&& !userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty())
+								&& !UserConstants.UIMS.equalsIgnoreCase(
+										userRequest.getUserRecord().getIDMS_Registration_Source__c()))) {
+					// openAmReq.getInput().getUser().setUsername(null);
+					json = objMapper.writeValueAsString(openAmReq.getInput().getUser());
+					json = json.replace("\"\"", "[]");
+					LOGGER.info("UserServiceImpl:userRegistration -> productService.userRegistration :  Request -> "
+							+ json);
+					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userName, json);
 
-			} else {
+				}
+			}else {
 				LOGGER.info(
 						"UserServiceImpl:userRegistration -> productService.userRegistration :  Request -> " + json);
 				userCreation = productService.userRegistration(iPlanetDirectoryKey, userAction, json);
@@ -2856,21 +2861,27 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("globalGetUserResponse : " + responseAsString);
 				try {
 					IFWCustomAttributesForWork idmsUser = objMapper.readValue(responseAsString,IFWCustomAttributesForWork.class);
-					CreateUserRequest iDMSUser = mapper.map(idmsUser, CreateUserRequest.class);
-					LOGGER.info("iDMSUser : " + iDMSUser);
+//					CreateUserRequest iDMSUser = mapper.map(idmsUser, CreateUserRequest.class);
+					IFWUser ifwUser = mapper.map(idmsUser, IFWUser.class);
+					ifwUser.setIdmsHashedToken(ChinaIdmsUtil.generateHashValue(confirmRequest.getPinCode()));
+					LOGGER.info("iDMSUser : " + ifwUser);
 					//creating the user
-					userRegistration("", "", iDMSUser);
+					CreateUserRequest createUserRequest = new CreateUserRequest();
+					createUserRequest.setUserRecord(ifwUser);
+					Response userRegistrationResponse = userRegistration("", "", createUserRequest);
+					if(200 == userRegistrationResponse.getStatus()){
 					//confirm the user
 					ConfirmPinRequest confirmPinRequest = new ConfirmPinRequest();
 					confirmPinRequest.setId(confirmRequest.getId());
-					confirmPinRequest.setIDMS_Email_opt_in__c("Y");
+					confirmPinRequest.setIDMS_Email_opt_in__c(confirmRequest.getIDMS_Email_opt_in__c());
 					confirmPinRequest.setIDMS_Federated_ID__c(confirmRequest.getIDMS_Federated_ID__c());
 					confirmPinRequest.setIDMS_Profile_update_source(confirmRequest.getIDMS_Profile_update_source());
 					confirmPinRequest.setOperation(confirmRequest.getOperation());
 					confirmPinRequest.setPassword(confirmRequest.getPassword());
 					confirmPinRequest.setPinCode(confirmRequest.getPinCode());
-					confirmPinRequest.setTncFlag("true");
+					confirmPinRequest.setTncFlag(confirmRequest.getTncFlag());
 					userPinConfirmation(confirmPinRequest);
+					}
 					
 				} catch (IOException e1) {
 					ERROR_LOGGER.error("Executing while creating the User :: -> " + e.getMessage());
