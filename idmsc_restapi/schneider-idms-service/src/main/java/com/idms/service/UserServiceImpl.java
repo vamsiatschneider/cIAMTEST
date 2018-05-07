@@ -651,7 +651,13 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
-				if (((null != userRequest.getPassword() && !userRequest.getPassword().isEmpty()))
+				
+				/**
+				 * R4 Release changes
+				 * */
+				
+				if (null != userRequest.getUIFlag() && UserConstants.TRUE.equalsIgnoreCase(userRequest.getUIFlag())) {
+					if (((null != userRequest.getPassword() && !userRequest.getPassword().isEmpty()))
 							&& !checkPasswordPolicy(userRequest.getPassword(),
 									userRequest.getUserRecord().getFirstName(),
 									userRequest.getUserRecord().getLastName())) {
@@ -660,6 +666,14 @@ public class UserServiceImpl implements UserService {
 						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 						LOGGER.info("Time taken by UserServiceImpl.userRegistration() : " + elapsedTime);
 						return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+					}
+				} else if ((null == userRequest.getUIFlag() || !UserConstants.TRUE.equalsIgnoreCase(userRequest.getUIFlag()))
+						&& (null != userRequest.getPassword() && !userRequest.getPassword().isEmpty())) {
+					errorResponse.setStatus(errorStatus);
+					errorResponse.setMessage(UserConstants.PASSWORD_WITH_USER_REG_BLCOKED);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by UserServiceImpl.userRegistration() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 			} catch (Exception e) {
 				LOGGER.error(e.toString());
@@ -893,13 +907,10 @@ public class UserServiceImpl implements UserService {
 			 * 
 			 * */
 			
-			if (!UserConstants.PRM
-					.contains(userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase())) {
-				if (appList.contains(userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase())
-						|| ((null != userRequest.getUserRecord().getIDMS_Federated_ID__c()
-								&& !userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty())
-								&& !UserConstants.UIMS.equalsIgnoreCase(
-										userRequest.getUserRecord().getIDMS_Registration_Source__c()))) {
+			if (!UserConstants.PRM.contains(userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase()) 
+				&& (appList.contains(userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase())
+						|| ((null != userRequest.getUserRecord().getIDMS_Federated_ID__c()&& !userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty())
+							&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())))) {
 					// openAmReq.getInput().getUser().setUsername(null);
 					json = objMapper.writeValueAsString(openAmReq.getInput().getUser());
 					json = json.replace("\"\"", "[]");
@@ -907,7 +918,6 @@ public class UserServiceImpl implements UserService {
 							+ json);
 					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userName, json);
 
-				}
 			}else {
 				LOGGER.info(
 						"UserServiceImpl:userRegistration -> productService.userRegistration :  Request -> " + json);
@@ -2414,25 +2424,26 @@ public class UserServiceImpl implements UserService {
 		String ifwAccessToken = null;
 		boolean validPinStatus = false;
 		ObjectMapper objMapper=new ObjectMapper();
+		String uniqueIdentifier = null;
 		try {
 			
 			ERROR_LOGGER.info("UserServiceImpl:userPinConfirmation -> : Request :  -> ", objMapper.writeValueAsString(confirmRequest));
 			
-			if (null == confirmRequest.getPinCode() || confirmRequest.getPinCode().isEmpty()) {
-				response.setStatus(errorStatus);
-				response.setMessage(UserConstants.MANDATORY_PINCODE);
-				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
-				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
-			}
+				if (null == confirmRequest.getPinCode() || confirmRequest.getPinCode().isEmpty()) {
+					response.setStatus(errorStatus);
+					response.setMessage(UserConstants.MANDATORY_PINCODE);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+				}
 
-			if (null == confirmRequest.getId() || confirmRequest.getId().isEmpty()) {
+			/*if (null == confirmRequest.getId() || confirmRequest.getId().isEmpty()) {
 				response.setStatus(errorStatus);
 				response.setMessage(UserConstants.MANDATORY_ID);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
-			}
+			}*/
 
 			if ((null == confirmRequest.getId() || confirmRequest.getId().isEmpty())
 					&& (null == confirmRequest.getIDMS_Federated_ID__c()
@@ -2480,11 +2491,20 @@ public class UserServiceImpl implements UserService {
 					&& UserConstants.SET_USER_PR.equalsIgnoreCase(confirmRequest.getOperation())
 					&& (null == confirmRequest.getPassword() || confirmRequest.getPassword().isEmpty())) {
 
-				response.setStatus(errorStatus);
-				response.setMessage(UserConstants.MANDATORY_PR);
-				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
-				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+				if (null != confirmRequest.getUIFlag() && !confirmRequest.getUIFlag().isEmpty()
+						&& UserConstants.TRUE.equalsIgnoreCase(confirmRequest.getUIFlag())) {
+					response.setStatus(errorStatus);
+					response.setMessage(UserConstants.MANDATORY_PR);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+				}else{
+					response.setStatus(errorStatus);
+					response.setMessage(UserConstants.OPERATION_BLCOKED);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+				}
 			} else if (null == confirmRequest.getOperation() || confirmRequest.getOperation().isEmpty()) {
 
 				response.setStatus(errorStatus);
@@ -2493,6 +2513,34 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 			}
+			
+			
+			/**
+			 * The below change applying for R5 Release start
+			 * 
+			 * */
+			
+			if (((null == confirmRequest.getUIFlag() ||  ! UserConstants.TRUE.equalsIgnoreCase(confirmRequest.getUIFlag()))
+					||	UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(confirmRequest.getOperation()))
+					&& (null != confirmRequest.getPassword() && !confirmRequest.getPassword().isEmpty())) {
+
+				response.setStatus(errorStatus);
+				response.setMessage(UserConstants.OPERATION_BLCOKED);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+			}
+			
+			
+			if (null != confirmRequest.getIDMS_Federated_ID__c()
+					&& !confirmRequest.getIDMS_Federated_ID__c().isEmpty()) {
+
+				uniqueIdentifier = confirmRequest.getIDMS_Federated_ID__c();
+			} else if (null != confirmRequest.getId() && !confirmRequest.getId().isEmpty()) {
+
+				uniqueIdentifier = confirmRequest.getId();
+			}
+			
 
 			/**
 			 * call /json/authenticate to iplanetDirectoryPro token for admins
@@ -2506,8 +2554,8 @@ public class UserServiceImpl implements UserService {
 			String getUserReponseProv = null;
 			if (null != iPlanetDirectoryKey) {
 				LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
-						+ AUDIT_OPENAM_API + AUDIT_OPENAM_GET_CALL + confirmRequest.getId() + AUDIT_LOG_CLOSURE);
-				getUserResponse = productService.getUser(iPlanetDirectoryKey, confirmRequest.getId());
+						+ AUDIT_OPENAM_API + AUDIT_OPENAM_GET_CALL + uniqueIdentifier + AUDIT_LOG_CLOSURE);
+				getUserResponse = productService.getUser(iPlanetDirectoryKey, uniqueIdentifier);
 
 				ERROR_LOGGER.info("UserServiceImpl:userPinConfirmation -> : productService.getUser: Response :  -> ", getUserResponse);
 				productDocCtx = JsonPath.using(conf).parse(getUserResponse);
@@ -2519,8 +2567,8 @@ public class UserServiceImpl implements UserService {
 						
 				if(null != loginIdCheck && "userRegistration".equals(confirmRequest.getOperation())){
 					response.setMessage("The user is already activated");
-					response.setId(confirmRequest.getId());
-					response.setId(confirmRequest.getIDMS_Federated_ID__c());
+					response.setId(uniqueIdentifier);
+					response.setFederation_Id(uniqueIdentifier);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
 					return Response.status(Response.Status.CONFLICT).entity(response).build();	
@@ -2533,7 +2581,7 @@ public class UserServiceImpl implements UserService {
 				}
 				String version = "{\"V_New\": \"" + vNewCntValue + "\"" + "}";
 				// Adding V_New
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, confirmRequest.getId(), version);
+				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, uniqueIdentifier, version);
 				amlbcookieValue = null != productDocCtx.read("$.amlbcookie")
 						? getValue(productDocCtx.read("$.amlbcookie").toString()) : getDelimeter();
 						
@@ -2556,7 +2604,7 @@ public class UserServiceImpl implements UserService {
 
 				if (UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(confirmRequest.getOperation())) {
 					getUserReponseProv = productService.getUser(iPlanetDirectoryKey,
-							confirmRequest.getId());
+							uniqueIdentifier);
 					provProductDocCtx = JsonPath.using(conf).parse(getUserReponseProv);
 					amlbcookieValue = null != provProductDocCtx.read("$.amlbcookie")
 							? getValue(provProductDocCtx.read("$.amlbcookie").toString()) : getDelimeter();
@@ -2586,7 +2634,7 @@ public class UserServiceImpl implements UserService {
 			} else {
 				response.setStatus(errorStatus);
 				response.setMessage(UserConstants.TOKEN_INVALID);
-				response.setId(confirmRequest.getId());
+				response.setId(uniqueIdentifier);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
@@ -2656,11 +2704,11 @@ public class UserServiceImpl implements UserService {
 						amlbcookieValue, hotpService, UserConstants.HOTP_SERVICE, productDocCtx.jsonString(),
 						userService);
 				if (UserConstants.USER_REGISTRATION.equalsIgnoreCase(confirmRequest.getOperation())) {
-						 validPinStatus = sendEmail.validatePin(confirmRequest.getPinCode(), confirmRequest.getId());
+						 validPinStatus = sendEmail.validatePin(confirmRequest.getPinCode(), uniqueIdentifier);
 				} else {
 					/*executeHotpCall(amlbcookieValue, hotpService, UserConstants.HOTP_SERVICE,
 							productDocCtx.jsonString(), userService);*/
-					validPinStatus = sendEmail.validatePin(confirmRequest.getPinCode(), confirmRequest.getId());
+					validPinStatus = sendEmail.validatePin(confirmRequest.getPinCode(), uniqueIdentifier);
 				}
 				if(!validPinStatus){
 					throw new Exception("Pin got expired or invalid!!");
@@ -2669,7 +2717,8 @@ public class UserServiceImpl implements UserService {
 				e.printStackTrace();
 				response.setStatus(errorStatus);
 				response.setMessage(e.getMessage());
-				response.setId(confirmRequest.getId());
+				response.setId(uniqueIdentifier);
+				response.setFederation_Id(uniqueIdentifier);
 
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
@@ -2680,7 +2729,7 @@ public class UserServiceImpl implements UserService {
 				e.printStackTrace();
 				errorResponse.setStatus(errorStatus);
 				errorResponse.setMessage(UserConstants.INVALID_PINCODE);
-				errorResponse.setId(confirmRequest.getId());
+				errorResponse.setId(uniqueIdentifier);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
 				ERROR_LOGGER.error("Exception while confirming the User pin:: -> " + e.getMessage());
@@ -2696,7 +2745,7 @@ public class UserServiceImpl implements UserService {
 					PRODUCT_JSON_STRING = "{" + "\"loginid\": \"" + emailOrMobile + "\",\"mobile\": \"" + emailOrMobile
 							+ "\"" + "}";
 
-					if (null != confirmRequest.getPassword() && !confirmRequest.getPassword().isEmpty()) {
+					if ((null !=confirmRequest.getUIFlag() && !confirmRequest.getUIFlag().isEmpty() )&& (null != confirmRequest.getPassword() && !confirmRequest.getPassword().isEmpty())) {
 						PRODUCT_JSON_STRING = "{" + "\"loginid\": \"" + emailOrMobile + "\",\"mobile\": \""
 								+ emailOrMobile + "\",\"userPassword\": \"" + confirmRequest.getPassword().trim() + "\""
 								+ "}";
@@ -2704,7 +2753,7 @@ public class UserServiceImpl implements UserService {
 				} else if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
 					PRODUCT_JSON_STRING = "{" + "\"loginid\": \"" + emailOrMobile + "\",\"mail\": \"" + emailOrMobile
 							+ "\"" + "}";
-					if (null != confirmRequest.getPassword() && !confirmRequest.getPassword().isEmpty()) {
+					if ((null !=confirmRequest.getUIFlag() && !confirmRequest.getUIFlag().isEmpty() )&&(null != confirmRequest.getPassword() && !confirmRequest.getPassword().isEmpty())) {
 						PRODUCT_JSON_STRING = "{" + "\"loginid\": \"" + emailOrMobile + "\",\"mail\": \""
 								+ emailOrMobile + "\",\"userPassword\": \"" + confirmRequest.getPassword().trim() + "\""
 								+ "}";
@@ -2732,12 +2781,12 @@ public class UserServiceImpl implements UserService {
 						.concat(",\"isActivated\":\"true\"}");
 				
 				if (null != emailOrMobile && !emailOrMobile.isEmpty()) {
-					LOGGER.info(AUDIT_REQUESTING_USER + confirmRequest.getId() + AUDIT_IMPERSONATING_USER
-							+ AUDIT_API_ADMIN + AUDIT_OPENAM_API + AUDIT_OPENAM_UPDATE_CALL + confirmRequest.getId()
+					LOGGER.info(AUDIT_REQUESTING_USER + uniqueIdentifier + AUDIT_IMPERSONATING_USER
+							+ AUDIT_API_ADMIN + AUDIT_OPENAM_API + AUDIT_OPENAM_UPDATE_CALL + uniqueIdentifier
 							+ AUDIT_LOG_CLOSURE);
 					ERROR_LOGGER.info("UserServiceImpl:userPinConfirmation -> : productService.updateUser: Requset :  -> ",PRODUCT_JSON_STRING);
 					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-							confirmRequest.getId(), PRODUCT_JSON_STRING);
+							uniqueIdentifier, PRODUCT_JSON_STRING);
 				}
 			}
 			if (UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(confirmRequest.getOperation())) {
@@ -2763,12 +2812,12 @@ public class UserServiceImpl implements UserService {
 				}
 
 				if (null != emailOrMobile && !emailOrMobile.isEmpty()) {
-					LOGGER.info(AUDIT_REQUESTING_USER + confirmRequest.getId() + AUDIT_IMPERSONATING_USER
-							+ AUDIT_API_ADMIN + AUDIT_OPENAM_API + AUDIT_OPENAM_UPDATE_CALL + confirmRequest.getId()
+					LOGGER.info(AUDIT_REQUESTING_USER + uniqueIdentifier + AUDIT_IMPERSONATING_USER
+							+ AUDIT_API_ADMIN + AUDIT_OPENAM_API + AUDIT_OPENAM_UPDATE_CALL + uniqueIdentifier
 							+ AUDIT_LOG_CLOSURE);
 					ERROR_LOGGER.info("UserServiceImpl:userPinConfirmation -> : productService.updateUser: Requset :  -> ",PRODUCT_JSON_STRING);
 					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-							confirmRequest.getId(), PRODUCT_JSON_STRING);
+							uniqueIdentifier, PRODUCT_JSON_STRING);
 				}
 				
 				/**
@@ -2777,10 +2826,10 @@ public class UserServiceImpl implements UserService {
 			provisionalService.deleteUser(UserConstants.IPLANET_DIRECTORY_PRO +iPlanetDirectoryKey, confirmRequest.getId().concat(".tmp"));
 			LOGGER.info("User record deleted successfully from provisional realm  " + confirmRequest.getId().concat(".tmp"));*/
 
-			EMAIL_CHANGE_LOGGER.info("{},{},{}", formatter.format(new Date()),confirmRequest.getId(),emailOrMobile);
+			EMAIL_CHANGE_LOGGER.info("{},{},{}", formatter.format(new Date()),uniqueIdentifier,emailOrMobile);
 			
 			}
-			if (UserConstants.SET_USER_PR.equalsIgnoreCase(confirmRequest.getOperation())) {
+			if ((null != confirmRequest.getUIFlag()&& !confirmRequest.getUIFlag().isEmpty())&&(UserConstants.SET_USER_PR.equalsIgnoreCase(confirmRequest.getOperation()))) {
 
 				/**
 				 * Checking if password want to update
@@ -2794,12 +2843,12 @@ public class UserServiceImpl implements UserService {
 
 					PRODUCT_JSON_STRING = "{" + "\"loginid\": \"" + emailOrMobile + "\",\"userPassword\": \""
 							+ confirmRequest.getPassword().trim() + "\"" + "}";
-					LOGGER.info(AUDIT_REQUESTING_USER + confirmRequest.getId() + AUDIT_IMPERSONATING_USER
-							+ AUDIT_API_ADMIN + AUDIT_OPENAM_API + AUDIT_OPENAM_GET_CALL + confirmRequest.getId()
+					LOGGER.info(AUDIT_REQUESTING_USER + uniqueIdentifier + AUDIT_IMPERSONATING_USER
+							+ AUDIT_API_ADMIN + AUDIT_OPENAM_API + AUDIT_OPENAM_GET_CALL + uniqueIdentifier
 							+ AUDIT_LOG_CLOSURE);
 					ERROR_LOGGER.info("UserServiceImpl:userPinConfirmation -> : productService.updateUser: Requset :  -> ",PRODUCT_JSON_STRING);
 					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-							confirmRequest.getId(), PRODUCT_JSON_STRING);
+							uniqueIdentifier, PRODUCT_JSON_STRING);
 				}
 
 			}
@@ -2814,12 +2863,13 @@ public class UserServiceImpl implements UserService {
 						vNewCntValue.toString(), UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						emailOrMobile);
 			} else if(null != confirmRequest.getIDMS_Profile_update_source()
-					&& !UserConstants.UIMS.equalsIgnoreCase(confirmRequest.getIDMS_Profile_update_source()) &&
-					(null != confirmRequest.getOperation() && UserConstants.SET_USER_PR .equalsIgnoreCase(confirmRequest.getOperation()))){
+					&& !UserConstants.UIMS.equalsIgnoreCase(confirmRequest.getIDMS_Profile_update_source()) 
+					&& (null != confirmRequest.getOperation() && UserConstants.SET_USER_PR .equalsIgnoreCase(confirmRequest.getOperation()))
+					&& (null != confirmRequest.getUIFlag() && !confirmRequest.getUIFlag().isEmpty())){
 				
 				//Calling Async method of setUIMSPassword
-				uimsUserManagerSoapService.setUIMSPassword(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,confirmRequest.getId(),
-						confirmRequest.getIDMS_Federated_ID__c(), confirmRequest.getPassword(), vNewCntValue.toString(),"");
+				uimsUserManagerSoapService.setUIMSPassword(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,uniqueIdentifier,
+						uniqueIdentifier, confirmRequest.getPassword(), vNewCntValue.toString(),"");
 			}else {
 				// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
 				// "logout");
@@ -2831,7 +2881,8 @@ public class UserServiceImpl implements UserService {
 			e.printStackTrace();
 			response.setStatus(errorStatus);
 			response.setMessage(e.getMessage());
-			response.setId(confirmRequest.getId());
+			response.setId(uniqueIdentifier);
+			response.setFederation_Id(uniqueIdentifier);
 
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
@@ -2879,9 +2930,9 @@ public class UserServiceImpl implements UserService {
 					if(200 == userRegistrationResponse.getStatus()){
 					//confirm the user
 					ConfirmPinRequest confirmPinRequest = new ConfirmPinRequest();
-					confirmPinRequest.setId(confirmRequest.getId());
+					confirmPinRequest.setId(uniqueIdentifier);
 					confirmPinRequest.setIDMS_Email_opt_in__c(confirmRequest.getIDMS_Email_opt_in__c());
-					confirmPinRequest.setIDMS_Federated_ID__c(confirmRequest.getIDMS_Federated_ID__c());
+					confirmPinRequest.setIDMS_Federated_ID__c(uniqueIdentifier);
 					confirmPinRequest.setIDMS_Profile_update_source(confirmRequest.getIDMS_Profile_update_source());
 					confirmPinRequest.setOperation(confirmRequest.getOperation());
 					confirmPinRequest.setPassword(confirmRequest.getPassword());
@@ -2897,7 +2948,8 @@ public class UserServiceImpl implements UserService {
 			}
 			response.setStatus(errorStatus);
 			response.setMessage("404 Not Found");
-			response.setId(confirmRequest.getId());
+			response.setId(uniqueIdentifier);
+			response.setFederation_Id(uniqueIdentifier);
 
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
@@ -2910,7 +2962,8 @@ public class UserServiceImpl implements UserService {
 			e.printStackTrace();
 			response.setStatus(errorStatus);
 			response.setMessage(UserConstants.SERVER_ERROR);
-			response.setId(confirmRequest.getId());
+			response.setId(uniqueIdentifier);
+			response.setFederation_Id(uniqueIdentifier);
 
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
@@ -2922,7 +2975,7 @@ public class UserServiceImpl implements UserService {
 		Attributes attributes = new Attributes();
 		IDMSUserRecord idmsUserRecord = new IDMSUserRecord();
 		idmsUserRecord.setAttributes(attributes);
-		idmsUserRecord.setId(confirmRequest.getId());
+		idmsUserRecord.setId(uniqueIdentifier);
 		PasswordRecoveryResponse passwordRecoveryResponse = new PasswordRecoveryResponse(idmsUserRecord);
 		passwordRecoveryResponse.setStatus(successStatus);
 		passwordRecoveryResponse.setMessage("PIN validated Successfully");
@@ -4367,6 +4420,15 @@ public class UserServiceImpl implements UserService {
 			ERROR_LOGGER.info("UserServiceImpl:updatePassword : sendOtp : Request    -> " + objMapper.writeValueAsString(updatePasswordRequest));
 			// Fetching the userid from the Authorization Token
 
+			if (null == updatePasswordRequest.getUIFlag() || !UserConstants.TRUE.equalsIgnoreCase(updatePasswordRequest.getUIFlag())) {
+				ErrorResponse errorResponse = new ErrorResponse();
+				errorResponse.setStatus(errorStatus);
+				errorResponse.setMessage(UserConstants.UPDATE_USER_REC_BLCOKED);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by UserServiceImpl.updatePassword() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+			}
+			
 			if (null != token && !token.isEmpty()) {
 				LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 						+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_INFO_CALL + AUDIT_LOG_CLOSURE);
@@ -4564,6 +4626,16 @@ public class UserServiceImpl implements UserService {
 		ObjectMapper objMapper = new ObjectMapper();
 		try {
 			ERROR_LOGGER.info("UserServiceImpl:updatePassword : setPassword : Request   -> " + objMapper.writeValueAsString(setPasswordRequest));
+			
+			if (null == setPasswordRequest.getUIFlag() ||  !UserConstants.TRUE.equalsIgnoreCase(setPasswordRequest.getUIFlag())) {
+
+				response.setStatus(errorStatus);
+				response.setMessage(UserConstants.OPERATION_BLCOKED);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by UserServiceImpl.setPassword() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+			}
+			
 			
 			// Evaluating the input parameters
 			if (null == setPasswordRequest.getIDMS_Profile_update_source()

@@ -12,6 +12,9 @@ public class CreateUserRequest {
 	@JsonProperty
 	private String Password;
 
+	@JsonProperty
+	private String UIFlag;
+
 	public IFWUser getUserRecord() {
 		return UserRecord;
 	}
@@ -26,6 +29,14 @@ public class CreateUserRequest {
 
 	public void setPassword(String password) {
 		Password = password;
+	}
+
+	public String getUIFlag() {
+		return UIFlag;
+	}
+
+	public void setUIFlag(String uIFlag) {
+		UIFlag = uIFlag;
 	}
 
 	@Override

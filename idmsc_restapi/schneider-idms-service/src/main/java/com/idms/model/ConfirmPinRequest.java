@@ -28,6 +28,9 @@ public class ConfirmPinRequest {
 	private String IDMS_Email_opt_in__c;
 	
 	@JsonProperty
+	private String UIFlag;
+	
+	@JsonProperty
 	private String tncFlag;
 
 	@JsonProperty("id")
@@ -108,6 +111,18 @@ public class ConfirmPinRequest {
 	@JsonProperty("tncFlag")
 	public void setTncFlag(String tncFlag) {
 		this.tncFlag = tncFlag;
+	}
+
+	
+	
+	@JsonProperty("UIFlag")
+	public String getUIFlag() {
+		return UIFlag;
+	}
+
+	@JsonProperty("UIFlag")
+	public void setUIFlag(String uIFlag) {
+		UIFlag = uIFlag;
 	}
 
 	@Override

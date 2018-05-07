@@ -22,6 +22,9 @@ public class UpdatePasswordRequest extends BaseEntity {
 	@JsonProperty("NewPwd")
 	private String NewPwd;
 
+	@JsonProperty("UIFlag")
+	private String UIFlag;
+
 	public String getIDMS_Profile_update_source() {
 		return IDMS_Profile_update_source;
 	}
@@ -44,6 +47,14 @@ public class UpdatePasswordRequest extends BaseEntity {
 
 	public void setNewPwd(String newPwd) {
 		NewPwd = newPwd;
+	}
+
+	public String getUIFlag() {
+		return UIFlag;
+	}
+
+	public void setUIFlag(String uIFlag) {
+		UIFlag = uIFlag;
 	}
 
 }

@@ -454,4 +454,10 @@ public class UserConstants {
 	
 	public static final String ACCOUNT_BLOCKED = "Your account has been locked.";
 	
+	public static final String OPERATION_BLCOKED = "Operation blocked. Set password is not allowed.";
+	
+	public static final String PASSWORD_WITH_USER_REG_BLCOKED = "Operation blocked. User registration with password is not allowed.";
+	
+	public static final String UPDATE_USER_REC_BLCOKED = "Operation blocked. Updating password is not allwed";
+	
 }

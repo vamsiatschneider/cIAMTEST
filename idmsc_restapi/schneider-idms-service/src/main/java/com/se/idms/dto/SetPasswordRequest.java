@@ -27,6 +27,9 @@ public class SetPasswordRequest {
 	
 	@JsonProperty
 	private  String Token;
+	
+	@JsonProperty
+	private String UIFlag;
 
 	public String getId() {
 		return Id;
@@ -74,6 +77,14 @@ public class SetPasswordRequest {
 
 	public void setFederationIdentifier(String federationIdentifier) {
 		FederationIdentifier = federationIdentifier;
+	}
+
+	public String getUIFlag() {
+		return UIFlag;
+	}
+
+	public void setUIFlag(String uIFlag) {
+		UIFlag = uIFlag;
 	}
 	
 	
