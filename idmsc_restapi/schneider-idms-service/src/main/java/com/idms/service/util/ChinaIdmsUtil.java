@@ -9,11 +9,14 @@ import java.security.NoSuchAlgorithmException;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+
+import com.se.idms.util.UserConstants;
 
 public class ChinaIdmsUtil {
 
@@ -57,4 +60,20 @@ public class ChinaIdmsUtil {
 		
 		return Response.status(response.getStatusLine().getStatusCode()).entity(result.toString()).build();
 	}
+	
+	/**
+	 * returns the UID with 36 random characters.
+	 * @return
+	 */
+	public static String generateFedId(){		 
+		
+        String fedId = "cn00";
+        fedId += RandomStringUtils.random(4, UserConstants.RANDOM_CHARS);; 
+        fedId += '-' + RandomStringUtils.random(4, UserConstants.RANDOM_CHARS);;
+        fedId += '-' + RandomStringUtils.random(4, UserConstants.RANDOM_CHARS);;
+        fedId += '-' + RandomStringUtils.random(4, UserConstants.RANDOM_CHARS);;
+        fedId += '-' + RandomStringUtils.random(12, UserConstants.RANDOM_CHARS);;
+        return fedId;
+    } 
+	
 }
