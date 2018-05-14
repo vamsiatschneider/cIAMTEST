@@ -1,6 +1,7 @@
 package com.idms.service.util;
 
 import java.io.BufferedReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.MessageDigest;
@@ -16,6 +17,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import com.opencsv.CSVWriter;
 import com.se.idms.util.UserConstants;
 
 public class ChinaIdmsUtil {
@@ -75,5 +77,31 @@ public class ChinaIdmsUtil {
         fedId += '-' + RandomStringUtils.random(12, UserConstants.RANDOM_CHARS);;
         return fedId;
     } 
+	
+	/**
+	 * Utility function to append the CSV file with the record.
+	 * @param filePath
+	 * @param recordString
+	 * @return
+	 */
+	public static boolean generateCSV(String filePath, String recordString){
+		boolean csvAppended = false;
+		
+		 CSVWriter writer;
+		try {
+			writer = new CSVWriter(new FileWriter(filePath, true));
+			String [] record = recordString.split(",");
+			
+			writer.writeNext(record);
+			
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	        
+		return csvAppended;
+		
+	}
 	
 }
