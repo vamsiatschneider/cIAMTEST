@@ -8,6 +8,8 @@ public class UserConstants {
 	
 	public static final String RANDOM_PR_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&*()-_";
 	
+	public static final String RANDOM_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	
 	public static final String RANDOM_PIN_CHARS = "0123456789";
 	/**
 	 * Password Policy Regular Expression

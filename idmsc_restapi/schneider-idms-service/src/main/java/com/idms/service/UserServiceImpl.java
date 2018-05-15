@@ -860,7 +860,9 @@ public class UserServiceImpl implements UserService {
 					&& (!appList.contains(userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase()))
 					&& (null == userRequest.getUserRecord().getIDMS_Federated_ID__c()|| userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty())){
 					
-					userName = UserConstants.UID_PREFIX + UUID.randomUUID().toString();
+					//new logic to generate fedId/userId
+//					userName = UserConstants.UID_PREFIX + UUID.randomUUID().toString();
+					userName = ChinaIdmsUtil.generateFedId();
 				} else {
 					userName = userRequest.getUserRecord().getIDMS_Federated_ID__c();
 				}
