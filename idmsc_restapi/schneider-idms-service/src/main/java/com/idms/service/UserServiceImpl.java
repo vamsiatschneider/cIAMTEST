@@ -32,7 +32,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -3266,7 +3268,7 @@ public class UserServiceImpl implements UserService {
 			IDMSUser__r idmsUser__r = new IDMSUser__r();
 			idmsUser__r.setAttributes(idmsUser_rAttributes);
 			idmsUser__r.setId(userId);
-			idmsUser__r.setIDMS_Federated_ID__c("");
+			idmsUser__r.setIDMS_Federated_ID__c(userId);
 
 			IDMSUserAIL idmsUserAIL = new IDMSUserAIL(idmsUser__r);
 			Attributes attributes = new Attributes();
@@ -5985,5 +5987,82 @@ public class UserServiceImpl implements UserService {
 		}
 		//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
 		return Response.status(Response.Status.NOT_FOUND).entity(userResponse).build();		
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Response sendRemainderEmail(List<String> remainderUsersForActivation) {
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		JSONObject response = new JSONObject();
+		DocumentContext productDocCtx = null;
+		String userData = null;
+		String loginIdentifier = null;
+		String iPlanetDirectoryKey = null;
+		String loginId = null;
+		String uniqueIdentifier = null;
+
+		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
+		long elapsedTime;
+		response.put(UserConstants.STATUS, UserConstants.STATUS_FAILD);
+		Set<String> userNotSendEmail = new HashSet<String>();
+			
+		for (String federationId : remainderUsersForActivation) {
+			try {
+				loginId = null;
+				iPlanetDirectoryKey = getSSOToken();
+
+				LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
+						+ AUDIT_OPENAM_API + AUDIT_OPENAM_GET_CALL + AUDIT_LOG_CLOSURE);
+				userData = productService.getUser(iPlanetDirectoryKey, federationId);
+				LOGGER.info("user data from Openam: " + userData);
+
+				productDocCtx = JsonPath.using(conf).parse(userData);
+
+				loginId = productDocCtx.read(JsonConstants.LOGIN_ID_LOWER_0);
+				if (null == loginId) {
+					loginId = productDocCtx.read(JsonConstants.LOGIN_ID_UPPER_0);
+				}
+
+				if (null == loginId || loginId.isEmpty()) {
+					uniqueIdentifier = productDocCtx.read("$.mail[0]");
+
+					if (null == uniqueIdentifier || uniqueIdentifier.isEmpty()) {
+						uniqueIdentifier = productDocCtx.read("$.mobile[0]");
+					}
+
+					String regestrationSource = productDocCtx.read("$.registerationSource[0]");
+					String otp = sendEmail.generateOtp(federationId);
+
+					if (!emailValidator.validate(uniqueIdentifier)) {
+						sendEmail.sendSMSMessage(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
+								regestrationSource);
+						sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
+								regestrationSource);
+					} else {
+						sendEmail.sendSMSMessage(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
+								regestrationSource);
+					}
+					/*
+					 * product_json_string = "{" + "\"authId\": \"" + "[]" +
+					 * "\"}";
+					 * 
+					 * productService.updateUser(UserConstants.CHINA_IDMS_TOKEN+
+					 * iPlanetDirectoryKey, federationId, product_json_string);
+					 */} else {
+					userNotSendEmail.add(federationId);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by UserServiceImpl.resendPIN() : " + elapsedTime);
+				ERROR_LOGGER.error("Executing while Resending User PIN :: -> " + e.getMessage());
+				userNotSendEmail.add(federationId);
+			}
+		}
+		response.put(UserConstants.STATUS, successStatus);
+		response.put(UserConstants.MESSAGE, "Remainder Email sent successfuly"+userNotSendEmail);
+		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+		LOGGER.info("Time taken by UserServiceImpl.resendPIN() : " + elapsedTime);
+		return Response.status(Response.Status.OK).entity(response).build();
 	}
 }

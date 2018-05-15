@@ -1,5 +1,7 @@
 package com.idms.service;
 
+import java.util.List;
+
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -193,5 +195,10 @@ public interface UserService {
 							@FormParam("submitted") String submitted,
 							@FormParam("loginbutton") String loginbutton
 							);
+	
+	@POST
+	@Path("/apexrest/sendRemainderEmail")
+	@Consumes("application/json")
+	Response sendRemainderEmail(List<String> remainderUsersForActivation);
 
 }
