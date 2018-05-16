@@ -6046,14 +6046,14 @@ public class UserServiceImpl implements UserService {
 						String regestrationSource = productDocCtx.read("$.registerationSource[0]");
 						String otp = sendEmail.generateOtp(federationId);
 
-						if (emailValidator.validate(uniqueIdentifier)) {
+						if (!emailValidator.validate(uniqueIdentifier)) {
 							sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
 									regestrationSource);
 
 							sendEmail.sendSMSMessage(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
 									regestrationSource);
 						} else {
-							sendEmail.sendSMSMessage(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
+							sendEmail.sendOpenAmEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
 									regestrationSource);
 						}
 
