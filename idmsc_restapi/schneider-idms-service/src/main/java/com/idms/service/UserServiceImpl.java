@@ -99,6 +99,7 @@ import com.idms.product.model.OpenAMGetUserWorkResponse;
 import com.idms.product.model.OpenAMPasswordRecoveryInput;
 import com.idms.product.model.OpenAmUser;
 import com.idms.product.model.OpenAmUserRequest;
+import com.idms.service.util.AsyncUtil;
 import com.idms.service.util.ChinaIdmsUtil;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
@@ -208,6 +209,11 @@ public class UserServiceImpl implements UserService {
 	@Inject 
 	private UIMSAccessManagerSoapService uimsAccessManagerSoapService;
 
+	@Value("${authCsvPath}")
+	private String authCsvPath;
+	
+	@Value("${registrationCsvPath}")
+	private String registrationCsvPath;
 
 	@Value("${adminUserName}")
 	private String adminUserName;
@@ -302,6 +308,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Response authenticateUser(String userName, String password, String realm) {
 		String successResponse = null;
+		String regSource = "";
 		Response checkUserExistsResponse = null;
 		UserExistsResponse checkUserExistsFlag = null;
 		JSONObject jsonObject = new JSONObject();
@@ -317,12 +324,31 @@ public class UserServiceImpl implements UserService {
 			// cache.evictExpiredElements();
 		}
 		//Response authenticateResponse = productService.authenticateIdmsChinaUser(userName, password, realm);
-		
+				
 		try {
+			
+			//The below snippet for authentication logs.
+			String PlanetDirectoryKey = getSSOToken();
+
+			String userData = productService.checkUserExistsWithEmailMobile(
+					UserConstants.CHINA_IDMS_TOKEN + PlanetDirectoryKey, "loginid eq " + "\"" + userName + "\"");
+			LOGGER.info("user data from Openam: " + userData);
+		
+			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+			// getting the context
+			DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
+			productDocCtx = JsonPath.using(conf).parse(userData);
+			Integer resultCount = productDocCtx.read("$.resultCount");
+			if (resultCount.intValue() > 0) {
+			regSource = null != productDocCtx.read("$.result[0].registerationSource[0]")
+					? getValue(productDocCtx.read("$.result[0].registerationSource[0]").toString()) : null;
+			LOGGER.info("regSource: " + regSource);
+			}
 			Response authenticateResponse = ChinaIdmsUtil.executeHttpClient(prefixStartUrl, realm, userName, password);
 			successResponse = (String) authenticateResponse.getEntity();
 			if(401 == authenticateResponse.getStatus() && successResponse.contains(UserConstants.ACCOUNT_BLOCKED)){
 				jsonObject.put("message", UserConstants.ACCOUNT_BLOCKED);
+				AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource);
 				return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
 				
 			}else if (401 == authenticateResponse.getStatus()) {
@@ -333,6 +359,7 @@ public class UserServiceImpl implements UserService {
 				if (UserConstants.TRUE.equalsIgnoreCase(checkUserExistsFlag.getMessage())) {
 
 					jsonObject.put("user_store", "CN");
+					AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource);
 					return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
 				} else {
 					checkUserExistsResponse = checkUserExists(userName, UserConstants.TRUE);
@@ -340,9 +367,11 @@ public class UserServiceImpl implements UserService {
 
 					if (UserConstants.TRUE.equalsIgnoreCase(checkUserExistsFlag.getMessage())) {
 						jsonObject.put("user_store", "GLOBAL");
+						AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource);
 						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
 					} else {
 						jsonObject.put("user_store", "None");
+						AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource);
 						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
 					}
 				}
@@ -352,10 +381,13 @@ public class UserServiceImpl implements UserService {
 		} catch (Exception e) {
 			e.printStackTrace();
 			jsonObject.put("user_store", "None");
+			AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + successStatus + "," + regSource);
 			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
 		}
 
+
 		LOGGER.debug(JsonConstants.JSON_STRING, successResponse);
+		AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + successStatus + "," + regSource);
 		return Response.status(Response.Status.OK.getStatusCode()).entity(successResponse).build();
 	}
 
@@ -937,6 +969,8 @@ public class UserServiceImpl implements UserService {
 				ERROR_LOGGER.info("User Registered Succssfully :: -> "
 						+ IOUtils.toString((InputStream) userCreation.getEntity()));
 			}
+			//log for user stats
+			AsyncUtil.generateCSV(registrationCsvPath, new Date() + "," + userName + "," + userRequest.getUserRecord().getIDMS_User_Context__c() + "," + userRequest.getUserRecord().getIDMS_Registration_Source__c());
 			
 			String version =  "{" + "\"V_Old\": \"" + UserConstants.V_OLD  + "\",\"V_New\": \""
 					+ UserConstants.V_NEW  + "\"" + "}";
