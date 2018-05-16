@@ -900,6 +900,7 @@ public class UserServiceImpl implements UserService {
 
 			// setting isInternal value to false
 			openAmReq.getInput().getUser().setIDMSisInternal__c("FALSE");
+			openAmReq.getInput().getUser().setEmailcount("0");
 			String json = objMapper.writeValueAsString(openAmReq);
 			json = json.replace("\"\"", "[]");
 			LOGGER.info("Open AM  user  Request ------------->" + json);
@@ -2152,6 +2153,10 @@ public class UserServiceImpl implements UserService {
 			if(UserConstants.TRUE.equalsIgnoreCase(userRequest.getTrustedAdmin())){
 				userRequest.setTrustedAdmin(UserConstants.SE_TRUSTED_ADMIN);
 			}
+		}
+		
+		if((checkMandatoryFields)&& (null == userRequest.getIsActivated() || null == userRequest.getIsActivated())){
+			userRequest.setIsActivated(UserConstants.FALSE);
 		}
 		
 		return false;
@@ -6002,15 +6007,17 @@ public class UserServiceImpl implements UserService {
 		String iPlanetDirectoryKey = null;
 		String loginId = null;
 		String uniqueIdentifier = null;
-
+		String product_json_string = null;
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
 		response.put(UserConstants.STATUS, UserConstants.STATUS_FAILD);
 		Set<String> userNotSendEmail = new HashSet<String>();
+		int mailCount = 0;
 			
 		for (String federationId : remainderUsersForActivation) {
 			try {
 				loginId = null;
+				product_json_string = null;
 				iPlanetDirectoryKey = getSSOToken();
 
 				LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
@@ -6026,31 +6033,36 @@ public class UserServiceImpl implements UserService {
 				}
 
 				if (null == loginId || loginId.isEmpty()) {
-					uniqueIdentifier = productDocCtx.read("$.mail[0]");
 
-					if (null == uniqueIdentifier || uniqueIdentifier.isEmpty()) {
-						uniqueIdentifier = productDocCtx.read("$.mobile[0]");
+					mailCount = Integer.valueOf(productDocCtx.read("$.emailcount[0]")).intValue();
+
+					if (mailCount < 3) {
+						uniqueIdentifier = productDocCtx.read("$.mail[0]");
+
+						if (null == uniqueIdentifier || uniqueIdentifier.isEmpty()) {
+							uniqueIdentifier = productDocCtx.read("$.mobile[0]");
+						}
+
+						String regestrationSource = productDocCtx.read("$.registerationSource[0]");
+						String otp = sendEmail.generateOtp(federationId);
+
+						if (emailValidator.validate(uniqueIdentifier)) {
+							sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
+									regestrationSource);
+
+							sendEmail.sendSMSMessage(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
+									regestrationSource);
+						} else {
+							sendEmail.sendSMSMessage(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
+									regestrationSource);
+						}
+
+						mailCount = mailCount + 1;
+						product_json_string = "{" + "\"emailcount\": \"" + mailCount + "\"}";
+						productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, federationId,
+								product_json_string);
 					}
-
-					String regestrationSource = productDocCtx.read("$.registerationSource[0]");
-					String otp = sendEmail.generateOtp(federationId);
-
-					if (!emailValidator.validate(uniqueIdentifier)) {
-						sendEmail.sendSMSMessage(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
-								regestrationSource);
-						sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
-								regestrationSource);
-					} else {
-						sendEmail.sendSMSMessage(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
-								regestrationSource);
-					}
-					/*
-					 * product_json_string = "{" + "\"authId\": \"" + "[]" +
-					 * "\"}";
-					 * 
-					 * productService.updateUser(UserConstants.CHINA_IDMS_TOKEN+
-					 * iPlanetDirectoryKey, federationId, product_json_string);
-					 */} else {
+				} else {
 					userNotSendEmail.add(federationId);
 				}
 			} catch (Exception e) {

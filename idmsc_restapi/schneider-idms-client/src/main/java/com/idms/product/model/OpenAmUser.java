@@ -216,6 +216,39 @@ public class OpenAmUser {
 	@JsonInclude(Include.NON_NULL)
 	private String trustedAdmin;
 	
+	
+	@JsonInclude(Include.NON_NULL)
+	private String isActivated;
+	
+	@JsonInclude(Include.NON_NULL)
+	private String emailcount;
+	
+	
+	
+	@JsonProperty("emailcount")
+    @JsonInclude(Include.NON_NULL)
+	public String getEmailcount() {
+		return emailcount;
+	}
+
+	@JsonProperty("emailcount")
+    @JsonInclude(Include.NON_NULL)
+	public void setEmailcount(String emailcount) {
+		this.emailcount = emailcount;
+	}
+
+	@JsonProperty("isActivated")
+    @JsonInclude(Include.NON_NULL)
+	public String getIsActivated() {
+		return isActivated;
+	}
+
+	@JsonProperty("isActivated")
+    @JsonInclude(Include.NON_NULL)
+	public void setIsActivated(String isActivated) {
+		this.isActivated = isActivated;
+	}
+
 	@JsonProperty("AboutMe")
     @JsonInclude(Include.NON_NULL)
 	public String getAboutMe() {

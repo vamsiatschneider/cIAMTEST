@@ -3,7 +3,9 @@ package com.idms.model;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.idms.product.model.Attributes;
 
 public class IFWUser extends BaseEntity {
@@ -215,7 +217,21 @@ public class IFWUser extends BaseEntity {
 	@JsonProperty
 	private String idmsHashedToken;
 	
+	@JsonProperty
+	private String isActivated;
 	
+	
+	
+	@JsonProperty("isActivated")
+	public String getIsActivated() {
+		return isActivated;
+	}
+
+	@JsonProperty("isActivated")
+	public void setIsActivated(String isActivated) {
+		this.isActivated = isActivated;
+	}
+
 	public Attributes getAttributes() {
 		return attributes;
 	}

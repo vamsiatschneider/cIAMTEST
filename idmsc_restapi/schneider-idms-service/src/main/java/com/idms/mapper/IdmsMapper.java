@@ -104,6 +104,7 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.aboutMe", "input.user.aboutMe")
         .field("userRecord.invitationCode", "input.user.invitationCode")
         .field("userRecord.trustedAdmin", "input.user.trustedAdmin")
+        .field("userRecord.isActivated", "input.user.isActivated")
         .byDefault()
         .register();
     }
