@@ -1339,6 +1339,12 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 
+		if (((null != userRequest.getEmail()) || (!userRequest.getEmail().isEmpty())) && userRequest.getEmail().length() > 65){
+			userResponse.setStatus(errorStatus);
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.EMAIL);
+			return true;
+		}
+		
 		if ((null != userRequest.getEmail()) && (!userRequest.getEmail().isEmpty())) {
 			if (!emailValidator.validate(userRequest.getEmail())) {
 				userResponse.setStatus(errorStatus);
@@ -3665,7 +3671,7 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info("Time taken by UserServiceImpl.userRegistration() : " + elapsedTime);
 					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 				}
-
+				
 				if (checkMandatoryFieldsFromRequest(userRequest.getUserRecord(), userResponse, false)) {
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
