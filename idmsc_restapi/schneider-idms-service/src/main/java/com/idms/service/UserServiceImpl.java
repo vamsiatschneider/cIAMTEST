@@ -35,7 +35,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -6068,9 +6067,15 @@ public class UserServiceImpl implements UserService {
 
 				if (null == loginId || loginId.isEmpty()) {
 
-					mailCount = Integer.valueOf(productDocCtx.read("$.emailcount[0]")).intValue();
+					//mailCount = Integer.valueOf(productDocCtx.read("$.emailcount[0]")).intValue();
+					
+					String lName = null != productDocCtx.read("$.emailcount[0]") ? getValue(productDocCtx.read("$.emailcount[0]").toString())
+							: getDelimeter();
+					//mailCount = Integer.valueOf(lName).intValue();
 
-					if (mailCount < 3) {
+					if (null != lName && Integer.valueOf(lName).intValue() < 
+							3) {
+						mailCount = Integer.valueOf(lName).intValue();
 						uniqueIdentifier = productDocCtx.read("$.mail[0]");
 
 						if (null == uniqueIdentifier || uniqueIdentifier.isEmpty()) {
@@ -6095,6 +6100,8 @@ public class UserServiceImpl implements UserService {
 						product_json_string = "{" + "\"emailcount\": \"" + mailCount + "\"}";
 						productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, federationId,
 								product_json_string);
+					}else {
+						userNotSendEmail.add(federationId);
 					}
 				} else {
 					userNotSendEmail.add(federationId);
@@ -6108,7 +6115,7 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 		response.put(UserConstants.STATUS, successStatus);
-		response.put(UserConstants.MESSAGE, "Remainder Email sent successfuly"+userNotSendEmail);
+		response.put(UserConstants.MESSAGE, "Remainder Email sent successfuly and Failed to send Users are :: "+userNotSendEmail);
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info("Time taken by UserServiceImpl.resendPIN() : " + elapsedTime);
 		return Response.status(Response.Status.OK).entity(response).build();
