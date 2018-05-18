@@ -1339,7 +1339,7 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 
-		if (((null != userRequest.getEmail()) || (!userRequest.getEmail().isEmpty())) && userRequest.getEmail().length() > 65){
+		if ((null != userRequest.getEmail() && !userRequest.getEmail().isEmpty()) && (userRequest.getEmail().length() > 65)){
 			userResponse.setStatus(errorStatus);
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.EMAIL);
 			return true;
