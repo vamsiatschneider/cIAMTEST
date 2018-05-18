@@ -5917,6 +5917,7 @@ public class UserServiceImpl implements UserService {
 		long elapsedTime;
 		Response ifwResponse = null;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		String loginId = null;
 
 		try {
 
@@ -5930,13 +5931,22 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 			}
 
+			
+			if(null != request.getEmail()&& !request.getEmail().isEmpty()){
+				loginId = request.getEmail();
+			}else if(null != request.getMobile()&& !request.getMobile().isEmpty()){
+				loginId = request.getMobile();
+			}else if(null != request.getLoginID()&& !request.getLoginID().isEmpty()){
+				loginId = request.getLoginID();
+			}
+			
 			iPlanetDirectoryKey = getSSOToken();
 
-			if (null != request.getLoginID()&& !request.getLoginID().isEmpty()) {
+			if (null != loginId&& !loginId.isEmpty()) {
 				LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
-						+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + request.getLoginID() + AUDIT_LOG_CLOSURE);
+						+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + loginId + AUDIT_LOG_CLOSURE);
 				String userExists = productService.checkUserExistsWithEmailMobile(
-						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\"" + request.getLoginID() + "\"");
+						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\"" + loginId + "\"");
 
 				productDocCtx = JsonPath.using(conf).parse(userExists);
 				Integer resultCount = productDocCtx.read("$.resultCount");
@@ -5968,16 +5978,16 @@ public class UserServiceImpl implements UserService {
 
 						String authorization = "Bearer " + accessToken;
 
-						if (emailValidator.validate(request.getLoginID())) {
+						if (emailValidator.validate(loginId)) {
 							ifwResponse = ifwService.checkUserExistsWithEmail(bfoAuthorizationToken,
 									UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE,
 									UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID, authorization,
-									request.getLoginID(), UserConstants.FALSE);
-						} else if (legthValidator.validate(UserConstants.MOBILE_PHONE,request.getLoginID())) {
+									loginId, UserConstants.FALSE);
+						} else if (legthValidator.validate(UserConstants.MOBILE_PHONE,loginId)) {
 							ifwResponse = ifwService.checkUserExistsWithMobile(bfoAuthorizationToken,
 									UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE,
 									UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID, authorization,
-									request.getLoginID(), UserConstants.FALSE);
+									loginId, UserConstants.FALSE);
 						}
 						
 						if (null != ifwResponse && 200 == ifwResponse.getStatus()) {
@@ -6067,14 +6077,10 @@ public class UserServiceImpl implements UserService {
 
 				if (null == loginId || loginId.isEmpty()) {
 
-					//mailCount = Integer.valueOf(productDocCtx.read("$.emailcount[0]")).intValue();
-					
-					String lName = null != productDocCtx.read("$.emailcount[0]") ? getValue(productDocCtx.read("$.emailcount[0]").toString())
-							: getDelimeter();
-					//mailCount = Integer.valueOf(lName).intValue();
+					String lName = null != productDocCtx.read("$.emailcount[0]")
+							? getValue(productDocCtx.read("$.emailcount[0]").toString()) : getDelimeter();
 
-					if (null != lName && Integer.valueOf(lName).intValue() < 
-							3) {
+					if (null != lName && Integer.valueOf(lName).intValue() < 3) {
 						mailCount = Integer.valueOf(lName).intValue();
 						uniqueIdentifier = productDocCtx.read("$.mail[0]");
 
@@ -6100,7 +6106,7 @@ public class UserServiceImpl implements UserService {
 						product_json_string = "{" + "\"emailcount\": \"" + mailCount + "\"}";
 						productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, federationId,
 								product_json_string);
-					}else {
+					} else {
 						userNotSendEmail.add(federationId);
 					}
 				} else {
