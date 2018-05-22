@@ -262,6 +262,7 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.phone", "phone")
         .field("userRecord.fax", "fax")
         .field("userRecord.IDMS_County__c", "county")
+        .field("userRecord.mobilePhone", "phoneId")
         //.field("userRecord.country", "input.countrycode")
         ////.field("userRecord.IDMS_Email_opt_in__c", "input.emailOptIn")
 
