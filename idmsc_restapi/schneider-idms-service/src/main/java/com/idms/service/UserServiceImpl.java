@@ -299,6 +299,7 @@ public class UserServiceImpl implements UserService {
 		appList = new ArrayList<String>();
 		appList.add("PACE");
 		appList.add("PRM");
+		appList.add("PRMPortal");
 	}
 	
 	 
