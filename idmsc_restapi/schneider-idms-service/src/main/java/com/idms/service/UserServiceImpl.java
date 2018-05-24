@@ -299,7 +299,7 @@ public class UserServiceImpl implements UserService {
 		appList = new ArrayList<String>();
 		appList.add("PACE");
 		appList.add("PRM");
-		appList.add("PRMPortal");
+		appList.add("PRMPORTAL");
 	}
 	
 	 
@@ -944,7 +944,8 @@ public class UserServiceImpl implements UserService {
 			 * 
 			 * */
 			
-			if (!UserConstants.PRM.contains(userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase()) 
+			if ((!pickListValidator.validate(UserConstants.IDMS_BFO_profile,
+					userRequest.getUserRecord().getIDMS_Registration_Source__c()))
 				&& (appList.contains(userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase())
 						|| ((null != userRequest.getUserRecord().getIDMS_Federated_ID__c()&& !userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty())
 							&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())))) {
