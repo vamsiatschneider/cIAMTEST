@@ -26,6 +26,7 @@ import com.uims.authenticatedUsermanager.LdapTemplateNotReadyException_Exception
 import com.uims.authenticatedUsermanager.RequestedEntryNotExistsException_Exception;
 import com.uims.authenticatedUsermanager.RequestedInternalUserException_Exception;
 import com.uims.authenticatedUsermanager.SecuredImsException_Exception;
+import com.uims.authenticatedUsermanager.Type;
 import com.uims.authenticatedUsermanager.UnexpectedLdapResponseException_Exception;
 import com.uims.authenticatedUsermanager.UnexpectedRuntimeImsException_Exception;
 import com.uims.authenticatedUsermanager.UserV6;
@@ -73,7 +74,15 @@ public class UIMSAuthenticatedUserManagerSoapService {
 		try {
 			AuthenticatedUserManagerUIMSV22 authenticatedUserManagerUIMSV2 = getAuthenticatedUserManager();
 			//uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentity(callerFid, identity, application);
+			if ((null == identity.getEmail() || identity.getEmail().isEmpty()) &&(null != identity.getPhoneId() && !identity.getPhoneId().isEmpty())) {
+
+				AccessElement application = new AccessElement();
+				application.setId("Uims");
+				application.setType(Type.APPLICATION);
+				uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithPhoneId(callerFid, identity, application);
+			}else{
 			uimsUserResponse =authenticatedUserManagerUIMSV2.createIdentityForceIdmsId(callerFid, identity, forcedFederatedId);
+			}
 		} catch (IMSServiceSecurityCallNotAllowedException_Exception | ImsMailerException_Exception
 				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
 				| RequestedEntryNotExistsException_Exception | RequestedInternalUserException_Exception
@@ -94,7 +103,18 @@ public class UIMSAuthenticatedUserManagerSoapService {
 		try {
 			AuthenticatedUserManagerUIMSV22 authenticatedUserManagerUIMSV2 = getAuthenticatedUserManager();
 			//uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithPassword(callerFid, identity, application,password);
-			uimsUserResponse=authenticatedUserManagerUIMSV2.createIdentityWithPasswordForceIdmsId(callerFid, identity, password, forcedFederatedId);
+
+			if ((null == identity.getEmail() || identity.getEmail().isEmpty()) &&(null != identity.getPhoneId() && !identity.getPhoneId().isEmpty())) {
+
+				AccessElement application = new AccessElement();
+				application.setId("Uims");
+				application.setType(Type.APPLICATION);
+				uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithMobileWithPassword(callerFid,
+						identity,application,password);
+			} else {
+				uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithPasswordForceIdmsId(callerFid,
+						identity, password, forcedFederatedId);
+			}
 		} catch (IMSServiceSecurityCallNotAllowedException_Exception | ImsMailerException_Exception
 				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
 				| RequestedEntryNotExistsException_Exception | RequestedInternalUserException_Exception

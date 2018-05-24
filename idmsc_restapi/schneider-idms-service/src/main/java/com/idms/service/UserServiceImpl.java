@@ -3024,6 +3024,8 @@ public class UserServiceImpl implements UserService {
 		IDMSUserRecord idmsUserRecord = new IDMSUserRecord();
 		idmsUserRecord.setAttributes(attributes);
 		idmsUserRecord.setId(uniqueIdentifier);
+		idmsUserRecord.setIDMS_Federated_ID__c(uniqueIdentifier);
+		
 		PasswordRecoveryResponse passwordRecoveryResponse = new PasswordRecoveryResponse(idmsUserRecord);
 		passwordRecoveryResponse.setStatus(successStatus);
 		passwordRecoveryResponse.setMessage("PIN validated Successfully");
@@ -4150,6 +4152,8 @@ public class UserServiceImpl implements UserService {
 				? getValue(productDocCtx.read("$.mobile").toString()) : getDelimeter();
 		String email = null != productDocCtx.read("$.mail") ? getValue(productDocCtx.read("$.mail").toString())
 				: getDelimeter();
+		String federationID = null != productDocCtx.read("$.federationID") ? getValue(productDocCtx.read("$.federationID").toString())
+				: getDelimeter();
 		// String idmsIdentityType = null !=
 		// productDocCtx.read("$.IDMSIdentityType__c")?
 		// getValue(productDocCtx.read("$.IDMSIdentityType__c").toString()) :
@@ -4163,6 +4167,7 @@ public class UserServiceImpl implements UserService {
 		idmsUserRecord.setMobilePhone(mobilePhone);
 		idmsUserRecord.setEmail(email);
 		idmsUserRecord.setIdmsIdentityType("");
+		idmsUserRecord.setIDMS_Federated_ID__c(username);
 
 		passwordRecoveryResponse = new PasswordRecoveryResponse(idmsUserRecord);
 		passwordRecoveryResponse.setStatus(successStatus);
