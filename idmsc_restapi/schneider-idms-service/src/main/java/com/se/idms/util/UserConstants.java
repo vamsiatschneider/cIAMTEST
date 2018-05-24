@@ -461,5 +461,7 @@ public class UserConstants {
 	public static final String PASSWORD_WITH_USER_REG_BLCOKED = "Operation blocked. User registration with password is not allowed.";
 	
 	public static final String UPDATE_USER_REC_BLCOKED = "Operation blocked. Updating password is not allwed";
+
+	public static final String IDMS_BFO_profile = "IDMS_BFO_profile";
 	
 }
