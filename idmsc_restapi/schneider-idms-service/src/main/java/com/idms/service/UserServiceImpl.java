@@ -2944,7 +2944,7 @@ public class UserServiceImpl implements UserService {
 			//logic for PRM set password, if the user not found, call the Global get user api 
 			//and retrieve the user details and pass it to create user 
 			if(null != confirmRequest.getIDMS_Profile_update_source() 
-					&& UserConstants.PRM.equals(confirmRequest.getIDMS_Profile_update_source())){
+				&& (!pickListValidator.validate(UserConstants.IDMS_BFO_profile, confirmRequest.getIDMS_Profile_update_source()))){
 				ifwAccessToken = ifwService.getIFWToken(UserConstants.CONTENT_TYPE_URL_FROM,
 						UserConstants.IFW_GRANT_TYPE, ifwClientId, ifwClientSecret);
 				productDocCtx = JsonPath.using(conf).parse(ifwAccessToken);
