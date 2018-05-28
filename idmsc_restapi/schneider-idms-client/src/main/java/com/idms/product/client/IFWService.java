@@ -64,6 +64,6 @@ public interface IFWService {
 			@HeaderParam("X-SE-IFW-RequestId") String requestId, 
 			@HeaderParam("X-SE-IFW-CountryCode") String countryCode,
 			@HeaderParam("X-SE-IFW-LanguageCode") String languageCode,
-			@QueryParam("IDMSFederatedId") String iDMSFederatedId);
+			@QueryParam("UIMSFederatedId") String iDMSFederatedId);
 	
 }
