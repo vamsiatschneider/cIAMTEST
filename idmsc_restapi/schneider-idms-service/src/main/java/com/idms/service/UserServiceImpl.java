@@ -2988,6 +2988,7 @@ public class UserServiceImpl implements UserService {
 					confirmPinRequest.setPassword(confirmRequest.getPassword());
 					confirmPinRequest.setPinCode(confirmRequest.getPinCode());
 					confirmPinRequest.setTncFlag(confirmRequest.getTncFlag());
+					confirmPinRequest.setUIFlag("true");
 					userPinConfirmation(confirmPinRequest);
 					}
 					
