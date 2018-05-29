@@ -2995,6 +2995,21 @@ public class UserServiceImpl implements UserService {
 					ERROR_LOGGER.error("Executing while creating the User :: -> " + e.getMessage());
 					e1.printStackTrace();
 				}
+				
+				//PRM success response
+				Attributes attributes = new Attributes();
+				IDMSUserRecord idmsUserRecord = new IDMSUserRecord();
+				idmsUserRecord.setAttributes(attributes);
+				idmsUserRecord.setId(uniqueIdentifier);
+				idmsUserRecord.setIDMS_Federated_ID__c(uniqueIdentifier);
+				
+				PasswordRecoveryResponse passwordRecoveryResponse = new PasswordRecoveryResponse(idmsUserRecord);
+				passwordRecoveryResponse.setStatus(successStatus);
+				passwordRecoveryResponse.setMessage("PIN validated Successfully");
+
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
+				return Response.status(Response.Status.OK).entity(passwordRecoveryResponse).build();
 			}
 			response.setStatus(errorStatus);
 			response.setMessage("404 Not Found");
