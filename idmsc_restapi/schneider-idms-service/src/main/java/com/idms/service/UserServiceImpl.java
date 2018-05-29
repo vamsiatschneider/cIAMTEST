@@ -5917,12 +5917,12 @@ public class UserServiceImpl implements UserService {
 		} catch (Exception e) {
 			LOGGER.error("UserServiceImpl :: idmsDirectLogin Exception occured!!!!");
 			e.printStackTrace();
-			jsonObject.put("error_code", "code_01");
+			jsonObject.put("error_code", "L9101");
 			jsonObject.put("error_message","Invalid username or password");
 			prefix.append(UserConstants.redirectUrl_Option3)
 				  .append("?startUrl=")
 				  .append(startUrl)
-				  .append("&login_error=code_01");
+				  .append("&login_error=L9101");
 			response = rb.header("Location", prefix.toString()).build();
 			//return Response.status(Response.Status.UNAUTHORIZED).entity(jsonObject).build();
 		}
