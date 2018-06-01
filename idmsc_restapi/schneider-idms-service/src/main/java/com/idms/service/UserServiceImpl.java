@@ -506,9 +506,9 @@ public class UserServiceImpl implements UserService {
 		Attributes attributes = new Attributes();
 		userHomeResponse.setAttributes(attributes);
 		userWorkResponse.setAttributes(attributes);
-		if ("@home".equalsIgnoreCase(context)) {
+		if ("@home".equalsIgnoreCase(context)|| "home".equalsIgnoreCase(context)) {
 			return returnGetUserHomeContext(startTime, userHomeResponse, userProductDocCtx);
-		} else if ("@work".equalsIgnoreCase(context)) {
+		} else if ("@work".equalsIgnoreCase(context)|| "work".equalsIgnoreCase(context)) {
 			valuesByOauthHomeWorkContext.parseValuesWorkContext(userWorkResponse, userProductDocCtx);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info(GET_USER_TIME_LOG + elapsedTime);
@@ -2970,8 +2970,17 @@ public class UserServiceImpl implements UserService {
 				try {
 					IFWCustomAttributesForWork idmsUser = objMapper.readValue(responseAsString,IFWCustomAttributesForWork.class);
 //					CreateUserRequest iDMSUser = mapper.map(idmsUser, CreateUserRequest.class);
+					
+					/**
+					 * Added the below condition if user doesn't send the hashed token form api
+					 * */
+					if(null == idmsUser.getIdmsHashedToken() || idmsUser.getIdmsHashedToken().isEmpty()){
+						idmsUser.setIdmsHashedToken(ChinaIdmsUtil.generateHashValue(confirmRequest.getPinCode()));
+					}
+					
+					
 					IFWUser ifwUser = mapper.map(idmsUser, IFWUser.class);
-					ifwUser.setIdmsHashedToken(ChinaIdmsUtil.generateHashValue(confirmRequest.getPinCode()));
+					//ifwUser.setIdmsHashedToken(ChinaIdmsUtil.generateHashValue(confirmRequest.getPinCode()));
 					LOGGER.info("iDMSUser : " + ifwUser);
 					//creating the user
 					CreateUserRequest createUserRequest = new CreateUserRequest();
@@ -2990,6 +2999,8 @@ public class UserServiceImpl implements UserService {
 					confirmPinRequest.setTncFlag(confirmRequest.getTncFlag());
 					confirmPinRequest.setUIFlag("true");
 					userPinConfirmation(confirmPinRequest);
+					}else{
+						return userRegistrationResponse;
 					}
 					
 				} catch (IOException e1) {
@@ -3170,8 +3181,13 @@ public class UserServiceImpl implements UserService {
 			return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 		}
 
+		
+		/**
+		 * Disabling the below condition as part of R5 Release changes
+		 * 
+		 * */
 		// Update source and ACL value have to be equal
-		if (null != ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c() && !UserConstants.UIMS
+		/*if (null != ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c() && !UserConstants.UIMS
 				.equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c())) {
 			if (!ailRequest.getUserAILRecord().getIDMSAcl__c()
 					.equals(ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c())) {
@@ -3184,7 +3200,7 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity(errorResponse).build();
 
 			}
-		}
+		}*/
 		try {
 			ERROR_LOGGER.info("UserServiceImpl:updateAIL -> : Requset :  -> ",objMapper.writeValueAsString(ailRequest));
 			

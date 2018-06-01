@@ -1,150 +1,227 @@
 package com.se.idms.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class IFWCustomAttributesForWork {
 
+	@JsonProperty
 	private String userId;
 
+	@JsonProperty
 	private String contactId;
 
+	@JsonProperty
 	private String accountId;
 
+	@JsonProperty
 	private String federatedId;
 
+	@JsonProperty
 	private String idmsFederatedId;
 
+	@JsonProperty
 	private String userContext;
 
+	@JsonProperty
 	private String salutation;
 
+	@JsonProperty
 	private String firstName;
 
+	@JsonProperty
 	private String middleName;
 
+	@JsonProperty
 	private String lastName;
 
+	@JsonProperty
 	private String countryCode;
 
+	@JsonProperty
 	private String email;
 
+	@JsonProperty
 	private String mobilePhone;
 
+	@JsonProperty
 	private String languageCode;
 
+	@JsonProperty
 	private String emailOptIn;
 
+	@JsonProperty
 	private String aboutMe;
 
+	@JsonProperty
 	private String street;
 
+	@JsonProperty
 	private String city;
 
+	@JsonProperty
 	private String zipCode;
 
+	@JsonProperty
 	private String stateOrProvinceCode;
 
+	@JsonProperty
 	private String county;
 
+	@JsonProperty
 	private String pOBox;
 
+	@JsonProperty
 	private String additionalAddress;
 
+	@JsonProperty
 	private String suffix;
 
+	@JsonProperty
 	private String homePhone;
 
+	@JsonProperty
 	private String fax;
 
+	@JsonProperty
 	private String trustStatus;
 
+	@JsonProperty
 	private String trustLevel;
 
+	@JsonProperty
 	private String rejectionReason;
 
+	@JsonProperty
 	private String rejectionComment;
 
+	@JsonProperty
 	private String registrationSource;
 
+	@JsonProperty
 	private String profileLastUpdateSource;
 
+	@JsonProperty
 	private String delegatedIdp;
 
+	@JsonProperty
 	private String identityType;
 
+	@JsonProperty
 	private String isInternal;
 
+	@JsonProperty
 	private String ail;
 
+	@JsonProperty
 	private String ailApplications;
 
+	@JsonProperty
 	private String ailFeatures;
 
+	@JsonProperty
 	private String ailPrograms;
 	
+	@JsonProperty
 	private String currency;
 
+	@JsonProperty
 	private String companyName;
 	
+	@JsonProperty
 	private String companyStreet;
 	
+	@JsonProperty
 	private String companyCity;
 	
+	@JsonProperty
 	private String companyZipCode;
 	
+	@JsonProperty
 	private String companyStateOrProvinceCode;
 	
+	@JsonProperty
 	private String companyPOBox;
 	
+	@JsonProperty
 	private String companyCounty;
 	
+	@JsonProperty
 	private String companyCountryCode;
 	
+	@JsonProperty
 	private String companyAdditionalAddress;
 	
+	@JsonProperty
 	private String companyWebsite;
 	
+	@JsonProperty
 	private String classLevel1;
 	
+	@JsonProperty
 	private String classLevel2;
 	
+	@JsonProperty
 	private String marketSegment;
 	
+	@JsonProperty
 	private String marketSubSegment;
 	
+	@JsonProperty
 	private String marketServed;
 	
+	@JsonProperty
 	private String employeeSize;
 	
+	@JsonProperty
 	private String department;
 	
+	@JsonProperty
 	private String division;
 	
+	@JsonProperty
 	private String title;
 	
+	@JsonProperty
 	private String businessUnit;
 	
+	@JsonProperty
 	private String headquarter;
 	
+	@JsonProperty
 	private String annualRevenue;
 	
+	@JsonProperty
 	private String taxIdentificationNumber;
 	
+	@JsonProperty
 	private String jobTitle;
 	
+	@JsonProperty
 	private String jobFunction;
 	
+	@JsonProperty
 	private String jobDescription;
 	
+	@JsonProperty
 	private String workPhone;
 	
+	@JsonProperty
 	private String trustedAdmin;
 	
+	@JsonProperty
 	private String uimsFederatedId;
 	
+	@JsonProperty
 	private String userStatus;
 	
+	@JsonProperty
 	private String companyFederatedId;
 	
+	@JsonProperty
 	private String isActivated;
+	
+	@JsonProperty
+	private String idmsHashedToken;
 	
 	public String getCompanyFederatedId() {
 		return companyFederatedId;
@@ -721,5 +798,13 @@ public class IFWCustomAttributesForWork {
 
 	public void setIsActivated(String isActivated) {
 		this.isActivated = isActivated;
+	}
+
+	public String getIdmsHashedToken() {
+		return idmsHashedToken;
+	}
+
+	public void setIdmsHashedToken(String idmsHashedToken) {
+		this.idmsHashedToken = idmsHashedToken;
 	}
 }

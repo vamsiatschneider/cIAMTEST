@@ -681,6 +681,7 @@ public class IdmsMapper extends ConfigurableMapper{
 		 .field("jobFunction", "job_Function__c")
 		 .field("jobDescription", "IDMSJobDescription__c")
 		 .field("workPhone", "phone")
+		 .field("idmsHashedToken", "idmsHashedToken")
 	        .byDefault()
 	        .register();
 	}
