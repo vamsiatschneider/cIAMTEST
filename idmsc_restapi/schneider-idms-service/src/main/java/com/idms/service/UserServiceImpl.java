@@ -83,6 +83,9 @@ import com.idms.model.ResendEmailChangeRequest;
 import com.idms.model.ResendPinRequest;
 import com.idms.model.ResendRegEmailRequest;
 import com.idms.model.SendInvitationRequest;
+import com.idms.model.TransliteratorAttributes;
+import com.idms.model.TransliteratorConversionListRequest;
+import com.idms.model.TransliteratorConversionRequest;
 import com.idms.model.TransliteratorRequest;
 import com.idms.model.TransliteratorResponse;
 import com.idms.model.UpdatePasswordRequest;
@@ -6170,5 +6173,148 @@ public class UserServiceImpl implements UserService {
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info("Time taken by UserServiceImpl.resendPIN() : " + elapsedTime);
 		return Response.status(Response.Status.OK).entity(response).build();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Response transliteratorConversion(String jsonAsString) {
+
+		String result = "";
+		String srcNtargetId = null;
+		JSONObject errorResponse = null;// new JSONObject();
+		ArrayList<Object> listResponse = null;
+		List<String> sourceLanguagesList = new ArrayList<String>();
+		List<String> supportedSourceLanguagesList = new ArrayList<String>();
+		List<String> supportedTargetLanguagesList = new ArrayList<String>();
+		TransliteratorConversionRequest response = null;
+		try {
+
+			List<TransliteratorConversionRequest> requestList = new ObjectMapper().readValue(jsonAsString,
+					new TypeReference<List<TransliteratorConversionRequest>>() {
+					});
+
+			List<String> supportedLanguages = LangSupportUtil.getTransilatorLanguages();
+			for (String supportedLanguage : supportedLanguages) {
+				String[] split = supportedLanguage.split("-");
+				supportedSourceLanguagesList.add(split[0]);
+				supportedTargetLanguagesList.add(split[1]);
+			}
+			
+			if (null != requestList && requestList.size() > 0) {
+
+				listResponse = new ArrayList<Object>();
+				
+				List<TransliteratorConversionRequest> conversionList = requestList;
+				
+				for (int index = 0; index < conversionList.size(); index++) {
+
+					if (null != conversionList.get(index).getSourceLanguage()) {
+						sourceLanguagesList.add(conversionList.get(index).getSourceLanguage());
+					}
+
+					srcNtargetId = conversionList.get(index).getSourceLanguage() + "-"
+							+ conversionList.get(index).getTargetLanguage();
+					
+					if (null == conversionList.get(index).getIdentifier() || conversionList.get(index).getIdentifier().isEmpty()) {
+						errorResponse = new JSONObject();
+						errorResponse.put("code", "MISSING_IDENTIFIER");
+						errorResponse.put("message", "Identifier is missing");
+						listResponse.add(errorResponse);
+					} else if (null == conversionList.get(index).getSourceLanguage()
+							|| conversionList.get(index).getSourceLanguage().isEmpty()) {
+						errorResponse = new JSONObject();
+						errorResponse.put("code", "MISSING_SOURCE_LANGUAGE");
+						errorResponse.put("message", "SourceLanguage is missing");
+						listResponse.add(errorResponse);
+					} else if (null == conversionList.get(index).getTargetLanguage()
+							|| conversionList.get(index).getTargetLanguage().isEmpty()) {
+						errorResponse = new JSONObject();
+						errorResponse.put("code", "MISSING_TARGET_LANGUAGE");
+						errorResponse.put("message", "TargetLanguage is missing");
+						listResponse.add(errorResponse);
+					}else if (null == conversionList.get(index).getAttributes()
+							|| conversionList.get(index).getAttributes().isEmpty()) {
+						errorResponse = new JSONObject();
+						errorResponse.put("code", "MISSING_ATTRIBUTES");
+						errorResponse.put("message", "Attributes are missing");
+						listResponse.add(errorResponse);
+					}else if ((null != conversionList.get(index).getAttributes()
+							&& conversionList.get(index).getAttributes().size()>0)&&(supportedLanguages.contains(srcNtargetId))) {
+						
+						List<TransliteratorAttributes> attributes = new ArrayList<TransliteratorAttributes>();
+						response = new TransliteratorConversionRequest();
+						response.setIdentifier(conversionList.get(index).getIdentifier());
+						response.setSourceLanguage(conversionList.get(index).getSourceLanguage());
+						response.setTargetLanguage(conversionList.get(index).getTargetLanguage());
+						
+						response.setAttributes(attributes);
+						
+						listResponse.add(response);
+						for (TransliteratorAttributes attribute : conversionList.get(index).getAttributes()) {
+
+							TransliteratorAttributes attribueResponse = new TransliteratorAttributes();
+
+							if ((null == attribute.getKey() || attribute.getKey().isEmpty())
+									&& (null == attribute.getValue() || attribute.getValue().isEmpty())) {
+								attribueResponse.setTarget("Key and Value are missing");
+							} else if (null == attribute.getKey() || attribute.getKey().isEmpty()) {
+								attribueResponse.setTarget("Key is missing");
+							} else if (null == attribute.getValue() || attribute.getValue().isEmpty()) {
+								attribueResponse.setTarget("Value is missing");
+								attribueResponse.setKey(attribute.getKey());
+							} else {
+								result = Transliterator.getInstance(srcNtargetId).transform(attribute.getValue());
+								attribueResponse.setTarget(result);
+								attribueResponse.setKey(attribute.getKey());
+								attribueResponse.setValue(attribute.getValue());
+							}
+							attributes.add(attribueResponse);
+						}
+						/*
+						if (supportedLanguages.contains(srcNtargetId) && (null != conversionList.get(index).getSource()
+								&& !conversionList.get(index).getSource().isEmpty())) {
+							result = Transliterator.getInstance(srcNtargetId).transform(conversionList.get(index).getSource());
+
+							response = new TransliteratorResponse();
+							response.setSource(requestList.get(index).getSource());
+							response.setTarget(result);
+							response.setSourceLanguage(requestList.get(index).getSourceLanguage());
+							response.setTargetLanguage(requestList.get(index).getTargetLanguage());
+							listResponse.add(response);
+
+						} else {
+							errorResponse = new JSONObject();
+							errorResponse.put("code", "INVALID_LANGUAGE");
+							errorResponse.put("message", "Language is invalid");
+							listResponse.add(errorResponse);
+						}*/
+						
+					}/*
+					else if (supportedLanguages.contains(srcNtargetId) && (null != conversionList.get(index).getSource()
+							&& !conversionList.get(index).getSource().isEmpty())) {
+						result = Transliterator.getInstance(srcNtargetId).transform(conversionList.get(index).getSource());
+
+						response = new TransliteratorResponse();
+						response.setSource(requestList.get(index).getSource());
+						response.setTarget(result);
+						response.setSourceLanguage(requestList.get(index).getSourceLanguage());
+						response.setTargetLanguage(requestList.get(index).getTargetLanguage());
+						listResponse.add(response);
+
+					}*/ else {
+						errorResponse = new JSONObject();
+						errorResponse.put("code", "INVALID_LANGUAGE");
+						errorResponse.put("message", "Language is invalid");
+						listResponse.add(errorResponse);
+					}
+
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return Response.status(Response.Status.OK).entity(listResponse).build();
 	}
 }
