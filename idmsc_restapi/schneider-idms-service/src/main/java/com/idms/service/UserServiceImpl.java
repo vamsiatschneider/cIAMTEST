@@ -2500,7 +2500,9 @@ public class UserServiceImpl implements UserService {
 
 			if ((null == confirmRequest.getId() || confirmRequest.getId().isEmpty())
 					&& (null == confirmRequest.getIDMS_Federated_ID__c()
-							|| confirmRequest.getIDMS_Federated_ID__c().isEmpty())) {
+							|| confirmRequest.getIDMS_Federated_ID__c().isEmpty())
+					&& (null == confirmRequest.getFederationIdentifier()
+							|| confirmRequest.getFederationIdentifier().isEmpty())) {
 				response.setStatus(errorStatus);
 				response.setMessage(UserConstants.MANDATORY_FEDERATION_ID);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -2589,6 +2591,10 @@ public class UserServiceImpl implements UserService {
 					&& !confirmRequest.getIDMS_Federated_ID__c().isEmpty()) {
 
 				uniqueIdentifier = confirmRequest.getIDMS_Federated_ID__c();
+			} else if (null != confirmRequest.getFederationIdentifier()
+					&& !confirmRequest.getFederationIdentifier().isEmpty()) {
+
+				uniqueIdentifier = confirmRequest.getFederationIdentifier();
 			} else if (null != confirmRequest.getId() && !confirmRequest.getId().isEmpty()) {
 
 				uniqueIdentifier = confirmRequest.getId();
@@ -4335,19 +4341,27 @@ public class UserServiceImpl implements UserService {
 			ERROR_LOGGER.info("UserServiceImpl:resendPIN : Request   -> " + objMapper.writeValueAsString(resendPinRequest));
 			iPlanetDirectoryKey = getSSOToken();
 			
-			if ((null == resendPinRequest.getIdmsUserId() || resendPinRequest.getIdmsUserId().isEmpty()) && 
-					(null == resendPinRequest.getIDMS_Federated_ID__c() || resendPinRequest.getIDMS_Federated_ID__c().isEmpty())) {
+			if ((null == resendPinRequest.getIdmsUserId() || resendPinRequest.getIdmsUserId().isEmpty())
+					&& (null == resendPinRequest.getIDMS_Federated_ID__c()|| resendPinRequest.getIDMS_Federated_ID__c().isEmpty())
+					&& (null == resendPinRequest.getFederationIdentifier()|| resendPinRequest.getFederationIdentifier().isEmpty())) {
 				response.put(UserConstants.STATUS, UserConstants.STATUS_FAILD);
 				response.put(UserConstants.MESSAGE, UserConstants.RESPONSE_MESSAGE_NULL);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by UserServiceImpl.resendPIN() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
-	
+
 			}else{
-				resendId = resendPinRequest.getIdmsUserId();
-				if((null == resendId)|| (resendId.isEmpty()) || "".equalsIgnoreCase(resendId)){
-					resendId = resendPinRequest.getIDMS_Federated_ID__c();
+				
+				if(null != resendPinRequest.getIdmsUserId() && !resendPinRequest.getIdmsUserId().isEmpty()){
+					resendId = resendPinRequest.getIdmsUserId();
+				} else if(null != resendPinRequest.getIDMS_Federated_ID__c() && !resendPinRequest.getIDMS_Federated_ID__c().isEmpty()){
+					resendId = resendPinRequest.getIdmsUserId();
+				}else{
+					resendId = resendPinRequest.getFederationIdentifier();
 				}
+				/*if((null == resendId)|| (resendId.isEmpty()) || "".equalsIgnoreCase(resendId)){
+					resendId = resendPinRequest.getIDMS_Federated_ID__c();
+				}*/
 			}
 			// Federation Identifier
 			/*if (null == resendPinRequest.getFederationId() || resendPinRequest.getFederationId().isEmpty()) {

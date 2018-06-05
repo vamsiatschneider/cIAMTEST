@@ -11,9 +11,12 @@ public class ResendPinRequest {
 
 	@JsonProperty
 	private String IDMS_Federated_ID__c;
-	
+
 	@JsonProperty
-	private String  Operation;
+	private String Operation;
+
+	@JsonProperty
+	private String FederationIdentifier;
 
 	public String getIdmsUserId() {
 		return idmsUserId;
@@ -37,6 +40,16 @@ public class ResendPinRequest {
 
 	public void setOperation(String operation) {
 		Operation = operation;
+	}
+
+	@JsonProperty("FederationIdentifier")
+	public String getFederationIdentifier() {
+		return FederationIdentifier;
+	}
+
+	@JsonProperty("FederationIdentifier")
+	public void setFederationIdentifier(String federationIdentifier) {
+		FederationIdentifier = federationIdentifier;
 	}
 
 	@Override

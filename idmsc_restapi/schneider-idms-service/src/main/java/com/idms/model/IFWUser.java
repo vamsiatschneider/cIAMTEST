@@ -3,9 +3,7 @@ package com.idms.model;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.idms.product.model.Attributes;
 
 public class IFWUser extends BaseEntity {

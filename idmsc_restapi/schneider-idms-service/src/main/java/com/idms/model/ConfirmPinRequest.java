@@ -32,6 +32,9 @@ public class ConfirmPinRequest {
 	
 	@JsonProperty
 	private String tncFlag;
+	
+	@JsonProperty
+	private String FederationIdentifier;
 
 	@JsonProperty("id")
 	public String getId() {
@@ -123,6 +126,17 @@ public class ConfirmPinRequest {
 	@JsonProperty("UIFlag")
 	public void setUIFlag(String uIFlag) {
 		UIFlag = uIFlag;
+	}
+
+	
+	@JsonProperty("FederationIdentifier")
+	public String getFederationIdentifier() {
+		return FederationIdentifier;
+	}
+
+	@JsonProperty("FederationIdentifier")
+	public void setFederationIdentifier(String federationIdentifier) {
+		FederationIdentifier = federationIdentifier;
 	}
 
 	@Override
