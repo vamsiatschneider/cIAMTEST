@@ -4621,7 +4621,8 @@ public class UserServiceImpl implements UserService {
 						+ "openAMApi:POST/accessmanager/json/authenticate");
 				// Authenticate the given credentials
 				try {
-					authenticateUser(userId,oldPassword, UserConstants.REALM); //productService.authenticateUser(userId, oldPassword, UserConstants.REALM);
+					//authenticateUser(userId,oldPassword, UserConstants.REALM); 
+					productService.authenticateUser(userId, oldPassword, UserConstants.REALM);
 				} catch (Exception e) {
 					ErrorResponse errorResponse = new ErrorResponse();
 					errorResponse.setStatus(errorStatus);
