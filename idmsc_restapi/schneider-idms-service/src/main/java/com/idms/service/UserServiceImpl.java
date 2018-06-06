@@ -6326,8 +6326,20 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 
-		} catch (Exception e) {
+		} catch (JsonMappingException e) {
 			e.printStackTrace();
+			errorResponse = new JSONObject();
+			errorResponse.put("code", "INVALID_REQUEST");
+			errorResponse.put(UserConstants.MESSAGE, "Invalid request format");
+			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+
+		catch (Exception e) {
+			e.printStackTrace();
+			errorResponse = new JSONObject();
+			errorResponse.put("code", "SERVER_ERROR");
+			errorResponse.put(UserConstants.MESSAGE, "Failed to transliterate");
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		}
 
 		return Response.status(Response.Status.OK).entity(listResponse).build();
