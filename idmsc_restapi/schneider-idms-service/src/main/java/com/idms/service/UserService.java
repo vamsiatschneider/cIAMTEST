@@ -180,7 +180,7 @@ public interface UserService {
 	@Consumes("application/json")
 	Response initSocialLogin(@QueryParam("service") String service);
 	
-	@POST
+	@PUT
 	@Path("/apexrest/transliterator")
 	@Consumes("application/json")
 	@Produces("application/json")
