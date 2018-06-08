@@ -180,7 +180,7 @@ public interface UserService {
 	@Consumes("application/json")
 	Response initSocialLogin(@QueryParam("service") String service);
 	
-	@PUT
+	@POST
 	@Path("/apexrest/transliterator")
 	@Consumes("application/json")
 	@Produces("application/json")
@@ -201,7 +201,7 @@ public interface UserService {
 	@Consumes("application/json")
 	Response sendRemainderEmail(List<String> remainderUsersForActivation);
 	
-	@POST
+	@PUT
 	@Path("/apexrest/transliteratorConversion")
 	@Consumes("application/json")
 	@Produces("application/json")
