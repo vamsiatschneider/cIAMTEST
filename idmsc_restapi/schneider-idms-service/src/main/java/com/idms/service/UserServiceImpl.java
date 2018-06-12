@@ -84,7 +84,6 @@ import com.idms.model.ResendPinRequest;
 import com.idms.model.ResendRegEmailRequest;
 import com.idms.model.SendInvitationRequest;
 import com.idms.model.TransliteratorAttributes;
-import com.idms.model.TransliteratorConversionListRequest;
 import com.idms.model.TransliteratorConversionRequest;
 import com.idms.model.TransliteratorRequest;
 import com.idms.model.TransliteratorResponse;
