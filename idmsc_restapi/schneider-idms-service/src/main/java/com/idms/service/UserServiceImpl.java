@@ -3796,6 +3796,7 @@ public class UserServiceImpl implements UserService {
 				
 				if ("PRM".equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Profile_update_source__c())) {
 					userId = userRequest.getUserRecord().getIDMS_Federated_ID__c();
+					fedId = userRequest.getUserRecord().getIDMS_Federated_ID__c();
 				} else {
 
 					productDocCtx = JsonPath.using(conf).parse(userInfoByAccessToken);
