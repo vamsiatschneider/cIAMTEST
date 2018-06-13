@@ -292,16 +292,16 @@ public class UserServiceImpl implements UserService {
 	private org.springframework.cache.ehcache.EhCacheCacheManager cacheManager;
 	
 	
-	protected static List<String> appList = null;
+	//protected static List<String> appList = null;
 
 	static {
 		emailValidator = EmailValidator.getInstance();
 		formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 		userResponse = new UserServiceResponse();
-		appList = new ArrayList<String>();
+		/*appList = new ArrayList<String>();
 		appList.add("PACE");
 		appList.add("PRM");
-		appList.add("PRMPORTAL");
+		appList.add("PRMPORTAL");*/
 	}
 	
 	 
@@ -891,7 +891,7 @@ public class UserServiceImpl implements UserService {
 				 */
 				
 				if((!UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c()))
-					&& (!appList.contains(userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase()))
+					&& (!pickListValidator.validate(UserConstants.APPLICATIONS,userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase()))
 					&& (null == userRequest.getUserRecord().getIDMS_Federated_ID__c()|| userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty())){
 					
 					//new logic to generate fedId/userId
@@ -948,9 +948,7 @@ public class UserServiceImpl implements UserService {
 			
 			if ((!pickListValidator.validate(UserConstants.IDMS_BFO_profile,
 					userRequest.getUserRecord().getIDMS_Registration_Source__c()))
-				&& (appList.contains(userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase())
-						|| ((null != userRequest.getUserRecord().getIDMS_Federated_ID__c()&& !userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty())
-							&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())))) {
+				&& (pickListValidator.validate(UserConstants.APPLICATIONS,userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase()))) {
 					// openAmReq.getInput().getUser().setUsername(null);
 					json = objMapper.writeValueAsString(openAmReq.getInput().getUser());
 					json = json.replace("\"\"", "[]");
@@ -1333,7 +1331,7 @@ public class UserServiceImpl implements UserService {
 		userResponse.setStatus(errorStatus);
 		
 		
-		if (null != userRequest.getIDMS_Registration_Source__c() && (appList.contains(userRequest.getIDMS_Registration_Source__c().toUpperCase())
+		if (null != userRequest.getIDMS_Registration_Source__c() && ((pickListValidator.validate(UserConstants.APPLICATIONS,userRequest.getIDMS_Registration_Source__c().toUpperCase()))
 				|| UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c()))) {
 
 			if ((checkMandatoryFields)
@@ -2200,6 +2198,17 @@ public class UserServiceImpl implements UserService {
 		
 		if((checkMandatoryFields)&& (null == userRequest.getIsActivated() || null == userRequest.getIsActivated())){
 			userRequest.setIsActivated(UserConstants.FALSE);
+		}
+		
+		
+		/**
+		 * IDMS_Profile_update_source__c validation and length check for PRM Update users
+		 */
+		if ((!checkMandatoryFields) && (null != userRequest.getIDMS_Profile_update_source__c()	&& !userRequest.getIDMS_Profile_update_source__c().isEmpty())
+			&& ("PRM".equalsIgnoreCase(userRequest.getIDMS_Profile_update_source__c()))
+			&& (null == userRequest.getIDMS_Federated_ID__c() || userRequest.getIDMS_Federated_ID__c().isEmpty())) {
+			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.FEDERATION_IDENTIFIER);
+			return true;
 		}
 		
 		return false;
@@ -3781,17 +3790,23 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info(AUDIT_REQUESTING_USER + userRequest.getUserRecord().getId() + AUDIT_IMPERSONATING_USER
 						+ AUDIT_API_ADMIN + AUDIT_OPENAM_API + AUDIT_OPENAM_USER_INFO_CALL + "/se" + userId
 						+ AUDIT_LOG_CLOSURE);
+
 				String userInfoByAccessToken = openAMTokenService.getUserInfoByAccessToken(authorizedToken, "/se");
-
-				productDocCtx = JsonPath.using(conf).parse(userInfoByAccessToken);
-				userId = productDocCtx.read("$.sub");
-				fedId = productDocCtx.read("$.federationID");
 				
-				usermail = productDocCtx.read("$.email");
-				if(usermail == null){
-					usermail = productDocCtx.read("$.Email");
-				}
+				
+				if ("PRM".equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Profile_update_source__c())) {
+					userId = userRequest.getUserRecord().getIDMS_Federated_ID__c();
+				} else {
 
+					productDocCtx = JsonPath.using(conf).parse(userInfoByAccessToken);
+					userId = productDocCtx.read("$.sub");
+					fedId = productDocCtx.read("$.federationID");
+
+					usermail = productDocCtx.read("$.email");
+					if (usermail == null) {
+						usermail = productDocCtx.read("$.Email");
+					}
+				}
 				userResponse.setId(userId);
 
 				/**

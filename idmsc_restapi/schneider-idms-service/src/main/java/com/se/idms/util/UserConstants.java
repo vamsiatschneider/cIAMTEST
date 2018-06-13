@@ -151,6 +151,8 @@ public class UserConstants {
 	 * Pick List properties
 	 * */
 	
+	public static final String APPLICATIONS = "Applications";
+	
 	public static final String EMLAIL_OPT_IN = "emailOptIn";
 	
 	public static final String IDMS_Email_opt_in__c="IDMS_Email_opt_in__c";
