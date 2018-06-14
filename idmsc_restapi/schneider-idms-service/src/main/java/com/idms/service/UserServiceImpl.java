@@ -2206,7 +2206,7 @@ public class UserServiceImpl implements UserService {
 		 */
 		if ((!checkMandatoryFields) && (null != userRequest.getIDMS_Profile_update_source__c()	&& !userRequest.getIDMS_Profile_update_source__c().isEmpty())
 			&& ("PRM".equalsIgnoreCase(userRequest.getIDMS_Profile_update_source__c()))
-			&& (null == userRequest.getIDMS_Federated_ID__c() || userRequest.getIDMS_Federated_ID__c().isEmpty())) {
+			&& (null == userRequest.getEmail() || userRequest.getEmail().isEmpty())) {
 			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.FEDERATION_IDENTIFIER);
 			return true;
 		}
@@ -3795,8 +3795,15 @@ public class UserServiceImpl implements UserService {
 				
 				
 				if ("PRM".equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Profile_update_source__c())) {
-					userId = userRequest.getUserRecord().getIDMS_Federated_ID__c();
-					fedId = userRequest.getUserRecord().getIDMS_Federated_ID__c();
+					//userId = userRequest.getUserRecord().getIDMS_Federated_ID__c();
+					//fedId = userRequest.getUserRecord().getIDMS_Federated_ID__c();
+					String userExistsInOpenam = productService.checkUserExistsWithEmailMobile(
+							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+							"loginid eq " + "\"" + userRequest.getUserRecord().getEmail() + "\"");
+					
+					productDocCtx = JsonPath.using(conf).parse(userExistsInOpenam);
+					userId = productDocCtx.read("$.result[0].username");
+					fedId = productDocCtx.read("$.result[0].federationID[0]");
 				} else {
 
 					productDocCtx = JsonPath.using(conf).parse(userInfoByAccessToken);
