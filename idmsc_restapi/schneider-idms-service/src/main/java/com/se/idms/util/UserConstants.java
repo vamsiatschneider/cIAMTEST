@@ -466,4 +466,6 @@ public class UserConstants {
 
 	public static final String IDMS_BFO_profile = "IDMS_BFO_profile";
 	
+	public static final String TOKEN_TYPE = "contact activation";
+	
 }

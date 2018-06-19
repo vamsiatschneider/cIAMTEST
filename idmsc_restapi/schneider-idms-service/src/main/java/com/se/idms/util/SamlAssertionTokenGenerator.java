@@ -84,5 +84,8 @@ public class SamlAssertionTokenGenerator {
 
 	}
 
+	public static void main(String args[]) throws Exception{
+		System.out.println(getSamlAssertionToken("7abb7286-60c7-4f58-a856-8b55c4b45d9a","1"));
+	}
 
 }

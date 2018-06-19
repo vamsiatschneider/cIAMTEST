@@ -2486,6 +2486,7 @@ public class UserServiceImpl implements UserService {
 		boolean validPinStatus = false;
 		ObjectMapper objMapper=new ObjectMapper();
 		String uniqueIdentifier = null;
+		String federationID = null;
 		try {
 			
 			ERROR_LOGGER.info("UserServiceImpl:userPinConfirmation -> : Request :  -> ", objMapper.writeValueAsString(confirmRequest));
@@ -2669,6 +2670,8 @@ public class UserServiceImpl implements UserService {
 
 				}
 
+				federationID = productDocCtx.read("$.federationID[0]");
+				
 				if (UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(confirmRequest.getOperation())) {
 					getUserReponseProv = productService.getUser(iPlanetDirectoryKey,
 							uniqueIdentifier);
@@ -2926,9 +2929,10 @@ public class UserServiceImpl implements UserService {
 			if (null != confirmRequest.getIDMS_Profile_update_source()
 					&& !UserConstants.UIMS.equalsIgnoreCase(confirmRequest.getIDMS_Profile_update_source()) &&
 					(null != confirmRequest.getOperation() && UserConstants.USER_REGISTRATION .equalsIgnoreCase(confirmRequest.getOperation())) ) {
+				confirmRequest.setIDMS_Federated_ID__c(federationID);
 				uimsUserManagerSoapService.activateUIMSUserConfirmPIN(confirmRequest,
 						vNewCntValue.toString(), UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-						emailOrMobile);
+						loginIdentifierType,emailOrMobile);
 			} else if(null != confirmRequest.getIDMS_Profile_update_source()
 					&& !UserConstants.UIMS.equalsIgnoreCase(confirmRequest.getIDMS_Profile_update_source()) 
 					&& (null != confirmRequest.getOperation() && UserConstants.SET_USER_PR .equalsIgnoreCase(confirmRequest.getOperation()))
@@ -2936,7 +2940,7 @@ public class UserServiceImpl implements UserService {
 				
 				//Calling Async method of setUIMSPassword
 				uimsUserManagerSoapService.setUIMSPassword(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,uniqueIdentifier,
-						uniqueIdentifier, confirmRequest.getPassword(), vNewCntValue.toString(),"");
+						federationID, confirmRequest.getPassword(), vNewCntValue.toString(),loginIdentifierType,emailOrMobile);
 			}else {
 				// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
 				// "logout");
@@ -4751,6 +4755,9 @@ public class UserServiceImpl implements UserService {
 		String usermail = "";
 		boolean validPinStatus = false;
 		ObjectMapper objMapper = new ObjectMapper();
+		String federationID = null;
+		String emailOrMobile = null;
+		String loginIdentifierType = null;
 		try {
 			ERROR_LOGGER.info("UserServiceImpl:updatePassword : setPassword : Request   -> " + objMapper.writeValueAsString(setPasswordRequest));
 			
@@ -4959,6 +4966,22 @@ public class UserServiceImpl implements UserService {
 								: getDelimeter();
 					}
 				}
+				
+				federationID = productDocCtx.read("$.federationID[0]");
+				
+				emailOrMobile = productDocCtx.read("$.loginid[0]");
+				
+				emailOrMobile = productDocCtx.read("$.mail[0]");
+				loginIdentifierType = UserConstants.EMAIL;
+				if (null == emailOrMobile) {
+					emailOrMobile = productDocCtx.read("$.mobile[0]");
+					loginIdentifierType = UserConstants.MOBILE;
+
+				}
+				
+				
+				
+				
 				amlbcookieValue = null != productDocCtx.read("$.amlbcookie")
 						? getValue(productDocCtx.read("$.amlbcookie").toString()) : getDelimeter();
 				// amlbcookieValue = UserConstants.AMLB_COOKIE+amlbcookieValue;
@@ -5037,7 +5060,7 @@ public class UserServiceImpl implements UserService {
 					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, setPasswordRequest.getId(), version);
 					//Calling Async method of setUIMSPassword
 					uimsUserManagerSoapService.setUIMSPassword(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,setPasswordRequest.getId(),
-							setPasswordRequest.getIDMS_Federated_ID__c(), setPasswordRequest.getNewPwd(), vNewCntValue.toString(),usermail);
+							federationID, setPasswordRequest.getNewPwd(), vNewCntValue.toString(),emailOrMobile,loginIdentifierType);
 				} else {
 					//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
 				}
@@ -5090,6 +5113,9 @@ public class UserServiceImpl implements UserService {
 		String iPlanetDirectoryKey = null;
 		String usermail = "";
 		ObjectMapper objMapper = new ObjectMapper();
+		String emailOrMobile = null;
+		String loginIdentifierType = null;
+		String federationID = null;
 		try {
 			ERROR_LOGGER.info("UserServiceImpl:activateUser : Request   -> " + objMapper.writeValueAsString(activateUserRequest));
 
@@ -5179,6 +5205,16 @@ public class UserServiceImpl implements UserService {
 				
 				usermail = productDocCtx.read("$.mail[0]");
 				
+				emailOrMobile = productDocCtx.read("$.mail[0]");
+				loginIdentifierType = UserConstants.EMAIL;
+				if (null == emailOrMobile) {
+					emailOrMobile = productDocCtx.read("$.mobile[0]");
+					loginIdentifierType = UserConstants.MOBILE;
+
+				}
+				
+				federationID = productDocCtx.read("$.federationID[0]");
+				
 				registrationSource = null != productDocCtx.read(JsonConstants.REGISTRATION_SOURCE)
 						? getValue(productDocCtx.read(JsonConstants.REGISTRATION_SOURCE).toString()) : null;
 
@@ -5223,8 +5259,10 @@ public class UserServiceImpl implements UserService {
 				//call uims activate user
 				LOGGER.info("In UserServiceImpl.activateUser().activateUIMSUser():--> "
 						+ "calling Async UIMS Usermanager methods of activateIdentity/activateIdentityWithNoPassword");
+				
+				activateUserRequest.getUserRecord().setIDMS_Federated_ID__c(federationID);
 				uimsUserManagerSoapService.activateIdentityNoPassword(activateUserRequest.getUserRecord().getId(),activateUserRequest.getUserRecord().getIDMS_Federated_ID__c(),
-												vNewCntValue.toString(),UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, usermail);
+												vNewCntValue.toString(),UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, loginIdentifierType,emailOrMobile);
 			} else {
 				//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
 			}

@@ -170,10 +170,14 @@ public class UIMSUserManagerSoapService {
 
 	@Async
 	public void setUIMSPassword(String iPlanetDirectoryKey, String userId,
-			String callerFid, String password, String openamVnew, String email) throws MalformedURLException {
+			String callerFid, String password, String openamVnew, String loginIdentifierType,String emailOrMobile) throws MalformedURLException {
 		LOGGER.info("inside setUIMSPassword Async Method");
 		try {
+			if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
 			samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(userId, openamVnew);
+			}else{
+				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, openamVnew);	
+			}
 		} catch (Exception e) {
 			LOGGER.error("Error executing while setUIMSPassword::" + e.getMessage());
 			e.printStackTrace();
@@ -182,7 +186,12 @@ public class UIMSUserManagerSoapService {
 			Callable<Boolean> callableUIMSPassword = new Callable<Boolean>() {
 				public Boolean call() throws Exception {
 					UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
-					setPasswordStatus = userManagerUIMSV22.setPassword(UimsConstants.CALLER_FID, samlAssertion, password);
+					if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
+						setPasswordStatus = userManagerUIMSV22.setPassword(UimsConstants.CALLER_FID, samlAssertion,
+								password);
+					} else {
+						setPasswordStatus = userManagerUIMSV22.setPasswordWithSms(UimsConstants.CALLER_FID, emailOrMobile, samlAssertion, UserConstants.TOKEN_TYPE, password);
+					}
 					LOGGER.info("setPasswordStatus: " + setPasswordStatus);
 					return true;
 				}
@@ -311,10 +320,18 @@ public class UIMSUserManagerSoapService {
 
 	@Async
 	public void activateIdentityNoPassword(String userId, String callerFid,
-			String openamVnew, String iPlanetDirectoryKey, String email) throws MalformedURLException {
+			String openamVnew, String iPlanetDirectoryKey, String loginIdentifierType,String emailOrMobile) throws MalformedURLException {
 		LOGGER.info("inside activateIdentityNoPassword UIMS Async Method");
 		try {
-			samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(userId, openamVnew);
+			// samlAssertion =
+			// SamlAssertionTokenGenerator.getSamlAssertionToken(userId,openamVnew);
+
+			if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
+				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(userId, openamVnew);
+			} else {
+				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, openamVnew);
+			}
+
 		} catch (Exception e) {
 			// productService.sessionLogout(iPlanetDirectoryKey, "logout");
 			LOGGER.error("Error executing while activateIdentityNoPassword::" + e.getMessage());
@@ -324,8 +341,12 @@ public class UIMSUserManagerSoapService {
 			Callable<Boolean> callableActivateIdentityNoPassword = new Callable<Boolean>() {
 				public Boolean call() throws Exception {
 					UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
+					if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
 					isNoPwdactivated = userManagerUIMSV22.activateIdentityNoPassword(UimsConstants.CALLER_FID,
 							samlAssertion);
+					}else{
+						isNoPwdactivated = userManagerUIMSV22.activateIdentityWithMobileNoPassword(UimsConstants.CALLER_FID, emailOrMobile, samlAssertion);
+					}
 					LOGGER.info("UIMS user activateIdentityNoPassword isactivated:" + isNoPwdactivated);
 					return true;
 				}
@@ -631,16 +652,16 @@ public class UIMSUserManagerSoapService {
 	 */
 	@Async
 	public void activateUIMSUserConfirmPIN(ConfirmPinRequest confirmRequest,
-			String openamVnew, String iPlanetDirectoryKey, String email) {
+			String openamVnew, String iPlanetDirectoryKey,String loginIdentifierType,String emailOrMobile) {
 		LOGGER.info(
 				"In UserServiceImpl.userPinConfirmation().activateUIMSUserConfirmPIN():--> Calling Async UIMS UserManager methods of setUIMSPassword/activateIdentityNoPassword");
 		try {
 			if (null != confirmRequest.getPassword() && !confirmRequest.getPassword().isEmpty()) {
-				setUIMSPassword(iPlanetDirectoryKey, confirmRequest.getId(),
-						confirmRequest.getIDMS_Federated_ID__c(), confirmRequest.getPassword().trim(), openamVnew, email);
+				/*setUIMSPassword(iPlanetDirectoryKey, confirmRequest.getId(),
+						confirmRequest.getIDMS_Federated_ID__c(), confirmRequest.getPassword().trim(), openamVnew, email);*/
 			} else if (null == confirmRequest.getPassword() || "".equals(confirmRequest.getPassword())) {
 				activateIdentityNoPassword(confirmRequest.getId(), confirmRequest.getIDMS_Federated_ID__c(),
-						openamVnew, iPlanetDirectoryKey,email);
+						openamVnew, iPlanetDirectoryKey,loginIdentifierType,emailOrMobile);
 			}
 		} catch (Exception e) {
 			LOGGER.error(
