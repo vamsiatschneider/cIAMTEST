@@ -85,6 +85,7 @@ import com.idms.model.ResendRegEmailRequest;
 import com.idms.model.SendInvitationRequest;
 import com.idms.model.TransliteratorAttributes;
 import com.idms.model.TransliteratorConversionRequest;
+import com.idms.model.TransliteratorConversionResponse;
 import com.idms.model.TransliteratorRequest;
 import com.idms.model.TransliteratorResponse;
 import com.idms.model.UpdatePasswordRequest;
@@ -4761,7 +4762,7 @@ public class UserServiceImpl implements UserService {
 		try {
 			ERROR_LOGGER.info("UserServiceImpl:updatePassword : setPassword : Request   -> " + objMapper.writeValueAsString(setPasswordRequest));
 			
-			if (null == setPasswordRequest.getUIFlag() ||  !UserConstants.TRUE.equalsIgnoreCase(setPasswordRequest.getUIFlag())) {
+			if ((!UserConstants.UIMS.equalsIgnoreCase(setPasswordRequest.getIDMS_Profile_update_source()))&&(null == setPasswordRequest.getUIFlag() ||  !UserConstants.TRUE.equalsIgnoreCase(setPasswordRequest.getUIFlag()))) {
 
 				response.setStatus(errorStatus);
 				response.setMessage(UserConstants.OPERATION_BLCOKED);
@@ -4792,8 +4793,9 @@ public class UserServiceImpl implements UserService {
 				
 				
 				// Federation Identifier
-				if (null == setPasswordRequest.getIDMS_Federated_ID__c()
-						|| setPasswordRequest.getIDMS_Federated_ID__c().isEmpty()) {
+				if ((null == setPasswordRequest.getIDMS_Federated_ID__c()
+						|| setPasswordRequest.getIDMS_Federated_ID__c().isEmpty())||(null == setPasswordRequest.getFederationIdentifier()
+								|| setPasswordRequest.getFederationIdentifier().isEmpty())) {
 					response.setStatus(errorStatus);
 					response.setMessage(UserConstants.MANDATORY_FEDERATION_ID);
 					response.setId(userId);
@@ -4821,7 +4823,9 @@ public class UserServiceImpl implements UserService {
 			if (null != setPasswordRequest.getIDMS_Profile_update_source()
 					&& !UserConstants.UIMS.equalsIgnoreCase(setPasswordRequest.getIDMS_Profile_update_source())) {
 				// Federation Identifier
-				if (null == setPasswordRequest.getId() || setPasswordRequest.getId().isEmpty()) {
+				if ((null == setPasswordRequest.getId() || setPasswordRequest.getId().isEmpty())
+						|| (null == setPasswordRequest.getIDMS_Federated_ID__c()
+								|| setPasswordRequest.getIDMS_Federated_ID__c().isEmpty())) {
 					response.setStatus(errorStatus);
 					response.setMessage(UserConstants.MANDATORY_FEDERATION_ID);
 					response.setId(userId);
@@ -4831,6 +4835,9 @@ public class UserServiceImpl implements UserService {
 				}
 
 				userId = setPasswordRequest.getId();
+				if(null == userId || userId.isEmpty()){
+					userId = setPasswordRequest.getIDMS_Federated_ID__c();
+				}
 				if (!userId.startsWith("cn00")) {
 					response.setStatus(errorStatus);
 					response.setMessage("User Id should start with cn00");
@@ -4906,10 +4913,16 @@ public class UserServiceImpl implements UserService {
 
 			if (null != setPasswordRequest.getIDMS_Profile_update_source()
 					&& UserConstants.UIMS.equalsIgnoreCase(setPasswordRequest.getIDMS_Profile_update_source())
-					&& null != setPasswordRequest.getIDMS_Federated_ID__c()) {
+					&& (null != setPasswordRequest.getIDMS_Federated_ID__c() || null != setPasswordRequest.getFederationIdentifier())) {
 
+				if(null != setPasswordRequest.getFederationIdentifier()){
+					userId = setPasswordRequest.getFederationIdentifier();
+				}else{
+					userId = setPasswordRequest.getIDMS_Federated_ID__c();
+				}
+				
 				Response fedResponse = checkUserExistsWithFederationID(iPlanetDirectoryKey,
-						setPasswordRequest.getIDMS_Federated_ID__c(), startTime);
+						setPasswordRequest.getFederationIdentifier(), startTime);
 				if (fedResponse.getStatus() == 200) {
 					JSONObject uimsResponse = (JSONObject) fedResponse.getEntity();
 					userId = (String) uimsResponse.get("userId");
@@ -5074,6 +5087,7 @@ public class UserServiceImpl implements UserService {
 			IDMSUserRecord idmsUserRecord = new IDMSUserRecord();
 			idmsUserRecord.setAttributes(attributes);
 			idmsUserRecord.setId(userId);
+			idmsUserRecord.setIDMS_Federated_ID__c(userId);
 			setPasswordResponse = new SetPasswordResponse(idmsUserRecord);
 			setPasswordResponse.setStatus("success");
 			setPasswordResponse.setMessage("Password Updated successfully");
@@ -6261,7 +6275,7 @@ public class UserServiceImpl implements UserService {
 		List<String> sourceLanguagesList = new ArrayList<String>();
 		List<String> supportedSourceLanguagesList = new ArrayList<String>();
 		List<String> supportedTargetLanguagesList = new ArrayList<String>();
-		TransliteratorConversionRequest response = null;
+		TransliteratorConversionResponse response = null;
 		try {
 
 			List<TransliteratorConversionRequest> requestList = new ObjectMapper().readValue(jsonAsString,
@@ -6298,26 +6312,30 @@ public class UserServiceImpl implements UserService {
 					} else if (null == conversionList.get(index).getSourceLanguage()
 							|| conversionList.get(index).getSourceLanguage().isEmpty()) {
 						errorResponse = new JSONObject();
+						errorResponse.put("identifier", conversionList.get(index).getIdentifier());
 						errorResponse.put("code", "MISSING_SOURCE_LANGUAGE");
 						errorResponse.put("message", "SourceLanguage is missing");
 						listResponse.add(errorResponse);
 					} else if (null == conversionList.get(index).getTargetLanguage()
 							|| conversionList.get(index).getTargetLanguage().isEmpty()) {
 						errorResponse = new JSONObject();
+						errorResponse.put("identifier", conversionList.get(index).getIdentifier());
 						errorResponse.put("code", "MISSING_TARGET_LANGUAGE");
 						errorResponse.put("message", "TargetLanguage is missing");
 						listResponse.add(errorResponse);
 					}else if (null == conversionList.get(index).getAttributes()
 							|| conversionList.get(index).getAttributes().isEmpty()) {
 						errorResponse = new JSONObject();
+						errorResponse.put("identifier", conversionList.get(index).getIdentifier());
 						errorResponse.put("code", "MISSING_ATTRIBUTES");
 						errorResponse.put("message", "Attributes are missing");
 						listResponse.add(errorResponse);
 					}else if ((null != conversionList.get(index).getAttributes()
 							&& conversionList.get(index).getAttributes().size()>0)&&(supportedLanguages.contains(srcNtargetId))) {
 						
-						List<TransliteratorAttributes> attributes = new ArrayList<TransliteratorAttributes>();
-						response = new TransliteratorConversionRequest();
+						//List<TransliteratorAttributes> attributes = new ArrayList<TransliteratorAttributes>();
+						List<Object> attributes = new ArrayList<Object>();
+						response = new TransliteratorConversionResponse();
 						response.setIdentifier(conversionList.get(index).getIdentifier());
 						response.setSourceLanguage(conversionList.get(index).getSourceLanguage());
 						response.setTargetLanguage(conversionList.get(index).getTargetLanguage());
@@ -6327,23 +6345,35 @@ public class UserServiceImpl implements UserService {
 						listResponse.add(response);
 						for (TransliteratorAttributes attribute : conversionList.get(index).getAttributes()) {
 
-							TransliteratorAttributes attribueResponse = new TransliteratorAttributes();
-
+							TransliteratorAttributes attribueResponse = null;//new TransliteratorAttributes();
+							JSONObject transErrorResponse = null;
 							if ((null == attribute.getKey() || attribute.getKey().isEmpty())
 									&& (null == attribute.getValue() || attribute.getValue().isEmpty())) {
-								attribueResponse.setTarget("Key and Value are missing");
+								transErrorResponse = new JSONObject();
+								transErrorResponse.put("code", "KEY_VALUE are missing");
+								transErrorResponse.put("message", "Key Value are missing");
 							} else if (null == attribute.getKey() || attribute.getKey().isEmpty()) {
-								attribueResponse.setTarget("Key is missing");
+								transErrorResponse = new JSONObject();
+								transErrorResponse.put("code", "KEY is missing");
+								transErrorResponse.put("message", "Key Value is missing");
 							} else if (null == attribute.getValue() || attribute.getValue().isEmpty()) {
-								attribueResponse.setTarget("Value is missing");
-								attribueResponse.setKey(attribute.getKey());
+								/*attribueResponse.setTarget("Value is missing");
+								attribueResponse.setKey(attribute.getKey());*/
+								transErrorResponse = new JSONObject();
+								transErrorResponse.put("code", "VALUE is missing");
+								transErrorResponse.put("message", "Value is missing");
 							} else {
 								result = Transliterator.getInstance(srcNtargetId).transform(attribute.getValue());
+								attribueResponse = new TransliteratorAttributes();
 								attribueResponse.setTarget(result);
 								attribueResponse.setKey(attribute.getKey());
 								attribueResponse.setValue(attribute.getValue());
 							}
-							attributes.add(attribueResponse);
+							if (null == transErrorResponse) {
+								attributes.add(attribueResponse);
+							} else {
+								attributes.add(transErrorResponse);
+							}
 						}
 						/*
 						if (supportedLanguages.contains(srcNtargetId) && (null != conversionList.get(index).getSource()

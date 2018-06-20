@@ -201,8 +201,8 @@ public interface UserService {
 	@Consumes("application/json")
 	Response sendRemainderEmail(List<String> remainderUsersForActivation);
 	
-	@PUT
-	@Path("/apexrest/transliterator")
+	@POST
+	@Path("/apexrest/transliterator/2.0")
 	@Consumes("application/json")
 	@Produces("application/json")
 	Response transliteratorConversion(String jsonAsString);
