@@ -4797,7 +4797,7 @@ public class UserServiceImpl implements UserService {
 				
 				// Federation Identifier
 				if ((null == setPasswordRequest.getIDMS_Federated_ID__c()
-						|| setPasswordRequest.getIDMS_Federated_ID__c().isEmpty())||(null == setPasswordRequest.getFederationIdentifier()
+						|| setPasswordRequest.getIDMS_Federated_ID__c().isEmpty())&&(null == setPasswordRequest.getFederationIdentifier()
 								|| setPasswordRequest.getFederationIdentifier().isEmpty())) {
 					response.setStatus(errorStatus);
 					response.setMessage(UserConstants.MANDATORY_FEDERATION_ID);
@@ -4925,7 +4925,7 @@ public class UserServiceImpl implements UserService {
 				}
 				
 				Response fedResponse = checkUserExistsWithFederationID(iPlanetDirectoryKey,
-						setPasswordRequest.getFederationIdentifier(), startTime);
+						userId, startTime);
 				if (fedResponse.getStatus() == 200) {
 					JSONObject uimsResponse = (JSONObject) fedResponse.getEntity();
 					userId = (String) uimsResponse.get("userId");
