@@ -947,7 +947,7 @@ public class UserServiceImpl implements UserService {
 			 * 
 			 * */
 			
-			if ((!pickListValidator.validate(UserConstants.IDMS_BFO_profile,
+			if ((pickListValidator.validate(UserConstants.IDMS_BFO_profile,
 					userRequest.getUserRecord().getIDMS_Registration_Source__c()))
 				&& (pickListValidator.validate(UserConstants.APPLICATIONS,userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase()))) {
 					// openAmReq.getInput().getUser().setUsername(null);
@@ -2205,10 +2205,13 @@ public class UserServiceImpl implements UserService {
 		/**
 		 * IDMS_Profile_update_source__c validation and length check for PRM Update users
 		 */
-		if ((!checkMandatoryFields) && (null != userRequest.getIDMS_Profile_update_source__c()	&& !userRequest.getIDMS_Profile_update_source__c().isEmpty())
-			&& ("PRM".equalsIgnoreCase(userRequest.getIDMS_Profile_update_source__c()))
-			&& (null == userRequest.getEmail() || userRequest.getEmail().isEmpty())) {
-			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.FEDERATION_IDENTIFIER);
+		if ((!checkMandatoryFields)
+				&& (null != userRequest.getIDMS_Profile_update_source__c()
+						&& !userRequest.getIDMS_Profile_update_source__c().isEmpty())
+				&& (!pickListValidator.validate(UserConstants.IDMS_BFO_profile,
+						userRequest.getIDMS_Profile_update_source__c()))
+				&& (null == userRequest.getEmail() || userRequest.getEmail().isEmpty())) {
+			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.EMAIL);
 			return true;
 		}
 		
@@ -3796,10 +3799,10 @@ public class UserServiceImpl implements UserService {
 						+ AUDIT_API_ADMIN + AUDIT_OPENAM_API + AUDIT_OPENAM_USER_INFO_CALL + "/se" + userId
 						+ AUDIT_LOG_CLOSURE);
 
-				String userInfoByAccessToken = openAMTokenService.getUserInfoByAccessToken(authorizedToken, "/se");
 				
 				
-				if ("PRM".equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Profile_update_source__c())) {
+				if (pickListValidator.validate(UserConstants.IDMS_BFO_profile,
+						userRequest.getUserRecord().getIDMS_Profile_update_source__c())) {
 					//userId = userRequest.getUserRecord().getIDMS_Federated_ID__c();
 					//fedId = userRequest.getUserRecord().getIDMS_Federated_ID__c();
 					String userExistsInOpenam = productService.checkUserExistsWithEmailMobile(
@@ -3810,7 +3813,7 @@ public class UserServiceImpl implements UserService {
 					userId = productDocCtx.read("$.result[0].username");
 					fedId = productDocCtx.read("$.result[0].federationID[0]");
 				} else {
-
+					String userInfoByAccessToken = openAMTokenService.getUserInfoByAccessToken(authorizedToken, "/se");
 					productDocCtx = JsonPath.using(conf).parse(userInfoByAccessToken);
 					userId = productDocCtx.read("$.sub");
 					fedId = productDocCtx.read("$.federationID");
@@ -6028,8 +6031,9 @@ public class UserServiceImpl implements UserService {
 			e.printStackTrace();
 			jsonObject.put("error_code", "L9101");
 			jsonObject.put("error_message","Invalid username or password");
-			prefix.append(UserConstants.redirectUrl_Option3)
-				  .append("?startUrl=")
+			/*prefix.append(UserConstants.redirectUrl_Option3)
+				  .append("?startUrl=")*/
+			prefix.append("startUrl=")
 				  .append(startUrl)
 				  .append("&login_error=L9101");
 			response = rb.header("Location", prefix.toString()).build();
