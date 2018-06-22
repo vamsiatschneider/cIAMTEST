@@ -86,6 +86,7 @@ import com.idms.model.SendInvitationRequest;
 import com.idms.model.TransliteratorAttributes;
 import com.idms.model.TransliteratorConversionRequest;
 import com.idms.model.TransliteratorConversionResponse;
+import com.idms.model.TransliteratorErrorResponse;
 import com.idms.model.TransliteratorRequest;
 import com.idms.model.TransliteratorResponse;
 import com.idms.model.UpdatePasswordRequest;
@@ -6280,6 +6281,7 @@ public class UserServiceImpl implements UserService {
 		List<String> supportedSourceLanguagesList = new ArrayList<String>();
 		List<String> supportedTargetLanguagesList = new ArrayList<String>();
 		TransliteratorConversionResponse response = null;
+		TransliteratorErrorResponse transErrorResponse = null;
 		try {
 
 			List<TransliteratorConversionRequest> requestList = new ObjectMapper().readValue(jsonAsString,
@@ -6309,30 +6311,30 @@ public class UserServiceImpl implements UserService {
 							+ conversionList.get(index).getTargetLanguage();
 					
 					if (null == conversionList.get(index).getIdentifier() || conversionList.get(index).getIdentifier().isEmpty()) {
-						errorResponse = new JSONObject();
-						errorResponse.put("code", "MISSING_IDENTIFIER");
-						errorResponse.put("message", "Identifier is missing");
-						listResponse.add(errorResponse);
+						transErrorResponse = new TransliteratorErrorResponse();
+						transErrorResponse.setCode("MISSING_IDENTIFIER");
+						transErrorResponse.setMessage("Identifier is missing");
+						listResponse.add(transErrorResponse);
 					} else if (null == conversionList.get(index).getSourceLanguage()
 							|| conversionList.get(index).getSourceLanguage().isEmpty()) {
-						errorResponse = new JSONObject();
-						errorResponse.put("identifier", conversionList.get(index).getIdentifier());
-						errorResponse.put("code", "MISSING_SOURCE_LANGUAGE");
-						errorResponse.put("message", "SourceLanguage is missing");
-						listResponse.add(errorResponse);
+						transErrorResponse = new TransliteratorErrorResponse();
+						transErrorResponse.setKey(conversionList.get(index).getIdentifier());
+						transErrorResponse.setCode("MISSING_SOURCE_LANGUAGE");
+						transErrorResponse.setMessage("SourceLanguage is missing");
+						listResponse.add(transErrorResponse);
 					} else if (null == conversionList.get(index).getTargetLanguage()
 							|| conversionList.get(index).getTargetLanguage().isEmpty()) {
-						errorResponse = new JSONObject();
-						errorResponse.put("identifier", conversionList.get(index).getIdentifier());
-						errorResponse.put("code", "MISSING_TARGET_LANGUAGE");
-						errorResponse.put("message", "TargetLanguage is missing");
-						listResponse.add(errorResponse);
+						transErrorResponse = new TransliteratorErrorResponse();
+						transErrorResponse.setKey(conversionList.get(index).getIdentifier());
+						transErrorResponse.setCode("MISSING_TARGET_LANGUAGE");
+						transErrorResponse.setMessage("TargetLanguage is missing");
+						listResponse.add(transErrorResponse);
 					}else if (null == conversionList.get(index).getAttributes()
 							|| conversionList.get(index).getAttributes().isEmpty()) {
-						errorResponse = new JSONObject();
-						errorResponse.put("identifier", conversionList.get(index).getIdentifier());
-						errorResponse.put("code", "MISSING_ATTRIBUTES");
-						errorResponse.put("message", "Attributes are missing");
+						transErrorResponse = new TransliteratorErrorResponse();
+						transErrorResponse.setKey(conversionList.get(index).getIdentifier());
+						transErrorResponse.setCode("MISSING_ATTRIBUTES");
+						transErrorResponse.setMessage("Attributes are missing");
 						listResponse.add(errorResponse);
 					}else if ((null != conversionList.get(index).getAttributes()
 							&& conversionList.get(index).getAttributes().size()>0)&&(supportedLanguages.contains(srcNtargetId))) {
@@ -6350,22 +6352,24 @@ public class UserServiceImpl implements UserService {
 						for (TransliteratorAttributes attribute : conversionList.get(index).getAttributes()) {
 
 							TransliteratorAttributes attribueResponse = null;//new TransliteratorAttributes();
-							JSONObject transErrorResponse = null;
-							if ((null == attribute.getKey() || attribute.getKey().isEmpty())
+							//TransliteratorErrorResponse transErrorResponse = null;
+							/*if ((null == attribute.getKey() || attribute.getKey().isEmpty())
 									&& (null == attribute.getValue() || attribute.getValue().isEmpty())) {
 								transErrorResponse = new JSONObject();
 								transErrorResponse.put("code", "KEY_VALUE are missing");
 								transErrorResponse.put("message", "Key Value are missing");
-							} else if (null == attribute.getKey() || attribute.getKey().isEmpty()) {
-								transErrorResponse = new JSONObject();
-								transErrorResponse.put("code", "KEY is missing");
-								transErrorResponse.put("message", "Key Value is missing");
+							} else*/ 
+							if (null == attribute.getKey() || attribute.getKey().isEmpty()) {
+								transErrorResponse = new TransliteratorErrorResponse();
+								transErrorResponse.setCode("MISSING_KEY");
+								transErrorResponse.setMessage("Key is missing");
+								/*transErrorResponse.put("code", "MISSING_KEY");
+								transErrorResponse.put("message", "Key is missing");*/
 							} else if (null == attribute.getValue() || attribute.getValue().isEmpty()) {
-								/*attribueResponse.setTarget("Value is missing");
-								attribueResponse.setKey(attribute.getKey());*/
-								transErrorResponse = new JSONObject();
-								transErrorResponse.put("code", "VALUE is missing");
-								transErrorResponse.put("message", "Value is missing");
+								transErrorResponse = new TransliteratorErrorResponse();
+								transErrorResponse.setKey(attribute.getKey());
+								transErrorResponse.setCode("MISSING_VALUE");
+								transErrorResponse.setMessage("Value is missing");
 							} else {
 								result = Transliterator.getInstance(srcNtargetId).transform(attribute.getValue());
 								attribueResponse = new TransliteratorAttributes();
