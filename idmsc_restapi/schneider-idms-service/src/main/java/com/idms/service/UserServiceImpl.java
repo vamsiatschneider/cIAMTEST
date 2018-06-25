@@ -948,9 +948,10 @@ public class UserServiceImpl implements UserService {
 			 * 
 			 * */
 			
-			if ((pickListValidator.validate(UserConstants.IDMS_BFO_profile,
-					userRequest.getUserRecord().getIDMS_Registration_Source__c()))
-				&& (pickListValidator.validate(UserConstants.APPLICATIONS,userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase()))) {
+			if ((!pickListValidator.validate(UserConstants.IDMS_BFO_profile,userRequest.getUserRecord().getIDMS_Registration_Source__c()))
+				&& ((pickListValidator.validate(UserConstants.APPLICATIONS,userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase()))
+                        || ((null != userRequest.getUserRecord().getIDMS_Federated_ID__c()&& !userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty())
+                            && !UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())))) {
 					// openAmReq.getInput().getUser().setUsername(null);
 					json = objMapper.writeValueAsString(openAmReq.getInput().getUser());
 					json = json.replace("\"\"", "[]");
@@ -6015,6 +6016,14 @@ public class UserServiceImpl implements UserService {
 				NewCookie newCookie = new NewCookie(cookie);
 				rb.cookie(newCookie);
 				
+				LOGGER.info(" UserServiceImpl :: idmsDirectLogin Start");
+				ERROR_LOGGER.info("UserServiceImpl:idmsDirectLogin -> CookieValue : -> " + newCookie);
+				ERROR_LOGGER.info("UserServiceImpl:idmsDirectLogin -> Request builder : -> " + rb);
+				
+				System.out.println("Cookievalue"+newCookie);
+				System.out.println("Request builder"+rb);
+				System.out.println("Token "+token);
+				
 				//startUrl = startUrl.substring(0, startUrl.indexOf(valueToFind)+valueToFind.length()).concat(URLEncoder.encode(valueToFind.substring(valueToFind.indexOf(valueToFind)+5, valueToFind.length()), "UTF-8" ));
 				
 				prefix.append(prefixStartUrl)
@@ -6352,7 +6361,7 @@ public class UserServiceImpl implements UserService {
 						for (TransliteratorAttributes attribute : conversionList.get(index).getAttributes()) {
 
 							TransliteratorAttributes attribueResponse = null;//new TransliteratorAttributes();
-							//TransliteratorErrorResponse transErrorResponse = null;
+							transErrorResponse = null;
 							/*if ((null == attribute.getKey() || attribute.getKey().isEmpty())
 									&& (null == attribute.getValue() || attribute.getValue().isEmpty())) {
 								transErrorResponse = new JSONObject();
@@ -6415,10 +6424,11 @@ public class UserServiceImpl implements UserService {
 						listResponse.add(response);
 
 					}*/ else {
-						errorResponse = new JSONObject();
-						errorResponse.put("code", "INVALID_LANGUAGE");
-						errorResponse.put("message", "Language is invalid");
-						listResponse.add(errorResponse);
+						transErrorResponse = new TransliteratorErrorResponse();
+						transErrorResponse.setKey(conversionList.get(index).getIdentifier());
+						transErrorResponse.setCode("INVALID_LANGUAGE");
+						transErrorResponse.setMessage("Language is invalid");
+						listResponse.add(transErrorResponse);
 					}
 
 				}
