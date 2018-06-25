@@ -6043,9 +6043,12 @@ public class UserServiceImpl implements UserService {
 			jsonObject.put("error_message","Invalid username or password");
 			/*prefix.append(UserConstants.redirectUrl_Option3)
 				  .append("?startUrl=")*/
-			prefix.append("startUrl=")
-				  .append(startUrl)
-				  .append("&login_error=L9101");
+			/*prefix.append("startUrl=")
+				  .append(startUrl)*/
+				prefix.append(prefixStartUrl)
+					  .append("/ui/#!")
+					  .append("/login?login_error=L9101");
+
 			response = rb.header("Location", prefix.toString()).build();
 			//return Response.status(Response.Status.UNAUTHORIZED).entity(jsonObject).build();
 		}
