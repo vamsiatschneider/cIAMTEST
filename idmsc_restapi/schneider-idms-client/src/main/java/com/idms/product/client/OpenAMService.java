@@ -75,6 +75,6 @@ public interface OpenAMService {
 	
 	@POST
 	@Path("/authenticate")
-	Response authenticateIdmsChinaUser(@HeaderParam("X-OpenAM-Username") String userName,@HeaderParam("X-OpenAM-Password") String password,@QueryParam("realm") String realm);
+	String authenticateIdmsChinaUser(@HeaderParam("X-OpenAM-Username") String userName,@HeaderParam("X-OpenAM-Password") String password,@QueryParam("realm") String realm);
 	
 }

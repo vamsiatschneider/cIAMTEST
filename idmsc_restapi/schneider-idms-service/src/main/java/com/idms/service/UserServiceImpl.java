@@ -6006,7 +6006,7 @@ public class UserServiceImpl implements UserService {
 				
 				rb = Response.status(Response.Status.MOVED_PERMANENTLY);
 				
-				String tokenResponse = productService.authenticateUser(idToken1, idToken2, UserConstants.SE_REALM);
+				String tokenResponse = productService.authenticateIdmsChinaUser(idToken1, idToken2, UserConstants.SE_REALM);
 				conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 				DocumentContext productDocCtx = JsonPath.using(conf).parse(tokenResponse);
 				token = productDocCtx.read(JsonConstants.TOKEN_ID);
