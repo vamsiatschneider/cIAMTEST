@@ -2210,7 +2210,7 @@ public class UserServiceImpl implements UserService {
 		if ((!checkMandatoryFields)
 				&& (null != userRequest.getIDMS_Profile_update_source__c()
 						&& !userRequest.getIDMS_Profile_update_source__c().isEmpty())
-				&& (!pickListValidator.validate(UserConstants.IDMS_BFO_profile,
+				&& (pickListValidator.validate(UserConstants.IDMS_BFO_profile,
 						userRequest.getIDMS_Profile_update_source__c()))
 				&& (null == userRequest.getEmail() || userRequest.getEmail().isEmpty())) {
 			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.EMAIL);
