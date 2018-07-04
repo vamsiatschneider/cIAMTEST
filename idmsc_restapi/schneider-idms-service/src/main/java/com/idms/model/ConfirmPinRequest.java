@@ -2,38 +2,50 @@ package com.idms.model;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 public class ConfirmPinRequest {
 
 	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String id;
 	
 	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String  IDMS_Federated_ID__c;
 	
 	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String  PinCode;
 	
 	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String  Operation;
 	
 	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String  Password;
 	
 	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String IDMS_Profile_update_source;
 	
 	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String IDMS_Email_opt_in__c;
 	
 	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String UIFlag;
 	
 	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String tncFlag;
 	
 	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String FederationIdentifier;
 
 	@JsonProperty("id")

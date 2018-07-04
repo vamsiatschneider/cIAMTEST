@@ -705,7 +705,7 @@ public class UserServiceImpl implements UserService {
 						LOGGER.info("Time taken by UserServiceImpl.userRegistration() : " + elapsedTime);
 						return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 					}
-				} else if ((null == userRequest.getUIFlag() || !UserConstants.TRUE.equalsIgnoreCase(userRequest.getUIFlag()))
+				} else if (((null == userRequest.getUIFlag() || !UserConstants.TRUE.equalsIgnoreCase(userRequest.getUIFlag()))&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())))
 						&& (null != userRequest.getPassword() && !userRequest.getPassword().isEmpty())) {
 					errorResponse.setStatus(errorStatus);
 					errorResponse.setMessage(UserConstants.PASSWORD_WITH_USER_REG_BLCOKED);
@@ -2592,7 +2592,8 @@ public class UserServiceImpl implements UserService {
 			
 			if (((null == confirmRequest.getUIFlag() ||  ! UserConstants.TRUE.equalsIgnoreCase(confirmRequest.getUIFlag()))
 					||	UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(confirmRequest.getOperation()))
-					&& (null != confirmRequest.getPassword() && !confirmRequest.getPassword().isEmpty())) {
+					&& (null != confirmRequest.getPassword() && !confirmRequest.getPassword().isEmpty())
+					&&(!UserConstants.UIMS.equalsIgnoreCase(confirmRequest.getIDMS_Profile_update_source()))) {
 
 				response.setStatus(errorStatus);
 				response.setMessage(UserConstants.OPERATION_BLCOKED);
@@ -4375,7 +4376,8 @@ public class UserServiceImpl implements UserService {
 			
 			if ((null == resendPinRequest.getIdmsUserId() || resendPinRequest.getIdmsUserId().isEmpty())
 					&& (null == resendPinRequest.getIDMS_Federated_ID__c()|| resendPinRequest.getIDMS_Federated_ID__c().isEmpty())
-					&& (null == resendPinRequest.getFederationIdentifier()|| resendPinRequest.getFederationIdentifier().isEmpty())) {
+					&& (null == resendPinRequest.getFederationIdentifier()|| resendPinRequest.getFederationIdentifier().isEmpty())
+					&& (null == resendPinRequest.getFederationId()|| resendPinRequest.getFederationId().isEmpty())) {
 				response.put(UserConstants.STATUS, UserConstants.STATUS_FAILD);
 				response.put(UserConstants.MESSAGE, UserConstants.RESPONSE_MESSAGE_NULL);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -4387,7 +4389,9 @@ public class UserServiceImpl implements UserService {
 				if(null != resendPinRequest.getIdmsUserId() && !resendPinRequest.getIdmsUserId().isEmpty()){
 					resendId = resendPinRequest.getIdmsUserId();
 				} else if(null != resendPinRequest.getIDMS_Federated_ID__c() && !resendPinRequest.getIDMS_Federated_ID__c().isEmpty()){
-					resendId = resendPinRequest.getIdmsUserId();
+					resendId = resendPinRequest.getIDMS_Federated_ID__c();
+				}else if(null != resendPinRequest.getFederationId() && !resendPinRequest.getFederationId().isEmpty()){
+					resendId = resendPinRequest.getFederationId();
 				}else{
 					resendId = resendPinRequest.getFederationIdentifier();
 				}
@@ -4556,7 +4560,8 @@ public class UserServiceImpl implements UserService {
 			ERROR_LOGGER.info("UserServiceImpl:updatePassword : sendOtp : Request    -> " + objMapper.writeValueAsString(updatePasswordRequest));
 			// Fetching the userid from the Authorization Token
 
-			if (null == updatePasswordRequest.getUIFlag() || !UserConstants.TRUE.equalsIgnoreCase(updatePasswordRequest.getUIFlag())) {
+			if ((null == updatePasswordRequest.getUIFlag() || !UserConstants.TRUE.equalsIgnoreCase(updatePasswordRequest.getUIFlag()))
+					&&(!UserConstants.UIMS.equalsIgnoreCase(updatePasswordRequest.getIDMS_Profile_update_source()))) {
 				ErrorResponse errorResponse = new ErrorResponse();
 				errorResponse.setStatus(errorStatus);
 				errorResponse.setMessage(UserConstants.UPDATE_USER_REC_BLCOKED);
