@@ -179,7 +179,7 @@ public class SendEmail {
 			//appid = regsource or updateresource pass from emthod
 			
 			url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + encodedHOTPcode + "&operationType="
-					+ hotpOperationType + "&lang=" + lang + "&app=" + appid + "&uid=" + userId;
+					+ hotpOperationType + "&lang=" + lang + "&app=" + appid + "&uid=" + userId+ "&email=" +to;
 			
 			//url = URLEncoder.encode( structurl, "UTF-8");  
 			

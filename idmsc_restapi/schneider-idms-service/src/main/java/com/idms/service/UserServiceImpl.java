@@ -910,10 +910,10 @@ public class UserServiceImpl implements UserService {
 			 * */
 			openAmReq.getInput().getUser().setFederationID(userName);
 			
-			openAmReq.getInput().getUser().setIdmsail_c("[]");
+			/*openAmReq.getInput().getUser().setIdmsail_c("[]");
 			openAmReq.getInput().getUser().setIdmsail_Applications_c("[]");
 			openAmReq.getInput().getUser().setIdmsail_Features_c("[]");
-			openAmReq.getInput().getUser().setIdmsail_Programs_c("[]");
+			openAmReq.getInput().getUser().setIdmsail_Programs_c("[]");*/
 			openAmReq.getInput().getUser().setCn(
 					userRequest.getUserRecord().getFirstName() + " " + userRequest.getUserRecord().getLastName());
 
@@ -3264,13 +3264,17 @@ public class UserServiceImpl implements UserService {
 			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
 			LOGGER.info("SSOTOKEN--------------------------->" + iPlanetDirectoryKey);
-			IDMSAil__c = productDocCtx.read("$.IDMSAil_c").toString();
-			IDMSAil__c = IDMSAil__c.replace("\"", "");
-			LOGGER.info("1st  var IDMSAil_c" + IDMSAil__c);
+			IDMSAil__c = productDocCtx.read("$.IDMSAil_c[0]");
+			
+			
+			//IDMSAil__c = IDMSAil__c.replace("\"", "");
+			//LOGGER.info("1st  var IDMSAil_c" + IDMSAil__c);
 			
 			if (null != IDMSAil__c) {
 				listOfAil_c = Arrays.asList(IDMSAil__c.replaceAll("[\\(\\)\\[\\]\\{\\}]", "").split(","));
-			} 
+			} else{
+				listOfAil_c = new ArrayList<String>();
+			}
 
 			usermail = productDocCtx.read("$.mail[0]");
 			
@@ -3278,19 +3282,19 @@ public class UserServiceImpl implements UserService {
 			if ((!listOfAil_c.contains(ailRequest.getUserAILRecord().getIDMSAclType__c() + ";"
 					+ ailRequest.getUserAILRecord().getIDMSAcl__c()))
 					&&("GRANT".equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMSOperation__c()))) {
-				String aclType_c = productDocCtx.read("$.IDMSAIL_" + idmsAclType_c + "_c").toString();
-				LOGGER.info("2nd Var ------->" + idmsAclType_c + "--------->" + aclType_c);
+				String aclType_c = productDocCtx.read("$.IDMSAIL_" + idmsAclType_c + "_c[0]");
+				/*LOGGER.info("2nd Var ------->" + idmsAclType_c + "--------->" + aclType_c);
 				aclType_c = aclType_c.substring(0, aclType_c.length() - 1);
 				aclType_c = aclType_c.substring(1);
 				aclType_c = aclType_c.replace("\"", "");
 				aclType_c = aclType_c.replaceAll("\\[", "");
-				aclType_c = aclType_c.replaceAll("\\]", "");
+				aclType_c = aclType_c.replaceAll("\\]", "");*/
 				// Checking the value does not contain null value
 				if (!(aclType_c == null || aclType_c.length() == 0))
 					aclType_c = aclType_c + "," + ailRequest.getUserAILRecord().getIDMSAcl__c();
 				else
 					aclType_c = ailRequest.getUserAILRecord().getIDMSAcl__c();
-				aclType_c = "[" + aclType_c + "]";
+				//aclType_c = "[" + aclType_c + "]";
 				PRODUCT_JSON_STRING = "{" + "\"IDMSAIL_" + idmsAclType_c + "_c\": \"" + aclType_c.trim() + "\""
 						+ "}";
 				LOGGER.info("AUDIT:requestingUser" + userId + "," + "impersonatingUser : amadmin,"
@@ -3299,16 +3303,16 @@ public class UserServiceImpl implements UserService {
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 						PRODUCT_JSON_STRING);
 
-				String tempString = IDMSAil__c.substring(0, IDMSAil__c.length() - 2);
+				/*String tempString = IDMSAil__c.substring(0, IDMSAil__c.length() - 2);
 				tempString = tempString.replaceAll("\\[", "");
-				LOGGER.info("tempString---------->" + tempString);
+				*///LOGGER.info("tempString---------->" + tempString);
 				// tempString=tempString.substring(1);
-				if (!(tempString == null || tempString.length() == 0))
-					IDMSAil__c = "[" + tempString + ",(" + ailRequest.getUserAILRecord().getIDMSAclType__c() + ";"
-							+ ailRequest.getUserAILRecord().getIDMSAcl__c() + ")" + "]";
+				if (null != IDMSAil__c && !IDMSAil__c.isEmpty())
+					IDMSAil__c = "" + IDMSAil__c + ",(" + ailRequest.getUserAILRecord().getIDMSAclType__c() + ";"
+							+ ailRequest.getUserAILRecord().getIDMSAcl__c() + ")";
 				else
-					IDMSAil__c = "[(" + ailRequest.getUserAILRecord().getIDMSAclType__c() + ";"
-							+ ailRequest.getUserAILRecord().getIDMSAcl__c() + ")" + "]";
+					IDMSAil__c = "(" + ailRequest.getUserAILRecord().getIDMSAclType__c() + ";"
+							+ ailRequest.getUserAILRecord().getIDMSAcl__c() + ")" ;
 				
 				// Update the IDMSAil__c in OpenAm
 				PRODUCT_JSON_STRING = "{" + "\"IDMSAil_c\": \"" + IDMSAil__c.trim() + "\"" + "}";
@@ -3319,7 +3323,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("IDMSAil__c Modified After Grant Operation --------------------------------->" + IDMSAil__c);
 			} else if ((listOfAil_c.contains(ailRequest.getUserAILRecord().getIDMSAclType__c() + ";"
 					+ ailRequest.getUserAILRecord().getIDMSAcl__c()))&&("REVOKE".equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMSOperation__c()))) {
-				IDMSAil__c = productDocCtx.read("$.IDMSAil_c").toString();
+				IDMSAil__c = productDocCtx.read("$.IDMSAil_c[0]");
 				IDMSAil__c = IDMSAil__c.replaceAll("\\[", "");
 				IDMSAil__c = IDMSAil__c.replaceAll("\\]", "");
 				String[] ailParts = IDMSAil__c.split(",");
@@ -3335,13 +3339,13 @@ public class UserServiceImpl implements UserService {
 				IDMSAil__c = IDMSAil__c.replace("\"", "");
 				if (!(IDMSAil__c == null || IDMSAil__c.length() == 0))
 					IDMSAil__c = IDMSAil__c.substring(0, IDMSAil__c.length() - 1);
-				IDMSAil__c = "[" + IDMSAil__c + "]";
-				String aclType = productDocCtx.read("$.IDMSAIL_" + idmsAclType_c + "_c").toString();
-				aclType = aclType.substring(0, aclType.length() - 1);
+				//IDMSAil__c = "[" + IDMSAil__c + "]";
+				String aclType = productDocCtx.read("$.IDMSAIL_" + idmsAclType_c + "_c[0]");
+				/*aclType = aclType.substring(0, aclType.length() - 1);
 				aclType = aclType.substring(1);
 				aclType = aclType.replace("\"", "");
 				aclType = aclType.replaceAll("\\[", "");
-				aclType = aclType.replaceAll("\\]", "");
+				aclType = aclType.replaceAll("\\]", "");*/
 				ailParts = aclType.split(",");
 				aclType = "";
 				for (String pair : ailParts) {
@@ -3356,9 +3360,23 @@ public class UserServiceImpl implements UserService {
 					aclType = aclType.replaceAll("\\[", "");
 					aclType = aclType.replaceAll("\\]", "");
 				}
-				aclType = "[" + aclType + "]";
-				PRODUCT_JSON_STRING = "{" + "\"IDMSAIL_" + idmsAclType_c + "_c\": \"" + aclType.trim() + "\""
-						+ "}";
+				//aclType = "[" + aclType + "]";
+				
+				/*if(null == aclType || aclType.isEmpty())
+				{
+					aclType = "[]";
+				}else{
+					aclType = aclType.trim();
+				}*/
+			/*	PRODUCT_JSON_STRING = "{" + "\"IDMSAIL_" + idmsAclType_c + "_c\": \"" + aclType + "\""
+						+ "}";*/
+				
+				if(null == aclType || aclType.isEmpty()){
+					PRODUCT_JSON_STRING = "{" + "\"IDMSAIL_" + idmsAclType_c + "_c\":".concat("[]}");
+				}else{
+					PRODUCT_JSON_STRING = "{" + "\"IDMSAIL_" + idmsAclType_c + "_c\": \"" + aclType + "\""
+							+ "}";	
+				}
 				LOGGER.info("AUDIT:requestingUser" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:GET/getUser/{userId}");
 				ERROR_LOGGER.info("UserServiceImpl:updateAIL -> : productService.updateUser : Request -> ",PRODUCT_JSON_STRING);
@@ -3366,7 +3384,11 @@ public class UserServiceImpl implements UserService {
 						PRODUCT_JSON_STRING);
 
 				// Update the IDMSAil__c in OpenAm
+				if(null == IDMSAil__c || IDMSAil__c.isEmpty()){
+					PRODUCT_JSON_STRING = "{" + "\"IDMSAil_c\":".concat("[]}");
+				}else{
 				PRODUCT_JSON_STRING = "{" + "\"IDMSAil_c\": \"" + IDMSAil__c.trim() + "\"" + "}";
+				}
 				LOGGER.info("AUDIT:requestingUser" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:GET/getUser/{userId}");
 				ERROR_LOGGER.info("UserServiceImpl:updateAIL -> : productService.updateUser : Request -> ",PRODUCT_JSON_STRING);
