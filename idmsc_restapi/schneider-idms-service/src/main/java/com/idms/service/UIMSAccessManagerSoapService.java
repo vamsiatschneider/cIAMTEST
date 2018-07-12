@@ -58,6 +58,9 @@ public class UIMSAccessManagerSoapService {
 	
 	@Value("${fromUserName}")
 	private String fromUserName;
+	
+	@Value("${supportUser}")
+	private String supportUser;
 
 	private boolean isrevokeresult = false;
 
@@ -112,7 +115,7 @@ public class UIMSAccessManagerSoapService {
 			}
 			if(!isgrantresult) {
 				LOGGER.info("UIMS UpdateAIL Grant Access got failed -----> ::sending mail notification::");
-				sendEmail.emailReadyToSendEmail(email, fromUserName,
+				sendEmail.emailReadyToSendEmail(supportUser, fromUserName,
 						"UIMS UpdateAIL Grant Access failed.", userId);
 			}
 		} catch (Exception e) {
@@ -154,7 +157,7 @@ public class UIMSAccessManagerSoapService {
 			}
 			if(!isrevokeresult) {
 				LOGGER.info("UIMS UpdateAIL revoke access got failed -----> ::sending mail notification::");
-				sendEmail.emailReadyToSendEmail(email, fromUserName,
+				sendEmail.emailReadyToSendEmail(supportUser, fromUserName,
 						"UIMS UpdateAIL revoke failed.", userId);
 			}
 		} catch (Exception e) {
