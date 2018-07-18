@@ -18,17 +18,19 @@ import com.se.idms.cache.validate.IValidator;
 @Component("legthValidator")
 public class LengthValidatorImpl implements IValidator {
 
-	private static final Logger logger = LoggerFactory.getLogger(LengthValidatorImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(LengthValidatorImpl.class);
 
 	@Override
 	public boolean validate(String key, Object value) {
+		LOGGER.info("Entered validate() -> Start");
+		LOGGER.info("Parameter key -> " + key+" ,value -> "+value);
 		try {
 			CacheManagerProvider cacheManagerProvider = new CacheManagerProviderImpl();
 			CacheBuilder cacheBuilder = new CacheBuilder(cacheManagerProvider);
 			Properties cacheProperties = cacheBuilder.getProperties(IdmsConstants.IDMS_FIELDSLENGTH_PROPERTIES_PATH);
 			String lengthProperty = cacheProperties.getProperty(key).trim();
 
-			logger.debug("lengthProperty from the cache is:" + lengthProperty);
+			LOGGER.debug("lengthProperty from the cache is:" + lengthProperty);
 
 			String strVal = value.toString();
 			Integer len1 = Integer.valueOf(strVal.length());
@@ -38,7 +40,7 @@ public class LengthValidatorImpl implements IValidator {
 				return true;
 			}
 		} catch (Exception e) {
-			logger.error("LengthValidatorImpl.validate::"+e.getMessage());
+			LOGGER.error("LengthValidatorImpl.validate::"+e.getMessage());
 		}
 		return false;
 	}

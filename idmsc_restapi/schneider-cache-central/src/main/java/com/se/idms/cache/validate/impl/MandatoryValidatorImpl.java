@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.se.idms.cache.api.CacheBuilder;
@@ -14,9 +16,12 @@ import com.se.idms.cache.validate.IValidator;
 
 @Component("mandatoryValidator")
 public class MandatoryValidatorImpl  implements IValidator{
+	private static final Logger LOGGER = LoggerFactory.getLogger(MultiPickListValidatorImpl.class);
 
 	@Override
 	public boolean validate(String key, Object value) {
+		LOGGER.info("Entered validate() -> Start");
+		LOGGER.info("Parameter key -> " + key+" ,value -> "+value);
 		CacheManagerProvider cacheManagerProvider = new CacheManagerProviderImpl();
 		CacheBuilder cacheBuilder = new CacheBuilder(cacheManagerProvider );
 		Properties cacheProperties = cacheBuilder.getProperties(IdmsConstants.IDMS_FIELDSMANDATORY_PROPERTIES_PATH);
@@ -26,7 +31,7 @@ public class MandatoryValidatorImpl  implements IValidator{
 		List<String> list = Arrays.asList(mandatoryPropertySplitter);
 		
 		
-		System.out.println("properties from cache::mandatoryProperty="+mandatoryProperty);
+		LOGGER.info("properties from cache::mandatoryProperty="+mandatoryProperty);
 		if(list.contains(value)){
 			return true;
 		}

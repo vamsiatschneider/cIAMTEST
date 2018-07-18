@@ -9,6 +9,8 @@ import net.sf.ehcache.constructs.blocking.CacheEntryFactory;
 import net.sf.ehcache.constructs.blocking.SelfPopulatingCache;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +20,7 @@ import com.se.idms.cache.population.PropertiesEntryCreator;
 
 @Component("cacheBuilder")
 public class CacheBuilder implements CacheTypes {
+	private static final Logger LOGGER = LoggerFactory.getLogger(CacheBuilder.class);
 
 	private CacheManager cacheManager;
 	
@@ -46,9 +49,11 @@ public class CacheBuilder implements CacheTypes {
 	 * @return
 	 */
 	private Ehcache getRawCache(String cacheName) {
+		LOGGER.info("Entered getRawCache() -> Start");
 		Ehcache ehcache = cacheManager.getEhcache(cacheName);
 
 		if (ehcache == null) {
+			LOGGER.error("The requested Cache: " + cacheName	+ " was not found.");
 			throw new CacheException("The requested Cache: " + cacheName	+ " was not found.");
 		}
 
@@ -63,6 +68,7 @@ public class CacheBuilder implements CacheTypes {
 	 * @return
 	 */
 	public Properties getProperties(String propertiesFile) {
+		LOGGER.info("Entered getProperties() -> Start");
 
 		if (StringUtils.isNotEmpty(propertiesFile)) {
 
@@ -70,7 +76,7 @@ public class CacheBuilder implements CacheTypes {
 //			return (Properties) propertiesCache.get(propertiesFile);
 			
 			Element element = (Element)propertiesCache.get(propertiesFile);
-			System.out.println("Size of the property file :: "+element.getKey() + " Value  "+element.getValue());
+			LOGGER.info("Size of the property file :: "+element.getKey() + " Value  "+element.getValue());
 			return (Properties) element.getValue();
 		}
 
@@ -82,9 +88,10 @@ public class CacheBuilder implements CacheTypes {
 	 * @return
 	 */
 	public CacheAdapter getPropertiesCache(String propertiesFile) {
+		LOGGER.info("Entered getPropertiesCache() -> Start");
 		
 		if (selfPopulatingPropertiesCache == null) {
-			System.out.println("propertiesFile="+propertiesFile);
+			LOGGER.info("propertiesFile="+propertiesFile);
 			if(propertiesFile.contains("LENGTH")){
 				createPropertiesCache("lengthProperties");
 			}
@@ -113,6 +120,7 @@ public class CacheBuilder implements CacheTypes {
 	 * 
 	 */
 	private void createPropertiesCache(String property){
+		LOGGER.info("Entered createPropertiesCache() -> Start");
 		
 		cacheEntryFactory = new PropertiesEntryCreator();
 

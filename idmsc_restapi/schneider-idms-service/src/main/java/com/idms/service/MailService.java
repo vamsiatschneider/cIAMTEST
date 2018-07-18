@@ -9,7 +9,11 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class MailService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(MailService.class); 
 
 	public static void main(String[] args) {
 	String to = "Suresh.Bachu@non.schneider-electric.com";//change accordingly
@@ -31,9 +35,12 @@ public class MailService {
 
        // Send message
        Transport.send(message);
-       System.out.println("message sent successfully....");
+       LOGGER.info("message sent successfully....");
 
-    }catch (MessagingException mex) {mex.printStackTrace();}
+    }catch (MessagingException mex) {
+    	mex.printStackTrace();
+    	LOGGER.error("Error in sending mail"+mex.getMessage());
+    	}
 	}
 
 }

@@ -99,6 +99,9 @@ public class SendEmail {
  
 	@Async
 	public void emailReadyToSendEmail(String to, String from, String subject, String msgBody) {
+		LOGGER.info("Entered emailReadyToSendEmail() -> Start");
+		LOGGER.info("Parameter to -> " + to+" ,from -> "+from+" ,subject -> "+subject);
+		LOGGER.info("Parameter msgBody -> " + msgBody);
 		
 		MimeMessage mailMessage = mailSender.createMimeMessage();
 		InternetAddress fromAddress = null;
@@ -136,14 +139,15 @@ public class SendEmail {
 	
 	@SuppressWarnings("unused")
 	public void sendOpenAmEmail(String code, String hotpOperationType,String userId, String appid ){
+		LOGGER.info("Entered sendOpenAmEmail() -> Start");
+		LOGGER.info("Parameter hotpOperationType -> "+hotpOperationType+" ,userId -> "+userId);
+		LOGGER.info("Parameter appid -> " + appid);
 			
 		String userData = "";
 		String to = "" ;
 		String subject = "";
 		String lang= "";
 		
-		LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : Inside sendOpenAmEmail()");
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : User's Email : " + to);
 
 			encodedHOTPcode = code;
 			// get sso token.. iPlanetDirectoryKey
@@ -243,6 +247,8 @@ public class SendEmail {
 	}
 	
 	public String generateOtp(String userId) throws Exception {
+		LOGGER.info("Entered generateOtp() -> Start");
+		LOGGER.info("Parameter userId -> " + userId);
 
 		// Proper Exception handling
 		String hexpin = "";
@@ -267,10 +273,12 @@ public class SendEmail {
 	}
 	
 	public void storePRMOtp(String userId, String hashedPin) throws Exception {
+		LOGGER.info("Entered storePRMOtp() -> Start");
 
 		// Proper Exception handling
 		String product_json_string = "";
 		LOGGER.info("hexa string is " + hashedPin);
+		LOGGER.info("Parameter userId -> " + userId);
 		
 		LocalDateTime currentDatenTime = LocalDateTime.now();
 		long currentDatenTimeInMillisecs = currentDatenTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
@@ -286,6 +294,8 @@ public class SendEmail {
 	}
 	
 	public boolean validatePin(String otp,String userId)throws Exception {
+		LOGGER.info("Entered validatePin() -> Start");
+		LOGGER.info("Parameter userId -> " + userId);
 		boolean validatePin = false;
 		String authIdTimeStmp = "";
 		String[] authIdTime = null;
@@ -325,12 +335,16 @@ public class SendEmail {
 							product_json_string);
 				}
 			}else{
+				LOGGER.error("Some problem in validatePin()");
 				throw new Exception("inValid Pin Exception!!!");
 			}
 		return validatePin;
 	}
 
 	private String emailContentTemplate(String to, String subject, String lang,String hotpOperationType)  {
+		LOGGER.info("Entered emailContentTemplate() -> Start");
+		LOGGER.info("Parameter to -> " + to+" ,subject -> "+subject);
+		LOGGER.info("Parameter lang -> " + lang+" ,hotpOperationType -> "+hotpOperationType);
 		String filePath;
 		boolean chineseLangCheck = (lang != null && lang.equals(EmailConstants.HOTP_LAN_CN)) || (hotpLanguage != null && hotpLanguage.equals(EmailConstants.HOTP_LAN_CN));
 		int startIndex=0;
@@ -518,11 +532,14 @@ public class SendEmail {
 	 */
 
 	private String generateRamdomPin() {
+		LOGGER.info("Entered generateRamdomPin() -> Start");
 		String tmpPr = RandomStringUtils.random(6, UserConstants.RANDOM_PIN_CHARS);
 		return tmpPr;
 	}
 	
 	private boolean checkTimeStamp(long localDTInMilli) {
+		LOGGER.info("Entered checkTimeStamp() -> Start");
+		LOGGER.info("Parameter localDTInMilli() ->"+ localDTInMilli);
 		
 		boolean validateTimeStamp = false;
 		LocalDateTime otpGeneratedDatenTime = Instant.ofEpochMilli(localDTInMilli).atZone(ZoneId.systemDefault())
@@ -544,16 +561,15 @@ public class SendEmail {
 	
 	@SuppressWarnings("unused")
 	public void sendInvitationEmail(String hotpOperationType,String redirectUrl, String email,String invitationId)throws Exception{
-			
+		LOGGER.info("Entered sendInvitationEmail() -> Start");
+		LOGGER.info("Parameter hotpOperationType -> " + hotpOperationType+" ,redirectUrl -> "+redirectUrl+" ,email -> "+email);
+		LOGGER.info("Parameter invitationId -> " + invitationId);
 		String userData = "";
 		String subject = "";
 		String lang= "";
 		
 		invID = invitationId;
 		
-		LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : Inside sendOpenAmEmail()");
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : User's Email : " + email);
-
 			if(null != invitationId && !invitationId.isEmpty()){
 				
 				url = redirectUrl + "&InvitationId="+ invitationId + "&email=" + email ;
@@ -603,8 +619,8 @@ public class SendEmail {
 	
 	@Async
 	public void sendSMSMessage(String code, String hotpOperationType, String userId, String appid) {
-
-		LOGGER.info("SendEmail.sendSMSMessage() : ");
+		LOGGER.info("Entered sendSMSMessage() -> Start");
+		LOGGER.info("Parameter hotpOperationType -> " + hotpOperationType+" ,userId -> "+userId+" ,appid -> "+appid);
 
 		String userData = "";
 		String to = "";
@@ -637,7 +653,7 @@ public class SendEmail {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			LOGGER.info("SendEmail.sendSMSMessage() : " + "Exception in sending HOTP code : ", e);
+			LOGGER.error("SendEmail.sendSMSMessage() : " + "Exception in sending HOTP code : ", e.getMessage());
 			// throw new AuthLoginException("Failed to send OTP code to " + to,
 			// e);
 		}
@@ -651,6 +667,8 @@ public class SendEmail {
 	
 	@SuppressWarnings("unused")
 	public void sendOpenAmMobileEmail(String code, String hotpOperationType,String userId, String appid ){
+		LOGGER.info("Entered sendOpenAmMobileEmail() -> Start");
+		LOGGER.info("Parameter hotpOperationType -> " + hotpOperationType+" ,userId -> "+userId+" ,appid -> "+appid);
 			
 		String userData = "";
 		String to = "" ;
