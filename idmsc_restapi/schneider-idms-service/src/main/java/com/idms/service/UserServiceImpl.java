@@ -2778,6 +2778,31 @@ public class UserServiceImpl implements UserService {
 					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 							uniqueIdentifier, PRODUCT_JSON_STRING);
 				}
+				
+				/**
+				 * The below code to activate the IDMSSetActivationDate
+				 * 
+				 * */
+				
+				if(UserConstants.PRMPORTAL.equalsIgnoreCase(confirmRequest.getIDMS_Profile_update_source())){
+					
+					PRODUCT_JSON_STRING = "{" + "\"federationId\": \"" + uniqueIdentifier + "\",\"appName\": \"" + confirmRequest.getIDMS_Profile_update_source() + "\"" + "}";
+					
+					String salesForceToken = getSaleforceToken();
+					
+					LOGGER.info("Request sending to  salesForceService.populateActivationDate : "+ PRODUCT_JSON_STRING);
+					
+					Response activationResponse = salesForceService.populateActivationDate(UserConstants.ACCEPT_TYPE_APP_JSON,salesForceToken, PRODUCT_JSON_STRING); 
+					
+					LOGGER.info("populateActivationDate Status :: "+ activationResponse.getStatus());
+					if(200 != activationResponse.getStatus()){
+						LOGGER.error("Failed to populate the activate date on PRM :: populateActivationDate -> " + IOUtils.toString((InputStream) activationResponse.getEntity()));
+					}else{
+						LOGGER.info("Successfully populated the activation date on PRM :: populateActivationDate -> " + IOUtils.toString((InputStream) activationResponse.getEntity()));
+					}
+					
+				}
+				
 			}
 			if (UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(confirmRequest.getOperation())) {
 
@@ -2849,6 +2874,7 @@ public class UserServiceImpl implements UserService {
 			if (null != confirmRequest.getIDMS_Profile_update_source()
 					&& !UserConstants.UIMS.equalsIgnoreCase(confirmRequest.getIDMS_Profile_update_source()) &&
 					(null != confirmRequest.getOperation() && UserConstants.USER_REGISTRATION .equalsIgnoreCase(confirmRequest.getOperation())) ) {
+				confirmRequest.setId(uniqueIdentifier);
 				confirmRequest.setIDMS_Federated_ID__c(federationID);
 				uimsUserManagerSoapService.activateUIMSUserConfirmPIN(confirmRequest,
 						vNewCntValue.toString(), UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
@@ -6560,5 +6586,24 @@ public class UserServiceImpl implements UserService {
 		}
 
 		return Response.status(Response.Status.OK).entity(listResponse).build();
+	}
+	
+	
+	private String getSaleforceToken() {
+		
+		DocumentContext productDocCtx = null;
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		
+		LOGGER.info("getSalesForceToken : => " + "PASSWORD_GRANT_TYPE : " + UserConstants.PR_GRANT_TYPE
+				+ " salesForceClientId: " + salesForceClientId + " salesForceClientSecret :" + salesForceClientSecret
+				+ " salesForceUserName: " + salesForceUserName + " salesForcePassword :" + salesForcePassword);
+		String bfoAuthorization = salesForceService.getSalesForceToken(UserConstants.CONTENT_TYPE_URL_FROM,
+				UserConstants.PR_GRANT_TYPE, salesForceClientId, salesForceClientSecret, salesForceUserName,
+				salesForcePassword);
+		conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		productDocCtx = JsonPath.using(conf).parse(bfoAuthorization);
+		String bfoAuthorizationToken = productDocCtx.read("$.access_token");
+
+		return  "Bearer " + bfoAuthorizationToken;
 	}
 }

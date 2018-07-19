@@ -468,4 +468,6 @@ public class UserConstants {
 	
 	public static final String TOKEN_TYPE = "contact activation";
 	
+	public static final String PRMPORTAL = "PRMPortal";
+	
 }
