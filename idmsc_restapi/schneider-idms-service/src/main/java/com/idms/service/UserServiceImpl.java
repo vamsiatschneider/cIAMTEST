@@ -2167,8 +2167,10 @@ public class UserServiceImpl implements UserService {
 				} else {
 					if (UserConstants.TRUE.equalsIgnoreCase(withGlobalUsers)) {
 
-						LOGGER.info("UserServiceImpl:checkUserExists -> ifwService.getIFWToken : Request :  -> " ,UserConstants.CONTENT_TYPE_URL_FROM,
-								UserConstants.IFW_GRANT_TYPE, ifwClientId, ifwClientSecret);
+						LOGGER.info("UserServiceImpl:checkUserExists -> ifwService.getIFWToken : Request are :  -> ");
+						LOGGER.info("UserConstants.CONTENT_TYPE_URL_FROM = "+UserConstants.CONTENT_TYPE_URL_FROM);
+						LOGGER.info("UserConstants.IFW_GRANT_TYPE = "+UserConstants.IFW_GRANT_TYPE);
+						LOGGER.info("ifwClientId -> "+ifwClientId+ " ,ifwClientSecret ->"+ifwClientSecret);
 						ifwAccessToken = ifwService.getIFWToken(UserConstants.CONTENT_TYPE_URL_FROM,
 								UserConstants.IFW_GRANT_TYPE, ifwClientId, ifwClientSecret);
 
@@ -2408,7 +2410,7 @@ public class UserServiceImpl implements UserService {
 		String federationID = null;
 		try {
 			
-			LOGGER.info("UserServiceImpl:userPinConfirmation -> : Request :  -> ", objMapper.writeValueAsString(confirmRequest));
+			LOGGER.info("UserServiceImpl:userPinConfirmation -> : Request :  -> "+ objMapper.writeValueAsString(confirmRequest));
 			
 				if (null == confirmRequest.getPinCode() || confirmRequest.getPinCode().isEmpty()) {
 					response.setStatus(errorStatus);
@@ -2545,7 +2547,7 @@ public class UserServiceImpl implements UserService {
 						+ AUDIT_OPENAM_API + AUDIT_OPENAM_GET_CALL + uniqueIdentifier + AUDIT_LOG_CLOSURE);
 				getUserResponse = productService.getUser(iPlanetDirectoryKey, uniqueIdentifier);
 
-				LOGGER.info("UserServiceImpl:userPinConfirmation -> : productService.getUser: Response :  -> ", getUserResponse);
+				LOGGER.info("UserServiceImpl:userPinConfirmation -> : productService.getUser: Response :  -> " + getUserResponse);
 				productDocCtx = JsonPath.using(conf).parse(getUserResponse);
 				
 				//if loginId already updated ->  then instead of 500, we need to return 409 already activated
@@ -2690,9 +2692,10 @@ public class UserServiceImpl implements UserService {
 			}
 			try {
 				
-				LOGGER.info("UserServiceImpl:userPinConfirmation -> : executeHotpCall: Requset :  -> ",
-						amlbcookieValue, hotpService, UserConstants.HOTP_SERVICE, productDocCtx.jsonString(),
-						userService);
+				LOGGER.info("UserServiceImpl:userPinConfirmation -> : executeHotpCall: Requset :  -> ");
+				LOGGER.info("hotpService ->"+hotpService+" ,UserConstants.HOTP_SERVICE ->"+UserConstants.HOTP_SERVICE);
+				LOGGER.info("productDocCtx.jsonString() - >"+productDocCtx.jsonString());
+				LOGGER.info("userService"+userService);
 				if (UserConstants.USER_REGISTRATION.equalsIgnoreCase(confirmRequest.getOperation())) {
 						 validPinStatus = sendEmail.validatePin(confirmRequest.getPinCode(), uniqueIdentifier);
 				} else {
@@ -2727,7 +2730,7 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 
-			LOGGER.info("UserServiceImpl:userPinConfirmation -> : Operation: Requset :  -> ", confirmRequest.getOperation());
+			LOGGER.info("UserServiceImpl:userPinConfirmation -> : Operation: Requset :  -> "+ confirmRequest.getOperation());
 			if (UserConstants.USER_REGISTRATION.equalsIgnoreCase(confirmRequest.getOperation())) {
 
 				if (UserConstants.MOBILE.equalsIgnoreCase(loginIdentifierType)) {
