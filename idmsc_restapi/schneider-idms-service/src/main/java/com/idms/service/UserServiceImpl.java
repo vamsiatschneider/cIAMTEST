@@ -35,6 +35,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,6 +67,11 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.rholder.retry.Retryer;
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.StopStrategies;
+import com.github.rholder.retry.WaitStrategies;
+import com.google.common.base.Predicates;
 import com.ibm.icu.text.Transliterator;
 import com.idms.mapper.IdmsMapper;
 import com.idms.model.AILRequest;
@@ -283,6 +290,8 @@ public class UserServiceImpl implements UserService {
 	//private static Ehcache cache = null;
 	
 	private static EhCacheCache cache = null;
+	
+	String userIdExistInUIMS = null;
 	
 	/*@Resource(name="cacheManager")
     private CacheManager cacheManager;*/
@@ -4811,6 +4820,7 @@ public class UserServiceImpl implements UserService {
 		String federationID = null;
 		String emailOrMobile = null;
 		String loginIdentifierType = null;
+
 		try {
 			LOGGER.info("UserServiceImpl:updatePassword : setPassword : Request   -> " + objMapper.writeValueAsString(setPasswordRequest));
 			
@@ -4983,6 +4993,26 @@ public class UserServiceImpl implements UserService {
 					userId = setPasswordRequest.getFederationIdentifier();
 				}else{
 					userId = setPasswordRequest.getIDMS_Federated_ID__c();
+				}
+				
+				Callable<String> callableGetUser = new Callable<String>() {
+					public String call() throws Exception {
+						LOGGER.info("in call method+++++++++");
+						userIdExistInUIMS = productService.getUser(getSSOToken(), (null != setPasswordRequest.getFederationIdentifier()?setPasswordRequest.getFederationIdentifier():setPasswordRequest.getIDMS_Federated_ID__c()));
+						LOGGER.info("userIdExistInUIMS= " + userIdExistInUIMS);
+						return userIdExistInUIMS;
+					}
+				};
+				Retryer<String> retryerGetUser = RetryerBuilder.<String> newBuilder()
+						.retryIfResult(Predicates.<String> isNull()).retryIfExceptionOfType(Exception.class)
+						.withWaitStrategy(WaitStrategies.fixedWait(23000L, TimeUnit.MILLISECONDS))
+						.withStopStrategy(StopStrategies.stopAfterAttempt(5)).build();
+				
+				try{
+					retryerGetUser.call(callableGetUser);
+				}catch(Exception e){
+					LOGGER.error("Problem in getting user details= " + e.getMessage());
+					e.printStackTrace();
 				}
 				
 				Response fedResponse = checkUserExistsWithFederationID(iPlanetDirectoryKey,
