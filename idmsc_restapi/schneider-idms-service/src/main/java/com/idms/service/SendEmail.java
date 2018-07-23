@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -147,6 +146,7 @@ public class SendEmail {
 		String to = "" ;
 		String subject = "";
 		String lang= "";
+		String firstName = "";
 		
 
 			encodedHOTPcode = code;
@@ -169,7 +169,7 @@ public class SendEmail {
 			LOGGER.info("productService.getUser : Response -> ", userData);
 
 			lang=productDocCtxUser.read("$.preferredlanguage[0]");
-			
+			firstName=productDocCtxUser.read("$.givenName[0]");
 			
 			/*				url = hotpEmailVerificationURL + "?userid=" + to + "&pin=" + encodedHOTPcode + "&operationType="
 						+ hotpOperationType + "&lang=" + lang + "&app=" + appid + "&uid=" + uid;
@@ -212,12 +212,12 @@ public class SendEmail {
 			// if section for chinese user
 			if ((lang != null && lang.equals("zh")) || (hotpLanguage != null && hotpLanguage.equals("zh"))) {
 				LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() :  Building Chinese email content..");
-				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType);
+				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,firstName);
 			}
 			// Else section for English user
 			else {
 				LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() :  Building English email content..");
-				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType);
+				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,firstName);
 
 			}
 
@@ -341,7 +341,7 @@ public class SendEmail {
 		return validatePin;
 	}
 
-	private String emailContentTemplate(String to, String subject, String lang,String hotpOperationType)  {
+	private String emailContentTemplate(String to, String subject, String lang,String hotpOperationType,String firstName)  {
 		LOGGER.info("Entered emailContentTemplate() -> Start");
 		LOGGER.info("Parameter to -> " + to+" ,subject -> "+subject);
 		LOGGER.info("Parameter lang -> " + lang+" ,hotpOperationType -> "+hotpOperationType);
@@ -445,6 +445,16 @@ public class SendEmail {
 			startIndex = contentBuilder.indexOf("{!invtURL}");
 			endIndex = startIndex+10;
 		}else{
+			
+			if(hotpOperationType != null && EmailConstants.USERREGISTRATION_OPT_TYPE.equals(hotpOperationType)){
+				
+				if(0 < contentBuilder.indexOf("{!registrationSource}")){
+				startIndex = contentBuilder.indexOf("{!registrationSource}");
+				 endIndex = startIndex + 21;
+				 	LOGGER.info("Starting and Ending Index of USerNAme in Email : Start : " + startIndex + " : End : +" + endIndex);
+				contentBuilder.replace(startIndex, endIndex, firstName);
+				}
+			}
 			 startIndex = contentBuilder.indexOf("{!firstname}");
 			 endIndex = startIndex + 12;
 			LOGGER.info("Starting and Ending Index of USerNAme in Email : Start : " + startIndex + " : End : +" + endIndex);
@@ -587,12 +597,12 @@ public class SendEmail {
 			// if section for chinese user
 			if ((lang != null && lang.equals("zh")) || (hotpLanguage != null && hotpLanguage.equals("zh"))) {
 				LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() :  Building Chinese email content..");
-				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType);
+				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,email);
 			}
 			// Else section for English user
 			else {
 				LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() :  Building English email content..");
-				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType);
+				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,email);
 
 			}
 
@@ -714,12 +724,12 @@ public class SendEmail {
 			// if section for chinese user
 			if ((lang != null && lang.equals("zh")) || (hotpLanguage != null && hotpLanguage.equals("zh"))) {
 				LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() :  Building Chinese email content..");
-				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType);
+				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,to);
 			}
 			// Else section for English user
 			else {
 				LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() :  Building English email content..");
-				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType);
+				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,to);
 
 			}
 

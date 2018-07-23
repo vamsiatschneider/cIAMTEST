@@ -6600,6 +6600,11 @@ public class UserServiceImpl implements UserService {
 					}
 
 				}
+			}else {
+				errorResponse = new JSONObject();
+				errorResponse.put("code", "MISSING_INPUT");
+				errorResponse.put("message", "Missing Input");
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 
 		} catch (JsonMappingException e) {
