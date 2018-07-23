@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -445,6 +444,16 @@ public class SendEmail {
 			startIndex = contentBuilder.indexOf("{!invtURL}");
 			endIndex = startIndex+10;
 		}else{
+			
+			if(hotpOperationType != null && EmailConstants.USERREGISTRATION_OPT_TYPE.equals(hotpOperationType)){
+				
+				if(0 < contentBuilder.indexOf("{!registrationSource}")){
+				startIndex = contentBuilder.indexOf("{!registrationSource}");
+				 endIndex = startIndex + 21;
+				 	LOGGER.info("Starting and Ending Index of USerNAme in Email : Start : " + startIndex + " : End : +" + endIndex);
+				contentBuilder.replace(startIndex, endIndex, subject);
+				}
+			}
 			 startIndex = contentBuilder.indexOf("{!firstname}");
 			 endIndex = startIndex + 12;
 			LOGGER.info("Starting and Ending Index of USerNAme in Email : Start : " + startIndex + " : End : +" + endIndex);
