@@ -12,7 +12,7 @@ import com.idms.model.CreateUserRequest;
 
 @Path("/identity/services/apexrest")
 @Produces("application/json")
-interface ICreateUserService {
+public interface ICreateUserService {
 
 	@POST
 	@Path("/IDMSsvcs/1.0/IDMSUser")
