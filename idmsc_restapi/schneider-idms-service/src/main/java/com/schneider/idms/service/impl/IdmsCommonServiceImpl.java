@@ -134,10 +134,10 @@ public class IdmsCommonServiceImpl {
 	protected String salesForceClientId;
 
 	@Value("${salesForceClientSecret}")
-	private String salesForceClientSecret;
+	protected String salesForceClientSecret;
 
 	@Value("${salesForceUserName}")
-	private String salesForceUserName;
+	protected String salesForceUserName;
 
 	@Value("${salesForcePassword}")
 	protected String salesForcePassword;
@@ -1135,5 +1135,67 @@ public class IdmsCommonServiceImpl {
 		LOGGER.info("Entered generateRamdomPassWord() -> Start");
 		String tmpPr = RandomStringUtils.random(10, UserConstants.RANDOM_PR_CHARS);
 		return tmpPr;
+	}
+	
+	public static String getValue(String key) {
+		LOGGER.info("Entered getValue() -> Start");
+		LOGGER.info("Parameter key -> " + key);
+		if (null != key) {
+			if (!key.contains("[")) {
+				return key;
+			}
+			if (key.contains("[\"[]")) {
+				return null;
+			}
+			if (key.contains("[\"[(") || key.contains("[\"[nul,(") || key.contains("[\"[null,")) {
+				return key.substring(key.indexOf("[\"[") + 3, key.lastIndexOf("]\""));
+			}
+
+			if (key.contains("[\"[")) {
+				return key.substring(key.indexOf("[\"[") + 3, key.lastIndexOf("]\""));
+			}
+			int beginIndex = key.indexOf('[') + 1;
+			int endIndex = key.indexOf(']');
+			String preValue = key.substring(beginIndex, endIndex);
+			return preValue.substring(preValue.indexOf('\"') + 1, preValue.lastIndexOf('\"'));
+		}
+		return "";
+	}
+
+	protected String getSaleforceToken() {
+		
+		DocumentContext productDocCtx = null;
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		
+		LOGGER.info("getSalesForceToken : => " + "PASSWORD_GRANT_TYPE : " + UserConstants.PR_GRANT_TYPE
+				+ " salesForceClientId: " + salesForceClientId + " salesForceClientSecret :" + salesForceClientSecret
+				+ " salesForceUserName: " + salesForceUserName + " salesForcePassword :" + salesForcePassword);
+		String bfoAuthorization = salesForceService.getSalesForceToken(UserConstants.CONTENT_TYPE_URL_FROM,
+				UserConstants.PR_GRANT_TYPE, salesForceClientId, salesForceClientSecret, salesForceUserName,
+				salesForcePassword);
+		conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		productDocCtx = JsonPath.using(conf).parse(bfoAuthorization);
+		String bfoAuthorizationToken = productDocCtx.read("$.access_token");
+
+		return  "Bearer " + bfoAuthorizationToken;
+	}
+	
+	public static String getValues(String key) {
+		LOGGER.info("Entered getValues() -> Start");
+		LOGGER.info("Parameter key -> " + key);
+		if (null != key) {
+			if (!key.contains("[" + '"' + "[")) {
+				return key;
+			}
+			int beginIndex = key.indexOf('[') + 1;
+			int endIndex = key.indexOf(']');
+			String preValue = key.substring(beginIndex, endIndex);
+			return preValue.substring(preValue.indexOf('\"') + 1, preValue.lastIndexOf('\"'));
+		}
+		return "";
+	}
+	
+	protected String getDelimeter() {
+		return UserConstants.USER_DELIMETER;
 	}
 }
