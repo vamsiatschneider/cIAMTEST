@@ -440,7 +440,7 @@ public class SendEmail {
 			startIndex = contentBuilder.indexOf("{!firstname}");
 			endIndex = startIndex + 12;
 			LOGGER.info("Starting and Ending Index of USerNAme in Email : Start : " + startIndex + " : End : +" + endIndex);
-			contentBuilder.replace(startIndex, endIndex, to);
+			contentBuilder.replace(startIndex, endIndex, firstName);
 			
 			startIndex = contentBuilder.indexOf("{!invtURL}");
 			endIndex = startIndex+10;
@@ -452,13 +452,13 @@ public class SendEmail {
 				startIndex = contentBuilder.indexOf("{!registrationSource}");
 				 endIndex = startIndex + 21;
 				 	LOGGER.info("Starting and Ending Index of USerNAme in Email : Start : " + startIndex + " : End : +" + endIndex);
-				contentBuilder.replace(startIndex, endIndex, firstName);
+				contentBuilder.replace(startIndex, endIndex, subject);
 				}
 			}
 			 startIndex = contentBuilder.indexOf("{!firstname}");
 			 endIndex = startIndex + 12;
 			LOGGER.info("Starting and Ending Index of USerNAme in Email : Start : " + startIndex + " : End : +" + endIndex);
-			contentBuilder.replace(startIndex, endIndex, to);
+			contentBuilder.replace(startIndex, endIndex, firstName);
 			 startIndex = contentBuilder.indexOf("{!url}");
 			 endIndex = startIndex+6;
 		}
