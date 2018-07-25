@@ -346,7 +346,7 @@ public class UserServiceImpl implements UserService {
 			String PlanetDirectoryKey = getSSOToken();
 
 			String userData = productService.checkUserExistsWithEmailMobile(
-					UserConstants.CHINA_IDMS_TOKEN + PlanetDirectoryKey, "loginid eq " + "\"" + URLEncoder.encode(userName,"UTF-8") + "\"");
+					UserConstants.CHINA_IDMS_TOKEN + PlanetDirectoryKey, "loginid eq " + "\"" + userName + "\"");
 			LOGGER.info("user data from Openam -> " + userData);
 		
 			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
@@ -844,10 +844,10 @@ public class UserServiceImpl implements UserService {
 
 				userExists = productService.checkUserExistsWithEmailMobile(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						"federationID eq " + "\"" + openAmReq.getInput().getUser().getFederationID()
-								+ "\" or loginid eq " + "\"" + URLEncoder.encode(loginIdentifier,"UTF-8") + "\"");
+								+ "\" or loginid eq " + "\"" + loginIdentifier + "\"");
 			} else {
 				userExists = productService.checkUserExistsWithEmailMobile(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-						"loginid eq " + "\"" + URLEncoder.encode(loginIdentifier,"UTF-8") + "\"");
+						"loginid eq " + "\"" + loginIdentifier + "\"");
 			}
 			LOGGER.info("UserServiceImpl:userRegistration -> productService.checkUserExistsWithEmailMobile :  userExists -> " + userExists);
 			productDocCtx = JsonPath.using(conf).parse(userExists);
@@ -2165,7 +2165,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 						+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + loginIdentifier + AUDIT_LOG_CLOSURE);
 				String userExists = productService.checkUserExistsWithEmailMobile(
-						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\"" + URLEncoder.encode(loginIdentifier,"UTF-8") + "\"");
+						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\"" + loginIdentifier + "\"");
 
 				productDocCtx = JsonPath.using(conf).parse(userExists);
 				Integer resultCount = productDocCtx.read("$.resultCount");
@@ -2284,12 +2284,9 @@ public class UserServiceImpl implements UserService {
 		if (null != email) {
 			LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 					+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + email + AUDIT_LOG_CLOSURE);
-			try {
-				userExists = productService.checkUserExistsWithEmailMobile(
-						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\"" + URLEncoder.encode(email,"UTF-8") + "\"");
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
+
+			userExists = productService.checkUserExistsWithEmailMobile(
+					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\"" + email + "\"");
 
 			// user exists and resultcount > 0
 			productDocCtx = JsonPath.using(conf).parse(userExists);
@@ -2920,7 +2917,7 @@ public class UserServiceImpl implements UserService {
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (NotFoundException e) {
 			e.printStackTrace();
-			LOGGER.error(e.getMessage());
+			LOGGER.error("Error is "+e.getMessage());
 			//logic for PRM set password, if the user not found, call the Global get user api 
 			//and retrieve the user details and pass it to create user 
 			if(null != confirmRequest.getIDMS_Profile_update_source() 
@@ -3017,7 +3014,7 @@ public class UserServiceImpl implements UserService {
 
 		catch (Exception e) {
 			e.printStackTrace();
-			LOGGER.error(e.getMessage());
+			LOGGER.error("Error is "+e.getMessage());
 			response.setStatus(errorStatus);
 			response.setMessage(UserConstants.SERVER_ERROR);
 			response.setId(uniqueIdentifier);
@@ -3552,7 +3549,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 					+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + loginIdentifier + AUDIT_LOG_CLOSURE);
 			String userExists = productService.checkUserExistsWithEmailMobile(
-					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\"" + URLEncoder.encode(loginIdentifier,"UTF-8") + "\"");
+					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\"" + loginIdentifier + "\"");
 
 			productDocCtx = JsonPath.using(conf).parse(userExists);
 			Integer resultCount = productDocCtx.read(JsonConstants.RESULT_COUNT);
@@ -3813,7 +3810,7 @@ public class UserServiceImpl implements UserService {
 					//fedId = userRequest.getUserRecord().getIDMS_Federated_ID__c();
 					String userExistsInOpenam = productService.checkUserExistsWithEmailMobile(
 							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-							"loginid eq " + "\"" + URLEncoder.encode(userRequest.getUserRecord().getEmail(),"UTF-8") + "\"");
+							"loginid eq " + "\"" + userRequest.getUserRecord().getEmail() + "\"");
 					
 					productDocCtx = JsonPath.using(conf).parse(userExistsInOpenam);
 					userId = productDocCtx.read("$.result[0].username");
@@ -5459,13 +5456,11 @@ public class UserServiceImpl implements UserService {
 		if (null != loginIdentifier) {
 			LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 					+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + loginIdentifier + AUDIT_LOG_CLOSURE);
-			try {
-				userExists = productService.checkUserExistsWithEmailMobile(
-						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-						"mail eq " + "\"" + loginIdentifier + "\" or mobile eq " + "\"" + URLEncoder.encode(loginIdentifier,"UTF-8") + "\"");
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
+
+			userExists = productService.checkUserExistsWithEmailMobile(
+					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+					"mail eq " + "\"" + loginIdentifier + "\" or mobile eq " + "\"" + loginIdentifier + "\"");
+
 
 			productDocCtx = JsonPath.using(conf).parse(userExists);
 			Integer resultCount = productDocCtx.read("$.resultCount");
@@ -5714,7 +5709,7 @@ public class UserServiceImpl implements UserService {
 							+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + resendRegEmail.getEmail() + AUDIT_LOG_CLOSURE);
 					String userExists = productService.checkUserExistsWithEmailMobile(
 							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-							"mail eq " + "\"" + resendRegEmail.getEmail() + "\" or mobile eq " + "\"" + URLEncoder.encode(resendRegEmail.getEmail(),"UTF-8") + "\"");
+							"mail eq " + "\"" + resendRegEmail.getEmail() + "\" or mobile eq " + "\"" + resendRegEmail.getEmail() + "\"");
 
 					productDocCtx = JsonPath.using(conf).parse(userExists);
 					
@@ -5853,7 +5848,7 @@ public class UserServiceImpl implements UserService {
 							+ emailChangeRequest.getOldEmail() + AUDIT_LOG_CLOSURE);
 					String userExists = productService.checkUserExistsWithEmailMobile(
 							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-							"mail eq " + "\"" + URLEncoder.encode(emailChangeRequest.getOldEmail(),"UTF-8") + "\"");
+							"mail eq " + "\"" + emailChangeRequest.getOldEmail() + "\"");
 
 					productDocCtx = JsonPath.using(conf).parse(userExists);
 
@@ -6138,29 +6133,34 @@ public class UserServiceImpl implements UserService {
 				userResponse.setMessage("StartUrl value is mandatory::");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by UserServiceImpl.idmsDirectLogin() : " + elapsedTime);
+				LOGGER.error("Error in idmsDirectLogin is "+userResponse.getMessage());
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 			} else if ((null == idToken1 || idToken1.isEmpty())) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage("idToken1 value is mandatory::");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Error in idmsDirectLogin is "+userResponse.getMessage());
 				LOGGER.info("Time taken by UserServiceImpl.idmsDirectLogin() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 			} else if ((null == idToken2 || idToken2.isEmpty())) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage("idToken2 value is mandatory::");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Error in idmsDirectLogin is "+userResponse.getMessage());
 				LOGGER.info("Time taken by UserServiceImpl.idmsDirectLogin() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 			} else if ((null == submitted || submitted.isEmpty())) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage("Submitted value is mandatory::");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Error in idmsDirectLogin is "+userResponse.getMessage());
 				LOGGER.info("Time taken by UserServiceImpl.idmsDirectLogin() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 			}else if ((null == loginbutton || loginbutton.isEmpty())) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage("Loginbutton value is mandatory::");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Error in idmsDirectLogin is "+userResponse.getMessage());
 				LOGGER.info("Time taken by UserServiceImpl.idmsDirectLogin() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 			}else {
@@ -6242,6 +6242,7 @@ public class UserServiceImpl implements UserService {
 				response.put(UserConstants.MESSAGE, UserConstants.GLOBAL_USER_BOOLEAN);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by UserServiceImpl.checkUserExists() : " + elapsedTime);
+				LOGGER.error("Error in idmsCheckUserExists is "+UserConstants.GLOBAL_USER_BOOLEAN);
 				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 			}
 
@@ -6260,7 +6261,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 						+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + loginId + AUDIT_LOG_CLOSURE);
 				String userExists = productService.checkUserExistsWithEmailMobile(
-						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\"" + URLEncoder.encode(loginId,"UTF-8") + "\"");
+						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\"" + loginId + "\"");
 
 				productDocCtx = JsonPath.using(conf).parse(userExists);
 				Integer resultCount = productDocCtx.read("$.resultCount");
@@ -6271,8 +6272,8 @@ public class UserServiceImpl implements UserService {
 				} else {
 					if (UserConstants.TRUE.equalsIgnoreCase(request.getWithGlobalUsers())) {
 
-						LOGGER.info("UserServiceImpl:checkUserExists -> ifwService.getIFWToken : Request :  -> " ,UserConstants.CONTENT_TYPE_URL_FROM,
-								UserConstants.IFW_GRANT_TYPE, ifwClientId, ifwClientSecret);
+						LOGGER.info("UserServiceImpl:checkUserExists -> ifwService.getIFWToken : Request :  -> " +UserConstants.CONTENT_TYPE_URL_FROM+" ,"+
+								UserConstants.IFW_GRANT_TYPE+" ,"+ ifwClientId+" ,"+ ifwClientSecret);
 						ifwAccessToken = ifwService.getIFWToken(UserConstants.CONTENT_TYPE_URL_FROM,
 								UserConstants.IFW_GRANT_TYPE, ifwClientId, ifwClientSecret);
 
@@ -6612,6 +6613,7 @@ public class UserServiceImpl implements UserService {
 			errorResponse = new JSONObject();
 			errorResponse.put("code", "INVALID_REQUEST");
 			errorResponse.put(UserConstants.MESSAGE, "Invalid request format");
+			LOGGER.error("Error in transliteratorConversion is "+e.getMessage());
 			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 		}
 
@@ -6620,6 +6622,7 @@ public class UserServiceImpl implements UserService {
 			errorResponse = new JSONObject();
 			errorResponse.put("code", "SERVER_ERROR");
 			errorResponse.put(UserConstants.MESSAGE, "Failed to transliterate");
+			LOGGER.error("Error in transliteratorConversion is "+e.getMessage());
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		}
 

@@ -76,7 +76,7 @@ public class CacheBuilder implements CacheTypes {
 //			return (Properties) propertiesCache.get(propertiesFile);
 			
 			Element element = (Element)propertiesCache.get(propertiesFile);
-			LOGGER.info("Size of the property file :: "+element.getKey() + " Value  "+element.getValue());
+			//LOGGER.info("Size of the property file :: "+element.getKey() + " Value  "+element.getValue());
 			return (Properties) element.getValue();
 		}
 
