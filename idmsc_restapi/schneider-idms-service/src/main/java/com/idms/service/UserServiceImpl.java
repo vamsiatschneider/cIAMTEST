@@ -346,7 +346,7 @@ public class UserServiceImpl implements UserService {
 			String PlanetDirectoryKey = getSSOToken();
 
 			String userData = productService.checkUserExistsWithEmailMobile(
-					UserConstants.CHINA_IDMS_TOKEN + PlanetDirectoryKey, "loginid eq " + "\"" + userName + "\"");
+					UserConstants.CHINA_IDMS_TOKEN + PlanetDirectoryKey, "loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(userName,"UTF-8"),"UTF-8") + "\"");
 			LOGGER.info("user data from Openam -> " + userData);
 		
 			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
@@ -844,10 +844,10 @@ public class UserServiceImpl implements UserService {
 
 				userExists = productService.checkUserExistsWithEmailMobile(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						"federationID eq " + "\"" + openAmReq.getInput().getUser().getFederationID()
-								+ "\" or loginid eq " + "\"" + loginIdentifier + "\"");
+								+ "\" or loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginIdentifier,"UTF-8"),"UTF-8") + "\"");
 			} else {
 				userExists = productService.checkUserExistsWithEmailMobile(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-						"loginid eq " + "\"" + loginIdentifier + "\"");
+						"loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginIdentifier,"UTF-8"),"UTF-8") + "\"");
 			}
 			LOGGER.info("UserServiceImpl:userRegistration -> productService.checkUserExistsWithEmailMobile :  userExists -> " + userExists);
 			productDocCtx = JsonPath.using(conf).parse(userExists);
@@ -2165,7 +2165,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 						+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + loginIdentifier + AUDIT_LOG_CLOSURE);
 				String userExists = productService.checkUserExistsWithEmailMobile(
-						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\"" + loginIdentifier + "\"");
+						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginIdentifier,"UTF-8"),"UTF-8") + "\"");
 
 				productDocCtx = JsonPath.using(conf).parse(userExists);
 				Integer resultCount = productDocCtx.read("$.resultCount");
@@ -2285,8 +2285,13 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 					+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + email + AUDIT_LOG_CLOSURE);
 
-			userExists = productService.checkUserExistsWithEmailMobile(
-					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\"" + email + "\"");
+			try {
+				userExists = productService.checkUserExistsWithEmailMobile(
+						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(email,"UTF-8"),"UTF-8") + "\"");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				LOGGER.error("Error is "+e.getMessage());
+			}
 
 			// user exists and resultcount > 0
 			productDocCtx = JsonPath.using(conf).parse(userExists);
@@ -3549,7 +3554,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 					+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + loginIdentifier + AUDIT_LOG_CLOSURE);
 			String userExists = productService.checkUserExistsWithEmailMobile(
-					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\"" + loginIdentifier + "\"");
+					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginIdentifier,"UTF-8"),"UTF-8") + "\"");
 
 			productDocCtx = JsonPath.using(conf).parse(userExists);
 			Integer resultCount = productDocCtx.read(JsonConstants.RESULT_COUNT);
@@ -3810,7 +3815,7 @@ public class UserServiceImpl implements UserService {
 					//fedId = userRequest.getUserRecord().getIDMS_Federated_ID__c();
 					String userExistsInOpenam = productService.checkUserExistsWithEmailMobile(
 							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-							"loginid eq " + "\"" + userRequest.getUserRecord().getEmail() + "\"");
+							"loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(userRequest.getUserRecord().getEmail(),"UTF-8"),"UTF-8") + "\"");
 					
 					productDocCtx = JsonPath.using(conf).parse(userExistsInOpenam);
 					userId = productDocCtx.read("$.result[0].username");
@@ -5457,9 +5462,14 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 					+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + loginIdentifier + AUDIT_LOG_CLOSURE);
 
-			userExists = productService.checkUserExistsWithEmailMobile(
-					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-					"mail eq " + "\"" + loginIdentifier + "\" or mobile eq " + "\"" + loginIdentifier + "\"");
+			try {
+				userExists = productService.checkUserExistsWithEmailMobile(
+						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+						"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginIdentifier,"UTF-8"),"UTF-8") + "\" or mobile eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginIdentifier,"UTF-8"),"UTF-8") + "\"");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				LOGGER.error("Error is "+e.getMessage());
+			}
 
 
 			productDocCtx = JsonPath.using(conf).parse(userExists);
@@ -5709,7 +5719,7 @@ public class UserServiceImpl implements UserService {
 							+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + resendRegEmail.getEmail() + AUDIT_LOG_CLOSURE);
 					String userExists = productService.checkUserExistsWithEmailMobile(
 							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-							"mail eq " + "\"" + resendRegEmail.getEmail() + "\" or mobile eq " + "\"" + resendRegEmail.getEmail() + "\"");
+							"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(resendRegEmail.getEmail(),"UTF-8"),"UTF-8") + "\" or mobile eq " + "\"" + URLEncoder.encode(URLDecoder.decode(resendRegEmail.getEmail(),"UTF-8"),"UTF-8") + "\"");
 
 					productDocCtx = JsonPath.using(conf).parse(userExists);
 					
@@ -5848,7 +5858,7 @@ public class UserServiceImpl implements UserService {
 							+ emailChangeRequest.getOldEmail() + AUDIT_LOG_CLOSURE);
 					String userExists = productService.checkUserExistsWithEmailMobile(
 							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-							"mail eq " + "\"" + emailChangeRequest.getOldEmail() + "\"");
+							"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(emailChangeRequest.getOldEmail(),"UTF-8"),"UTF-8") + "\"");
 
 					productDocCtx = JsonPath.using(conf).parse(userExists);
 
@@ -6261,7 +6271,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 						+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + loginId + AUDIT_LOG_CLOSURE);
 				String userExists = productService.checkUserExistsWithEmailMobile(
-						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\"" + loginId + "\"");
+						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginId,"UTF-8"),"UTF-8") + "\"");
 
 				productDocCtx = JsonPath.using(conf).parse(userExists);
 				Integer resultCount = productDocCtx.read("$.resultCount");
