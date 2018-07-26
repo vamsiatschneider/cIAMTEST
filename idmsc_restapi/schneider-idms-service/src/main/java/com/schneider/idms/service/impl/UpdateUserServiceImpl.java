@@ -154,8 +154,8 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 					return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
 				}
 
-				Response fedResponse = null;R7//checkUserExistsWithFederationID(iPlanetDirectoryKey,
-						userRequest.getUserRecord().getIDMS_Federated_ID__c(), startTime);
+				Response fedResponse = null;
+				//R7//checkUserExistsWithFederationID(iPlanetDirectoryKey,userRequest.getUserRecord().getIDMS_Federated_ID__c(), startTime);
 				if (fedResponse.getStatus() == 200) {
 					openAmReq = mapper.map(userRequest, OpenAmUserRequest.class);
 					JSONObject uimsResponse = (JSONObject) fedResponse.getEntity();
