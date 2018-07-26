@@ -8,6 +8,10 @@ import static com.se.idms.util.UserConstants.AUDIT_OPENAM_AUTHENTICATE_CALL;
 import static com.se.idms.util.UserConstants.AUDIT_REQUESTING_USER;
 import static com.se.idms.util.UserConstants.AUDIT_TECHNICAL_USER;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 
@@ -37,6 +41,7 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+import com.se.idms.cache.CacheTypes;
 import com.se.idms.cache.validate.IValidator;
 import com.se.idms.dto.ParseValuesByOauthHomeWorkContextDto;
 import com.se.idms.dto.UserServiceResponse;
@@ -1199,5 +1204,53 @@ public class IdmsCommonServiceImpl {
 	
 	protected String getDelimeter() {
 		return UserConstants.USER_DELIMETER;
+	}
+	
+	public StringBuilder getContentFromTemplate(String scenarioName, String prefferedLanguage) throws IOException {
+		LOGGER.info("Entered getContentFromTemplate() -> Start");
+		LOGGER.info("Parameter scenarioName -> " + scenarioName);
+		LOGGER.info("Parameter prefferedLanguage -> " + prefferedLanguage);
+		StringBuilder contentBuilder = new StringBuilder();
+		BufferedReader in = null;
+		FileReader file = null;
+		String filePath = null;
+
+		// Need to check the scenario //UPDATE EMAIL NOTIFICATION
+		if (UserConstants.UPDATE_EMAIL_NOTIFICATION.equalsIgnoreCase(scenarioName)) {
+			if (UserConstants.LANGUAGE_CHINA.equalsIgnoreCase(prefferedLanguage)) {
+				filePath = CacheTypes.EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_CHINA.html";
+			} else {
+				filePath = CacheTypes.EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_ENGLISH.html";
+			}
+		} else if (UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(scenarioName)) {
+
+		} else if (UserConstants.SET_USER_PR.equalsIgnoreCase(scenarioName)) {
+
+		}
+		try {
+
+			file = new FileReader(filePath);
+
+			in = new BufferedReader(file);
+			String str;
+			while ((str = in.readLine()) != null) {
+				contentBuilder.append(str);
+			}
+			in.close();
+			file.close();
+		} catch (IOException e) {
+			throw new FileNotFoundException("Email template not found in the location");
+		}
+
+		return contentBuilder;
+	}
+	protected boolean validateMobile(String mobileNumber) {
+		LOGGER.info("Entered validateMobile() -> Start");
+		LOGGER.info("Parameter mobileNumber -> " + mobileNumber);
+
+		if (mobileNumber.matches("\\d{11}")) {
+			return true;
+		}
+		return false;
 	}
 }
