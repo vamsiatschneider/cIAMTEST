@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.Date;
 
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
@@ -22,7 +23,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.cxf.helpers.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.idms.model.CreateUserRequest;
@@ -30,7 +31,6 @@ import com.idms.model.CreateUserResponse;
 import com.idms.model.IDMSUserResponse;
 import com.idms.product.model.Attributes;
 import com.idms.product.model.OpenAmUserRequest;
-import com.idms.service.UserServiceImpl;
 import com.idms.service.util.AsyncUtil;
 import com.idms.service.util.ChinaIdmsUtil;
 import com.jayway.jsonpath.Configuration;
@@ -47,6 +47,7 @@ import com.se.idms.util.UserConstants;
 import com.uims.authenticatedUsermanager.UserV6;
 import com.uims.companymanager.CompanyV3;
 
+@Service("createUserService")
 public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICreateUserService {
 
 	/**
@@ -54,8 +55,8 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(CreateUserServiceImpl.class);
 
-	@Autowired
-	private static UserServiceResponse userResponse;
+	@Inject
+	public static UserServiceResponse userResponse;
 
 	@Override
 	public Response userRegistration(String clientId, String clientSecret, CreateUserRequest userRequest) {
@@ -70,11 +71,11 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 		String identifierType = null;
 		ObjectMapper objMapper = null;
 		String userName = null;
-		String PRODUCT_JSON_STRING = null;
 		String iPlanetDirectoryKey = null;
 		String userExists = null;
 		boolean uimsAlreadyCreatedFlag = false;
 		Response userCreation = null;
+		UserServiceResponse userResponse = new UserServiceResponse();
 		try {
 
 			objMapper = new ObjectMapper();

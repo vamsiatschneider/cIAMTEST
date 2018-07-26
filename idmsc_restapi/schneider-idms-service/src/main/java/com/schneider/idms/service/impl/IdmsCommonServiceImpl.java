@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.ehcache.EhCacheCache;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
 
 import com.idms.mapper.IdmsMapper;
 import com.idms.model.IFWUser;
@@ -44,6 +45,7 @@ import com.se.idms.util.JsonConstants;
 import com.se.idms.util.PhoneValidator;
 import com.se.idms.util.UserConstants;
 
+@Service("commonService")
 public class IdmsCommonServiceImpl {
 
 	/**
