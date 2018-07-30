@@ -218,6 +218,9 @@ public class UserServiceImpl implements UserService {
 	
 	@Inject 
 	private UIMSAccessManagerSoapService uimsAccessManagerSoapService;
+	
+	@Inject 
+	private UimsSetPasswordSoapService uimsSetPasswordSoapService;
 
 	@Value("${authCsvPath}")
 	private String authCsvPath;
@@ -2798,7 +2801,7 @@ public class UserServiceImpl implements UserService {
 				 * 
 				 * */
 				
-				if(UserConstants.PRMPORTAL.equalsIgnoreCase(confirmRequest.getIDMS_Profile_update_source())){
+				if(pickListValidator.validate(UserConstants.IDMS_BFO_profile, confirmRequest.getIDMS_Profile_update_source())){
 					
 					PRODUCT_JSON_STRING = "{" + "\"federationId\": \"" + uniqueIdentifier + "\",\"appName\": \"" + confirmRequest.getIDMS_Profile_update_source() + "\"" + "}";
 					
