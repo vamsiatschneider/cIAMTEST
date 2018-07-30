@@ -4697,7 +4697,7 @@ public class UserServiceImpl implements UserService {
 				// Authenticate the given credentials
 				try {
 					//authenticateUser(userId,oldPassword, UserConstants.REALM); 
-					productService.authenticateUser(userId, oldPassword, UserConstants.REALM);
+					productService.authenticateIdmsChinaUser(userId, oldPassword, UserConstants.REALM);
 				} catch (Exception e) {
 					e.printStackTrace();
 					ErrorResponse errorResponse = new ErrorResponse();
