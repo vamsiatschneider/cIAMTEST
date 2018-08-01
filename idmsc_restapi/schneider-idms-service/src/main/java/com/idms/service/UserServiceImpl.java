@@ -2994,12 +2994,17 @@ public class UserServiceImpl implements UserService {
 					&& (null != confirmRequest.getUIFlag() && !confirmRequest.getUIFlag().isEmpty())){
 				// check UIMSPasswordSync to call sync or Async method  
 				if(pickListValidator.validate(UserConstants.UIMSPasswordSync, UserConstants.TRUE)){
+					//Calling Sync method of setUIMSPassword
+					LOGGER.info("Calling SYNC setUIMSPassword() of UimsSetPasswordSoapService");
 					uimsSetPasswordSoapService.setUIMSPassword(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,uniqueIdentifier,
 							federationID, confirmRequest.getPassword(), vNewCntValue.toString(),loginIdentifierType,emailOrMobile);
+					LOGGER.info("SYNC setUIMSPassword() of UimsSetPasswordSoapService finished");
 				}else{
 					//Calling Async method of setUIMSPassword
+					LOGGER.info("Calling ASYNC setUIMSPassword() of uimsUserManagerSoapService");
 					uimsUserManagerSoapService.setUIMSPassword(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,uniqueIdentifier,
 							federationID, confirmRequest.getPassword(), vNewCntValue.toString(),loginIdentifierType,emailOrMobile);
+					LOGGER.info("ASYNC setUIMSPassword() of uimsUserManagerSoapService finished");
 				}
 				
 				
@@ -4817,9 +4822,10 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("AUDIT:requestingUser" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:GET/se/users/getUser{userId}");
 				if (null != userId) {
-
+					LOGGER.info("calling getUser() of OpenAMService for userId:"+userId);
 					userData = productService.getUser(iPlanetDirectoryKey, userId);
-					LOGGER.info("UserServiceImpl:updatePassword : productService.getUser : Response   -> " + userData);
+					LOGGER.info("getUser() of OpenAMService finished for userId:"+userId);
+					LOGGER.info("userData:" + userData);
 				}
 				conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 				productDocCtx = JsonPath.using(conf).parse(userData);
@@ -4879,8 +4885,22 @@ public class UserServiceImpl implements UserService {
 		productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, version);
 		try {
 			// calling Async UIMS api for update password
-			uimsUserManagerSoapService.updateUIMSPassword(fedId,userId,updatePasswordRequest.getExistingPwd(),
-					updatePasswordRequest.getNewPwd(), vNewCntValue.toString(),UserConstants.CHINA_IDMS_TOKEN +iPlanetDirectoryKey);
+			/*uimsUserManagerSoapService.updateUIMSPassword(fedId,userId,updatePasswordRequest.getExistingPwd(),
+					updatePasswordRequest.getNewPwd(), vNewCntValue.toString(),UserConstants.CHINA_IDMS_TOKEN +iPlanetDirectoryKey);*/
+			
+			// check UIMSPasswordSync to call sync or Async method  
+			if(pickListValidator.validate(UserConstants.UIMSPasswordSync, UserConstants.TRUE)){
+				LOGGER.info("Calling SYNC method of updateUIMSPassword() of UimsSetPasswordSoapService");
+				uimsSetPasswordSoapService.updateUIMSPassword(fedId,userId,updatePasswordRequest.getExistingPwd(),
+						updatePasswordRequest.getNewPwd(), vNewCntValue.toString(),UserConstants.CHINA_IDMS_TOKEN +iPlanetDirectoryKey);
+				LOGGER.info("SYNC method of updateUIMSPassword() of UimsSetPasswordSoapService finished");
+			}else{
+				//Calling Async method of setUIMSPassword
+				LOGGER.info("Calling ASYNC method of updateUIMSPassword() of UIMSUserManagerSoapService");
+				uimsUserManagerSoapService.updateUIMSPassword(fedId,userId,updatePasswordRequest.getExistingPwd(),
+						updatePasswordRequest.getNewPwd(), vNewCntValue.toString(),UserConstants.CHINA_IDMS_TOKEN +iPlanetDirectoryKey);
+				LOGGER.info("ASYNC method of updateUIMSPassword() of UIMSUserManagerSoapService finished");
+			}
 		} catch (MalformedURLException me) {
 			me.printStackTrace();
 			LOGGER.error("Exception while calling updatePassword UIMS API:: ->" + me.getMessage());
