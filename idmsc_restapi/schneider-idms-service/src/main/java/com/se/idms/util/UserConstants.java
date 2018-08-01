@@ -201,6 +201,8 @@ public class UserConstants {
 	
 	public static final String COMPANY_ADDRESS2_C = "Company_Address2__c";
 	
+	public static final String IDMSCompanyCounty__c ="IDMSCompanyCounty__c";
+	
 	public static final String IDMS_ACL_TYPE_C="IDMSAclType__c";
 	
 	public static final String IDMS_OPERATION_C="IDMSOperation__c";
