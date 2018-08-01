@@ -31,11 +31,12 @@ public class MandatoryValidatorImpl  implements IValidator{
 		List<String> list = Arrays.asList(mandatoryPropertySplitter);
 		
 		
-		LOGGER.info("properties from cache::mandatoryProperty="+mandatoryProperty);
+		//LOGGER.info("properties from cache::mandatoryProperty="+mandatoryProperty);
 		if(list.contains(value)){
+			LOGGER.info("Mandatory Validation of key:"+key+" ,value:"+value+" is OK! and validate() is Ending");
 			return true;
 		}
-		
+		LOGGER.error("Mandatory Validation of key:"+key+" ,value:"+value+" is NOT OK! and validate() is Ending");
 		return false;
 	}
 

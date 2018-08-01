@@ -30,18 +30,20 @@ public class LengthValidatorImpl implements IValidator {
 			Properties cacheProperties = cacheBuilder.getProperties(IdmsConstants.IDMS_FIELDSLENGTH_PROPERTIES_PATH);
 			String lengthProperty = cacheProperties.getProperty(key).trim();
 
-			LOGGER.debug("lengthProperty from the cache is:" + lengthProperty);
+			//LOGGER.debug("lengthProperty from the cache is:" + lengthProperty);
 
 			String strVal = value.toString();
 			Integer len1 = Integer.valueOf(strVal.length());
 			Integer len2 = Integer.valueOf(lengthProperty);
 
 			if (len1 <= len2) {
+				LOGGER.info("Length Validation of key:"+key+" ,value:"+value+" is OK! and validate() is Ending");
 				return true;
 			}
 		} catch (Exception e) {
-			LOGGER.error("LengthValidatorImpl.validate::"+e.getMessage());
+			LOGGER.error("Length Validation of key:"+key+" ,value:"+value+"is having error:"+e.getMessage());
 		}
+		LOGGER.error("Length Validation of key:"+key+" ,value:"+value+" is NOT OK! and validate() is Ending");
 		return false;
 	}
 

@@ -49,7 +49,7 @@ public class CacheBuilder implements CacheTypes {
 	 * @return
 	 */
 	private Ehcache getRawCache(String cacheName) {
-		LOGGER.info("Entered getRawCache() -> Start");
+		//LOGGER.info("Entered getRawCache() -> Start");
 		Ehcache ehcache = cacheManager.getEhcache(cacheName);
 
 		if (ehcache == null) {
@@ -68,7 +68,7 @@ public class CacheBuilder implements CacheTypes {
 	 * @return
 	 */
 	public Properties getProperties(String propertiesFile) {
-		LOGGER.info("Entered getProperties() -> Start");
+		//LOGGER.info("Entered getProperties() -> Start");
 
 		if (StringUtils.isNotEmpty(propertiesFile)) {
 
@@ -80,6 +80,7 @@ public class CacheBuilder implements CacheTypes {
 			return (Properties) element.getValue();
 		}
 
+		LOGGER.error("propertiesFile:"+propertiesFile+" is Empty or Null");
 		throw new CacheException("The input parameter for getProperties() is Empty or Null");
 	}
 	
@@ -113,6 +114,7 @@ public class CacheBuilder implements CacheTypes {
 			}
 			
 		}
+		LOGGER.info("getPropertiesCache() -> End");
 		return new CacheAdapter(selfPopulatingPropertiesCache);
 	}
 	
@@ -120,7 +122,7 @@ public class CacheBuilder implements CacheTypes {
 	 * 
 	 */
 	private void createPropertiesCache(String property){
-		LOGGER.info("Entered createPropertiesCache() -> Start");
+		//LOGGER.info("Entered createPropertiesCache() -> Start");
 		
 		cacheEntryFactory = new PropertiesEntryCreator();
 

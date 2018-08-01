@@ -35,7 +35,7 @@ public class PickListValidatorImpl implements IValidator {
 		//LOGGER.info("countryList" + "-->" + pickListCache.size());
 		String pickListValue = (String) value;
 
-		LOGGER.info("country value=" + pickListValue);
+		//LOGGER.info("country value=" + pickListValue);
 
 		/*
 		 * for (Object obj : countryPickListValue) {
@@ -43,9 +43,11 @@ public class PickListValidatorImpl implements IValidator {
 		 * (countryPickListCache.contains(obj) == false) { return false; } }
 		 */
 		if (pickListCache.contains(pickListValue)) {
+			LOGGER.info("Validation of key:"+key+" ,value:"+value+" is OK! and validate() is Ending");
 			return true;
 		}
 
+		LOGGER.error("Validation of key:"+key+" ,value:"+value+" is NOT OK! and validate() is Ending");
 		return false;
 	}
 }

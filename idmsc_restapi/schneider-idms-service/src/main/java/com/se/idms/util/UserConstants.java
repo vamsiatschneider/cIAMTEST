@@ -470,4 +470,6 @@ public class UserConstants {
 	
 	public static final String PRMPORTAL = "PRMPortal";
 	
+	public static final String UIMSPasswordSync = "UIMSPasswordSync";
+	
 }

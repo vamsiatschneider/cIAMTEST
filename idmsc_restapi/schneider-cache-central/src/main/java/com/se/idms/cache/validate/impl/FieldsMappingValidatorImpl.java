@@ -25,12 +25,14 @@ public class FieldsMappingValidatorImpl  implements IValidator{
 		Properties cacheProperties = cacheBuilder.getProperties(IdmsConstants.IDMS_FIELDSMAPPING_PROPERTIES_PATH);
 		String fieldMapProperty = cacheProperties.getProperty(key);
 		
-		LOGGER.info("properties from cache::fieldMapProperty="+fieldMapProperty);
+		//LOGGER.info("properties from cache::fieldMapProperty="+fieldMapProperty);
 		
 		if(value.equals(fieldMapProperty)){
+			LOGGER.info("Validation of key:"+key+" ,value:"+value+" is OK! and validate() is Ending");
 			return true;
 		}
 
+		LOGGER.error("Validation of key:"+key+" ,value:"+value+" is NOT OK! and validate() is Ending");
 		return false;
 	}
 	

@@ -100,7 +100,7 @@ public class SendEmail {
 	public void emailReadyToSendEmail(String to, String from, String subject, String msgBody) {
 		LOGGER.info("Entered emailReadyToSendEmail() -> Start");
 		LOGGER.info("Parameter to -> " + to+" ,from -> "+from+" ,subject -> "+subject);
-		LOGGER.info("Parameter msgBody -> " + msgBody);
+		//LOGGER.info("Parameter msgBody -> " + msgBody);
 		
 		MimeMessage mailMessage = mailSender.createMimeMessage();
 		InternetAddress fromAddress = null;
@@ -119,18 +119,20 @@ public class SendEmail {
 			 */
 			// helper.setText(msgBody,true);
 
+			LOGGER.info("started sending email");
 			mailSender.send(mailMessage); 
+			LOGGER.info("sending email finsihed");
 		} 
 		catch (SMTPSendFailedException e) {
-			LOGGER.error("Executing while sending email :: -> " + e.getMessage());
+			LOGGER.error("SMTPSendFailedException while sending email :: -> " + e.getMessage());
 			e.printStackTrace();
 		}
 		catch (MessagingException e) {
-			LOGGER.error("Executing while sending email :: -> " + e.getMessage());
+			LOGGER.error("MessagingException while sending email :: -> " + e.getMessage());
 			e.printStackTrace();
 		}
 		catch (Exception e) {
-			LOGGER.error("Executing while sending email :: -> " + e.getMessage());
+			LOGGER.error("Exception while sending email :: -> " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -151,8 +153,9 @@ public class SendEmail {
 
 			encodedHOTPcode = code;
 			// get sso token.. iPlanetDirectoryKey
-			
+			LOGGER.info("Going to call getUser() of openamService");
 			userData = productService.getUser(userService.getSSOToken(), userId);
+			LOGGER.info("getUser() call of openamService finished with data from Openam: " + userData);
 			productDocCtxUser = JsonPath.using(conf).parse(userData);
 			
 			
@@ -165,8 +168,6 @@ public class SendEmail {
 				subject=productDocCtxUser.read("$.registerationSource[0]");
 				to = productDocCtxUser.read("$.mail[0]");
 			}
-
-			LOGGER.info("productService.getUser : Response -> ", userData);
 
 			lang=productDocCtxUser.read("$.preferredlanguage[0]");
 			firstName=productDocCtxUser.read("$.givenName[0]");
@@ -196,7 +197,7 @@ public class SendEmail {
 			// hotpEmailVerificationURL+"?userid="+email+"&pin="+code+"&operationType="+hotpOperationType+"&lang="+hotpLanguage;
 			// String url =
 			// hotpEmailVerificationURL+"?userid="+to+"&pin="+code+"&operationType="+hotpOperationType+"&lang="+lang+"&appid="+appid+"&uid="+uid;
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : URL compiled to : " + url);
+			LOGGER.info("sendOpenAmEmail : URL compiled to : " + url);
 			// String msg = html1+url+html2;
 
 			// debug.error("SchneiderSMSGatewayImpl.sendEmail() : Message 1
@@ -204,19 +205,19 @@ public class SendEmail {
 
 			contentBuilder = new StringBuilder();
 			LOGGER.info(
-					"SchneiderSMSGatewayImpl.sendEmail() : Content Builder Length initial:" + contentBuilder.length());
+					"sendOpenAmEmail : Content Builder Length initial:" + contentBuilder.length());
 			contentBuilder.setLength(0);
 			LOGGER.info(
-					"SchneiderSMSGatewayImpl.sendEmail() : Content Builder Length cleared:" + contentBuilder.length());
+					"sendOpenAmEmail : Content Builder Length cleared:" + contentBuilder.length());
 
 			// if section for chinese user
 			if ((lang != null && lang.equals("zh")) || (hotpLanguage != null && hotpLanguage.equals("zh"))) {
-				LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() :  Building Chinese email content..");
+				LOGGER.info("sendOpenAmEmail :  Building Chinese email content..");
 				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,firstName);
 			}
 			// Else section for English user
 			else {
-				LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() :  Building English email content..");
+				LOGGER.info("sendOpenAmEmail :  Building English email content..");
 				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,firstName);
 
 			}
@@ -226,10 +227,10 @@ public class SendEmail {
 			tos[0] = to;
 			//AMSendMail sendMail = new AMSendMail();
 
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : to : " + to);
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : subject : " + subject);
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : content.isEmpty : " + content.isEmpty());
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : from : " + from);
+			LOGGER.info("sendOpenAmEmail : to : " + to);
+			LOGGER.info("sendOpenAmEmail : subject : " + subject);
+			LOGGER.info("sendOpenAmEmail : content.isEmpty : " + content.isEmpty());
+			LOGGER.info("sendOpenAmEmail : from : " + from);
 
 			//sendMail.postMail(tos, subject, content, from, "text/html", "UTF-8", smtpHostName, smtpHostPort,
 			//smtpUserName, smtpUserPassword, sslEnabled);
@@ -242,7 +243,7 @@ public class SendEmail {
 				 */
 
 			if (LOGGER.isDebugEnabled()) {
-				LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : " + "HOTP sent to : " + to + ".");
+				LOGGER.info("sendOpenAmEmail : " + "HOTP sent to : " + to + ".");
 			}
 	}
 	
@@ -266,9 +267,10 @@ public class SendEmail {
 		product_json_string = "{" + "\"authId\": \"" + hexpin + "\"}";
 		// Need add the timestamp
 		// update hashkey in openAM.
+		LOGGER.info("Going to call updateUser() of openamservice to update hashkey");
 		productService.updateUser(UserConstants.CHINA_IDMS_TOKEN+userService.getSSOToken(), userId,
 				product_json_string);
-
+		LOGGER.info("updateUser() of openamservice to update hashkey finsihed");
 		return pin;
 	}
 	
@@ -288,8 +290,10 @@ public class SendEmail {
 		product_json_string = "{" + "\"authId\": \"" + hashedPin + "\"}";
 		// update hashkey in openAM.
 		LOGGER.info("hashedPin is " + hashedPin);
+		LOGGER.info("Going to call updateUser() of openamservice to update hashedPin");
 		productService.updateUser(UserConstants.CHINA_IDMS_TOKEN+userService.getSSOToken(), userId,
 				product_json_string);
+		LOGGER.info("updateUser() of openamservice to update hashedPin finsihed");
 
 	}
 	
@@ -306,7 +310,9 @@ public class SendEmail {
 
 			// iplane getsson
 			// get user details to get stored hashkey.
+			LOGGER.info("Going to call getUser() of openamservice to get stored hashkey");
 			String userData = productService.getUser(userService.getSSOToken(), userId);
+			LOGGER.info("getUser() of openamservice to get stored hashkey finsihed, userdata="+userData);
 			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
 
@@ -331,11 +337,13 @@ public class SendEmail {
 					product_json_string = "{" + "\"authId\": \"" + "[]" + "\"}";
 					// Need add the timestamp
 					// update hashkey in openAM.
+					LOGGER.info("Going to call updateUser() of openamservice to update hashkey for userid ="+userId);
 					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN+userService.getSSOToken(), userId,
 							product_json_string);
+					LOGGER.info("updateUser() of openamservice to update hashkey finsihed");
 				}
 			}else{
-				LOGGER.error("Some problem in validatePin()");
+				LOGGER.error("Some problem in validatePin() for userId="+userId);
 				throw new Exception("inValid Pin Exception!!!");
 			}
 		return validatePin;
@@ -356,13 +364,12 @@ public class SendEmail {
 			// For Unix//
 			BufferedReader in = null;
 			FileReader file = null;
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : hotpOperationType : " + hotpOperationType);
 
 			String filePathone = new File("").getAbsolutePath();
 			LOGGER.info("Current File Path : " + filePathone);
 
 			if (hotpOperationType != null && hotpOperationType.equals(EmailConstants.SETUSERPWD_OPT_TYPE)) {
-				LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : Inside OperationType  :  " + hotpOperationType);
+				LOGGER.info("emailContentTemplate : Inside SetUserPwd OperationType  :  " + hotpOperationType);
 				// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_Reset_password.html";
 				if (chineseLangCheck) {
 					filePath = EmailConstants.IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN;
@@ -370,10 +377,10 @@ public class SendEmail {
 					filePath = EmailConstants.IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN;
 				}
 				file = new FileReader(filePath);
-
+				LOGGER.info("filePath is"+filePath);
 				in = new BufferedReader(file);
 			} else if (hotpOperationType != null && hotpOperationType.equals(EmailConstants.USERREGISTRATION_OPT_TYPE)) {
-				LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : Inside OperationType Create " + hotpOperationType);
+				LOGGER.info("emailContentTemplate : Inside userRegistration OperationType Create " + hotpOperationType);
 				// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_registration_with_password.html";
 				if (chineseLangCheck) {
 					filePath = EmailConstants.IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN;
@@ -381,9 +388,10 @@ public class SendEmail {
 					filePath = EmailConstants.IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN;
 				}
 				file = new FileReader(filePath);
+				LOGGER.info("filePath is"+filePath);
 				in = new BufferedReader(file);
 			} else if (hotpOperationType != null && hotpOperationType.equals(EmailConstants.UPDATEUSERRECORD_OPT_TYPE)) {
-				LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : Inside OperationType Update " + hotpOperationType);
+				LOGGER.info("emailContentTemplate : Inside OperationType UpdateUserRecord " + hotpOperationType);
 				// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_registration_with_password.html";
 				if (chineseLangCheck) {
 					filePath = EmailConstants.IDMS_USER_UPDATE_EMAILTEMPLATE_CN;
@@ -391,9 +399,10 @@ public class SendEmail {
 					filePath = EmailConstants.IDMS_USER_UPDATE_EMAILTEMPLATE_EN;
 				}
 				file = new FileReader(filePath);
+				LOGGER.info("filePath is"+filePath);
 				in = new BufferedReader(file);
 			}else if (hotpOperationType != null && hotpOperationType.equals(EmailConstants.SENDINVITATION_OPT_TYPE)) {
-				LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : Inside OperationType send invitation " + hotpOperationType);
+				LOGGER.info("emailContentTemplate : Inside OperationType sendInvitation " + hotpOperationType);
 				// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_registration_with_password.html";
 				if (chineseLangCheck) {
 					filePath = EmailConstants.IDMS_SEND_INVITATION_EMAILTEMPLATE_CN;
@@ -401,9 +410,10 @@ public class SendEmail {
 					filePath = EmailConstants.IDMS_SEND_INVITATION_EMAILTEMPLATE_EN;
 				}
 				file = new FileReader(filePath);
+				LOGGER.info("filePath is"+filePath);
 				in = new BufferedReader(file);
 			} else {
-				LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : Inside Common OperationType " + hotpOperationType);
+				LOGGER.info("emailContentTemplate : Inside Common OperationType " + hotpOperationType);
 				// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_registration_with_password.html";
 				if (chineseLangCheck) {
 					filePath = EmailConstants.IDMS_USER_DEFAULT_EMAILTEMPLATE_CN;
@@ -411,6 +421,7 @@ public class SendEmail {
 					filePath = EmailConstants.IDMS_USER_DEFAULT_EMAILTEMPLATE_EN;
 				}
 				file = new FileReader(filePath);
+				LOGGER.info("filePath is"+filePath);
 				in = new BufferedReader(file);
 			}
 			String str;
@@ -434,12 +445,12 @@ public class SendEmail {
 		if(null != invID &&  EmailConstants.SENDINVITATION_OPT_TYPE.equalsIgnoreCase(hotpOperationType)){
 			 startIndex = contentBuilder.indexOf("{!invtID}");
 			 endIndex = startIndex + 9;
-			LOGGER.info("Starting and Ending Index of USerNAme in Email : Start : " + startIndex + " : End : +" + endIndex);
+			LOGGER.info("Starting and Ending Index of invtID in Email : Start : " + startIndex + " : End : +" + endIndex);
 			contentBuilder.replace(startIndex, endIndex, invID);
 			
 			startIndex = contentBuilder.indexOf("{!firstname}");
 			endIndex = startIndex + 12;
-			LOGGER.info("Starting and Ending Index of USerNAme in Email : Start : " + startIndex + " : End : +" + endIndex);
+			LOGGER.info("Starting and Ending Index of firstname in Email : Start : " + startIndex + " : End : +" + endIndex);
 			contentBuilder.replace(startIndex, endIndex, firstName);
 			
 			startIndex = contentBuilder.indexOf("{!invtURL}");
@@ -451,13 +462,13 @@ public class SendEmail {
 				if(0 < contentBuilder.indexOf("{!registrationSource}")){
 				startIndex = contentBuilder.indexOf("{!registrationSource}");
 				 endIndex = startIndex + 21;
-				 	LOGGER.info("Starting and Ending Index of USerNAme in Email : Start : " + startIndex + " : End : +" + endIndex);
+				 	LOGGER.info("Starting and Ending Index of registrationSource in Email : Start : " + startIndex + " : End : +" + endIndex);
 				contentBuilder.replace(startIndex, endIndex, subject);
 				}
 			}
 			 startIndex = contentBuilder.indexOf("{!firstname}");
 			 endIndex = startIndex + 12;
-			LOGGER.info("Starting and Ending Index of USerNAme in Email : Start : " + startIndex + " : End : +" + endIndex);
+			LOGGER.info("Starting and Ending Index of firstname in Email : Start : " + startIndex + " : End : +" + endIndex);
 			contentBuilder.replace(startIndex, endIndex, firstName);
 			 startIndex = contentBuilder.indexOf("{!url}");
 			 endIndex = startIndex+6;
@@ -471,7 +482,7 @@ public class SendEmail {
 		
 		
 		if (hotpOperationType != null && EmailConstants.SETUSERPWD_OPT_TYPE.equalsIgnoreCase(hotpOperationType)) {
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : Inside OperationType " + hotpOperationType
+			LOGGER.info("emailContentTemplate : Inside OperationType " + hotpOperationType
 					+ " .. setting template starte and end value accordingly! ");
 			//endURL = startURL + 57;
 			if (chineseLangCheck) {
@@ -480,7 +491,7 @@ public class SendEmail {
 				subject = subject + EmailConstants.HYPHEN + EmailConstants.SCHE_PWD_RESET_EN;
 			}
 		} else if (hotpOperationType != null && EmailConstants.USERREGISTRATION_OPT_TYPE.equalsIgnoreCase(hotpOperationType)) {
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : Inside OperationType " + hotpOperationType
+			LOGGER.info("emailContentTemplate : Inside userRegistration OperationType " + hotpOperationType
 					+ " .. setting template starte and end value accordingly! ");
 			//endURL = startURL + 6;
 			if (chineseLangCheck) {
@@ -489,7 +500,7 @@ public class SendEmail {
 				subject = subject + EmailConstants.HYPHEN + EmailConstants.COMPLETE_REG_EN;
 			}
 		} else if (hotpOperationType != null && EmailConstants.UPDATEUSERRECORD_OPT_TYPE.equalsIgnoreCase(hotpOperationType)) {
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : Inside OperationType " + hotpOperationType
+			LOGGER.info("emailContentTemplate : Inside UpdateUserRecord OperationType " + hotpOperationType
 					+ " .. setting template starte and end value accordingly! ");
 			//endURL = startURL + 70;
 			if (chineseLangCheck) {
@@ -498,7 +509,7 @@ public class SendEmail {
 				subject = subject + EmailConstants.HYPHEN + EmailConstants.SCHE_LOGINID_CHANGE_NOTIFICATION_EN;
 			}
 		}else if (hotpOperationType != null && EmailConstants.SENDINVITATION_OPT_TYPE.equalsIgnoreCase(hotpOperationType)) {
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : Inside OperationType " + hotpOperationType
+			LOGGER.info("emailContentTemplate : Inside sendInvitation OperationType " + hotpOperationType
 					+ " .. setting template starte and end value accordingly! ");
 			//endURL = startURL + 70;
 			if (chineseLangCheck) {
@@ -508,7 +519,7 @@ public class SendEmail {
 			}
 		} else {
 			LOGGER.info(
-					"SchneiderSMSGatewayImpl.sendEmail() : OperationType doesn't match any of the above .. setting template starte and end value accordingly! ");
+					"emailContentTemplate : OperationType doesn't match any of the above .. setting template starte and end value accordingly! ");
 			//endURL = startURL + 70;
 			if (chineseLangCheck) {
 				subject = subject + EmailConstants.HYPHEN + EmailConstants.OPENAM_OTP_CN;
@@ -516,7 +527,7 @@ public class SendEmail {
 				subject = subject + EmailConstants.HYPHEN + EmailConstants.OPENAM_OTP_EN;
 			}
 		}
-		
+		LOGGER.info("subject="+subject);
 		LOGGER.info("Starting and Ending Index of URL in Email : Start : " + startIndex + " : End : +" + endIndex);
 		contentBuilder.replace(startIndex, endIndex, url);
 		
@@ -530,7 +541,7 @@ public class SendEmail {
 		}*/
 
 		content = contentBuilder.toString();
-		LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : Message 2 compiled to : " );
+		LOGGER.info("emailContentTemplate : Message 2 compiled to : " );
 		return subject;
 	}
 	
@@ -564,8 +575,10 @@ public class SendEmail {
 
 		long currentDatenTimeInMillisecs = currentDatenTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 		if(currentDatenTimeInMillisecs < datePlusSevendaysInMillisecs){
+			LOGGER.info("checkTimeStamp(): OTP timestamp validation OK! and checkTimeStamp() ended");
 			 validateTimeStamp = true;
 		}
+		LOGGER.info("checkTimeStamp(): OTP timestamp validation NOT OK! and checkTimeStamp() ended");
 		return validateTimeStamp;
 	}
 	
@@ -585,40 +598,40 @@ public class SendEmail {
 				url = redirectUrl + "&InvitationId="+ invitationId + "&email=" + email ;
 			}
 			
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : URL compiled to : " + url);
+			LOGGER.info("sendInvitationEmail URL compiled to : " + url);
 
 			contentBuilder = new StringBuilder();
 			LOGGER.info(
-					"SchneiderSMSGatewayImpl.sendEmail() : Content Builder Length initial:" + contentBuilder.length());
+					"sendInvitationEmail : Content Builder Length initial:" + contentBuilder.length());
 			contentBuilder.setLength(0);
 			LOGGER.info(
-					"SchneiderSMSGatewayImpl.sendEmail() : Content Builder Length cleared:" + contentBuilder.length());
+					"sendInvitationEmail : Content Builder Length cleared:" + contentBuilder.length());
 
 			// if section for chinese user
 			if ((lang != null && lang.equals("zh")) || (hotpLanguage != null && hotpLanguage.equals("zh"))) {
-				LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() :  Building Chinese email content..");
+				LOGGER.info("sendInvitationEmail :  Building Chinese email content..");
 				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,email);
 			}
 			// Else section for English user
 			else {
-				LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() :  Building English email content..");
+				LOGGER.info("sendInvitationEmail :  Building English email content..");
 				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,email);
-
+				LOGGER.info("subject="+subject);
 			}
 
 			String tos[] = new String[1];
 
 			tos[0] = email;
 			
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : to : " + email);
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : subject : " + subject);
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : content.isEmpty : " + content.isEmpty());
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : from : " + from);
+			LOGGER.info("sendInvitationEmail : to : " + email);
+			LOGGER.info("sendInvitationEmail : subject : " + subject);
+			LOGGER.info("sendInvitationEmail : content.isEmpty : " + content.isEmpty());
+			LOGGER.info("sendInvitationEmail : from : " + from);
 
 		    emailReadyToSendEmail(email, from, subject, content);
 
 			if (LOGGER.isDebugEnabled()) {
-				LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : " + "HOTP sent to : " + email + ".");
+				LOGGER.info("sendInvitationEmail : " + "HOTP sent to : " + email + ".");
 			}
 	}
 	
@@ -641,7 +654,9 @@ public class SendEmail {
 				+code+"%20%EF%BC%8C30%E5%88%86%E9%92%9F%E5%86%85%E6%9C%89%E6%95%88";
 		try {
 
+			LOGGER.info("Going to call getUser() of openamservice for sending SMS");
 			userData = productService.getUser(userService.getSSOToken(), userId);
+			LOGGER.info("getUser() call of openamservice finished for sending SMS with data from Openam: " + userData);
 			productDocCtxUser = JsonPath.using(conf).parse(userData);
 
 			if (hotpOperationType.equalsIgnoreCase(EmailConstants.UPDATEUSERRECORD_OPT_TYPE)) {
@@ -650,20 +665,22 @@ public class SendEmail {
 				to = productDocCtxUser.read("$.mobile[0]");
 			}
 
-			LOGGER.info("productService.getUser : Response -> ", userData);
+			//LOGGER.info("productService.getUser : Response -> ", userData);
 
+			LOGGER.info("Going to call sendSMSCode() of smsservice to "+to);
 			Response smsResponse = smsService.sendSMSCode(SMSAdmin, SMSAdminPassword, to, smsContent, template);
-			LOGGER.info("sendSMSCode Response status :: -> " + smsResponse.getStatus());
+			LOGGER.info("sendSMSCode() finished, Response status :: -> " + smsResponse.getStatus());
 			if (200 == smsResponse.getStatus()) {
 				LOGGER.info("sendSMSCode sent Succssfully :: -> "
 						+ IOUtils.toString((InputStream) smsResponse.getEntity()));
 			} else {
+				LOGGER.error("Error occured while sendSMSCode() to "+to);
 				throw new Exception(IOUtils.toString((InputStream) smsResponse.getEntity()));
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			LOGGER.error("SendEmail.sendSMSMessage() : " + "Exception in sending HOTP code : ", e.getMessage());
+			LOGGER.error("Exception in sendSMSMessage() while sending HOTP code : ", e.getMessage());
 			// throw new AuthLoginException("Failed to send OTP code to " + to,
 			// e);
 		}
@@ -685,13 +702,14 @@ public class SendEmail {
 		String subject = "";
 		String lang= "";
 		
-		LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : Inside sendOpenAmEmail()");
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : User's Email : " + to);
+		//LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : Inside sendOpenAmEmail()");
+			//LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : User's Email : " + to);
 
 			encodedHOTPcode = code;
 			// get sso token.. iPlanetDirectoryKey
-			
+			LOGGER.info("Going to call getUser() of openamservice for sendOpenAmMobileEmail");
 			userData = productService.getUser(userService.getSSOToken(), userId);
+			LOGGER.info("getUser() call of openamuser finished with data from Openam: " + userData);
 			productDocCtxUser = JsonPath.using(conf).parse(userData);
 			
 			
@@ -705,30 +723,30 @@ public class SendEmail {
 			
 			to = to.concat("@mailinator.com");
 			String emailContent = "Your OpenAM One Time Password is : " + code;
-			LOGGER.info("productService.getUser : Response -> ", userData);
+			//LOGGER.info("productService.getUser : Response -> ", userData);
 
 			lang=productDocCtxUser.read("$.preferredlanguage[0]");
 			
 			url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + encodedHOTPcode + "&operationType="
 					+ hotpOperationType + "&lang=" + lang + "&app=" + appid + "&uid=" + userId;
 			
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : URL compiled to : " + url);
+			LOGGER.info("URL compiled to : " + url);
 			
 			contentBuilder = new StringBuilder();
 			LOGGER.info(
-					"SchneiderSMSGatewayImpl.sendEmail() : Content Builder Length initial:" + contentBuilder.length());
+					"Content Builder Length initial:" + contentBuilder.length());
 			contentBuilder.setLength(0);
 			LOGGER.info(
-					"SchneiderSMSGatewayImpl.sendEmail() : Content Builder Length cleared:" + contentBuilder.length());
+					"Content Builder Length cleared:" + contentBuilder.length());
 
 			// if section for chinese user
 			if ((lang != null && lang.equals("zh")) || (hotpLanguage != null && hotpLanguage.equals("zh"))) {
-				LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() :  Building Chinese email content..");
+				LOGGER.info("Building Chinese email content..");
 				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,to);
 			}
 			// Else section for English user
 			else {
-				LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() :  Building English email content..");
+				LOGGER.info("Building English email content..");
 				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,to);
 
 			}
@@ -738,10 +756,10 @@ public class SendEmail {
 			tos[0] = to;
 			//AMSendMail sendMail = new AMSendMail();
 
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : to : " + to);
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : subject : " + subject);
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : content.isEmpty : " + content.isEmpty());
-			LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : from : " + from);
+			LOGGER.info("sendOpenAmMobileEmail : to : " + to);
+			LOGGER.info("sendOpenAmMobileEmail : subject : " + subject);
+			LOGGER.info("sendOpenAmMobileEmail : content.isEmpty : " + content.isEmpty());
+			LOGGER.info("sendOpenAmMobileEmail : from : " + from);
 
 			//sendMail.postMail(tos, subject, content, from, "text/html", "UTF-8", smtpHostName, smtpHostPort,
 			//smtpUserName, smtpUserPassword, sslEnabled);
@@ -754,7 +772,7 @@ public class SendEmail {
 				 */
 
 			if (LOGGER.isDebugEnabled()) {
-				LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : " + "HOTP sent to : " + to + ".");
+				LOGGER.info("sendOpenAmMobileEmail : " + "HOTP sent to : " + to + ".");
 			}
 	}
 }
