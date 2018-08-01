@@ -30,12 +30,12 @@ public class PickListValidatorImpl implements IValidator {
 		// pickListProperty will be in the form of comma separated string. Eg.
 		// AF,AL,DZ,AD,AO,AI,AQ,AG,AR,AM,AW,AU
 
-		LOGGER.info("properties from cache:" + pickListProperty);
+		//LOGGER.info("properties from cache:" + pickListProperty);
 		List<String> pickListCache = Arrays.asList(pickListProperty.split(","));
-		LOGGER.info("countryList" + "-->" + pickListCache.size());
+		//LOGGER.info("countryList" + "-->" + pickListCache.size());
 		String pickListValue = (String) value;
 
-		LOGGER.info("country list=" + pickListValue);
+		//LOGGER.info("country value=" + pickListValue);
 
 		/*
 		 * for (Object obj : countryPickListValue) {
@@ -43,9 +43,11 @@ public class PickListValidatorImpl implements IValidator {
 		 * (countryPickListCache.contains(obj) == false) { return false; } }
 		 */
 		if (pickListCache.contains(pickListValue)) {
+			LOGGER.info("Validation of key:"+key+" ,value:"+value+" is OK! and validate() is Ending");
 			return true;
 		}
 
+		LOGGER.error("Validation of key:"+key+" ,value:"+value+" is NOT OK! and validate() is Ending");
 		return false;
 	}
 }

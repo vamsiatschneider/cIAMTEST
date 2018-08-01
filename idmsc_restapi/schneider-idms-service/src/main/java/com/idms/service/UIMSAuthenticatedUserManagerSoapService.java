@@ -45,7 +45,8 @@ public class UIMSAuthenticatedUserManagerSoapService {
 	/**
 	 * Logger instance.
 	 */
-	private static final Logger uimsLog = LoggerFactory.getLogger(UIMSAuthenticatedUserManagerSoapService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(UIMSAuthenticatedUserManagerSoapService.class);
+	//private static final Logger UIMSLOGGER = LoggerFactory.getLogger("uimsLogger");
 	
 	@Value("${authUserManaUIMSVWsdl}")
 	private String authUserManaUIMSVWsdl;
@@ -57,19 +58,24 @@ public class UIMSAuthenticatedUserManagerSoapService {
 	private String authUserManaUIMSVPName;
 
 	public AuthenticatedUserManagerUIMSV22 getAuthenticatedUserManager() throws MalformedURLException {
+		LOGGER.info("Entered getAuthenticatedUserManager() method -> Start");
 		URL url = new URL(authUserManaUIMSVWsdl);
 		QName qname = new QName(authUserManaUIMSVQname,authUserManaUIMSVPName);
 		Service service = Service.create(url, qname);
 
+		LOGGER.info("Going to call getPort() of UIMS");
 		AuthenticatedUserManagerUIMSV22 authenticatedUserManagerUIMSV2 = service
 				.getPort(AuthenticatedUserManagerUIMSV22.class);
+		LOGGER.info("getPort() of UIMS -> End, response is:"+authenticatedUserManagerUIMSV2);
 		return authenticatedUserManagerUIMSV2;
 	}
 
 	public String createUIMSUser(String callerFid,UserV6 identity,String forcedFederatedId)
 			throws MalformedURLException, ForcedFidAlreadyExistException_Exception {
 		
-		uimsLog.info("inside createUIMSUser Async method");
+		LOGGER.info("Entered createUIMSUser() method - > Start");
+		LOGGER.info("Parameter callerFid -> " + callerFid+" ,identity -> "+identity);
+		LOGGER.info("Parameter forcedFederatedId -> " + forcedFederatedId);
 		CreatedIdentityReport uimsUserResponse = null;
 		try {
 			AuthenticatedUserManagerUIMSV22 authenticatedUserManagerUIMSV2 = getAuthenticatedUserManager();
@@ -79,26 +85,32 @@ public class UIMSAuthenticatedUserManagerSoapService {
 				AccessElement application = new AccessElement();
 				application.setId("Uims");
 				application.setType(Type.APPLICATION);
+				LOGGER.info("Going to call createIdentityWithPhoneId() of UIMS for phone:"+identity.getPhoneId());
 				uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithPhoneId(callerFid, identity, application);
+				LOGGER.info("createIdentityWithPhoneId() of UIMS finished, response:"+uimsUserResponse);
 			}else{
+				LOGGER.info("Going to call createIdentityForceIdmsId() of UIMS for phone:"+identity.getPhoneId());
 			uimsUserResponse =authenticatedUserManagerUIMSV2.createIdentityForceIdmsId(callerFid, identity, forcedFederatedId);
+			LOGGER.info("createIdentityForceIdmsId() of UIMS finished, response:"+uimsUserResponse);
 			}
 		} catch (IMSServiceSecurityCallNotAllowedException_Exception | ImsMailerException_Exception
 				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
 				| RequestedEntryNotExistsException_Exception | RequestedInternalUserException_Exception
 				| SecuredImsException_Exception | UnexpectedLdapResponseException_Exception
 				| UnexpectedRuntimeImsException_Exception e) {
-			uimsLog.error("Error executing while createUIMSUser::" + e.getMessage());
+			LOGGER.error("Exception while createUIMSUser() of UIMS::" + e.getMessage());
 			e.printStackTrace();
 		}
-		uimsLog.info("Completed createUIMSUser Async method!");
+		LOGGER.info("createUIMSUser() Async method -> End..FederatedID="+uimsUserResponse.getFederatedID());
 		return uimsUserResponse.getFederatedID();
 	}
 	
 	public String createUIMSUserWithPassword(String callerFid,UserV6 identity,String password,String forcedFederatedId)
 			throws MalformedURLException, ForcedFidAlreadyExistException_Exception {
 
-		uimsLog.info("inside createUIMSUserWithPassword UIMS Async method");
+		LOGGER.info("Entered createUIMSUserWithPassword() Async -> Start");
+		LOGGER.info("Parameter callerFid -> " + callerFid+" ,identity -> "+identity);
+		LOGGER.info("Parameter password -> " + password+" ,forcedFederatedId -> "+forcedFederatedId);
 		CreatedIdentityReport uimsUserResponse = null;
 		try {
 			AuthenticatedUserManagerUIMSV22 authenticatedUserManagerUIMSV2 = getAuthenticatedUserManager();
@@ -109,41 +121,46 @@ public class UIMSAuthenticatedUserManagerSoapService {
 				AccessElement application = new AccessElement();
 				application.setId("Uims");
 				application.setType(Type.APPLICATION);
+				LOGGER.info("Going to call createIdentityWithMobileWithPassword() of UIMS for phone:"+identity.getPhoneId());
 				uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithMobileWithPassword(callerFid,
 						identity,application,password);
+				LOGGER.info("createIdentityWithMobileWithPassword() of UIMS finished, response:"+uimsUserResponse);
 			} else {
+				LOGGER.info("Going to call createIdentityWithPasswordForceIdmsId() of UIMS for phone:"+identity.getPhoneId());
 				uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithPasswordForceIdmsId(callerFid,
 						identity, password, forcedFederatedId);
+				LOGGER.info("createIdentityWithPasswordForceIdmsId() of UIMS finished, response:"+uimsUserResponse);
 			}
 		} catch (IMSServiceSecurityCallNotAllowedException_Exception | ImsMailerException_Exception
 				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
 				| RequestedEntryNotExistsException_Exception | RequestedInternalUserException_Exception
 				| SecuredImsException_Exception | UnexpectedLdapResponseException_Exception
 				| UnexpectedRuntimeImsException_Exception e) {
-			uimsLog.error("Error executing while createUIMSUser::" + e.getMessage());
+			LOGGER.error("Exception while createUIMSUserWithPassword()::" + e.getMessage());
 			e.printStackTrace();
 		}
-		uimsLog.info("Completed createUIMSUserWithPassword UIMS Async method");
+		LOGGER.info("createUIMSUserWithPassword() UIMS Async method -> End.. with FederatedID:"+uimsUserResponse.getFederatedID());
 		return uimsUserResponse.getFederatedID();
 	}
 
 	@Async
 	public void resetUIMSPassword(String callerFid, String federatedId, AccessElement application)
 			throws MalformedURLException {
-
-		uimsLog.info("inside resetUIMSPassword UIMS Async method");
+		LOGGER.info("Entered resetUIMSPassword() UIMS Async method -> Start");
 		try {
 			AuthenticatedUserManagerUIMSV22 authenticatedUserManagerUIMSV2 = getAuthenticatedUserManager();
+			LOGGER.info("Going to call resetPassword() of UIMS for federatedId:"+federatedId);
 			authenticatedUserManagerUIMSV2.resetPassword(callerFid, federatedId, application);
+			LOGGER.info("resetPassword() of UIMS finishedfor federatedId:"+federatedId);
 		} catch (IMSServiceSecurityCallNotAllowedException_Exception | ImsMailerException_Exception
 				| InactiveUserImsException_Exception | InvalidImsPropertiesFileException_Exception
 				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
 				| RequestedEntryNotExistsException_Exception | SecuredImsException_Exception
 				| UnexpectedLdapResponseException_Exception | UnexpectedRuntimeImsException_Exception e) {
-			uimsLog.error("Error executing while resetUIMSPassword::" + e.getMessage());
+			LOGGER.error("Exception while resetPassword() of UIMS::" + e.getMessage());
 			e.printStackTrace();
 		}
-		uimsLog.info("Completed resetUIMSPassword UIMS Async method");
+		LOGGER.info("resetUIMSPassword() UIMS Async method -> End");
 	}
 
 }
