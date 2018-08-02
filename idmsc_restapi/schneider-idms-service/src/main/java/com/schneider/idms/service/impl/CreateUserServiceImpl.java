@@ -91,7 +91,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 
 			try {
 
-				if (checkMandatoryFieldsFromRequest(userRequest.getUserRecord(), userResponse, true)) {
+				if (checkMandatoryFieldsForDirectAPIRequest(userRequest.getUserRecord(), userResponse, true)) {
 					errorResponse.setMessage(userResponse.getMessage());
 					errorResponse.setStatus(userResponse.getStatus());
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;

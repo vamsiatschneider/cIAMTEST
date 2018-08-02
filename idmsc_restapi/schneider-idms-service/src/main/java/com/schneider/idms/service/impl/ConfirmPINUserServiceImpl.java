@@ -414,28 +414,24 @@ public class ConfirmPINUserServiceImpl extends IdmsCommonServiceImpl implements 
 				 * 
 				 */
 
-				if (UserConstants.PRMPORTAL.equalsIgnoreCase(confirmPIN.getIDMS_Profile_update_source())) {
-
-					PRODUCT_JSON_STRING = "{" + "\"federationId\": \"" + uniqueIdentifier + "\",\"appName\": \""
-							+ confirmPIN.getIDMS_Profile_update_source() + "\"" + "}";
-
+				if(pickListValidator.validate(UserConstants.IDMS_BFO_profile, confirmPIN.getIDMS_Profile_update_source())){
+					
+					PRODUCT_JSON_STRING = "{" + "\"federationId\": \"" + uniqueIdentifier + "\",\"appName\": \"" + confirmPIN.getIDMS_Profile_update_source() + "\"" + "}";
+					
+					LOGGER.info("going to call getSaleforceToken()");
 					String salesForceToken = getSaleforceToken();
-
-					LOGGER.info(
-							"Request sending to  salesForceService.populateActivationDate : " + PRODUCT_JSON_STRING);
-
-					Response activationResponse = salesForceService.populateActivationDate(
-							UserConstants.ACCEPT_TYPE_APP_JSON, salesForceToken, PRODUCT_JSON_STRING);
-
-					LOGGER.info("populateActivationDate Status :: " + activationResponse.getStatus());
-					if (200 != activationResponse.getStatus()) {
-						LOGGER.error("Failed to populate the activate date on PRM :: populateActivationDate -> "
-								+ IOUtils.toString((InputStream) activationResponse.getEntity()));
-					} else {
-						LOGGER.info("Successfully populated the activation date on PRM :: populateActivationDate -> "
-								+ IOUtils.toString((InputStream) activationResponse.getEntity()));
+					LOGGER.info("getSaleforceToken() call finsihed");					
+					LOGGER.info("Request sending to  salesForceService.populateActivationDate : "+ PRODUCT_JSON_STRING);
+					LOGGER.info("going to call populateActivationDate() of SalesForceService");
+					Response activationResponse = salesForceService.populateActivationDate(UserConstants.ACCEPT_TYPE_APP_JSON,salesForceToken, PRODUCT_JSON_STRING); 
+					LOGGER.info("populateActivationDate() of SalesForceService finished");
+					LOGGER.info("populateActivationDate Status :: "+ activationResponse.getStatus());
+					if(200 != activationResponse.getStatus()){
+						LOGGER.error("Failed to populate the activate date on PRM :: populateActivationDate -> " + IOUtils.toString((InputStream) activationResponse.getEntity()));
+					}else{
+						LOGGER.info("Successfully populated the activation date on PRM :: populateActivationDate -> " + IOUtils.toString((InputStream) activationResponse.getEntity()));
 					}
-
+					
 				}
 
 			}
@@ -643,6 +639,7 @@ public class ConfirmPINUserServiceImpl extends IdmsCommonServiceImpl implements 
 		return Response.status(Response.Status.OK).entity(passwordRecoveryResponse).build();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Response resendPIN(String token, ResendPinRequest resendPinRequest) {
 
