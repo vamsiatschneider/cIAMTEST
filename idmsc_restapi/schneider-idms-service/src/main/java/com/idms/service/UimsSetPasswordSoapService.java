@@ -65,6 +65,8 @@ public class UimsSetPasswordSoapService {
 	
 	private boolean isNoPwdactivated = false;
 	
+	private boolean ispasswordupdated = false;
+	
 	/**
 	 * 
 	 * @return
@@ -319,9 +321,82 @@ public class UimsSetPasswordSoapService {
 			e.printStackTrace();
 		}
 		// productService.sessionLogout(iPlanetDirectoryKey, "logout");
-		UIMSLOGGER.info("Completed UIMS activateIdentityNoPassword UIMS Async method!");
-		LOGGER.info("Completed UIMS activateIdentityNoPassword UIMS Async method!");
+		UIMSLOGGER.info("Completed UIMS activateIdentityNoPassword UIMS Sync method!");
+		LOGGER.info("Completed UIMS activateIdentityNoPassword UIMS Sync method!");
+	}
+	
+	/**
+	 * 
+	 * @param callerFid
+	 * @param userId
+	 * @param oldPassword
+	 * @param newPassword
+	 * @param openamVnew
+	 * @param iPlanetDirectoryKey
+	 * @throws MalformedURLException
+	 */
+	public void updateUIMSPassword(String callerFid, String userId, String oldPassword, String newPassword,
+			String openamVnew, String iPlanetDirectoryKey) throws MalformedURLException {
+		LOGGER.info("Entered Sync updateUIMSPassword() -> Start");
+		LOGGER.info("Parameter iPlanetDirectoryKey -> " + iPlanetDirectoryKey+" ,userId -> "+userId);
+		LOGGER.info("Parameter callerFid -> " + callerFid);
+		LOGGER.info("Parameter openamVnew -> " + openamVnew);
+		UIMSLOGGER.info("Entered updateUIMSPassword() -> Start");
+		UIMSLOGGER.info("Parameter iPlanetDirectoryKey -> " + iPlanetDirectoryKey+" ,userId -> "+userId);
+		UIMSLOGGER.info("Parameter callerFid -> " + callerFid);
+		UIMSLOGGER.info("Parameter openamVnew -> " + openamVnew);
+		try {
+			LOGGER.info("Going to call getSamlAssertionToken() of UIMS for callerFid:"+callerFid);
+			samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, openamVnew);
+			LOGGER.info("getSamlAssertionToken() of UIMS finished for callerFid:"+callerFid);
+		} catch (Exception e1) {
+			LOGGER.error("Exception while getting samlAssertion ::" + e1.getMessage());
+			UIMSLOGGER.error("Exception while getting samlAssertion::" + e1.getMessage());
+			e1.printStackTrace();
+		}
+		try {
+			Callable<Boolean> callableUpdateUIMSPassword = new Callable<Boolean>() {
+				public Boolean call() throws Exception {
+					UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
+					LOGGER.info("Going to call updatePassword() of UIMS for callerFid:"+callerFid);
+					ispasswordupdated = userManagerUIMSV22.updatePassword(UimsConstants.CALLER_FID, samlAssertion,
+							oldPassword, newPassword);
+					LOGGER.info("updatePassword() of UIMS finished for callerFid:"+callerFid);
+					LOGGER.info("Update password status is::" + ispasswordupdated);
+					UIMSLOGGER.info("Update password status is::" + ispasswordupdated);
+					return true;
+				}
+			};
 
+			Retryer<Boolean> retryer = RetryerBuilder.<Boolean> newBuilder()
+					.retryIfResult(Predicates.<Boolean> isNull()).retryIfExceptionOfType(Exception.class)
+					.retryIfRuntimeException().withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
+			try {
+				retryer.call(callableUpdateUIMSPassword);
+				// after successful activateIdentityNoPassword, we need to
+				// update the v_old
+				if (ispasswordupdated) {
+					String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
+					LOGGER.info("Going to call updateUser() of openamservice to update version for userId:"+userId);
+					productService.updateUser(iPlanetDirectoryKey, userId, version);
+					LOGGER.info("updateUser() call of openamservice finished for userId:"+userId);
+				}
+			} catch (RetryException e) {
+				LOGGER.error("Retry failed while calling UIMS update user::" + e.getMessage());
+				UIMSLOGGER.error("Retry failed while calling UIMS update user::" + e.getMessage());
+				e.printStackTrace();
+				
+			} catch (ExecutionException e) {
+				LOGGER.error("ExecutionException while calling UIMS update user::" + e.getMessage());
+				UIMSLOGGER.error("ExecutionException while calling UIMS update user::" + e.getMessage());
+				e.printStackTrace();
+			}
+
+		} catch (Exception e) {
+			LOGGER.error("Exception while updateUIMSPassword()::" + e.getMessage());
+			UIMSLOGGER.error("Exception while updateUIMSPassword()::" + e.getMessage());
+			e.printStackTrace();
+		}
 	}
 
 }
