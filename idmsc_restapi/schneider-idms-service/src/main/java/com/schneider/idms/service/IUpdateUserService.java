@@ -14,7 +14,7 @@ import com.idms.model.UpdateUserRequest;
 public interface IUpdateUserService {
 
 	@PUT
-	@Path("/IDMSsvcs/1.0/IDMSUser")
+	@Path("/IDMSuser/1.0/IDMSUser")
 	@Consumes("application/json")
 	Response updateUser(@HeaderParam("Authorization")String authorizedToken,@HeaderParam("client_id")String clientId,
 			@HeaderParam("client_secret")String clientSecret,UpdateUserRequest userRequest);

@@ -15,26 +15,32 @@ public class CreateUserRequest {
 	@JsonProperty
 	private String UIFlag;
 
+	@JsonProperty("UserRecord")
 	public IFWUser getUserRecord() {
 		return UserRecord;
 	}
 
+	@JsonProperty("UserRecord")
 	public void setUserRecord(IFWUser userRecord) {
 		UserRecord = userRecord;
 	}
 
+	@JsonProperty("Password")
 	public String getPassword() {
 		return Password;
 	}
 
+	@JsonProperty("Password")
 	public void setPassword(String password) {
 		Password = password;
 	}
 
+	@JsonProperty("UIFlag")
 	public String getUIFlag() {
 		return UIFlag;
 	}
 
+	@JsonProperty("UIFlag")
 	public void setUIFlag(String uIFlag) {
 		UIFlag = uIFlag;
 	}

@@ -11,6 +11,7 @@ import static com.se.idms.util.UserConstants.AUDIT_REQUESTING_USER;
 
 import java.net.URLEncoder;
 
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotAuthorizedException;
@@ -29,6 +30,7 @@ import com.idms.model.UpdateUserRequest;
 import com.idms.model.UpdateUserResponse;
 import com.idms.product.model.OpenAmUser;
 import com.idms.product.model.OpenAmUserRequest;
+import com.idms.service.UserService;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -45,7 +47,10 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 	/**
 	 * Logger instance.
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(CreateUserServiceImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(UpdateUserServiceImpl.class);
+	
+	@Inject
+	private UserService userService;
 
 	@Override
 	public Response updateUser(String authorizedToken, String clientId, String clientSecret,
@@ -468,9 +473,9 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 						productService, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, usermail);
 			}
 
-			//R7
-			Response response = null;//getUser(userId);
-			Object responseObject = response.getEntity();
+			//R7 Need to change the below one
+			Response response = userService.getUser(userId);
+			Object responseObject = response.getEntity(); 
 
 			sucessRespone = new UpdateUserResponse();
 			sucessRespone.setStatus(successStatus);
