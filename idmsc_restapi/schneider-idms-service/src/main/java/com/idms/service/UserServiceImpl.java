@@ -637,8 +637,8 @@ public class UserServiceImpl implements UserService {
 	}
 
 	public static String getValue(String key) {
-		LOGGER.info("Entered getValue() -> Start");
-		LOGGER.info("Parameter key -> " + key);
+		//LOGGER.info("Entered getValue() -> Start");
+		//LOGGER.info("Parameter key -> " + key);
 		if (null != key) {
 			if (!key.contains("[")) {
 				return key;
@@ -662,8 +662,8 @@ public class UserServiceImpl implements UserService {
 	}
 
 	public static String getValues(String key) {
-		LOGGER.info("Entered getValues() -> Start");
-		LOGGER.info("Parameter key -> " + key);
+		//LOGGER.info("Entered getValues() -> Start");
+		//LOGGER.info("Parameter key -> " + key);
 		if (null != key) {
 			if (!key.contains("[" + '"' + "[")) {
 				return key;
@@ -1129,7 +1129,10 @@ public class UserServiceImpl implements UserService {
 				!UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())) {
 			// mapping IFW request to UserCompany
 			CompanyV3 company = mapper.map(userRequest, CompanyV3.class);
+			company.setLanguageCode(company.getLanguageCode().toLowerCase());
 			UserV6 identity = mapper.map(userRequest, UserV6.class);
+			identity.setLanguageCode(identity.getLanguageCode().toLowerCase());
+			
 			//forcedFederatedId = "cn00"+ UUID.randomUUID().toString();
 			//Calling Async method createUIMSUserAndCompany
 			LOGGER.info("Going to call createUIMSUserAndCompany() of UIMSUserManagerSoapService for userName:"+userName);
@@ -4297,8 +4300,9 @@ public class UserServiceImpl implements UserService {
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, version);
 				// mapping IFW request to UserCompany
 				CompanyV3 company = mapper.map(userRequest, CompanyV3.class);
+				company.setLanguageCode(company.getLanguageCode().toLowerCase());
 				com.se.uims.usermanager.UserV6 identity = mapper.map(userRequest, com.se.uims.usermanager.UserV6.class);
-
+				identity.setLanguageCode(identity.getLanguageCode().toLowerCase());
 				// calling Async method updateUIMSUserAndCompany
 				uimsUserManagerSoapService.updateUIMSUserAndCompany(fedId, identity,
 						userRequest.getUserRecord().getIDMS_User_Context__c(), company, vNewCntValue.toString(),
@@ -5706,7 +5710,7 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Entered checkUserExistsWithFederationID() -> Start");
 		LOGGER.info("Parameter iPlanetDirectoryToken -> " + iPlanetDirectoryToken);
 		LOGGER.info("Parameter federationId -> " + federationId);
-		LOGGER.info("Parameter startTime -> " + startTime);
+		//LOGGER.info("Parameter startTime -> " + startTime);
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		DocumentContext productDocCtx = null;
 		JSONObject uimsResponse = new JSONObject();
@@ -5833,7 +5837,7 @@ public class UserServiceImpl implements UserService {
 		
 		try {
 			
-			LOGGER.info(" inside UserServiceImpl :: sendInvitation ");
+			//LOGGER.info(" inside UserServiceImpl :: sendInvitation ");
 			
 			if ((null == sendInvitaionRequest.getEmail() || sendInvitaionRequest.getEmail().isEmpty()) 
 					|| (null == sendInvitaionRequest.getInvitationId() || sendInvitaionRequest.getInvitationId().isEmpty()) 

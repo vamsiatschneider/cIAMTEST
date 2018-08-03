@@ -32,7 +32,7 @@ public class UimsSetPasswordSoapService {
 	/**
 	 * Logger instance.
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(UIMSUserManagerSoapService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(UimsSetPasswordSoapService.class);
 
 	private static final Logger UIMSLOGGER = LoggerFactory.getLogger("uimsLogger");
 	
