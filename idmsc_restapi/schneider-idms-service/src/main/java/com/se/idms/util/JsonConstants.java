@@ -23,4 +23,6 @@ public class JsonConstants {
 	public static final String RESULT = "$.result[0].username";
 	public static final String FEDERATION_ID = "$.federationID";
 	public static final String RESULT_Loginid = "$.result[0].Loginid[0]";
+	
+	public static final String USER_LEVEL = "_registrationLevel";
 }

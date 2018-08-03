@@ -22,6 +22,16 @@
 		</jaxrs:headers>
 	</jaxrs:client>
 	
+	<jaxrs:client id="openDJService" address="${openAMService.url}"
+		serviceClass="com.idms.product.client.OpenDjService">
+		<jaxrs:headers>
+			<entry key="Accept" value="application/json" />
+			<entry key="Host" value="${headerHostname}" />
+			<entry key="Connection" value="keep-alive" />
+			<entry key="Cache-Control" value="no-cache" />
+		</jaxrs:headers>
+	</jaxrs:client>
+	
 	<jaxrs:client id="provisionalService" address="${openAMService.url}"
 		serviceClass="com.idms.product.client.OpenAMProvisionalService">
 		<jaxrs:headers>

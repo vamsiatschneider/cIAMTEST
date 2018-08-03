@@ -84,6 +84,8 @@ public class UserConstants {
 	
 	public static final String USER_CONTEXT_WORK = "@Work";
 	
+	public static final String USER_CONTEXT_WORK_1 = "Work";
+	
 	public static final String MOBILE_VALIDATION = "Mobile should be 11 Numberic Digits - ";
 	
 	public static final String EMAIL_VALIDATION = "Email error - ";
@@ -473,5 +475,11 @@ public class UserConstants {
 	public static final String PRMPORTAL = "PRMPortal";
 	
 	public static final String UIMSPasswordSync = "UIMSPasswordSync";
+	
+	public static final String USER_TYPE_L1 = "L1";
+	
+	public static final String USER_TYPE_L2 = "L2";
+	
+	public static final String USER_TYPE_L3 = "L3";
 	
 }

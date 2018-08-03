@@ -76,6 +76,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 		boolean uimsAlreadyCreatedFlag = false;
 		Response userCreation = null;
 		UserServiceResponse userResponse = new UserServiceResponse();
+		String userType = null;
 		try {
 
 			objMapper = new ObjectMapper();
@@ -90,8 +91,12 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			 */
 
 			try {
+				
+				/**
+				 * Validate the data quality I - check mandatory information
+				 */
 
-				if (checkMandatoryFieldsForDirectAPIRequest(userRequest.getUserRecord(), userResponse, true)) {
+				if (checkMandatoryFieldsForDirectAPIRequest(userRequest.getUserRecord(), userResponse, true,userType)) {
 					errorResponse.setMessage(userResponse.getMessage());
 					errorResponse.setStatus(userResponse.getStatus());
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -128,7 +133,18 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 					LOGGER.error("Error while processing is " + errorResponse.getMessage());
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
-			} catch (Exception e) {
+			} 
+			catch (NotFoundException e) {
+				e.printStackTrace();
+				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
+				errorResponse.setMessage(e.getMessage());
+				errorResponse.setStatus(errorStatus);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
+				LOGGER.error("Error while processing is " + errorResponse.getMessage());
+				return Response.status(Response.Status.NOT_FOUND).entity(errorResponse).build();
+			}
+			catch (Exception e) {
 				e.printStackTrace();
 				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
@@ -188,7 +204,9 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			// Step 2:
 
 			OpenAmUserRequest openAmReq = mapper.map(userRequest, OpenAmUserRequest.class);
-
+			
+			LOGGER.info("Admin Token Generated SuccessFully {} "+objMapper.writeValueAsString(openAmReq));
+			
 			/**
 			 * call /json/authenticate to iplanetDirectoryPro token for admin
 			 */

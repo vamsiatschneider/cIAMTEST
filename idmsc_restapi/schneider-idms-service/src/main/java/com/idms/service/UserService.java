@@ -204,7 +204,7 @@ public interface UserService {
 	@POST
 	@Path("/apexrest/transliterator/2.0")
 	@Consumes("application/json")
-	@Produces("application/json")
+	@Produces("application/json;**charset=UTF-8**")
 	Response transliteratorConversion(String jsonAsString);
 
 }

@@ -12,13 +12,16 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.cxf.helpers.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +31,11 @@ import org.springframework.cache.ehcache.EhCacheCache;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import com.idms.mapper.IdmsMapper;
 import com.idms.model.IFWUser;
 import com.idms.product.client.IFWService;
 import com.idms.product.client.OpenAMService;
 import com.idms.product.client.OpenAMTokenService;
+import com.idms.product.client.OpenDjService;
 import com.idms.product.client.SalesForceService;
 import com.idms.service.SendEmail;
 import com.idms.service.UIMSAccessManagerSoapService;
@@ -41,6 +44,7 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+import com.schneider.idms.mapper.DirectApiIdmsMapper;
 import com.se.idms.cache.CacheTypes;
 import com.se.idms.cache.validate.IValidator;
 import com.se.idms.dto.ParseValuesByOauthHomeWorkContextDto;
@@ -58,11 +62,6 @@ public class IdmsCommonServiceImpl {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(IdmsCommonServiceImpl.class);
 
-	private static final Logger EMAIL_CHANGE_LOGGER = LoggerFactory.getLogger("emailChangeLogger");
-
-	// private static final Logger LOGGER =
-	// LoggerFactory.getLogger("errorLogger");
-
 	/**
 	 * Service to fetch information about {@link Product}s.
 	 */
@@ -70,9 +69,8 @@ public class IdmsCommonServiceImpl {
 	@Inject
 	protected OpenAMService productService;
 
-	/*
-	 * @Inject private OpenAMProvisionalService provisionalService;
-	 */
+	@Inject
+	private OpenDjService openDJService;
 
 	@Inject
 	protected OpenAMTokenService openAMTokenService;
@@ -84,7 +82,7 @@ public class IdmsCommonServiceImpl {
 	protected SalesForceService salesForceService;
 
 	@Inject
-	protected IdmsMapper mapper;
+	protected DirectApiIdmsMapper mapper;
 
 	@Inject
 	@Qualifier("pickListValidator")
@@ -173,6 +171,12 @@ public class IdmsCommonServiceImpl {
 	@Value("${openAMService.url}")
 	protected String prefixStartUrl;
 
+	@Value("${openDJUserName}")
+	protected String openDJUserName;
+
+	@Value("${openDJUserPassword}")
+	protected String openDJUserPassword;
+
 	protected static String userAction = "submitRequirements";
 
 	protected static String errorStatus = "Error";
@@ -187,6 +191,8 @@ public class IdmsCommonServiceImpl {
 
 	@Resource(name = "cacheManager")
 	protected org.springframework.cache.ehcache.EhCacheCacheManager cacheManager;
+
+	Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 
 	static {
 		emailValidator = EmailValidator.getInstance();
@@ -636,7 +642,6 @@ public class IdmsCommonServiceImpl {
 			}
 		}
 
-		
 		/**
 		 * IDMSMarketSegment__c Length Validation check
 		 */
@@ -1078,7 +1083,7 @@ public class IdmsCommonServiceImpl {
 	}
 
 	protected boolean checkMandatoryFieldsForDirectAPIRequest(IFWUser userRequest, UserServiceResponse userResponse,
-			boolean checkMandatoryFields) {
+			boolean checkMandatoryFields, String applicationType) throws IOException {
 
 		LOGGER.info("Entered checkMandatoryFieldsFromRequest() -> Start");
 		LOGGER.info("Parameter userRequest -> " + userRequest);
@@ -1086,15 +1091,23 @@ public class IdmsCommonServiceImpl {
 		LOGGER.info("Parameter checkMandatoryFields -> " + checkMandatoryFields);
 
 		userResponse.setStatus(errorStatus);
-		
+
+		String userType = null;
+
+		/**
+		 * Validating Application configured or not
+		 */
+
+		userType = getUserType(userRequest.getIDMS_Registration_Source__c());
+
 		/***
 		 * HomeContext Mandatory checks start
 		 */
-		
+
 		/**
 		 * Email or Mobile is mandatory for user creation
 		 */
-		
+
 		if ((checkMandatoryFields) && (null == userRequest.getEmail() || userRequest.getEmail().isEmpty())
 				&& (null == userRequest.getMobilePhone() || userRequest.getMobilePhone().isEmpty())) {
 			userResponse.setStatus(errorStatus);
@@ -1102,7 +1115,7 @@ public class IdmsCommonServiceImpl {
 					UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.EMAIL + " OR " + UserConstants.MOBILE);
 			return true;
 		}
-		
+
 		if ((null != userRequest.getEmail() && !userRequest.getEmail().isEmpty())
 				&& (userRequest.getEmail().length() > 65)) {
 			userResponse.setStatus(errorStatus);
@@ -1117,12 +1130,7 @@ public class IdmsCommonServiceImpl {
 				return true;
 			}
 		}
-		
-		
-		
-		
-		
-		
+
 		/**
 		 * FirstName Mandatory validation and length check
 		 */
@@ -1146,8 +1154,7 @@ public class IdmsCommonServiceImpl {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.LAST_NAME);
 			return true;
 		}
-		
-		
+
 		/**
 		 * Country validation and length check Mandatory
 		 */
@@ -1167,8 +1174,7 @@ public class IdmsCommonServiceImpl {
 			}
 
 		}
-			
-		
+
 		/**
 		 * IDMS_PreferredLanguage__c validation and length check Mandatory
 		 */
@@ -1220,7 +1226,6 @@ public class IdmsCommonServiceImpl {
 			return true;
 		}
 
-		
 		if (null != userRequest.getIDMS_Registration_Source__c() && ((pickListValidator
 				.validate(UserConstants.APPLICATIONS, userRequest.getIDMS_Registration_Source__c().toUpperCase()))
 				|| UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c()))) {
@@ -1232,7 +1237,6 @@ public class IdmsCommonServiceImpl {
 			}
 		}
 
-		
 		if (null != userRequest.getIDMS_Registration_Source__c()
 				&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c())) {
 
@@ -1245,7 +1249,7 @@ public class IdmsCommonServiceImpl {
 				}
 			}
 		}
-		
+
 		/**
 		 * IDMS_User_Context__c validation and length check Mandatory
 		 */
@@ -1268,7 +1272,7 @@ public class IdmsCommonServiceImpl {
 				return true;
 			}
 		}
-		
+
 		/***
 		 * HomeContext Mandatory checks end
 		 */
@@ -1276,124 +1280,180 @@ public class IdmsCommonServiceImpl {
 		/***
 		 * WorkContext Mandatory checks started
 		 */
-		
-		/**
-		 * CompanyName Length Validation check
-		 */
 
-		if ((null != userRequest.getCompanyName() && !userRequest.getCompanyName().isEmpty())
-				&& (!legthValidator.validate(UserConstants.COMPANY_NAME, userRequest.getCompanyName()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_NAME);
-			return true;
-		}
-		
-		
-		/**
-		 * IDMSClassLevel1__c validation and length check
-		 */
-		if ((null != userRequest.getIDMSClassLevel1__c() && !userRequest.getIDMSClassLevel1__c().isEmpty())) {
+		if ((UserConstants.USER_TYPE_L2.equalsIgnoreCase(userType)
+				|| UserConstants.USER_TYPE_L3.equalsIgnoreCase(userType))
+				|| (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(userRequest.getIDMS_User_Context__c())
+						|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(userRequest.getIDMS_User_Context__c()))) {
 
-			/*
-			 * if (!legthValidator.validate(UserConstants.IAM_A1,
-			 * userRequest.getIDMSClassLevel1__c())) {
-			 * userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH +
-			 * UserConstants.IDMS_CLASS_LEVEL_C);
-			 * 
-			 * } else
-			 */ if (!pickListValidator.validate(UserConstants.IAM_A1, userRequest.getIDMSClassLevel1__c())) {
-				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_CLASS_LEVEL_C);
+			/**
+			 * CompanyName Length Validation check
+			 */
+			if ((checkMandatoryFields)
+					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c()))
+					&& (null == userRequest.getCompanyName() || userRequest.getCompanyName().isEmpty())) {
+				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_NAME.toString());
+				return true;
+			} else if ((null != userRequest.getCompanyName() && !userRequest.getCompanyName().isEmpty())
+					&& (!legthValidator.validate(UserConstants.COMPANY_NAME, userRequest.getCompanyName()))) {
+				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_NAME);
 				return true;
 			}
+
+			/**
+			 * IDMSClassLevel1__c validation and length check
+			 */
+
+			if ((checkMandatoryFields)
+					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c()))
+					&& (null == userRequest.getIDMSClassLevel1__c() || userRequest.getIDMSClassLevel1__c().isEmpty())) {
+				userResponse.setMessage(
+						UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.IDMS_CLASS_LEVEL_C.toString());
+				return true;
+			} else if ((null != userRequest.getIDMSClassLevel1__c()
+					&& !userRequest.getIDMSClassLevel1__c().isEmpty())) {
+
+				/*
+				 * if (!legthValidator.validate(UserConstants.IAM_A1,
+				 * userRequest.getIDMSClassLevel1__c())) {
+				 * userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH
+				 * + UserConstants.IDMS_CLASS_LEVEL_C);
+				 * 
+				 * } else
+				 */ if (!pickListValidator.validate(UserConstants.IAM_A1, userRequest.getIDMSClassLevel1__c())) {
+					userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_CLASS_LEVEL_C);
+					return true;
+				}
+			}
+
 		}
-		
-		
 
-		/**
-		 * Company_Address1__c Length Validation check
-		 */
+		if (UserConstants.USER_TYPE_L3.equalsIgnoreCase(userType)) {
 
-		if ((null != userRequest.getCompany_Address1__c() && !userRequest.getCompany_Address1__c().isEmpty())
-				&& (!legthValidator.validate(UserConstants.COMPANY_ADDRESS1_C, userRequest.getCompany_Address1__c()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_ADDRESS1_C);
-			return true;
-		}
+			/**
+			 * Company_Address1__c Length Validation check
+			 */
 
-		/**
-		 * Company_City__c Length Validation check
-		 */
-
-		if ((null != userRequest.getCompany_City__c() && !userRequest.getCompany_City__c().isEmpty())
-				&& (!legthValidator.validate(UserConstants.COMPANY_CITY_C, userRequest.getCompany_City__c()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_CITY_C);
-			return true;
-		}
-
-		/**
-		 * Company_Postal_Code__c Length Validation check
-		 */
-
-		if ((null != userRequest.getCompany_Postal_Code__c() && !userRequest.getCompany_Postal_Code__c().isEmpty())
-				&& (!legthValidator.validate(UserConstants.COMPANY_POSTAL_CODE_C,
-						userRequest.getCompany_Postal_Code__c()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_POSTAL_CODE_C);
-			return true;
-		}
-		
-		/**
-		 * IDMSCompanyCounty__c Length Validation check
-		 */
-
-		if ((null != userRequest.getIDMSCompanyCounty__c() && !userRequest.getIDMSCompanyCounty__c().isEmpty())
-				&& (!pickListValidator.validate(UserConstants.COUNTRY, userRequest.getIDMSCompanyCounty__c()))) {
-			userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMSCompanyCounty__c);
-			return true;
-		}
-		
-		
-		/**
-		 * IDMSClassLevel2__c Length Validation check
-		 */
-
-		if ((null != userRequest.getIDMSClassLevel2__c() && !userRequest.getIDMSClassLevel2__c().isEmpty())) {
-
-			/*
-			 * if (!legthValidator.validate(UserConstants.IAM_A2.toString(),
-			 * userRequest.getIDMSClassLevel2__c())) {
-			 * userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH +
-			 * UserConstants.IDMS_CLASS_LEVEL2_C);
-			 * 
-			 * } else
-			 */ if (!pickListValidator.validate(UserConstants.IAM_A2.toString(), userRequest.getIDMSClassLevel2__c())) {
-				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_CLASS_LEVEL2_C);
+			if ((checkMandatoryFields)
+					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c()))
+					&& (null == userRequest.getCompany_Address1__c()
+					|| userRequest.getCompany_Address1__c().isEmpty())) {
+				userResponse.setMessage(
+						UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_ADDRESS1_C.toString());
+				return true;
+			} else if ((null != userRequest.getCompany_Address1__c() && !userRequest.getCompany_Address1__c().isEmpty())
+					&& (!legthValidator.validate(UserConstants.COMPANY_ADDRESS1_C,
+							userRequest.getCompany_Address1__c()))) {
+				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_ADDRESS1_C);
 				return true;
 			}
-		}
 
-		
-		/**
-		 * IDMSMarketSegment__c Length Validation check
-		 */
+			/**
+			 * Company_City__c Length Validation check
+			 */
 
-		if ((null != userRequest.getIDMSMarketSegment__c() && !userRequest.getIDMSMarketSegment__c().isEmpty())) {
-
-			/*
-			 * if (!legthValidator.validate(UserConstants.MY_INDUSTRY_SEGMENT,
-			 * userRequest.getIDMSMarketSegment__c())) {
-			 * userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH +
-			 * UserConstants.IDMS_MARKET_SEGMENT_C);
-			 * 
-			 * } else
-			 */ if (!pickListValidator.validate(UserConstants.MY_INDUSTRY_SEGMENT,
-					userRequest.getIDMSMarketSegment__c())) {
-				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_MARKET_SEGMENT_C);
+			if ((checkMandatoryFields)
+					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c()))
+					&& (null == userRequest.getCompany_City__c() || userRequest.getCompany_City__c().isEmpty())) {
+				userResponse
+				.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_CITY_C.toString());
+				return true;
+			} else if ((null != userRequest.getCompany_City__c() && !userRequest.getCompany_City__c().isEmpty())
+					&& (!legthValidator.validate(UserConstants.COMPANY_CITY_C, userRequest.getCompany_City__c()))) {
+				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_CITY_C);
 				return true;
 			}
+
+			/**
+			 * Company_Postal_Code__c Length Validation check
+			 */
+
+			if ((checkMandatoryFields)
+					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c()))
+					&& (null == userRequest.getCompany_Postal_Code__c() || userRequest.getCompany_Postal_Code__c().isEmpty())) {
+				userResponse
+				.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_POSTAL_CODE_C.toString());
+				return true;
+			} else if ((null != userRequest.getCompany_Postal_Code__c() && !userRequest.getCompany_Postal_Code__c().isEmpty())
+					&& (!legthValidator.validate(UserConstants.COMPANY_POSTAL_CODE_C,
+							userRequest.getCompany_Postal_Code__c()))) {
+				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_POSTAL_CODE_C);
+				return true;
+			}
+
+			/**
+			 * IDMSCompanyCounty__c Length Validation check
+			 */
+
+			if ((checkMandatoryFields)
+					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c()))
+					&& (null == userRequest.getIDMSCompanyCounty__c() || userRequest.getIDMSCompanyCounty__c().isEmpty())) {
+				userResponse
+				.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.IDMSCompanyCounty__c.toString());
+				return true;
+			} else if ((null != userRequest.getIDMSCompanyCounty__c() && !userRequest.getIDMSCompanyCounty__c().isEmpty())
+					&& (!pickListValidator.validate(UserConstants.COUNTRY, userRequest.getIDMSCompanyCounty__c()))) {
+				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMSCompanyCounty__c);
+				return true;
+			}
+
+			/**
+			 * IDMSClassLevel2__c Length Validation check
+			 */
+
+			if ((checkMandatoryFields)
+					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c()))
+					&& (null == userRequest.getIDMSClassLevel2__c() || userRequest.getIDMSClassLevel2__c().isEmpty())) {
+				userResponse
+				.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.IDMS_CLASS_LEVEL2_C.toString());
+				return true;
+			} else if ((null != userRequest.getIDMSClassLevel2__c() && !userRequest.getIDMSClassLevel2__c().isEmpty())) {
+
+				/*
+				 * if (!legthValidator.validate(UserConstants.IAM_A2.toString(),
+				 * userRequest.getIDMSClassLevel2__c())) {
+				 * userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH
+				 * + UserConstants.IDMS_CLASS_LEVEL2_C);
+				 * 
+				 * } else
+				 */ if (!pickListValidator.validate(UserConstants.IAM_A2.toString(),
+						 userRequest.getIDMSClassLevel2__c())) {
+					 userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_CLASS_LEVEL2_C);
+					 return true;
+				 }
+			}
+
+			/**
+			 * IDMSMarketSegment__c Length Validation check
+			 */
+
+			if ((checkMandatoryFields)
+					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c()))
+					&& (null == userRequest.getIDMSMarketSegment__c() || userRequest.getIDMSMarketSegment__c().isEmpty())) {
+				userResponse
+				.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.IDMS_MARKET_SEGMENT_C.toString());
+				return true;
+			} else if ((null != userRequest.getIDMSMarketSegment__c() && !userRequest.getIDMSMarketSegment__c().isEmpty())) {
+
+				/*
+				 * if
+				 * (!legthValidator.validate(UserConstants.MY_INDUSTRY_SEGMENT,
+				 * userRequest.getIDMSMarketSegment__c())) {
+				 * userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH
+				 * + UserConstants.IDMS_MARKET_SEGMENT_C);
+				 * 
+				 * } else
+				 */ if (!pickListValidator.validate(UserConstants.MY_INDUSTRY_SEGMENT,
+						 userRequest.getIDMSMarketSegment__c())) {
+					 userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_MARKET_SEGMENT_C);
+					 return true;
+				 }
+			}
 		}
-		
 		/***
 		 * WorkContext Mandatory checks end
 		 */
-		
+
 		/**
 		 * IDMS_Email_opt_in__c length check
 		 */
@@ -1549,9 +1609,6 @@ public class IdmsCommonServiceImpl {
 			return true;
 		}
 
-		
-
-
 		/**
 		 * Company_State__c Pick List Validation check
 		 */
@@ -1605,8 +1662,6 @@ public class IdmsCommonServiceImpl {
 			return true;
 		}
 
-		
-
 		/**
 		 * IDMSClassLevel2__c Length Validation check
 		 */
@@ -1625,8 +1680,6 @@ public class IdmsCommonServiceImpl {
 				return true;
 			}
 		}
-
-		
 
 		/**
 		 * IDMSMarketSubSegment__c Length Validation checkJob_Title__c
@@ -2046,11 +2099,9 @@ public class IdmsCommonServiceImpl {
 		}
 
 		return false;
-	
+
 	}
-	
-	
-	
+
 	/**
 	 * This method will verify the user password against the regex provided by
 	 * the user.
@@ -2087,7 +2138,7 @@ public class IdmsCommonServiceImpl {
 		return productDocCtx.read(JsonConstants.TOKEN_ID);
 
 	}
-	
+
 	/**
 	 * This method will generate the random password based on langUtils with
 	 * string characters
@@ -2099,7 +2150,7 @@ public class IdmsCommonServiceImpl {
 		String tmpPr = RandomStringUtils.random(10, UserConstants.RANDOM_PR_CHARS);
 		return tmpPr;
 	}
-	
+
 	public static String getValue(String key) {
 		LOGGER.info("Entered getValue() -> Start");
 		LOGGER.info("Parameter key -> " + key);
@@ -2126,10 +2177,10 @@ public class IdmsCommonServiceImpl {
 	}
 
 	protected String getSaleforceToken() {
-		
+
 		DocumentContext productDocCtx = null;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
-		
+
 		LOGGER.info("getSalesForceToken : => " + "PASSWORD_GRANT_TYPE : " + UserConstants.PR_GRANT_TYPE
 				+ " salesForceClientId: " + salesForceClientId + " salesForceClientSecret :" + salesForceClientSecret
 				+ " salesForceUserName: " + salesForceUserName + " salesForcePassword :" + salesForcePassword);
@@ -2140,9 +2191,9 @@ public class IdmsCommonServiceImpl {
 		productDocCtx = JsonPath.using(conf).parse(bfoAuthorization);
 		String bfoAuthorizationToken = productDocCtx.read("$.access_token");
 
-		return  "Bearer " + bfoAuthorizationToken;
+		return "Bearer " + bfoAuthorizationToken;
 	}
-	
+
 	public static String getValues(String key) {
 		LOGGER.info("Entered getValues() -> Start");
 		LOGGER.info("Parameter key -> " + key);
@@ -2157,11 +2208,11 @@ public class IdmsCommonServiceImpl {
 		}
 		return "";
 	}
-	
+
 	protected String getDelimeter() {
 		return UserConstants.USER_DELIMETER;
 	}
-	
+
 	public StringBuilder getContentFromTemplate(String scenarioName, String prefferedLanguage) throws IOException {
 		LOGGER.info("Entered getContentFromTemplate() -> Start");
 		LOGGER.info("Parameter scenarioName -> " + scenarioName);
@@ -2200,6 +2251,7 @@ public class IdmsCommonServiceImpl {
 
 		return contentBuilder;
 	}
+
 	protected boolean validateMobile(String mobileNumber) {
 		LOGGER.info("Entered validateMobile() -> Start");
 		LOGGER.info("Parameter mobileNumber -> " + mobileNumber);
@@ -2208,5 +2260,16 @@ public class IdmsCommonServiceImpl {
 			return true;
 		}
 		return false;
+	}
+
+	public String getUserType(String registrationSource) throws IOException {
+
+		DocumentContext productDocCtx = null;
+
+		Response applicationDetails = openDJService.getUser(openDJUserName, openDJUserPassword, registrationSource);
+		productDocCtx = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
+		String userLevel = productDocCtx.read(JsonConstants.USER_LEVEL);
+
+		return userLevel;
 	}
 }
