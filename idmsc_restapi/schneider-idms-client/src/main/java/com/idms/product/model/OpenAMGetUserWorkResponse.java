@@ -197,6 +197,8 @@ public class OpenAMGetUserWorkResponse {
 	//new fields
 	private String DefaultCurrencyIsoCode;
 	
+	private String currencyCode;
+	
 	private String FederationIdentifier;
 	
 	private String IDMSClassLevel1__c;
@@ -1021,4 +1023,16 @@ public class OpenAMGetUserWorkResponse {
 	public void setIsActivated(String isActivated) {
 		this.isActivated = isActivated;
 	}
+
+	@JsonProperty("currencyCode")
+	public String getCurrencyCode() {
+		return currencyCode;
+	}
+
+	@JsonProperty("currencyCode")
+	public void setCurrencyCode(String currencyCode) {
+		this.currencyCode = currencyCode;
+	}
+	
+	
 }
