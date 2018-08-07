@@ -19,14 +19,12 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.cxf.helpers.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.idms.model.CreateUserRequest;
 import com.idms.model.CreateUserResponse;
 import com.idms.model.IDMSUserResponse;
 import com.idms.product.model.Attributes;
@@ -37,6 +35,7 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+import com.schneider.idms.model.IdmsUserRequest;
 import com.schneider.idms.service.ICreateUserService;
 import com.se.idms.cache.utils.EmailConstants;
 import com.se.idms.dto.ErrorResponse;
@@ -59,7 +58,8 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 	public static UserServiceResponse userResponse;
 
 	@Override
-	public Response userRegistration(String clientId, String clientSecret, CreateUserRequest userRequest) {
+	public Response userRegistration(String authorization, String accept, String region, String clientId,
+			String clientSecret, IdmsUserRequest userRequest) {
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
@@ -83,7 +83,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 
 			LOGGER.info("Entered userRegistration() -> Start");
 			LOGGER.info("Parameter userRequest -> " + objMapper.writeValueAsString(userRequest));
-			LOGGER.info("Parameter clientId -> " + clientId + " ,clientSecret -> " + clientSecret);
+		//	LOGGER.info("Parameter clientId -> " + clientId + " ,clientSecret -> " + clientSecret);
 
 			// Step 1:
 			/**
@@ -96,40 +96,11 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				 * Validate the data quality I - check mandatory information
 				 */
 
-				if (checkMandatoryFieldsForDirectAPIRequest(userRequest.getUserRecord(), userResponse, true,userType)) {
+				if (checkMandatoryFieldsForDirectAPIRequest(userRequest, userResponse, true,userType)) {
 					errorResponse.setMessage(userResponse.getMessage());
 					errorResponse.setStatus(userResponse.getStatus());
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-					LOGGER.error("Error while processing is " + errorResponse.getMessage());
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-				}
-
-				/**
-				 * R4 Release changes
-				 */
-
-				if (null != userRequest.getUIFlag() && UserConstants.TRUE.equalsIgnoreCase(userRequest.getUIFlag())) {
-					if (((null != userRequest.getPassword() && !userRequest.getPassword().isEmpty()))
-							&& !checkPasswordPolicy(userRequest.getPassword(),
-									userRequest.getUserRecord().getFirstName(),
-									userRequest.getUserRecord().getLastName())) {
-						errorResponse.setStatus(errorStatus);
-						errorResponse.setMessage(UserConstants.PR_POLICY);
-						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-						LOGGER.info("Time taken by UserServiceImpl.userRegistration() : " + elapsedTime);
-						LOGGER.error("Error while processing is " + errorResponse.getMessage());
-						return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-					}
-				} else if (((null == userRequest.getUIFlag()
-						|| !UserConstants.TRUE.equalsIgnoreCase(userRequest.getUIFlag()))
-						&& (!UserConstants.UIMS
-								.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())))
-						&& (null != userRequest.getPassword() && !userRequest.getPassword().isEmpty())) {
-					errorResponse.setStatus(errorStatus);
-					errorResponse.setMessage(UserConstants.PASSWORD_WITH_USER_REG_BLCOKED);
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.info("Time taken by UserServiceImpl.userRegistration() : " + elapsedTime);
 					LOGGER.error("Error while processing is " + errorResponse.getMessage());
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
@@ -144,7 +115,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				LOGGER.error("Error while processing is " + errorResponse.getMessage());
 				return Response.status(Response.Status.NOT_FOUND).entity(errorResponse).build();
 			}
-			catch (Exception e) {
+			catch (BadRequestException e) {
 				e.printStackTrace();
 				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
@@ -154,11 +125,21 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				LOGGER.error("Error while processing is " + errorResponse.getMessage());
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
+			catch (Exception e) {
+				e.printStackTrace();
+				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
+				errorResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
+				errorResponse.setStatus(userResponse.getStatus());
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
+				LOGGER.error("Error while processing is " + errorResponse.getMessage());
+				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
+			}
 
 			LOGGER.info("CheckMandatoryFieldsFromRequest Completed ");
 
-			if (null != userRequest.getUserRecord().getIDMS_Registration_Source__c() && UserConstants.UIMS
-					.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())) {
+			if (null != userRequest.getRegistrationSource() && UserConstants.UIMS
+					.equalsIgnoreCase(userRequest.getRegistrationSource())) {
 
 				if (null == clientId || null == clientSecret) {
 					userResponse.setStatus(errorStatus);
@@ -185,20 +166,20 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			 * 
 			 */
 
-			if (null == userRequest.getUserRecord().getIDMSPrimaryContact__c()
-					|| userRequest.getUserRecord().getIDMSPrimaryContact__c().isEmpty()) {
+			if (null == userRequest.getPrimaryContact()
+					|| userRequest.getPrimaryContact().isEmpty()) {
 
-				if (UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())) {
-					userRequest.getUserRecord().setIDMSPrimaryContact__c(UserConstants.FALSE);
+				if (UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource())) {
+					userRequest.setPrimaryContact(UserConstants.FALSE);
 				} else {
-					userRequest.getUserRecord().setIDMSPrimaryContact__c(UserConstants.TRUE);
+					userRequest.setPrimaryContact(UserConstants.TRUE);
 				}
 
 			}
 
-			if (null != userRequest.getUserRecord().getAdminCompanyFederatedId()
-					&& !userRequest.getUserRecord().getAdminCompanyFederatedId().isEmpty()) {
-				userRequest.getUserRecord().setIDMSPrimaryContact__c(UserConstants.FALSE);
+			if (null != userRequest.getAdminCompanyFederatedId()
+					&& !userRequest.getAdminCompanyFederatedId().isEmpty()) {
+				userRequest.setPrimaryContact(UserConstants.FALSE);
 			}
 
 			// Step 2:
@@ -219,24 +200,24 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			/**
 			 * check email and mobile phone for login identifier
 			 */
-			if ((null != userRequest.getUserRecord().getEmail() && !userRequest.getUserRecord().getEmail().isEmpty())
-					&& (null != userRequest.getUserRecord().getMobilePhone()
-							&& !userRequest.getUserRecord().getMobilePhone().isEmpty())) {
+			if ((null != userRequest.getEmail() && !userRequest.getEmail().isEmpty())
+					&& (null != userRequest.getMobilePhone()
+							&& !userRequest.getMobilePhone().isEmpty())) {
 
-				openAmReq.getInput().getUser().setIdmsuid(userRequest.getUserRecord().getEmail());
-				loginIdentifier = userRequest.getUserRecord().getEmail();
+				openAmReq.getInput().getUser().setIdmsuid(userRequest.getEmail());
+				loginIdentifier = userRequest.getEmail();
 				identifierType = UserConstants.EMAIL;
-			} else if ((null != userRequest.getUserRecord().getEmail())
-					&& (!userRequest.getUserRecord().getEmail().isEmpty())) {
+			} else if ((null != userRequest.getEmail())
+					&& (!userRequest.getEmail().isEmpty())) {
 
-				openAmReq.getInput().getUser().setIdmsuid(userRequest.getUserRecord().getEmail());
-				loginIdentifier = userRequest.getUserRecord().getEmail();
+				openAmReq.getInput().getUser().setIdmsuid(userRequest.getEmail());
+				loginIdentifier = userRequest.getEmail();
 				identifierType = UserConstants.EMAIL;
-			} else if ((null != userRequest.getUserRecord().getMobilePhone())
-					&& (!userRequest.getUserRecord().getMobilePhone().isEmpty())) {
+			} else if ((null != userRequest.getMobilePhone())
+					&& (!userRequest.getMobilePhone().isEmpty())) {
 				openAmReq.getInput().getUser()
-						.setIdmsuid(userRequest.getUserRecord().getMobilePhone() + "bridge-fo.com");
-				loginIdentifier = userRequest.getUserRecord().getMobilePhone();
+						.setIdmsuid(userRequest.getMobilePhone() + "bridge-fo.com");
+				loginIdentifier = userRequest.getMobilePhone();
 				identifierType = UserConstants.MOBILE;
 			}
 
@@ -282,31 +263,14 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			 * check login identifier e-email or mobile already handled in step2
 			 */
 
-			// Step 3:
-			/**
-			 * Check password exits and assign to openAM
-			 */
-			if (null != userRequest.getPassword() && !userRequest.getPassword().isEmpty()) {
-				openAmReq.getInput().getUser().setUserPassword(userRequest.getPassword());
-				openAmReq.getInput().getUser()
-						.setTmp_password(new String(Base64.encodeBase64(userRequest.getPassword().getBytes())));
-			} else {
-				if (null != userRequest.getUserRecord().getIDMS_Federated_ID__c() && !userRequest.getUserRecord()
-						.getIDMS_Federated_ID__c().startsWith(UserConstants.SOCIAL_LOGIN_PREFIX)) {
-					openAmReq.getInput().getUser().setUserPassword(generateRamdomPassWord());
-				} else if (null == userRequest.getUserRecord().getIDMS_Federated_ID__c()) {
-					openAmReq.getInput().getUser().setUserPassword(generateRamdomPassWord());
-				}
-			}
-
 			// new logic
 			String userExistsInOpenam = productService.checkUserExistsWithEmailMobile(
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 					"mail eq " + "\"" + loginIdentifier + "\" or mobile eq " + "\"" + loginIdentifier + "\"");
 			productDocCtxCheck = JsonPath.using(conf).parse(userExistsInOpenam);
 			Integer resultCountCheck = productDocCtxCheck.read(JsonConstants.RESULT_COUNT);
-			if ((resultCountCheck.intValue() > 0) && ((null == userRequest.getUserRecord().getIDMS_Federated_ID__c()
-					|| userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty()))) {
+			if ((resultCountCheck.intValue() > 0) && ((null == userRequest.getFederationId()
+					|| userRequest.getFederationId().isEmpty()))) {
 				// deleting already existing id in openam
 
 				String userIdFromOpenam = productDocCtxCheck.read("$.result[0].username");
@@ -330,23 +294,23 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				/**
 				 * Generate Random login ID and map it to Open AM Username
 				 * attribute Condition added for social login issue // (null ==
-				 * userRequest.getUserRecord().getIDMS_Federated_ID__c()||
-				 * userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty
+				 * userRequest.getIDMS_Federated_ID__c()||
+				 * userRequest.getIDMS_Federated_ID__c().isEmpty
 				 * ())){
 				 * 
 				 */
 
-				if ((!UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c()))
+				if ((!UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
 						&& (!pickListValidator.validate(UserConstants.APPLICATIONS,
-								userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase()))
-						&& (null == userRequest.getUserRecord().getIDMS_Federated_ID__c()
-								|| userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty())) {
+								userRequest.getRegistrationSource().toUpperCase()))
+						&& (null == userRequest.getFederationId()
+								|| userRequest.getFederationId().isEmpty())) {
 
 					// new logic to generate fedId/userId
 					// userName = UserConstants.UID_PREFIX + UUID.randomUUID().toString();
 					userName = ChinaIdmsUtil.generateFedId();
 				} else {
-					userName = userRequest.getUserRecord().getIDMS_Federated_ID__c();
+					userName = userRequest.getFederationId();
 				}
 
 			}
@@ -363,7 +327,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			 * openAmReq.getInput().getUser().setIdmsail_Programs_c("[]");
 			 */
 			openAmReq.getInput().getUser().setCn(
-					userRequest.getUserRecord().getFirstName() + " " + userRequest.getUserRecord().getLastName());
+					userRequest.getFirstName() + " " + userRequest.getLastName());
 
 			// Step 5:
 			/**
@@ -386,13 +350,13 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			 */
 
 			if ((!pickListValidator.validate(UserConstants.IDMS_BFO_profile,
-					userRequest.getUserRecord().getIDMS_Registration_Source__c()))
+					userRequest.getRegistrationSource()))
 					&& ((pickListValidator.validate(UserConstants.APPLICATIONS,
-							userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase()))
-							|| ((null != userRequest.getUserRecord().getIDMS_Federated_ID__c()
-									&& !userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty())
+							userRequest.getRegistrationSource().toUpperCase()))
+							|| ((null != userRequest.getFederationId()
+									&& !userRequest.getFederationId().isEmpty())
 									&& !UserConstants.UIMS.equalsIgnoreCase(
-											userRequest.getUserRecord().getIDMS_Registration_Source__c())))) {
+											userRequest.getRegistrationSource())))) {
 				// openAmReq.getInput().getUser().setUsername(null);
 				json = objMapper.writeValueAsString(openAmReq.getInput().getUser());
 				json = json.replace("\"\"", "[]");
@@ -416,8 +380,8 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			}
 			// log for user stats
 			AsyncUtil.generateCSV(registrationCsvPath,
-					new Date() + "," + userName + "," + userRequest.getUserRecord().getIDMS_User_Context__c() + ","
-							+ userRequest.getUserRecord().getIDMS_Registration_Source__c());
+					new Date() + "," + userName + "," + userRequest.getUserContext() + ","
+							+ userRequest.getRegistrationSource());
 
 			String version = "{" + "\"V_Old\": \"" + UserConstants.V_OLD + "\",\"V_New\": \"" + UserConstants.V_NEW
 					+ "\"" + "}";
@@ -433,20 +397,20 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				if (UserConstants.EMAIL.equalsIgnoreCase(identifierType)) {
 
 					// if Registration source is not PRM then send mail
-					if (null != userRequest.getUserRecord().getIDMS_Registration_Source__c()
+					if (null != userRequest.getRegistrationSource()
 							&& (!pickListValidator.validate(UserConstants.IDMS_BFO_profile,
-									userRequest.getUserRecord().getIDMS_Registration_Source__c()))) {
+									userRequest.getRegistrationSource()))) {
 
 						String otp = sendEmail.generateOtp(userName);
 						LOGGER.info("Successfully OTP generated for " + userName);
 						sendEmail.sendOpenAmEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
-								userRequest.getUserRecord().getIDMS_Registration_Source__c());
-					} else if (null != userRequest.getUserRecord().getIDMS_Registration_Source__c()
+								userRequest.getRegistrationSource());
+					} else if (null != userRequest.getRegistrationSource()
 							&& (pickListValidator.validate(UserConstants.IDMS_BFO_profile,
-									userRequest.getUserRecord().getIDMS_Registration_Source__c()))) {
+									userRequest.getRegistrationSource()))) {
 
 						// HashedToken field is to store the hashed pin which comes from global IDMS
-						sendEmail.storePRMOtp(userName, userRequest.getUserRecord().getIdmsHashedToken());
+						sendEmail.storePRMOtp(userName, userRequest.getHashedPin());
 					}
 				} else if (identifierType.equalsIgnoreCase(UserConstants.MOBILE)) {
 
@@ -457,9 +421,9 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 					String otp = sendEmail.generateOtp(userName);
 					LOGGER.info("Successfully OTP generated for " + userName);
 					sendEmail.sendSMSMessage(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
-							userRequest.getUserRecord().getIDMS_Registration_Source__c());
+							userRequest.getRegistrationSource());
 					sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
-							userRequest.getUserRecord().getIDMS_Profile_update_source__c());
+							userRequest.getProfileLastUpdateSource());
 				}
 			}
 		} catch (BadRequestException e) {
@@ -485,25 +449,22 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(userResponse).build();
 		}
 
-		userRequest.getUserRecord().setIDMS_Federated_ID__c(userName);
+		userRequest.setFederationId(userName);
 		LOGGER.info(
 				"UserServiceImpl:userRegistration -> uimsUserManagerSoapService :  !uimsAlreadyCreatedFlag Value is -> "
 						+ !uimsAlreadyCreatedFlag);
-		if (!uimsAlreadyCreatedFlag && null != userRequest.getUserRecord().getIDMS_Registration_Source__c()
-				&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())) {
+		if (!uimsAlreadyCreatedFlag && null != userRequest.getRegistrationSource()
+				&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource())) {
 			// mapping IFW request to UserCompany
 			CompanyV3 company = mapper.map(userRequest, CompanyV3.class);
 			UserV6 identity = mapper.map(userRequest, UserV6.class);
 			// forcedFederatedId = "cn00"+ UUID.randomUUID().toString();
 			// Calling Async method createUIMSUserAndCompany
-			uimsUserManagerSoapService.createUIMSUserAndCompany(UimsConstants.CALLER_FID, identity,
-					userRequest.getUserRecord().getIDMS_User_Context__c(), company, userName,
+			direct_uimsUserManagerSoapService.createUIMSUserAndCompany(UimsConstants.CALLER_FID, identity,
+					userRequest.getUserContext(), company, userName,
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, UserConstants.V_NEW,
-					userRequest.getPassword(), userName, userRequest);
-			userRequest.getUserRecord().setIDMS_Federated_ID__c(userName);// federated
-																			// id
-																			// for
-																			// IDMS
+					userName, userRequest);
+			userRequest.setFederationId(userName);
 		}
 
 		sucessRespone = new CreateUserResponse();
@@ -511,15 +472,14 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 		sucessRespone.setMessage(UserConstants.CREATE_USER_SUCCESS_MESSAGE);
 		Attributes attributes = new Attributes();
 		attributes.setType("User");
-		userRequest.getUserRecord().setAttributes(attributes);
-		userRequest.getUserRecord().setId(userName);
-		userRequest.getUserRecord().setDefaultCurrencyIsoCode("CNY");
+		/*userRequest.setAttributes(attributes);
+		userRequest.setId(userName);*/
+		userRequest.setCurrencyCode("CNY");
 		IDMSUserResponse idmsResponse = mapper.map(userRequest, IDMSUserResponse.class);
-		idmsResponse.setActive(userRequest.getUserRecord().isActive());
+		idmsResponse.setActive(userRequest.isActive());
 		sucessRespone.setIDMSUserRecord(idmsResponse);
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 		return Response.status(Response.Status.OK).entity(sucessRespone).build();
 	}
-
 }

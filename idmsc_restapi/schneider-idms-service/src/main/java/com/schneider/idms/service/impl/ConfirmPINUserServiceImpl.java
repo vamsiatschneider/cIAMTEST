@@ -489,7 +489,7 @@ public class ConfirmPINUserServiceImpl extends IdmsCommonServiceImpl implements 
 							&& UserConstants.USER_REGISTRATION.equalsIgnoreCase(confirmPIN.getOperation()))) {
 				confirmPIN.setId(uniqueIdentifier);
 				confirmPIN.setIDMS_Federated_ID__c(federationID);
-				uimsUserManagerSoapService.activateUIMSUserConfirmPIN(confirmPIN, vNewCntValue.toString(),
+				direct_uimsUserManagerSoapService.activateUIMSUserConfirmPIN(confirmPIN, vNewCntValue.toString(),
 						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, loginIdentifierType, emailOrMobile);
 			} else if (null != confirmPIN.getIDMS_Profile_update_source()
 					&& !UserConstants.UIMS.equalsIgnoreCase(confirmPIN.getIDMS_Profile_update_source())
@@ -498,7 +498,7 @@ public class ConfirmPINUserServiceImpl extends IdmsCommonServiceImpl implements 
 					&& (null != confirmPIN.getUIFlag() && !confirmPIN.getUIFlag().isEmpty())) {
 
 				// Calling Async method of setUIMSPassword
-				uimsUserManagerSoapService.setUIMSPassword(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+				direct_uimsUserManagerSoapService.setUIMSPassword(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						uniqueIdentifier, federationID, confirmPIN.getPassword(), vNewCntValue.toString(),
 						loginIdentifierType, emailOrMobile);
 			}
@@ -562,7 +562,7 @@ public class ConfirmPINUserServiceImpl extends IdmsCommonServiceImpl implements 
 					// creating the user
 					CreateUserRequest createUserRequest = new CreateUserRequest();
 					createUserRequest.setUserRecord(ifwUser);
-					Response userRegistrationResponse = createUserService.userRegistration("", "", createUserRequest);
+					Response userRegistrationResponse = null;//createUserService.userRegistration("", "", "", "", "", "");
 					if (200 == userRegistrationResponse.getStatus()) {
 						// confirm the user
 						ConfirmPinRequest confirmPinRequest = new ConfirmPinRequest();

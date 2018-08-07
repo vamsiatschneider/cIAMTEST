@@ -118,11 +118,14 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 				}
 
-				if (checkMandatoryFieldsFromRequest(userRequest.getUserRecord(), userResponse, false)) {
+				/**
+				 *  Need to check with for validation
+				 */
+				/*if (checkMandatoryFieldsFromRequest(userRequest.getUserRecord(), userResponse, false)) {
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
 					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
-				}
+				}*/ 
 			} catch (Exception e) {
 				e.printStackTrace();
 				userResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
@@ -468,7 +471,7 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				com.se.uims.usermanager.UserV6 identity = mapper.map(userRequest, com.se.uims.usermanager.UserV6.class);
 
 				// calling Async method updateUIMSUserAndCompany
-				uimsUserManagerSoapService.updateUIMSUserAndCompany(fedId, identity,
+				direct_uimsUserManagerSoapService.updateUIMSUserAndCompany(fedId, identity,
 						userRequest.getUserRecord().getIDMS_User_Context__c(), company, vNewCntValue.toString(),
 						productService, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, usermail);
 			}
