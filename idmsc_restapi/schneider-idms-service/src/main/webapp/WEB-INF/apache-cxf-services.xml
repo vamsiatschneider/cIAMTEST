@@ -75,6 +75,7 @@
 			<ref bean="createUserService"/>
 			<ref bean="confirmPinService"/>
 			<ref bean="updateUserService"/>
+			<ref bean="resendPinService"/>
 		</jaxrs:serviceBeans>
 		<jaxrs:providers>
 			<!-- TODO: Since allowOrigins is not set, all origins are allowed - i.e. "Access-Control-Allow-Origin:*" -->

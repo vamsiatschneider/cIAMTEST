@@ -16,6 +16,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.idms.model.ResendPinRequest;
@@ -28,6 +29,7 @@ import com.se.idms.cache.utils.EmailConstants;
 import com.se.idms.util.JsonConstants;
 import com.se.idms.util.UserConstants;
 
+@Service("resendPinService")
 public class ResendPinServiceImpl extends IdmsCommonServiceImpl implements IResendPinService {
 	
 	/**

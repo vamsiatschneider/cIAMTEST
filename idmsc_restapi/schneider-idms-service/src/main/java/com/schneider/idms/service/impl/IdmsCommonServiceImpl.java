@@ -1282,10 +1282,14 @@ public class IdmsCommonServiceImpl {
 		 */
 
 		if ((UserConstants.USER_TYPE_L2.equalsIgnoreCase(userType)
-				|| UserConstants.USER_TYPE_L3.equalsIgnoreCase(userType))
-				|| (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(userRequest.getIDMS_User_Context__c())
-						|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(userRequest.getIDMS_User_Context__c()))) {
+				|| UserConstants.USER_TYPE_L3.equalsIgnoreCase(userType))) {
 
+			/*
+			 * Need to add the below condition if there any failures
+			 * 
+			 * || (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(userRequest.getIDMS_User_Context__c())
+					|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(userRequest.getIDMS_User_Context__c()))*/
+			
 			/**
 			 * CompanyName Length Validation check
 			 */
