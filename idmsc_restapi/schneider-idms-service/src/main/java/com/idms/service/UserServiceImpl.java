@@ -5661,8 +5661,8 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private String getIDMSAclType(String aclType) {
-		LOGGER.info("Entered getIDMSAclType() -> Start");
-		LOGGER.info("Parameter aclType -> " + aclType);
+		/*LOGGER.info("Entered getIDMSAclType() -> Start");
+		LOGGER.info("Parameter aclType -> " + aclType);*/
 
 		if (UserConstants.ACLTYPE_APPLICATION.equalsIgnoreCase(aclType))
 			return UserConstants.ACLTYPE_APPLICATIONS;
