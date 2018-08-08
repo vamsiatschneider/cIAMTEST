@@ -58,14 +58,14 @@ import com.uims.companymanager.CompanyV3;
  * @author SESA453215
  *
  */
-@org.springframework.stereotype.Service("uimsUserManagerSoapService_Direct")
+@org.springframework.stereotype.Service("directUIMSUserManagerSoapService")
 @EnableAsync
-public class Direct_UIMSUserManagerSoapService {
+public class DirectUIMSUserManagerSoapService {
 
 	/**
 	 * Logger instance.
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(Direct_UIMSUserManagerSoapService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DirectUIMSUserManagerSoapService.class);
 
 	private static final Logger UIMSLOGGER = LoggerFactory.getLogger("uimsLogger");
 
@@ -841,7 +841,7 @@ public class Direct_UIMSUserManagerSoapService {
 
 	public static void main(String[] args) {
 
-		Direct_UIMSUserManagerSoapService service = new Direct_UIMSUserManagerSoapService();
+		DirectUIMSUserManagerSoapService service = new DirectUIMSUserManagerSoapService();
 		com.uims.authenticatedUsermanager.UserV6 user = new com.uims.authenticatedUsermanager.UserV6();
 		user.setFederatedID("123457");
 		String email = UUID.randomUUID().toString() + "@mailinator.com";

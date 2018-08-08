@@ -57,7 +57,7 @@
 								  location="classpath:config/properties/application.properties" />
 
 	<!-- scans and register beans using annotation-config (metadata) -->
-	<context:component-scan base-package="com.idms.*,com.se.idms.*,com.schneider.idms.*" />
+	<context:component-scan base-package="com.idms.*,com.se.idms.*,com.schneider.idms.*,com.schneider.uims.*" />
 
 	<bean name="defaultMapper" class="ma.glasnost.orika.impl.ConfigurableMapper" />
 
@@ -73,11 +73,8 @@
 			<ref bean="uimsSetPasswordSoapService"/>
 			<ref bean="commonService"/>
 			<ref bean="createUserService"/>
-			<ref bean="confirmPinService"/>
-			<ref bean="updateUserService"/>
-			<ref bean="resendPinService"/>
+			<ref bean="directUIMSUserManagerSoapService"/>
 			
-			<ref bean="uimsUserManagerSoapService_Direct"/>
 		</jaxrs:serviceBeans>
 		<jaxrs:providers>
 			<!-- TODO: Since allowOrigins is not set, all origins are allowed - i.e. "Access-Control-Allow-Origin:*" -->

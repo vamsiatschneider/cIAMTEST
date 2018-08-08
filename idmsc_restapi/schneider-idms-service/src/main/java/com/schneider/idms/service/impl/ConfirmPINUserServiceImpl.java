@@ -24,7 +24,6 @@ import org.apache.cxf.helpers.IOUtils;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.idms.model.ConfirmPinErrorResponse;
@@ -48,7 +47,7 @@ import com.se.idms.dto.PasswordRecoveryResponse;
 import com.se.idms.util.JsonConstants;
 import com.se.idms.util.UserConstants;
 
-@Service("confirmPinService")
+//@Service("confirmPinService")
 public class ConfirmPINUserServiceImpl extends IdmsCommonServiceImpl implements IConfirmPinUserService {
 
 	/**
@@ -489,8 +488,8 @@ public class ConfirmPINUserServiceImpl extends IdmsCommonServiceImpl implements 
 							&& UserConstants.USER_REGISTRATION.equalsIgnoreCase(confirmPIN.getOperation()))) {
 				confirmPIN.setId(uniqueIdentifier);
 				confirmPIN.setIDMS_Federated_ID__c(federationID);
-				direct_uimsUserManagerSoapService.activateUIMSUserConfirmPIN(confirmPIN, vNewCntValue.toString(),
-						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, loginIdentifierType, emailOrMobile);
+				/*direct_uimsUserManagerSoapService.activateUIMSUserConfirmPIN(confirmPIN, vNewCntValue.toString(),
+						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, loginIdentifierType, emailOrMobile);*/
 			} else if (null != confirmPIN.getIDMS_Profile_update_source()
 					&& !UserConstants.UIMS.equalsIgnoreCase(confirmPIN.getIDMS_Profile_update_source())
 					&& (null != confirmPIN.getOperation()
@@ -498,9 +497,9 @@ public class ConfirmPINUserServiceImpl extends IdmsCommonServiceImpl implements 
 					&& (null != confirmPIN.getUIFlag() && !confirmPIN.getUIFlag().isEmpty())) {
 
 				// Calling Async method of setUIMSPassword
-				direct_uimsUserManagerSoapService.setUIMSPassword(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+				/*direct_uimsUserManagerSoapService.setUIMSPassword(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						uniqueIdentifier, federationID, confirmPIN.getPassword(), vNewCntValue.toString(),
-						loginIdentifierType, emailOrMobile);
+						loginIdentifierType, emailOrMobile);*/
 			}
 			LOGGER.info("activateUIMSUserConfirmPIN is completed successfully::::");
 

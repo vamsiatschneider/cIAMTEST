@@ -29,7 +29,7 @@ import com.se.idms.cache.utils.EmailConstants;
 import com.se.idms.util.JsonConstants;
 import com.se.idms.util.UserConstants;
 
-@Service("resendPinService")
+//@Service("resendPinService")
 public class ResendPinServiceImpl extends IdmsCommonServiceImpl implements IResendPinService {
 	
 	/**

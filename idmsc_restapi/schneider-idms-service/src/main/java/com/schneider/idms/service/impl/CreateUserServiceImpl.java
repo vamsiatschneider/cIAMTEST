@@ -22,6 +22,7 @@ import javax.ws.rs.core.Response;
 import org.apache.cxf.helpers.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,6 +38,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.schneider.idms.model.IdmsUserRequest;
 import com.schneider.idms.service.ICreateUserService;
+import com.schneider.uims.service.DirectUIMSUserManagerSoapService;
 import com.se.idms.cache.utils.EmailConstants;
 import com.se.idms.dto.ErrorResponse;
 import com.se.idms.dto.UserServiceResponse;
@@ -56,6 +58,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 
 	@Inject
 	public static UserServiceResponse userResponse;
+	
 
 	@Override
 	public Response userRegistration(String authorization, String accept, String region, String clientId,
@@ -78,7 +81,14 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 		UserServiceResponse userResponse = new UserServiceResponse();
 		String userType = null;
 		try {
+			
+			
+			/**
+			 * Check the authorization is valid or not
+			 */
 
+			
+			
 			objMapper = new ObjectMapper();
 
 			LOGGER.info("Entered userRegistration() -> Start");
@@ -315,6 +325,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 
 			}
 			openAmReq.getInput().getUser().setUsername(userName);
+			openAmReq.getInput().getUser().setUserPassword(generateRamdomPassWord());
 			/**
 			 * Adding below line for R4 Release
 			 */
@@ -460,7 +471,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			UserV6 identity = mapper.map(userRequest, UserV6.class);
 			// forcedFederatedId = "cn00"+ UUID.randomUUID().toString();
 			// Calling Async method createUIMSUserAndCompany
-			direct_uimsUserManagerSoapService.createUIMSUserAndCompany(UimsConstants.CALLER_FID, identity,
+			directUIMSUserManagerSoapService.createUIMSUserAndCompany(UimsConstants.CALLER_FID, identity,
 					userRequest.getUserContext(), company, userName,
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, UserConstants.V_NEW,
 					userName, userRequest);

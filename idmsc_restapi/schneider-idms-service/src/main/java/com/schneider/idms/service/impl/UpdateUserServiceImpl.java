@@ -20,7 +20,6 @@ import javax.ws.rs.core.Response;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.idms.model.ActivateUser;
@@ -41,7 +40,7 @@ import com.se.idms.util.JsonConstants;
 import com.se.idms.util.UserConstants;
 import com.uims.companymanager.CompanyV3;
 
-@Service("updateUserService")
+//@Service("updateUserService")
 public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpdateUserService {
 
 	/**
@@ -471,9 +470,9 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				com.se.uims.usermanager.UserV6 identity = mapper.map(userRequest, com.se.uims.usermanager.UserV6.class);
 
 				// calling Async method updateUIMSUserAndCompany
-				direct_uimsUserManagerSoapService.updateUIMSUserAndCompany(fedId, identity,
+				/*direct_uimsUserManagerSoapService.updateUIMSUserAndCompany(fedId, identity,
 						userRequest.getUserRecord().getIDMS_User_Context__c(), company, vNewCntValue.toString(),
-						productService, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, usermail);
+						productService, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, usermail);*/
 			}
 
 			//R7 Need to change the below one

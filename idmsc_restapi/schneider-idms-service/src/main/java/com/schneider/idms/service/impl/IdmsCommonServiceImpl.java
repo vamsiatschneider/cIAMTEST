@@ -42,9 +42,10 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+import com.schneider.idms.common.DirectApiConstants;
 import com.schneider.idms.mapper.DirectApiIdmsMapper;
 import com.schneider.idms.model.IdmsUserRequest;
-import com.schneider.uims.service.Direct_UIMSUserManagerSoapService;
+import com.schneider.uims.service.DirectUIMSUserManagerSoapService;
 import com.se.idms.cache.CacheTypes;
 import com.se.idms.cache.validate.IValidator;
 import com.se.idms.dto.ParseValuesByOauthHomeWorkContextDto;
@@ -112,10 +113,10 @@ public class IdmsCommonServiceImpl {
 	protected SendEmail sendEmail;
 
 	@Inject
-	protected Direct_UIMSUserManagerSoapService direct_uimsUserManagerSoapService;
-
+	public UIMSAccessManagerSoapService uimsAccessManagerSoapService;
+	
 	@Inject
-	protected UIMSAccessManagerSoapService uimsAccessManagerSoapService;
+	public DirectUIMSUserManagerSoapService directUIMSUserManagerSoapService;
 
 	@Value("${authCsvPath}")
 	protected String authCsvPath;
@@ -230,14 +231,14 @@ public class IdmsCommonServiceImpl {
 				&& (null == userRequest.getMobilePhone() || userRequest.getMobilePhone().isEmpty())) {
 			userResponse.setStatus(errorStatus);
 			userResponse.setMessage(
-					UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.EMAIL + " OR " + UserConstants.MOBILE);
+					UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.EMAIL + " OR " + DirectApiConstants.MOBILEPHONE);
 			return true;
 		}
 
 		if ((null != userRequest.getEmail() && !userRequest.getEmail().isEmpty())
 				&& (userRequest.getEmail().length() > 65)) {
 			userResponse.setStatus(errorStatus);
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.EMAIL);
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.EMAIL);
 			return true;
 		}
 
@@ -253,11 +254,11 @@ public class IdmsCommonServiceImpl {
 		 * FirstName Mandatory validation and length check
 		 */
 		if ((checkMandatoryFields) && (null == userRequest.getFirstName() || userRequest.getFirstName().isEmpty())) {
-			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.FIRST_NAME);
+			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.FIRSTNAME);
 			return true;
 		} else if ((null != userRequest.getFirstName() && !userRequest.getFirstName().isEmpty())
 				&& (!legthValidator.validate(UserConstants.FIRST_NAME, userRequest.getFirstName()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.FIRST_NAME);
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.FIRSTNAME);
 			return true;
 		}
 
@@ -265,11 +266,11 @@ public class IdmsCommonServiceImpl {
 		 * LastName validation and length check
 		 */
 		if ((checkMandatoryFields) && (null == userRequest.getLastName() || userRequest.getLastName().isEmpty())) {
-			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.LAST_NAME);
+			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.LASTNAME);
 			return true;
 		} else if ((null != userRequest.getLastName() && !userRequest.getLastName().isEmpty())
 				&& (!legthValidator.validate(UserConstants.LAST_NAME, userRequest.getLastName()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.LAST_NAME);
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.LASTNAME);
 			return true;
 		}
 
@@ -278,16 +279,16 @@ public class IdmsCommonServiceImpl {
 		 */
 
 		if ((checkMandatoryFields) && (null == userRequest.getCounty() || userRequest.getCounty().isEmpty())) {
-			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COUNTRY);
+			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COUNTY);
 			return true;
 		} else if ((null != userRequest.getCounty() && !userRequest.getCounty().isEmpty())) {
 
 			if (!legthValidator.validate(UserConstants.COUNTRY, userRequest.getCounty())) {
-				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COUNTRY);
+				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COUNTY);
 				return true;
 
 			} else if (!pickListValidator.validate(UserConstants.COUNTRY, userRequest.getCounty())) {
-				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.COUNTRY);
+				userResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.COUNTY);
 				return true;
 			}
 
@@ -301,13 +302,13 @@ public class IdmsCommonServiceImpl {
 				&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
 				&& (null == userRequest.getLanguageCode()
 						|| userRequest.getLanguageCode().isEmpty())) {
-			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.PREFERRED_LANGUAGE);
+			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.LANGUAGECODE);
 			return true;
 		} else if ((null != userRequest.getLanguageCode()
 				&& !userRequest.getLanguageCode().isEmpty())
 				&& !pickListValidator.validate(UserConstants.PREFERRED_LANGUAGE,
 						userRequest.getLanguageCode().toLowerCase())) {
-			userResponse.setMessage(UserConstants.INVALID_VALUE_IDMS + UserConstants.PREFERRED_LANGUAGE);
+			userResponse.setMessage(UserConstants.INVALID_VALUE_IDMS + DirectApiConstants.LANGUAGECODE);
 			return true;
 		}
 
@@ -316,13 +317,13 @@ public class IdmsCommonServiceImpl {
 						&& !userRequest.getLanguageCode().isEmpty())) {
 			if (!legthValidator.validate(UserConstants.PREFERRED_LANGUAGE,
 					userRequest.getLanguageCode())) {
-				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.PREFERRED_LANGUAGE);
+				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.LANGUAGECODE);
 				return true;
 
 			}
 			if (!pickListValidator.validate(UserConstants.PREFERRED_LANGUAGE,
 					userRequest.getLanguageCode())) {
-				userResponse.setMessage(UserConstants.INVALID_VALUE_IDMS + UserConstants.PREFERRED_LANGUAGE);
+				userResponse.setMessage(UserConstants.INVALID_VALUE_IDMS + DirectApiConstants.LANGUAGECODE);
 				return true;
 			}
 		}
@@ -333,14 +334,14 @@ public class IdmsCommonServiceImpl {
 
 		if ((checkMandatoryFields) && (null == userRequest.getRegistrationSource()
 				|| userRequest.getRegistrationSource().isEmpty())) {
-			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.IDMS_REGISTRATION_SOURCE_C);
+			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.REGISTRATIONSOURCE);
 			return true;
 		} else if ((checkMandatoryFields)
 				&& (null != userRequest.getRegistrationSource()
 						&& !userRequest.getRegistrationSource().isEmpty())
 				&& (!legthValidator.validate(UserConstants.IDMS_REGISTRATION_SOURCE_C,
 						userRequest.getRegistrationSource()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_REGISTRATION_SOURCE_C);
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.REGISTRATIONSOURCE);
 			return true;
 		}
 
@@ -350,7 +351,7 @@ public class IdmsCommonServiceImpl {
 
 			if ((checkMandatoryFields) && (null == userRequest.getFederationId()
 					|| userRequest.getFederationId().isEmpty())) {
-				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.FEDERATION_IDENTIFIER);
+				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.REGISTRATIONSOURCE);
 				return true;
 			}
 		}
@@ -362,7 +363,7 @@ public class IdmsCommonServiceImpl {
 				if (!legthValidator.validate(UserConstants.MOBILE_PHONE, userRequest.getMobilePhone())) {
 
 					userResponse.setStatus(errorStatus);
-					userResponse.setMessage("Field(s) not in correct format -" + UserConstants.MOBILE_PHONE);
+					userResponse.setMessage("Field(s) not in correct format -" + DirectApiConstants.MOBILEPHONE);
 					return true;
 				}
 			}
@@ -375,18 +376,18 @@ public class IdmsCommonServiceImpl {
 				&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
 				&& (null == userRequest.getUserContext() || userRequest.getUserContext().isEmpty())) {
 			userResponse
-					.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.IDMS_USER_CONTEXT_C.toString());
+					.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.USERCONTEXT);
 			return true;
 		} else if (null != userRequest.getUserContext() && !userRequest.getUserContext().isEmpty()) {
 
 			if (!legthValidator.validate(UserConstants.IDMS_USER_CONTEXT_C, userRequest.getUserContext())) {
 				userResponse.setMessage(
-						UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_USER_CONTEXT_C.toString());
+						UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.USERCONTEXT);
 				return true;
 
 			} else if (!pickListValidator.validate(UserConstants.IDMS_USER_CONTEXT_C,
 					userRequest.getUserContext())) {
-				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_USER_CONTEXT_C.toString());
+				userResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.USERCONTEXT);
 				return true;
 			}
 		}
@@ -414,11 +415,11 @@ public class IdmsCommonServiceImpl {
 			if ((checkMandatoryFields)
 					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
 					&& (null == userRequest.getCompanyName() || userRequest.getCompanyName().isEmpty())) {
-				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_NAME.toString());
+				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYNAME);
 				return true;
 			} else if ((null != userRequest.getCompanyName() && !userRequest.getCompanyName().isEmpty())
 					&& (!legthValidator.validate(UserConstants.COMPANY_NAME, userRequest.getCompanyName()))) {
-				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_NAME);
+				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYNAME);
 				return true;
 			}
 
@@ -430,7 +431,7 @@ public class IdmsCommonServiceImpl {
 					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
 					&& (null == userRequest.getClassLevel1() || userRequest.getClassLevel1().isEmpty())) {
 				userResponse.setMessage(
-						UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.IDMS_CLASS_LEVEL_C.toString());
+						UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.CLASSLEVEL1);
 				return true;
 			} else if ((null != userRequest.getClassLevel1()
 					&& !userRequest.getClassLevel1().isEmpty())) {
@@ -443,7 +444,7 @@ public class IdmsCommonServiceImpl {
 				 * 
 				 * } else
 				 */ if (!pickListValidator.validate(UserConstants.IAM_A1, userRequest.getClassLevel1())) {
-					userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_CLASS_LEVEL_C);
+					userResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.CLASSLEVEL1);
 					return true;
 				}
 			}
@@ -461,12 +462,12 @@ public class IdmsCommonServiceImpl {
 					&& (null == userRequest.getCompanyStreet()
 					|| userRequest.getCompanyStreet().isEmpty())) {
 				userResponse.setMessage(
-						UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_ADDRESS1_C.toString());
+						UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYSTREET);
 				return true;
 			} else if ((null != userRequest.getCompanyStreet() && !userRequest.getCompanyStreet().isEmpty())
 					&& (!legthValidator.validate(UserConstants.COMPANY_ADDRESS1_C,
 							userRequest.getCompanyStreet()))) {
-				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_ADDRESS1_C);
+				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYSTREET);
 				return true;
 			}
 
@@ -478,11 +479,11 @@ public class IdmsCommonServiceImpl {
 					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
 					&& (null == userRequest.getCompanyCity() || userRequest.getCompanyCity().isEmpty())) {
 				userResponse
-				.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_CITY_C.toString());
+				.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYCITY);
 				return true;
 			} else if ((null != userRequest.getCompanyCity() && !userRequest.getCompanyCity().isEmpty())
 					&& (!legthValidator.validate(UserConstants.COMPANY_CITY_C, userRequest.getCompanyCity()))) {
-				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_CITY_C);
+				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYCITY);
 				return true;
 			}
 
@@ -494,12 +495,12 @@ public class IdmsCommonServiceImpl {
 					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
 					&& (null == userRequest.getCompanyZipCode() || userRequest.getCompanyZipCode().isEmpty())) {
 				userResponse
-				.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_POSTAL_CODE_C.toString());
+				.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYZIPCODE);
 				return true;
 			} else if ((null != userRequest.getCompanyZipCode() && !userRequest.getCompanyZipCode().isEmpty())
 					&& (!legthValidator.validate(UserConstants.COMPANY_POSTAL_CODE_C,
 							userRequest.getCompanyZipCode()))) {
-				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_POSTAL_CODE_C);
+				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYZIPCODE);
 				return true;
 			}
 
@@ -511,11 +512,11 @@ public class IdmsCommonServiceImpl {
 					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
 					&& (null == userRequest.getCompanyCounty()) || userRequest.getCompanyCounty().isEmpty()) {
 				userResponse
-				.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.IDMSCompanyCounty__c.toString());
+				.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYCOUNTY);
 				return true;
 			} else if ((null != userRequest.getCompanyCounty() && !userRequest.getCompanyCounty().isEmpty())
 					&& (!pickListValidator.validate(UserConstants.COUNTRY, userRequest.getCompanyCounty()))) {
-				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMSCompanyCounty__c);
+				userResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.COMPANYCOUNTY);
 				return true;
 			}
 
@@ -527,7 +528,7 @@ public class IdmsCommonServiceImpl {
 					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getClassLevel2()))
 					&& (null == userRequest.getClassLevel2() || userRequest.getClassLevel2().isEmpty())) {
 				userResponse
-				.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.IDMS_CLASS_LEVEL2_C.toString());
+				.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.CLASSLEVEL2);
 				return true;
 			} else if ((null != userRequest.getClassLevel2() && !userRequest.getClassLevel2().isEmpty())) {
 
@@ -540,7 +541,7 @@ public class IdmsCommonServiceImpl {
 				 * } else
 				 */ if (!pickListValidator.validate(UserConstants.IAM_A2.toString(),
 						 userRequest.getClassLevel2())) {
-					 userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_CLASS_LEVEL2_C);
+					 userResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.CLASSLEVEL2);
 					 return true;
 				 }
 			}
@@ -553,7 +554,7 @@ public class IdmsCommonServiceImpl {
 					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
 					&& (null == userRequest.getMarketSegment() || userRequest.getMarketSegment().isEmpty())) {
 				userResponse
-				.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.IDMS_MARKET_SEGMENT_C.toString());
+				.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.MARKETSEGMENT);
 				return true;
 			} else if ((null != userRequest.getMarketSegment() && !userRequest.getMarketSegment().isEmpty())) {
 
@@ -567,7 +568,7 @@ public class IdmsCommonServiceImpl {
 				 * } else
 				 */ if (!pickListValidator.validate(UserConstants.MY_INDUSTRY_SEGMENT,
 						 userRequest.getMarketSegment())) {
-					 userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_MARKET_SEGMENT_C);
+					 userResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.MARKETSEGMENT);
 					 return true;
 				 }
 			}
@@ -584,12 +585,12 @@ public class IdmsCommonServiceImpl {
 
 			if (!legthValidator.validate(UserConstants.IDMS_Email_opt_in__c, userRequest.getEmailOptIn())) {
 				userResponse
-						.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.EMLAIL_OPT_IN_DOC.toString());
+						.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.EMAILOPTIN);
 				return true;
 
 			} else if (!pickListValidator.validate(UserConstants.EMLAIL_OPT_IN,
 					userRequest.getEmailOptIn())) {
-				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.EMLAIL_OPT_IN_DOC.toString());
+				userResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.EMAILOPTIN);
 				return true;
 			}
 		}
@@ -600,11 +601,11 @@ public class IdmsCommonServiceImpl {
 		if ((null != userRequest.getCurrencyCode() && !userRequest.getCurrencyCode().isEmpty())) {
 
 			if (!legthValidator.validate(UserConstants.CURRENCY, userRequest.getCurrencyCode())) {
-				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.CURRENCY);
+				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.CURRENCYCODE);
 				return true;
 
 			} else if (!pickListValidator.validate(UserConstants.CURRENCY, userRequest.getCurrencyCode())) {
-				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.CURRENCY);
+				userResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.CURRENCYCODE);
 				return true;
 			}
 		}
@@ -615,7 +616,7 @@ public class IdmsCommonServiceImpl {
 
 		if ((null != userRequest.getStreet() && !userRequest.getStreet().isEmpty())
 				&& (!legthValidator.validate(UserConstants.STREET, userRequest.getStreet()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.STREET);
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.STREET);
 			return true;
 		}
 
@@ -624,7 +625,7 @@ public class IdmsCommonServiceImpl {
 		 */
 		if ((null != userRequest.getCity() && !userRequest.getCity().isEmpty())
 				&& (!legthValidator.validate(UserConstants.CITY, userRequest.getCity()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.CITY);
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.CITY);
 			return true;
 		}
 
@@ -634,7 +635,7 @@ public class IdmsCommonServiceImpl {
 
 		if ((null != userRequest.getZipCode() && !userRequest.getZipCode().isEmpty())
 				&& (!legthValidator.validate(UserConstants.POSTAL_CODE, userRequest.getZipCode()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.POSTAL_CODE);
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.ZIPCODE);
 			return true;
 		}
 
@@ -649,11 +650,11 @@ public class IdmsCommonServiceImpl {
 			if ((null != userRequest.getStateOrProvinceCode() && !userRequest.getStateOrProvinceCode().isEmpty())) {
 
 				if (!legthValidator.validate(UserConstants.STATE, userRequest.getStateOrProvinceCode())) {
-					userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.STATE);
+					userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.STATEORPROVINCECODE);
 					return true;
 
 				} else if (!pickListValidator.validate(UserConstants.STATE, userRequest.getStateOrProvinceCode())) {
-					userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.STATE);
+					userResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.STATEORPROVINCECODE);
 					return true;
 				}
 			}
@@ -664,7 +665,7 @@ public class IdmsCommonServiceImpl {
 		 */
 		if ((null != userRequest.getCounty() && !userRequest.getCounty().isEmpty())
 				&& (!legthValidator.validate(UserConstants.IDMS_COUNTY_C, userRequest.getCounty()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_COUNTY_C);
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COUNTY);
 			return true;
 		}
 
@@ -673,7 +674,7 @@ public class IdmsCommonServiceImpl {
 		 */
 		if ((null != userRequest.getpOBox() && !userRequest.getpOBox().isEmpty())
 				&& (!legthValidator.validate(UserConstants.IDMS_PO_BOX_C, userRequest.getpOBox()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_PO_BOX_C);
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.POBOX);
 			return true;
 		}
 
@@ -685,12 +686,12 @@ public class IdmsCommonServiceImpl {
 				&& (UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
 				&& (null == userRequest.getFederationId() || userRequest.getFederationId().isEmpty())) {
 			userResponse
-					.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.FEDERATION_IDENTIFIER.toString());
+					.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.FEDERATIONID);
 			return true;
 		} else if ((null != userRequest.getFederationId() && !userRequest.getFederationId().isEmpty())
 				&& (!legthValidator.validate(UserConstants.FEDERATION_IDENTIFIER,
 						userRequest.getFederationId()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.FEDERATION_IDENTIFIER);
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.FEDERATIONID);
 			return true;
 		}
 
@@ -699,13 +700,13 @@ public class IdmsCommonServiceImpl {
 		 */
 		if ((!checkMandatoryFields) && (null == userRequest.getProfileLastUpdateSource()
 				|| userRequest.getProfileLastUpdateSource().isEmpty())) {
-			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.UPDATE_SOURCE);
+			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.PROFILELASTUPDATESOURCE);
 			return true;
 		} else if ((null != userRequest.getProfileLastUpdateSource()
 				&& !userRequest.getProfileLastUpdateSource().isEmpty())
 				&& (!pickListValidator.validate(UserConstants.UPDATE_SOURCE,
 						userRequest.getProfileLastUpdateSource()))) {
-			userResponse.setMessage(UserConstants.INVALID_VALUE_IDMS + UserConstants.UPDATE_SOURCE);
+			userResponse.setMessage(UserConstants.INVALID_VALUE_IDMS + DirectApiConstants.PROFILELASTUPDATESOURCE);
 			return true;
 		}
 
@@ -715,7 +716,7 @@ public class IdmsCommonServiceImpl {
 		if ((!checkMandatoryFields) && (null != userRequest.getProfileLastUpdateSource()
 				&& UserConstants.UIMS.equalsIgnoreCase(userRequest.getProfileLastUpdateSource())
 				&& null == userRequest.getFederationId())) {
-			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.FEDERATION_IDENTIFIER);
+			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.FEDERATIONID);
 			return true;
 		}
 
@@ -727,7 +728,7 @@ public class IdmsCommonServiceImpl {
 				&& !userRequest.getCompanyAdditionalAddress().isEmpty())
 				&& (!legthValidator.validate(UserConstants.IDMS_ADDITIONAL_ADDRESS_C,
 						userRequest.getCompanyAdditionalAddress()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_ADDITIONAL_ADDRESS_C);
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYADDITIONALADDRESS);
 			return true;
 		}
 
@@ -743,7 +744,7 @@ public class IdmsCommonServiceImpl {
 			if ((null != userRequest.getCompanyStateOrProvinceCode() && !userRequest.getCompanyStateOrProvinceCode().isEmpty())) {
 
 				if (!pickListValidator.validate(UserConstants.COMPANY_STATE_C, userRequest.getCompanyStateOrProvinceCode())) {
-					userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.COMPANY_STATE_C);
+					userResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.COMPANYSTATEORPROVINCECODE);
 					return true;
 				}
 			}
@@ -755,7 +756,7 @@ public class IdmsCommonServiceImpl {
 		if ((null != userRequest.getCompanyPOBox() && !userRequest.getCompanyPOBox().isEmpty())
 				&& (!legthValidator.validate(UserConstants.IDMS_COMPANY_PO_BOX_C,
 						userRequest.getCompanyPOBox()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_COMPANY_PO_BOX_C);
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYPOBOX);
 			return true;
 		}
 
@@ -765,11 +766,11 @@ public class IdmsCommonServiceImpl {
 
 		if ((null != userRequest.getCompanyCountryCode() && !userRequest.getCompanyCountryCode().isEmpty())) {
 			if (!legthValidator.validate(UserConstants.COUNTRY, userRequest.getCompanyCountryCode())) {
-				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_COUNTRY_C);
+				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYCOUNTRYCODE);
 				return true;
 
 			} else if (!pickListValidator.validate(UserConstants.COUNTRY, userRequest.getCompanyCountryCode())) {
-				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.COMPANY_COUNTRY_C);
+				userResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.COMPANYCOUNTRYCODE);
 				return true;
 			}
 		}
@@ -780,7 +781,7 @@ public class IdmsCommonServiceImpl {
 
 		if ((null != userRequest.getCompanyAdditionalAddress() && !userRequest.getCompanyAdditionalAddress().isEmpty())
 				&& (!legthValidator.validate(UserConstants.COMPANY_ADDRESS2_C, userRequest.getCompanyAdditionalAddress()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_ADDRESS2_C);
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYADDITIONALADDRESS);
 			return true;
 		}
 
@@ -798,7 +799,7 @@ public class IdmsCommonServiceImpl {
 			 * 
 			 * } else
 			 */ if (!pickListValidator.validate(UserConstants.IAM_A2.toString(), userRequest.getClassLevel2())) {
-				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_CLASS_LEVEL2_C);
+				userResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.CLASSLEVEL2);
 				return true;
 			}
 		}
@@ -819,7 +820,7 @@ public class IdmsCommonServiceImpl {
 			 * } else
 			 */ if (!pickListValidator.validate(UserConstants.MY_INDUSTRY_SUB_SEGMENT,
 					userRequest.getMarketSubSegment())) {
-				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_MARKET_SUB_SEGMENT_C);
+				userResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.MARKETSUBSEGMENT);
 				return true;
 			}
 		}
@@ -829,7 +830,7 @@ public class IdmsCommonServiceImpl {
 		 */
 		if ((null != userRequest.getWorkPhone() && !userRequest.getWorkPhone().isEmpty())
 				&& (!legthValidator.validate(UserConstants.MOBILE_PHONE, userRequest.getWorkPhone()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.PHONE);
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.WORKPHONE);
 			return true;
 		}
 
@@ -841,7 +842,7 @@ public class IdmsCommonServiceImpl {
 
 			if ((null != userRequest.getWorkPhone() && !userRequest.getWorkPhone().isEmpty())
 					&& (!legthValidator.validate(UserConstants.MOBILE_PHONE, userRequest.getWorkPhone()))) {
-				userResponse.setMessage(UserConstants.COUNTRY_FIELDS_MISSING + UserConstants.PHONE);
+				userResponse.setMessage(UserConstants.COUNTRY_FIELDS_MISSING + DirectApiConstants.WORKPHONE);
 				return true;
 			}
 		}
@@ -858,7 +859,7 @@ public class IdmsCommonServiceImpl {
 			 * 
 			 * } else
 			 */ if (!pickListValidator.validate(UserConstants.JOB_TITLE.toString(), userRequest.getJobTitle())) {
-				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.JOB_TITLE_C);
+				userResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.JOBTITLE);
 				return true;
 			}
 		}
@@ -876,7 +877,7 @@ public class IdmsCommonServiceImpl {
 			 * 
 			 * } else
 			 */ if (!pickListValidator.validate(UserConstants.JOB_FUNCTION, userRequest.getJobFunction())) {
-				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.JOB_FUNCTION_C);
+				userResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.JOBFUNCTION);
 				return true;
 			}
 		}
@@ -888,7 +889,7 @@ public class IdmsCommonServiceImpl {
 		if ((null != userRequest.getJobDescription() && !userRequest.getJobDescription().isEmpty())
 				&& (!legthValidator.validate(UserConstants.IDMS_JOB_DESCRIPTION_C,
 						userRequest.getJobDescription()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_JOB_DESCRIPTION_C);
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.JOBDESCRIPTION);
 			return true;
 		}
 
@@ -900,7 +901,7 @@ public class IdmsCommonServiceImpl {
 				&& !userRequest.getMarketServed().isEmpty())
 				&& (!multiPickListValidator.validate(UserConstants.IDMS_COMPANY_MARKET_SERVED_C,
 						userRequest.getMarketServed()))) {
-			userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_COMPANY_MARKET_SERVED_C);
+			userResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.MARKETSERVED);
 			return true;
 		}
 
@@ -914,7 +915,7 @@ public class IdmsCommonServiceImpl {
 				&& !(UserConstants.TRUE.equalsIgnoreCase(userRequest.getHeadquarter())
 						|| UserConstants.FALSE.equalsIgnoreCase(userRequest.getHeadquarter()))) {
 			userResponse
-					.setMessage(UserConstants.INVALID_VALUE_HEADQUARTER + UserConstants.IDMS_COMPANY_HEAD_QUARTERS_C);
+					.setMessage(UserConstants.INVALID_VALUE_HEADQUARTER + DirectApiConstants.HEADQUARTER);
 			return true;
 		}
 
@@ -932,7 +933,7 @@ public class IdmsCommonServiceImpl {
 					userRequest.setAnnualRevenue(null);
 				} else {
 					userResponse
-							.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_ANNUAL_REVENUE_C);
+							.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.ANNUALREVENUE);
 					return true;
 				}
 			}
@@ -947,7 +948,7 @@ public class IdmsCommonServiceImpl {
 				&& (!legthValidator.validate(UserConstants.IDMS_TAX_IDENTIFICATION_NUMBER_C,
 						userRequest.getTaxIdentificationNumber()))) {
 			userResponse
-					.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_TAX_IDENTIFICATION_NUMBER_C);
+					.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.TAXIDENTIFICATIONNUMBER);
 			return true;
 		}
 
@@ -956,7 +957,7 @@ public class IdmsCommonServiceImpl {
 		 */
 		if ((null != userRequest.getMiddleName() && !userRequest.getMiddleName().isEmpty())
 				&& (!legthValidator.validate(UserConstants.IDMS_MIDDLE_NAME_C, userRequest.getMiddleName()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_MIDDLE_NAME_C);
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.MIDDLENAME);
 			return true;
 		}
 
@@ -966,7 +967,7 @@ public class IdmsCommonServiceImpl {
 
 		if ((null != userRequest.getCompanyWebsite() && !userRequest.getCompanyWebsite().isEmpty())
 				&& (!legthValidator.validate(UserConstants.COMPANY_WEBSITE_C, userRequest.getCompanyWebsite()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_WEBSITE_C);
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYWEBSITE);
 			return true;
 		}
 
@@ -976,7 +977,7 @@ public class IdmsCommonServiceImpl {
 		if ((null != userRequest.getSalutation() && !userRequest.getSalutation().isEmpty())
 				&& (!pickListValidator.validate(UserConstants.SALUTATION.toString(),
 						userRequest.getSalutation()))) {
-			userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.SALUTATION);
+			userResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.SALUTATION);
 			return true;
 		}
 
@@ -985,7 +986,7 @@ public class IdmsCommonServiceImpl {
 		 */
 		if ((null != userRequest.getDepartment() && !userRequest.getDepartment().isEmpty())
 				&& (!legthValidator.validate(UserConstants.DEPARTMENT, userRequest.getDepartment()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.DEPARTMENT);
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.DEPARTMENT);
 			return true;
 		}
 		/**
@@ -993,7 +994,7 @@ public class IdmsCommonServiceImpl {
 		 */
 		if ((null != userRequest.getSuffix() && !userRequest.getSuffix().isEmpty())
 				&& (!legthValidator.validate(UserConstants.IDMS_SUFFIX_C, userRequest.getSuffix()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_SUFFIX_C);
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.SUFFIX);
 			return true;
 		}
 
@@ -1002,7 +1003,7 @@ public class IdmsCommonServiceImpl {
 		 */
 		if ((null != userRequest.getFax() && !userRequest.getFax().isEmpty())
 				&& (!legthValidator.validate(UserConstants.FAX, userRequest.getFax()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.FAX);
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.FAX);
 			return true;
 		}
 
@@ -1015,7 +1016,7 @@ public class IdmsCommonServiceImpl {
 				&& (!legthValidator.validate(UserConstants.IDMS_COMAPNY_FED_IDENTIFIER_C,
 						userRequest.getCompanyFederatedId()))) {
 			userResponse
-					.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_COMAPNY_FED_IDENTIFIER_C);
+					.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYFEDERATEDID);
 			return true;
 		}
 
@@ -1026,7 +1027,7 @@ public class IdmsCommonServiceImpl {
 		if ((null != userRequest.getDelegatedIdp() && !userRequest.getDelegatedIdp().isEmpty())
 				&& (!pickListValidator.validate(UserConstants.DELEGATED_IDP.toString(),
 						userRequest.getDelegatedIdp()))) {
-			userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_DELEGATED_IDP_C);
+			userResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.DELEGATEDIDP);
 			return true;
 		}
 
@@ -1037,7 +1038,7 @@ public class IdmsCommonServiceImpl {
 		if ((null != userRequest.getIdentityType() && !userRequest.getIdentityType().isEmpty())
 				&& (!pickListValidator.validate(UserConstants.IDENTITY_TYPE.toString(),
 						userRequest.getIdentityType()))) {
-			userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_IDENTITY_TYPE_C);
+			userResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.IDENTITYTYPE);
 			return true;
 		}
 
@@ -1045,9 +1046,9 @@ public class IdmsCommonServiceImpl {
 		 * IDMSCompanyCounty__c Length Validation check
 		 */
 
-		if ((null != userRequest.getMobilePhone() && !userRequest.getMobilePhone().isEmpty())
-				&& (!legthValidator.validate(UserConstants.MOBILE_PHONE, userRequest.getMobilePhone()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.MOBILE_PHONE);
+		if ((null != userRequest.getCompanyCounty() && !userRequest.getCompanyCounty().isEmpty())
+				&& (!legthValidator.validate(UserConstants.IDMSCompanyCounty__c, userRequest.getCompanyCounty()))) {
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYCOUNTY);
 			return true;
 		}
 
@@ -1058,7 +1059,7 @@ public class IdmsCommonServiceImpl {
 		if ((null != userRequest.getPrimaryContact() && !userRequest.getPrimaryContact().isEmpty())
 				&& (!(UserConstants.TRUE.equalsIgnoreCase(userRequest.getPrimaryContact())
 						|| (UserConstants.FALSE.equalsIgnoreCase(userRequest.getPrimaryContact()))))) {
-			userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_PRIMARY_CONTACT_C);
+			userResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.PRIMARYCONTACT);
 			return true;
 		}
 
@@ -1071,7 +1072,7 @@ public class IdmsCommonServiceImpl {
 			 */
 			if ((checkMandatoryFields)
 					&& (null == userRequest.getFirstName() || userRequest.getFirstName().isEmpty())) {
-				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.FIRST_NAME);
+				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.FIRSTNAME);
 				return true;
 			}
 
@@ -1079,7 +1080,7 @@ public class IdmsCommonServiceImpl {
 			 * LastName validation and length check
 			 */
 			if ((checkMandatoryFields) && (null == userRequest.getLastName() || userRequest.getLastName().isEmpty())) {
-				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.LAST_NAME);
+				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.LASTNAME);
 				return true;
 			}
 
@@ -1089,7 +1090,7 @@ public class IdmsCommonServiceImpl {
 			if ((checkMandatoryFields) && (null == userRequest.getEmail() || userRequest.getEmail().isEmpty())
 					&& (null == userRequest.getMobilePhone() || userRequest.getMobilePhone().isEmpty())) {
 				userResponse.setMessage(
-						UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.EMAIL + " OR " + UserConstants.MOBILE);
+						UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.EMAIL + " OR " + DirectApiConstants.MOBILEPHONE);
 				return true;
 			}
 
@@ -1098,7 +1099,7 @@ public class IdmsCommonServiceImpl {
 			 */
 			if ((checkMandatoryFields) && (null == userRequest.getLanguageCode()
 					|| userRequest.getLanguageCode().isEmpty())) {
-				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.PREFERRED_LANGUAGE);
+				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.LANGUAGECODE);
 				return true;
 			}
 
@@ -1106,7 +1107,7 @@ public class IdmsCommonServiceImpl {
 			 * validate Country Code attribute values should be present
 			 */
 			if ((checkMandatoryFields) && (null == userRequest.getCountryCode() || userRequest.getCountryCode().isEmpty())) {
-				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COUNTRY);
+				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COUNTRYCODE);
 				return true;
 			}
 
@@ -1115,7 +1116,7 @@ public class IdmsCommonServiceImpl {
 			 */
 			if ((checkMandatoryFields)
 					&& (null == userRequest.getCompanyName() || userRequest.getCompanyName().isEmpty())) {
-				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_NAME);
+				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYNAME);
 				return true;
 			}
 
@@ -1124,7 +1125,7 @@ public class IdmsCommonServiceImpl {
 			 */
 			if ((checkMandatoryFields) && (null == userRequest.getCompanyStreet()
 					|| userRequest.getCompanyStreet().isEmpty())) {
-				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_ADDRESS1_C);
+				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYSTREET);
 				return true;
 			}
 
@@ -1133,7 +1134,7 @@ public class IdmsCommonServiceImpl {
 			 */
 			if ((checkMandatoryFields)
 					&& (null == userRequest.getCompanyCity() || userRequest.getCompanyCity().isEmpty())) {
-				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_CITY_C);
+				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYCITY);
 				return true;
 			}
 
@@ -1142,7 +1143,7 @@ public class IdmsCommonServiceImpl {
 			 */
 			if ((checkMandatoryFields) && (null == userRequest.getCompanyZipCode()
 					|| userRequest.getCompanyZipCode().isEmpty())) {
-				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_POSTAL_CODE_C);
+				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYZIPCODE);
 				return true;
 			}
 
@@ -1151,7 +1152,7 @@ public class IdmsCommonServiceImpl {
 			 */
 			if ((checkMandatoryFields)
 					&& (null == userRequest.getCompanyCountryCode() || userRequest.getCompanyCountryCode().isEmpty())) {
-				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_COUNTRY_C);
+				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYCOUNTRYCODE);
 				return true;
 			}
 
@@ -1159,7 +1160,7 @@ public class IdmsCommonServiceImpl {
 
 		if ((null != userRequest.getAboutMe() && !userRequest.getAboutMe().isEmpty())
 				&& (!legthValidator.validate(UserConstants.ABOUT_ME, userRequest.getFirstName()))) {
-			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.ABOUT_ME);
+			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.ABOUTME);
 			return true;
 		}
 
@@ -1196,7 +1197,7 @@ public class IdmsCommonServiceImpl {
 				&& (pickListValidator.validate(UserConstants.IDMS_BFO_profile,
 						userRequest.getProfileLastUpdateSource()))
 				&& (null == userRequest.getEmail() || userRequest.getEmail().isEmpty())) {
-			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.EMAIL);
+			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.EMAIL);
 			return true;
 		}
 
@@ -1374,4 +1375,5 @@ public class IdmsCommonServiceImpl {
 
 		return userLevel;
 	}
+
 }
