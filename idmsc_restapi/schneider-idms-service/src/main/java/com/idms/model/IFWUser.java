@@ -48,6 +48,9 @@ public class IFWUser extends BaseEntity {
 
 	@JsonProperty
 	private String DefaultCurrencyIsoCode;
+	
+	@JsonProperty
+	private String currencyCode;
 
 	@JsonProperty
 	private String CompanyName;
@@ -841,6 +844,16 @@ public class IFWUser extends BaseEntity {
 		this.trustedAdmin = trustedAdmin;
 	}
 
+	
+	@JsonProperty("currencyCode")
+	public String getCurrencyCode() {
+		return currencyCode;
+	}
+
+	@JsonProperty("currencyCode")
+	public void setCurrencyCode(String currencyCode) {
+		this.currencyCode = currencyCode;
+	}
 
 	@Override
 	public String toString() {

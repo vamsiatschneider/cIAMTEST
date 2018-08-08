@@ -336,6 +336,7 @@ public class ParseValuesByOauthHomeWorkContextDto {
 				? getValue(userProductDocCtx.read("$.preferredlanguage").toString()) : getDelimeter());
 		userResponse.setIDMS_Company_Currency_ISO_Code__c(null != userProductDocCtx.read("$.currency")
 				? getValue(userProductDocCtx.read("$.currency").toString()) : getDelimeter());
+		
 		userResponse.setStreet(null != userProductDocCtx.read("$.street")
 				? getValue(userProductDocCtx.read("$.street").toString()) : getDelimeter());
 		userResponse.setCity(null != userProductDocCtx.read("$.l") ? getValue(userProductDocCtx.read("$.l").toString())
@@ -366,7 +367,11 @@ public class ParseValuesByOauthHomeWorkContextDto {
 		
 		userResponse.setDefaultCurrencyIsoCode(null != userProductDocCtx.read("$.currency")
 				? getValue(userProductDocCtx.read("$.currency").toString()) : getDelimeter());
+		userResponse.setCurrencyCode(null != userProductDocCtx.read("$.currency")
+				? getValue(userProductDocCtx.read("$.currency").toString()) : getDelimeter());
 
+		userResponse.setCurrencyCode(null != userProductDocCtx.read("$.currency")
+				? getValue(userProductDocCtx.read("$.currency").toString()) : getDelimeter());
 
 		userResponse.setIDMS_Registration_Source__c(null != userProductDocCtx.read("$.registerationSource")
 				? getValue(userProductDocCtx.read("$.registerationSource").toString()) : getDelimeter());
@@ -478,6 +483,8 @@ public class ParseValuesByOauthHomeWorkContextDto {
 				? getValue(userProductDocCtx.read("$.preferredlanguage").toString()) : getDelimeter());
 		
 		userResponse.setDefaultCurrencyIsoCode(null != userProductDocCtx.read("$.currency")
+				? getValue(userProductDocCtx.read("$.currency").toString()) : getDelimeter());
+		userResponse.setCurrencyCode(null != userProductDocCtx.read("$.currency")
 				? getValue(userProductDocCtx.read("$.currency").toString()) : getDelimeter());
 				
 		userResponse.setIDMS_Company_Currency_ISO_Code__c(null != userProductDocCtx.read("$.currency")

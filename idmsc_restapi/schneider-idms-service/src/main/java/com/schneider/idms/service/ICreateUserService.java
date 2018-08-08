@@ -8,15 +8,18 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
-import com.idms.model.CreateUserRequest;
+import com.schneider.idms.model.IdmsUserRequest;
 
-@Path("/identity/services/apexrest")
+@Path("/identity/services/apexrest/IDMSServices")
 @Produces("application/json")
 public interface ICreateUserService {
 
 	@POST
-	@Path("/IDMSsvcs/1.0/IDMSUser")
+	@Path("/Registration/1.0")
 	@Consumes("application/json")
-	Response userRegistration(@HeaderParam("client_id")String clientId,
-			@HeaderParam("client_secret")String clientSecret,@Valid CreateUserRequest userRequest);
+	Response userRegistration(@HeaderParam("Authorization")String authorization,
+			@HeaderParam("Accept")String accept,
+			@HeaderParam("IDMS-Region")String region,
+			@HeaderParam("client_id")String clientId,
+			@HeaderParam("client_secret")String clientSecret,@Valid IdmsUserRequest userRequest);
 }
