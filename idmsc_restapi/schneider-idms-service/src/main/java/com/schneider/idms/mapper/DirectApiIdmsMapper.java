@@ -4,6 +4,7 @@ import javax.inject.Named;
 
 import com.idms.product.model.OpenAmUserRequest;
 import com.schneider.idms.model.IdmsUserRequest;
+import com.schneider.idms.model.IdmsUserResponse;
 import com.uims.authenticatedUsermanager.UserV6;
 import com.uims.companymanager.CompanyV3;
 
@@ -21,6 +22,7 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
     	configureIdmsUserRequestToOpenAmUserRequest(mapperFactory);
     	configureIdmsUserRequestToUimsCompanyV3(mapperFactory);
     	configureIdmsUserRequestToUimsUserV6(mapperFactory);
+    	configureIdmsUserRequestToIdmsUserResponse(mapperFactory);
     	
     }
     
@@ -92,6 +94,64 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
         .field(UserConstants.MAPPER_CREATE_USER_PR_REQUEST,UserConstants.MAPPER_OPENAM_USER_PR_REQUEST)
         .field("userRecord.adminFederatedId", "input.user.admin_federated_id")
         .field("userRecord.invitationCode", "input.user.invitationCode")*/
+        .byDefault()
+        .register();
+    }
+	
+	private void configureIdmsUserRequestToIdmsUserResponse(MapperFactory mapperFactory) {
+        mapperFactory.classMap(IdmsUserRequest.class,IdmsUserResponse.class)
+        
+        .field("userContext", "userContext")
+        .field("salutation", "salutation")
+        .field("firstName", "firstName")
+        .field("middleName", "middleName")
+        .field("lastName", "lastName")
+        .field("countryCode", "countryCode")
+        .field("email", "email")
+        .field("mobilePhone", "mobilePhone")
+        .field("languageCode", "languageCode")
+        .field("emailOptIn", "emailOptIn")
+        .field("aboutMe", "aboutMe")
+        .field("street", "street")
+        .field("city", "city")
+        .field("zipCode", "zipCode")
+        .field("stateOrProvinceCode", "stateOrProvinceCode")
+        .field("county", "county")
+        .field("pOBox", "pOBox")
+        .field("additionalAddress", "additionalAddress")
+        .field("suffix", "suffix")
+        .field("homePhone", "homePhone")
+        .field("fax", "fax")
+        .field("accountId", "accountId")
+        .field("registrationSource", "registrationSource")
+        .field("currency", "currency")
+        .field("companyName", "companyName")
+        .field("companyStreet", "companyStreet")
+        .field("companyCity", "companyCity")
+        .field("companyZipCode", "companyZipCode")
+        .field("companyStateOrProvinceCode", "companyStateOrProvinceCode")
+        .field("companyPOBox", "companyPOBox")
+        .field("companyCounty", "companyCounty")
+        .field("companyCountryCode", "companyCountryCode")
+        .field("companyAdditionalAddress", "companyAdditionalAddress")
+        .field("companyWebsite", "companyWebsite")
+        .field("classLevel1", "classLevel1")
+        .field("classLevel2", "classLevel2")
+        .field("marketSegment", "marketSegment")
+        .field("marketSubSegment", "marketSubSegment")
+        .field("marketServed", "marketServed")
+        .field("employeeSize", "employeeSize")
+        .field("department", "department")
+        .field("headquarter", "headquarter")
+        .field("annualRevenue", "annualRevenue")
+        .field("taxIdentificationNumber", "taxIdentificationNumber")
+        .field("jobTitle", "jobTitle")
+        .field("jobFunction", "jobFunction")
+        .field("jobDescription", "jobDescription")
+        .field("workPhone", "workPhone")
+        .field("trustedAdmin", "trustedAdmin")
+        .field("companyFederatedId", "companyFederatedId")
+        .field("currencyCode", "currencyCode") 
         .byDefault()
         .register();
     }

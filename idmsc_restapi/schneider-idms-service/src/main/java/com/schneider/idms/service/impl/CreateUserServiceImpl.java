@@ -17,6 +17,7 @@ import java.util.Date;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
 
 import org.apache.cxf.helpers.IOUtils;
@@ -38,6 +39,7 @@ import com.jayway.jsonpath.Option;
 import com.schneider.idms.common.ErrorCodeConstants;
 import com.schneider.idms.common.ErrorResponseCode;
 import com.schneider.idms.model.IdmsUserRequest;
+import com.schneider.idms.model.IdmsUserResponse;
 import com.schneider.idms.service.ICreateUserService;
 import com.se.idms.cache.utils.EmailConstants;
 import com.se.idms.dto.UserServiceResponse;
@@ -141,7 +143,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 			} 
-			catch (NotFoundException e) {
+			catch (NotAuthorizedException e) {
 				e.printStackTrace();
 				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(ErrorCodeConstants.UNAUTHORIZED_MESSAGE);
@@ -149,7 +151,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Error while processing is " + errorResponse.getMessage());
-				return Response.status(Response.Status.NOT_FOUND).entity(errorResponse).build();
+				return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 			}
 			catch (BadRequestException e) {
 				e.printStackTrace();
@@ -485,19 +487,12 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			userRequest.setFederationId(userName);
 		}
 
-		sucessRespone = new CreateUserResponse();
-		sucessRespone.setStatus(successStatus);
-		sucessRespone.setMessage(UserConstants.CREATE_USER_SUCCESS_MESSAGE);
-		Attributes attributes = new Attributes();
-		attributes.setType("User");
-		/*userRequest.setAttributes(attributes);
-		userRequest.setId(userName);*/
-		userRequest.setCurrencyCode("CNY");
-		IDMSUserResponse idmsResponse = mapper.map(userRequest, IDMSUserResponse.class);
-		idmsResponse.setActive(userRequest.isActive());
-		sucessRespone.setIDMSUserRecord(idmsResponse);
+		
+		IdmsUserResponse idmsResponse = mapper.map(userRequest, IdmsUserResponse.class);
+		idmsResponse.setUserStatus("Registered + Active + In bFO");
+		idmsResponse.setUserId(userName);
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-		return Response.status(Response.Status.OK).entity(sucessRespone).build();
+		return Response.status(Response.Status.OK).entity(idmsResponse).build();
 	}
 }
