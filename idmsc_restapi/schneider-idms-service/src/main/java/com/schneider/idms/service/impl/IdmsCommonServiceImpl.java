@@ -71,7 +71,7 @@ public class IdmsCommonServiceImpl {
 	protected OpenAMService productService;
 
 	@Inject
-	private OpenDjService openDJService;
+	protected OpenDjService openDJService;
 
 	@Inject
 	protected OpenAMTokenService openAMTokenService;
@@ -1222,22 +1222,26 @@ public class IdmsCommonServiceImpl {
 			return true;
 	}
 
+	/**
+	 * Authorization token from OPENAM
+	 * @return
+	 */
 	public String getSSOToken() {
-
 		LOGGER.info("Entered getSSOToken() -> Start");
 		LOGGER.info(AUDIT_REQUESTING_USER.concat(AUDIT_TECHNICAL_USER).concat(AUDIT_IMPERSONATING_USER)
 				.concat(AUDIT_API_ADMIN).concat(AUDIT_OPENAM_API).concat(AUDIT_OPENAM_AUTHENTICATE_CALL)
 				.concat(AUDIT_LOG_CLOSURE));
 
-		cache = (EhCacheCache) cacheManager.getCache("iPlanetToken");
+		/*cache = (EhCacheCache) cacheManager.getCache("iPlanetToken");
 
 		if (null != cache) {
 			LOGGER.info("cacahe NotNull");
-		}
+		}*/
 
 		String tokenResponse = productService.authenticateUser(adminUserName, adminPassword, UserConstants.REALM);
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		DocumentContext productDocCtx = JsonPath.using(conf).parse(tokenResponse);
+		LOGGER.info("getSSOToken() -> End");
 		return productDocCtx.read(JsonConstants.TOKEN_ID);
 
 	}
@@ -1247,7 +1251,6 @@ public class IdmsCommonServiceImpl {
 	 * string characters
 	 * 
 	 */
-
 	protected String generateRamdomPassWord() {
 		LOGGER.info("Entered generateRamdomPassWord() -> Start");
 		String tmpPr = RandomStringUtils.random(10, UserConstants.RANDOM_PR_CHARS);

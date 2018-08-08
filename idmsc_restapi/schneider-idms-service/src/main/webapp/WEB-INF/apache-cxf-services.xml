@@ -74,6 +74,7 @@
 			<ref bean="commonService"/>
 			<ref bean="createUserService"/>
 			<ref bean="directUIMSUserManagerSoapService"/>
+			<ref bean="getUserService"/>
 			
 		</jaxrs:serviceBeans>
 		<jaxrs:providers>
