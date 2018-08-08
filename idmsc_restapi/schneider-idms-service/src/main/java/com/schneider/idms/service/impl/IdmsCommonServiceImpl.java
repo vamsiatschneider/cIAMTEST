@@ -1198,6 +1198,16 @@ public class IdmsCommonServiceImpl {
 			return true;
 		}
 
+		if (null != userRequest.getRegistrationSource() && ((pickListValidator.validate(UserConstants.APPLICATIONS,userRequest.getRegistrationSource()))
+				|| UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))) {
+
+			if ((checkMandatoryFields)
+					&& (null == userRequest.getFederationId() || userRequest.getFederationId().isEmpty())) {
+				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.FEDERATIONID);
+				return true;
+			}
+		}
+		
 		return false;
 
 	}
@@ -1376,4 +1386,18 @@ public class IdmsCommonServiceImpl {
 		return userLevel;
 	}
 
+	public boolean getTechnicalUserDetails(String authorizationToken){
+
+		String userInfo = openDJService.getUserDetails(authorizationToken);
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		DocumentContext productDocCtx = JsonPath.using(conf).parse(userInfo);
+
+		String userSubject =  getValue(productDocCtx.read("$.sub").toString());
+
+		if(userSubject.contains(DirectApiConstants.TECHNICAL_USER))
+		{
+			return true;
+		}
+		return false;
+	}
 }

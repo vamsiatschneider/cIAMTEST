@@ -96,6 +96,38 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 
 			try {
 				
+				if(!getTechnicalUserDetails(authorization)){
+					errorResponse.setMessage(ErrorCodeConstants.BADREQUEST_MESSAGE);
+					errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
+					LOGGER.error("Error while processing is " + errorResponse.getMessage());
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+				}
+				
+				if (null != userRequest.getRegistrationSource() && UserConstants.UIMS
+						.equalsIgnoreCase(userRequest.getRegistrationSource())) {
+
+					if (null == clientId || null == clientSecret) {
+						errorResponse.setCode(ErrorCodeConstants.UNAUTHORIZED_REQUEST);
+						errorResponse.setMessage(UserConstants.UIMS_CLIENTID_SECRET);
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
+						LOGGER.error("Error while processing is " + errorResponse.getMessage());
+						return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+					}
+
+					if ((null != clientId && !clientId.equalsIgnoreCase(uimsClientId))
+							|| (null != clientSecret && !clientSecret.equalsIgnoreCase(uimsClientSecret))) {
+						errorResponse.setCode(ErrorCodeConstants.UNAUTHORIZED_REQUEST);
+						errorResponse.setMessage(UserConstants.INVALID_UIMS_CREDENTIALS);
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
+						LOGGER.error("Error while processing is " + errorResponse.getMessage());
+						return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+					}
+				}
+				
 				/**
 				 * Validate the data quality I - check mandatory information
 				 */
@@ -142,28 +174,6 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 
 			LOGGER.info("CheckMandatoryFieldsFromRequest Completed ");
 
-			if (null != userRequest.getRegistrationSource() && UserConstants.UIMS
-					.equalsIgnoreCase(userRequest.getRegistrationSource())) {
-
-				if (null == clientId || null == clientSecret) {
-					errorResponse.setCode(ErrorCodeConstants.UNAUTHORIZED_REQUEST);
-					errorResponse.setMessage(UserConstants.UIMS_CLIENTID_SECRET);
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
-					LOGGER.error("Error while processing is " + errorResponse.getMessage());
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-				}
-
-				if ((null != clientId && !clientId.equalsIgnoreCase(uimsClientId))
-						|| (null != clientSecret && !clientSecret.equalsIgnoreCase(uimsClientSecret))) {
-					errorResponse.setCode(ErrorCodeConstants.UNAUTHORIZED_REQUEST);
-					errorResponse.setMessage(UserConstants.INVALID_UIMS_CREDENTIALS);
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
-					LOGGER.error("Error while processing is " + errorResponse.getMessage());
-					return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
-				}
-			}
 			/**
 			 * Checking primary contact is coming from source map the property
 			 * or if it is not coming from UIMS set it false otherwise true
