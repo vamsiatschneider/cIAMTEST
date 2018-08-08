@@ -1275,7 +1275,7 @@ public class UserServiceImpl implements UserService {
 		userResponse.setStatus(errorStatus);
 		
 		
-		if (null != userRequest.getIDMS_Registration_Source__c() && ((pickListValidator.validate(UserConstants.APPLICATIONS,userRequest.getIDMS_Registration_Source__c().toUpperCase()))
+		if (null != userRequest.getIDMS_Registration_Source__c() && ((pickListValidator.validate(UserConstants.APPLICATIONS,userRequest.getIDMS_Registration_Source__c()))
 				|| UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c()))) {
 
 			if ((checkMandatoryFields)
@@ -3316,7 +3316,7 @@ public class UserServiceImpl implements UserService {
 			// Getting the user data
 			LOGGER.info("Going to call getSSOToken()");
 			iPlanetDirectoryKey = getSSOToken();
-			LOGGER.error("call getSSOToken() finished");
+			LOGGER.info("call getSSOToken() finished");
 
 			if (null != ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c() && UserConstants.UIMS
 					.equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c())) {
