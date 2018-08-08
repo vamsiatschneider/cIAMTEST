@@ -22,7 +22,6 @@ import javax.ws.rs.core.Response;
 import org.apache.cxf.helpers.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,11 +35,11 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+import com.schneider.idms.common.ErrorCodeConstants;
+import com.schneider.idms.common.ErrorResponseCode;
 import com.schneider.idms.model.IdmsUserRequest;
 import com.schneider.idms.service.ICreateUserService;
-import com.schneider.uims.service.DirectUIMSUserManagerSoapService;
 import com.se.idms.cache.utils.EmailConstants;
-import com.se.idms.dto.ErrorResponse;
 import com.se.idms.dto.UserServiceResponse;
 import com.se.idms.util.JsonConstants;
 import com.se.idms.util.UimsConstants;
@@ -56,10 +55,6 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(CreateUserServiceImpl.class);
 
-	@Inject
-	public static UserServiceResponse userResponse;
-	
-
 	@Override
 	public Response userRegistration(String authorization, String accept, String region, String clientId,
 			String clientSecret, IdmsUserRequest userRequest) {
@@ -67,7 +62,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 		long elapsedTime;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		CreateUserResponse sucessRespone;
-		ErrorResponse errorResponse = new ErrorResponse();
+		ErrorResponseCode errorResponse = new ErrorResponseCode();
 		DocumentContext productDocCtx = null;
 		DocumentContext productDocCtxCheck = null;
 		String loginIdentifier = null;
@@ -78,7 +73,6 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 		String userExists = null;
 		boolean uimsAlreadyCreatedFlag = false;
 		Response userCreation = null;
-		UserServiceResponse userResponse = new UserServiceResponse();
 		String userType = null;
 		try {
 			
@@ -106,9 +100,9 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				 * Validate the data quality I - check mandatory information
 				 */
 
-				if (checkMandatoryFieldsForDirectAPIRequest(userRequest, userResponse, true,userType)) {
-					errorResponse.setMessage(userResponse.getMessage());
-					errorResponse.setStatus(userResponse.getStatus());
+				if (checkMandatoryFieldsForDirectAPIRequest(userRequest, errorResponse, true,userType)) {
+					errorResponse.setMessage(errorResponse.getMessage());
+					errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 					LOGGER.error("Error while processing is " + errorResponse.getMessage());
@@ -118,8 +112,8 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			catch (NotFoundException e) {
 				e.printStackTrace();
 				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
-				errorResponse.setMessage(e.getMessage());
-				errorResponse.setStatus(errorStatus);
+				errorResponse.setMessage(ErrorCodeConstants.UNAUTHORIZED_MESSAGE);
+				errorResponse.setCode(ErrorCodeConstants.UNAUTHORIZED_REQUEST);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Error while processing is " + errorResponse.getMessage());
@@ -129,7 +123,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				e.printStackTrace();
 				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
-				errorResponse.setStatus(userResponse.getStatus());
+				errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Error while processing is " + errorResponse.getMessage());
@@ -139,7 +133,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				e.printStackTrace();
 				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
-				errorResponse.setStatus(userResponse.getStatus());
+				errorResponse.setCode(ErrorCodeConstants.SERVER_ERROR_REQUEST);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Error while processing is " + errorResponse.getMessage());
@@ -152,22 +146,22 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 					.equalsIgnoreCase(userRequest.getRegistrationSource())) {
 
 				if (null == clientId || null == clientSecret) {
-					userResponse.setStatus(errorStatus);
-					userResponse.setMessage(UserConstants.UIMS_CLIENTID_SECRET);
+					errorResponse.setCode(ErrorCodeConstants.UNAUTHORIZED_REQUEST);
+					errorResponse.setMessage(UserConstants.UIMS_CLIENTID_SECRET);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
-					LOGGER.error("Error while processing is " + userResponse.getMessage());
-					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+					LOGGER.error("Error while processing is " + errorResponse.getMessage());
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 
 				if ((null != clientId && !clientId.equalsIgnoreCase(uimsClientId))
 						|| (null != clientSecret && !clientSecret.equalsIgnoreCase(uimsClientSecret))) {
-					userResponse.setStatus(errorStatus);
-					userResponse.setMessage(UserConstants.INVALID_UIMS_CREDENTIALS);
+					errorResponse.setCode(ErrorCodeConstants.UNAUTHORIZED_REQUEST);
+					errorResponse.setMessage(UserConstants.INVALID_UIMS_CREDENTIALS);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
-					LOGGER.error("Error while processing is " + userResponse.getMessage());
-					return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
+					LOGGER.error("Error while processing is " + errorResponse.getMessage());
+					return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 				}
 			}
 			/**
@@ -259,8 +253,8 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			productDocCtx = JsonPath.using(conf).parse(userExists);
 			Integer resultCount = productDocCtx.read(JsonConstants.RESULT_COUNT);
 			if (resultCount.intValue() > 0) {
-				errorResponse.setStatus(errorStatus);
-				errorResponse.setMessage(UserConstants.USER_EXISTS);
+				errorResponse.setCode(ErrorCodeConstants.CONFLICT_REQUEST);
+				errorResponse.setMessage(ErrorCodeConstants.CONFLICT_MESSAGE);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Error while creating user is " + errorResponse.getMessage());
@@ -439,25 +433,28 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			}
 		} catch (BadRequestException e) {
 			e.printStackTrace();
-			userResponse.setMessage(UserConstants.ERROR_CREATE_USER);
+			errorResponse.setMessage(ErrorCodeConstants.BADREQUEST_MESSAGE);
+			errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 			LOGGER.error("Executing while user Registration :: -> " + e.getMessage());
-			return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 		} catch (NotFoundException e) {
 			e.printStackTrace();
-			userResponse.setMessage(UserConstants.ERROR_CREATE_USER);
+			errorResponse.setMessage(ErrorCodeConstants.NOTFOUND_MESSAGE);
+			errorResponse.setCode(ErrorCodeConstants.NOTFOUND_REQUEST);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 			LOGGER.error("Executing while user Registration :: -> " + e.getMessage());
-			return Response.status(Response.Status.NOT_FOUND).entity(userResponse).build();
+			return Response.status(Response.Status.NOT_FOUND).entity(errorResponse).build();
 		} catch (Exception e) {
 			e.printStackTrace();
-			userResponse.setMessage(UserConstants.ERROR_CREATE_USER);
+			errorResponse.setMessage(ErrorCodeConstants.SERVER_ERROR_MESSAGE);
+			errorResponse.setCode(ErrorCodeConstants.SERVER_ERROR_REQUEST);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 			LOGGER.error("Executing while user Registration :: -> " + e.getMessage());
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(userResponse).build();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		}
 
 		userRequest.setFederationId(userName);

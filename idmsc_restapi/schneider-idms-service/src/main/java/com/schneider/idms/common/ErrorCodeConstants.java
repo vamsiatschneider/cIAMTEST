@@ -10,6 +10,10 @@ public class ErrorCodeConstants {
 	
 	public static final String UNAUTHORIZED_MESSAGE = "Session expired or invalid";
 	
+	public static final String NOTFOUND_REQUEST = "USER NOT FOUND ";
+	
+	public static final String NOTFOUND_MESSAGE = "||user not found from backend||";
+	
 	public static final String CONFLICT_REQUEST = "CREATE_FAILED ";
 	
 	public static final String CONFLICT_MESSAGE = "||description of the error from backend ||";
