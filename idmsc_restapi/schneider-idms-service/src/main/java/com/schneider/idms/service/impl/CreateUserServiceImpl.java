@@ -14,10 +14,9 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.Date;
 
-import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 
 import org.apache.cxf.helpers.IOUtils;
@@ -26,9 +25,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.idms.model.CreateUserResponse;
-import com.idms.model.IDMSUserResponse;
-import com.idms.product.model.Attributes;
 import com.idms.product.model.OpenAmUserRequest;
 import com.idms.service.util.AsyncUtil;
 import com.idms.service.util.ChinaIdmsUtil;
@@ -42,7 +38,6 @@ import com.schneider.idms.model.IdmsUserRequest;
 import com.schneider.idms.model.IdmsUserResponse;
 import com.schneider.idms.service.ICreateUserService;
 import com.se.idms.cache.utils.EmailConstants;
-import com.se.idms.dto.UserServiceResponse;
 import com.se.idms.util.JsonConstants;
 import com.se.idms.util.UimsConstants;
 import com.se.idms.util.UserConstants;
@@ -63,7 +58,6 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
-		CreateUserResponse sucessRespone;
 		ErrorResponseCode errorResponse = new ErrorResponseCode();
 		DocumentContext productDocCtx = null;
 		DocumentContext productDocCtxCheck = null;

@@ -9,17 +9,19 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
-import com.idms.model.ConfirmPinRequest;
 import com.idms.model.ResendPinRequest;
+import com.schneider.idms.model.IdmsUserConfirmRequest;
 
-@Path("/identity/services/apexrest")
+@Path("/identity/services/apexrest/IDMSServices")
 @Produces("application/json")
 public interface IConfirmPinUserService {
 
 	@POST
-	@Path("/IDMSsvcs/1.0/ConfirmPIN")
+	@Path("/ConfirmPin/1.0")
 	@Consumes("application/json")
-	Response userPinConfirmation(@Valid ConfirmPinRequest confirmPIN);
+	Response userPinConfirmation(@HeaderParam("Authorization")String authorization,
+			@HeaderParam("Accept")String accept,
+			@HeaderParam("IDMS-Region")String region,@Valid IdmsUserConfirmRequest confirmPinRequest);
 	
 	@PUT
 	@Path("/IDMSsvcs/1.0/ResendPinCode")

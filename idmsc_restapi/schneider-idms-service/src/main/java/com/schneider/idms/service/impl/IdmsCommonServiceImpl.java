@@ -37,7 +37,6 @@ import com.idms.product.client.OpenAMTokenService;
 import com.idms.product.client.OpenDjService;
 import com.idms.product.client.SalesForceService;
 import com.idms.service.SendEmail;
-import com.idms.service.UIMSAccessManagerSoapService;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -110,9 +109,6 @@ public class IdmsCommonServiceImpl {
 	@Lazy
 	protected SendEmail sendEmail;
 
-	@Inject
-	public UIMSAccessManagerSoapService uimsAccessManagerSoapService;
-	
 	@Inject
 	public DirectUIMSUserManagerSoapService directUIMSUserManagerSoapService;
 	

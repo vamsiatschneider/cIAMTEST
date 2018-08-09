@@ -357,8 +357,8 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, version);
 				LOGGER.info("updateUser() of OpenAMService finished for userId="+userId+" ,version="+version);
 				LOGGER.info("Going to call updateUIMSUserAIL() of UIMSAccessManagerSoapService for usermail="+usermail);
-				uimsAccessManagerSoapService.updateUIMSUserAIL(ailRequest, idmsUserAIL,vNewCntValue.toString(),productService,
-						UserConstants.CHINA_IDMS_TOKEN +iPlanetDirectoryKey, usermail);
+				/*directUIMSUserManagerSoapService.updateUIMSUserAIL(ailRequest, idmsUserAIL,vNewCntValue.toString(),productService,
+						UserConstants.CHINA_IDMS_TOKEN +iPlanetDirectoryKey, usermail);*/
 				LOGGER.info("updateUIMSUserAIL() of UIMSAccessManagerSoapService finished for usermail="+usermail);
 			} else {
 				//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
