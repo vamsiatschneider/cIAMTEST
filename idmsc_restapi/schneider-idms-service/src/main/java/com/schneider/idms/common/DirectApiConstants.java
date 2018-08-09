@@ -187,5 +187,7 @@ public class DirectApiConstants {
 	private boolean isActive;
 	
 	public static final String EMAIL_VALIDATION = "Email error - ";
+	
+	public static final String TECHNICAL_USER = "technicaluser";
 
 }
