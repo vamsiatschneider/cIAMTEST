@@ -149,10 +149,10 @@ public class IdmsUserRequest {
 	private String workPhone;
 
 	@JsonProperty
-	private String trustedAdmin;
-
-	@JsonProperty
 	private String companyFederatedId;
+	
+	@JsonProperty
+	private String trustedAdmin;
 
 	@JsonProperty
 	private String adminCompanyFederatedId;
