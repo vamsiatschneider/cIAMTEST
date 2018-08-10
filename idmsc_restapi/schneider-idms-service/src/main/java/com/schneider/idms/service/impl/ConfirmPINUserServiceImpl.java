@@ -395,19 +395,12 @@ public class ConfirmPINUserServiceImpl extends IdmsCommonServiceImpl implements 
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 
-		Attributes attributes = new Attributes();
-		IDMSUserRecord idmsUserRecord = new IDMSUserRecord();
-		idmsUserRecord.setAttributes(attributes);
-		idmsUserRecord.setId(uniqueIdentifier);
-		idmsUserRecord.setIDMS_Federated_ID__c(uniqueIdentifier);
-
-		PasswordRecoveryResponse passwordRecoveryResponse = new PasswordRecoveryResponse(idmsUserRecord);
-		passwordRecoveryResponse.setStatus(successStatus);
-		passwordRecoveryResponse.setMessage("PIN validated Successfully");
+		JSONObject successResponse = new JSONObject();
+		successResponse.put("federatedId", loginIdentifierType);
 
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
-		return Response.status(Response.Status.OK).entity(passwordRecoveryResponse).build();
+		return Response.status(Response.Status.OK).entity(successResponse).build();
 	}
 
 	@SuppressWarnings("unchecked")
