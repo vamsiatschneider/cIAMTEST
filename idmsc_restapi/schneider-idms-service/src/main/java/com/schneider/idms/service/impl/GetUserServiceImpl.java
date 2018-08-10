@@ -27,7 +27,7 @@ import com.schneider.idms.service.GetUserService;
 
 /**
  * @author SESA508936
- *
+ * For Direct API
  */
 @Service("getUserService")
 public class GetUserServiceImpl extends IdmsCommonServiceImpl implements GetUserService {
@@ -35,7 +35,6 @@ public class GetUserServiceImpl extends IdmsCommonServiceImpl implements GetUser
 
 	@Override
 	public Response getUser(String authorization, String accept, String region) {
-
 		LOGGER.info("Entered getUser() -> Start");
 		LOGGER.info("Parameter IDMS-Authorization -> " + authorization);
 		LOGGER.info("Parameter Accept -> " + accept);
@@ -60,11 +59,13 @@ public class GetUserServiceImpl extends IdmsCommonServiceImpl implements GetUser
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
 				}
 				if(null == region || region.equalsIgnoreCase("CN")){
-				userData = openDJService.getUserDetails("Bearer"+authorization);
-				LOGGER.info("User Data from Openam: " + userData);
-				LOGGER.info("Time took in Processing:" + (System.currentTimeMillis() - startTime));
+					LOGGER.info("Going to call getUserDetails() of OpenDjService for bearer id:"+authorization);
+					userData = openDJService.getUserDetails(authorization);
+					LOGGER.info("getUserDetails() of OpenDjService finished for bearer id:"+authorization);
+					LOGGER.info("User Data from Openam: " + userData);
+					LOGGER.info("Time took in Processing:" + (System.currentTimeMillis() - startTime));
 				}
-				
+
 			}
 
 			if (userData == null) {
@@ -83,12 +84,12 @@ public class GetUserServiceImpl extends IdmsCommonServiceImpl implements GetUser
 			}
 		} catch (NotAuthorizedException e) {
 			e.printStackTrace();			
-			LOGGER.error("NotAuthorizedException ="+e.getMessage());
+			LOGGER.error("Direct API NotAuthorizedException ="+e.getMessage());
 			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(JsonBody.InvalidSessionJsonArray()).build();
 		}catch (Exception e) {
 			LOGGER.error("Error in Direct API getUser() OpenDjService ->" + e.getMessage());
 			e.printStackTrace();
-			return Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(JsonBody.EmptyJsonArray(authorization)).build();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).build();
 		}
 	}
 }
