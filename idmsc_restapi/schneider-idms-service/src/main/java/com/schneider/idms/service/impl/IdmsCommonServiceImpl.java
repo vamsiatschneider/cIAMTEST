@@ -74,7 +74,7 @@ public class IdmsCommonServiceImpl {
 	protected OpenDjService openDJService;
 
 	@Inject
-	protected OpenAMTokenService openAMTokenService;
+	public OpenAMTokenService openAMTokenService;
 
 	@Inject
 	protected IFWService ifwService;

@@ -34,8 +34,8 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.schneider.idms.common.ErrorCodeConstants;
 import com.schneider.idms.common.ErrorResponseCode;
+import com.schneider.idms.model.IdmsCreateUserResponse;
 import com.schneider.idms.model.IdmsUserRequest;
-import com.schneider.idms.model.IdmsUserResponse;
 import com.schneider.idms.service.ICreateUserService;
 import com.se.idms.cache.utils.EmailConstants;
 import com.se.idms.util.JsonConstants;
@@ -482,7 +482,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 		}
 
 		
-		IdmsUserResponse idmsResponse = mapper.map(userRequest, IdmsUserResponse.class);
+		IdmsCreateUserResponse idmsResponse = mapper.map(userRequest, IdmsCreateUserResponse.class);
 		idmsResponse.setUserStatus("Registered + Active + In bFO");
 		idmsResponse.setUserId(userName);
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;

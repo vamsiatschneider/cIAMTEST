@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.idms.model.ConfirmPinErrorResponse;
 import com.idms.model.ResendPinRequest;
-import com.idms.product.model.Attributes;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -38,8 +37,6 @@ import com.schneider.idms.common.ErrorResponseCode;
 import com.schneider.idms.model.IdmsUserConfirmRequest;
 import com.schneider.idms.service.IConfirmPinUserService;
 import com.se.idms.cache.utils.EmailConstants;
-import com.se.idms.dto.IDMSUserRecord;
-import com.se.idms.dto.PasswordRecoveryResponse;
 import com.se.idms.util.JsonConstants;
 import com.se.idms.util.UserConstants;
 

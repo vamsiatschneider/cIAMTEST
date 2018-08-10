@@ -6,65 +6,59 @@ import static com.se.idms.util.UserConstants.AUDIT_LOG_CLOSURE;
 import static com.se.idms.util.UserConstants.AUDIT_OPENAM_API;
 import static com.se.idms.util.UserConstants.AUDIT_OPENAM_GET_CALL;
 import static com.se.idms.util.UserConstants.AUDIT_OPENAM_UPDATE_CALL;
-import static com.se.idms.util.UserConstants.AUDIT_OPENAM_USER_INFO_CALL;
 import static com.se.idms.util.UserConstants.AUDIT_REQUESTING_USER;
 
 import java.net.URLEncoder;
 
-import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
 
-import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.idms.model.ActivateUser;
-import com.idms.model.ActivateUserRequest;
 import com.idms.model.IFWUser;
-import com.idms.model.UpdateUserRequest;
-import com.idms.model.UpdateUserResponse;
 import com.idms.product.model.OpenAmUser;
 import com.idms.product.model.OpenAmUserRequest;
-import com.idms.service.UserService;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+import com.schneider.idms.common.ErrorCodeConstants;
+import com.schneider.idms.common.ErrorResponseCode;
+import com.schneider.idms.model.IdmsUpdateUserRequest;
+import com.schneider.idms.model.IdmsUpdateUserResponse;
 import com.schneider.idms.service.IUpdateUserService;
 import com.se.idms.cache.utils.EmailConstants;
 import com.se.idms.util.JsonConstants;
 import com.se.idms.util.UserConstants;
 import com.uims.companymanager.CompanyV3;
 
-//@Service("updateUserService")
+@Service("updateUserService")
 public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpdateUserService {
 
 	/**
 	 * Logger instance.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(UpdateUserServiceImpl.class);
-	
-	@Inject
-	private UserService userService;
 
 	@Override
-	public Response updateUser(String authorizedToken, String clientId, String clientSecret,
-			UpdateUserRequest userRequest) {
+	public Response updateUser(String authorizedToken, String accept, String region,
+			IdmsUpdateUserRequest userRequest) {
+
 		LOGGER.info("Entered updateUser() -> Start");
 		LOGGER.info("Parameter authorizedToken -> " + authorizedToken);
-		LOGGER.info("Parameter clientId -> " + clientId + " ,clientSecret" + clientSecret);
 		LOGGER.info("Parameter userRequest -> " + userRequest);
-		UpdateUserResponse sucessRespone = null;
+		IdmsUpdateUserResponse sucessRespone = null;
+		ErrorResponseCode errorResponse = new ErrorResponseCode();
 		String userName = null;
 		String iPlanetDirectoryKey = null;
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
 		ObjectMapper objMapper = new ObjectMapper();
-		userResponse.setStatus(errorStatus);
 
 		try {
 			LOGGER.info("UserServiceImpl:updateUser -> : Request -> ", objMapper.writeValueAsString(userRequest));
@@ -73,7 +67,6 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 			DocumentContext productDocCtx = null;
 			DocumentContext productDocCtxUser = null;
 			String userId = null;
-			String hotpService = null;
 			String identifierType = null;
 			String jsonRequset = null;
 			String jsonResponse = null;
@@ -107,31 +100,38 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				LOGGER.info(" UserServiceImpl :: updateUser getSSOToken ");
 				iPlanetDirectoryKey = getSSOToken();
 
-				if ((null != userRequest.getUserRecord().getIDMSAnnualRevenue__c())
-						&& (userRequest.getUserRecord().getIDMSAnnualRevenue__c().matches("^\\D+$") == true)) {
-					userResponse.setStatus(errorStatus);
-					userResponse.setMessage(UserConstants.INCORRECT_REVENUE);
+				if ((null != userRequest.getAnnualRevenue())
+						&& (userRequest.getAnnualRevenue().matches("^\\D+$") == true)) {
+					errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
+					;
+					errorResponse.setMessage(UserConstants.INCORRECT_REVENUE);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.error("Error is " + userResponse.getMessage());
+					LOGGER.error("Error is " + errorResponse.getMessage());
 					LOGGER.info("Time taken by UserServiceImpl.userRegistration() : " + elapsedTime);
-					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 
 				/**
-				 *  Need to check with for validation
+				 * Need to check with for validation
 				 */
-				/*if (checkMandatoryFieldsFromRequest(userRequest.getUserRecord(), userResponse, false)) {
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
-					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
-				}*/ 
+				/*
+				 * if
+				 * (checkMandatoryFieldsFromRequest(userRequest.getUserRecord(),
+				 * userResponse, false)) { elapsedTime =
+				 * UserConstants.TIME_IN_MILLI_SECONDS - startTime; LOGGER.info(
+				 * "Time taken by UserServiceImpl.updateUser() : " +
+				 * elapsedTime); return
+				 * Response.status(Response.Status.BAD_REQUEST).entity(
+				 * userResponse).build(); }
+				 */
 			} catch (Exception e) {
 				e.printStackTrace();
-				userResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
+				errorResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
+				errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
-				LOGGER.error("UserServiceImpl.updateUser()->" + userResponse.getMessage());
-				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+				LOGGER.error("UserServiceImpl.updateUser()->" + errorResponse.getMessage());
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 
 			// Need to check do we need pass the user FirstName
@@ -139,44 +139,8 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 			// "bsuresh.infi@gmail.com", "EMAIL CHANGE NOTIFICATION",
 			// UserConstants.EMAIL_BODY);
 
-			if (null != userRequest.getUserRecord().getIDMS_Profile_update_source__c() && UserConstants.UIMS
-					.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Profile_update_source__c())) {
-
-				if (null == clientId || null == clientSecret) {
-					userResponse.setStatus(errorStatus);
-					userResponse.setMessage(UserConstants.UIMS_CLIENTID_SECRET);
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.error("Error is " + userResponse.getMessage());
-					LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
-					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
-				}
-
-				if ((null != clientId && !clientId.equalsIgnoreCase(uimsClientId))
-						|| (null != clientSecret && !clientSecret.equalsIgnoreCase(uimsClientSecret))) {
-					userResponse.setStatus(errorStatus);
-					userResponse.setMessage(UserConstants.INVALID_UIMS_CREDENTIALS);
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.error("Error is " + userResponse.getMessage());
-					LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
-					return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
-				}
-
-				Response fedResponse = null;
-				//R7//checkUserExistsWithFederationID(iPlanetDirectoryKey,userRequest.getUserRecord().getIDMS_Federated_ID__c(), startTime);
-				if (fedResponse.getStatus() == 200) {
-					openAmReq = mapper.map(userRequest, OpenAmUserRequest.class);
-					JSONObject uimsResponse = (JSONObject) fedResponse.getEntity();
-					if (("Email".equalsIgnoreCase((String) uimsResponse.get("loginIdentity")))
-							&& null != userRequest.getUserRecord().getEmail()) {
-						openAmReq.getInput().getUser().setLoginid(userRequest.getUserRecord().getEmail());
-					} else if (("Mobile".equalsIgnoreCase((String) uimsResponse.get("loginIdentity")))
-							&& null != userRequest.getUserRecord().getMobilePhone()) {
-						openAmReq.getInput().getUser().setLoginid(userRequest.getUserRecord().getMobilePhone());
-					}
-					userId = (String) uimsResponse.get("userId");
-				} else {
-					return fedResponse;
-				}
+			if (null != userRequest.getProfileLastUpdateSource()
+					&& UserConstants.UIMS.equalsIgnoreCase(userRequest.getProfileLastUpdateSource())) {
 
 			} else {
 
@@ -184,19 +148,15 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				 * Calling UserInfoByAccessToken to validate user accessToken
 				 * and to get the user information
 				 */
-				LOGGER.info(AUDIT_REQUESTING_USER + userRequest.getUserRecord().getId() + AUDIT_IMPERSONATING_USER
-						+ AUDIT_API_ADMIN + AUDIT_OPENAM_API + AUDIT_OPENAM_USER_INFO_CALL + "/se" + userId
-						+ AUDIT_LOG_CLOSURE);
-
 				if (pickListValidator.validate(UserConstants.IDMS_BFO_profile,
-						userRequest.getUserRecord().getIDMS_Profile_update_source__c())) {
+						userRequest.getProfileLastUpdateSource())) {
 					// userId =
-					// userRequest.getUserRecord().getIDMS_Federated_ID__c();
+					// userRequest.getIDMS_Federated_ID__c();
 					// fedId =
-					// userRequest.getUserRecord().getIDMS_Federated_ID__c();
+					// userRequest.getIDMS_Federated_ID__c();
 					String userExistsInOpenam = productService.checkUserExistsWithEmailMobile(
-							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\""
-									+ URLEncoder.encode(userRequest.getUserRecord().getEmail(), "UTF-8") + "\"");
+							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+							"loginid eq " + "\"" + URLEncoder.encode(userRequest.getEmail(), "UTF-8") + "\"");
 
 					productDocCtx = JsonPath.using(conf).parse(userExistsInOpenam);
 					userId = productDocCtx.read("$.result[0].username");
@@ -212,7 +172,6 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 						usermail = productDocCtx.read("$.Email");
 					}
 				}
-				userResponse.setId(userId);
 
 				/**
 				 * Getting the user to check user is updating for same user or
@@ -250,49 +209,40 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				 */
 
 				if (((null != updatingUser) ? emailValidator.validate(updatingUser) : true)
-						&& (null != userRequest.getUserRecord().getEmail()
-								&& !userRequest.getUserRecord().getEmail().isEmpty())
-						&& (null != userRequest.getUserRecord().getMobilePhone()
-								&& !userRequest.getUserRecord().getMobilePhone().isEmpty())) {
+						&& (null != userRequest.getEmail() && !userRequest.getEmail().isEmpty())
+						&& (null != userRequest.getMobilePhone() && !userRequest.getMobilePhone().isEmpty())) {
 
-					openAmReq.getInput().getUser().setIdmsuid(userRequest.getUserRecord().getEmail());
-					hotpService = UserConstants.HOTP_EMAIL_UPDATE;
+					openAmReq.getInput().getUser().setIdmsuid(userRequest.getEmail());
 					identifierType = UserConstants.EMAIL;
-					user.setMail(userRequest.getUserRecord().getEmail());
-					user.setMobile(userRequest.getUserRecord().getMobilePhone());
-					loginIdentifier = userRequest.getUserRecord().getEmail();
-					if (null != updatingUser && updatingUser.equalsIgnoreCase(userRequest.getUserRecord().getEmail())) {
+					user.setMail(userRequest.getEmail());
+					user.setMobile(userRequest.getMobilePhone());
+					loginIdentifier = userRequest.getEmail();
+					if (null != updatingUser && updatingUser.equalsIgnoreCase(userRequest.getEmail())) {
 						userUpdateforSameUser = true;
 					}
 
 				} else if (((null != updatingUser) ? emailValidator.validate(updatingUser) : true)
-						&& (null != userRequest.getUserRecord().getEmail())
-						&& (!userRequest.getUserRecord().getEmail().isEmpty())) {
-					user.setMail(userRequest.getUserRecord().getEmail());
-					openAmReq.getInput().getUser().setIdmsuid(userRequest.getUserRecord().getEmail());
-					hotpService = UserConstants.HOTP_EMAIL_UPDATE;
+						&& (null != userRequest.getEmail()) && (!userRequest.getEmail().isEmpty())) {
+					user.setMail(userRequest.getEmail());
+					openAmReq.getInput().getUser().setIdmsuid(userRequest.getEmail());
 					identifierType = UserConstants.EMAIL;
-					loginIdentifier = userRequest.getUserRecord().getEmail();
-					if (null != updatingUser && updatingUser.equalsIgnoreCase(userRequest.getUserRecord().getEmail())) {
+					loginIdentifier = userRequest.getEmail();
+					if (null != updatingUser && updatingUser.equalsIgnoreCase(userRequest.getEmail())) {
 						userUpdateforSameUser = true;
 					}
-				} else if ((null != userRequest.getUserRecord().getMobilePhone())
-						&& (!userRequest.getUserRecord().getMobilePhone().isEmpty())) {
-					if (null != userRequest.getUserRecord().getIDMS_Profile_update_source__c() && !UserConstants.UIMS
-							.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Profile_update_source__c())) {
+				} else if ((null != userRequest.getMobilePhone()) && (!userRequest.getMobilePhone().isEmpty())) {
+					if (null != userRequest.getProfileLastUpdateSource()
+							&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getProfileLastUpdateSource())) {
 						if (null != updatingUser) {// added if socialLogin id is
 													// empty
 							legthValidator.validate(UserConstants.MOBILE_PHONE, updatingUser);
 						}
 					}
-					user.setMobile(userRequest.getUserRecord().getMobilePhone());
-					openAmReq.getInput().getUser()
-							.setIdmsuid(userRequest.getUserRecord().getMobilePhone() + "bridge-fo.com");
-					hotpService = UserConstants.HOTP_MOBILE_UPDATE;
+					user.setMobile(userRequest.getMobilePhone());
+					openAmReq.getInput().getUser().setIdmsuid(userRequest.getMobilePhone() + "bridge-fo.com");
 					identifierType = UserConstants.MOBILE;
-					loginIdentifier = userRequest.getUserRecord().getMobilePhone();
-					if (null != updatingUser
-							&& updatingUser.equalsIgnoreCase(userRequest.getUserRecord().getMobilePhone())) {
+					loginIdentifier = userRequest.getMobilePhone();
+					if (null != updatingUser && updatingUser.equalsIgnoreCase(userRequest.getMobilePhone())) {
 						userUpdateforSameUser = true;
 					}
 				}
@@ -305,12 +255,12 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				Integer resultCount = productDocCtx.read(JsonConstants.RESULT_COUNT);
 				if (resultCount.intValue() > 0 && ((null != loginIdentifier) && (null != updatingUser)
 						&& (!loginIdentifier.equalsIgnoreCase(updatingUser)))) {
-					userResponse.setStatus(errorStatus);
-					userResponse.setMessage(UserConstants.NEW_USER_EXISTS);
+					errorResponse.setMessage(UserConstants.NEW_USER_EXISTS);
+					errorResponse.setCode(ErrorCodeConstants.CONFLICT_REQUEST);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.error("Error is " + userResponse.getMessage());
+					LOGGER.error("Error is " + errorResponse.getMessage());
 					LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
-					return Response.status(Response.Status.CONFLICT).entity(userResponse).build();
+					return Response.status(Response.Status.CONFLICT).entity(errorResponse).build();
 
 				}
 
@@ -321,8 +271,7 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 					 * Check password exits and assign to openAM
 					 */
 
-					String product_json_string = "{" + "\"newmail\": \"" + userRequest.getUserRecord().getEmail() + "\""
-							+ "}";
+					String product_json_string = "{" + "\"newmail\": \"" + userRequest.getEmail() + "\"" + "}";
 
 					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 							product_json_string);
@@ -335,8 +284,8 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 					String otp = sendEmail.generateOtp(userId);
 					LOGGER.info("Successfully OTP generated for " + userId);
 					sendEmail.sendOpenAmEmail(otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userId,
-							userRequest.getUserRecord().getIDMS_Profile_update_source__c());
-					
+							userRequest.getProfileLastUpdateSource());
+
 					/**
 					 * To update authId in openAM extended attribute
 					 */
@@ -391,18 +340,17 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				} else if (UserConstants.MOBILE.equalsIgnoreCase(identifierType) && !userUpdateforSameUser) {
 					// for mobile scenarios
 
-					String product_json_string = "{" + "\"newmobile\": \""
-							+ userRequest.getUserRecord().getMobilePhone() + "\"" + "}";
+					String product_json_string = "{" + "\"newmobile\": \"" + userRequest.getMobilePhone() + "\"" + "}";
 					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 							product_json_string);
 
 					String otp = sendEmail.generateOtp(userId);
 					LOGGER.info("Successfully OTP generated for " + userId);
 					sendEmail.sendSMSMessage(otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userName,
-							userRequest.getUserRecord().getIDMS_Registration_Source__c());
+							userRequest.getProfileLastUpdateSource());
 
 					sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userId,
-							userRequest.getUserRecord().getIDMS_Profile_update_source__c());
+							userRequest.getProfileLastUpdateSource());
 					if (null != updatingUser) {
 						// Need to check whether do we need to send message to
 						// existing mobile number
@@ -415,11 +363,11 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				if (UserConstants.MOBILE.equalsIgnoreCase(identifierType) && !userUpdateforSameUser) {
 					openAmReq.getInput().getUser().setMobile(null);
 					userRecord = new IFWUser();
-					userRecord.setMobilePhone(userRequest.getUserRecord().getMobilePhone());
+					userRecord.setMobilePhone(userRequest.getMobilePhone());
 				} else if (UserConstants.EMAIL.equalsIgnoreCase(identifierType) && !userUpdateforSameUser) {
 					openAmReq.getInput().getUser().setMail(null);
 					userRecord = new IFWUser();
-					userRecord.setEmail(userRequest.getUserRecord().getEmail());
+					userRecord.setEmail(userRequest.getEmail());
 				}
 			}
 
@@ -447,22 +395,9 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 
 			LOGGER.info("Json Response " + jsonResponse);
 
-			if (booleanTrue == userRequest.getUserRecord().isActive() && UserConstants.UIMS
-					.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Profile_update_source__c())) {
-
-				ActivateUserRequest activateUserRequest = new ActivateUserRequest();
-				ActivateUser activateUser = new ActivateUser();
-				activateUserRequest.setUserRecord(activateUser);
-				activateUser.setIDMS_Federated_ID__c(userRequest.getUserRecord().getIDMS_Federated_ID__c());
-				activateUser.setIDMS_Registration_Source__c(UserConstants.UIMS);
-				//*R7
-				//activateUser(iPlanetDirectoryKey, clientId, clientSecret, activateUserRequest);
-			}
-
 			// calling UIMS update user
-			if ((!isUserFromSocialLogin)
-					&& (null != userRequest.getUserRecord().getIDMS_Profile_update_source__c() && !UserConstants.UIMS
-							.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Profile_update_source__c()))) {
+			if ((!isUserFromSocialLogin) && (null != userRequest.getProfileLastUpdateSource()
+					&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getProfileLastUpdateSource()))) {
 				// Adding V_New
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, version);
 				// mapping IFW request to UserCompany
@@ -470,49 +405,50 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				com.se.uims.usermanager.UserV6 identity = mapper.map(userRequest, com.se.uims.usermanager.UserV6.class);
 
 				// calling Async method updateUIMSUserAndCompany
-				/*direct_uimsUserManagerSoapService.updateUIMSUserAndCompany(fedId, identity,
-						userRequest.getUserRecord().getIDMS_User_Context__c(), company, vNewCntValue.toString(),
-						productService, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, usermail);*/
+				/*
+				 * direct_uimsUserManagerSoapService.updateUIMSUserAndCompany(
+				 * fedId, identity, userRequest.getIDMS_User_Context__c(),
+				 * company, vNewCntValue.toString(), productService,
+				 * UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+				 * usermail);
+				 */
 			}
 
-			//R7 Need to change the below one
-			Response response = userService.getUser(userId);
-			Object responseObject = response.getEntity(); 
-
-			sucessRespone = new UpdateUserResponse();
-			sucessRespone.setStatus(successStatus);
-			sucessRespone.setMessage(UserConstants.UPDATE_USER_SUCCESS_MESSAGE);
-			userRequest.getUserRecord().setId(userId);
-			sucessRespone.setIDMSUserRecord(responseObject);
+			// R7 Need to change the below one
+			sucessRespone = mapper.map(userRequest, IdmsUpdateUserResponse.class);
 
 		} catch (BadRequestException e) {
 			e.printStackTrace();
-			userResponse.setMessage(UserConstants.ERROR_UPDATE_USER);
+			errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
+			errorResponse.setMessage(UserConstants.ERROR_UPDATE_USER);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
 			LOGGER.error("Executing while Updating the User :: -> " + e.getMessage());
-			return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 		} catch (NotAuthorizedException e) {
 			e.printStackTrace();
-			userResponse.setMessage("Session expired or invalid");
+			errorResponse.setCode(ErrorCodeConstants.UNAUTHORIZED_REQUEST);
+			errorResponse.setMessage("Session expired or invalid");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
 			LOGGER.error("Executing while Updating the User :: -> " + e.getMessage());
-			return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
+			return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 		} catch (ClientErrorException e) {
 			e.printStackTrace();
-			userResponse.setMessage(UserConstants.NEW_USER_EXISTS);
+			errorResponse.setCode(ErrorCodeConstants.CONFLICT_REQUEST);
+			errorResponse.setMessage(UserConstants.NEW_USER_EXISTS);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
-			LOGGER.error("Exception while updating the User :: -> " + userResponse.getMessage());
-			return Response.status(Response.Status.CONFLICT).entity(userResponse).build();
+			LOGGER.error("Exception while updating the User :: -> " + errorResponse.getMessage());
+			return Response.status(Response.Status.CONFLICT).entity(errorResponse).build();
 		} catch (Exception e) {
 			e.printStackTrace();
-			userResponse.setMessage(UserConstants.ERROR_UPDATE_USER);
+			errorResponse.setCode(ErrorCodeConstants.SERVER_ERROR_MESSAGE);
+			errorResponse.setMessage(UserConstants.ERROR_UPDATE_USER);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
 			LOGGER.error("Executing while Updating the User :: -> " + e.getMessage());
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(userResponse).build();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		}
 
 		LOGGER.info(" UserServiceImpl :: updateUser End");

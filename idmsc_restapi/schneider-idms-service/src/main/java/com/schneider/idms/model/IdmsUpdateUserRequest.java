@@ -59,6 +59,9 @@ public class IdmsUpdateUserRequest {
 	private String suffix;
 
 	@JsonProperty
+	private String homePhone;
+
+	@JsonProperty
 	private String fax;
 
 	@JsonProperty
@@ -66,6 +69,9 @@ public class IdmsUpdateUserRequest {
 
 	@JsonProperty
 	private String currency;
+
+	@JsonProperty
+	private String currencyCode;
 
 	@JsonProperty
 	private String companyName;
@@ -508,6 +514,22 @@ public class IdmsUpdateUserRequest {
 
 	public void setTrustedAdmin(String trustedAdmin) {
 		this.trustedAdmin = trustedAdmin;
+	}
+
+	public String getHomePhone() {
+		return homePhone;
+	}
+
+	public void setHomePhone(String homePhone) {
+		this.homePhone = homePhone;
+	}
+
+	public String getCurrencyCode() {
+		return currencyCode;
+	}
+
+	public void setCurrencyCode(String currencyCode) {
+		this.currencyCode = currencyCode;
 	}
 
 }
