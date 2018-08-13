@@ -1275,7 +1275,7 @@ public class UserServiceImpl implements UserService {
 		userResponse.setStatus(errorStatus);
 		
 		
-		if (null != userRequest.getIDMS_Registration_Source__c() && ((pickListValidator.validate(UserConstants.APPLICATIONS,userRequest.getIDMS_Registration_Source__c()))
+		if (null != userRequest.getIDMS_Registration_Source__c() && ((pickListValidator.validate(UserConstants.APPLICATIONS,userRequest.getIDMS_Registration_Source__c().toUpperCase()))
 				|| UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c()))) {
 
 			if ((checkMandatoryFields)
@@ -3339,7 +3339,7 @@ public class UserServiceImpl implements UserService {
 			}
 
 			if (null != userId) {
-				LOGGER.info("AUDIT:requestingUser" + userId + "," + "impersonatingUser : amadmin,"
+				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:GET/getUser/{userId}");
 
 				LOGGER.info("Going to call getUser() of OpenAMService for userId="+userId);
@@ -3383,7 +3383,7 @@ public class UserServiceImpl implements UserService {
 				//aclType_c = "[" + aclType_c + "]";
 				PRODUCT_JSON_STRING = "{" + "\"IDMSAIL_" + idmsAclType_c + "_c\": \"" + aclType_c.trim() + "\""
 						+ "}";
-				LOGGER.info("AUDIT:requestingUser" + userId + "," + "impersonatingUser : amadmin,"
+				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:GET/updateUser/{userId}");
 				LOGGER.info("Grant Operation: productService.updateUser : Request -> "+PRODUCT_JSON_STRING);
 				LOGGER.info("Going to call updateUser() of OpenAMService for userId="+userId);
@@ -3404,7 +3404,7 @@ public class UserServiceImpl implements UserService {
 				
 				// Update the IDMSAil__c in OpenAm
 				PRODUCT_JSON_STRING = "{" + "\"IDMSAil_c\": \"" + IDMSAil__c.trim() + "\"" + "}";
-				LOGGER.info("AUDIT:requestingUser" + userId + "," + "impersonatingUser : amadmin,"
+				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:GET/getUser/{userId}");
 				LOGGER.info("productService.updateUser : Request -> "+PRODUCT_JSON_STRING);
 				LOGGER.info("Going to call updateUser() of OpenAMService for userId="+userId);
@@ -3467,7 +3467,7 @@ public class UserServiceImpl implements UserService {
 					PRODUCT_JSON_STRING = "{" + "\"IDMSAIL_" + idmsAclType_c + "_c\": \"" + aclType + "\""
 							+ "}";	
 				}
-				LOGGER.info("AUDIT:requestingUser" + userId + "," + "impersonatingUser : amadmin,"
+				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:GET/getUser/{userId}");
 				LOGGER.info("Revoke Operation: productService.updateUser : Request -> "+PRODUCT_JSON_STRING);
 				LOGGER.info("Going to call updateUser() of OpenAMService for userId="+userId);
@@ -3481,7 +3481,7 @@ public class UserServiceImpl implements UserService {
 				}else{
 				PRODUCT_JSON_STRING = "{" + "\"IDMSAil_c\": \"" + IDMSAil__c.trim() + "\"" + "}";
 				}
-				LOGGER.info("AUDIT:requestingUser" + userId + "," + "impersonatingUser : amadmin,"
+				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:GET/getUser/{userId}");
 				LOGGER.info("Revoke Operation -> : productService.updateUser : Request -> "+PRODUCT_JSON_STRING);
 				LOGGER.info("Going to call updateUser() of OpenAMService for userId="+userId);
@@ -4762,7 +4762,7 @@ public class UserServiceImpl implements UserService {
 				productDocCtx = JsonPath.using(conf).parse(userInfoByAccessToken);
 				userId = productDocCtx.read("$.sub");
 				fedId=userId; //productDocCtx.read("$.federationID"); //There is no federationID in the token response
-				LOGGER.info("AUDIT:requestingUser" + userId + "," + "impersonatingUser : amadmin,"
+				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:GET/userinfo");
 
 				// Authenticating the User
@@ -4823,7 +4823,7 @@ public class UserServiceImpl implements UserService {
 				
 				iPlanetDirectoryKey = getSSOToken();
 
-				LOGGER.info("AUDIT:requestingUser" + userId + "," + "impersonatingUser : amadmin,"
+				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:GET/se/users/getUser{userId}");
 				if (null != userId) {
 					LOGGER.info("calling getUser() of OpenAMService for userId:"+userId);
@@ -4834,12 +4834,15 @@ public class UserServiceImpl implements UserService {
 				conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 				productDocCtx = JsonPath.using(conf).parse(userData);
 
-				userName = productDocCtx.read("$.IDMSUID").toString();
+				userName = productDocCtx.read("$.Loginid[0]");
+				if(null == userName){
+					userName = productDocCtx.read("$.loginid[0]");
+				}
 				userName = userName.replace("\"", "");
 				userName = userName.replaceAll("\\[", "");
 				userName = userName.replaceAll("\\]", "");
 
-				LOGGER.info("AUDIT:requestingUser" + userId + "," + "impersonatingUser : amadmin,"
+				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:POST/accessmanager/json/authenticate");
 				// Authenticate the given credentials
 				try {
@@ -5196,7 +5199,7 @@ public class UserServiceImpl implements UserService {
 
 			} else {
 				// Fetching the AuthID from the UserId
-				LOGGER.info("AUDIT:requestingUser" + userId + "," + "impersonatingUser : amadmin,"
+				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:GET/se/users/getUser{userId}");
 				if (null != userId) {
 					try {
