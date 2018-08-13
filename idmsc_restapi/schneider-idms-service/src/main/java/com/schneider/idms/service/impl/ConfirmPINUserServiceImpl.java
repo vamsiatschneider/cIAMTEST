@@ -50,6 +50,7 @@ public class ConfirmPINUserServiceImpl extends IdmsCommonServiceImpl implements 
 
 	private static final Logger EMAIL_CHANGE_LOGGER = LoggerFactory.getLogger("emailChangeLogger");
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Response userPinConfirmation(String authorization, String accept, String region,
 			IdmsUserConfirmRequest confirmPinRequest) {
@@ -410,7 +411,7 @@ public class ConfirmPINUserServiceImpl extends IdmsCommonServiceImpl implements 
 		
 
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
-		JSONObject response = new JSONObject();
+		ErrorResponseCode response = new ErrorResponseCode();
 		DocumentContext productDocCtx = null;
 		String userData = null;
 		String loginIdentifier = null;
@@ -418,12 +419,11 @@ public class ConfirmPINUserServiceImpl extends IdmsCommonServiceImpl implements 
 		String PRODUCT_JSON_STRING = null;
 		String iPlanetDirectoryKey = null;
 		String sendEmailOptType = "";
-		String resendId= "";
+		String federatedId= "";
 		ObjectMapper objMapper=new ObjectMapper();
 
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
-		response.put(UserConstants.STATUS, UserConstants.STATUS_FAILD);
 		try {
 			LOGGER.info("UserServiceImpl:resendPIN : Request   -> " + objMapper.writeValueAsString(resendPinRequest));
 			iPlanetDirectoryKey = getSSOToken();
@@ -432,8 +432,8 @@ public class ConfirmPINUserServiceImpl extends IdmsCommonServiceImpl implements 
 					&& (null == resendPinRequest.getIDMS_Federated_ID__c()|| resendPinRequest.getIDMS_Federated_ID__c().isEmpty())
 					&& (null == resendPinRequest.getFederationIdentifier()|| resendPinRequest.getFederationIdentifier().isEmpty())
 					&& (null == resendPinRequest.getFederationId()|| resendPinRequest.getFederationId().isEmpty())) {
-				response.put(UserConstants.STATUS, UserConstants.STATUS_FAILD);
-				response.put(UserConstants.MESSAGE, UserConstants.RESPONSE_MESSAGE_NULL);
+				response.setCode(UserConstants.STATUS_FAILD);
+				response.setMessage(UserConstants.RESPONSE_MESSAGE_NULL);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error(UserConstants.RESPONSE_MESSAGE_NULL);
 				LOGGER.info("Time taken by UserServiceImpl.resendPIN() : " + elapsedTime);
@@ -442,13 +442,13 @@ public class ConfirmPINUserServiceImpl extends IdmsCommonServiceImpl implements 
 			}else{
 				
 				if(null != resendPinRequest.getIdmsUserId() && !resendPinRequest.getIdmsUserId().isEmpty()){
-					resendId = resendPinRequest.getIdmsUserId();
+					federatedId = resendPinRequest.getIdmsUserId();
 				} else if(null != resendPinRequest.getIDMS_Federated_ID__c() && !resendPinRequest.getIDMS_Federated_ID__c().isEmpty()){
-					resendId = resendPinRequest.getIDMS_Federated_ID__c();
+					federatedId = resendPinRequest.getIDMS_Federated_ID__c();
 				}else if(null != resendPinRequest.getFederationId() && !resendPinRequest.getFederationId().isEmpty()){
-					resendId = resendPinRequest.getFederationId();
+					federatedId = resendPinRequest.getFederationId();
 				}else{
-					resendId = resendPinRequest.getFederationIdentifier();
+					federatedId = resendPinRequest.getFederationIdentifier();
 				}
 				/*if((null == resendId)|| (resendId.isEmpty()) || "".equalsIgnoreCase(resendId)){
 					resendId = resendPinRequest.getIDMS_Federated_ID__c();
@@ -463,10 +463,10 @@ public class ConfirmPINUserServiceImpl extends IdmsCommonServiceImpl implements 
 				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 			}*/
 
-			if (null != resendId) {
+			if (null != federatedId) {
 				LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 						+ AUDIT_OPENAM_API + AUDIT_OPENAM_GET_CALL + AUDIT_LOG_CLOSURE);
-				userData = productService.getUser(iPlanetDirectoryKey, resendId);
+				userData = productService.getUser(iPlanetDirectoryKey, federatedId);
 				LOGGER.info("user data from Openam: " + userData);
 
 				productDocCtx = JsonPath.using(conf).parse(userData);
@@ -519,23 +519,23 @@ public class ConfirmPINUserServiceImpl extends IdmsCommonServiceImpl implements 
 					if ((EmailConstants.UPDATEUSERRECORD_OPT_TYPE.equalsIgnoreCase(sendEmailOptType) && null != productDocCtx.read("$.newmail[0]"))
 							|| EmailConstants.USERREGISTRATION_OPT_TYPE.equalsIgnoreCase(sendEmailOptType)
 							|| EmailConstants.SETUSERPWD_OPT_TYPE.equalsIgnoreCase(sendEmailOptType)) {
-						String otp = sendEmail.generateOtp(resendId);
-						LOGGER.info("Successfully OTP generated for "+resendId);
-						sendEmail.sendSMSMessage(otp, sendEmailOptType, resendId, regestrationSource);
+						String otp = sendEmail.generateOtp(federatedId);
+						LOGGER.info("Successfully OTP generated for "+federatedId);
+						sendEmail.sendSMSMessage(otp, sendEmailOptType, federatedId, regestrationSource);
 						
-						sendEmail.sendOpenAmMobileEmail(otp, sendEmailOptType, resendId, regestrationSource);
+						sendEmail.sendOpenAmMobileEmail(otp, sendEmailOptType, federatedId, regestrationSource);
 						//sendEmail.sendOpenAmEmail(otp, sendEmailOptType, resendId, regestrationSource);
 					} else {
-						response.put(UserConstants.STATUS, UserConstants.STATUS_FAILD);
-						response.put(UserConstants.MESSAGE, UserConstants.RESEND_UPDATEOPTTYPE_ERROR);
+						response.setCode(ErrorCodeConstants.SERVER_ERROR_REQUEST);
+						response.setMessage(ErrorCodeConstants.SERVER_ERROR_REQUEST);
 						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 						LOGGER.error(UserConstants.RESEND_UPDATEOPTTYPE_ERROR);
 						LOGGER.info("Time taken by UserServiceImpl.resendPIN() : " + elapsedTime);
 						return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 					}
 				} else {
-					response.put(UserConstants.STATUS, UserConstants.STATUS_FAILD);
-					response.put(UserConstants.MESSAGE, UserConstants.RESEND_ONLYMOBILE_ERROR_MESSAGE);
+					response.setCode(ErrorCodeConstants.SERVER_ERROR_REQUEST);
+					response.setMessage(ErrorCodeConstants.SERVER_ERROR_REQUEST);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.error(UserConstants.RESEND_ONLYMOBILE_ERROR_MESSAGE);
 					LOGGER.info("Time taken by UserServiceImpl.resendPIN() : " + elapsedTime);
@@ -543,8 +543,8 @@ public class ConfirmPINUserServiceImpl extends IdmsCommonServiceImpl implements 
 				}
 
 			} else {
-				response.put(UserConstants.STATUS, UserConstants.STATUS_FAILD);
-				response.put(UserConstants.MESSAGE, UserConstants.RESPONSE_MESSAGE);
+				response.setCode(ErrorCodeConstants.SERVER_ERROR_REQUEST);
+				response.setMessage(ErrorCodeConstants.SERVER_ERROR_REQUEST);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error(UserConstants.RESPONSE_MESSAGE);
 				LOGGER.info("Time taken by UserServiceImpl.resendPIN() : " + elapsedTime);
@@ -552,7 +552,8 @@ public class ConfirmPINUserServiceImpl extends IdmsCommonServiceImpl implements 
 			}
 		} catch (NotFoundException e) {
 			e.printStackTrace();
-			response.put(UserConstants.MESSAGE, UserConstants.ERROR_RESEND_PIN);
+			response.setCode(ErrorCodeConstants.NOTFOUND_REQUEST);
+			response.setMessage(ErrorCodeConstants.NOTFOUND_MESSAGE);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.resendPIN() : " + elapsedTime);
 			LOGGER.error("Executing while Resending User PIN :: -> " + e.getMessage());
@@ -560,7 +561,8 @@ public class ConfirmPINUserServiceImpl extends IdmsCommonServiceImpl implements 
 			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 		} catch (BadRequestException e) {
 			e.printStackTrace();
-			response.put(UserConstants.MESSAGE, UserConstants.ERROR_RESEND_PIN);
+			response.setCode(ErrorCodeConstants.BAD_REQUEST);
+			response.setMessage(ErrorCodeConstants.BADREQUEST_MESSAGE);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.resendPIN() : " + elapsedTime);
 			LOGGER.error("Executing while Resending User PIN :: -> " + e.getMessage());
@@ -568,15 +570,16 @@ public class ConfirmPINUserServiceImpl extends IdmsCommonServiceImpl implements 
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (Exception e) {
 			e.printStackTrace();
-			response.put(UserConstants.MESSAGE, UserConstants.ERROR_RESEND_PIN);
+			response.setCode(ErrorCodeConstants.SERVER_ERROR_REQUEST);
+			response.setMessage(ErrorCodeConstants.SERVER_ERROR_MESSAGE);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.resendPIN() : " + elapsedTime);
 			LOGGER.error("Executing while Resending User PIN :: -> " + e.getMessage());
 			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
-		response.put(UserConstants.STATUS, successStatus);
-		response.put(UserConstants.MESSAGE, "Pin Code has been sent successfully");
+		JSONObject successResponse = new JSONObject();
+		successResponse.put("federatedId", federatedId);
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info("Time taken by UserServiceImpl.resendPIN() : " + elapsedTime);
 		//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
