@@ -189,5 +189,7 @@ public class DirectApiConstants {
 	public static final String EMAIL_VALIDATION = "Email error - ";
 	
 	public static final String TECHNICAL_USER = "technicaluser";
+	
+	public static final String COUNTRY_CHINA = "CN";
 
 }

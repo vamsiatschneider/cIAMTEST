@@ -1,70 +1,71 @@
 package com.schneider.idms.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 public class IdmsCreateUserResponse extends IdmsUserRequest {
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String userId;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String idmsFederatedId;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String trustStatus;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String trustLevel;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String rejectionReason;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String rejectionComment;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String delegatedIdp;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String identityType;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String isInternal;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String ail;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String ailApplications;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String ailFeatures;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String ailPrograms;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String division;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String title;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String businessUnit;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String userStatus;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String socialProviders;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String trustedAdmin;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String contactGoldenID;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String accountGoldenID;
 
 	public String getUserId() {
