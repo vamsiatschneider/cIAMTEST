@@ -77,4 +77,9 @@ public interface OpenAMService {
 	@Path("/authenticate")
 	String authenticateIdmsChinaUser(@HeaderParam("X-OpenAM-Username") String userName,@HeaderParam("X-OpenAM-Password") String password,@QueryParam("realm") String realm);
 	
+	@POST
+	@Path("/se/authenticate")
+	@Consumes("application/json")
+	Response oauth2iplanet(@HeaderParam("Cache-Control") String cacheControl,@HeaderParam("access_token") String accessToken, @QueryParam("service") String service,@QueryParam("authIndexType") String authIndexType, @QueryParam("authIndexValue") String authIndexValue,String auth);
+	
 }

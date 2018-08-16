@@ -6827,4 +6827,53 @@ public class UserServiceImpl implements UserService {
 
 		return  "Bearer " + bfoAuthorizationToken;
 	}
+
+	@SuppressWarnings({ "unchecked" })
+	public Response oauthToIplanet(String token) {
+		JSONObject response = new JSONObject();
+		JSONObject errorResponse = null;
+		Response oauth2iplanetResponse = null;
+		String tokenId = null;
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		try {
+			Response authenticate = productService.otpAuthentication("", "OAuth2IPlanet", UserConstants.HOTP_SERVICE,
+					"OAuth2IPlanet", "");
+			String authResponseAsString = authenticate.readEntity(String.class);
+			LOGGER.info("authenticate JSON request: " + authResponseAsString);
+			if (token.contains("Bearer")) {
+				String[] tokenSplit = token.split("Bearer ");
+				oauth2iplanetResponse = productService.oauth2iplanet("no-cache", tokenSplit[1], "OAuth2IPlanet",
+						UserConstants.HOTP_SERVICE, "OAuth2IPlanet", authResponseAsString);
+			} else {
+				oauth2iplanetResponse = productService.oauth2iplanet("no-cache", token, "OAuth2IPlanet",
+						UserConstants.HOTP_SERVICE, "OAuth2IPlanet", authResponseAsString);
+			}
+			if (Response.Status.UNAUTHORIZED.getStatusCode() == oauth2iplanetResponse.getStatus()) {
+				errorResponse = new JSONObject();
+				errorResponse.put("message", "token invalid");
+				LOGGER.error("Error in oauth2iplanet: " + "UNAUTHORIZED");
+				return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+			}
+			String oauth2iplanetResponseAsString = oauth2iplanetResponse.readEntity(String.class);
+			LOGGER.info("authenticate JSON request: " + oauth2iplanetResponseAsString);
+			DocumentContext productDocCtx = JsonPath.using(conf).parse(oauth2iplanetResponseAsString);
+			tokenId = productDocCtx.read("$.tokenId");
+		} catch (NotAuthorizedException e) {
+			e.printStackTrace();
+			errorResponse = new JSONObject();
+			errorResponse.put("message", "token invalid");
+			LOGGER.error("Error in oauth2iplanet: " + e.getMessage());
+			return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			errorResponse = new JSONObject();
+			errorResponse.put("code", "SERVER_ERROR");
+			errorResponse.put(UserConstants.MESSAGE, "oauth2iplanet failed.");
+			LOGGER.error("Error in oauth2iplanet: " + e.getMessage());
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
+		}
+		response.put("iPlanetDirectoryPro", tokenId);
+		return Response.status(Response.Status.OK).entity(response).build();
+	}
+
 }
