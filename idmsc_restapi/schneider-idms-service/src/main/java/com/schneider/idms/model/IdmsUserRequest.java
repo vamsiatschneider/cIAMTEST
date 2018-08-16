@@ -151,7 +151,7 @@ public class IdmsUserRequest {
 
 	@JsonInclude(Include.NON_NULL)
 	private String companyFederatedId;
-	
+
 	@JsonInclude(Include.NON_NULL)
 	private String trustedAdmin;
 
@@ -187,6 +187,12 @@ public class IdmsUserRequest {
 
 	@JsonInclude(Include.NON_NULL)
 	private boolean isActive;
+
+	@JsonInclude(Include.NON_NULL)
+	private String channel;
+
+	@JsonInclude(Include.NON_NULL)
+	private String subchannel;
 
 	public String getUserContext() {
 		return userContext;
@@ -674,6 +680,22 @@ public class IdmsUserRequest {
 
 	public void setAdminCompanyFederatedId(String adminCompanyFederatedId) {
 		this.adminCompanyFederatedId = adminCompanyFederatedId;
+	}
+
+	public String getChannel() {
+		return channel;
+	}
+
+	public void setChannel(String channel) {
+		this.channel = channel;
+	}
+
+	public String getSubchannel() {
+		return subchannel;
+	}
+
+	public void setSubchannel(String subchannel) {
+		this.subchannel = subchannel;
 	}
 
 }

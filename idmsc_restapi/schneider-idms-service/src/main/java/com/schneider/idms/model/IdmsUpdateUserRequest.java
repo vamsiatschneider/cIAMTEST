@@ -1,152 +1,159 @@
 package com.schneider.idms.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 public class IdmsUpdateUserRequest {
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String salutation;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String firstName;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String middleName;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String lastName;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String countryCode;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String email;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String mobilePhone;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String languageCode;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String emailOptIn;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String aboutMe;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String street;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String city;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String zipCode;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String stateOrProvinceCode;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String county;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String pOBox;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String additionalAddress;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String suffix;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String homePhone;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String fax;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String profileLastUpdateSource;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String currency;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String currencyCode;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String companyName;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String companyStreet;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String companyCity;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String companyZipCode;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String companyStateOrProvinceCode;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String companyPOBox;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String companyCounty;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String companyCountryCode;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String companyAdditionalAddress;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String companyWebsite;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String classLevel1;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String classLevel2;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String marketSegment;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String marketSubSegment;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String marketServed;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String employeeSize;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String department;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String headquarter;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String annualRevenue;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String taxIdentificationNumber;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String jobTitle;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String jobFunction;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String jobDescription;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String workPhone;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String trustedAdmin;
+
+	@JsonInclude(Include.NON_NULL)
+	private String channel;
+
+	@JsonInclude(Include.NON_NULL)
+	private String subchannel;
 
 	public String getSalutation() {
 		return salutation;
@@ -530,6 +537,22 @@ public class IdmsUpdateUserRequest {
 
 	public void setCurrencyCode(String currencyCode) {
 		this.currencyCode = currencyCode;
+	}
+
+	public String getChannel() {
+		return channel;
+	}
+
+	public void setChannel(String channel) {
+		this.channel = channel;
+	}
+
+	public String getSubchannel() {
+		return subchannel;
+	}
+
+	public void setSubchannel(String subchannel) {
+		this.subchannel = subchannel;
 	}
 
 }
