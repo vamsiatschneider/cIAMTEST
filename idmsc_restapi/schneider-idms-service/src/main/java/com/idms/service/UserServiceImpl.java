@@ -3964,7 +3964,7 @@ public class UserServiceImpl implements UserService {
 					String userInfoByAccessToken = openAMTokenService.getUserInfoByAccessToken(authorizedToken, "/se");
 					productDocCtx = JsonPath.using(conf).parse(userInfoByAccessToken);
 					
-					if(productDocCtx.read("$.sub").toString().contains("technicaluser")){
+					if(productDocCtx.read("$.email").toString().contains(UserConstants.TECHNICAL_USER)){
 						String userExistsInOpenam = productService.checkUserExistsWithEmailMobile(
 								UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 								"loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(userRequest.getUserRecord().getEmail(),"UTF-8"),"UTF-8") + "\"");

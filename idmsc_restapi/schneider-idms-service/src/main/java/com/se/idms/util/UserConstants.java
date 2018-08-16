@@ -472,4 +472,6 @@ public class UserConstants {
 	
 	public static final String UIMSPasswordSync = "UIMSPasswordSync";
 	
+	public static final String TECHNICAL_USER = "TechnicalUser";
+	
 }
