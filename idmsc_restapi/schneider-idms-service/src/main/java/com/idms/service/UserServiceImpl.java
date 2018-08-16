@@ -3960,13 +3960,22 @@ public class UserServiceImpl implements UserService {
 						userRequest.getUserRecord().getIDMS_Profile_update_source__c())) {
 					//userId = userRequest.getUserRecord().getIDMS_Federated_ID__c();
 					//fedId = userRequest.getUserRecord().getIDMS_Federated_ID__c();
-					String userExistsInOpenam = productService.checkUserExistsWithEmailMobile(
-							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-							"loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(userRequest.getUserRecord().getEmail(),"UTF-8"),"UTF-8") + "\"");
 					
-					productDocCtx = JsonPath.using(conf).parse(userExistsInOpenam);
-					userId = productDocCtx.read("$.result[0].username");
-					fedId = productDocCtx.read("$.result[0].federationID[0]");
+					String userInfoByAccessToken = openAMTokenService.getUserInfoByAccessToken(authorizedToken, "/se");
+					productDocCtx = JsonPath.using(conf).parse(userInfoByAccessToken);
+					
+					if(productDocCtx.read("$.sub").toString().contains("technicaluser")){
+						String userExistsInOpenam = productService.checkUserExistsWithEmailMobile(
+								UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+								"loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(userRequest.getUserRecord().getEmail(),"UTF-8"),"UTF-8") + "\"");
+						
+						productDocCtx = JsonPath.using(conf).parse(userExistsInOpenam);
+						userId = productDocCtx.read("$.result[0].username");
+						fedId = productDocCtx.read("$.result[0].federationID[0]");
+					}else{
+						userId = productDocCtx.read("$.sub");
+						fedId = productDocCtx.read("$.federationID");
+					}
 				} else {
 					String userInfoByAccessToken = openAMTokenService.getUserInfoByAccessToken(authorizedToken, "/se");
 					productDocCtx = JsonPath.using(conf).parse(userInfoByAccessToken);
