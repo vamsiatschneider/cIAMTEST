@@ -637,8 +637,8 @@ public class UserServiceImpl implements UserService {
 	}
 
 	public static String getValue(String key) {
-		LOGGER.info("Entered getValue() -> Start");
-		LOGGER.info("Parameter key -> " + key);
+		//LOGGER.info("Entered getValue() -> Start");
+		//LOGGER.info("Parameter key -> " + key);
 		if (null != key) {
 			if (!key.contains("[")) {
 				return key;
@@ -662,8 +662,8 @@ public class UserServiceImpl implements UserService {
 	}
 
 	public static String getValues(String key) {
-		LOGGER.info("Entered getValues() -> Start");
-		LOGGER.info("Parameter key -> " + key);
+		//LOGGER.info("Entered getValues() -> Start");
+		//LOGGER.info("Parameter key -> " + key);
 		if (null != key) {
 			if (!key.contains("[" + '"' + "[")) {
 				return key;
@@ -1129,7 +1129,10 @@ public class UserServiceImpl implements UserService {
 				!UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())) {
 			// mapping IFW request to UserCompany
 			CompanyV3 company = mapper.map(userRequest, CompanyV3.class);
+			company.setLanguageCode(company.getLanguageCode().toLowerCase());
 			UserV6 identity = mapper.map(userRequest, UserV6.class);
+			identity.setLanguageCode(identity.getLanguageCode().toLowerCase());
+			
 			//forcedFederatedId = "cn00"+ UUID.randomUUID().toString();
 			//Calling Async method createUIMSUserAndCompany
 			LOGGER.info("Going to call createUIMSUserAndCompany() of UIMSUserManagerSoapService for userName:"+userName);
@@ -3313,7 +3316,7 @@ public class UserServiceImpl implements UserService {
 			// Getting the user data
 			LOGGER.info("Going to call getSSOToken()");
 			iPlanetDirectoryKey = getSSOToken();
-			LOGGER.error("call getSSOToken() finished");
+			LOGGER.info("call getSSOToken() finished");
 
 			if (null != ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c() && UserConstants.UIMS
 					.equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c())) {
@@ -3336,7 +3339,7 @@ public class UserServiceImpl implements UserService {
 			}
 
 			if (null != userId) {
-				LOGGER.info("AUDIT:requestingUser" + userId + "," + "impersonatingUser : amadmin,"
+				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:GET/getUser/{userId}");
 
 				LOGGER.info("Going to call getUser() of OpenAMService for userId="+userId);
@@ -3380,7 +3383,7 @@ public class UserServiceImpl implements UserService {
 				//aclType_c = "[" + aclType_c + "]";
 				PRODUCT_JSON_STRING = "{" + "\"IDMSAIL_" + idmsAclType_c + "_c\": \"" + aclType_c.trim() + "\""
 						+ "}";
-				LOGGER.info("AUDIT:requestingUser" + userId + "," + "impersonatingUser : amadmin,"
+				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:GET/updateUser/{userId}");
 				LOGGER.info("Grant Operation: productService.updateUser : Request -> "+PRODUCT_JSON_STRING);
 				LOGGER.info("Going to call updateUser() of OpenAMService for userId="+userId);
@@ -3401,7 +3404,7 @@ public class UserServiceImpl implements UserService {
 				
 				// Update the IDMSAil__c in OpenAm
 				PRODUCT_JSON_STRING = "{" + "\"IDMSAil_c\": \"" + IDMSAil__c.trim() + "\"" + "}";
-				LOGGER.info("AUDIT:requestingUser" + userId + "," + "impersonatingUser : amadmin,"
+				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:GET/getUser/{userId}");
 				LOGGER.info("productService.updateUser : Request -> "+PRODUCT_JSON_STRING);
 				LOGGER.info("Going to call updateUser() of OpenAMService for userId="+userId);
@@ -3464,7 +3467,7 @@ public class UserServiceImpl implements UserService {
 					PRODUCT_JSON_STRING = "{" + "\"IDMSAIL_" + idmsAclType_c + "_c\": \"" + aclType + "\""
 							+ "}";	
 				}
-				LOGGER.info("AUDIT:requestingUser" + userId + "," + "impersonatingUser : amadmin,"
+				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:GET/getUser/{userId}");
 				LOGGER.info("Revoke Operation: productService.updateUser : Request -> "+PRODUCT_JSON_STRING);
 				LOGGER.info("Going to call updateUser() of OpenAMService for userId="+userId);
@@ -3478,7 +3481,7 @@ public class UserServiceImpl implements UserService {
 				}else{
 				PRODUCT_JSON_STRING = "{" + "\"IDMSAil_c\": \"" + IDMSAil__c.trim() + "\"" + "}";
 				}
-				LOGGER.info("AUDIT:requestingUser" + userId + "," + "impersonatingUser : amadmin,"
+				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:GET/getUser/{userId}");
 				LOGGER.info("Revoke Operation -> : productService.updateUser : Request -> "+PRODUCT_JSON_STRING);
 				LOGGER.info("Going to call updateUser() of OpenAMService for userId="+userId);
@@ -3957,13 +3960,26 @@ public class UserServiceImpl implements UserService {
 						userRequest.getUserRecord().getIDMS_Profile_update_source__c())) {
 					//userId = userRequest.getUserRecord().getIDMS_Federated_ID__c();
 					//fedId = userRequest.getUserRecord().getIDMS_Federated_ID__c();
-					String userExistsInOpenam = productService.checkUserExistsWithEmailMobile(
-							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-							"loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(userRequest.getUserRecord().getEmail(),"UTF-8"),"UTF-8") + "\"");
-					
-					productDocCtx = JsonPath.using(conf).parse(userExistsInOpenam);
-					userId = productDocCtx.read("$.result[0].username");
-					fedId = productDocCtx.read("$.result[0].federationID[0]");
+
+					String userInfoByAccessToken = openAMTokenService.getUserInfoByAccessToken(authorizedToken, "/se");
+					productDocCtx = JsonPath.using(conf).parse(userInfoByAccessToken);
+
+					if(productDocCtx.read("$.email").toString().contains(UserConstants.TECHNICAL_USER)){
+						String userExistsInOpenam = productService.checkUserExistsWithEmailMobile(
+								UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+								"loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(userRequest.getUserRecord().getEmail(),"UTF-8"),"UTF-8") + "\"");
+
+						productDocCtx = JsonPath.using(conf).parse(userExistsInOpenam);
+						userId = productDocCtx.read("$.result[0].username");
+						fedId = productDocCtx.read("$.result[0].federationID[0]");
+					}else{
+						userId = productDocCtx.read("$.sub");
+						fedId = productDocCtx.read("$.federationID");
+					}
+					usermail = productDocCtx.read("$.email");
+					if (usermail == null) {
+						usermail = productDocCtx.read("$.Email");
+					}
 				} else {
 					String userInfoByAccessToken = openAMTokenService.getUserInfoByAccessToken(authorizedToken, "/se");
 					productDocCtx = JsonPath.using(conf).parse(userInfoByAccessToken);
@@ -4297,8 +4313,9 @@ public class UserServiceImpl implements UserService {
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, version);
 				// mapping IFW request to UserCompany
 				CompanyV3 company = mapper.map(userRequest, CompanyV3.class);
+				company.setLanguageCode(company.getLanguageCode().toLowerCase());
 				com.se.uims.usermanager.UserV6 identity = mapper.map(userRequest, com.se.uims.usermanager.UserV6.class);
-
+				identity.setLanguageCode(identity.getLanguageCode().toLowerCase());
 				// calling Async method updateUIMSUserAndCompany
 				uimsUserManagerSoapService.updateUIMSUserAndCompany(fedId, identity,
 						userRequest.getUserRecord().getIDMS_User_Context__c(), company, vNewCntValue.toString(),
@@ -4758,7 +4775,7 @@ public class UserServiceImpl implements UserService {
 				productDocCtx = JsonPath.using(conf).parse(userInfoByAccessToken);
 				userId = productDocCtx.read("$.sub");
 				fedId=userId; //productDocCtx.read("$.federationID"); //There is no federationID in the token response
-				LOGGER.info("AUDIT:requestingUser" + userId + "," + "impersonatingUser : amadmin,"
+				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:GET/userinfo");
 
 				// Authenticating the User
@@ -4819,7 +4836,7 @@ public class UserServiceImpl implements UserService {
 				
 				iPlanetDirectoryKey = getSSOToken();
 
-				LOGGER.info("AUDIT:requestingUser" + userId + "," + "impersonatingUser : amadmin,"
+				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:GET/se/users/getUser{userId}");
 				if (null != userId) {
 					LOGGER.info("calling getUser() of OpenAMService for userId:"+userId);
@@ -4830,12 +4847,15 @@ public class UserServiceImpl implements UserService {
 				conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 				productDocCtx = JsonPath.using(conf).parse(userData);
 
-				userName = productDocCtx.read("$.IDMSUID").toString();
+				userName = productDocCtx.read("$.Loginid[0]");
+				if(null == userName){
+					userName = productDocCtx.read("$.loginid[0]");
+				}
 				userName = userName.replace("\"", "");
 				userName = userName.replaceAll("\\[", "");
 				userName = userName.replaceAll("\\]", "");
 
-				LOGGER.info("AUDIT:requestingUser" + userId + "," + "impersonatingUser : amadmin,"
+				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:POST/accessmanager/json/authenticate");
 				// Authenticate the given credentials
 				try {
@@ -5192,7 +5212,7 @@ public class UserServiceImpl implements UserService {
 
 			} else {
 				// Fetching the AuthID from the UserId
-				LOGGER.info("AUDIT:requestingUser" + userId + "," + "impersonatingUser : amadmin,"
+				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:GET/se/users/getUser{userId}");
 				if (null != userId) {
 					try {
@@ -5706,7 +5726,7 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Entered checkUserExistsWithFederationID() -> Start");
 		LOGGER.info("Parameter iPlanetDirectoryToken -> " + iPlanetDirectoryToken);
 		LOGGER.info("Parameter federationId -> " + federationId);
-		LOGGER.info("Parameter startTime -> " + startTime);
+		//LOGGER.info("Parameter startTime -> " + startTime);
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		DocumentContext productDocCtx = null;
 		JSONObject uimsResponse = new JSONObject();
@@ -5833,7 +5853,7 @@ public class UserServiceImpl implements UserService {
 		
 		try {
 			
-			LOGGER.info(" inside UserServiceImpl :: sendInvitation ");
+			//LOGGER.info(" inside UserServiceImpl :: sendInvitation ");
 			
 			if ((null == sendInvitaionRequest.getEmail() || sendInvitaionRequest.getEmail().isEmpty()) 
 					|| (null == sendInvitaionRequest.getInvitationId() || sendInvitaionRequest.getInvitationId().isEmpty()) 

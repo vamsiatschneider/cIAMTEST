@@ -481,5 +481,7 @@ public class UserConstants {
 	public static final String USER_TYPE_L2 = "L2";
 	
 	public static final String USER_TYPE_L3 = "L3";
+
+	public static final String TECHNICAL_USER = "TechnicalUser";
 	
 }
