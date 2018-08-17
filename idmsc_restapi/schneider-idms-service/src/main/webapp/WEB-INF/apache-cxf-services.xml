@@ -76,6 +76,7 @@
 			<ref bean="directUIMSUserManagerSoapService"/>
 			<ref bean="getUserService"/>
 			<ref bean="confirmPinService"/>
+			<ref bean="updateAILService"/>
 			
 		</jaxrs:serviceBeans>
 		<jaxrs:providers>

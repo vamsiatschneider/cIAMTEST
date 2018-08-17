@@ -1,13 +1,28 @@
 package com.schneider.idms.service.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
+import com.schneider.idms.common.ErrorCodeConstants;
+import com.schneider.idms.common.ErrorResponseCode;
+import com.schneider.idms.common.ResponseCodeStatus;
 import com.schneider.idms.model.IdmsUserAilRequest;
 import com.schneider.idms.service.UpdateAILService;
+import com.se.idms.util.UserConstants;
 
 /**
  * @author SESA508936 For Direct Call API
@@ -16,12 +31,303 @@ import com.schneider.idms.service.UpdateAILService;
 public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements UpdateAILService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UpdateAILServiceImpl.class);
 
+	@SuppressWarnings("unused")
 	@Override
 	public Response updateAIL(String federatedId, String authorization, String accept, String region,
 			IdmsUserAilRequest userAilRequest) {
+		LOGGER.info("Entered updateAIL() -> Start");
+		LOGGER.info("Paramters are federatedId=" + federatedId + " ,region=" + region);
+		LOGGER.info("Paramters are authorization=" + authorization + " ,accept=" + accept);
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		ErrorResponseCode errorResponseCode = new ErrorResponseCode();
+		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
+		long elapsedTime;
+		String userId = null;
+		String userData = null;
+		String iPlanetDirectoryKey = null;
+		String inOpenAMAILFullValues = null, modifiedAILFullValues = "";
+		String inRequestAILTypeValPair = null;
+		String aclType = null, aclValue = null, aclOperation = null;
+		String inOpenAMAILType = null;
+		String inOpenAMAILValue = null, modifiedAILValue = "";
+		List<String> listOfAilValues = null;
+		String PRODUCT_JSON_STRING = "";
+		ResponseCodeStatus responseCodeStatus = new ResponseCodeStatus();
+
+		try {
+			LOGGER.info("userAilRequest=" + objectMapper.writeValueAsString(userAilRequest));
+
+			if (true) {
+
+				// FederatedId
+				if (null == federatedId || federatedId.isEmpty()) {
+					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+					errorResponseCode.setMessage("Path field federatedId is Mandatory");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.error("Mandatory check: Path field federatedId is Missing or Null/Empty");
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				}
+
+				// Authorization
+				if (null == authorization || authorization.isEmpty()) {
+					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+					errorResponseCode.setMessage("Header field authorization is Mandatory");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.error("Mandatory check: Header field authorization is Missing or Null/Empty");
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				}
+
+				// accept
+				if (null == accept || accept.isEmpty()) {
+					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+					errorResponseCode.setMessage("Header field accept is Mandatory");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.error("Mandatory check: Header field accept is Missing or Null/Empty");
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				}
+
+				if (null != accept && !accept.equalsIgnoreCase("application/json")) {
+					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+					errorResponseCode.setMessage("Header field accept must be application/json");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.error("Mandatory check: Header field accept:" + accept + " is not permitted");
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				}
+
+				// region
+				if (null != region && !region.equalsIgnoreCase("CN")) {
+					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+					errorResponseCode.setMessage("Header field IDMS-Region must be CN");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.error("Mandatory check: Header field IDMS-Region:" + region + " is not permitted");
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				}
+
+				// Profile Update Source
+				if (null == userAilRequest.getProfileLastUpdateSource()
+						|| userAilRequest.getProfileLastUpdateSource().isEmpty()) {
+					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+					errorResponseCode.setMessage("ProfileLastUpdateSource is Mandatory");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.error("Mandatory check: ProfileLastUpdateSource is Missing or Null/Empty");
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				}
+
+				// acl
+				if (null == userAilRequest.getAcl() || userAilRequest.getAcl().isEmpty()) {
+					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+					errorResponseCode.setMessage("Acl is Mandatory");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.error("Mandatory check: Acl is Missing or Null/Empty");
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				}
+
+				// aclType
+				if (null == userAilRequest.getAclType() || userAilRequest.getAclType().isEmpty()) {
+					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+					errorResponseCode.setMessage("AclType is Mandatory");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.error("Mandatory check: AclType is Missing or Null/Empty");
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				}
+
+				if (null != userAilRequest.getAclType()
+						&& (!pickListValidator.validate(UserConstants.IDMS_ACL_TYPE_C, userAilRequest.getAclType()))) {
+					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+					errorResponseCode.setMessage("AclType is Not Valid");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.error("Mandatory check: AclType " + userAilRequest.getAclType() + " is Not Valid");
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				}
+
+				// operation
+				if (null == userAilRequest.getOperation() || userAilRequest.getOperation().isEmpty()) {
+					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+					errorResponseCode.setMessage("AIL Operation is Mandatory");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.error("Mandatory check: Operation is Null or Empty");
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				}
+
+				if (null != userAilRequest.getOperation() && (!pickListValidator
+						.validate(UserConstants.IDMS_OPERATION_C, userAilRequest.getOperation()))) {
+					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+					errorResponseCode.setMessage("Operation is Not Valid");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.error("Mandatory check: AIL Operation " + userAilRequest.getOperation() + " is Not Valid");
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				}
+
+				// writing business logic - start
+				userId = federatedId;
+				iPlanetDirectoryKey = getSSOToken();
+
+				aclType = getIDMSAclType(userAilRequest.getAclType());
+				aclValue = userAilRequest.getAcl();
+				aclOperation = userAilRequest.getOperation();
+
+				LOGGER.info("ACL type=" + aclType + " ,aclValue=" + aclValue + " ,aclOperation=" + aclOperation);
+
+				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
+						+ "openAMApi:GET/getUser/{userId}");
+
+				LOGGER.info("Start: calling getUser() of OpenAMService to fetch AIL values for userId=" + userId);
+				userData = productService.getUser(iPlanetDirectoryKey, userId);
+				LOGGER.info("End: getUser() of OpenAMService to fetch AIL values finsihed for userId=" + userId);
+				Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+				DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
+
+				inOpenAMAILFullValues = productDocCtx.read("$.IDMSAil_c[0]"); 
+				inOpenAMAILType = "IDMSAIL_" + aclType + "_c"; 
+				inOpenAMAILValue = productDocCtx.read("$.IDMSAIL_" + aclType + "_c[0]"); 
+				
+				LOGGER.info("In OpenAM AIL Full Values=" + inOpenAMAILFullValues);
+				LOGGER.info("In OpenAM AIL Type=" + inOpenAMAILType + " ,Values=" + inOpenAMAILValue);
+				
+				if (null != inOpenAMAILFullValues && !inOpenAMAILFullValues.isEmpty()) {
+					listOfAilValues = Arrays.asList(inOpenAMAILFullValues.split(","));
+				} else {
+					listOfAilValues = new ArrayList<String>();
+				}
+				
+				inRequestAILTypeValPair = userAilRequest.getAclType().trim() + ";" + userAilRequest.getAcl().trim();
+
+				// Grant OPeration
+				if ((!listOfAilValues.contains("(" + inRequestAILTypeValPair + ")"))
+						&& ("GRANT".equalsIgnoreCase(aclOperation))) {
+
+					if (!(inOpenAMAILValue == null || inOpenAMAILValue.length() == 0))
+						modifiedAILValue = inOpenAMAILValue + "," + aclValue;
+					else
+						modifiedAILValue = aclValue;
+
+					if (null != inOpenAMAILFullValues && !inOpenAMAILFullValues.isEmpty())
+						modifiedAILFullValues = "" + inOpenAMAILFullValues + ",(" + inRequestAILTypeValPair + ")";
+					else
+						modifiedAILFullValues = "(" + inRequestAILTypeValPair + ")";
+
+					PRODUCT_JSON_STRING = "{" + "\"" + inOpenAMAILType + "\": \"" + modifiedAILValue.trim() + "\""
+							+ ",\"IDMSAil_c\": \"" + modifiedAILFullValues.trim() + "\"}";
+
+					LOGGER.info("Grant Operation: JSON string to update all AIL -> " + PRODUCT_JSON_STRING);
+					LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
+							+ "openAMApi:GET/getUser/{userId}");
+					LOGGER.info("Start: Calling updateUser() of OpenAMService to update AIL for userId=" + userId);
+					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+							PRODUCT_JSON_STRING);
+					LOGGER.info("End: updateUser() of OpenAMService to update AIL finished for userId=" + userId);
+					// response
+					responseCodeStatus.setStatus(ErrorCodeConstants.SUCCESS);
+					responseCodeStatus.setMessage("AIL was granted successfully ");
+
+					return Response.status(Response.Status.OK.getStatusCode()).entity(responseCodeStatus).build();
+
+				}else
+				// Revoke Operation
+				if ((listOfAilValues.contains("(" + inRequestAILTypeValPair + ")"))
+						&& ("REVOKE".equalsIgnoreCase(aclOperation))) {
+					modifiedAILFullValues = "";
+					List<String> ailValList = null;
+					modifiedAILValue = "";
+					PRODUCT_JSON_STRING = "";
+
+					for (String pair : listOfAilValues) {
+						if (!listOfAilValues.contains("(" + inRequestAILTypeValPair + ")")) {
+							modifiedAILFullValues = modifiedAILFullValues + pair + ",";
+						}
+					}
+					if (null != modifiedAILFullValues && !modifiedAILFullValues.isEmpty()) {
+						modifiedAILFullValues = modifiedAILFullValues.substring(0, modifiedAILFullValues.length() - 1);
+					}
+
+					if (null != inOpenAMAILValue) {
+						ailValList = new ArrayList<String>(Arrays.asList(inOpenAMAILValue.split(",")));
+					}
+
+					for (String val : ailValList) {
+						if (!val.equalsIgnoreCase(aclValue)) {
+							modifiedAILValue = modifiedAILValue + val + ",";
+						}
+					}
+					if (null != modifiedAILValue && !modifiedAILValue.isEmpty()) {
+						modifiedAILValue = modifiedAILValue.substring(0, modifiedAILValue.length() - 1);
+					}
+
+					if (null == modifiedAILValue.trim() || modifiedAILValue.trim().isEmpty()) {
+						PRODUCT_JSON_STRING = "{\"" + inOpenAMAILType + "\":".concat("[]}");
+					} else {
+						PRODUCT_JSON_STRING = "{\"" + inOpenAMAILType + ": \"" + modifiedAILValue.trim() + "\"" + "}";
+					}
+
+					if (null == modifiedAILFullValues.trim() || modifiedAILFullValues.trim().isEmpty()) {
+						PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
+								.concat(",\"IDMSAil_c\":".concat("[]}"));
+					} else {
+						PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
+								.concat(",\"IDMSAil_c\": \"" + modifiedAILFullValues.trim() + "\"}");
+					}
+
+					LOGGER.info("JSON String to Update=" + PRODUCT_JSON_STRING);
+					LOGGER.info("Start: calling updateUser() of OpenAMService to update AIL values for userId=" + userId);
+					
+					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+							PRODUCT_JSON_STRING);
+					LOGGER.info("updateUser() of OpenAMService finished for userId=" + userId);
+
+					responseCodeStatus.setStatus(ErrorCodeConstants.SUCCESS);
+					responseCodeStatus.setMessage("AIL was revoked successfully ");
+
+					return Response.status(Response.Status.OK.getStatusCode()).entity(responseCodeStatus).build();
+				}else{
+					errorResponseCode.setMessage("Can not perform Grant/Revoke operation. AIL Value/s already present/removed.");
+					errorResponseCode.setCode("BAD_REQUEST");
+					LOGGER.error("Can not perform Grant/Revoke operation. AIL Value/s already present/removed.");
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				}
+				// writing business logic - end
+			}
+
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+			LOGGER.error("JsonProcessingException = " + e.getMessage());
+			errorResponseCode.setCode(ErrorCodeConstants.SERVER_ERROR_REQUEST);
+			errorResponseCode.setMessage("JSON Parsing error, Please try again");
+			LOGGER.error("JSON Parsing error, Please try again");
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponseCode).build();
+		} catch (NotFoundException e) {
+			e.printStackTrace();
+			errorResponseCode.setCode(ErrorCodeConstants.NOTFOUND_REQUEST);
+			errorResponseCode.setMessage("User not found based on user Id");
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by UserServiceImpl.updateAIL() : " + elapsedTime);
+			LOGGER.error("Executing while updateAIL() :: -> " + errorResponseCode.getMessage());
+			LOGGER.error("Executing while updateAIL() :: -> " + e.getMessage());
+			return Response.status(Response.Status.NOT_FOUND).entity(errorResponseCode).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			errorResponseCode.setCode(ErrorCodeConstants.SERVER_ERROR_REQUEST);
+			errorResponseCode.setMessage("Error in Updating the AIL Object");
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by UserServiceImpl.updateAIL() : " + elapsedTime);
+			LOGGER.error("Executing while updateAIL() :: -> " + errorResponseCode.getMessage());
+			LOGGER.error("Executing while updateAIL() :: -> " + e.getMessage());
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponseCode).build();
+		}
+		errorResponseCode.setCode(ErrorCodeConstants.SERVER_ERROR_REQUEST);
+		errorResponseCode.setMessage("Error in Calling Update AIL API, Please try again");
+		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponseCode).build();
+	}
+
+	private String getIDMSAclType(String aclType) {
+		if (UserConstants.ACLTYPE_APPLICATION.equalsIgnoreCase(aclType))
+			return UserConstants.ACLTYPE_APPLICATIONS;
+		else if (UserConstants.ACLTYPE_PROGRAM.equalsIgnoreCase(aclType))
+			return UserConstants.ACLTYPE_PROGRAMS;
+		else if (UserConstants.ACLTYPE_FEATURE.equalsIgnoreCase(aclType))
+			return UserConstants.ACLTYPE_FEATURES;
+
 		return null;
 	}
-	
-	
-	
+
 }
