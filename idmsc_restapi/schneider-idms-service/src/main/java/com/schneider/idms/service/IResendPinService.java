@@ -10,12 +10,12 @@ import javax.ws.rs.core.Response;
 
 import com.idms.model.ResendPinRequest;
 
-@Path("/identity/services/apexrest")
+@Path("/services/apexrest/IDMSServices")
 @Produces("application/json")
 public interface IResendPinService {
 
 	@PUT
-	@Path("/IDMSsvcs/1.0/ResendPinCode")
+	@Path("/ResendPinCode/1.0")
 	@Consumes("application/json")
 	Response resendPIN(@HeaderParam("Authorization") String token,@Valid ResendPinRequest resendPinRequest);
 }

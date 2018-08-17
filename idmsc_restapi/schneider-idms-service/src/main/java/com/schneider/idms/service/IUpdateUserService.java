@@ -7,9 +7,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
-import com.schneider.idms.model.IdmsUpdateUserRequest;
+import com.schneider.idms.model.IdmsUserRequest;
 
-@Path("/identity/services/apexrest")
+@Path("/services/apexrest")
 @Produces("application/json")
 public interface IUpdateUserService {
 
@@ -18,6 +18,6 @@ public interface IUpdateUserService {
 	@Consumes("application/json")
 	Response updateUser(@HeaderParam("IDMS-Authorization")String authorization,
 			@HeaderParam("Accept")String accept,
-			@HeaderParam("IDMS-Region")String region,IdmsUpdateUserRequest userRequest);
+			@HeaderParam("IDMS-Region")String region,IdmsUserRequest userRequest);
 	
 }

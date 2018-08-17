@@ -29,8 +29,8 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.schneider.idms.common.ErrorCodeConstants;
 import com.schneider.idms.common.ErrorResponseCode;
-import com.schneider.idms.model.IdmsUpdateUserRequest;
 import com.schneider.idms.model.IdmsUpdateUserResponse;
+import com.schneider.idms.model.IdmsUserRequest;
 import com.schneider.idms.service.IUpdateUserService;
 import com.se.idms.cache.utils.EmailConstants;
 import com.se.idms.util.JsonConstants;
@@ -47,7 +47,7 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 
 	@Override
 	public Response updateUser(String authorizedToken, String accept, String region,
-			IdmsUpdateUserRequest userRequest) {
+			IdmsUserRequest userRequest) {
 
 		LOGGER.info("Entered updateUser() -> Start");
 		LOGGER.info("Parameter authorizedToken -> " + authorizedToken);
@@ -103,7 +103,6 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				if ((null != userRequest.getAnnualRevenue())
 						&& (userRequest.getAnnualRevenue().matches("^\\D+$") == true)) {
 					errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
-					;
 					errorResponse.setMessage(UserConstants.INCORRECT_REVENUE);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.error("Error is " + errorResponse.getMessage());
@@ -114,24 +113,55 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				/**
 				 * Need to check with for validation
 				 */
-				/*
-				 * if
-				 * (checkMandatoryFieldsFromRequest(userRequest.getUserRecord(),
-				 * userResponse, false)) { elapsedTime =
-				 * UserConstants.TIME_IN_MILLI_SECONDS - startTime; LOGGER.info(
-				 * "Time taken by UserServiceImpl.updateUser() : " +
-				 * elapsedTime); return
-				 * Response.status(Response.Status.BAD_REQUEST).entity(
-				 * userResponse).build(); }
-				 */
-			} catch (Exception e) {
+				
+				if (checkMandatoryFieldsForDirectAPIRequest(userRequest, errorResponse, false)) {
+					errorResponse.setMessage(errorResponse.getMessage());
+					errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
+					LOGGER.error("Error while processing is " + errorResponse.getMessage());
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+				}
+				 
+			} catch (NotAuthorizedException e) {
 				e.printStackTrace();
+				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
+				errorResponse.setMessage(ErrorCodeConstants.UNAUTHORIZED_MESSAGE);
+				errorResponse.setCode(ErrorCodeConstants.UNAUTHORIZED_REQUEST);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
+				LOGGER.error("Error while processing is " + errorResponse.getMessage());
+				return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+			}
+			catch (BadRequestException e) {
+				e.printStackTrace();
+				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
 				errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
-				LOGGER.error("UserServiceImpl.updateUser()->" + errorResponse.getMessage());
+				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
+				LOGGER.error("Error while processing is " + errorResponse.getMessage());
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+			}
+			catch (IllegalArgumentException e) {
+				e.printStackTrace();
+				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
+				errorResponse.setMessage(ErrorCodeConstants.BADREQUEST_MESSAGE);
+				errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
+				LOGGER.error("Error while processing is " + errorResponse.getMessage());
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
+				errorResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
+				errorResponse.setCode(ErrorCodeConstants.SERVER_ERROR_REQUEST);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
+				LOGGER.error("Error while processing is " + errorResponse.getMessage());
+				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 			}
 
 			// Need to check do we need pass the user FirstName
@@ -414,8 +444,8 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				 */
 			}
 
-			userData = productService.getUser(iPlanetDirectoryKey, userId);
-			sucessRespone = convertUserDataToUserResponse(userData);
+			/*userData = productService.getUser(iPlanetDirectoryKey, userId);
+			sucessRespone = convertUserDataToUserResponse(userData);*/
 			// R7 Need to change the below one
 			sucessRespone = mapper.map(userRequest, IdmsUpdateUserResponse.class);
 

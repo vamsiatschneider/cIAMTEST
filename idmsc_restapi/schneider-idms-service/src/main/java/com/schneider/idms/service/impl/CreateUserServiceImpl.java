@@ -54,8 +54,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 	private static final Logger LOGGER = LoggerFactory.getLogger(CreateUserServiceImpl.class);
 
 	@Override
-	public Response userRegistration(String authorization, String accept, String region, String clientId,
-			String clientSecret, IdmsUserRequest userRequest) {
+	public Response userRegistration(String authorization, String accept, String region,IdmsUserRequest userRequest) {
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
@@ -70,7 +69,6 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 		String userExists = null;
 		boolean uimsAlreadyCreatedFlag = false;
 		Response userCreation = null;
-		String userType = null;
 		OpenAmUserRequest openAmReq = null;
 		try {
 			
@@ -125,7 +123,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				 * Validate the data quality I - check mandatory information
 				 */
 
-				if (checkMandatoryFieldsForDirectAPIRequest(userRequest, errorResponse, true,userType)) {
+				if (checkMandatoryFieldsForDirectAPIRequest(userRequest, errorResponse, true)) {
 					errorResponse.setMessage(errorResponse.getMessage());
 					errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;

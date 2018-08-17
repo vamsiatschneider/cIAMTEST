@@ -201,7 +201,7 @@ public class IdmsCommonServiceImpl {
 	}
 
 	protected boolean checkMandatoryFieldsForDirectAPIRequest(IdmsUserRequest userRequest, ErrorResponseCode errorResponse,
-			boolean checkMandatoryFields, String applicationType) throws IOException {
+			boolean checkMandatoryFields) throws IOException {
 
 		LOGGER.info("Entered checkMandatoryFieldsFromRequest() -> Start");
 		LOGGER.info("Parameter userRequest -> " + userRequest);
@@ -216,12 +216,99 @@ public class IdmsCommonServiceImpl {
 		 * Validating Application configured or not
 		 */
 
-		userType = getUserType(userRequest.getRegistrationSource());
+		if (checkMandatoryFields) {
+			userType = getUserType(userRequest.getRegistrationSource());
+		} else {
+			userType = getUserType(userRequest.getProfileLastUpdateSource());
+		}
 
 		/***
 		 * HomeContext Mandatory checks start
 		 */
+		
+		
+		/**
+		 * userContext validation and length check Mandatory
+		 */
+		if ((checkMandatoryFields)
+				&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
+				&& (null == userRequest.getUserContext() || userRequest.getUserContext().isEmpty())) {
+			errorResponse
+					.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.USERCONTEXT);
+			return true;
+		} else if (null != userRequest.getUserContext() && !userRequest.getUserContext().isEmpty()) {
 
+			if (UserContext.valueOf(userRequest.getUserContext()).equals(userRequest.getUserContext()))  {
+				errorResponse.setMessage(
+						UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.USERCONTEXT);
+				return true;
+
+			}
+		}
+		
+		
+		/**
+		 * salutation Length Validation check
+		 */
+		if ((null != userRequest.getSalutation() && !userRequest.getSalutation().isEmpty())
+				&& (!pickListValidator.validate(UserConstants.SALUTATION.toString(),
+						userRequest.getSalutation()))) {
+			errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.SALUTATION);
+			return true;
+		}
+
+		/**
+		 * firstName Mandatory validation and length check
+		 */
+		if ((checkMandatoryFields) && (null == userRequest.getFirstName() || userRequest.getFirstName().isEmpty())) {
+			errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.FIRSTNAME);
+			return true;
+		} else if ((null != userRequest.getFirstName() && !userRequest.getFirstName().isEmpty())
+				&& (!legthValidator.validate(UserConstants.FIRST_NAME, userRequest.getFirstName()))) {
+			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.FIRSTNAME);
+			return true;
+		}
+		
+		/**
+		 * middleName Length Validation check
+		 */
+		if ((null != userRequest.getMiddleName() && !userRequest.getMiddleName().isEmpty())
+				&& (!legthValidator.validate(UserConstants.IDMS_MIDDLE_NAME_C, userRequest.getMiddleName()))) {
+			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.MIDDLENAME);
+			return true;
+		}
+
+		/**
+		 * LastName validation and length check
+		 */
+		if ((checkMandatoryFields) && (null == userRequest.getLastName() || userRequest.getLastName().isEmpty())) {
+			errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.LASTNAME);
+			return true;
+		} else if ((null != userRequest.getLastName() && !userRequest.getLastName().isEmpty())
+				&& (!legthValidator.validate(UserConstants.LAST_NAME, userRequest.getLastName()))) {
+			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.LASTNAME);
+			return true;
+		}
+		
+		/**
+		 * validate Country Code attribute values should be present
+		 */
+		if ((checkMandatoryFields) && (null == userRequest.getCountryCode() || userRequest.getCountryCode().isEmpty())) {
+			errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COUNTRYCODE);
+			return true;
+		}else if(null != userRequest.getCountryCode() && !userRequest.getCountryCode().isEmpty()){
+			
+			if (!legthValidator.validate(UserConstants.COUNTRY, userRequest.getCountryCode())) {
+				errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COUNTRYCODE);
+				return true;
+
+			} else if (!pickListValidator.validate(UserConstants.COUNTRY, userRequest.getCountryCode())) {
+				errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.COUNTRYCODE);
+				return true;
+			}
+		}
+		
+		
 		/**
 		 * Email or Mobile is mandatory for user creation
 		 */
@@ -245,113 +332,11 @@ public class IdmsCommonServiceImpl {
 				return true;
 			}
 		}
-
+		
 		/**
-		 * FirstName Mandatory validation and length check
+		 * mobilePhone is mandatory when user not provided email
 		 */
-		if ((checkMandatoryFields) && (null == userRequest.getFirstName() || userRequest.getFirstName().isEmpty())) {
-			errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.FIRSTNAME);
-			return true;
-		} else if ((null != userRequest.getFirstName() && !userRequest.getFirstName().isEmpty())
-				&& (!legthValidator.validate(UserConstants.FIRST_NAME, userRequest.getFirstName()))) {
-			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.FIRSTNAME);
-			return true;
-		}
-
-		/**
-		 * LastName validation and length check
-		 */
-		if ((checkMandatoryFields) && (null == userRequest.getLastName() || userRequest.getLastName().isEmpty())) {
-			errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.LASTNAME);
-			return true;
-		} else if ((null != userRequest.getLastName() && !userRequest.getLastName().isEmpty())
-				&& (!legthValidator.validate(UserConstants.LAST_NAME, userRequest.getLastName()))) {
-			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.LASTNAME);
-			return true;
-		}
-
-		/**
-		 * Country validation and length check Mandatory
-		 */
-
-		if ((checkMandatoryFields) && (null == userRequest.getCounty() || userRequest.getCounty().isEmpty())) {
-			errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COUNTY);
-			return true;
-		} else if ((null != userRequest.getCounty() && !userRequest.getCounty().isEmpty())) {
-
-			if (!legthValidator.validate(UserConstants.COUNTRY, userRequest.getCounty())) {
-				errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COUNTY);
-				return true;
-
-			} else if (!pickListValidator.validate(UserConstants.COUNTRY, userRequest.getCounty())) {
-				errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.COUNTY);
-				return true;
-			}
-
-		}
-
-		/**
-		 * IDMS_PreferredLanguage__c validation and length check Mandatory
-		 */
-
-		if ((checkMandatoryFields)
-				&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
-				&& (null == userRequest.getLanguageCode()
-						|| userRequest.getLanguageCode().isEmpty())) {
-			errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.LANGUAGECODE);
-			return true;
-		} else if ((null != userRequest.getLanguageCode()
-				&& !userRequest.getLanguageCode().isEmpty())
-				&& !pickListValidator.validate(UserConstants.PREFERRED_LANGUAGE,
-						userRequest.getLanguageCode().toLowerCase())) {
-			errorResponse.setMessage(UserConstants.INVALID_VALUE_IDMS + DirectApiConstants.LANGUAGECODE);
-			return true;
-		}
-
-		if ((UserConstants.UIMS.equalsIgnoreCase(userRequest.getLanguageCode()))
-				&& (null != userRequest.getLanguageCode()
-						&& !userRequest.getLanguageCode().isEmpty())) {
-			if (!legthValidator.validate(UserConstants.PREFERRED_LANGUAGE,
-					userRequest.getLanguageCode())) {
-				errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.LANGUAGECODE);
-				return true;
-
-			}
-			if (!pickListValidator.validate(UserConstants.PREFERRED_LANGUAGE,
-					userRequest.getLanguageCode())) {
-				errorResponse.setMessage(UserConstants.INVALID_VALUE_IDMS + DirectApiConstants.LANGUAGECODE);
-				return true;
-			}
-		}
-
-		/**
-		 * IDMS_Registration_Source__c validation and length check Mandatory
-		 */
-
-		if ((checkMandatoryFields) && (null == userRequest.getRegistrationSource()
-				|| userRequest.getRegistrationSource().isEmpty())) {
-			errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.REGISTRATIONSOURCE);
-			return true;
-		} else if ((checkMandatoryFields)
-				&& (null != userRequest.getRegistrationSource()
-						&& !userRequest.getRegistrationSource().isEmpty())
-				&& (!legthValidator.validate(UserConstants.IDMS_REGISTRATION_SOURCE_C,
-						userRequest.getRegistrationSource()))) {
-			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.REGISTRATIONSOURCE);
-			return true;
-		}
-
-		if (null != userRequest.getRegistrationSource() && ((pickListValidator
-				.validate(UserConstants.APPLICATIONS, userRequest.getRegistrationSource().toUpperCase()))
-				|| UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))) {
-
-			if ((checkMandatoryFields) && (null == userRequest.getFederationId()
-					|| userRequest.getFederationId().isEmpty())) {
-				errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.REGISTRATIONSOURCE);
-				return true;
-			}
-		}
-
+		
 		if (null != userRequest.getRegistrationSource()
 				&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource())) {
 
@@ -363,213 +348,25 @@ public class IdmsCommonServiceImpl {
 				}
 			}
 		}
-
+		
+		
 		/**
-		 * IDMS_User_Context__c validation and length check Mandatory
+		 * languageCode validation and length check Mandatory
 		 */
-		if ((checkMandatoryFields)
-				&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
-				&& (null == userRequest.getUserContext() || userRequest.getUserContext().isEmpty())) {
-			errorResponse
-					.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.USERCONTEXT);
+
+		if ((checkMandatoryFields) && (null == userRequest.getLanguageCode() || userRequest.getLanguageCode().isEmpty())) {
+			errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.LANGUAGECODE);
 			return true;
-		} else if (null != userRequest.getUserContext() && !userRequest.getUserContext().isEmpty()) {
-
-			if (UserContext.valueOf(userRequest.getUserContext()).equals(userRequest.getUserContext()))  {
-				errorResponse.setMessage(
-						UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.USERCONTEXT);
-				return true;
-
-			}
+		} else if ((null != userRequest.getLanguageCode()&& !userRequest.getLanguageCode().isEmpty())
+				&& !pickListValidator.validate(UserConstants.PREFERRED_LANGUAGE,
+						userRequest.getLanguageCode().toLowerCase())) {
+			errorResponse.setMessage(UserConstants.INVALID_VALUE_IDMS + DirectApiConstants.LANGUAGECODE);
+			return true;
 		}
 
-		/***
-		 * HomeContext Mandatory checks end
-		 */
-
-		/***
-		 * WorkContext Mandatory checks started
-		 */
-
-		if ((UserConstants.USER_TYPE_L2.equalsIgnoreCase(userType)
-				|| UserConstants.USER_TYPE_L3.equalsIgnoreCase(userType))) {
-
-			/*
-			 * Need to add the below condition if there any failures
-			 * 
-			 * || (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(userRequest.getIDMS_User_Context__c())
-					|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(userRequest.getIDMS_User_Context__c()))*/
-			
-			/**
-			 * CompanyName Length Validation check
-			 */
-			if ((checkMandatoryFields)
-					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
-					&& (null == userRequest.getCompanyName() || userRequest.getCompanyName().isEmpty())) {
-				errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYNAME);
-				return true;
-			} else if ((null != userRequest.getCompanyName() && !userRequest.getCompanyName().isEmpty())
-					&& (!legthValidator.validate(UserConstants.COMPANY_NAME, userRequest.getCompanyName()))) {
-				errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYNAME);
-				return true;
-			}
-
-			/**
-			 * IDMSClassLevel1__c validation and length check
-			 */
-
-			if ((checkMandatoryFields)
-					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
-					&& (null == userRequest.getClassLevel1() || userRequest.getClassLevel1().isEmpty())) {
-				errorResponse.setMessage(
-						UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.CLASSLEVEL1);
-				return true;
-			} else if ((null != userRequest.getClassLevel1()
-					&& !userRequest.getClassLevel1().isEmpty())) {
-
-				/*
-				 * if (!legthValidator.validate(UserConstants.IAM_A1,
-				 * userRequest.getIDMSClassLevel1__c())) {
-				 * userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH
-				 * + UserConstants.IDMS_CLASS_LEVEL_C);
-				 * 
-				 * } else
-				 */ if (!pickListValidator.validate(UserConstants.IAM_A1, userRequest.getClassLevel1())) {
-					errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.CLASSLEVEL1);
-					return true;
-				}
-			}
-
-		}
-
-		if (UserConstants.USER_TYPE_L3.equalsIgnoreCase(userType)) {
-
-			/**
-			 * Company_Address1__c Length Validation check
-			 */
-
-			if ((checkMandatoryFields)
-					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
-					&& (null == userRequest.getCompanyStreet()
-					|| userRequest.getCompanyStreet().isEmpty())) {
-				errorResponse.setMessage(
-						UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYSTREET);
-				return true;
-			} else if ((null != userRequest.getCompanyStreet() && !userRequest.getCompanyStreet().isEmpty())
-					&& (!legthValidator.validate(UserConstants.COMPANY_ADDRESS1_C,
-							userRequest.getCompanyStreet()))) {
-				errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYSTREET);
-				return true;
-			}
-
-			/**
-			 * Company_City__c Length Validation check
-			 */
-
-			if ((checkMandatoryFields)
-					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
-					&& (null == userRequest.getCompanyCity() || userRequest.getCompanyCity().isEmpty())) {
-				errorResponse
-				.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYCITY);
-				return true;
-			} else if ((null != userRequest.getCompanyCity() && !userRequest.getCompanyCity().isEmpty())
-					&& (!legthValidator.validate(UserConstants.COMPANY_CITY_C, userRequest.getCompanyCity()))) {
-				errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYCITY);
-				return true;
-			}
-
-			/**
-			 * Company_Postal_Code__c Length Validation check
-			 */
-
-			if ((checkMandatoryFields)
-					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
-					&& (null == userRequest.getCompanyZipCode() || userRequest.getCompanyZipCode().isEmpty())) {
-				errorResponse
-				.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYZIPCODE);
-				return true;
-			} else if ((null != userRequest.getCompanyZipCode() && !userRequest.getCompanyZipCode().isEmpty())
-					&& (!legthValidator.validate(UserConstants.COMPANY_POSTAL_CODE_C,
-							userRequest.getCompanyZipCode()))) {
-				errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYZIPCODE);
-				return true;
-			}
-
-			/**
-			 * IDMSCompanyCounty__c Length Validation check
-			 */
-
-			if ((checkMandatoryFields)
-					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
-					&& (null == userRequest.getCompanyCounty()) || userRequest.getCompanyCounty().isEmpty()) {
-				errorResponse
-				.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYCOUNTY);
-				return true;
-			} else if ((null != userRequest.getCompanyCounty() && !userRequest.getCompanyCounty().isEmpty())
-					&& (!pickListValidator.validate(UserConstants.COUNTRY, userRequest.getCompanyCounty()))) {
-				errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.COMPANYCOUNTY);
-				return true;
-			}
-
-			/**
-			 * IDMSClassLevel2__c Length Validation check
-			 */
-
-			if ((checkMandatoryFields)
-					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getClassLevel2()))
-					&& (null == userRequest.getClassLevel2() || userRequest.getClassLevel2().isEmpty())) {
-				errorResponse
-				.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.CLASSLEVEL2);
-				return true;
-			} else if ((null != userRequest.getClassLevel2() && !userRequest.getClassLevel2().isEmpty())) {
-
-				/*
-				 * if (!legthValidator.validate(UserConstants.IAM_A2.toString(),
-				 * userRequest.getIDMSClassLevel2__c())) {
-				 * userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH
-				 * + UserConstants.IDMS_CLASS_LEVEL2_C);
-				 * 
-				 * } else
-				 */ if (!pickListValidator.validate(UserConstants.IAM_A2.toString(),
-						 userRequest.getClassLevel2())) {
-					 errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.CLASSLEVEL2);
-					 return true;
-				 }
-			}
-
-			/**
-			 * IDMSMarketSegment__c Length Validation check
-			 */
-
-			if ((checkMandatoryFields)
-					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
-					&& (null == userRequest.getMarketSegment() || userRequest.getMarketSegment().isEmpty())) {
-				errorResponse
-				.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.MARKETSEGMENT);
-				return true;
-			} else if ((null != userRequest.getMarketSegment() && !userRequest.getMarketSegment().isEmpty())) {
-
-				/*
-				 * if
-				 * (!legthValidator.validate(UserConstants.MY_INDUSTRY_SEGMENT,
-				 * userRequest.getIDMSMarketSegment__c())) {
-				 * userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH
-				 * + UserConstants.IDMS_MARKET_SEGMENT_C);
-				 * 
-				 * } else
-				 */ if (!pickListValidator.validate(UserConstants.MY_INDUSTRY_SEGMENT,
-						 userRequest.getMarketSegment())) {
-					 errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.MARKETSEGMENT);
-					 return true;
-				 }
-			}
-		}
-		/***
-		 * WorkContext Mandatory checks end
-		 */
-
+		
 		/**
-		 * IDMS_Email_opt_in__c length check
+		 * emailOptIn validation check it should allow 'Y' or 'N'
 		 */
 
 		if (null != userRequest.getEmailOptIn() && !userRequest.getEmailOptIn().isEmpty()) {
@@ -579,24 +376,19 @@ public class IdmsCommonServiceImpl {
 				return true;
 			}
 		}
-
+		
 		/**
-		 * DefaultCurrencyIsoCode validation and length check Mandatory
+		 * aboutMe validation check 
 		 */
-		if ((null != userRequest.getCurrencyCode() && !userRequest.getCurrencyCode().isEmpty())) {
-
-			if (!legthValidator.validate(UserConstants.CURRENCY, userRequest.getCurrencyCode())) {
-				errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.CURRENCYCODE);
-				return true;
-
-			} else if (!pickListValidator.validate(UserConstants.CURRENCY, userRequest.getCurrencyCode())) {
-				errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.CURRENCYCODE);
-				return true;
-			}
+		
+		if ((null != userRequest.getAboutMe() && !userRequest.getAboutMe().isEmpty())
+				&& (!legthValidator.validate(UserConstants.ABOUT_ME, userRequest.getAboutMe()))) {
+			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.ABOUTME);
+			return true;
 		}
-
+		
 		/**
-		 * Length Validation check :: Street
+		 * street Length Validation check
 		 */
 
 		if ((null != userRequest.getStreet() && !userRequest.getStreet().isEmpty())
@@ -604,9 +396,9 @@ public class IdmsCommonServiceImpl {
 			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.STREET);
 			return true;
 		}
-
+		
 		/**
-		 * Length Validation check :: City
+		 * city Length Validation check
 		 */
 		if ((null != userRequest.getCity() && !userRequest.getCity().isEmpty())
 				&& (!legthValidator.validate(UserConstants.CITY, userRequest.getCity()))) {
@@ -614,8 +406,9 @@ public class IdmsCommonServiceImpl {
 			return true;
 		}
 
+		
 		/**
-		 * Length Validation check :: PostalCode
+		 * zipCode Length Validation check
 		 */
 
 		if ((null != userRequest.getZipCode() && !userRequest.getZipCode().isEmpty())
@@ -623,130 +416,237 @@ public class IdmsCommonServiceImpl {
 			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.ZIPCODE);
 			return true;
 		}
-
+		
 		/**
-		 * Length Validation check :: State
+		 * stateOrProvinceCode Length & PickList Validation check
 		 */
+		
+		if ((null != userRequest.getStateOrProvinceCode() && !userRequest.getStateOrProvinceCode().isEmpty())) {
 
-		if ((null != userRequest.getRegistrationSource()
-				&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
-				|| (null != userRequest.getProfileLastUpdateSource()
-						&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getProfileLastUpdateSource()))) {
-			if ((null != userRequest.getStateOrProvinceCode() && !userRequest.getStateOrProvinceCode().isEmpty())) {
+			if (!legthValidator.validate(UserConstants.STATE, userRequest.getStateOrProvinceCode())) {
+				errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.STATEORPROVINCECODE);
+				return true;
 
-				if (!legthValidator.validate(UserConstants.STATE, userRequest.getStateOrProvinceCode())) {
-					errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.STATEORPROVINCECODE);
-					return true;
-
-				} else if (!pickListValidator.validate(UserConstants.STATE, userRequest.getStateOrProvinceCode())) {
-					errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.STATEORPROVINCECODE);
-					return true;
-				}
+			} else if (!pickListValidator.validate(UserConstants.STATE, userRequest.getStateOrProvinceCode())) {
+				errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.STATEORPROVINCECODE);
+				return true;
 			}
 		}
-
+		
 		/**
-		 * IDMS_County__c Length Validation check
+		 * county length validation check
 		 */
-		if ((null != userRequest.getCounty() && !userRequest.getCounty().isEmpty())
-				&& (!legthValidator.validate(UserConstants.IDMS_COUNTY_C, userRequest.getCounty()))) {
-			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COUNTY);
-			return true;
+
+		if ((null != userRequest.getCounty() && !userRequest.getCounty().isEmpty())) {
+
+			if (!legthValidator.validate(UserConstants.IDMS_COUNTY_C, userRequest.getCounty())) {
+				errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COUNTY);
+				return true;
+
+			} 
 		}
 
 		/**
-		 * IDMS_POBox__c Length Validation check
+		 * pOBox Length Validation check
 		 */
 		if ((null != userRequest.getpOBox() && !userRequest.getpOBox().isEmpty())
 				&& (!legthValidator.validate(UserConstants.IDMS_PO_BOX_C, userRequest.getpOBox()))) {
 			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.POBOX);
 			return true;
 		}
-
+		
+		
 		/**
-		 * IDMS_Federated_ID__c Length Validation check
+		 * additionalAddress Length Validation check
 		 */
 
-		if ((checkMandatoryFields)
-				&& (UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
-				&& (null == userRequest.getFederationId() || userRequest.getFederationId().isEmpty())) {
-			errorResponse
-					.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.FEDERATIONID);
+		if ((null != userRequest.getAdditionalAddress()	&& !userRequest.getAdditionalAddress().isEmpty())
+				&& (!legthValidator.validate(UserConstants.IDMS_ADDITIONAL_ADDRESS_C,userRequest.getAdditionalAddress()))) {
+			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.ADDITIONALADDRESS);
 			return true;
-		} else if ((null != userRequest.getFederationId() && !userRequest.getFederationId().isEmpty())
-				&& (!legthValidator.validate(UserConstants.FEDERATION_IDENTIFIER,
-						userRequest.getFederationId()))) {
-			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.FEDERATIONID);
+		}
+		
+		/**
+		 * suffix Length Validation check
+		 */
+		if ((null != userRequest.getSuffix() && !userRequest.getSuffix().isEmpty())
+				&& (!legthValidator.validate(UserConstants.IDMS_SUFFIX_C, userRequest.getSuffix()))) {
+			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.SUFFIX);
 			return true;
 		}
 
 		/**
-		 * IDMS_Profile_update_source__c validation and length check
+		 * homePhone Length Validation check
 		 */
-		if ((!checkMandatoryFields) && (null == userRequest.getProfileLastUpdateSource()
-				|| userRequest.getProfileLastUpdateSource().isEmpty())) {
-			errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.PROFILELASTUPDATESOURCE);
+		if ((null != userRequest.getHomePhone() && !userRequest.getHomePhone().isEmpty())
+				&& (!legthValidator.validate(UserConstants.PHONE, userRequest.getHomePhone()))) {
+			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.HOMEPHONE);
 			return true;
-		} else if ((null != userRequest.getProfileLastUpdateSource()
-				&& !userRequest.getProfileLastUpdateSource().isEmpty())
-				&& (!pickListValidator.validate(UserConstants.UPDATE_SOURCE,
-						userRequest.getProfileLastUpdateSource()))) {
-			errorResponse.setMessage(UserConstants.INVALID_VALUE_IDMS + DirectApiConstants.PROFILELASTUPDATESOURCE);
+		}
+		
+		/**
+		 * fax Length Validation check
+		 */
+		if ((null != userRequest.getFax() && !userRequest.getFax().isEmpty())
+				&& (!legthValidator.validate(UserConstants.FAX, userRequest.getFax()))) {
+			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.FAX);
+			return true;
+		}
+		
+		/**
+		 * idmsFederatedId Length Validation check
+		 */
+		if ((null != userRequest.getIdmsFederatedId() && !userRequest.getIdmsFederatedId().isEmpty())
+				&& (userRequest.getIdmsFederatedId().length() > 0 || userRequest.getIdmsFederatedId().length() <= 40)) {
+			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.IDMSFEDERATEDID);
+			return true;
+		}
+		
+		
+		/**
+		 * registrationSource validation and length check Mandatory
+		 */
+
+		if ((checkMandatoryFields) && (null == userRequest.getRegistrationSource()	|| userRequest.getRegistrationSource().isEmpty())) {
+			errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.REGISTRATIONSOURCE);
+			return true;
+		}else if ((null != userRequest.getRegistrationSource()&& !userRequest.getRegistrationSource().isEmpty()) 
+				&&(pickListValidator.validate(UserConstants.APPLICATIONS, userRequest.getRegistrationSource().toUpperCase()))
+				) {
+			errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.REGISTRATIONSOURCE);
 			return true;
 		}
 
+		
 		/**
-		 * IDMS_Profile_update_source__c validation and length check
+		 * currency validation check
 		 */
-		if ((!checkMandatoryFields) && (null != userRequest.getProfileLastUpdateSource()
-				&& UserConstants.UIMS.equalsIgnoreCase(userRequest.getProfileLastUpdateSource())
-				&& null == userRequest.getFederationId())) {
-			errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.FEDERATIONID);
-			return true;
-		}
+		if ((null != userRequest.getCurrency() && !userRequest.getCurrency().isEmpty())) {
 
-		/**
-		 * IDMS_AdditionalAddress__c Length Validation check
-		 */
-
-		if ((null != userRequest.getCompanyAdditionalAddress()
-				&& !userRequest.getCompanyAdditionalAddress().isEmpty())
-				&& (!legthValidator.validate(UserConstants.IDMS_ADDITIONAL_ADDRESS_C,
-						userRequest.getCompanyAdditionalAddress()))) {
-			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYADDITIONALADDRESS);
-			return true;
-		}
-
-		/**
-		 * Company_State__c Pick List Validation check
-		 */
-
-		if ((null != userRequest.getRegistrationSource()
-				&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
-				|| (null != userRequest.getProfileLastUpdateSource()
-						&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getProfileLastUpdateSource()))) {
-
-			if ((null != userRequest.getCompanyStateOrProvinceCode() && !userRequest.getCompanyStateOrProvinceCode().isEmpty())) {
-
-				if (!pickListValidator.validate(UserConstants.COMPANY_STATE_C, userRequest.getCompanyStateOrProvinceCode())) {
-					errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.COMPANYSTATEORPROVINCECODE);
-					return true;
-				}
+			if (!pickListValidator.validate(UserConstants.CURRENCY, userRequest.getCurrency())) {
+				errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.CURRENCY);
+				return true;
 			}
 		}
+		
+		
 		/**
-		 * IDMSCompanyPoBox__c Length Validation check
+		 * currencyCode validation check
+		 */
+		if ((null != userRequest.getCurrencyCode() && !userRequest.getCurrencyCode().isEmpty())) {
+
+			if (!pickListValidator.validate(UserConstants.CURRENCY, userRequest.getCurrencyCode())) {
+				errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.CURRENCYCODE);
+				return true;
+			}
+		}
+		
+		if ((UserConstants.USER_TYPE_L2.equalsIgnoreCase(userType)
+				|| UserConstants.USER_TYPE_L3.equalsIgnoreCase(userType))) {
+			
+			/**
+			 * companyName Length Validation check
+			 */
+			
+			if ((checkMandatoryFields)	& (null == userRequest.getCompanyName() || userRequest.getCompanyName().isEmpty())) {
+				errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYNAME);
+				return true;
+			} else if ((null != userRequest.getCompanyName() && !userRequest.getCompanyName().isEmpty())
+					&& (!legthValidator.validate(UserConstants.COMPANY_NAME, userRequest.getCompanyName()))) {
+				errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYNAME);
+				return true;
+			}
+			
+			
+		}
+		
+		if (UserConstants.USER_TYPE_L3.equalsIgnoreCase(userType)) {
+			
+			/**
+			 * companyStreet Length Validation check
+			 */
+			if ((checkMandatoryFields)&& (null == userRequest.getCompanyStreet() || userRequest.getCompanyStreet().isEmpty())) {
+				errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYSTREET);
+				return true;
+			} else if ((null != userRequest.getCompanyStreet() && !userRequest.getCompanyStreet().isEmpty())
+					&& (!legthValidator.validate(UserConstants.COMPANY_ADDRESS1_C,userRequest.getCompanyStreet()))) {
+				errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYSTREET);
+				return true;
+			}
+			
+			/**
+			 * companyCity Length Validation check
+			 */
+
+			if ((checkMandatoryFields)&& (null == userRequest.getCompanyCity() || userRequest.getCompanyCity().isEmpty())) {
+				errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYCITY);
+				return true;
+			} else if ((null != userRequest.getCompanyCity() && !userRequest.getCompanyCity().isEmpty())
+					&& (!legthValidator.validate(UserConstants.COMPANY_CITY_C, userRequest.getCompanyCity()))) {
+				errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYCITY);
+				return true;
+			}
+			
+			
+			/**
+			 * companyZipCode Length Validation check
+			 */
+
+			if ((checkMandatoryFields)&& (null == userRequest.getCompanyZipCode() || userRequest.getCompanyZipCode().isEmpty())) {
+				errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYZIPCODE);
+				return true;
+			} else if ((null != userRequest.getCompanyZipCode() && !userRequest.getCompanyZipCode().isEmpty())
+					&& (!legthValidator.validate(UserConstants.COMPANY_POSTAL_CODE_C,userRequest.getCompanyZipCode()))) {
+				errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYZIPCODE);
+				return true;
+			}
+			
+		}
+		
+		
+		/**
+		 * companyStateOrProvinceCode Pick List Validation check
+		 */
+
+		if ((null != userRequest.getCompanyStateOrProvinceCode() && !userRequest.getCompanyStateOrProvinceCode().isEmpty())) {
+
+			if (!pickListValidator.validate(UserConstants.COMPANY_STATE_C, userRequest.getCompanyStateOrProvinceCode())) {
+				errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.COMPANYSTATEORPROVINCECODE);
+				return true;
+			}
+		}
+		
+		/**
+		 * companyPOBox Length Validation check
 		 */
 
 		if ((null != userRequest.getCompanyPOBox() && !userRequest.getCompanyPOBox().isEmpty())
-				&& (!legthValidator.validate(UserConstants.IDMS_COMPANY_PO_BOX_C,
-						userRequest.getCompanyPOBox()))) {
+				&& (!legthValidator.validate(UserConstants.IDMS_COMPANY_PO_BOX_C,userRequest.getCompanyPOBox()))) {
 			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYPOBOX);
 			return true;
 		}
-
+		
+		
 		/**
-		 * Company_Country__c validation and length check
+		 * companyCounty Length Validation check
+		 */
+
+		if (UserConstants.USER_TYPE_L3.equalsIgnoreCase(userType)) {
+			if ((checkMandatoryFields)&& (null == userRequest.getCompanyCounty()) || userRequest.getCompanyCounty().isEmpty()) {
+				errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYCOUNTY);
+				return true;
+			} else if ((null != userRequest.getCompanyCounty() && !userRequest.getCompanyCounty().isEmpty())
+					&& (!pickListValidator.validate(UserConstants.COUNTRY, userRequest.getCompanyCounty()))) {
+				/*
+				 * TODO Need to check list of company county values
+				 */
+				errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.COMPANYCOUNTY);
+				return true;
+			}
+
+		}
+		/**
+		 * companyCountryCode validation and length check
 		 */
 
 		if ((null != userRequest.getCompanyCountryCode() && !userRequest.getCompanyCountryCode().isEmpty())) {
@@ -759,153 +659,135 @@ public class IdmsCommonServiceImpl {
 				return true;
 			}
 		}
-
+		
+		
 		/**
-		 * Company_Address2__c Length Validation check
+		 * companyAdditionalAddress Length Validation check
 		 */
 
-		if ((null != userRequest.getCompanyAdditionalAddress() && !userRequest.getCompanyAdditionalAddress().isEmpty())
-				&& (!legthValidator.validate(UserConstants.COMPANY_ADDRESS2_C, userRequest.getCompanyAdditionalAddress()))) {
+		if ((null != userRequest.getCompanyAdditionalAddress()&& !userRequest.getCompanyAdditionalAddress().isEmpty())
+				&& (!legthValidator.validate(UserConstants.IDMS_ADDITIONAL_ADDRESS_C,userRequest.getCompanyAdditionalAddress()))) {
 			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYADDITIONALADDRESS);
 			return true;
 		}
-
+		
 		/**
-		 * IDMSClassLevel2__c Length Validation check
+		 * companyWebsite Length Validation check
 		 */
 
-		if ((null != userRequest.getClassLevel2() && !userRequest.getClassLevel2().isEmpty())) {
+		if ((null != userRequest.getCompanyWebsite() && !userRequest.getCompanyWebsite().isEmpty())
+				&& (!legthValidator.validate(UserConstants.COMPANY_WEBSITE_C, userRequest.getCompanyWebsite()))) {
+			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYWEBSITE);
+			return true;
+		}
+		
+		if ((UserConstants.USER_TYPE_L2.equalsIgnoreCase(userType)
+				|| UserConstants.USER_TYPE_L3.equalsIgnoreCase(userType))) {
 
-			/*
-			 * if (!legthValidator.validate(UserConstants.IAM_A2.toString(),
-			 * userRequest.getIDMSClassLevel2__c())) {
-			 * userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH +
-			 * UserConstants.IDMS_CLASS_LEVEL2_C);
-			 * 
-			 * } else
-			 */ if (!pickListValidator.validate(UserConstants.IAM_A2.toString(), userRequest.getClassLevel2())) {
-				errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.CLASSLEVEL2);
+			/**
+			 * classLevel1 validation and length check
+			 */
+			if ((checkMandatoryFields) && (null == userRequest.getClassLevel1() || userRequest.getClassLevel1().isEmpty())) {
+				errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.CLASSLEVEL1);
 				return true;
+			} else if ((null != userRequest.getClassLevel1()&& !userRequest.getClassLevel1().isEmpty())) {
+				if (!pickListValidator.validate(UserConstants.IAM_A1, userRequest.getClassLevel1())) {
+					errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.CLASSLEVEL1);
+					return true;
+				}
 			}
 		}
 
+		if (UserConstants.USER_TYPE_L3.equalsIgnoreCase(userType)) {
+			
+			/**
+			 * classLevel2 Length Validation check
+			 */
+
+			if ((checkMandatoryFields)&& (null == userRequest.getClassLevel2() || userRequest.getClassLevel2().isEmpty())) {
+				errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.CLASSLEVEL2);
+				return true;
+			} else if ((null != userRequest.getClassLevel2() && !userRequest.getClassLevel2().isEmpty())) {
+
+				if (!pickListValidator.validate(UserConstants.IAM_A2.toString(),userRequest.getClassLevel2())) {
+					errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.CLASSLEVEL2);
+					return true;
+				}
+			}
+			
+			/**
+			 * marketSegment Length Validation check
+			 */
+
+			if ((checkMandatoryFields)&& (null == userRequest.getMarketSegment() || userRequest.getMarketSegment().isEmpty())) {
+				errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.MARKETSEGMENT);
+				return true;
+			} else if ((null != userRequest.getMarketSegment() && !userRequest.getMarketSegment().isEmpty())) {
+				if (!pickListValidator.validate(UserConstants.MY_INDUSTRY_SEGMENT, userRequest.getMarketSegment())) {
+					errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.MARKETSEGMENT);
+					return true;
+				}
+			}
+		}
+		
+		
 		/**
-		 * IDMSMarketSubSegment__c Length Validation checkJob_Title__c
+		 * marketSubSegment Length & PickList Validation check
 		 */
 
 		if ((null != userRequest.getMarketSubSegment() && !userRequest.getMarketSubSegment().isEmpty())) {
 
-			/*
-			 * if
-			 * (!legthValidator.validate(UserConstants.MY_INDUSTRY_SUB_SEGMENT,
-			 * userRequest.getIDMSMarketSubSegment__c())) {
-			 * userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH +
-			 * UserConstants.IDMS_MARKET_SUB_SEGMENT_C);
-			 * 
-			 * } else
-			 */ if (!pickListValidator.validate(UserConstants.MY_INDUSTRY_SUB_SEGMENT,
-					userRequest.getMarketSubSegment())) {
+			 if (!pickListValidator.validate(UserConstants.MY_INDUSTRY_SUB_SEGMENT,userRequest.getMarketSubSegment())) {
 				errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.MARKETSUBSEGMENT);
 				return true;
 			}
 		}
-
+		
 		/**
-		 * Phone Length Validation check
-		 */
-		if ((null != userRequest.getWorkPhone() && !userRequest.getWorkPhone().isEmpty())
-				&& (!legthValidator.validate(UserConstants.MOBILE_PHONE, userRequest.getWorkPhone()))) {
-			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.WORKPHONE);
-			return true;
-		}
-
-		/**
-		 * Phone Length Validation check
-		 */
-		if (null != userRequest.getRegistrationSource()
-				&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource())) {
-
-			if ((null != userRequest.getWorkPhone() && !userRequest.getWorkPhone().isEmpty())
-					&& (!legthValidator.validate(UserConstants.MOBILE_PHONE, userRequest.getWorkPhone()))) {
-				errorResponse.setMessage(UserConstants.COUNTRY_FIELDS_MISSING + DirectApiConstants.WORKPHONE);
-				return true;
-			}
-		}
-		/**
-		 * Job_Title__c Length Validation check
-		 */
-		if ((null != userRequest.getJobTitle() && !userRequest.getJobTitle().isEmpty())) {
-
-			/*
-			 * if (!legthValidator.validate(UserConstants.JOB_TITLE.toString(),
-			 * userRequest.getJob_Title__c())) {
-			 * userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH +
-			 * UserConstants.JOB_TITLE_C);
-			 * 
-			 * } else
-			 */ if (!pickListValidator.validate(UserConstants.JOB_TITLE.toString(), userRequest.getJobTitle())) {
-				errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.JOBTITLE);
-				return true;
-			}
-		}
-
-		/**
-		 * Job_Function__c Length Validation check
-		 */
-		if ((null != userRequest.getJobFunction() && !userRequest.getJobFunction().isEmpty())) {
-
-			/*
-			 * if (!legthValidator.validate(UserConstants.JOB_FUNCTION,
-			 * userRequest.getJob_Function__c())) {
-			 * userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH +
-			 * UserConstants.JOB_FUNCTION_C);
-			 * 
-			 * } else
-			 */ if (!pickListValidator.validate(UserConstants.JOB_FUNCTION, userRequest.getJobFunction())) {
-				errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.JOBFUNCTION);
-				return true;
-			}
-		}
-
-		/**
-		 * IDMSJobDescription__c Length Validation check
+		 * marketServed Length Validation check PickList
 		 */
 
-		if ((null != userRequest.getJobDescription() && !userRequest.getJobDescription().isEmpty())
-				&& (!legthValidator.validate(UserConstants.IDMS_JOB_DESCRIPTION_C,
-						userRequest.getJobDescription()))) {
-			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.JOBDESCRIPTION);
-			return true;
-		}
-
-		/**
-		 * IDMSCompanyMarketServed__c Length Validation check PickList
-		 */
-
-		if ((null != userRequest.getMarketServed()
-				&& !userRequest.getMarketServed().isEmpty())
+		if ((null != userRequest.getMarketServed()&& !userRequest.getMarketServed().isEmpty())
 				&& (!multiPickListValidator.validate(UserConstants.IDMS_COMPANY_MARKET_SERVED_C,
 						userRequest.getMarketServed()))) {
 			errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.MARKETSERVED);
 			return true;
 		}
-
-
+		
+		
 		/**
-		 * IDMSCompanyHeadquarters__c Length Validation check
+		 * employeeSize Length Validation check PickList
+		 */
+		if ((null != userRequest.getEmployeeSize())&& !userRequest.getEmployeeSize().isEmpty())
+			 if (!pickListValidator.validate(UserConstants.IDMS_COMPANY_NBR_EMPLOYEES_C,userRequest.getEmployeeSize())) {
+			errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.EMPLOYEESIZE);
+			return true;
+		}
+		
+		/**
+		 * department Length Validation check
+		 */
+		if ((null != userRequest.getDepartment() && !userRequest.getDepartment().isEmpty())
+				&& (!legthValidator.validate(UserConstants.DEPARTMENT, userRequest.getDepartment()))) {
+			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.DEPARTMENT);
+			return true;
+		}
+		
+		
+		/**
+		 * headquarter Length Validation check
 		 */
 
-		if ((null != userRequest.getHeadquarter()
-				&& !userRequest.getHeadquarter().isEmpty())
+		if ((null != userRequest.getHeadquarter()	&& !userRequest.getHeadquarter().isEmpty())
 				&& !(UserConstants.TRUE.equalsIgnoreCase(userRequest.getHeadquarter())
 						|| UserConstants.FALSE.equalsIgnoreCase(userRequest.getHeadquarter()))) {
 			errorResponse
 					.setMessage(UserConstants.INVALID_VALUE_HEADQUARTER + DirectApiConstants.HEADQUARTER);
 			return true;
 		}
-
+		
 		/**
-		 * IDMSAnnualRevenue__c Length Validation check
+		 * annualRevenue Length Validation check
 		 */
 
 		if ((null != userRequest.getAnnualRevenue()) && !userRequest.getAnnualRevenue().isEmpty()) {
@@ -923,281 +805,85 @@ public class IdmsCommonServiceImpl {
 				}
 			}
 		}
-
+		
+		
 		/**
-		 * IDMSTaxIdentificationNumber__c Length Validation check
+		 * taxIdentificationNumber Length Validation check
 		 */
 
-		if ((null != userRequest.getTaxIdentificationNumber()
-				&& !userRequest.getTaxIdentificationNumber().isEmpty())
-				&& (!legthValidator.validate(UserConstants.IDMS_TAX_IDENTIFICATION_NUMBER_C,
-						userRequest.getTaxIdentificationNumber()))) {
-			errorResponse
-					.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.TAXIDENTIFICATIONNUMBER);
+		if ((null != userRequest.getTaxIdentificationNumber()&& !userRequest.getTaxIdentificationNumber().isEmpty())
+				&& (!legthValidator.validate(UserConstants.IDMS_TAX_IDENTIFICATION_NUMBER_C,userRequest.getTaxIdentificationNumber()))) {
+			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.TAXIDENTIFICATIONNUMBER);
 			return true;
 		}
-
+		
 		/**
-		 * IDMSMiddleName__c Length Validation check
+		 * jobTitle Length Validation check
 		 */
-		if ((null != userRequest.getMiddleName() && !userRequest.getMiddleName().isEmpty())
-				&& (!legthValidator.validate(UserConstants.IDMS_MIDDLE_NAME_C, userRequest.getMiddleName()))) {
-			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.MIDDLENAME);
-			return true;
-		}
+		if ((null != userRequest.getJobTitle() && !userRequest.getJobTitle().isEmpty())) {
 
-		/**
-		 * Company_Website__c Length Validation check
-		 */
-
-		if ((null != userRequest.getCompanyWebsite() && !userRequest.getCompanyWebsite().isEmpty())
-				&& (!legthValidator.validate(UserConstants.COMPANY_WEBSITE_C, userRequest.getCompanyWebsite()))) {
-			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYWEBSITE);
-			return true;
-		}
-
-		/**
-		 * IDMSSalutation__c Length Validation check
-		 */
-		if ((null != userRequest.getSalutation() && !userRequest.getSalutation().isEmpty())
-				&& (!pickListValidator.validate(UserConstants.SALUTATION.toString(),
-						userRequest.getSalutation()))) {
-			errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.SALUTATION);
-			return true;
-		}
-
-		/**
-		 * Department Length Validation check
-		 */
-		if ((null != userRequest.getDepartment() && !userRequest.getDepartment().isEmpty())
-				&& (!legthValidator.validate(UserConstants.DEPARTMENT, userRequest.getDepartment()))) {
-			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.DEPARTMENT);
-			return true;
-		}
-		/**
-		 * IDMSSuffix__c Length Validation check
-		 */
-		if ((null != userRequest.getSuffix() && !userRequest.getSuffix().isEmpty())
-				&& (!legthValidator.validate(UserConstants.IDMS_SUFFIX_C, userRequest.getSuffix()))) {
-			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.SUFFIX);
-			return true;
-		}
-
-		/**
-		 * Fax Length Validation check
-		 */
-		if ((null != userRequest.getFax() && !userRequest.getFax().isEmpty())
-				&& (!legthValidator.validate(UserConstants.FAX, userRequest.getFax()))) {
-			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.FAX);
-			return true;
-		}
-
-		/**
-		 * IDMSCompanyFederationIdentifier__c Length Validation check
-		 */
-
-		if ((null != userRequest.getCompanyFederatedId()
-				&& !userRequest.getCompanyFederatedId().isEmpty())
-				&& (!legthValidator.validate(UserConstants.IDMS_COMAPNY_FED_IDENTIFIER_C,
-						userRequest.getCompanyFederatedId()))) {
-			errorResponse
-					.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYFEDERATEDID);
-			return true;
-		}
-
-		/**
-		 * IDMSDelegatedIdp__c Length Validation check
-		 */
-
-		if ((null != userRequest.getDelegatedIdp() && !userRequest.getDelegatedIdp().isEmpty())
-				&& (!pickListValidator.validate(UserConstants.DELEGATED_IDP.toString(),
-						userRequest.getDelegatedIdp()))) {
-			errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.DELEGATEDIDP);
-			return true;
-		}
-
-		/**
-		 * IDMSIdentityType__c Length Validation check
-		 */
-
-		if ((null != userRequest.getIdentityType() && !userRequest.getIdentityType().isEmpty())
-				&& (!pickListValidator.validate(UserConstants.IDENTITY_TYPE.toString(),
-						userRequest.getIdentityType()))) {
-			errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.IDENTITYTYPE);
-			return true;
-		}
-
-		/**
-		 * IDMSCompanyCounty__c Length Validation check
-		 */
-
-		if ((null != userRequest.getCompanyCounty() && !userRequest.getCompanyCounty().isEmpty())
-				&& (!legthValidator.validate(UserConstants.IDMSCompanyCounty__c, userRequest.getCompanyCounty()))) {
-			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYCOUNTY);
-			return true;
-		}
-
-		/**
-		 * IDMSPrimaryContact__c Length Validation check
-		 */
-
-		if ((null != userRequest.getPrimaryContact() && !userRequest.getPrimaryContact().isEmpty())
-				&& (!(UserConstants.TRUE.equalsIgnoreCase(userRequest.getPrimaryContact())
-						|| (UserConstants.FALSE.equalsIgnoreCase(userRequest.getPrimaryContact()))))) {
-			errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.PRIMARYCONTACT);
-			return true;
-		}
-
-		// Need to check mandatory field for GoDigiatal
-
-		if (null != goDigitalValue && goDigitalValue.equalsIgnoreCase(userRequest.getRegistrationSource())) {
-
-			/**
-			 * FirstName Mandatory validation and length check
-			 */
-			if ((checkMandatoryFields)
-					&& (null == userRequest.getFirstName() || userRequest.getFirstName().isEmpty())) {
-				errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.FIRSTNAME);
-				return true;
-			}
-
-			/**
-			 * LastName validation and length check
-			 */
-			if ((checkMandatoryFields) && (null == userRequest.getLastName() || userRequest.getLastName().isEmpty())) {
-				errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.LASTNAME);
-				return true;
-			}
-
-			/**
-			 * validate e-mail or mobile attribute values should be present
-			 */
-			if ((checkMandatoryFields) && (null == userRequest.getEmail() || userRequest.getEmail().isEmpty())
-					&& (null == userRequest.getMobilePhone() || userRequest.getMobilePhone().isEmpty())) {
-				errorResponse.setMessage(
-						UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.EMAIL + " OR " + DirectApiConstants.MOBILEPHONE);
-				return true;
-			}
-
-			/**
-			 * validate preferred Language attribute values should be present
-			 */
-			if ((checkMandatoryFields) && (null == userRequest.getLanguageCode()
-					|| userRequest.getLanguageCode().isEmpty())) {
-				errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.LANGUAGECODE);
-				return true;
-			}
-
-			/**
-			 * validate Country Code attribute values should be present
-			 */
-			if ((checkMandatoryFields) && (null == userRequest.getCountryCode() || userRequest.getCountryCode().isEmpty())) {
-				errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COUNTRYCODE);
-				return true;
-			}
-
-			/**
-			 * validate COMPANY_NAME attribute values should be present
-			 */
-			if ((checkMandatoryFields)
-					&& (null == userRequest.getCompanyName() || userRequest.getCompanyName().isEmpty())) {
-				errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYNAME);
-				return true;
-			}
-
-			/**
-			 * validate COMPANY_ADDRESS1_C attribute values should be present
-			 */
-			if ((checkMandatoryFields) && (null == userRequest.getCompanyStreet()
-					|| userRequest.getCompanyStreet().isEmpty())) {
-				errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYSTREET);
-				return true;
-			}
-
-			/**
-			 * validate COMPANY_CITY_C attribute values should be present
-			 */
-			if ((checkMandatoryFields)
-					&& (null == userRequest.getCompanyCity() || userRequest.getCompanyCity().isEmpty())) {
-				errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYCITY);
-				return true;
-			}
-
-			/**
-			 * validate COMPANY_POSTAL_CODE_C attribute values should be present
-			 */
-			if ((checkMandatoryFields) && (null == userRequest.getCompanyZipCode()
-					|| userRequest.getCompanyZipCode().isEmpty())) {
-				errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYZIPCODE);
-				return true;
-			}
-
-			/**
-			 * validate COMPANY_COUNTRY_C attribute values should be present
-			 */
-			if ((checkMandatoryFields)
-					&& (null == userRequest.getCompanyCountryCode() || userRequest.getCompanyCountryCode().isEmpty())) {
-				errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.COMPANYCOUNTRYCODE);
-				return true;
-			}
-
-		}
-
-		if ((null != userRequest.getAboutMe() && !userRequest.getAboutMe().isEmpty())
-				&& (!legthValidator.validate(UserConstants.ABOUT_ME, userRequest.getFirstName()))) {
-			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.ABOUTME);
-			return true;
-		}
-
-		if ((null != userRequest.getAccountId() && !userRequest.getAccountId().isEmpty())
-				&& (!legthValidator.validate(UserConstants.BFO_ACCOUNT_ID, userRequest.getAccountId()))) {
-			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.BFO_ACCOUNT_ID);
-			return true;
-		}
-
-		if ((null != userRequest.getAccountId() && !userRequest.getAccountId().isEmpty())
-				&& (!legthValidator.validate(UserConstants.ACCOUNT_ID, userRequest.getAccountId()))) {
-			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.ACCOUNT_ID);
-			return true;
-		}
-
-		if ((null != userRequest.getTrustedAdmin() && !userRequest.getTrustedAdmin().isEmpty())) {
-
-			if (UserConstants.TRUE.equalsIgnoreCase(userRequest.getTrustedAdmin())) {
-				userRequest.setTrustedAdmin(UserConstants.SE_TRUSTED_ADMIN);
-			}
-		}
-
-		if ((checkMandatoryFields) && (null == userRequest.getIsActivated() || null == userRequest.getIsActivated())) {
-			userRequest.setIsActivated(UserConstants.FALSE);
-		}
-
-		/**
-		 * IDMS_Profile_update_source__c validation and length check for PRM
-		 * Update users
-		 */
-		if ((!checkMandatoryFields)
-				&& (null != userRequest.getProfileLastUpdateSource()
-						&& !userRequest.getProfileLastUpdateSource().isEmpty())
-				&& (pickListValidator.validate(UserConstants.IDMS_BFO_profile,
-						userRequest.getProfileLastUpdateSource()))
-				&& (null == userRequest.getEmail() || userRequest.getEmail().isEmpty())) {
-			errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.EMAIL);
-			return true;
-		}
-
-		if (null != userRequest.getRegistrationSource() && ((pickListValidator.validate(UserConstants.APPLICATIONS,userRequest.getRegistrationSource()))
-				|| UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))) {
-
-			if ((checkMandatoryFields)
-					&& (null == userRequest.getFederationId() || userRequest.getFederationId().isEmpty())) {
-				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.FEDERATIONID);
+			if (!pickListValidator.validate(UserConstants.JOB_TITLE.toString(), userRequest.getJobTitle())) {
+				errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.JOBTITLE);
 				return true;
 			}
 		}
 		
-		return false;
+		/**
+		 * jobFunction Length Validation check
+		 */
+		if ((null != userRequest.getJobFunction() && !userRequest.getJobFunction().isEmpty())) {
 
+			 if (!pickListValidator.validate(UserConstants.JOB_FUNCTION, userRequest.getJobFunction())) {
+				errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.JOBFUNCTION);
+				return true;
+			}
+		}
+		
+		/**
+		 * jobDescription Length Validation check
+		 */
+
+		if ((null != userRequest.getJobDescription() && !userRequest.getJobDescription().isEmpty())
+				&& (!legthValidator.validate(UserConstants.IDMS_JOB_DESCRIPTION_C,
+						userRequest.getJobDescription()))) {
+			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.JOBDESCRIPTION);
+			return true;
+		}
+		
+		/**
+		 * workPhone Length Validation check
+		 */
+		if ((null != userRequest.getWorkPhone() && !userRequest.getWorkPhone().isEmpty())
+				&& (!legthValidator.validate(UserConstants.MOBILE_PHONE, userRequest.getWorkPhone()))) {
+			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.WORKPHONE);
+			return true;
+		}
+		
+		/**
+		 * companyFederatedId Length Validation check
+		 */
+
+		if ((null != userRequest.getCompanyFederatedId()&& !userRequest.getCompanyFederatedId().isEmpty())
+				&& (!legthValidator.validate(UserConstants.IDMS_COMAPNY_FED_IDENTIFIER_C,userRequest.getCompanyFederatedId()))) {
+			errorResponse
+					.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.COMPANYFEDERATEDID);
+			return true;
+		}
+		
+		
+		/**
+		 * profileLastUpdateSource validation and length check
+		 */
+		if ((!checkMandatoryFields) && (null == userRequest.getProfileLastUpdateSource() || userRequest.getProfileLastUpdateSource().isEmpty())) {
+			errorResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + DirectApiConstants.PROFILELASTUPDATESOURCE);
+			return true;
+		} else if ((null != userRequest.getProfileLastUpdateSource()&& !userRequest.getProfileLastUpdateSource().isEmpty())
+				&& (!pickListValidator.validate(UserConstants.UPDATE_SOURCE,userRequest.getProfileLastUpdateSource()))) {
+			errorResponse.setMessage(UserConstants.INVALID_VALUE_IDMS + DirectApiConstants.PROFILELASTUPDATESOURCE);
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

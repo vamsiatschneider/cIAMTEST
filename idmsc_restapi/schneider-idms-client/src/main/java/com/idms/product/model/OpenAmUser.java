@@ -35,7 +35,6 @@ public class OpenAmUser {
 	@JsonInclude(Include.NON_NULL)
 	private String preferredlanguage;
 
-
 	@JsonInclude(Include.NON_NULL)
 	private String currency;
 
@@ -52,7 +51,7 @@ public class OpenAmUser {
 	private String st;
 
 	// county one more field is there
-	
+
 	@JsonInclude(Include.NON_NULL)
 	private String county;
 
@@ -178,96 +177,99 @@ public class OpenAmUser {
 
 	@JsonInclude(Include.NON_NULL)
 	private String idmsuid;
-	
+
 	@JsonInclude(Include.NON_NULL)
-	private String hotpEmailVerification ;
-	
+	private String hotpEmailVerification;
+
 	@JsonInclude(Include.NON_NULL)
-	private  String hotpMobileVerification ;
-	
+	private String hotpMobileVerification;
+
 	@JsonInclude(Include.NON_NULL)
 	private String tncFlag;
 
 	@JsonInclude(Include.NON_NULL)
 	private String idmsail_c;
-	
+
 	@JsonInclude(Include.NON_NULL)
 	private String tmp_password;
-	
+
 	@JsonInclude(Include.NON_NULL)
 	private String IDMSisInternal__c;
-	
+
 	@JsonInclude(Include.NON_NULL)
 	private String admin_company_id;
-	
+
 	@JsonInclude(Include.NON_NULL)
 	private String admin_federated_id;
-	
+
 	@JsonInclude(Include.NON_NULL)
 	private String CompanyID;
-	
-	
+
 	@JsonInclude(Include.NON_NULL)
 	private String AboutMe;
-	
+
 	@JsonInclude(Include.NON_NULL)
 	private String invitationCode;
-	
+
 	@JsonInclude(Include.NON_NULL)
 	private String trustedAdmin;
-	
-	
+
 	@JsonInclude(Include.NON_NULL)
 	private String isActivated;
-	
+
 	@JsonInclude(Include.NON_NULL)
 	private String emailcount;
-	
-	
-	
+
+	@JsonInclude(Include.NON_NULL)
+	private String channel;
+
+	@JsonInclude(Include.NON_NULL)
+	private String subchannel;
+
 	@JsonProperty("emailcount")
-    @JsonInclude(Include.NON_NULL)
+	@JsonInclude(Include.NON_NULL)
 	public String getEmailcount() {
 		return emailcount;
 	}
 
 	@JsonProperty("emailcount")
-    @JsonInclude(Include.NON_NULL)
+	@JsonInclude(Include.NON_NULL)
 	public void setEmailcount(String emailcount) {
 		this.emailcount = emailcount;
 	}
 
 	@JsonProperty("isActivated")
-    @JsonInclude(Include.NON_NULL)
+	@JsonInclude(Include.NON_NULL)
 	public String getIsActivated() {
 		return isActivated;
 	}
 
 	@JsonProperty("isActivated")
-    @JsonInclude(Include.NON_NULL)
+	@JsonInclude(Include.NON_NULL)
 	public void setIsActivated(String isActivated) {
 		this.isActivated = isActivated;
 	}
 
 	@JsonProperty("AboutMe")
-    @JsonInclude(Include.NON_NULL)
+	@JsonInclude(Include.NON_NULL)
 	public String getAboutMe() {
 		return AboutMe;
 	}
-	
+
 	@JsonProperty("AboutMe")
-    @JsonInclude(Include.NON_NULL)
+	@JsonInclude(Include.NON_NULL)
 	public void setAboutMe(String aboutMe) {
 		AboutMe = aboutMe;
 	}
-	
+
 	@JsonProperty("CompanyID")
-    @JsonInclude(Include.NON_NULL)
+	@JsonInclude(Include.NON_NULL)
 	public String getCompanyID() {
 		return CompanyID;
 	}
+
 	@JsonProperty("CompanyID")
-    @JsonInclude(Include.NON_NULL)
+	@JsonInclude(Include.NON_NULL)
 	public void setCompanyID(String companyID) {
 		CompanyID = companyID;
 	}
@@ -282,56 +284,47 @@ public class OpenAmUser {
 
 	@JsonInclude(Include.NON_NULL)
 	private String cn;
-	
-	/*@JsonProperty("IDMSAil_c")
+
+	/*
+	 * @JsonProperty("IDMSAil_c")
+	 * 
+	 * @JsonInclude(Include.NON_NULL) public String getIDMSAil_c() { return
+	 * IDMSAil_c; }
+	 * 
+	 * public void setIDMSAil_c(String iDMSAil_c) { IDMSAil_c = iDMSAil_c; }
+	 * 
+	 * @JsonProperty("IDMSAIL_Applications_c")
+	 * 
+	 * @JsonInclude(Include.NON_NULL) public String getIDMSAIL_Applications_c()
+	 * { return IDMSAIL_Applications_c; }
+	 * 
+	 * public void setIDMSAIL_Applications_c(String iDMSAIL_Applications_c) {
+	 * IDMSAIL_Applications_c = iDMSAIL_Applications_c; }
+	 * 
+	 * @JsonProperty("IDMSAIL_Programs_c")
+	 * 
+	 * @JsonInclude(Include.NON_NULL) public String getIDMSAIL_Programs_c() {
+	 * return IDMSAIL_Programs_c; }
+	 * 
+	 * public void setIDMSAIL_Programs_c(String iDMSAIL_Programs_c) {
+	 * IDMSAIL_Programs_c = iDMSAIL_Programs_c; }
+	 * 
+	 * @JsonProperty("IDMSAIL_Features_c")
+	 * 
+	 * @JsonInclude(Include.NON_NULL) public String getIDMSAIL_Features_c() {
+	 * return IDMSAIL_Features_c; }
+	 * 
+	 * public void setIDMSAIL_Features_c(String iDMSAIL_Features_c) {
+	 * IDMSAIL_Features_c = iDMSAIL_Features_c; }
+	 */
 	@JsonInclude(Include.NON_NULL)
-	public String getIDMSAil_c() {
-		return IDMSAil_c;
-	}
-
-	public void setIDMSAil_c(String iDMSAil_c) {
-		IDMSAil_c = iDMSAil_c;
-	}
-
-	@JsonProperty("IDMSAIL_Applications_c")
-	@JsonInclude(Include.NON_NULL)
-	public String getIDMSAIL_Applications_c() {
-		return IDMSAIL_Applications_c;
-	}
-
-	public void setIDMSAIL_Applications_c(String iDMSAIL_Applications_c) {
-		IDMSAIL_Applications_c = iDMSAIL_Applications_c;
-	}
-
-	@JsonProperty("IDMSAIL_Programs_c")
-	@JsonInclude(Include.NON_NULL)
-	public String getIDMSAIL_Programs_c() {
-		return IDMSAIL_Programs_c;
-	}
-
-	public void setIDMSAIL_Programs_c(String iDMSAIL_Programs_c) {
-		IDMSAIL_Programs_c = iDMSAIL_Programs_c;
-	}
-
-	@JsonProperty("IDMSAIL_Features_c")
-	@JsonInclude(Include.NON_NULL)
-	public String getIDMSAIL_Features_c() {
-		return IDMSAIL_Features_c;
-	}
-
-	public void setIDMSAIL_Features_c(String iDMSAIL_Features_c) {
-		IDMSAIL_Features_c = iDMSAIL_Features_c;
-	}
-*/
-	@JsonInclude(Include.NON_NULL)
-	private  String idmsail_Applications_c;
-	
-	@JsonInclude(Include.NON_NULL)
-	private  String idmsail_Features_c;
+	private String idmsail_Applications_c;
 
 	@JsonInclude(Include.NON_NULL)
-	private  String idmsail_Programs_c;
-	
+	private String idmsail_Features_c;
+
+	@JsonInclude(Include.NON_NULL)
+	private String idmsail_Programs_c;
 
 	public String getUsername() {
 		return username;
@@ -637,7 +630,6 @@ public class OpenAmUser {
 		this.employeeType = employeeType;
 	}
 
-
 	public String getPreferredlanguage() {
 		return preferredlanguage;
 	}
@@ -654,7 +646,6 @@ public class OpenAmUser {
 		this.street = street;
 	}
 
-	
 	public String getL() {
 		return l;
 	}
@@ -806,7 +797,7 @@ public class OpenAmUser {
 	public void setTncFlag(String tncFlag) {
 		this.tncFlag = tncFlag;
 	}
-	
+
 	public String getIdmsail_c() {
 		return idmsail_c;
 	}
@@ -848,17 +839,17 @@ public class OpenAmUser {
 	}
 
 	@JsonProperty("IDMSisInternal__c")
-    @JsonInclude(Include.NON_NULL)
+	@JsonInclude(Include.NON_NULL)
 	public String getIDMSisInternal__c() {
 		return IDMSisInternal__c;
 	}
 
 	@JsonProperty("IDMSisInternal__c")
-    @JsonInclude(Include.NON_NULL)
+	@JsonInclude(Include.NON_NULL)
 	public void setIDMSisInternal__c(String iDMSisInternal__c) {
 		IDMSisInternal__c = iDMSisInternal__c;
 	}
-	
+
 	public String getAdmin_company_id() {
 		return admin_company_id;
 	}
@@ -874,6 +865,7 @@ public class OpenAmUser {
 	public void setAdmin_federated_id(String admin_federated_id) {
 		this.admin_federated_id = admin_federated_id;
 	}
+
 	public String getInvitationCode() {
 		return invitationCode;
 	}
@@ -890,6 +882,21 @@ public class OpenAmUser {
 		this.trustedAdmin = trustedAdmin;
 	}
 
+	public String getChannel() {
+		return channel;
+	}
+
+	public void setChannel(String channel) {
+		this.channel = channel;
+	}
+
+	public String getSubchannel() {
+		return subchannel;
+	}
+
+	public void setSubchannel(String subchannel) {
+		this.subchannel = subchannel;
+	}
 
 	@Override
 	public String toString() {
