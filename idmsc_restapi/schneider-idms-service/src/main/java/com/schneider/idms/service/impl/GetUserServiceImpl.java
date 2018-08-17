@@ -19,6 +19,7 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+import com.schneider.idms.common.ErrorCodeConstants;
 import com.schneider.idms.common.ErrorResponseCode;
 import com.schneider.idms.common.JsonBody;
 import com.schneider.idms.mapper.UserInfoMapper;
@@ -59,9 +60,9 @@ public class GetUserServiceImpl extends IdmsCommonServiceImpl implements GetUser
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
 				}
 				if(null == region || region.equalsIgnoreCase("CN")){
-					LOGGER.info("Going to call getUserDetails() of OpenDjService for bearer id:"+authorization);
+					LOGGER.info("Start: calling getUserDetails() of OpenDjService to fetch User Details for bearer id:"+authorization);
 					userData = openDJService.getUserDetails(authorization);
-					LOGGER.info("getUserDetails() of OpenDjService finished for bearer id:"+authorization);
+					LOGGER.info("End: getUserDetails() of OpenDjService to fetch User Details Finished for bearer id:"+authorization);
 					LOGGER.info("User Data from Openam: " + userData);
 					LOGGER.info("Time took in Processing:" + (System.currentTimeMillis() - startTime));
 				}
@@ -89,7 +90,9 @@ public class GetUserServiceImpl extends IdmsCommonServiceImpl implements GetUser
 		}catch (Exception e) {
 			LOGGER.error("Error in Direct API getUser() OpenDjService ->" + e.getMessage());
 			e.printStackTrace();
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).build();
+			errorResponseCode.setCode(ErrorCodeConstants.SERVER_ERROR_REQUEST);
+			errorResponseCode.setMessage("Error in Calling GetUser API, Please try again");
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponseCode).build();
 		}
 	}
 }

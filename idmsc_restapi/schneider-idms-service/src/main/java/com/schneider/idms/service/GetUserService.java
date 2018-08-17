@@ -13,7 +13,7 @@ import javax.ws.rs.core.Response;
  * @author SESA508936
  *
  */
-@Path("/identity/services/apexrest")
+@Path("/services/apexrest")
 @Produces("application/json")
 public interface GetUserService {
 

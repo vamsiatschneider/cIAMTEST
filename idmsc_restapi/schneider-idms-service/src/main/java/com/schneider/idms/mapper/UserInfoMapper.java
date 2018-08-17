@@ -22,14 +22,14 @@ public class UserInfoMapper {
 				? getValue(userProductDocCtx.read("$.uid").toString()) : getDelimeter());
 		userInfoDTO.setAdditionalAddress(null != userProductDocCtx.read("$.additionalInfo")
 				? getValue(userProductDocCtx.read("$.additionalInfo").toString()) : getDelimeter());
-		userInfoDTO.setAil(null != userProductDocCtx.read("$.IDMSAil_c")
-				? getValue(userProductDocCtx.read("$.IDMSAil_c").toString()) : getDelimeter());
-		userInfoDTO.setAilApplications(null != userProductDocCtx.read("$.IDMSAIL_Applications_c")
-				? getValue(userProductDocCtx.read("$.IDMSAIL_Applications_c").toString()) : getDelimeter());
-		userInfoDTO.setAilFeatures(null != userProductDocCtx.read("$.IDMSAIL_Features_c")
-				? getValue(userProductDocCtx.read("$.IDMSAIL_Features_c").toString()) : getDelimeter());
-		userInfoDTO.setAilPrograms(null != userProductDocCtx.read("$.IDMSAIL_Programs_c")
-				? getValue(userProductDocCtx.read("$.IDMSAIL_Programs_c").toString()) : getDelimeter());
+		userInfoDTO.setAil(null != userProductDocCtx.read("$.ail")
+				? getValue(userProductDocCtx.read("$.ail").toString()) : getDelimeter());
+		userInfoDTO.setAilApplications(null != userProductDocCtx.read("$.ail_applications")
+				? getValue(userProductDocCtx.read("$.ail_applications").toString()) : getDelimeter());
+		userInfoDTO.setAilFeatures(null != userProductDocCtx.read("$.ail_features")
+				? getValue(userProductDocCtx.read("$.ail_features").toString()) : getDelimeter());
+		userInfoDTO.setAilPrograms(null != userProductDocCtx.read("$.ail_programs")
+				? getValue(userProductDocCtx.read("$.ail_programs").toString()) : getDelimeter());
 		userInfoDTO.setAnnualRevenue(null != userProductDocCtx.read("$.annualRevenue")
 				? Float.parseFloat(getValue(userProductDocCtx.read("$.annualRevenue").toString())) : 0.0f);
 		//userInfoDTO.setBusinessUnit(businessUnit);
@@ -64,8 +64,8 @@ public class UserInfoMapper {
 		//userInfoDTO.setContactGoldenID(contactGoldenID);
 		userInfoDTO.setContactId(null != userProductDocCtx.read("$.uid")
 				? getValue(userProductDocCtx.read("$.uid").toString()) : getDelimeter());
-		userInfoDTO.setCountryCode(null != userProductDocCtx.read("$.Country")
-				? getValue(userProductDocCtx.read("$.Country").toString()) : getDelimeter());
+		userInfoDTO.setCountryCode(null != userProductDocCtx.read("$.c")
+				? getValue(userProductDocCtx.read("$.c").toString()) : getDelimeter());
 		userInfoDTO.setCounty(null != userProductDocCtx.read("$.county")
 				? getValue(userProductDocCtx.read("$.county").toString()) : getDelimeter());
 		userInfoDTO.setCurrency(null != userProductDocCtx.read("$.currency")
@@ -75,23 +75,23 @@ public class UserInfoMapper {
 		userInfoDTO.setDepartment(null != userProductDocCtx.read("$.departmentNumber")
 				? getValue(userProductDocCtx.read("$.departmentNumber").toString()) : getDelimeter());
 		//userInfoDTO.setDivision(division);
-		userInfoDTO.setEmail(null != userProductDocCtx.read("$.Email")
-				? getValue(userProductDocCtx.read("$.Email").toString()) : getDelimeter());
+		userInfoDTO.setEmail(null != userProductDocCtx.read("$.email")
+				? getValue(userProductDocCtx.read("$.email").toString()) : getDelimeter());
 		userInfoDTO.setEmployeeSize(null != userProductDocCtx.read("$.employeeSize")
 				? getValue(userProductDocCtx.read("$.employeeSize").toString()) : getDelimeter());
 		userInfoDTO.setFax(null != userProductDocCtx.read("$.fax")
 				? getValue(userProductDocCtx.read("$.fax").toString()) : getDelimeter());
 		userInfoDTO.setFederatedId(null != userProductDocCtx.read("$.federationID")
 				? getValue(userProductDocCtx.read("$.federationID").toString()) : getDelimeter());
-		userInfoDTO.setFirstName(null != userProductDocCtx.read("$.FirstName")
-				? getValue(userProductDocCtx.read("$.FirstName").toString()) : getDelimeter());
+		userInfoDTO.setFirstName(null != userProductDocCtx.read("$.firstName")
+				? getValue(userProductDocCtx.read("$.firstName").toString()) : getDelimeter());
 		//userInfoDTO.setHashedPin(hashedPin);
-		userInfoDTO.setHeadquarter(null != userProductDocCtx.read("$.headquarters")
-				? Boolean.parseBoolean(getValue(userProductDocCtx.read("$.headquarters").toString())) : false);
-		userInfoDTO.setHomePhone(null != userProductDocCtx.read("$.mobile")
-				? getValue(userProductDocCtx.read("$.mobile").toString()) : getDelimeter());
-		userInfoDTO.setIdentityType(null != userProductDocCtx.read("$.IDMSIdentityType__c")
-				? getValue(userProductDocCtx.read("$.IDMSIdentityType__c").toString()) : getDelimeter());
+		userInfoDTO.setHeadquarter(null != userProductDocCtx.read("$.headquarter")
+				? Boolean.parseBoolean(getValue(userProductDocCtx.read("$.headquarter").toString())) : false);
+		userInfoDTO.setHomePhone(null != userProductDocCtx.read("$.homePhone")
+				? getValue(userProductDocCtx.read("$.homePhone").toString()) : getDelimeter());
+		userInfoDTO.setIdentityType(null != userProductDocCtx.read("$.identityType")
+				? getValue(userProductDocCtx.read("$.identityType").toString()) : getDelimeter());
 		userInfoDTO.setIdmsFederatedId(null != userProductDocCtx.read("$.federationID")
 				? getValue(userProductDocCtx.read("$.federationID").toString()) : getDelimeter());
 		userInfoDTO.setIsInternal(null != userProductDocCtx.read("$.IDMSisInternal__c")
@@ -100,8 +100,8 @@ public class UserInfoMapper {
 				? getValue(userProductDocCtx.read("$.jobDescription").toString()) : getDelimeter());
 		userInfoDTO.setJobFunction(null != userProductDocCtx.read("$.jobFunction")
 				? getValue(userProductDocCtx.read("$.jobFunction").toString()) : getDelimeter());
-		userInfoDTO.setJobTitle(null != userProductDocCtx.read("$.title")
-				? getValue(userProductDocCtx.read("$.title").toString()) : getDelimeter());
+		userInfoDTO.setJobTitle(null != userProductDocCtx.read("$.job_Title__c")
+				? getValue(userProductDocCtx.read("$.job_Title__c").toString()) : getDelimeter());
 		userInfoDTO.setLanguageCode(null != userProductDocCtx.read("$.preferredlanguage")
 				? getValue(userProductDocCtx.read("$.preferredlanguage").toString()) : getDelimeter());
 		userInfoDTO.setLastName(null != userProductDocCtx.read("$.LastName")
@@ -122,15 +122,17 @@ public class UserInfoMapper {
 				? getValue(userProductDocCtx.read("$.updateSource").toString()) : getDelimeter());
 		userInfoDTO.setRegistrationSource(null != userProductDocCtx.read("$.registerationSource")
 				? getValue(userProductDocCtx.read("$.registerationSource").toString()) : getDelimeter());
-		//userInfoDTO.setRejectionComment(rejectionComment);
-		//userInfoDTO.setRejectionReason(rejectionReason);
+		userInfoDTO.setRejectionComment(null != userProductDocCtx.read("$.IDMS_RejectionComments__c")
+		? getValue(userProductDocCtx.read("$.IDMS_RejectionComments__c").toString()) : getDelimeter());
+		userInfoDTO.setRejectionReason(null != userProductDocCtx.read("$.IDMS_RejectionReason__c")
+		? getValue(userProductDocCtx.read("$.IDMS_RejectionReason__c").toString()) : getDelimeter());
 		userInfoDTO.setSalutation(null != userProductDocCtx.read("$.initials")
 				? getValue(userProductDocCtx.read("$.initials").toString()) : getDelimeter());
 		//userInfoDTO.setSocialProviders(socialProviders);
-		userInfoDTO.setStateOrProvinceCode(null != userProductDocCtx.read("$.st")
-				? getValue(userProductDocCtx.read("$.st").toString()) : getDelimeter());
-		userInfoDTO.setStreet(null != userProductDocCtx.read("$.st")
-				? getValue(userProductDocCtx.read("$.st").toString()) : getDelimeter());
+		userInfoDTO.setStateOrProvinceCode(null != userProductDocCtx.read("$.State")
+				? getValue(userProductDocCtx.read("$.State").toString()) : getDelimeter());
+		userInfoDTO.setStreet(null != userProductDocCtx.read("$.street")
+				? getValue(userProductDocCtx.read("$.street").toString()) : getDelimeter());
 		userInfoDTO.setSuffix(null != userProductDocCtx.read("$.suffix")
 				? getValue(userProductDocCtx.read("$.suffix").toString()) : getDelimeter());
 		userInfoDTO.setTaxIdentificationNumber(null != userProductDocCtx.read("$.taxID")
@@ -139,15 +141,18 @@ public class UserInfoMapper {
 				? getValue(userProductDocCtx.read("$.title").toString()) : getDelimeter());
 		userInfoDTO.setTrustedAdmin(null != userProductDocCtx.read("$.trustedAdmin")
 				? Boolean.parseBoolean(getValue(userProductDocCtx.read("$.trustedAdmin").toString())) : false);
-		//userInfoDTO.setTrustLevel(trustLevel);
-		//userInfoDTO.setTrustStatus(trustStatus);
-		userInfoDTO.setUserId(null != userProductDocCtx.read("$.uid")
-				? getValue(userProductDocCtx.read("$.uid").toString()) : getDelimeter());
-		//userInfoDTO.setUserStatus(userStatus);
+		userInfoDTO.setTrustLevel(null != userProductDocCtx.read("$.IDMS_TrustLevel__c")
+		? getValue(userProductDocCtx.read("$.IDMS_TrustLevel__c").toString()) : getDelimeter());
+		userInfoDTO.setTrustStatus(null != userProductDocCtx.read("$.IDMS_TrustStatus__c")
+		? getValue(userProductDocCtx.read("$.IDMS_TrustStatus__c").toString()) : getDelimeter());
+		userInfoDTO.setUserId(null != userProductDocCtx.read("$.IDMSUID")
+				? getValue(userProductDocCtx.read("$.IDMSUID").toString()) : getDelimeter());
+		userInfoDTO.setUserStatus(null != userProductDocCtx.read("$.inetUserStatus")
+		? getValue(userProductDocCtx.read("$.inetUserStatus").toString()) : getDelimeter());
 		userInfoDTO.setWorkPhone(null != userProductDocCtx.read("$.telephoneNumber")
 				? getValue(userProductDocCtx.read("$.telephoneNumber").toString()) : getDelimeter());
-		userInfoDTO.setZipCode(null != userProductDocCtx.read("$.postOfficeBox")
-				? getValue(userProductDocCtx.read("$.postOfficeBox").toString()) : getDelimeter());
+		userInfoDTO.setZipCode(null != userProductDocCtx.read("$.PostalCode")
+				? getValue(userProductDocCtx.read("$.PostalCode").toString()) : getDelimeter());
 		
 	}
 	

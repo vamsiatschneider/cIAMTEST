@@ -22,4 +22,7 @@ public class ErrorCodeConstants {
 	
 	public static final String SERVER_ERROR_MESSAGE = "||description of the error from backend||";
 	
+	public static final String SUCCESS = "SUCCESS";
+	
+	
 }
