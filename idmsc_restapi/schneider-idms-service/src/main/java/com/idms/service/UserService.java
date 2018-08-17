@@ -206,5 +206,10 @@ public interface UserService {
 	@Consumes("application/json")
 	@Produces("application/json;**charset=UTF-8**")
 	Response transliteratorConversion(String jsonAsString);
+	
+	@POST
+	@Path("/apexrest/oauth2iplanet")
+	@Consumes("application/json")
+	Response oauthToIplanet(@HeaderParam("Authorization") String token);
 
 }

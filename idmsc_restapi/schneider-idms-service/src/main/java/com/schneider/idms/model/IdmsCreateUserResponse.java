@@ -1,85 +1,71 @@
 package com.schneider.idms.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-public class IdmsUpdateUserResponse extends IdmsUpdateUserRequest{
+public class IdmsCreateUserResponse extends IdmsUserRequest {
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String userId;
 
-	@JsonProperty
-	private String accountId;
-
-	@JsonProperty
-	private String federatedId;
-
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String idmsFederatedId;
 
-	@JsonProperty
-	private String userContext;
-
-	@JsonProperty
-	private String registrationSource;
-
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String trustStatus;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String trustLevel;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String rejectionReason;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String rejectionComment;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String delegatedIdp;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String identityType;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String isInternal;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String ail;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String ailApplications;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String ailFeatures;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String ailPrograms;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String division;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String title;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String businessUnit;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String userStatus;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String socialProviders;
 
-	@JsonProperty
-	private String companyFederatedId;
-
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String trustedAdmin;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String contactGoldenID;
 
-	@JsonProperty
+	@JsonInclude(Include.NON_NULL)
 	private String accountGoldenID;
 
 	public String getUserId() {
@@ -90,44 +76,12 @@ public class IdmsUpdateUserResponse extends IdmsUpdateUserRequest{
 		this.userId = userId;
 	}
 
-	public String getAccountId() {
-		return accountId;
-	}
-
-	public void setAccountId(String accountId) {
-		this.accountId = accountId;
-	}
-
-	public String getFederatedId() {
-		return federatedId;
-	}
-
-	public void setFederatedId(String federatedId) {
-		this.federatedId = federatedId;
-	}
-
 	public String getIdmsFederatedId() {
 		return idmsFederatedId;
 	}
 
 	public void setIdmsFederatedId(String idmsFederatedId) {
 		this.idmsFederatedId = idmsFederatedId;
-	}
-
-	public String getUserContext() {
-		return userContext;
-	}
-
-	public void setUserContext(String userContext) {
-		this.userContext = userContext;
-	}
-
-	public String getRegistrationSource() {
-		return registrationSource;
-	}
-
-	public void setRegistrationSource(String registrationSource) {
-		this.registrationSource = registrationSource;
 	}
 
 	public String getTrustStatus() {
@@ -256,14 +210,6 @@ public class IdmsUpdateUserResponse extends IdmsUpdateUserRequest{
 
 	public void setSocialProviders(String socialProviders) {
 		this.socialProviders = socialProviders;
-	}
-
-	public String getCompanyFederatedId() {
-		return companyFederatedId;
-	}
-
-	public void setCompanyFederatedId(String companyFederatedId) {
-		this.companyFederatedId = companyFederatedId;
 	}
 
 	public String getTrustedAdmin() {

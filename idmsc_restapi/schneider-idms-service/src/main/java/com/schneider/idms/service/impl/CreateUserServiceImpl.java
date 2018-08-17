@@ -32,10 +32,11 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+import com.schneider.idms.common.DirectApiConstants;
 import com.schneider.idms.common.ErrorCodeConstants;
 import com.schneider.idms.common.ErrorResponseCode;
+import com.schneider.idms.model.IdmsCreateUserResponse;
 import com.schneider.idms.model.IdmsUserRequest;
-import com.schneider.idms.model.IdmsUserResponse;
 import com.schneider.idms.service.ICreateUserService;
 import com.se.idms.cache.utils.EmailConstants;
 import com.se.idms.util.JsonConstants;
@@ -70,6 +71,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 		boolean uimsAlreadyCreatedFlag = false;
 		Response userCreation = null;
 		String userType = null;
+		OpenAmUserRequest openAmReq = null;
 		try {
 			
 			
@@ -101,27 +103,22 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 				
-				if (null != userRequest.getRegistrationSource() && UserConstants.UIMS
-						.equalsIgnoreCase(userRequest.getRegistrationSource())) {
-
-					if (null == clientId || null == clientSecret) {
-						errorResponse.setCode(ErrorCodeConstants.UNAUTHORIZED_REQUEST);
-						errorResponse.setMessage(UserConstants.UIMS_CLIENTID_SECRET);
-						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-						LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
-						LOGGER.error("Error while processing is " + errorResponse.getMessage());
-						return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-					}
-
-					if ((null != clientId && !clientId.equalsIgnoreCase(uimsClientId))
-							|| (null != clientSecret && !clientSecret.equalsIgnoreCase(uimsClientSecret))) {
-						errorResponse.setCode(ErrorCodeConstants.UNAUTHORIZED_REQUEST);
-						errorResponse.setMessage(UserConstants.INVALID_UIMS_CREDENTIALS);
-						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-						LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
-						LOGGER.error("Error while processing is " + errorResponse.getMessage());
-						return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
-					}
+				if(!UserConstants.ACCEPT_TYPE_APP_JSON.equalsIgnoreCase(accept)){
+					errorResponse.setMessage(ErrorCodeConstants.BADREQUEST_MESSAGE);
+					errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
+					LOGGER.error("Error while processing is " + errorResponse.getMessage());
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+				}
+				
+				if(!DirectApiConstants.COUNTRY_CHINA.equalsIgnoreCase(region)){
+					errorResponse.setMessage(ErrorCodeConstants.BADREQUEST_MESSAGE);
+					errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
+					LOGGER.error("Error while processing is " + errorResponse.getMessage());
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 				
 				/**
@@ -151,6 +148,16 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				e.printStackTrace();
 				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
+				errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
+				LOGGER.error("Error while processing is " + errorResponse.getMessage());
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+			}
+			catch (IllegalArgumentException e) {
+				e.printStackTrace();
+				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
+				errorResponse.setMessage(ErrorCodeConstants.BADREQUEST_MESSAGE);
 				errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
@@ -194,7 +201,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 
 			// Step 2:
 
-			OpenAmUserRequest openAmReq = mapper.map(userRequest, OpenAmUserRequest.class);
+			openAmReq = mapper.map(userRequest, OpenAmUserRequest.class);
 			
 			LOGGER.info("Admin Token Generated SuccessFully {} "+objMapper.writeValueAsString(openAmReq));
 			
@@ -477,12 +484,12 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			directUIMSUserManagerSoapService.createUIMSUserAndCompany(UimsConstants.CALLER_FID, identity,
 					userRequest.getUserContext(), company, userName,
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, UserConstants.V_NEW,
-					userName, userRequest);
+					userName,userRequest);
 			userRequest.setFederationId(userName);
 		}
 
 		
-		IdmsUserResponse idmsResponse = mapper.map(userRequest, IdmsUserResponse.class);
+		IdmsCreateUserResponse idmsResponse = mapper.map(userRequest, IdmsCreateUserResponse.class);
 		idmsResponse.setUserStatus("Registered + Active + In bFO");
 		idmsResponse.setUserId(userName);
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;

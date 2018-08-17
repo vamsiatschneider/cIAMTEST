@@ -22,7 +22,7 @@
 	http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
 	
 	<!-- these are for configuring ssl support -->
-	<http:conduit name="https://identity-int.schneider-electric.com/.*">
+	<http:conduit name="https://openam.schneider-electric.com/.*">
 	    <http:tlsClientParameters disableCNCheck="true">
 	      <sec:trustManagers>
 	        <sec:keyStore type="JKS" password="${jksPassword}" file="${jksFilePath}"/>
@@ -30,7 +30,7 @@
 	    </http:tlsClientParameters>
 	</http:conduit> 
 	
-	<http:conduit name="https://godigital-sqe2.cn.schneider-electric.com/.*">
+	<http:conduit name="https://godigital.schneider-electric.cn/.*">
 	    <http:tlsClientParameters disableCNCheck="true">
 	      <sec:trustManagers>
 	        <sec:keyStore type="JKS" password="${jksPassword}" file="${jksFilePath}"/>
@@ -57,7 +57,7 @@
 								  location="classpath:config/properties/application.properties" />
 
 	<!-- scans and register beans using annotation-config (metadata) -->
-	<context:component-scan base-package="com.idms.*,com.se.idms.*,com.schneider.idms.*,com.schneider.uims.*" />
+	<context:component-scan base-package="com.idms.*,com.se.idms.*,com.schneider.*" />
 
 	<bean name="defaultMapper" class="ma.glasnost.orika.impl.ConfigurableMapper" />
 
@@ -70,14 +70,13 @@
 			<ref bean="uimsAuthUserManagSoapService"/>
 			<ref bean="uimsCompManagSoapService"/>
 			<ref bean="uimsUserManagSoapService"/>
-			<ref bean="uimsSetPasswordSoapService"/>
-			<ref bean="commonService"/>
+			 <ref bean="commonService"/>
 			<ref bean="createUserService"/>
-			<ref bean="directUIMSUserManagerSoapService"/>
-			<ref bean="getUserService"/>
 			<ref bean="confirmPinService"/>
+			<ref bean="updateUserService"/>
+			<ref bean="getUserService"/>
 			<ref bean="updateAILService"/>
-			
+			<ref bean="directUIMSUserManagerSoapService"/>
 		</jaxrs:serviceBeans>
 		<jaxrs:providers>
 			<!-- TODO: Since allowOrigins is not set, all origins are allowed - i.e. "Access-Control-Allow-Origin:*" -->

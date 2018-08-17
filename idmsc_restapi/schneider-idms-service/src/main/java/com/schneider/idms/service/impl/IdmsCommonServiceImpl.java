@@ -42,7 +42,9 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.schneider.idms.common.DirectApiConstants;
+import com.schneider.idms.common.EmailOption;
 import com.schneider.idms.common.ErrorResponseCode;
+import com.schneider.idms.common.UserContext;
 import com.schneider.idms.mapper.DirectApiIdmsMapper;
 import com.schneider.idms.model.IdmsUserRequest;
 import com.schneider.uims.service.DirectUIMSUserManagerSoapService;
@@ -74,7 +76,7 @@ public class IdmsCommonServiceImpl {
 	protected OpenDjService openDJService;
 
 	@Inject
-	protected OpenAMTokenService openAMTokenService;
+	public OpenAMTokenService openAMTokenService;
 
 	@Inject
 	protected IFWService ifwService;
@@ -373,15 +375,11 @@ public class IdmsCommonServiceImpl {
 			return true;
 		} else if (null != userRequest.getUserContext() && !userRequest.getUserContext().isEmpty()) {
 
-			if (!legthValidator.validate(UserConstants.IDMS_USER_CONTEXT_C, userRequest.getUserContext())) {
+			if (UserContext.valueOf(userRequest.getUserContext()).equals(userRequest.getUserContext()))  {
 				errorResponse.setMessage(
 						UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.USERCONTEXT);
 				return true;
 
-			} else if (!pickListValidator.validate(UserConstants.IDMS_USER_CONTEXT_C,
-					userRequest.getUserContext())) {
-				errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.USERCONTEXT);
-				return true;
 			}
 		}
 
@@ -576,13 +574,7 @@ public class IdmsCommonServiceImpl {
 
 		if (null != userRequest.getEmailOptIn() && !userRequest.getEmailOptIn().isEmpty()) {
 
-			if (!legthValidator.validate(UserConstants.IDMS_Email_opt_in__c, userRequest.getEmailOptIn())) {
-				errorResponse
-						.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.EMAILOPTIN);
-				return true;
-
-			} else if (!pickListValidator.validate(UserConstants.EMLAIL_OPT_IN,
-					userRequest.getEmailOptIn())) {
+			if (EmailOption.valueOf(userRequest.getEmailOptIn()).equals(userRequest.getEmailOptIn())){
 				errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.EMAILOPTIN);
 				return true;
 			}
