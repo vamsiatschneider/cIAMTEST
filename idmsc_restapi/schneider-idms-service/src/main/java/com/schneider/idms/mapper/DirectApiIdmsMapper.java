@@ -96,6 +96,8 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
         .field("identityType", "input.user.identityType")
         .field("delegatedIdp", "input.user.delegatedIDP")
         
+        .field("channel", "input.user.channel")
+        .field("subchannel", "input.user.subchannel")
         /*.field("userRecord.tncFlag", "input.user.tncFlag")
         .field(UserConstants.MAPPER_CREATE_USER_PR_REQUEST,UserConstants.MAPPER_OPENAM_USER_PR_REQUEST)
         .field("userRecord.adminFederatedId", "input.user.admin_federated_id")
@@ -345,7 +347,7 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
     }
 	
 	private void configureIdmsUpdateUserRequestToOpenAmUserRequest(MapperFactory mapperFactory) {
-        mapperFactory.classMap(IdmsUpdateUserRequest.class,OpenAmUserRequest.class)
+        mapperFactory.classMap(IdmsUserRequest.class,OpenAmUserRequest.class)
         
         .field("salutation", "input.user.initials")
         .field("firstName", "input.user.givenName")

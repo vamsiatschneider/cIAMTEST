@@ -24,7 +24,7 @@ public interface IConfirmPinUserService {
 			@HeaderParam("IDMS-Region")String region,@Valid IdmsUserConfirmRequest confirmPinRequest);
 	
 	@PUT
-	@Path("/IDMSsvcs/1.0/ResendPinCode")
+	@Path("/ResendPinCode/1.0")
 	@Consumes("application/json")
 	Response resendPIN(@HeaderParam("Authorization") String token,@Valid ResendPinRequest resendPinRequest);
 }
