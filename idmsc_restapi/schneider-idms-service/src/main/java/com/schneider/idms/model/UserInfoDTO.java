@@ -14,7 +14,7 @@ public class UserInfoDTO {
 	private String accountId;
 	private String federatedId;
 	private String idmsFederatedId;
-	private enum userContext{Home,Work};
+	private String userContext;
 	private String salutation;
 	private String firstName;
 	private String middleName;
@@ -23,7 +23,7 @@ public class UserInfoDTO {
 	private String email;
 	private String mobilePhone;
 	private String languageCode;
-	private enum emailOptIn{Y,N,y,n};	
+	private String emailOption;
 	private String aboutMe;
 	private String street;
 	private String city;
@@ -515,5 +515,17 @@ public class UserInfoDTO {
 	public void setAccountGoldenID(String accountGoldenID) {
 		this.accountGoldenID = accountGoldenID;
 	}
-
+	public String getUserContext() {
+		return userContext;
+	}
+	public void setUserContext(String userContext) {
+		this.userContext = userContext;
+	}
+	public String getEmailOption() {
+		return emailOption;
+	}
+	public void setEmailOption(String emailOption) {
+		this.emailOption = emailOption;
+	}
+	
 }
