@@ -153,6 +153,10 @@ public class UserInfoMapper {
 				? getValue(userProductDocCtx.read("$.telephoneNumber").toString()) : getDelimeter());
 		userInfoDTO.setZipCode(null != userProductDocCtx.read("$.PostalCode")
 				? getValue(userProductDocCtx.read("$.PostalCode").toString()) : getDelimeter());
+		userInfoDTO.setUserContext(null != userProductDocCtx.read("$.employeeType")
+				? getValue(userProductDocCtx.read("$.employeeType").toString()) : getDelimeter());
+		userInfoDTO.setEmailOption(null != userProductDocCtx.read("$.emailOptIn")
+				? getValue(userProductDocCtx.read("$.emailOptIn").toString()) : getDelimeter());
 		
 	}
 	
