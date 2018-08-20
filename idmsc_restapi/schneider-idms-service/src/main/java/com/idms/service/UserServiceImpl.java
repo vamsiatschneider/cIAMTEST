@@ -3011,9 +3011,13 @@ public class UserServiceImpl implements UserService {
 				}
 				
 				
-			}else {
-				// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
-				// "logout");
+			} else if (null != confirmRequest.getIDMS_Profile_update_source()
+					&& !UserConstants.UIMS.equalsIgnoreCase(confirmRequest.getIDMS_Profile_update_source())
+					&& (null != confirmRequest.getOperation()
+							&& UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(confirmRequest.getOperation()))) {
+				LOGGER.info("Calling ASYNC setUIMSPassword() of uimsUserManagerSoapService");
+				uimsUserManagerSoapService.updateChangeEmailOrMobile(iPlanetDirectoryKey, uniqueIdentifier, federationID, openamVnew, loginIdentifierType, emailOrMobile);
+				LOGGER.info("ASYNC setUIMSPassword() of uimsUserManagerSoapService finished");
 			}
 			
 			LOGGER.info("activateUIMSUserConfirmPIN is completed successfully::::");
@@ -3964,7 +3968,7 @@ public class UserServiceImpl implements UserService {
 					String userInfoByAccessToken = openAMTokenService.getUserInfoByAccessToken(authorizedToken, "/se");
 					productDocCtx = JsonPath.using(conf).parse(userInfoByAccessToken);
 
-					if(productDocCtx.read("$.email").toString().contains(UserConstants.TECHNICAL_USER)){
+					if(null != productDocCtx.read("$.email") && productDocCtx.read("$.email").toString().contains(UserConstants.TECHNICAL_USER)){
 						String userExistsInOpenam = productService.checkUserExistsWithEmailMobile(
 								UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 								"loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(userRequest.getUserRecord().getEmail(),"UTF-8"),"UTF-8") + "\"");
@@ -4313,9 +4317,13 @@ public class UserServiceImpl implements UserService {
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, version);
 				// mapping IFW request to UserCompany
 				CompanyV3 company = mapper.map(userRequest, CompanyV3.class);
+				if(null != company.getLanguageCode()){
 				company.setLanguageCode(company.getLanguageCode().toLowerCase());
+				}
 				com.se.uims.usermanager.UserV6 identity = mapper.map(userRequest, com.se.uims.usermanager.UserV6.class);
+				if(null != identity.getLanguageCode()){
 				identity.setLanguageCode(identity.getLanguageCode().toLowerCase());
+				}
 				// calling Async method updateUIMSUserAndCompany
 				uimsUserManagerSoapService.updateUIMSUserAndCompany(fedId, identity,
 						userRequest.getUserRecord().getIDMS_User_Context__c(), company, vNewCntValue.toString(),
