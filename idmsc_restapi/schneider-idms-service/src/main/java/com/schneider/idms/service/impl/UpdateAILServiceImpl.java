@@ -163,9 +163,9 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 				userId = federatedId;
 				iPlanetDirectoryKey = getSSOToken();
 
-				aclType = getIDMSAclType(userAilRequest.getAclType());
-				aclValue = userAilRequest.getAcl();
-				aclOperation = userAilRequest.getOperation();
+				aclType = getIDMSAclType(userAilRequest.getAclType().trim());
+				aclValue = userAilRequest.getAcl().trim();
+				aclOperation = userAilRequest.getOperation().trim();
 
 				LOGGER.info("ACL type=" + aclType + " ,aclValue=" + aclValue + " ,aclOperation=" + aclOperation);
 
@@ -175,6 +175,7 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 				LOGGER.info("Start: calling getUser() of OpenAMService to fetch AIL values for userId=" + userId);
 				userData = productService.getUser(iPlanetDirectoryKey, userId);
 				LOGGER.info("End: getUser() of OpenAMService to fetch AIL values finsihed for userId=" + userId);
+				LOGGER.info("Returned User Data from OpenAM=" + userData);
 				Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 				DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
 
@@ -210,7 +211,7 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 					PRODUCT_JSON_STRING = "{" + "\"" + inOpenAMAILType + "\": \"" + modifiedAILValue.trim() + "\""
 							+ ",\"IDMSAil_c\": \"" + modifiedAILFullValues.trim() + "\"}";
 
-					LOGGER.info("Grant Operation: JSON string to update all AIL -> " + PRODUCT_JSON_STRING);
+					LOGGER.info("Grant Operation: JSON string to update -> " + PRODUCT_JSON_STRING);
 					LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
 							+ "openAMApi:GET/getUser/{userId}");
 					LOGGER.info("Start: Calling updateUser() of OpenAMService to update AIL for userId=" + userId);
@@ -233,7 +234,7 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 					PRODUCT_JSON_STRING = "";
 
 					for (String pair : listOfAilValues) {
-						if (!listOfAilValues.contains("(" + inRequestAILTypeValPair + ")")) {
+						if (!pair.equalsIgnoreCase("(" + inRequestAILTypeValPair + ")")) {
 							modifiedAILFullValues = modifiedAILFullValues + pair + ",";
 						}
 					}
@@ -255,25 +256,25 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 					}
 
 					if (null == modifiedAILValue.trim() || modifiedAILValue.trim().isEmpty()) {
-						PRODUCT_JSON_STRING = "{\"" + inOpenAMAILType + "\":".concat("[]}");
+						PRODUCT_JSON_STRING = "{\"" + inOpenAMAILType + "\": ".concat("[]}");
 					} else {
 						PRODUCT_JSON_STRING = "{\"" + inOpenAMAILType + ": \"" + modifiedAILValue.trim() + "\"" + "}";
 					}
 
 					if (null == modifiedAILFullValues.trim() || modifiedAILFullValues.trim().isEmpty()) {
 						PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
-								.concat(",\"IDMSAil_c\":".concat("[]}"));
+								.concat(",\"IDMSAil_c\": ".concat("[]}"));
 					} else {
 						PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
 								.concat(",\"IDMSAil_c\": \"" + modifiedAILFullValues.trim() + "\"}");
 					}
 
-					LOGGER.info("JSON String to Update=" + PRODUCT_JSON_STRING);
+					LOGGER.info("Revoke Operation: JSON String to Update=" + PRODUCT_JSON_STRING);
 					LOGGER.info("Start: calling updateUser() of OpenAMService to update AIL values for userId=" + userId);
 					
 					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 							PRODUCT_JSON_STRING);
-					LOGGER.info("updateUser() of OpenAMService finished for userId=" + userId);
+					LOGGER.info("End: updateUser() of OpenAMService to update AIL values finished for userId=" + userId);
 
 					responseCodeStatus.setStatus(ErrorCodeConstants.SUCCESS);
 					responseCodeStatus.setMessage("AIL was revoked successfully ");
