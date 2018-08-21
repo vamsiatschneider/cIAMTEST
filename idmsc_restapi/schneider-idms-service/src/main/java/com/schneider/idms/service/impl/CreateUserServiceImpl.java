@@ -201,6 +201,12 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 
 			openAmReq = mapper.map(userRequest, OpenAmUserRequest.class);
 			
+			/**
+			 * TODO RegistrationSource mapping not happening need to check why
+			 * 
+			 */
+			
+			openAmReq.getInput().getUser().setRegisterationSource(userRequest.getRegistrationSource());
 			LOGGER.info("Admin Token Generated SuccessFully {} "+objMapper.writeValueAsString(openAmReq));
 			
 			/**

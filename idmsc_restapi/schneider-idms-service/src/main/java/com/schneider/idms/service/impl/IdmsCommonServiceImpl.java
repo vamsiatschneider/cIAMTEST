@@ -497,7 +497,7 @@ public class IdmsCommonServiceImpl {
 		 * idmsFederatedId Length Validation check
 		 */
 		if ((null != userRequest.getIdmsFederatedId() && !userRequest.getIdmsFederatedId().isEmpty())
-				&& (userRequest.getIdmsFederatedId().length() > 0 || userRequest.getIdmsFederatedId().length() <= 40)) {
+				&& (userRequest.getIdmsFederatedId().length() > 0 && userRequest.getIdmsFederatedId().length() > 40)) {
 			errorResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + DirectApiConstants.IDMSFEDERATEDID);
 			return true;
 		}

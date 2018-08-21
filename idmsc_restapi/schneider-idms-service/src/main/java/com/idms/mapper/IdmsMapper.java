@@ -105,6 +105,8 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.invitationCode", "input.user.invitationCode")
         .field("userRecord.trustedAdmin", "input.user.trustedAdmin")
         .field("userRecord.isActivated", "input.user.isActivated")
+        .field("userRecord.channel__c", "input.user.channel")
+        .field("userRecord.subChannel__c", "input.user.subchannel")
         .byDefault()
         .register();
     }
@@ -263,8 +265,8 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.fax", "fax")
         .field("userRecord.IDMS_County__c", "county")
         .field("userRecord.mobilePhone", "phoneId")
-        //.field("userRecord.country", "input.countrycode")
-        ////.field("userRecord.IDMS_Email_opt_in__c", "input.emailOptIn")
+        .field("userRecord.channel__c", "channel")
+        .field("userRecord.subChannel__c", "subChannel")
 
         .byDefault()
         .register();
@@ -293,9 +295,8 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.phone", "phone")
         .field("userRecord.fax", "fax")
         .field("userRecord.IDMS_County__c", "county")
-        //.field("userRecord.country", "input.countrycode")
-        ////.field("userRecord.IDMS_Email_opt_in__c", "input.emailOptIn")
-
+        .field("userRecord.channel__c", "channel")
+        .field("userRecord.subChannel__c", "subChannel")
         .byDefault()
         .register();
     }
@@ -595,6 +596,9 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.IDMSCompanyNbrEmployees__c", "iDMS_Company_Employee_Size__c")
         .field("userRecord.IDMSCompanyHeadquarters__c", "iDMS_Company_Headquarters__c")
         .field("userRecord.IDMSTaxIdentificationNumber__c", "iDMS_Company_Tax_Identification_Number__c")
+        
+        .field("userRecord.channel__c", "channel__c")
+        .field("userRecord.subChannel__c", "subChannel__c")
         /*.field("userRecord.", "iDMSIsInternal__c")
         .field("userRecord.", "iDMSAil__c")
         .field("userRecord.", "iDMSAIL_Applications__c")

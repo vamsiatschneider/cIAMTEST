@@ -237,6 +237,10 @@ public class OpenAMGetUserWorkResponse {
 	
 	private String isActivated;
 	
+	private String Channel__c;
+
+	private String SubChannel__c;
+	
 	@JsonProperty("IDMSCompanyFederationIdentifier__c")
 	public String getIDMSCompanyFederationIdentifier__c() {
 		return IDMSCompanyFederationIdentifier__c;
@@ -1032,6 +1036,26 @@ public class OpenAMGetUserWorkResponse {
 	@JsonProperty("currencyCode")
 	public void setCurrencyCode(String currencyCode) {
 		this.currencyCode = currencyCode;
+	}
+
+	@JsonProperty("Channel__c")
+	public String getChannel__c() {
+		return Channel__c;
+	}
+
+	@JsonProperty("Channel__c")
+	public void setChannel__c(String channel__c) {
+		Channel__c = channel__c;
+	}
+
+	@JsonProperty("SubChannel__c")
+	public String getSubChannel__c() {
+		return SubChannel__c;
+	}
+
+	@JsonProperty("SubChannel__c")
+	public void setSubChannel__c(String subChannel__c) {
+		SubChannel__c = subChannel__c;
 	}
 	
 	

@@ -394,6 +394,12 @@ public class IDMSUserResponse implements Serializable {
 	@JsonInclude(Include.NON_NULL)
 	private String trustedAdmin;
 	
+	@JsonProperty
+	private String Channel__c;
+
+	@JsonProperty
+	private String SubChannel__c;
+	
 	
 	/*@JsonProperty("attributes")
 	public Attributes getAttributes() {
@@ -1338,7 +1344,25 @@ public class IDMSUserResponse implements Serializable {
 		this.trustedAdmin = trustedAdmin;
 	}
 	
-	
+	@JsonProperty("Channel__c")
+	public String getChannel__c() {
+		return Channel__c;
+	}
+
+	@JsonProperty("Channel__c")
+	public void setChannel__c(String channel__c) {
+		Channel__c = channel__c;
+	}
+
+	@JsonProperty("SubChannel__c")
+	public String getSubChannel__c() {
+		return SubChannel__c;
+	}
+
+	@JsonProperty("SubChannel__c")
+	public void setSubChannel__c(String subChannel__c) {
+		SubChannel__c = subChannel__c;
+	}
 	
 
 }

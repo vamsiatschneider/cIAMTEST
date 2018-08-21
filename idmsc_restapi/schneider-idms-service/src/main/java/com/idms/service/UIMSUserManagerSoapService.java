@@ -129,6 +129,8 @@ public class UIMSUserManagerSoapService {
 
 	private boolean ispasswordupdated = false;
 	
+	private boolean changeEmailUpdated = false;
+	
 	private String createdFedId = null;
 	
 	String createdCompanyFedId = null;
@@ -840,6 +842,112 @@ public class UIMSUserManagerSoapService {
 			e.printStackTrace();
 		}
 	}
+	
+	@Async
+	public void updateChangeEmailOrMobile(String iPlanetDirectoryKey, String userId,
+			String callerFid, String openamVnew, String loginIdentifierType,String newEmailOrMobile) throws MalformedURLException {
+		LOGGER.info("Entered updateChangeEmailOrMobile() -> Start");
+		LOGGER.info("Parameter iPlanetDirectoryKey -> " + iPlanetDirectoryKey+" ,userId -> "+userId);
+		LOGGER.info("Parameter callerFid -> " + callerFid);
+		LOGGER.info("Parameter openamVnew -> " + openamVnew+" ,loginIdentifierType -> "+loginIdentifierType);
+		LOGGER.info("Parameter emailOrMobile -> " + newEmailOrMobile);
+		UIMSLOGGER.info("Entered updateChangeEmailOrMobile() -> Start");
+		UIMSLOGGER.info("Parameter iPlanetDirectoryKey -> " + iPlanetDirectoryKey+" ,userId -> "+userId);
+		UIMSLOGGER.info("Parameter callerFid -> " + callerFid);
+		UIMSLOGGER.info("Parameter openamVnew -> " + openamVnew+" ,loginIdentifierType -> "+loginIdentifierType);
+		UIMSLOGGER.info("Parameter emailOrMobile -> " + newEmailOrMobile);
+		
+		com.se.uims.usermanager.AccessElement application = new com.se.uims.usermanager.AccessElement();
+		application.setId(applicationName);
+		application.setType(com.se.uims.usermanager.Type.APPLICATION);
+		
+		try {
+			if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
+				LOGGER.info("Going to call getSamlAssertionToken() of UIMS for EMAIL.. userId:"+userId);
+				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(userId, openamVnew);
+				LOGGER.info("getSamlAssertionToken() of UIMS finished for EMAIL.. userId:"+userId);
+			}else{
+				LOGGER.info("Going to call getSamlAssertionToken() of UIMS.. callerFid:"+callerFid);
+				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, openamVnew);
+				LOGGER.info("getSamlAssertionToken() of UIMS finished.. callerFid:"+callerFid);
+			}
+		} catch (Exception e) {
+			LOGGER.error("Exception while getting getSamlAssertionToken() of UIMS::" + e.getMessage());
+			UIMSLOGGER.error("Exception while getting getSamlAssertionToken() of UIMS::" + e.getMessage());
+			e.printStackTrace();
+		}
+		try {
+			Callable<Boolean> callableUIMSPassword = new Callable<Boolean>() {
+				public Boolean call() throws Exception {
+					UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
+					if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
+						LOGGER.info("Going to call requestEmailChange() of UIMS for EMAIL.. userId:"+userId);
+						
+						changeEmailUpdated = userManagerUIMSV22.requestEmailChange(UimsConstants.CALLER_FID, samlAssertion, application, newEmailOrMobile);
+						
+						LOGGER.info("requestEmailChange() of UIMS finished for EMAIL.. userId:"+userId);
+					} else {
+						LOGGER.info("Going to call requestPhoneIdChange() of UIMS for non-EMAIL.. userId:"+userId);
+						
+						changeEmailUpdated = userManagerUIMSV22.requestPhoneIdChange(UimsConstants.CALLER_FID, samlAssertion, application, newEmailOrMobile);
+						
+						LOGGER.info("requestPhoneIdChange() of UIMS finished for non-EMAIL.. userId:"+userId);
+					}
+					LOGGER.info("requestPhoneIdChange: " + changeEmailUpdated);
+					UIMSLOGGER.info("requestPhoneIdChange: " + changeEmailUpdated);
+					
+
+					if(changeEmailUpdated){
+						changeEmailUpdated = userManagerUIMSV22.updateEmail(UimsConstants.CALLER_FID, samlAssertion);
+					}
+					
+					return true;
+				}
+			};
+
+			Retryer<Boolean> retryer = RetryerBuilder.<Boolean> newBuilder()
+					.retryIfResult(Predicates.<Boolean> isNull()).retryIfExceptionOfType(Exception.class)
+					.retryIfRuntimeException().withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
+			try {
+				retryer.call(callableUIMSPassword);
+				// after successful setUIMSPassword , we need to update the
+				// v_old
+				if (changeEmailUpdated) {
+					
+					String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
+					LOGGER.info("Going to call updateUser() of openamservice to update version for userId:"+userId);
+					//productService.updateUser(iPlanetDirectoryKey, userId, version);
+					LOGGER.info("updateUser() call of openamservice finished for userId:"+userId);
+				}
+			} catch (RetryException e) {
+				LOGGER.error("Retry failed while calling requestEmailChange() of UIMS::" + e.getMessage());
+				UIMSLOGGER.error("Retry failed while calling requestEmailChange() of UIMS::" + e.getMessage());
+				e.printStackTrace();
+				
+			} catch (ExecutionException e) {
+				LOGGER.error("ExecutionException while calling requestEmailChange() of UIMS::" + e.getMessage());
+				UIMSLOGGER.error("ExecutionException while calling requestEmailChange() of UIMS::" + e.getMessage());
+				e.printStackTrace();
+			}
+			if(!changeEmailUpdated) {
+				LOGGER.info("UIMS UserpinConfirmation requestEmailChange got failed -----> ::sending mail notification for userid::"+userId);
+				UIMSLOGGER.info("UIMS UserpinConfirmation requestEmailChange got failed -----> ::sending mail notification for userid::"+userId);
+				LOGGER.info("Going to call emailReadyToSendEmail() for userId:"+userId);
+				sendEmail.emailReadyToSendEmail(supportUser, fromUserName,
+						"UIMS updateChangeEmailOrMobile failed.", userId);
+				LOGGER.info("emailReadyToSendEmail() finished for userId:"+userId);
+			}
+		} catch (Exception e) {
+			// productService.sessionLogout(iPlanetDirectoryKey, "logout");
+			LOGGER.error("Exception while requestEmailChange::" + e.getMessage());
+			UIMSLOGGER.error("Exception while requestEmailChange::" + e.getMessage());
+			e.printStackTrace();
+		}
+		// productService.sessionLogout(iPlanetDirectoryKey, "logout");
+		LOGGER.info("requestEmailChange() Async Method -> End");
+		UIMSLOGGER.info("requestEmailChange Async Method -> End");
+	}
+
 
 	public static void main(String[] args) {
 

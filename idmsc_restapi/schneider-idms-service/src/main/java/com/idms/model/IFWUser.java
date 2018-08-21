@@ -1,6 +1,5 @@
 package com.idms.model;
 
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,13 +14,13 @@ public class IFWUser extends BaseEntity {
 	 */
 	@JsonProperty
 	private Attributes attributes;
-	
+
 	@JsonProperty
 	private String Id;
 
 	@JsonProperty
 	private String IDMS_Federated_ID__c;
-	
+
 	@JsonProperty
 	private String IDMS_User_Context__c;
 
@@ -30,25 +29,25 @@ public class IFWUser extends BaseEntity {
 
 	@JsonProperty
 	private String LastName;
-	
+
 	@JsonProperty
 	private String Country;
-	
+
 	@JsonProperty
 	private String Email;
 
 	@JsonProperty
 	private String MobilePhone;
-	
+
 	@JsonProperty
 	private String IDMS_PreferredLanguage__c;
-	
+
 	@JsonProperty
 	private String IDMS_Email_opt_in__c;
 
 	@JsonProperty
 	private String DefaultCurrencyIsoCode;
-	
+
 	@JsonProperty
 	private String currencyCode;
 
@@ -60,16 +59,16 @@ public class IFWUser extends BaseEntity {
 
 	@JsonProperty
 	private String Company_City__c;
-	
+
 	@JsonProperty
 	private String Company_Postal_Code__c;
 
 	@JsonProperty
 	private String Company_State__c;
-	
+
 	@JsonProperty
 	private String IDMSCompanyPoBox__c;
-	
+
 	@JsonProperty
 	private String IDMSCompanyCounty__c;
 
@@ -78,7 +77,7 @@ public class IFWUser extends BaseEntity {
 
 	@JsonProperty
 	private String Company_Address2__c;
-	
+
 	@JsonProperty
 	private String Company_Website__c;
 
@@ -93,16 +92,16 @@ public class IFWUser extends BaseEntity {
 
 	@JsonProperty
 	private String IDMSMarketSubSegment__c;
-	
+
 	@JsonProperty
 	private String IDMSCompanyMarketServed__c;
 
 	@JsonProperty
 	private String IDMSCompanyNbrEmployees__c;
-	
+
 	@JsonProperty
 	private String Department;
-	
+
 	@JsonProperty
 	private String IDMSCompanyHeadquarters__c;
 
@@ -120,9 +119,9 @@ public class IFWUser extends BaseEntity {
 
 	@JsonProperty
 	private String IDMSJobDescription__c;
-	
+
 	@JsonProperty
-	private String Phone;	
+	private String Phone;
 
 	@JsonProperty
 	private String Street;
@@ -141,22 +140,22 @@ public class IFWUser extends BaseEntity {
 
 	@JsonProperty
 	private String IDMS_POBox__c;
-	
+
 	@JsonProperty
 	private String IDMS_AdditionalAddress__c;
-	
+
 	@JsonProperty
 	private String IDMSMiddleName__c;
-	
+
 	@JsonProperty
 	private String IDMSSalutation__c;
 
 	@JsonProperty
 	private String IDMSSuffix__c;
-	
+
 	@JsonProperty
 	private String Fax;
-	
+
 	@JsonProperty
 	private String AccountId;
 
@@ -164,7 +163,7 @@ public class IFWUser extends BaseEntity {
 	private String IDMS_Registration_Source__c;
 
 	@JsonProperty
-	private String IDMS_Profile_update_source__c;	
+	private String IDMS_Profile_update_source__c;
 
 	@JsonProperty
 	private String IDMS_TrustStatus__c;
@@ -173,14 +172,13 @@ public class IFWUser extends BaseEntity {
 	private String IDMS_RejectionReason__c;
 
 	@JsonProperty
-	private String IDMS_RejectionComments__c;	
-	
+	private String IDMS_RejectionComments__c;
+
 	@JsonProperty
 	private boolean isActive;
-	
+
 	@JsonProperty
 	private String BFO_ACCOUNT_ID__c;
-	
 
 	@JsonProperty
 	private String IDMSCompanyFederationIdentifier__c;
@@ -193,36 +191,40 @@ public class IFWUser extends BaseEntity {
 
 	@JsonProperty
 	private String tncFlag;
-	
+
 	@JsonProperty
 	private String IDMSPrimaryContact__c;
-	
+
 	@JsonProperty
 	private String companyFederatedId;
-	
+
 	@JsonProperty
 	private String adminFederatedId;
-	
+
 	@JsonProperty
 	private String adminCompanyFederatedId;
-	
+
 	@JsonProperty
 	private String AboutMe;
-	
+
 	@JsonProperty
 	private String invitationCode;
-	
+
 	@JsonProperty
 	private String trustedAdmin;
-	
+
 	@JsonProperty
 	private String idmsHashedToken;
-	
+
 	@JsonProperty
 	private String isActivated;
-	
-	
-	
+
+	@JsonProperty
+	private String Channel__c;
+
+	@JsonProperty
+	private String SubChannel__c;
+
 	@JsonProperty("isActivated")
 	public String getIsActivated() {
 		return isActivated;
@@ -241,7 +243,7 @@ public class IFWUser extends BaseEntity {
 	public String getIdmsHashedToken() {
 		return idmsHashedToken;
 	}
-	
+
 	@JsonProperty("IDMSHashedToken__c")
 	public void setIdmsHashedToken(String idmsHashedToken) {
 		this.idmsHashedToken = idmsHashedToken;
@@ -599,7 +601,7 @@ public class IFWUser extends BaseEntity {
 
 	@JsonProperty("IDMSAnnualRevenue__c")
 	public String getIDMSAnnualRevenue__c() {
-		return IDMSAnnualRevenue__c; 
+		return IDMSAnnualRevenue__c;
 	}
 
 	public void setIDMSAnnualRevenue__c(String iDMSAnnualRevenue__c) {
@@ -758,7 +760,6 @@ public class IFWUser extends BaseEntity {
 		IDMS_RejectionComments__c = iDMS_RejectionComments__c;
 	}
 
-	
 	@JsonProperty("IDMSPrimaryContact__c")
 	public String getIDMSPrimaryContact__c() {
 		return IDMSPrimaryContact__c;
@@ -767,7 +768,7 @@ public class IFWUser extends BaseEntity {
 	public void setIDMSPrimaryContact__c(String iDMSPrimaryContact__c) {
 		IDMSPrimaryContact__c = iDMSPrimaryContact__c;
 	}
-	
+
 	public boolean isActive() {
 		return isActive;
 	}
@@ -775,12 +776,12 @@ public class IFWUser extends BaseEntity {
 	public void setActive(boolean isActive) {
 		this.isActive = isActive;
 	}
-	
+
 	@JsonProperty("BFO_ACCOUNT_ID__c")
 	public String getBFO_ACCOUNT_ID__c() {
 		return BFO_ACCOUNT_ID__c;
 	}
-	
+
 	@JsonProperty("BFO_ACCOUNT_ID__c")
 	public void setBFO_ACCOUNT_ID__c(String bFO_ACCOUNT_ID__c) {
 		BFO_ACCOUNT_ID__c = bFO_ACCOUNT_ID__c;
@@ -790,6 +791,7 @@ public class IFWUser extends BaseEntity {
 	public String getCompanyFederatedId() {
 		return companyFederatedId;
 	}
+
 	@JsonProperty("COMPANY_FEDERATED_ID")
 	public void setCompanyFederatedId(String companyFederatedId) {
 		this.companyFederatedId = companyFederatedId;
@@ -814,8 +816,7 @@ public class IFWUser extends BaseEntity {
 	public void setAdminCompanyFederatedId(String adminCompanyFederatedId) {
 		this.adminCompanyFederatedId = adminCompanyFederatedId;
 	}
-	
-	
+
 	@JsonProperty("AboutMe")
 	public String getAboutMe() {
 		return AboutMe;
@@ -825,7 +826,7 @@ public class IFWUser extends BaseEntity {
 	public void setAboutMe(String aboutMe) {
 		AboutMe = aboutMe;
 	}
-	
+
 	@JsonProperty("InvitationCode")
 	public String getInvitationCode() {
 		return invitationCode;
@@ -844,7 +845,6 @@ public class IFWUser extends BaseEntity {
 		this.trustedAdmin = trustedAdmin;
 	}
 
-	
 	@JsonProperty("currencyCode")
 	public String getCurrencyCode() {
 		return currencyCode;
@@ -853,6 +853,24 @@ public class IFWUser extends BaseEntity {
 	@JsonProperty("currencyCode")
 	public void setCurrencyCode(String currencyCode) {
 		this.currencyCode = currencyCode;
+	}
+
+	@JsonProperty("Channel__c")
+	public String getChannel__c() {
+		return Channel__c;
+	}
+
+	@JsonProperty("Channel__c")
+	public void setChannel__c(String channel__c) {
+		Channel__c = channel__c;
+	}
+
+	public String getSubChannel__c() {
+		return SubChannel__c;
+	}
+
+	public void setSubChannel__c(String subChannel__c) {
+		SubChannel__c = subChannel__c;
 	}
 
 	@Override
