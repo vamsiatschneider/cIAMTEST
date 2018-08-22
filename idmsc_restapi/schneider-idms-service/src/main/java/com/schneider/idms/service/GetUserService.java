@@ -14,10 +14,10 @@ import javax.ws.rs.core.Response;
  *
  */
 @Produces("application/json")
+@Path("/services/apexrest/IDMSUser/1.0")
 public interface GetUserService {
 
 	@GET
-	@Path("/services/apexrest/IDMSUser/1.0")
 	Response getUser(@HeaderParam("IDMS-Authorization") String authorization, @HeaderParam("Accept") String accept,
 			@HeaderParam("IDMS-Region") String region);
 
