@@ -57,7 +57,7 @@
 								  location="classpath:config/properties/application.properties" />
 
 	<!-- scans and register beans using annotation-config (metadata) -->
-	<context:component-scan base-package="com.idms.*,com.se.idms.*,com.schneider.*" />
+	<context:component-scan base-package="com.idms.*,com.se.idms.*,com.schneider.*,com.se.uims.*" />
 
 	<bean name="defaultMapper" class="ma.glasnost.orika.impl.ConfigurableMapper" />
 
@@ -70,7 +70,9 @@
 			<ref bean="uimsAuthUserManagSoapService"/>
 			<ref bean="uimsCompManagSoapService"/>
 			<ref bean="uimsUserManagSoapService"/>
-			 <ref bean="commonService"/>
+			<ref bean="uimsSetPasswordSoapService"/>
+			
+			<ref bean="commonService"/>
 			<ref bean="createUserService"/>
 			<ref bean="confirmPinService"/>
 			<ref bean="updateUserService"/>
