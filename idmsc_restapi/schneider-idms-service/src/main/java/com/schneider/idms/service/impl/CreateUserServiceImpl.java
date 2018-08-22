@@ -207,6 +207,8 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			 */
 			
 			openAmReq.getInput().getUser().setRegisterationSource(userRequest.getRegistrationSource());
+			openAmReq.getInput().getUser().setChannel(userRequest.getChannel());
+			openAmReq.getInput().getUser().setSubchannel(userRequest.getSubChannel());
 			LOGGER.info("Admin Token Generated SuccessFully {} "+objMapper.writeValueAsString(openAmReq));
 			
 			/**

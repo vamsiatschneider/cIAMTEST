@@ -153,7 +153,7 @@ public class IdmsUpdateUserRequest {
 	private String channel;
 
 	@JsonInclude(Include.NON_NULL)
-	private String subchannel;
+	private String subChannel;
 
 	public String getSalutation() {
 		return salutation;
@@ -547,12 +547,12 @@ public class IdmsUpdateUserRequest {
 		this.channel = channel;
 	}
 
-	public String getSubchannel() {
-		return subchannel;
+	public String getSubChannel() {
+		return subChannel;
 	}
 
-	public void setSubchannel(String subchannel) {
-		this.subchannel = subchannel;
+	public void setSubChannel(String subChannel) {
+		this.subChannel = subChannel;
 	}
 
 }

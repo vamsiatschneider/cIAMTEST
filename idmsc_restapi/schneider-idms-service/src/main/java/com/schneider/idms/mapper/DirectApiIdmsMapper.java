@@ -36,7 +36,6 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
 	
 	private void configureIdmsUserRequestToOpenAmUserRequest(MapperFactory mapperFactory) {
         mapperFactory.classMap(IdmsUserRequest.class,OpenAmUserRequest.class)
-        
         .field("userContext", "input.user.employeeType")
         .field("salutation", "input.user.initials")
         .field("firstName", "input.user.givenName")
@@ -95,9 +94,9 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
         .field("primaryContact", "input.user.primaryContact")
         .field("identityType", "input.user.identityType")
         .field("delegatedIdp", "input.user.delegatedIDP")
-        
         .field("channel", "input.user.channel")
-        .field("subchannel", "input.user.subchannel")
+        .field("subChannel", "input.user.subchannel")
+        
         /*.field("userRecord.tncFlag", "input.user.tncFlag")
         .field(UserConstants.MAPPER_CREATE_USER_PR_REQUEST,UserConstants.MAPPER_OPENAM_USER_PR_REQUEST)
         .field("userRecord.adminFederatedId", "input.user.admin_federated_id")
@@ -307,7 +306,8 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
         .field("county", "county")
         .field("mobilePhone", "phoneId")
         .field("channel", "channel")
-        .field("subchannel", "subchannel")
+        .field("subChannel", "subChannel")
+        .field("primaryContact", "primaryContact")
         //.field("userRecord.mobilePhone", "phoneId")
         //.field("userRecord.country", "input.countrycode")
         ////.field("userRecord.IDMS_Email_opt_in__c", "input.emailOptIn")
@@ -341,7 +341,7 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
         .field("county", "county")
         .field("mobilePhone", "phoneId")
         .field("channel", "channel")
-        .field("subchannel", "subchannel")
+        .field("subChannel", "subChannel")
         //.field("userRecord.mobilePhone", "phoneId")
         //.field("userRecord.country", "input.countrycode")
         ////.field("userRecord.IDMS_Email_opt_in__c", "input.emailOptIn")
@@ -400,13 +400,16 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
         .field("jobDescription", "input.user.jobDescription")
         .field("workPhone", "input.user.telephoneNumber")
         .field("trustedAdmin", "input.user.trustedAdmin")
+        .field("primaryContact", "input.user.primaryContact")
+        .field("channel", "input.user.channel")
+        .field("subChannel", "input.user.subchannel")
         /*.field("companyFederatedId", "input.user.companyFederatedID")
         .field("adminCompanyFederatedId", "input.user.admin_company_id")
         .field("profileLastUpdateSource", "input.user.updateSource")
         .field("currencyCode", "input.user.currency") 
         .field("isActivated", "input.user.isActivated")
         .field("accountId", "input.user.companyID")
-        .field("primaryContact", "input.user.primaryContact")
+        
         .field("identityType", "input.user.identityType")
         .field("delegatedIdp", "input.user.delegatedIDP")*/
         

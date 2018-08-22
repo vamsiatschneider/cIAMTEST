@@ -192,7 +192,7 @@ public class IdmsUserRequest {
 	private String channel;
 
 	@JsonInclude(Include.NON_NULL)
-	private String subchannel;
+	private String subChannel;
 
 	public String getUserContext() {
 		return userContext;
@@ -690,12 +690,12 @@ public class IdmsUserRequest {
 		this.channel = channel;
 	}
 
-	public String getSubchannel() {
-		return subchannel;
+	public String getSubChannel() {
+		return subChannel;
 	}
 
-	public void setSubchannel(String subchannel) {
-		this.subchannel = subchannel;
+	public void setSubChannel(String subChannel) {
+		this.subChannel = subChannel;
 	}
 
 }
