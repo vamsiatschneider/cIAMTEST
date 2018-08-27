@@ -3871,7 +3871,7 @@ public class UserServiceImpl implements UserService {
 			UpdateUserRequest userRequest) {
 		LOGGER.info("Entered updateUser() -> Start");
 		LOGGER.info("Parameter authorizedToken -> "+authorizedToken);
-		LOGGER.info("Parameter clientId -> "+clientId+" ,clientSecret"+clientSecret);
+		LOGGER.info("Parameter clientId -> "+clientId+" ,clientSecret ->"+clientSecret);
 		LOGGER.info("Parameter userRequest -> "+userRequest);
 		UpdateUserResponse sucessRespone = null;
 		String userName = null;
@@ -3882,7 +3882,7 @@ public class UserServiceImpl implements UserService {
 		userResponse.setStatus(errorStatus);
 		
 		try {
-			LOGGER.info("UserServiceImpl:updateUser -> : Request -> ",objMapper.writeValueAsString(userRequest));
+			LOGGER.info("UserServiceImpl:updateUser -> : Request -> "+objMapper.writeValueAsString(userRequest));
 			
 			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 			DocumentContext productDocCtx = null;
@@ -3908,7 +3908,7 @@ public class UserServiceImpl implements UserService {
 			boolean isUserFromSocialLogin = false;
 			// Step 1:
 
-			LOGGER.info(" UserServiceImpl :: updateUser getUserInfoByAccessToken ");
+			//LOGGER.info(" UserServiceImpl :: updateUser getUserInfoByAccessToken ");
 
 			/**
 			 * Check mandatory values and user type (home/work)
@@ -3919,7 +3919,7 @@ public class UserServiceImpl implements UserService {
 				/**
 				 * Get iPlanetDirectory Pro Admin token for admin
 				 */
-				LOGGER.info(" UserServiceImpl :: updateUser getSSOToken ");
+				//LOGGER.info(" UserServiceImpl :: updateUser getSSOToken ");
 				iPlanetDirectoryKey = getSSOToken();
 				
 				if ((null != userRequest.getUserRecord().getIDMSAnnualRevenue__c()) && (userRequest.getUserRecord().getIDMSAnnualRevenue__c().matches("^\\D+$") == true)){

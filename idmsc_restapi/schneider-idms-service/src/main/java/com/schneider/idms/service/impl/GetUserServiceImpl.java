@@ -20,8 +20,7 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.schneider.idms.common.ErrorCodeConstants;
-import com.schneider.idms.common.ErrorResponseCode;
-import com.schneider.idms.common.JsonBody;
+import com.schneider.idms.common.ResponseCodeStatus;
 import com.schneider.idms.mapper.UserInfoMapper;
 import com.schneider.idms.model.UserInfoDTO;
 import com.schneider.idms.service.GetUserService;
@@ -43,36 +42,40 @@ public class GetUserServiceImpl extends IdmsCommonServiceImpl implements GetUser
 
 		String userData = null;
 		long startTime = System.currentTimeMillis();
-		ErrorResponseCode errorResponseCode = new ErrorResponseCode();
+		ResponseCodeStatus errorResponse = new ResponseCodeStatus();
 
 		try {
 			if (null == authorization || authorization.isEmpty()) {
 				LOGGER.error("IDMS-Authorization(Bearer) is either empty or null");
-				return Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(JsonBody.EmptyJsonArray(authorization)).build();
-			} else if (null != authorization) {
+				errorResponse.setStatus(ErrorCodeConstants.ERROR);
+				errorResponse.setMessage("Mandatory Check: IDMS-Authorization token is null or empty");
+				return Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(errorResponse).build();
+			} else if (null != authorization.trim() && !authorization.trim().isEmpty()) {
 				LOGGER.info(AUDIT_REQUESTING_USER.concat(AUDIT_TECHNICAL_USER).concat(AUDIT_IMPERSONATING_USER)
 						.concat(AUDIT_API_ADMIN).concat(AUDIT_OPENAM_API).concat(AUDIT_OPENAM_GET_CALL).concat(authorization)
 						.concat(AUDIT_LOG_CLOSURE));
 				if(null != region && !region.equalsIgnoreCase("CN")){
-					errorResponseCode.setMessage("Other than China region is not supported");
-					errorResponseCode.setCode("BAD_REQUEST");
+					errorResponse.setStatus(ErrorCodeConstants.ERROR);
+					errorResponse.setMessage("Other than China region is not supported");					
 					LOGGER.error("Requested region is "+region+". It is not supported");
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
-				}
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+				}				
 				if(null == region || region.equalsIgnoreCase("CN")){
 					LOGGER.info("Start: calling getUserDetails() of OpenDjService to fetch User Details for bearer id:"+authorization);
+					authorization = "Bearer "+authorization.trim();
 					userData = openDJService.getUserDetails(authorization);
 					LOGGER.info("End: getUserDetails() of OpenDjService to fetch User Details Finished for bearer id:"+authorization);
 					LOGGER.info("User Data from Openam: " + userData);
 					LOGGER.info("Time took in Processing:" + (System.currentTimeMillis() - startTime));
 				}
-
 			}
 
 			if (userData == null) {
 				LOGGER.info("Time took in Processing:" + (System.currentTimeMillis() - startTime));
 				LOGGER.error("UserData received from OpenAM is NULL for authorization id:" + authorization);
-				return Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(JsonBody.EmptyJsonArray(authorization)).build();
+				errorResponse.setStatus(ErrorCodeConstants.ERROR);
+				errorResponse.setMessage("User does not exists in OPENAM for authorization token:"+authorization);
+				return Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(errorResponse).build();
 			} else {
 				UserInfoMapper userInfoMapper = new UserInfoMapper();
 				UserInfoDTO userInfoDTO = new UserInfoDTO();
@@ -86,13 +89,15 @@ public class GetUserServiceImpl extends IdmsCommonServiceImpl implements GetUser
 		} catch (NotAuthorizedException e) {
 			e.printStackTrace();			
 			LOGGER.error("Direct API NotAuthorizedException ="+e.getMessage());
-			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(JsonBody.InvalidSessionJsonArray()).build();
+			errorResponse.setStatus(ErrorCodeConstants.ERROR);
+			errorResponse.setMessage("Session expired or Invalid or Unauthorized");
+			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(errorResponse).build();
 		}catch (Exception e) {
 			LOGGER.error("Error in Direct API getUser() OpenDjService ->" + e.getMessage());
 			e.printStackTrace();
-			errorResponseCode.setCode(ErrorCodeConstants.SERVER_ERROR_REQUEST);
-			errorResponseCode.setMessage("Error in Calling GetUser API, Please try again");
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponseCode).build();
+			errorResponse.setStatus(ErrorCodeConstants.ERROR);
+			errorResponse.setMessage("Error in Calling GetUser API, Please try again");
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		}
 	}
 }
