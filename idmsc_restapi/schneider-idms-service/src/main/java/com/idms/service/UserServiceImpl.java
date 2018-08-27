@@ -109,6 +109,7 @@ import com.idms.product.model.OpenAMGetUserWorkResponse;
 import com.idms.product.model.OpenAMPasswordRecoveryInput;
 import com.idms.product.model.OpenAmUser;
 import com.idms.product.model.OpenAmUserRequest;
+import com.idms.service.uims.sync.UIMSUserManagerSoapServiceSync;
 import com.idms.service.util.AsyncUtil;
 import com.idms.service.util.ChinaIdmsUtil;
 import com.jayway.jsonpath.Configuration;
@@ -221,6 +222,9 @@ public class UserServiceImpl implements UserService {
 	
 	@Inject 
 	private UimsSetPasswordSoapService uimsSetPasswordSoapService;
+	
+	@Inject 
+	private UIMSUserManagerSoapServiceSync uimsUserManagerSync;
 
 	@Value("${authCsvPath}")
 	private String authCsvPath;
@@ -897,9 +901,37 @@ public class UserServiceImpl implements UserService {
 			//new logic
 			String userExistsInOpenam = productService.checkUserExistsWithEmailMobile(
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-					"mail eq " + "\"" + loginIdentifier + "\" or mobile eq " + "\"" + loginIdentifier + "\""); 
+					"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginIdentifier,"UTF-8"),"UTF-8") + "\" or mobile eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginIdentifier,"UTF-8"),"UTF-8") + "\""); 
 			productDocCtxCheck = JsonPath.using(conf).parse(userExistsInOpenam);
 			Integer resultCountCheck = productDocCtxCheck.read(JsonConstants.RESULT_COUNT);
+			
+			//delete records from OPENAM if application is PRM
+			if ((resultCountCheck.intValue() > 0)
+					&& (null != userRequest.getUserRecord().getIDMS_Registration_Source__c()
+							&& pickListValidator.validate(UserConstants.APPLICATIONS,
+									userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase()))) {
+				for (int i = 0; i < resultCountCheck.intValue(); i++) {
+					String isActivated=productDocCtxCheck.read("$.result["+i+"].isActivated[0]");
+					if (!Boolean.valueOf(isActivated)) {
+						Response deleteResponse = productService.deleteUser(
+								UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+								productDocCtxCheck.read("$.result[" +i+ "].username"));
+						if (deleteResponse.getStatus() == 200) {
+							LOGGER.info("Deleted the old entry from openam"
+									+ IOUtils.toString((InputStream) deleteResponse.getEntity()));
+						} else {
+							LOGGER.error("Failed to delete the old entry from openam"
+									+ IOUtils.toString((InputStream) deleteResponse.getEntity()) + " Status="
+									+ deleteResponse.getStatus());
+						}
+					}
+				}
+			}
+			
+			
+			
+			
+			
 			if ((resultCountCheck.intValue() > 0) && ((null == userRequest.getUserRecord().getIDMS_Federated_ID__c()
 					|| userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty()))) {
 				//deleting already existing id in openam
@@ -1134,12 +1166,21 @@ public class UserServiceImpl implements UserService {
 			identity.setLanguageCode(identity.getLanguageCode().toLowerCase());
 			
 			//forcedFederatedId = "cn00"+ UUID.randomUUID().toString();
-			//Calling Async method createUIMSUserAndCompany
-			LOGGER.info("Going to call createUIMSUserAndCompany() of UIMSUserManagerSoapService for userName:"+userName);
-			uimsUserManagerSoapService.createUIMSUserAndCompany(UimsConstants.CALLER_FID, identity, userRequest.getUserRecord().getIDMS_User_Context__c(), company, userName,
+			if(pickListValidator.validate(UserConstants.UIMSCreateUserSync, UserConstants.TRUE)){
+				//Calling SYNC method createUIMSUserAndCompany
+				LOGGER.info("Start: calling SYNC createUIMSUserAndCompany() of UIMSUserManagerSync for userName:"+userName);
+				uimsUserManagerSync.createUIMSUserAndCompany(UimsConstants.CALLER_FID, identity, userRequest.getUserRecord().getIDMS_User_Context__c(), company, userName,
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, UserConstants.V_NEW,userRequest.getPassword(),userName,userRequest);
-			LOGGER.info("createUIMSUserAndCompany() of UIMSUserManagerSoapService finished for userName:"+userName);
-			userRequest.getUserRecord().setIDMS_Federated_ID__c(userName);//federated id for IDMS
+				LOGGER.info("End: Sync createUIMSUserAndCompany() of UIMSUserManagerSync finished for userName:"+userName);
+				
+			}else{
+			//Calling Async method createUIMSUserAndCompany
+				LOGGER.info("Start: calling Async createUIMSUserAndCompany() of UIMSUserManagerSoapService for userName:"+userName);
+				uimsUserManagerSoapService.createUIMSUserAndCompany(UimsConstants.CALLER_FID, identity, userRequest.getUserRecord().getIDMS_User_Context__c(), company, userName,
+					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, UserConstants.V_NEW,userRequest.getPassword(),userName,userRequest);
+				LOGGER.info("End: Async createUIMSUserAndCompany() of UIMSUserManagerSoapService finished for userName:"+userName);
+				userRequest.getUserRecord().setIDMS_Federated_ID__c(userName);//federated id for IDMS
+			}
 		} else {
 			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
 		}

@@ -72,6 +72,10 @@
 			<ref bean="uimsUserManagSoapService"/>
 			<ref bean="uimsSetPasswordSoapService"/>
 			
+			<ref bean="uimsAuthUserManagSoapServiceSync"/>
+			<ref bean="uimsCompManagSoapServiceSync"/>
+			<ref bean="uimsUserManagerSoapServiceSync"/>
+			
 			<ref bean="commonService"/>
 			<ref bean="createUserService"/>
 			<ref bean="confirmPinService"/>
