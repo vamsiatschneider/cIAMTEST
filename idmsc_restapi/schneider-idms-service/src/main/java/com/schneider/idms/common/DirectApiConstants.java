@@ -182,6 +182,10 @@ public class DirectApiConstants {
 
 	
 	public static final String FEDERATIONID = "federationId";
+	
+	public static final String CHANNEL = "channel";
+	
+	public static final String SUBCHANNEL = "subChannel";
 
 	
 	private boolean isActive;
