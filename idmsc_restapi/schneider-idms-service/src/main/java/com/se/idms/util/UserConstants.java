@@ -486,4 +486,8 @@ public class UserConstants {
 	
 	public static final String UIMSCreateUserSync = "UIMSCreateUserSync";
 	
+	public static final String CHANNEL = "Channel__c";
+	
+	public static final String SUBCHANNEL = "SubChannel__c";
+	
 }

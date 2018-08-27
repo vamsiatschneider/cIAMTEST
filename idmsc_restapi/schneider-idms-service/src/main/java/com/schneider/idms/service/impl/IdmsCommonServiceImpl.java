@@ -882,7 +882,28 @@ public class IdmsCommonServiceImpl {
 			errorResponse.setMessage(UserConstants.INVALID_VALUE_IDMS + DirectApiConstants.PROFILELASTUPDATESOURCE);
 			return true;
 		}
+		
+		/**
+		 *  channel picklist validation check
+		 */
+		if ((null != userRequest.getChannel()&& !userRequest.getChannel().isEmpty())) {
+			if (!pickListValidator.validate(UserConstants.IAM_A1, userRequest.getChannel())) {
+				errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.CHANNEL);
+				return true;
+			}
+		}
+		
 
+		/**
+		 *  subChannel picklist validation check
+		 */
+		if ((null != userRequest.getSubChannel()&& !userRequest.getSubChannel().isEmpty())) {
+			if (!pickListValidator.validate(UserConstants.IAM_A1, userRequest.getSubChannel())) {
+				errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.CHANNEL);
+				return true;
+			}
+		}
+		
 		return false;
 	}
 
