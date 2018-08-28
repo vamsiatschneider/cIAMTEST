@@ -8,7 +8,7 @@ public class ErrorCodeConstants {
 	
 	public static final String UNAUTHORIZED_REQUEST = "INVALID_SESSION_ID";
 	
-	public static final String UNAUTHORIZED_MESSAGE = "Session expired or invalid";
+	public static final String UNAUTHORIZED_MESSAGE = "Session expired or invalid token";
 	
 	public static final String NOTFOUND_REQUEST = "NOT_FOUND";
 	
@@ -24,7 +24,7 @@ public class ErrorCodeConstants {
 	
 	public static final String SUCCESS = "SUCCESS";
 	
-	public static final String ERROR = "ERROR";
+	public static final String ERROR = "Error";
 	
 	
 }

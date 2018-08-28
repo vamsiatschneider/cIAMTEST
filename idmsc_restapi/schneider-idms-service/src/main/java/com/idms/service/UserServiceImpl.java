@@ -2204,8 +2204,8 @@ public class UserServiceImpl implements UserService {
 		 */
 		
 		if ((null != userRequest.getChannel__c() && !userRequest.getChannel__c().isEmpty())
-				&& (pickListValidator.validate(UserConstants.IAM_A1, userRequest.getChannel__c()))) {
-			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.CHANNEL);
+				&& (!pickListValidator.validate(UserConstants.IAM_A1, userRequest.getChannel__c()))) {
+			userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.CHANNEL);
 			return true;
 		}
 		
@@ -2213,8 +2213,8 @@ public class UserServiceImpl implements UserService {
 		 *  SubChannel__c PickList validation
 		 */
 		if ((null != userRequest.getSubChannel__c() && !userRequest.getSubChannel__c().isEmpty())
-				&& (pickListValidator.validate(UserConstants.IAM_A2, userRequest.getSubChannel__c()))) {
-			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.SUBCHANNEL);
+				&& (!pickListValidator.validate(UserConstants.IAM_A2, userRequest.getSubChannel__c()))) {
+			userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.SUBCHANNEL);
 			return true;
 		}
 		

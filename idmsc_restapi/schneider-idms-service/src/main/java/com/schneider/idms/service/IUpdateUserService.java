@@ -10,10 +10,10 @@ import javax.ws.rs.core.Response;
 import com.schneider.idms.model.IdmsUserRequest;
 
 @Produces("application/json")
+@Path("/services/apexrest/IDMSUser/1.0")
 public interface IUpdateUserService {
 
 	@PUT
-	@Path("/services/apexrest/IDMSUser/1.0")
 	@Consumes("application/json")
 	Response updateUser(@HeaderParam("IDMS-Authorization")String authorization,
 			@HeaderParam("Accept")String accept,
