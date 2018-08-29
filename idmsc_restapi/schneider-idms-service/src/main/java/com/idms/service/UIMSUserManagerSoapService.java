@@ -582,7 +582,7 @@ public class UIMSUserManagerSoapService {
 				e.printStackTrace();
 			}
 
-			if((!userCreated || null == createdFedId) && (null != context && UserConstants.USER_CONTEXT_HOME.equalsIgnoreCase(context))) {
+			if((!userCreated || null == createdFedId) && (null != context && (UserConstants.USER_CONTEXT_HOME.equalsIgnoreCase(context)||UserConstants.USER_CONTEXT_HOME_1.equalsIgnoreCase(context)))) {
 				UIMSLOGGER.error("CreateUser got failed -----> ::sending mail notification for userRequestjsonString::"+userRequestjsonString);
 				LOGGER.error("CreateUser got failed -----> ::sending mail notification for userRequestjsonString::"+userRequestjsonString);
 				sendEmail.emailReadyToSendEmail(supportUser, fromUserName, "UIMS CreateUser failed.", userRequestjsonString);
@@ -642,7 +642,7 @@ public class UIMSUserManagerSoapService {
 					.retryIfResult(Predicates.<Boolean> isNull()).retryIfExceptionOfType(Exception.class)
 					.retryIfRuntimeException().withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
 			try {
-				if (null != context && UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)) {
+				if (null != context && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context))) {
 
 					companyCreated = retryerCompany.call(callableCompany);
 					if (userCreated && companyCreated) {
@@ -667,7 +667,7 @@ public class UIMSUserManagerSoapService {
 				e.printStackTrace();
 			}
 			if((!(userCreated && companyCreated) || (null == createdCompanyFedId && null == createdFedId)) && 
-					(null != context && UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context))){
+					(null != context && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context)))){
 				UIMSLOGGER.error("UIMS CreateUser and CreateCompany got failed -----> ::sending mail notification::"+userRequestjsonString);
 				LOGGER.error("UIMS CreateUser and CreateCompany got failed -----> ::sending mail notification::"+userRequestjsonString);
 				sendEmail.emailReadyToSendEmail(supportUser, fromUserName,
@@ -741,7 +741,7 @@ public class UIMSUserManagerSoapService {
 				e.printStackTrace();
 			}
 			
-			if(!updateUIMSUser && (null != context && UserConstants.USER_CONTEXT_HOME.equalsIgnoreCase(context))) {
+			if(!updateUIMSUser && (null != context && (UserConstants.USER_CONTEXT_HOME.equalsIgnoreCase(context)||UserConstants.USER_CONTEXT_HOME_1.equalsIgnoreCase(context)))) {
 				UIMSLOGGER.error("updateUIMSUser() of UIMS got failed -----> ::sending mail notification for userName::"+userName);
 				LOGGER.error("updateUIMSUser() of UIMS got failed -----> ::sending mail notification for userName::"+userName);
 				
@@ -764,7 +764,7 @@ public class UIMSUserManagerSoapService {
 					.retryIfRuntimeException().withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
 			try {
 
-				if (null != context && UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)) {
+				if (null != context && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context))) {
 
 					retryerCompany.call(callableUpdateCompany);
 					if (updateUIMSUser && updateUIMSCompany) {
@@ -785,7 +785,7 @@ public class UIMSUserManagerSoapService {
 				LOGGER.error("ExecutionException while calling the UIMS create company::" + e.getMessage());
 				e.printStackTrace();
 			}
-			if(!(updateUIMSUser && updateUIMSCompany) && (null != context && UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context))) {
+			if(!(updateUIMSUser && updateUIMSCompany) && (null != context && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context)))) {
 				UIMSLOGGER.error("UIMS User and Company updated got failed -----> ::sending mail notification for userName::"+userName);
 				LOGGER.error("UIMS User and Company updated got failed -----> ::sending mail notification for userName::"+userName);
 				sendEmail.emailReadyToSendEmail(supportUser, fromUserName,

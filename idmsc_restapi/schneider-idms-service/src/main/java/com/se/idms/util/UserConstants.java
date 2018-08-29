@@ -17,7 +17,9 @@ public class UserConstants {
 	
 	public static final String PR_REGEX1 = "^(?=.*?[A-Z]+)(?=.*?[a-z])(?=.*?[0-9]{1,2})(?=.*?[#?!@$%^&*-]).{8,16}$";
 	
-	public static final String PR_REGEX = "^((?=.*?[A-Z]+)(?=.*?[a-z])(?=.*?[0-9])|(?=.*?[a-z]+)(?=.*?[A-Z])(?=.*?[^\\w])|(?=.*?[0-9]+)(?=.*?[a-z])(?=.*?[^\\w])|(?=.*?[^\\w]+)(?=.*?[A-Z]+)(?=.*?[0-9])).{8,532}$";
+	//public static final String PR_REGEX = "^((?=.*?[A-Z]+)(?=.*?[a-z])(?=.*?[0-9])|(?=.*?[a-z]+)(?=.*?[A-Z])(?=.*?[^\\w])|(?=.*?[0-9]+)(?=.*?[a-z])(?=.*?[^\\w])|(?=.*?[^\\w]+)(?=.*?[A-Z]+)(?=.*?[0-9])).{8,532}$";
+	
+	public static final String PR_REGEX = "^((([^<>()\\[\\];:\\s@]([^<>()\\[\\]\\.;:\\s@])*)|(\".+\"))+@(([0-9]{1,3}+\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})|([a-zA-Z&#45;0-9]+\\.[a-zA-Z]{2,})))$";
 	/**
 	 * Token constanst 
 	 * 
@@ -81,6 +83,8 @@ public class UserConstants {
 	public static final String ERROR_RESEND_PIN="Error in Resend user pin.";
 	
 	public static final String USER_CONTEXT_HOME = "@Home";
+	
+	public static final String USER_CONTEXT_HOME_1 = "Home";
 	
 	public static final String USER_CONTEXT_WORK = "@Work";
 	

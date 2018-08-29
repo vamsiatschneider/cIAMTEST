@@ -145,7 +145,7 @@ public class UIMSUserManagerSoapServiceSync {
 				e.printStackTrace();
 			}
 
-			if((!userCreated || null == createdFedId) && (null != context && UserConstants.USER_CONTEXT_HOME.equalsIgnoreCase(context))) {
+			if((!userCreated || null == createdFedId) && (null != context && (UserConstants.USER_CONTEXT_HOME.equalsIgnoreCase(context)||UserConstants.USER_CONTEXT_HOME_1.equalsIgnoreCase(context)))) {
 				LOGGER.error("CreateUser got failed -----> ::sending mail notification for userRequestjsonString::"+userRequestjsonString);
 				sendEmail.emailReadyToSendEmail(supportUser, fromUserName, "UIMS CreateUser failed.", userRequestjsonString);
 			}
@@ -203,7 +203,7 @@ public class UIMSUserManagerSoapServiceSync {
 					.retryIfResult(Predicates.<Boolean> isNull()).retryIfExceptionOfType(Exception.class)
 					.retryIfRuntimeException().withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
 			try {
-				if (null != context && UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)) {
+				if (null != context && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context))) {
 
 					companyCreated = retryerCompany.call(callableCompany);
 					if (userCreated && companyCreated) {
@@ -226,7 +226,7 @@ public class UIMSUserManagerSoapServiceSync {
 				e.printStackTrace();
 			}
 			if((!(userCreated && companyCreated) || (null == createdCompanyFedId && null == createdFedId)) && 
-					(null != context && UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context))){
+					(null != context && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context)))){
 				LOGGER.error("UIMS CreateUser and CreateCompany got failed -----> ::sending mail notification::"+userRequestjsonString);
 				sendEmail.emailReadyToSendEmail(supportUser, fromUserName,
 						"UIMS CreateUser and CreateCompany failed.", userRequestjsonString);
