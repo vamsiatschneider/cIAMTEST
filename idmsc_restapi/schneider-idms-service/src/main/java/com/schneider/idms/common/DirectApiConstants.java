@@ -195,5 +195,7 @@ public class DirectApiConstants {
 	public static final String TECHNICAL_USER = "technicaluser";
 	
 	public static final String COUNTRY_CHINA = "CN";
+	
+	public static final String BEAR_STRING = "Bearer ";
 
 }

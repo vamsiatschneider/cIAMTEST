@@ -34,7 +34,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.schneider.idms.common.DirectApiConstants;
 import com.schneider.idms.common.ErrorCodeConstants;
-import com.schneider.idms.common.ErrorResponseCode;
+import com.schneider.idms.common.ResponseCodeStatus;
 import com.schneider.idms.model.IdmsCreateUserResponse;
 import com.schneider.idms.model.IdmsUserRequest;
 import com.schneider.idms.service.ICreateUserService;
@@ -58,7 +58,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
-		ErrorResponseCode errorResponse = new ErrorResponseCode();
+		ResponseCodeStatus errorResponse = new ResponseCodeStatus();
 		DocumentContext productDocCtx = null;
 		DocumentContext productDocCtxCheck = null;
 		String loginIdentifier = null;
@@ -92,18 +92,20 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 
 			try {
 				
-				if(!getTechnicalUserDetails(authorization)){
+				
+				if(null == authorization || authorization.isEmpty()){
 					errorResponse.setMessage(ErrorCodeConstants.BADREQUEST_MESSAGE);
-					errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
+					errorResponse.setStatus(ErrorCodeConstants.ERROR);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 					LOGGER.error("Error while processing is " + errorResponse.getMessage());
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 				
+				
 				if(!UserConstants.ACCEPT_TYPE_APP_JSON.equalsIgnoreCase(accept)){
 					errorResponse.setMessage(ErrorCodeConstants.BADREQUEST_MESSAGE);
-					errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
+					errorResponse.setStatus(ErrorCodeConstants.ERROR);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 					LOGGER.error("Error while processing is " + errorResponse.getMessage());
@@ -112,7 +114,16 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				
 				if(!DirectApiConstants.COUNTRY_CHINA.equalsIgnoreCase(region)){
 					errorResponse.setMessage(ErrorCodeConstants.BADREQUEST_MESSAGE);
-					errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
+					errorResponse.setStatus(ErrorCodeConstants.ERROR);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
+					LOGGER.error("Error while processing is " + errorResponse.getMessage());
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+				}
+				
+				if(!getTechnicalUserDetails(DirectApiConstants.BEAR_STRING+authorization)){
+					errorResponse.setMessage(ErrorCodeConstants.BADREQUEST_MESSAGE);
+					errorResponse.setStatus(ErrorCodeConstants.ERROR);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 					LOGGER.error("Error while processing is " + errorResponse.getMessage());
@@ -125,7 +136,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 
 				if (checkMandatoryFieldsForDirectAPIRequest(userRequest, errorResponse, true)) {
 					errorResponse.setMessage(errorResponse.getMessage());
-					errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
+					errorResponse.setStatus(ErrorCodeConstants.ERROR);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 					LOGGER.error("Error while processing is " + errorResponse.getMessage());
@@ -136,7 +147,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				e.printStackTrace();
 				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(ErrorCodeConstants.UNAUTHORIZED_MESSAGE);
-				errorResponse.setCode(ErrorCodeConstants.UNAUTHORIZED_REQUEST);
+				errorResponse.setStatus(ErrorCodeConstants.ERROR);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Error while processing is " + errorResponse.getMessage());
@@ -146,7 +157,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				e.printStackTrace();
 				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
-				errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
+				errorResponse.setStatus(ErrorCodeConstants.ERROR);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Error while processing is " + errorResponse.getMessage());
@@ -156,7 +167,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				e.printStackTrace();
 				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(ErrorCodeConstants.BADREQUEST_MESSAGE);
-				errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
+				errorResponse.setStatus(ErrorCodeConstants.ERROR);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Error while processing is " + errorResponse.getMessage());
@@ -166,7 +177,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				e.printStackTrace();
 				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
-				errorResponse.setCode(ErrorCodeConstants.SERVER_ERROR_REQUEST);
+				errorResponse.setStatus(ErrorCodeConstants.ERROR);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Error while processing is " + errorResponse.getMessage());
@@ -272,7 +283,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			productDocCtx = JsonPath.using(conf).parse(userExists);
 			Integer resultCount = productDocCtx.read(JsonConstants.RESULT_COUNT);
 			if (resultCount.intValue() > 0) {
-				errorResponse.setCode(ErrorCodeConstants.CONFLICT_REQUEST);
+				errorResponse.setStatus(ErrorCodeConstants.ERROR);
 				errorResponse.setMessage(ErrorCodeConstants.CONFLICT_MESSAGE);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
@@ -292,6 +303,29 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 					"mail eq " + "\"" + loginIdentifier + "\" or mobile eq " + "\"" + loginIdentifier + "\"");
 			productDocCtxCheck = JsonPath.using(conf).parse(userExistsInOpenam);
 			Integer resultCountCheck = productDocCtxCheck.read(JsonConstants.RESULT_COUNT);
+			
+			//delete records from OPENAM if application is PRM
+			if ((resultCountCheck.intValue() > 0) && (null != userRequest.getRegistrationSource() && pickListValidator
+					.validate(UserConstants.APPLICATIONS, userRequest.getRegistrationSource().toUpperCase()))) {
+				for (int i = 0; i < resultCountCheck.intValue(); i++) {
+					String isActivated = productDocCtxCheck.read("$.result[" + i + "].isActivated[0]");
+					if (!Boolean.valueOf(isActivated)) {
+						Response deleteResponse = productService.deleteUser(
+								UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+								productDocCtxCheck.read("$.result[" + i + "].username"));
+						if (deleteResponse.getStatus() == 200) {
+							LOGGER.info("Deleted the old entry from openam"
+									+ IOUtils.toString((InputStream) deleteResponse.getEntity()));
+						} else {
+							LOGGER.error("Failed to delete the old entry from openam"
+									+ IOUtils.toString((InputStream) deleteResponse.getEntity()) + " Status="
+									+ deleteResponse.getStatus());
+						}
+					}
+				}
+			}
+			
+			
 			if ((resultCountCheck.intValue() > 0) && ((null == userRequest.getFederationId()
 					|| userRequest.getFederationId().isEmpty()))) {
 				// deleting already existing id in openam
@@ -453,7 +487,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 		} catch (BadRequestException e) {
 			e.printStackTrace();
 			errorResponse.setMessage(ErrorCodeConstants.BADREQUEST_MESSAGE);
-			errorResponse.setCode(ErrorCodeConstants.BAD_REQUEST);
+			errorResponse.setStatus(ErrorCodeConstants.ERROR);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 			LOGGER.error("Executing while user Registration :: -> " + e.getMessage());
@@ -461,7 +495,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 		} catch (NotFoundException e) {
 			e.printStackTrace();
 			errorResponse.setMessage(ErrorCodeConstants.NOTFOUND_MESSAGE);
-			errorResponse.setCode(ErrorCodeConstants.NOTFOUND_REQUEST);
+			errorResponse.setStatus(ErrorCodeConstants.ERROR);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 			LOGGER.error("Executing while user Registration :: -> " + e.getMessage());
@@ -469,7 +503,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 		} catch (Exception e) {
 			e.printStackTrace();
 			errorResponse.setMessage(ErrorCodeConstants.SERVER_ERROR_MESSAGE);
-			errorResponse.setCode(ErrorCodeConstants.SERVER_ERROR_REQUEST);
+			errorResponse.setStatus(ErrorCodeConstants.ERROR);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 			LOGGER.error("Executing while user Registration :: -> " + e.getMessage());

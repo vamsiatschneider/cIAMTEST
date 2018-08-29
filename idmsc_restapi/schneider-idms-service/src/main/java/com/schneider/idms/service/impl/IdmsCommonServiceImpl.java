@@ -176,6 +176,9 @@ public class IdmsCommonServiceImpl {
 
 	@Value("${openDJUserPassword}")
 	protected String openDJUserPassword;
+	
+	@Value("${directApiSecretToken}")
+	protected String directApiSecretToken;
 
 	protected static String userAction = "submitRequirements";
 
