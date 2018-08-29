@@ -43,7 +43,7 @@ public interface OpenAMService {
 	String checkUserExistsWithEmailMobile(@HeaderParam("Cookie") String iPlanetDirectoryKey,@QueryParam("_queryFilter") String emailOrMobile);
 	
 	@POST
-	@Path("/se/authenticate")
+	@Path("/mobilesso/authenticate")
 	@Consumes("application/json")
 	Response otpAuthentication(@HeaderParam("Cookie") String cookieValue, @QueryParam("service") String service,@QueryParam("authIndexType") String authIndexType, @QueryParam("authIndexValue") String authIndexValue,String request);
 	
