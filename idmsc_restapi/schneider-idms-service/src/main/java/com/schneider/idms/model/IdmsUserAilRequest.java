@@ -21,6 +21,9 @@ public class IdmsUserAilRequest {
 	private String operation;
 	
 	@JsonProperty
+	private String federatedId;
+
+	@JsonProperty
 	private String profileLastUpdateSource;
 
 	public String getAclType() {
@@ -53,6 +56,14 @@ public class IdmsUserAilRequest {
 
 	public void setProfileLastUpdateSource(String profileLastUpdateSource) {
 		this.profileLastUpdateSource = profileLastUpdateSource;
+	}
+
+	public String getFederatedId() {
+		return federatedId;
+	}
+
+	public void setFederatedId(String federatedId) {
+		this.federatedId = federatedId;
 	}
 	
 }

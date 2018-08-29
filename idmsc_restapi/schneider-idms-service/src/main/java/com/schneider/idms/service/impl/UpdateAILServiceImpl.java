@@ -31,12 +31,10 @@ import com.se.idms.util.UserConstants;
 public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements UpdateAILService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UpdateAILServiceImpl.class);
 
-	@SuppressWarnings("unused")
 	@Override
-	public Response updateAIL(String federatedId, String authorization, String accept, String region,
-			IdmsUserAilRequest userAilRequest) {
+	public Response updateAIL(String authorization, String accept, String region, IdmsUserAilRequest userAilRequest) {
 		LOGGER.info("Entered updateAIL() -> Start");
-		LOGGER.info("Paramters are federatedId=" + federatedId + " ,region=" + region);
+		LOGGER.info("Paramters are region=" + region);
 		LOGGER.info("Paramters are authorization=" + authorization + " ,accept=" + accept);
 
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -54,177 +52,187 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 		List<String> listOfAilValues = null;
 		String PRODUCT_JSON_STRING = "";
 		ResponseCodeStatus responseCodeStatus = new ResponseCodeStatus();
+		String federatedId = null;
 
 		try {
 			LOGGER.info("userAilRequest=" + objectMapper.writeValueAsString(userAilRequest));
+			federatedId = userAilRequest.getFederatedId();
 
-			if (true) {
+			// FederatedId
+			if (null == federatedId || federatedId.isEmpty()) {
+				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+				errorResponseCode.setMessage("Mandatory Check: federatedId is Mandatory");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Mandatory check: Path field federatedId is Missing or Null/Empty");
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+			}
 
-				// FederatedId
-				if (null == federatedId || federatedId.isEmpty()) {
-					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-					errorResponseCode.setMessage("Path field federatedId is Mandatory");
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.error("Mandatory check: Path field federatedId is Missing or Null/Empty");
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
-				}
+			// Validation_authorization_token
+			if (!getTechnicalUserDetails(authorization)) {
+				errorResponseCode.setMessage("Mandatory Validation: IDMS-Authorization token is invalid");
+				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
+				LOGGER.error("Error while processing is " + errorResponseCode.getMessage());
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+			}
 
-				// Authorization
-				if (null == authorization || authorization.isEmpty()) {
-					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-					errorResponseCode.setMessage("Header field authorization is Mandatory");
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.error("Mandatory check: Header field authorization is Missing or Null/Empty");
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
-				}
+			// Authorization
+			if (null == authorization || authorization.isEmpty()) {
+				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+				errorResponseCode.setMessage("Mandatory Check: IDMS-Authorization token is null or empty");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Mandatory check: Header field authorization is Missing or Null/Empty");
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+			}
 
-				// accept
-				if (null == accept || accept.isEmpty()) {
-					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-					errorResponseCode.setMessage("Header field accept is Mandatory");
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.error("Mandatory check: Header field accept is Missing or Null/Empty");
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
-				}
+			// accept
+			if (null == accept || accept.isEmpty()) {
+				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+				errorResponseCode.setMessage("Header field accept is Mandatory");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Mandatory check: Header field accept is Missing or Null/Empty");
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+			}
 
-				if (null != accept && !accept.equalsIgnoreCase("application/json")) {
-					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-					errorResponseCode.setMessage("Header field accept must be application/json");
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.error("Mandatory check: Header field accept:" + accept + " is not permitted");
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
-				}
+			if (null != accept && !accept.equals("*/*") && !accept.equalsIgnoreCase("application/json")) {
+				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+				errorResponseCode.setMessage("Header field accept must be application/json");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Mandatory check: Header field accept:" + accept + " is not permitted");
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+			}
 
-				// region
-				if (null != region && !region.equalsIgnoreCase("CN")) {
-					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-					errorResponseCode.setMessage("Header field IDMS-Region must be CN");
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.error("Mandatory check: Header field IDMS-Region:" + region + " is not permitted");
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
-				}
+			// region
+			if (null != region && !region.equalsIgnoreCase("CN")) {
+				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+				errorResponseCode.setMessage("Header field IDMS-Region must be CN");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Mandatory check: Header field IDMS-Region:" + region + " is not permitted");
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+			}
 
-				// Profile Update Source
-				if (null == userAilRequest.getProfileLastUpdateSource()
-						|| userAilRequest.getProfileLastUpdateSource().isEmpty()) {
-					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-					errorResponseCode.setMessage("ProfileLastUpdateSource is Mandatory");
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.error("Mandatory check: ProfileLastUpdateSource is Missing or Null/Empty");
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
-				}
+			// Profile Update Source
+			if (null == userAilRequest.getProfileLastUpdateSource()
+					|| userAilRequest.getProfileLastUpdateSource().isEmpty()) {
+				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+				errorResponseCode.setMessage("ProfileLastUpdateSource is Mandatory");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Mandatory check: ProfileLastUpdateSource is Missing or Null/Empty");
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+			}
 
-				// acl
-				if (null == userAilRequest.getAcl() || userAilRequest.getAcl().isEmpty()) {
-					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-					errorResponseCode.setMessage("Acl is Mandatory");
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.error("Mandatory check: Acl is Missing or Null/Empty");
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
-				}
+			// acl
+			if (null == userAilRequest.getAcl() || userAilRequest.getAcl().isEmpty()) {
+				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+				errorResponseCode.setMessage("Acl is Mandatory");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Mandatory check: Acl is Missing or Null/Empty");
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+			}
 
-				// aclType
-				if (null == userAilRequest.getAclType() || userAilRequest.getAclType().isEmpty()) {
-					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-					errorResponseCode.setMessage("AclType is Mandatory");
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.error("Mandatory check: AclType is Missing or Null/Empty");
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
-				}
+			// aclType
+			if (null == userAilRequest.getAclType() || userAilRequest.getAclType().isEmpty()) {
+				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+				errorResponseCode.setMessage("AclType is Mandatory");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Mandatory check: AclType is Missing or Null/Empty");
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+			}
 
-				if (null != userAilRequest.getAclType()
-						&& (!pickListValidator.validate(UserConstants.IDMS_ACL_TYPE_C, userAilRequest.getAclType()))) {
-					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-					errorResponseCode.setMessage("AclType is Not Valid");
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.error("Mandatory check: AclType " + userAilRequest.getAclType() + " is Not Valid");
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
-				}
+			if (null != userAilRequest.getAclType()
+					&& (!pickListValidator.validate(UserConstants.IDMS_ACL_TYPE_C, userAilRequest.getAclType()))) {
+				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+				errorResponseCode.setMessage("AclType is Not Valid");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Mandatory check: AclType " + userAilRequest.getAclType() + " is Not Valid");
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+			}
 
-				// operation
-				if (null == userAilRequest.getOperation() || userAilRequest.getOperation().isEmpty()) {
-					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-					errorResponseCode.setMessage("AIL Operation is Mandatory");
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.error("Mandatory check: Operation is Null or Empty");
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
-				}
+			// operation
+			if (null == userAilRequest.getOperation() || userAilRequest.getOperation().isEmpty()) {
+				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+				errorResponseCode.setMessage("AIL Operation is Mandatory");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Mandatory check: Operation is Null or Empty");
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+			}
 
-				if (null != userAilRequest.getOperation() && (!pickListValidator
-						.validate(UserConstants.IDMS_OPERATION_C, userAilRequest.getOperation()))) {
-					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-					errorResponseCode.setMessage("Operation is Not Valid");
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.error("Mandatory check: AIL Operation " + userAilRequest.getOperation() + " is Not Valid");
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
-				}
+			if (null != userAilRequest.getOperation()
+					&& (!pickListValidator.validate(UserConstants.IDMS_OPERATION_C, userAilRequest.getOperation()))) {
+				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+				errorResponseCode.setMessage("Operation is Not Valid");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Mandatory check: AIL Operation " + userAilRequest.getOperation() + " is Not Valid");
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+			}
 
-				// writing business logic - start
-				userId = federatedId;
-				iPlanetDirectoryKey = getSSOToken();
+			// writing business logic - start
+			userId = federatedId;
+			iPlanetDirectoryKey = getSSOToken();
 
-				aclType = getIDMSAclType(userAilRequest.getAclType().trim());
-				aclValue = userAilRequest.getAcl().trim();
-				aclOperation = userAilRequest.getOperation().trim();
+			aclType = getIDMSAclType(userAilRequest.getAclType().trim());
+			aclValue = userAilRequest.getAcl().trim();
+			aclOperation = userAilRequest.getOperation().trim();
 
-				LOGGER.info("ACL type=" + aclType + " ,aclValue=" + aclValue + " ,aclOperation=" + aclOperation);
+			LOGGER.info("ACL type=" + aclType + " ,aclValue=" + aclValue + " ,aclOperation=" + aclOperation);
 
+			LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
+					+ "openAMApi:GET/getUser/{userId}");
+
+			LOGGER.info("Start: calling getUser() of OpenAMService to fetch AIL values for userId=" + userId);
+			userData = productService.getUser(iPlanetDirectoryKey, userId);
+			LOGGER.info("End: getUser() of OpenAMService to fetch AIL values finsihed for userId=" + userId);
+			LOGGER.info("Returned User Data from OpenAM=" + userData);
+			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+			DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
+
+			inOpenAMAILFullValues = productDocCtx.read("$.IDMSAil_c[0]");
+			inOpenAMAILType = "IDMSAIL_" + aclType + "_c";
+			inOpenAMAILValue = productDocCtx.read("$.IDMSAIL_" + aclType + "_c[0]");
+
+			LOGGER.info("In OpenAM AIL Full Values=" + inOpenAMAILFullValues);
+			LOGGER.info("In OpenAM AIL Type=" + inOpenAMAILType + " ,Values=" + inOpenAMAILValue);
+
+			if (null != inOpenAMAILFullValues && !inOpenAMAILFullValues.isEmpty()) {
+				listOfAilValues = Arrays.asList(inOpenAMAILFullValues.split(","));
+			} else {
+				listOfAilValues = new ArrayList<String>();
+			}
+
+			inRequestAILTypeValPair = userAilRequest.getAclType().trim() + ";" + userAilRequest.getAcl().trim();
+
+			// Grant OPeration
+			if ((!listOfAilValues.contains("(" + inRequestAILTypeValPair + ")"))
+					&& ("GRANT".equalsIgnoreCase(aclOperation))) {
+
+				if (!(inOpenAMAILValue == null || inOpenAMAILValue.length() == 0))
+					modifiedAILValue = inOpenAMAILValue + "," + aclValue;
+				else
+					modifiedAILValue = aclValue;
+
+				if (null != inOpenAMAILFullValues && !inOpenAMAILFullValues.isEmpty())
+					modifiedAILFullValues = "" + inOpenAMAILFullValues + ",(" + inRequestAILTypeValPair + ")";
+				else
+					modifiedAILFullValues = "(" + inRequestAILTypeValPair + ")";
+
+				PRODUCT_JSON_STRING = "{" + "\"" + inOpenAMAILType + "\": \"" + modifiedAILValue.trim() + "\""
+						+ ",\"IDMSAil_c\": \"" + modifiedAILFullValues.trim() + "\"}";
+
+				LOGGER.info("Grant Operation: JSON string to update -> " + PRODUCT_JSON_STRING);
 				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:GET/getUser/{userId}");
+				LOGGER.info("Start: Calling updateUser() of OpenAMService to update AIL for userId=" + userId);
+				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+						PRODUCT_JSON_STRING);
+				LOGGER.info("End: updateUser() of OpenAMService to update AIL finished for userId=" + userId);
+				// response
+				responseCodeStatus.setStatus(ErrorCodeConstants.SUCCESS);
+				responseCodeStatus.setMessage("AIL was granted successfully ");
 
-				LOGGER.info("Start: calling getUser() of OpenAMService to fetch AIL values for userId=" + userId);
-				userData = productService.getUser(iPlanetDirectoryKey, userId);
-				LOGGER.info("End: getUser() of OpenAMService to fetch AIL values finsihed for userId=" + userId);
-				LOGGER.info("Returned User Data from OpenAM=" + userData);
-				Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
-				DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
+				return Response.status(Response.Status.OK.getStatusCode()).entity(responseCodeStatus).build();
 
-				inOpenAMAILFullValues = productDocCtx.read("$.IDMSAil_c[0]"); 
-				inOpenAMAILType = "IDMSAIL_" + aclType + "_c"; 
-				inOpenAMAILValue = productDocCtx.read("$.IDMSAIL_" + aclType + "_c[0]"); 
-				
-				LOGGER.info("In OpenAM AIL Full Values=" + inOpenAMAILFullValues);
-				LOGGER.info("In OpenAM AIL Type=" + inOpenAMAILType + " ,Values=" + inOpenAMAILValue);
-				
-				if (null != inOpenAMAILFullValues && !inOpenAMAILFullValues.isEmpty()) {
-					listOfAilValues = Arrays.asList(inOpenAMAILFullValues.split(","));
-				} else {
-					listOfAilValues = new ArrayList<String>();
-				}
-				
-				inRequestAILTypeValPair = userAilRequest.getAclType().trim() + ";" + userAilRequest.getAcl().trim();
-
-				// Grant OPeration
-				if ((!listOfAilValues.contains("(" + inRequestAILTypeValPair + ")"))
-						&& ("GRANT".equalsIgnoreCase(aclOperation))) {
-
-					if (!(inOpenAMAILValue == null || inOpenAMAILValue.length() == 0))
-						modifiedAILValue = inOpenAMAILValue + "," + aclValue;
-					else
-						modifiedAILValue = aclValue;
-
-					if (null != inOpenAMAILFullValues && !inOpenAMAILFullValues.isEmpty())
-						modifiedAILFullValues = "" + inOpenAMAILFullValues + ",(" + inRequestAILTypeValPair + ")";
-					else
-						modifiedAILFullValues = "(" + inRequestAILTypeValPair + ")";
-
-					PRODUCT_JSON_STRING = "{" + "\"" + inOpenAMAILType + "\": \"" + modifiedAILValue.trim() + "\""
-							+ ",\"IDMSAil_c\": \"" + modifiedAILFullValues.trim() + "\"}";
-
-					LOGGER.info("Grant Operation: JSON string to update -> " + PRODUCT_JSON_STRING);
-					LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
-							+ "openAMApi:GET/getUser/{userId}");
-					LOGGER.info("Start: Calling updateUser() of OpenAMService to update AIL for userId=" + userId);
-					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
-							PRODUCT_JSON_STRING);
-					LOGGER.info("End: updateUser() of OpenAMService to update AIL finished for userId=" + userId);
-					// response
-					responseCodeStatus.setStatus(ErrorCodeConstants.SUCCESS);
-					responseCodeStatus.setMessage("AIL was granted successfully ");
-
-					return Response.status(Response.Status.OK.getStatusCode()).entity(responseCodeStatus).build();
-
-				}else
+			} else
 				// Revoke Operation
 				if ((listOfAilValues.contains("(" + inRequestAILTypeValPair + ")"))
 						&& ("REVOKE".equalsIgnoreCase(aclOperation))) {
@@ -271,7 +279,7 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 
 					LOGGER.info("Revoke Operation: JSON String to Update=" + PRODUCT_JSON_STRING);
 					LOGGER.info("Start: calling updateUser() of OpenAMService to update AIL values for userId=" + userId);
-					
+
 					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 							PRODUCT_JSON_STRING);
 					LOGGER.info("End: updateUser() of OpenAMService to update AIL values finished for userId=" + userId);
@@ -280,15 +288,14 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 					responseCodeStatus.setMessage("AIL was revoked successfully ");
 
 					return Response.status(Response.Status.OK.getStatusCode()).entity(responseCodeStatus).build();
-				}else{
-					errorResponseCode.setMessage("Can not perform Grant/Revoke operation. AIL Value/s already present/removed.");
+				} else {
+					errorResponseCode
+					.setMessage("Can not perform Grant/Revoke operation. AIL Value/s already present/removed.");
 					errorResponseCode.setCode("BAD_REQUEST");
 					LOGGER.error("Can not perform Grant/Revoke operation. AIL Value/s already present/removed.");
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
 				}
-				// writing business logic - end
-			}
-
+			// writing business logic - end
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 			LOGGER.error("JsonProcessingException = " + e.getMessage());
@@ -315,9 +322,7 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 			LOGGER.error("Executing while updateAIL() :: -> " + e.getMessage());
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponseCode).build();
 		}
-		errorResponseCode.setCode(ErrorCodeConstants.SERVER_ERROR_REQUEST);
-		errorResponseCode.setMessage("Error in Calling Update AIL API, Please try again");
-		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponseCode).build();
+
 	}
 
 	private String getIDMSAclType(String aclType) {

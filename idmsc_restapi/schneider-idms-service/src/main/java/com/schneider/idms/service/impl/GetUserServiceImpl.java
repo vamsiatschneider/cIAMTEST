@@ -56,7 +56,7 @@ public class GetUserServiceImpl extends IdmsCommonServiceImpl implements GetUser
 						.concat(AUDIT_LOG_CLOSURE));
 				if(null != region && !region.equalsIgnoreCase("CN")){
 					errorResponse.setStatus(ErrorCodeConstants.ERROR);
-					errorResponse.setMessage("Other than China region is not supported");					
+					errorResponse.setMessage("Invalid Region");					
 					LOGGER.error("Requested region is "+region+". It is not supported");
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}				
@@ -90,7 +90,7 @@ public class GetUserServiceImpl extends IdmsCommonServiceImpl implements GetUser
 			e.printStackTrace();			
 			LOGGER.error("Direct API NotAuthorizedException ="+e.getMessage());
 			errorResponse.setStatus(ErrorCodeConstants.ERROR);
-			errorResponse.setMessage("Session expired or Invalid or Unauthorized");
+			errorResponse.setMessage("Session expired or Invalid token");
 			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(errorResponse).build();
 		}catch (Exception e) {
 			LOGGER.error("Error in Direct API getUser() OpenDjService ->" + e.getMessage());

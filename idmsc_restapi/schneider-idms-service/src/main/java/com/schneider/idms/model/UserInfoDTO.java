@@ -3,86 +3,237 @@
  */
 package com.schneider.idms.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 /**
  * @author SESA508936
  * For Direct API Call
  */
 public class UserInfoDTO {
 
+	@JsonInclude(Include.NON_NULL)
 	private String userId;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String contactId;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String accountId;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String federatedId;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String idmsFederatedId;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String userContext;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String salutation;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String firstName;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String middleName;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String lastName;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String countryCode;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String email;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String mobilePhone;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String languageCode;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String emailOption;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String aboutMe;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String street;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String city;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String zipCode;	
+	
+	@JsonInclude(Include.NON_NULL)
 	private String stateOrProvinceCode;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String county;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String pOBox;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String additionalAddress;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String suffix;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String homePhone;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String fax;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String trustStatus;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String trustLevel;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String rejectionReason;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String rejectionComment;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String registrationSource;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String profileLastUpdateSource;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String delegatedIdp;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String identityType;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String isInternal;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String ail;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String ailApplications;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String ailFeatures;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String ailPrograms;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String currency;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String companyName;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String companyStreet;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String companyCity;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String companyZipCode;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String companyStateOrProvinceCode;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String companyPOBox;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String companyCounty;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String companyCountryCode;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String companyAdditionalAddress;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String companyWebsite;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String classLevel1;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String classLevel2;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String marketSegment;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String marketSubSegment;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String marketServed;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String employeeSize;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String department;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String division;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String title;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String businessUnit;
+	
+	@JsonInclude(Include.NON_NULL)
 	private boolean headquarter;
+	
+	@JsonInclude(Include.NON_NULL)
 	private float annualRevenue;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String taxIdentificationNumber;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String jobTitle;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String jobFunction;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String jobDescription;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String workPhone;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String userStatus;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String socialProviders;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String companyFederatedId;
+	
+	@JsonInclude(Include.NON_NULL)
 	private boolean trustedAdmin;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String hashedPin;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String contactGoldenID;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String accountGoldenID;
+	
 	public String getUserId() {
 		return userId;
 	}
