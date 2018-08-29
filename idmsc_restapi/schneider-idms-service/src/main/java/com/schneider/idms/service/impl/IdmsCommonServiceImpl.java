@@ -921,7 +921,7 @@ public class IdmsCommonServiceImpl {
 		LOGGER.info("Parameter firstName -> " + firstName + " ,lastName" + lastName);
 
 		if (userPassword.contains(firstName) | userPassword.contains(lastName)
-				| !userPassword.matches(UserConstants.PR_REGEX))
+				| !userPassword.matches(UserConstants.PASSWORD_REGEX))
 			return false;
 		else
 			return true;

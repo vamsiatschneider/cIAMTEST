@@ -4569,7 +4569,7 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Parameter firstName -> " + firstName+" ,lastName"+lastName);
 
 		if (userPassword.contains(firstName) | userPassword.contains(lastName)
-				| !userPassword.matches(UserConstants.PR_REGEX))
+				| !userPassword.matches(UserConstants.PASSWORD_REGEX))
 			return false;
 		else
 			return true;
@@ -4886,7 +4886,7 @@ public class UserServiceImpl implements UserService {
 
 				// Pattern pswNamePtrn =
 				// Pattern.compile("((?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{6,15})");
-				Pattern pswNamePtrn = Pattern.compile(UserConstants.PR_REGEX);
+				Pattern pswNamePtrn = Pattern.compile(UserConstants.PASSWORD_REGEX);
 				if (null != newPassword && !newPassword.isEmpty()) {
 					Matcher mtch = pswNamePtrn.matcher(newPassword);
 					if (!mtch.matches()) {
@@ -5179,7 +5179,7 @@ public class UserServiceImpl implements UserService {
 				
 				// Checking the newPassword any policy
 
-				Pattern pswNamePtrn = Pattern.compile(UserConstants.PR_REGEX);
+				Pattern pswNamePtrn = Pattern.compile(UserConstants.PASSWORD_REGEX);
 				Matcher mtch = pswNamePtrn.matcher(setPasswordRequest.getNewPwd());
 				if (!mtch.matches()) {
 					response.setStatus(errorStatus);
