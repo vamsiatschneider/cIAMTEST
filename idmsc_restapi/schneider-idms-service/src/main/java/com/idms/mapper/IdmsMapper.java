@@ -107,6 +107,7 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.isActivated", "input.user.isActivated")
         .field("userRecord.channel__c", "input.user.channel")
         .field("userRecord.subChannel__c", "input.user.subchannel")
+        .field("userRecord.contactId", "input.user.contactId")
         .byDefault()
         .register();
     }
@@ -268,6 +269,8 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.channel__c", "channel")
         .field("userRecord.subChannel__c", "subChannel")
         .field("userRecord.IDMSPrimaryContact__c", "primaryContact")
+        .field("userRecord.contactId", "bfoId")
+        
 
         .byDefault()
         .register();
@@ -299,6 +302,7 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.channel__c", "channel")
         .field("userRecord.subChannel__c", "subChannel")
         .field("userRecord.IDMSPrimaryContact__c", "primaryContact")
+        .field("userRecord.contactId", "bfoId")
         .byDefault()
         .register();
     }
@@ -601,6 +605,7 @@ public class IdmsMapper extends ConfigurableMapper{
         
         .field("userRecord.channel__c", "channel__c")
         .field("userRecord.subChannel__c", "subChannel__c")
+        .field("userRecord.contactId", "contactId")
         /*.field("userRecord.", "iDMSIsInternal__c")
         .field("userRecord.", "iDMSAil__c")
         .field("userRecord.", "iDMSAIL_Applications__c")

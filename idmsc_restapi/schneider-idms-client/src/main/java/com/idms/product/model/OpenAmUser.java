@@ -226,6 +226,9 @@ public class OpenAmUser {
 	@JsonInclude(Include.NON_NULL)
 	private String subchannel;
 
+	@JsonInclude(Include.NON_NULL)
+	private String contactId;
+
 	@JsonProperty("emailcount")
 	@JsonInclude(Include.NON_NULL)
 	public String getEmailcount() {
@@ -896,6 +899,14 @@ public class OpenAmUser {
 
 	public void setSubchannel(String subchannel) {
 		this.subchannel = subchannel;
+	}
+
+	public String getContactId() {
+		return contactId;
+	}
+
+	public void setContactId(String contactId) {
+		this.contactId = contactId;
 	}
 
 	@Override

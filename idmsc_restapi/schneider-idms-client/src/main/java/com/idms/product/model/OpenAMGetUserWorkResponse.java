@@ -11,236 +11,188 @@ public class OpenAMGetUserWorkResponse {
 
 	@JsonInclude
 	private Attributes Attributes;
-	
+
 	/**
 	 * Attribute of the IFW which has the UserName for which this user is
 	 * created.
 	 */
-	    
+
 	@Size(min = 8, max = 12)
 	private String Email;
 
-	    
 	private String MobilePhone;
 
-	    
 	private String Phone;
 
-	    
 	private String FirstName;
 
-	    
 	private String LastName;
 
-	    
 	private String IDMS_Email_opt_in__c;
 
-	    
 	private String IDMS_User_Context__c;
 
-	    
 	private String Country;
 
-	    
 	private String IDMS_PreferredLanguage__c;
 
-	    
 	private String IDMS_Company_Currency_ISO_Code__c;
 
-	    
 	private String Street;
 
-	    
 	private String City;
 
-	    
 	private String PostalCode;
 
-	    
 	private String State;
 
-	    
 	private String IDMS_County__c;
 
-	    
 	private String IDMS_POBox__c;
 
-	    
 	private String IDMS_Federated_ID__c;
 
-	    
 	private String IDMS_Registration_Source__c;
 
-	    
 	private String IDMS_Profile_update_source__c;
-				   	
-	    
+
 	private String IDMS_AdditionalAddress__c;
 
-	    
 	private String IDMS_Company_Name__c;
 
-	    
 	private String IDMS_Company_Address1__c;
 
-	    
 	private String IDMS_Company_City__c;
 
-	    
 	private String IDMS_Company_Postal_Code__c;
 
-	    
 	private String IDMS_Company_State__c;
 
-	    
 	private String IDMS_Company_Address_PO_BOX__c;
 
-	    
 	private String IDMS_Company_Country__c;
 
-	    
 	private String IDMS_Company_Address2__c;
 
-	    
 	private String IDMS_Company_I_am_a__c;
 
-	    
 	private String IDMS_Company_My_Industry_is_a__c;
-	
+
 	private String IDMSClassLevel2_c;
 
-	    
 	private String IDMSMarketSegment__c;
 
-	    
 	private String IDMSMarketSubSegment__c;
-	
-	    
+
 	private String Job_Title__c;
 
-	    
 	private String Job_Function__c;
 
-	    
 	private String IDMSJobDescription__c;
-	
-	    
+
 	private String IDMS_Company_Industries_I_serve__c;
-	
-	    
+
 	private String IDMS_Company_Employee_Size__c;
-	
-	    
+
 	private String IDMS_Company_Headquarters__c;
 
-	    
 	private String IDMSAnnualRevenue__c;
-	
-	    
+
 	private String IDMS_Company_Tax_Identification_Number__c;
-	
-	    
+
 	private String IDMSMiddleName__c;
-	
-	    
+
 	private String IDMS_Company_Website__c;
-	
-	    
+
 	private String IDMSSalutation__c;
-	
-	    
+
 	private String Department;
 
-	    
 	private String IDMSSuffix__c;
 
-	    
 	private String Fax;
-	
-	    
+
 	private String IDMSDelegatedIdp__c;
-	
-	    
+
 	private String IDMSIdentityType__c;
-	
-	    
+
 	private String IDMS_Company_County__c;
-	
+
 	private String Id;
-	
+
 	private String tncFlag;
-	
+
 	private String Username;
 
-	private String ContactId;
-	
+	private String contactId;
+
 	private String AccountId;
-	
+
 	private String IDMS_federatedidentity__c;
-	
+
 	private String IDMSisInternal__c;
-	
+
 	private String IDMSAil__c;
-	
+
 	private String IDMSAIL_Applications__c;
-	
+
 	private String IDMSAIL_Features__c;
-	
+
 	private String IDMSAIL_Programs__c;
-	
+
 	private String IDMSPrimaryContact__c;
-	
+
 	private String companyFederatedID;
-	
+
 	private String AboutMe;
 
-	//new fields
+	// new fields
 	private String DefaultCurrencyIsoCode;
-	
+
 	private String currencyCode;
-	
+
 	private String FederationIdentifier;
-	
+
 	private String IDMSClassLevel1__c;
-	
+
 	private String Title;
-	
+
 	private String UserStatus__c;
-	
+
 	private String Company_City__c;
-	
+
 	private String Company_Address2__c;
-	
+
 	private String IDMSCompanyFederationIdentifier__c;
-	
+
 	private String Company_Website__c;
-	
+
 	private String Company_Country__c;
-	
+
 	private String Company_State__c;
-	
+
 	private String Company_Postal_Code__c;
-	
+
 	private String IDMSTaxIdentificationNumber_c;
-	
+
 	private String IDMSCompanyHeadquarters__c;
-	
+
 	private String IDMSCompanyCounty__c;
-	
+
 	private String IDMSCompanyPoBox__c;
-	
+
 	private String CompanyName;
-	
+
 	private String IDMSCompanyNbrEmployees__c;
-	
+
 	private String trustedAdmin;
-	
+
 	private String isActivated;
-	
+
 	private String Channel__c;
 
 	private String SubChannel__c;
-	
+
 	@JsonProperty("IDMSCompanyFederationIdentifier__c")
 	public String getIDMSCompanyFederationIdentifier__c() {
 		return IDMSCompanyFederationIdentifier__c;
@@ -249,7 +201,7 @@ public class OpenAMGetUserWorkResponse {
 	public void setIDMSCompanyFederationIdentifier__c(String iDMSCompanyFederationIdentifier__c) {
 		IDMSCompanyFederationIdentifier__c = iDMSCompanyFederationIdentifier__c;
 	}
-	
+
 	@JsonProperty("IDMSCompanyHeadquarters__c")
 	public String getIDMSCompanyHeadquarters_c() {
 		return IDMSCompanyHeadquarters__c;
@@ -258,7 +210,7 @@ public class OpenAMGetUserWorkResponse {
 	public void setIDMSCompanyHeadquarters_c(String iDMSCompanyHeadquarters__c) {
 		IDMSCompanyHeadquarters__c = iDMSCompanyHeadquarters__c;
 	}
-	
+
 	@JsonProperty("IDMSCompanyCounty__c")
 	public String getIDMSCompanyCounty_c() {
 		return IDMSCompanyCounty__c;
@@ -267,7 +219,7 @@ public class OpenAMGetUserWorkResponse {
 	public void setIDMSCompanyCounty_c(String iDMSCompanyCounty__c) {
 		IDMSCompanyCounty__c = iDMSCompanyCounty__c;
 	}
-	
+
 	@JsonProperty("IDMSCompanyPoBox__c")
 	public String getIDMSCompanyPoBox__c() {
 		return IDMSCompanyPoBox__c;
@@ -277,7 +229,6 @@ public class OpenAMGetUserWorkResponse {
 		IDMSCompanyPoBox__c = iDMSCompanyPoBox__c;
 	}
 
-	
 	@JsonProperty("CompanyName")
 	public String getCompanyName_c() {
 		return CompanyName;
@@ -286,7 +237,7 @@ public class OpenAMGetUserWorkResponse {
 	public void setCompanyName_c(String companyName) {
 		CompanyName = companyName;
 	}
-	
+
 	@JsonProperty("IDMSCompanyNbrEmployees__c")
 	public String getIDMSCompanyNbrEmployees_c() {
 		return IDMSCompanyNbrEmployees__c;
@@ -295,8 +246,7 @@ public class OpenAMGetUserWorkResponse {
 	public void setIDMSCompanyNbrEmployees_c(String iDMSCompanyNbrEmployees__c) {
 		IDMSCompanyNbrEmployees__c = iDMSCompanyNbrEmployees__c;
 	}
-	
-	
+
 	@JsonProperty("Company_Postal_Code__c")
 	public String getCompany_Postal_Code_c() {
 		return Company_Postal_Code__c;
@@ -305,8 +255,7 @@ public class OpenAMGetUserWorkResponse {
 	public void setCompany_Postal_Code_c(String company_Postal_Code__c) {
 		Company_Postal_Code__c = company_Postal_Code__c;
 	}
-	
-	
+
 	@JsonProperty("Company_State__c")
 	public String getCompany_State_c() {
 		return Company_State__c;
@@ -315,8 +264,7 @@ public class OpenAMGetUserWorkResponse {
 	public void setCompany_State_c(String company_State__c) {
 		Company_State__c = company_State__c;
 	}
-	
-	
+
 	@JsonProperty("Company_Country__c")
 	public String getCompany_Country_c() {
 		return Company_Country__c;
@@ -325,8 +273,7 @@ public class OpenAMGetUserWorkResponse {
 	public void setCompany_Country_c(String company_Country__c) {
 		Company_Country__c = company_Country__c;
 	}
-	
-	
+
 	@JsonProperty("Company_Website__c")
 	public String getCompany_Website_c() {
 		return Company_Website__c;
@@ -335,7 +282,7 @@ public class OpenAMGetUserWorkResponse {
 	public void setCompany_Website_c(String company_Website__c) {
 		Company_Website__c = company_Website__c;
 	}
-	
+
 	@JsonProperty("Company_Address2__c")
 	public String getCompany_Address2_c() {
 		return Company_Address2__c;
@@ -344,7 +291,7 @@ public class OpenAMGetUserWorkResponse {
 	public void setCompany_Address2_c(String company_Address2__c) {
 		Company_Address2__c = company_Address2__c;
 	}
-	
+
 	@JsonProperty("Company_City__c")
 	public String getCompany_City_c() {
 		return Company_City__c;
@@ -353,8 +300,7 @@ public class OpenAMGetUserWorkResponse {
 	public void setCompany_City_c(String company_City__c) {
 		Company_City__c = company_City__c;
 	}
-	
-	
+
 	@JsonProperty("UserStatus__c")
 	public String getUserStatus__c() {
 		return UserStatus__c;
@@ -391,7 +337,7 @@ public class OpenAMGetUserWorkResponse {
 		FederationIdentifier = federationIdentifier;
 	}
 
-	@JsonProperty("DefaultCurrencyIsoCode")	
+	@JsonProperty("DefaultCurrencyIsoCode")
 	public String getDefaultCurrencyIsoCode() {
 		return DefaultCurrencyIsoCode;
 	}
@@ -399,8 +345,8 @@ public class OpenAMGetUserWorkResponse {
 	public void setDefaultCurrencyIsoCode(String defaultCurrencyIsoCode) {
 		DefaultCurrencyIsoCode = defaultCurrencyIsoCode;
 	}
-	
-	@JsonProperty("Id")	
+
+	@JsonProperty("Id")
 	public String getId() {
 		return Id;
 	}
@@ -524,7 +470,7 @@ public class OpenAMGetUserWorkResponse {
 	public void setCity(String city) {
 		City = city;
 	}
-	
+
 	@JsonProperty("PostalCode")
 	public String getPostalCode() {
 		return PostalCode;
@@ -587,7 +533,7 @@ public class OpenAMGetUserWorkResponse {
 	public void setIDMS_Profile_update_source__c(String iDMS_Profile_update_source__c) {
 		IDMS_Profile_update_source__c = iDMS_Profile_update_source__c;
 	}
-	
+
 	@JsonProperty("IDMS_AdditionalAddress__c")
 	public String getIDMS_AdditionalAddress__c() {
 		return IDMS_AdditionalAddress__c;
@@ -642,7 +588,6 @@ public class OpenAMGetUserWorkResponse {
 		IDMS_Company_State__c = company_State__c;
 	}
 
-	
 	@JsonProperty("IDMS_Company_Address_PO_BOX__c")
 	public String getIDMS_Company_Address_PO_BOX__c() {
 		return IDMS_Company_Address_PO_BOX__c;
@@ -706,7 +651,7 @@ public class OpenAMGetUserWorkResponse {
 	public void setIDMSMarketSubSegment__c(String iDMSMarketSubSegment__c) {
 		IDMSMarketSubSegment__c = iDMSMarketSubSegment__c;
 	}
-	
+
 	@JsonProperty("Job_Title__c")
 	public String getJob_Title__c() {
 		return Job_Title__c;
@@ -742,7 +687,7 @@ public class OpenAMGetUserWorkResponse {
 	public void setIDMSCompanyMarketServed__c(String iDMSCompanyMarketServed__c) {
 		IDMS_Company_Industries_I_serve__c = iDMSCompanyMarketServed__c;
 	}
-	
+
 	@JsonProperty("IDMS_Company_Employee_Size__c")
 	public String getIDMSCompanyNbrEmployees__c() {
 		return IDMS_Company_Employee_Size__c;
@@ -878,14 +823,14 @@ public class OpenAMGetUserWorkResponse {
 		Username = username;
 	}
 
-	@JsonProperty("ContactId")
+	@JsonProperty("contactId")
 	public String getContactId() {
-		return ContactId;
+		return contactId;
 	}
 
-	@JsonProperty("ContactId")
+	@JsonProperty("contactId")
 	public void setContactId(String contactId) {
-		ContactId = contactId;
+		this.contactId = contactId;
 	}
 
 	@JsonProperty("AccountId")
@@ -972,7 +917,7 @@ public class OpenAMGetUserWorkResponse {
 	public String getCompanyFederatedID() {
 		return companyFederatedID;
 	}
-	
+
 	@JsonProperty("companyFederatedID")
 	public void setCompanyFederatedID(String companyFederatedID) {
 		this.companyFederatedID = companyFederatedID;
@@ -1057,6 +1002,5 @@ public class OpenAMGetUserWorkResponse {
 	public void setSubChannel__c(String subChannel__c) {
 		SubChannel__c = subChannel__c;
 	}
-	
-	
+
 }
