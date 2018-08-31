@@ -18,7 +18,6 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.schneider.idms.common.ErrorCodeConstants;
-import com.schneider.idms.common.ErrorResponseCode;
 import com.schneider.idms.common.ResponseCodeStatus;
 import com.schneider.idms.model.IdmsUserAilRequest;
 import com.schneider.idms.service.UpdateAILService;
@@ -38,7 +37,7 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 		LOGGER.info("Paramters are authorization=" + authorization + " ,accept=" + accept);
 
 		ObjectMapper objectMapper = new ObjectMapper();
-		ErrorResponseCode errorResponseCode = new ErrorResponseCode();
+		ResponseCodeStatus responseCode = new ResponseCodeStatus();
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
 		String userId = null;
@@ -60,111 +59,121 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 
 			// FederatedId
 			if (null == federatedId || federatedId.isEmpty()) {
-				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-				errorResponseCode.setMessage("Mandatory Check: federatedId is Mandatory");
+				responseCode.setStatus(ErrorCodeConstants.ERROR);
+				responseCode.setMessage("Mandatory Check: federatedId is Mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Mandatory check: Path field federatedId is Missing or Null/Empty");
-				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 			}
 
 			// Validation_authorization_token
 			if (!getTechnicalUserDetails(authorization)) {
-				errorResponseCode.setMessage("Mandatory Validation: IDMS-Authorization token is invalid");
-				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+				responseCode.setMessage("Mandatory Validation: IDMS-Authorization token is invalid");
+				responseCode.setStatus(ErrorCodeConstants.ERROR);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-				LOGGER.error("Error while processing is " + errorResponseCode.getMessage());
-				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				LOGGER.error("Error while processing is " + responseCode.getMessage());
+				return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 			}
 
 			// Authorization
 			if (null == authorization || authorization.isEmpty()) {
-				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-				errorResponseCode.setMessage("Mandatory Check: IDMS-Authorization token is null or empty");
+				responseCode.setStatus(ErrorCodeConstants.ERROR);
+				responseCode.setMessage("Mandatory Check: IDMS-Authorization token is null or empty");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Mandatory check: Header field authorization is Missing or Null/Empty");
-				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 			}
 
 			// accept
 			if (null == accept || accept.isEmpty()) {
-				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-				errorResponseCode.setMessage("Header field accept is Mandatory");
+				responseCode.setStatus(ErrorCodeConstants.ERROR);
+				responseCode.setMessage("Header field accept is Mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Mandatory check: Header field accept is Missing or Null/Empty");
-				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 			}
 
 			if (null != accept && !accept.equals("*/*") && !accept.equalsIgnoreCase("application/json")) {
-				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-				errorResponseCode.setMessage("Header field accept must be application/json");
+				responseCode.setStatus(ErrorCodeConstants.ERROR);
+				responseCode.setMessage("Header field accept must be application/json");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Mandatory check: Header field accept:" + accept + " is not permitted");
-				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 			}
 
 			// region
 			if (null != region && !region.equalsIgnoreCase("CN")) {
-				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-				errorResponseCode.setMessage("Header field IDMS-Region must be CN");
+				responseCode.setStatus(ErrorCodeConstants.ERROR);
+				responseCode.setMessage("Header field IDMS-Region must be CN");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Mandatory check: Header field IDMS-Region:" + region + " is not permitted");
-				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 			}
 
 			// Profile Update Source
 			if (null == userAilRequest.getProfileLastUpdateSource()
 					|| userAilRequest.getProfileLastUpdateSource().isEmpty()) {
-				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-				errorResponseCode.setMessage("ProfileLastUpdateSource is Mandatory");
+				responseCode.setStatus(ErrorCodeConstants.ERROR);
+				responseCode.setMessage("ProfileLastUpdateSource is Mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Mandatory check: ProfileLastUpdateSource is Missing or Null/Empty");
-				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 			}
 
 			// acl
 			if (null == userAilRequest.getAcl() || userAilRequest.getAcl().isEmpty()) {
-				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-				errorResponseCode.setMessage("Acl is Mandatory");
+				responseCode.setStatus(ErrorCodeConstants.ERROR);
+				responseCode.setMessage("Acl is Mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Mandatory check: Acl is Missing or Null/Empty");
-				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 			}
 
 			// aclType
 			if (null == userAilRequest.getAclType() || userAilRequest.getAclType().isEmpty()) {
-				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-				errorResponseCode.setMessage("AclType is Mandatory");
+				responseCode.setStatus(ErrorCodeConstants.ERROR);
+				responseCode.setMessage("AclType is Mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Mandatory check: AclType is Missing or Null/Empty");
-				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 			}
 
 			if (null != userAilRequest.getAclType()
 					&& (!pickListValidator.validate(UserConstants.IDMS_ACL_TYPE_C, userAilRequest.getAclType()))) {
-				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-				errorResponseCode.setMessage("AclType is Not Valid");
+				responseCode.setStatus(ErrorCodeConstants.ERROR);
+				responseCode.setMessage("AclType is Not Valid");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Mandatory check: AclType " + userAilRequest.getAclType() + " is Not Valid");
-				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 			}
 
 			// operation
 			if (null == userAilRequest.getOperation() || userAilRequest.getOperation().isEmpty()) {
-				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-				errorResponseCode.setMessage("AIL Operation is Mandatory");
+				responseCode.setStatus(ErrorCodeConstants.ERROR);
+				responseCode.setMessage("AIL Operation is Mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Mandatory check: Operation is Null or Empty");
-				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 			}
 
 			if (null != userAilRequest.getOperation()
 					&& (!pickListValidator.validate(UserConstants.IDMS_OPERATION_C, userAilRequest.getOperation()))) {
-				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-				errorResponseCode.setMessage("Operation is Not Valid");
+				responseCode.setStatus(ErrorCodeConstants.ERROR);
+				responseCode.setMessage("Operation is Not Valid");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Mandatory check: AIL Operation " + userAilRequest.getOperation() + " is Not Valid");
-				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 			}
 
 			// writing business logic - start
@@ -289,38 +298,38 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 
 					return Response.status(Response.Status.OK.getStatusCode()).entity(responseCodeStatus).build();
 				} else {
-					errorResponseCode
+					responseCode
 					.setMessage("Can not perform Grant/Revoke operation. AIL Value/s already present/removed.");
-					errorResponseCode.setCode("BAD_REQUEST");
+					responseCode.setStatus(ErrorCodeConstants.ERROR);
 					LOGGER.error("Can not perform Grant/Revoke operation. AIL Value/s already present/removed.");
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+					return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 				}
 			// writing business logic - end
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 			LOGGER.error("JsonProcessingException = " + e.getMessage());
-			errorResponseCode.setCode(ErrorCodeConstants.SERVER_ERROR_REQUEST);
-			errorResponseCode.setMessage("JSON Parsing error, Please try again");
+			responseCode.setStatus(ErrorCodeConstants.ERROR);
+			responseCode.setMessage("JSON Parsing error, Please try again");
 			LOGGER.error("JSON Parsing error, Please try again");
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponseCode).build();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(responseCode).build();
 		} catch (NotFoundException e) {
 			e.printStackTrace();
-			errorResponseCode.setCode(ErrorCodeConstants.NOTFOUND_REQUEST);
-			errorResponseCode.setMessage("User not found based on user Id");
+			responseCode.setStatus(ErrorCodeConstants.ERROR);
+			responseCode.setMessage("User not found based on user Id");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.updateAIL() : " + elapsedTime);
-			LOGGER.error("Executing while updateAIL() :: -> " + errorResponseCode.getMessage());
+			LOGGER.error("Executing while updateAIL() :: -> " + responseCode.getMessage());
 			LOGGER.error("Executing while updateAIL() :: -> " + e.getMessage());
-			return Response.status(Response.Status.NOT_FOUND).entity(errorResponseCode).build();
+			return Response.status(Response.Status.NOT_FOUND).entity(responseCode).build();
 		} catch (Exception e) {
 			e.printStackTrace();
-			errorResponseCode.setCode(ErrorCodeConstants.SERVER_ERROR_REQUEST);
-			errorResponseCode.setMessage("Error in Updating the AIL Object");
+			responseCode.setStatus(ErrorCodeConstants.ERROR);
+			responseCode.setMessage("Error in Updating the AIL Object");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.updateAIL() : " + elapsedTime);
-			LOGGER.error("Executing while updateAIL() :: -> " + errorResponseCode.getMessage());
+			LOGGER.error("Executing while updateAIL() :: -> " + responseCode.getMessage());
 			LOGGER.error("Executing while updateAIL() :: -> " + e.getMessage());
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponseCode).build();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(responseCode).build();
 		}
 
 	}

@@ -1,5 +1,8 @@
 package com.schneider.idms.service.impl;
 
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
@@ -9,12 +12,10 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.idms.model.CheckUserExistsRequest;
-import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.Option;
 import com.schneider.idms.common.ErrorCodeConstants;
-import com.schneider.idms.common.ErrorResponseCode;
+import com.schneider.idms.common.ResponseCodeStatus;
 import com.schneider.idms.service.CheckUserExistService;
 import com.se.idms.util.EmailValidator;
 import com.se.idms.util.UserConstants;
@@ -38,7 +39,7 @@ public class CheckUserExistServiceImpl extends IdmsCommonServiceImpl implements 
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
 		ObjectMapper objectMapper = new ObjectMapper();
-		ErrorResponseCode errorResponseCode = new ErrorResponseCode();
+		ResponseCodeStatus responseCode = new ResponseCodeStatus();
 		String emailOrMobile = null;
 		String email = null, mobile = null;
 		String withGlobalUsers = checkUserExistsRequest.getWithGlobalUsers();
@@ -46,43 +47,43 @@ public class CheckUserExistServiceImpl extends IdmsCommonServiceImpl implements 
 
 		// Authorization
 		if (null == authorization || authorization.isEmpty()) {
-			errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-			errorResponseCode.setMessage("Mandatory Check: IDMS-Authorization token is null or empty");
+			responseCode.setStatus(ErrorCodeConstants.ERROR);
+			responseCode.setMessage("Mandatory Check: IDMS-Authorization token is null or empty");
 			LOGGER.error("Mandatory check: Header field Authorization is Missing or Null/Empty");
-			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+			return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 		}
 		
 		// Validate_Authorization
 		if (!getTechnicalUserDetails(authorization)) {
-			errorResponseCode.setMessage("Mandatory Validation: IDMS-Authorization token is invalid");
-			errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
+			responseCode.setMessage("Mandatory Validation: IDMS-Authorization token is invalid");
+			responseCode.setStatus(ErrorCodeConstants.ERROR);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-			LOGGER.error("Error while processing is " + errorResponseCode.getMessage());
-			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+			LOGGER.error("Error while processing is " + responseCode.getMessage());
+			return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 		}
 
 		// accept
 		if (null == accept || accept.isEmpty()) {
-			errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-			errorResponseCode.setMessage("Header field Accept is Mandatory");
+			responseCode.setStatus(ErrorCodeConstants.ERROR);
+			responseCode.setMessage("Header field Accept is Mandatory");
 			LOGGER.error("Mandatory check: Header field Accept is Missing or Null/Empty");
-			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+			return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 		}
 
 		if (null != accept && !accept.equalsIgnoreCase("application/json")) {
-			errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-			errorResponseCode.setMessage("Header field Accept must be application/json");
+			responseCode.setStatus(ErrorCodeConstants.ERROR);
+			responseCode.setMessage("Header field Accept must be application/json");
 			LOGGER.error("Mandatory check: Header field Accept:" + accept + " is not permitted");
-			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+			return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 		}
 
 		// region
 		if (null != region && !region.equalsIgnoreCase("CN")) {
-			errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-			errorResponseCode.setMessage("Region is Invalid");
+			responseCode.setStatus(ErrorCodeConstants.ERROR);
+			responseCode.setMessage("Region is Invalid");
 			LOGGER.error("Mandatory check: Header field IDMS-Region:" + region + " is not permitted");
-			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+			return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 		}
 		// mobile
 		if (null != checkUserExistsRequest.getMobile() && !checkUserExistsRequest.getMobile().isEmpty()) {
@@ -92,17 +93,17 @@ public class CheckUserExistServiceImpl extends IdmsCommonServiceImpl implements 
 				LOGGER.info("mobileNumber==" + mobile);
 
 				if (!StringUtils.isNumeric(mobile)) {
-					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-					errorResponseCode.setMessage("Mobile number is Non-numberic");
+					responseCode.setStatus(ErrorCodeConstants.ERROR);
+					responseCode.setMessage("Mobile number is Non-numberic");
 					LOGGER.error("Mandatory check: Mobile number is Non-numberic:" + mobileNumber);
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+					return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 				}
 
 				if (mobile.length() > 11) {
-					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-					errorResponseCode.setMessage("Mobile number should not be greater than 11 digits");
+					responseCode.setStatus(ErrorCodeConstants.ERROR);
+					responseCode.setMessage("Mobile number should not be greater than 11 digits");
 					LOGGER.error("Mandatory check: Mobile number should not exceed 11 digits:" + mobileNumber);
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+					return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 				}
 			}
 		}
@@ -113,28 +114,27 @@ public class CheckUserExistServiceImpl extends IdmsCommonServiceImpl implements 
 			if (null != email && !email.isEmpty()) {
 				boolean validEmail = EmailValidator.getInstance().validate(email);
 				if (!validEmail) {
-					errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-					errorResponseCode.setMessage("Email is not valid");
+					responseCode.setStatus(ErrorCodeConstants.ERROR);
+					responseCode.setMessage("Email is not valid");
 					LOGGER.error("Mandatory check Email: Not a valid email:" + email);
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+					return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 				}
 			}
 		}
 
 		// withGlobalUsers
-		if ((null != withGlobalUsers) && (!UserConstants.TRUE.equalsIgnoreCase(withGlobalUsers)
+		if ((null != withGlobalUsers && !withGlobalUsers.isEmpty()) && (!UserConstants.TRUE.equalsIgnoreCase(withGlobalUsers)
 				&& !UserConstants.FALSE.equalsIgnoreCase(withGlobalUsers))) {
-			errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-			errorResponseCode.setMessage(UserConstants.GLOBAL_USER_BOOLEAN);
+			responseCode.setStatus(ErrorCodeConstants.ERROR);
+			responseCode.setMessage(UserConstants.GLOBAL_USER_BOOLEAN);
 			LOGGER.error("Mandatory check GlobalUSerField:" + UserConstants.GLOBAL_USER_BOOLEAN);
-			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+			return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 		}
 
 		try {
 			LOGGER.info("userAilRequest=" + objectMapper.writeValueAsString(checkUserExistsRequest));
 			email = checkUserExistsRequest.getEmail();
 			mobile = checkUserExistsRequest.getMobile();
-			String tempGlobalUsers = checkUserExistsRequest.getWithGlobalUsers();
 
 			if (null != email && !email.trim().isEmpty() && email.trim().length() > 0) {
 				emailOrMobile = email.trim();
@@ -145,28 +145,41 @@ public class CheckUserExistServiceImpl extends IdmsCommonServiceImpl implements 
 				}
 			}
 			if (null == emailOrMobile || emailOrMobile.isEmpty()) {
-				errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-				errorResponseCode.setMessage("Both email & mobile can not be empty");
+				responseCode.setStatus(ErrorCodeConstants.ERROR);
+				responseCode.setMessage("Both email & mobile can not be empty");
 				LOGGER.error("Mandatory check: Atleast email or mobile should have value");
-				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 			}
 			LOGGER.info("--------after emailOrMobile----------");
 			// start
-			String bfoAuthorization = salesForceService.getSalesForceToken(
-					UserConstants.CONTENT_TYPE_URL_FROM, UserConstants.PR_GRANT_TYPE, salesForceClientId,
-					salesForceClientSecret, salesForceUserName, salesForcePassword);
-			conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
-			productDocCtx = JsonPath.using(conf).parse(bfoAuthorization);
-			String bfoAuthorizationToken = productDocCtx.read("$.access_token");
+			String iPlanetDirectoryKey = getSSOToken();
+			LOGGER.info("Start:Calling checkUserExistsWithEmailMobile() of OpenAMService for user having emailOrMobile: "+emailOrMobile);
+			String userExists = productService.checkUserExistsWithEmailMobile(
+					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(emailOrMobile,"UTF-8"),"UTF-8") + "\"");
+			LOGGER.info("End:checkUserExistsWithEmailMobile() of OpenAMService Finished for user having emailOrMobile: "+emailOrMobile);
+			productDocCtx = JsonPath.using(conf).parse(userExists);
+			Integer resultCount = productDocCtx.read("$.resultCount");
+			LOGGER.info("Result count="+resultCount);
+			if (resultCount.intValue() > 0) {
+				responseCode.setMessage(UserConstants.TRUE);
+				return Response.status(Response.Status.OK).entity(responseCode).build();
+			}else{
+				if (UserConstants.TRUE.equalsIgnoreCase(withGlobalUsers.trim())) {
+					String bfoAuthorization = salesForceService.getSalesForceToken(
+							UserConstants.CONTENT_TYPE_URL_FROM, UserConstants.PR_GRANT_TYPE, salesForceClientId,
+							salesForceClientSecret, salesForceUserName, salesForcePassword);
+					productDocCtx = JsonPath.using(conf).parse(bfoAuthorization);
+					String bfoAuthorizationToken = productDocCtx.read("$.access_token");
+					
+				}
+			
 
-			//String authorization = "Bearer " + accessToken;
-
-			// End
-			errorResponseCode.setCode(ErrorCodeConstants.BAD_REQUEST);
-			errorResponseCode.setMessage("Direct API: CheckUserExists still in development phase");
+			}
+			responseCode.setStatus(ErrorCodeConstants.ERROR);
+			responseCode.setMessage("Direct API: CheckUserExists still in development phase");
 			LOGGER.error("Mandatory check: Direct API Still in development phase");
-			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseCode).build();
-
+			return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
