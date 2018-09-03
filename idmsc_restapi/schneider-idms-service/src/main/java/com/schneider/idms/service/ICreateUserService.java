@@ -18,6 +18,7 @@ public interface ICreateUserService {
 	@Path("/Registration/1.0")
 	@Consumes("application/json")
 	Response userRegistration(@HeaderParam("Authorization")String authorization,
+			@HeaderParam("IDMS-Authorization")String secretToken,
 			@HeaderParam("Accept")String accept,
 			@HeaderParam("IDMS-Region")String region,@Valid IdmsUserRequest userRequest);
 }

@@ -54,7 +54,8 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 	private static final Logger LOGGER = LoggerFactory.getLogger(CreateUserServiceImpl.class);
 
 	@Override
-	public Response userRegistration(String authorization, String accept, String region,IdmsUserRequest userRequest) {
+	public Response userRegistration(String authorization, String secretToken, String accept, String region,
+			IdmsUserRequest userRequest) {
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
@@ -70,6 +71,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 		boolean uimsAlreadyCreatedFlag = false;
 		Response userCreation = null;
 		OpenAmUserRequest openAmReq = null;
+		String longLiveHashedToken = null;
 		try {
 			
 			
@@ -93,7 +95,8 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			try {
 				
 				
-				if(null == authorization || authorization.isEmpty()){
+				if ((null == authorization || authorization.isEmpty())
+						&& (null == secretToken || secretToken.isEmpty())) {
 					errorResponse.setMessage(ErrorCodeConstants.BADREQUEST_MESSAGE);
 					errorResponse.setStatus(ErrorCodeConstants.ERROR);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -121,7 +124,22 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 				
-				if(!getTechnicalUserDetails(DirectApiConstants.BEAR_STRING+authorization)){
+				/**
+				 * hashing secret token using RSA-256
+				 */
+				
+				if(null != secretToken && !secretToken.isEmpty()){
+					longLiveHashedToken = ChinaIdmsUtil.generateHashValue(secretToken);
+				}
+				
+				if ((null != longLiveHashedToken && longLiveHashedToken.equalsIgnoreCase(directApiSecretToken))) {
+					errorResponse.setMessage(ErrorCodeConstants.BADREQUEST_MESSAGE);
+					errorResponse.setStatus(ErrorCodeConstants.ERROR);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
+					LOGGER.error("Error while processing is " + errorResponse.getMessage());
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+				}else if(!getTechnicalUserDetails(DirectApiConstants.BEAR_STRING+authorization)){
 					errorResponse.setMessage(ErrorCodeConstants.BADREQUEST_MESSAGE);
 					errorResponse.setStatus(ErrorCodeConstants.ERROR);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
