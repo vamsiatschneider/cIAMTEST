@@ -701,4 +701,12 @@ public class IdmsUserRequest {
 		this.subChannel = subChannel;
 	}
 
+	public String getContactId() {
+		return contactId;
+	}
+
+	public void setContactId(String contactId) {
+		this.contactId = contactId;
+	}
+
 }

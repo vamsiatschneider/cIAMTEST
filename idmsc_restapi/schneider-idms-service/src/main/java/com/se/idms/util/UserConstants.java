@@ -494,4 +494,12 @@ public class UserConstants {
 	
 	public static final String SUBCHANNEL = "SubChannel__c";
 	
+	public static final String SE_MAIL = "@se.com";
+	
+	public static final String NON_SE_MAIL = "@non.se.com";
+	
+	public static final String SCHNEIDER_MAIL = "@schneider-electric.com";
+	
+	public static final String NON_SCHNEIDER_MAIL = "@non.schneider-electric.com";
+	
 }

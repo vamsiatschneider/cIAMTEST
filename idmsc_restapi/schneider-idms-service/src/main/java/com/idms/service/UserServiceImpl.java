@@ -1338,6 +1338,16 @@ public class UserServiceImpl implements UserService {
 				userResponse.setMessage(UserConstants.EMAIL_VALIDATION + userRequest.getEmail());
 				return true;
 			}
+			
+			if (userRequest.getEmail().contains(UserConstants.SE_MAIL)
+					|| userRequest.getEmail().contains(UserConstants.NON_SE_MAIL)
+					|| userRequest.getEmail().contains(UserConstants.SCHNEIDER_MAIL)
+					|| userRequest.getEmail().contains(UserConstants.NON_SCHNEIDER_MAIL)) {
+
+				userResponse.setStatus(errorStatus);
+				userResponse.setMessage(UserConstants.EMAIL_VALIDATION + userRequest.getEmail());
+				return true;
+			}
 		}
 		if (null != userRequest.getIDMS_Registration_Source__c()
 				&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c())) {
@@ -5803,7 +5813,7 @@ public class UserServiceImpl implements UserService {
 		String loginIdentifierType = "";
 
 		String userExists = productService.checkUserExistsWithEmailMobile(
-				UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryToken, "federationID eq " + "\"" + federationId + "\"");
+				UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryToken, "federationID eq " + "\"" + federationId + "\" or uid eq " + "\"" + federationId + "\"");
 		LOGGER.info("User Exist with fed ID= " + userExists);
 
 		productDocCtx = JsonPath.using(conf).parse(userExists);
