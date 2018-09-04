@@ -4269,8 +4269,8 @@ public class UserServiceImpl implements UserService {
 								userName, PRODUCT_JSON_STRING);*/
 
 						if (UserConstants.EMAIL.equalsIgnoreCase(identifierType) && null !=updatingUser) {
-							String prefferedLanguage = null != productDocCtx.read("$.preferredlanguage")
-									? getValue(productDocCtx.read("$.preferredlanguage").toString()) : getDelimeter();;
+							String prefferedLanguage = null != productDocCtxUser.read("$.preferredlanguage")
+									? getValue(productDocCtxUser.read("$.preferredlanguage").toString()) : getDelimeter();;
 							
 							/**
 							 * Adding for social lgoin 
