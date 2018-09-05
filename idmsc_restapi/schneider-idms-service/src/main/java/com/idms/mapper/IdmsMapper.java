@@ -108,6 +108,7 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.channel__c", "input.user.channel")
         .field("userRecord.subChannel__c", "input.user.subchannel")
         .field("userRecord.contactId", "input.user.contactId")
+        .field("userRecord.registrationAttributes__c", "input.user.registrationAttributes__c")
         .byDefault()
         .register();
     }

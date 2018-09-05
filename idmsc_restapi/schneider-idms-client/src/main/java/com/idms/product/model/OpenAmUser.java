@@ -228,6 +228,21 @@ public class OpenAmUser {
 
 	@JsonInclude(Include.NON_NULL)
 	private String contactId;
+	
+	@JsonInclude(Include.NON_NULL)
+	private String RegistrationAttributes__c;
+	
+	@JsonProperty("RegistrationAttributes__c")
+	@JsonInclude(Include.NON_NULL)
+	public String getRegistrationAttributes__c() {
+		return RegistrationAttributes__c;
+	}
+
+	@JsonProperty("RegistrationAttributes__c")
+	@JsonInclude(Include.NON_NULL)
+	public void setRegistrationAttributes__c(String registrationAttributes__c) {
+		RegistrationAttributes__c = registrationAttributes__c;
+	}
 
 	@JsonProperty("emailcount")
 	@JsonInclude(Include.NON_NULL)

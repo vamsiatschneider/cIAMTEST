@@ -229,17 +229,16 @@ public class IFWUser extends BaseEntity {
 	private String contactId;
 	
 	@JsonProperty
-	private String RegistrationAttriutes__c;
+	private String RegistrationAttributes__c;
 	
-	
-	@JsonProperty("RegistrationAttriutes__c")
-	public String getRegistrationAttriutes__c() {
-		return RegistrationAttriutes__c;
+	@JsonProperty("RegistrationAttributes__c")
+	public String getRegistrationAttributes__c() {
+		return RegistrationAttributes__c;
 	}
 
-	@JsonProperty("RegistrationAttriutes__c")
-	public void setRegistrationAttriutes__c(String registrationAttriutes__c) {
-		RegistrationAttriutes__c = registrationAttriutes__c;
+	@JsonProperty("RegistrationAttributes__c")
+	public void setRegistrationAttributes__c(String registrationAttributes__c) {
+		RegistrationAttributes__c = registrationAttributes__c;
 	}
 
 	@JsonProperty("isActivated")
