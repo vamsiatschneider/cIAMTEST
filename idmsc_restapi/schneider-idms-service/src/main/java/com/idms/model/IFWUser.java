@@ -227,6 +227,20 @@ public class IFWUser extends BaseEntity {
 
 	@JsonProperty
 	private String contactId;
+	
+	@JsonProperty
+	private String RegistrationAttriutes__c;
+	
+	
+	@JsonProperty("RegistrationAttriutes__c")
+	public String getRegistrationAttriutes__c() {
+		return RegistrationAttriutes__c;
+	}
+
+	@JsonProperty("RegistrationAttriutes__c")
+	public void setRegistrationAttriutes__c(String registrationAttriutes__c) {
+		RegistrationAttriutes__c = registrationAttriutes__c;
+	}
 
 	@JsonProperty("isActivated")
 	public String getIsActivated() {
