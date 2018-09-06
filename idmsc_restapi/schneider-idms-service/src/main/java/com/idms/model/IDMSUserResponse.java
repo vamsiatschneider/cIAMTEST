@@ -1365,10 +1365,12 @@ public class IDMSUserResponse implements Serializable {
 		SubChannel__c = subChannel__c;
 	}
 
+	@JsonProperty("ContactId")
 	public String getContactId() {
 		return contactId;
 	}
 
+	@JsonProperty("ContactId")
 	public void setContactId(String contactId) {
 		this.contactId = contactId;
 	}
