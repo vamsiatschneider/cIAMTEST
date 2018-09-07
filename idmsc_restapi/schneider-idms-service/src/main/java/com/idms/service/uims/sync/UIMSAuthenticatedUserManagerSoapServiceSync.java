@@ -49,16 +49,27 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 	@Value("${authUserManaUIMSVPName}")
 	private String authUserManaUIMSVPName;
 	
-	public AuthenticatedUserManagerUIMSV22 getAuthenticatedUserManager() throws MalformedURLException {
+	public AuthenticatedUserManagerUIMSV22 getAuthenticatedUserManager() {
 		LOGGER.info("Entered getAuthenticatedUserManager() method -> Start");
-		URL url = new URL(authUserManaUIMSVWsdl);
-		QName qname = new QName(authUserManaUIMSVQname,authUserManaUIMSVPName);
-		Service service = Service.create(url, qname);
+		URL url;
+		AuthenticatedUserManagerUIMSV22 authenticatedUserManagerUIMSV2 = null;
+		try {
+			url = new URL(authUserManaUIMSVWsdl);
 
-		LOGGER.info("Going to call getPort() of UIMS");
-		AuthenticatedUserManagerUIMSV22 authenticatedUserManagerUIMSV2 = service
-				.getPort(AuthenticatedUserManagerUIMSV22.class);
-		LOGGER.info("getPort() of UIMS -> End, response is:"+authenticatedUserManagerUIMSV2);
+			QName qname = new QName(authUserManaUIMSVQname, authUserManaUIMSVPName);
+			Service service = Service.create(url, qname);
+
+			LOGGER.info("Going to call getPort() of UIMS");
+			authenticatedUserManagerUIMSV2 = service.getPort(AuthenticatedUserManagerUIMSV22.class);
+			LOGGER.info("getPort() of UIMS -> End, response is:" + authenticatedUserManagerUIMSV2);
+		} catch (MalformedURLException e) {
+			LOGGER.error("Exception while getAuthenticatedUserManager()::" + e.getMessage());
+			e.printStackTrace();
+		}
+		catch (Exception e) {
+			LOGGER.error("Exception while getAuthenticatedUserManager()::" + e.getMessage());
+			e.printStackTrace();
+		}
 		return authenticatedUserManagerUIMSV2;
 	}
 	

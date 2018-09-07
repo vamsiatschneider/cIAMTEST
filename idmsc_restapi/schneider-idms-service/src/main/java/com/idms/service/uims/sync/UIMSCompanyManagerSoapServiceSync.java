@@ -58,13 +58,26 @@ public class UIMSCompanyManagerSoapServiceSync {
 	 * @return
 	 * @throws MalformedURLException
 	 */
-	public AuthenticatedCompanyManagerUIMSV2 getAuthenitcatedCompanyManager() throws MalformedURLException {
-		URL url = new URL(uimsCompanyManagerWsdl);
+	public AuthenticatedCompanyManagerUIMSV2 getAuthenitcatedCompanyManager() {
+		LOGGER.info("Entered getAuthenitcatedCompanyManager() method -> Start");
+		URL url;
+		AuthenticatedCompanyManagerUIMSV2 userManagerUIMSV2 = null;
+		try {
+			url = new URL(uimsCompanyManagerWsdl);
+		
 		QName qname = new QName(uimsCompanyManagerQname,uimsCompanyManagerPortName);
 		Service service = Service.create(url, qname);
-
-		AuthenticatedCompanyManagerUIMSV2 userManagerUIMSV2 = service.getPort(AuthenticatedCompanyManagerUIMSV2.class);
-		
+		LOGGER.info("Going to call getPort() of UIMS");
+		 userManagerUIMSV2 = service.getPort(AuthenticatedCompanyManagerUIMSV2.class);
+		 LOGGER.info("getPort() of UIMS -> End, response is:" + userManagerUIMSV2);
+		} catch (MalformedURLException e) {
+			LOGGER.error("Exception while getAuthenitcatedCompanyManager()::" + e.getMessage());
+			e.printStackTrace();
+		}
+		catch (Exception e) {
+			LOGGER.error("Exception while getAuthenitcatedCompanyManager()::" + e.getMessage());
+			e.printStackTrace();
+		}
 		return userManagerUIMSV2;
 	}
 	
