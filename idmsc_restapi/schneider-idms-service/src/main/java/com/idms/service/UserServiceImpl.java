@@ -64,9 +64,12 @@ import org.springframework.cache.ehcache.EhCacheCache;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
@@ -281,6 +284,9 @@ public class UserServiceImpl implements UserService {
 	
 	@Value("${openAMService.url}")
 	private String prefixStartUrl;
+	
+	@Value("$revocationEndpoint.url")
+	private String revocation_endpoint_url;
 
 	private static String userAction = "submitRequirements";
 
@@ -7053,4 +7059,39 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 	
+	@Override
+	@SuppressWarnings({ "unchecked" })
+	public Response getOIDCAutoDiscoveryConfig() {
+		Object entity = null;
+		JsonNode jsonNode = null;
+		ObjectMapper oMapper = new ObjectMapper();
+		Response oidcAutoDiscoveryConfig = openAMTokenService.getOIDCAutoDiscoveryConfig();
+		
+		if(oidcAutoDiscoveryConfig.getStatus() == Response.Status.OK.getStatusCode()) {
+			entity = oidcAutoDiscoveryConfig.getEntity();
+			try {
+				String respString = IOUtils.toString((InputStream) entity);
+				jsonNode = oMapper.readTree(respString);
+			} catch (JsonProcessingException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			((ObjectNode)jsonNode).put("revocation_endpoint", revocation_endpoint_url);
+			return Response.status(Response.Status.OK).entity(entity).build();
+		} else {
+			try {
+				LOGGER.error("Received error from OpenAM OIDC discovery endpoint: " + 
+						IOUtils.toString((InputStream) oidcAutoDiscoveryConfig.getEntity()));
+			} catch (IOException e) {
+				e.printStackTrace();
+				LOGGER.error("Error reading data stream from OpenAM OIDC discovery endpoint");
+			}
+		}
+		
+		JSONObject errorResponse = new JSONObject();
+		errorResponse.put("code", "SERVER_ERROR");
+		errorResponse.put(UserConstants.MESSAGE, "Error generating OIDC Discovery data");
+		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
+	}
 }

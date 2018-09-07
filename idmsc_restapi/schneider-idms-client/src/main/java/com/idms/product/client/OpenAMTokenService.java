@@ -45,6 +45,9 @@ public interface OpenAMTokenService {
 			@QueryParam("redirect_uri")  String redirecturi,
 			@QueryParam("code")  String code);
 
+	@GET
+	@Path("/oauth2/se/.well-known/openid-configuration")
+	Response getOIDCAutoDiscoveryConfig();
 
 	//	@POST
 	//	@Path("/oauth2/authorize")

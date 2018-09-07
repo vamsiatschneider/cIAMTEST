@@ -224,4 +224,9 @@ public interface UserService {
 	Response updateIDMSUserService(@HeaderParam("Authorization")String authorizedToken,@HeaderParam("client_id")String clientId,
 			@HeaderParam("client_secret")String clientSecret,UpdateUserRequest userRequest);
 
+	@GET
+	@Path("/apexrest/oidcautodiscovery")
+	@Consumes("application/json")
+	Response getOIDCAutoDiscoveryConfig();
+	
 }
