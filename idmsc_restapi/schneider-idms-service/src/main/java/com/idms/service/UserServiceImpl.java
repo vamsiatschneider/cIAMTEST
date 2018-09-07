@@ -1184,37 +1184,16 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("!uimsAlreadyCreatedFlag Value is -> " + !uimsAlreadyCreatedFlag);
 		if (!uimsAlreadyCreatedFlag && null != userRequest.getUserRecord().getIDMS_Registration_Source__c() && 
 				!UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())) {
-			// mapping IFW request to UserCompany
-			CompanyV3 company = mapper.map(userRequest, CompanyV3.class);
-			if (null != company.getLanguageCode() && !company.getLanguageCode().isEmpty()) {
-				company.setLanguageCode(company.getLanguageCode().toLowerCase());
-			}
-			UserV6 identity = mapper.map(userRequest, UserV6.class);
-			if (null != identity.getLanguageCode() && !identity.getLanguageCode().isEmpty()) {
-				identity.setLanguageCode(identity.getLanguageCode().toLowerCase());
-			}
-			
-			Integer resultCountCheck = checkCompanyMappedOtherUsers(userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c());
-			
-			//forcedFederatedId = "cn00"+ UUID.randomUUID().toString();
-			if(pickListValidator.validate(UserConstants.UIMSCreateUserSync, UserConstants.TRUE)){
-				//Calling SYNC method createUIMSUserAndCompany
-				LOGGER.info("Start: calling SYNC createUIMSUserAndCompany() of UIMSUserManagerSync for userName:"+userName);
-				uimsUserManagerSync.createUIMSUserAndCompany(UimsConstants.CALLER_FID, identity, userRequest.getUserRecord().getIDMS_User_Context__c(), company, userName,
-					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, UserConstants.V_NEW,userRequest.getPassword(),userName,userRequest,resultCountCheck.intValue());
-				LOGGER.info("End: Sync createUIMSUserAndCompany() of UIMSUserManagerSync finished for userName:"+userName);
-				
-			}else{
-			//Calling Async method createUIMSUserAndCompany
-				LOGGER.info("Start: calling Async createUIMSUserAndCompany() of UIMSUserManagerSoapService for userName:"+userName);
-				uimsUserManagerSoapService.createUIMSUserAndCompany(UimsConstants.CALLER_FID, identity, userRequest.getUserRecord().getIDMS_User_Context__c(), company, userName,
-					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, UserConstants.V_NEW,userRequest.getPassword(),userName,userRequest,resultCountCheck.intValue());
-				LOGGER.info("End: Async createUIMSUserAndCompany() of UIMSUserManagerSoapService finished for userName:"+userName);
-				userRequest.getUserRecord().setIDMS_Federated_ID__c(userName);//federated id for IDMS
-			}
-		} else {
-			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
-		}
+
+			Thread thread = new Thread(new Runnable() {
+				public void run() {
+					executeCreateUserAndCompany(userRequest);
+				}
+			});
+
+			thread.start();
+
+		} 
 		
 		sucessRespone = new CreateUserResponse();
 		sucessRespone.setStatus(successStatus);
@@ -7028,4 +7007,50 @@ public class UserServiceImpl implements UserService {
 			UpdateUserRequest userRequest) {
 		return this.updateUser(authorizedToken, clientId, clientSecret, userRequest);
 	}
+	
+	public void executeCreateUserAndCompany(CreateUserRequest userRequest) {
+
+		String iPlanetDirectoryKey = getSSOToken();
+		// mapping IFW request to UserCompany
+		CompanyV3 company = mapper.map(userRequest, CompanyV3.class);
+		if (null != company.getLanguageCode() && !company.getLanguageCode().isEmpty()) {
+			company.setLanguageCode(company.getLanguageCode().toLowerCase());
+		}
+		UserV6 identity = mapper.map(userRequest, UserV6.class);
+		if (null != identity.getLanguageCode() && !identity.getLanguageCode().isEmpty()) {
+			identity.setLanguageCode(identity.getLanguageCode().toLowerCase());
+		}
+
+		Integer resultCountCheck = checkCompanyMappedOtherUsers(
+				userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c());
+
+		// forcedFederatedId = "cn00"+ UUID.randomUUID().toString();
+		if (pickListValidator.validate(UserConstants.UIMSCreateUserSync, UserConstants.TRUE)) {
+			// Calling SYNC method createUIMSUserAndCompany
+			uimsUserManagerSync.createUIMSUserAndCompany(UimsConstants.CALLER_FID, identity,
+					userRequest.getUserRecord().getIDMS_User_Context__c(), company,
+					userRequest.getUserRecord().getIDMS_Federated_ID__c(),
+					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, UserConstants.V_NEW,
+					userRequest.getPassword(), userRequest.getUserRecord().getIDMS_Federated_ID__c(), userRequest,
+					resultCountCheck.intValue());
+			LOGGER.info("End: Sync createUIMSUserAndCompany() of UIMSUserManagerSync finished for userName:"
+					+ userRequest.getUserRecord().getIDMS_Federated_ID__c());
+
+		} else {
+			// Calling Async method createUIMSUserAndCompany
+			LOGGER.info("Start: calling Async createUIMSUserAndCompany() of UIMSUserManagerSoapService for userName:"
+					+ userRequest.getUserRecord().getIDMS_Federated_ID__c());
+			uimsUserManagerSoapService.createUIMSUserAndCompany(UimsConstants.CALLER_FID, identity,
+					userRequest.getUserRecord().getIDMS_User_Context__c(), company,
+					userRequest.getUserRecord().getIDMS_Federated_ID__c(),
+					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, UserConstants.V_NEW,
+					userRequest.getPassword(), userRequest.getUserRecord().getIDMS_Federated_ID__c(), userRequest,
+					resultCountCheck.intValue());
+			LOGGER.info("End: Async createUIMSUserAndCompany() of UIMSUserManagerSoapService finished for userName:"
+					+ userRequest.getUserRecord().getIDMS_Federated_ID__c());
+			userRequest.getUserRecord().setIDMS_Federated_ID__c(userRequest.getUserRecord().getIDMS_Federated_ID__c());// federated
+			// IDMS
+		}
+	}
+	
 }
