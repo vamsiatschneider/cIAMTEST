@@ -35,6 +35,7 @@ import com.idms.service.UIMSCompanyManagerSoapService;
 import com.idms.service.digital.GoDigitalUserService;
 import com.schneider.idms.model.IdmsUserConfirmRequest;
 import com.schneider.idms.model.IdmsUserRequest;
+import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.util.SamlAssertionTokenGenerator;
 import com.se.idms.util.UimsConstants;
 import com.se.idms.util.UserConstants;
@@ -51,7 +52,6 @@ import com.se.uims.usermanager.UserManagerUIMSV22;
 import com.se.uims.usermanager.UserV6;
 import com.uims.authenticatedUsermanager.AccessElement;
 import com.uims.authenticatedUsermanager.Type;
-import com.uims.companymanager.CompanyV3;
 
 /**
  * 

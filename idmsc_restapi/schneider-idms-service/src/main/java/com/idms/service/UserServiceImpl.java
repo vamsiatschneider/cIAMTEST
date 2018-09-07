@@ -116,6 +116,7 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.cache.CacheTypes;
 import com.se.idms.cache.utils.EmailConstants;
 import com.se.idms.cache.validate.IValidator;
@@ -144,7 +145,6 @@ import com.se.idms.util.PhoneValidator;
 import com.se.idms.util.UimsConstants;
 import com.se.idms.util.UserConstants;
 import com.uims.authenticatedUsermanager.UserV6;
-import com.uims.companymanager.CompanyV3;
 
 @Service("userService")
 public class UserServiceImpl implements UserService {
@@ -805,9 +805,34 @@ public class UserServiceImpl implements UserService {
 			}
 
 			
+			/**
+			 * Checking companyFederation is not passing generating new one and adding
+			 */
+			
+			if ((UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_User_Context__c())
+					|| UserConstants.USER_CONTEXT_WORK_1
+							.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_User_Context__c()))
+					&& (null == userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c()
+							|| userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c().isEmpty())) {
+				
+				userRequest.getUserRecord().setIDMSCompanyFederationIdentifier__c(ChinaIdmsUtil.generateFedId());
+
+			}
+			
+			
+			
 			// Step 2:
 
 			OpenAmUserRequest openAmReq = mapper.map(userRequest, OpenAmUserRequest.class);
+			
+			
+			/**
+			 * Setting registration 
+			 */
+			
+			if(null != userRequest.getAttributes() && userRequest.getAttributes().size() > 0){
+			openAmReq.getInput().getUser().setRegistrationAttributes__c(objMapper.writeValueAsString(userRequest.getAttributes()));
+			}
 
 			/**
 			 * call /json/authenticate to iplanetDirectoryPro token for admin
@@ -1161,23 +1186,29 @@ public class UserServiceImpl implements UserService {
 				!UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())) {
 			// mapping IFW request to UserCompany
 			CompanyV3 company = mapper.map(userRequest, CompanyV3.class);
-			company.setLanguageCode(company.getLanguageCode().toLowerCase());
+			if (null != company.getLanguageCode() && !company.getLanguageCode().isEmpty()) {
+				company.setLanguageCode(company.getLanguageCode().toLowerCase());
+			}
 			UserV6 identity = mapper.map(userRequest, UserV6.class);
-			identity.setLanguageCode(identity.getLanguageCode().toLowerCase());
+			if (null != identity.getLanguageCode() && !identity.getLanguageCode().isEmpty()) {
+				identity.setLanguageCode(identity.getLanguageCode().toLowerCase());
+			}
+			
+			Integer resultCountCheck = checkCompanyMappedOtherUsers(userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c());
 			
 			//forcedFederatedId = "cn00"+ UUID.randomUUID().toString();
 			if(pickListValidator.validate(UserConstants.UIMSCreateUserSync, UserConstants.TRUE)){
 				//Calling SYNC method createUIMSUserAndCompany
 				LOGGER.info("Start: calling SYNC createUIMSUserAndCompany() of UIMSUserManagerSync for userName:"+userName);
 				uimsUserManagerSync.createUIMSUserAndCompany(UimsConstants.CALLER_FID, identity, userRequest.getUserRecord().getIDMS_User_Context__c(), company, userName,
-					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, UserConstants.V_NEW,userRequest.getPassword(),userName,userRequest);
+					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, UserConstants.V_NEW,userRequest.getPassword(),userName,userRequest,resultCountCheck.intValue());
 				LOGGER.info("End: Sync createUIMSUserAndCompany() of UIMSUserManagerSync finished for userName:"+userName);
 				
 			}else{
 			//Calling Async method createUIMSUserAndCompany
 				LOGGER.info("Start: calling Async createUIMSUserAndCompany() of UIMSUserManagerSoapService for userName:"+userName);
 				uimsUserManagerSoapService.createUIMSUserAndCompany(UimsConstants.CALLER_FID, identity, userRequest.getUserRecord().getIDMS_User_Context__c(), company, userName,
-					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, UserConstants.V_NEW,userRequest.getPassword(),userName,userRequest);
+					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, UserConstants.V_NEW,userRequest.getPassword(),userName,userRequest,resultCountCheck.intValue());
 				LOGGER.info("End: Async createUIMSUserAndCompany() of UIMSUserManagerSoapService finished for userName:"+userName);
 				userRequest.getUserRecord().setIDMS_Federated_ID__c(userName);//federated id for IDMS
 			}
@@ -6974,4 +7005,27 @@ public class UserServiceImpl implements UserService {
 		return Response.status(Response.Status.OK).entity(response).build();
 	}
 
+	public Integer checkCompanyMappedOtherUsers(String companyId){
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		DocumentContext productDocCtxCheck = null;
+		
+		String iPlanetDirectoryKey = getSSOToken();
+		String companyMapped = productService.checkUserExistsWithEmailMobile(
+				UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "companyFederatedID eq " + "\"" + companyId + "\"");
+		productDocCtxCheck = JsonPath.using(conf).parse(companyMapped);
+		Integer resultCountCheck = productDocCtxCheck.read(JsonConstants.RESULT_COUNT);
+		
+		return resultCountCheck;
+	}
+
+	@Override
+	public Response userRegistration_4_1(String clientId, String clientSecret, CreateUserRequest userRequest) {
+		return this.userRegistration(clientId, clientSecret, userRequest);
+	}
+
+	@Override
+	public Response updateIDMSUserService(String authorizedToken, String clientId, String clientSecret,
+			UpdateUserRequest userRequest) {
+		return this.updateUser(authorizedToken, clientId, clientSecret, userRequest);
+	}
 }

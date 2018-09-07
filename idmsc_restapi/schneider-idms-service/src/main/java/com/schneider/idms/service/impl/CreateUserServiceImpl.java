@@ -38,12 +38,12 @@ import com.schneider.idms.common.ResponseCodeStatus;
 import com.schneider.idms.model.IdmsCreateUserResponse;
 import com.schneider.idms.model.IdmsUserRequest;
 import com.schneider.idms.service.ICreateUserService;
+import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.cache.utils.EmailConstants;
 import com.se.idms.util.JsonConstants;
 import com.se.idms.util.UimsConstants;
 import com.se.idms.util.UserConstants;
 import com.uims.authenticatedUsermanager.UserV6;
-import com.uims.companymanager.CompanyV3;
 
 @Service("createUserService")
 public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICreateUserService {

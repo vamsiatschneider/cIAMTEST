@@ -12,10 +12,10 @@ import com.idms.model.UserRegistrationInfoRequest;
 import com.idms.product.model.OpenAMPasswordRecoveryInput;
 import com.idms.product.model.OpenAmUserRequest;
 import com.idms.product.model.UimsUserRequest;
+import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.dto.IFWCustomAttributesForWork;
 import com.se.idms.util.UserConstants;
 import com.uims.authenticatedUsermanager.UserV6;
-import com.uims.companymanager.CompanyV3;
 
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.ConfigurableMapper;
@@ -100,7 +100,8 @@ public class IdmsMapper extends ConfigurableMapper{
         .field(UserConstants.MAPPER_CREATE_USER_PR_REQUEST,UserConstants.MAPPER_OPENAM_USER_PR_REQUEST)
         .field("userRecord.adminCompanyFederatedId", "input.user.admin_company_id")
         .field("userRecord.adminFederatedId", "input.user.admin_federated_id")
-        .field("userRecord.BFO_ACCOUNT_ID__c", "input.user.companyID")
+        .field("userRecord.BFO_ACCOUNT_ID__c", "input.user.bfoAccountId")
+        .field("userRecord.companyFederatedId", "input.user.companyID")
         .field("userRecord.aboutMe", "input.user.aboutMe")
         .field("userRecord.invitationCode", "input.user.invitationCode")
         .field("userRecord.trustedAdmin", "input.user.trustedAdmin")
@@ -172,6 +173,10 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.aboutMe", "input.user.aboutMe")
         .field("userRecord.IDMSPrimaryContact__c", "input.user.primaryContact")
         .field("userRecord.trustedAdmin", "input.user.trustedAdmin")
+        .field("userRecord.channel__c", "input.user.channel")
+        .field("userRecord.subChannel__c", "input.user.subchannel")
+        .field("userRecord.BFO_ACCOUNT_ID__c", "input.user.bfoAccountId")
+        .field("userRecord.contactId", "input.user.contactId")
         .byDefault()
         .register();
     }
@@ -310,7 +315,7 @@ public class IdmsMapper extends ConfigurableMapper{
 	
 	private void configureIFWUserRequestToCompanyV3Request(MapperFactory mapperFactory) {
         mapperFactory.classMap(CreateUserRequest.class,CompanyV3.class)
-        .field("userRecord.IDMSCompanyFederationIdentifier__c", "federatedId") 
+       // .field("userRecord.IDMSCompanyFederationIdentifier__c", "federatedId") 
         .field("userRecord.companyName", "organizationName")
         .field("userRecord.company_Country__c", "countryCode")
         .field("userRecord.defaultCurrencyIsoCode", "currencyCode")
@@ -335,13 +340,14 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.IDMSClassLevel1__c", "businessType")
         .field("userRecord.IDMSCompanyMarketServed__c", "marketSegment")
         .field("userRecord.IDMSAnnualRevenue__c", "annualSales")
+        .field("userRecord.BFO_ACCOUNT_ID__c", "bfoId")
         .byDefault()
         .register();
     }
 	
 	private void configureUpdateUserToCompanyV3Request(MapperFactory mapperFactory) {
         mapperFactory.classMap(UpdateUserRequest.class,CompanyV3.class)
-        .field("userRecord.IDMSCompanyFederationIdentifier__c", "federatedId") 
+       // .field("userRecord.IDMSCompanyFederationIdentifier__c", "federatedId") 
         .field("userRecord.companyName", "organizationName")
         .field("userRecord.company_Country__c", "countryCode")
         .field("userRecord.defaultCurrencyIsoCode", "currencyCode")
@@ -366,6 +372,7 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.IDMSClassLevel1__c", "businessType")
         .field("userRecord.IDMSCompanyMarketServed__c", "marketSegment")
         .field("userRecord.IDMSAnnualRevenue__c", "annualSales")
+        .field("userRecord.BFO_ACCOUNT_ID__c", "bfoId")
         .byDefault()
         .register();
     }

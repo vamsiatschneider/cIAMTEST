@@ -1,5 +1,7 @@
 package com.idms.model;
 
+import java.util.List;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,6 +16,9 @@ public class CreateUserRequest {
 
 	@JsonProperty
 	private String UIFlag;
+
+	@JsonProperty
+	private List<RegistrationAttributes> attributes;
 
 	@JsonProperty("UserRecord")
 	public IFWUser getUserRecord() {
@@ -43,6 +48,14 @@ public class CreateUserRequest {
 	@JsonProperty("UIFlag")
 	public void setUIFlag(String uIFlag) {
 		UIFlag = uIFlag;
+	}
+
+	public List<RegistrationAttributes> getAttributes() {
+		return attributes;
+	}
+
+	public void setAttributes(List<RegistrationAttributes> attributes) {
+		this.attributes = attributes;
 	}
 
 	@Override

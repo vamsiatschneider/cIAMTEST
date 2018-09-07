@@ -24,11 +24,11 @@ import com.idms.model.digital.Authentication;
 import com.idms.product.client.OpenAMService;
 import com.idms.service.SendEmail;
 import com.idms.service.digital.GoDigitalUserService;
+import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.util.UimsConstants;
 import com.se.idms.util.UserConstants;
 import com.uims.authenticatedUsermanager.AccessElement;
 import com.uims.authenticatedUsermanager.Type;
-import com.uims.companymanager.CompanyV3;
 
 /**
  * The Soap Service interface layer to call the UIMS user manager stubs.
@@ -75,7 +75,7 @@ public class UIMSUserManagerSoapServiceSync {
 	public String createUIMSUserAndCompany(String callerFid, com.uims.authenticatedUsermanager.UserV6 identity,
 			String context, CompanyV3 company, String userName,
 			String iPlanetDirectoryKey, String v_new, String password, String forcedFederatedId,
-			CreateUserRequest userRequest) {
+			CreateUserRequest userRequest,int companyCreatedCount) {
 		LOGGER.info("Entered createUIMSUserAndCompany() -> Start");
 		LOGGER.info("Parameter callerFid -> " + callerFid);
 		LOGGER.info("Parameter context -> " + context);
@@ -98,6 +98,7 @@ public class UIMSUserManagerSoapServiceSync {
 			
 			userRequestjsonString = objMapper.writeValueAsString(userRequest);
 			userRequestjsonString = userRequestjsonString.replace("\"\"", "[]");
+			
 		} catch (JsonProcessingException e) {
 			LOGGER.error("Error while converting the userRequest to Json" + e.getMessage());
 			e.printStackTrace();
@@ -110,6 +111,14 @@ public class UIMSUserManagerSoapServiceSync {
 			Callable<Boolean> callableUser = new Callable<Boolean>() {
 				public Boolean call() throws Exception {
 
+					if(null != userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c() && !userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c().isEmpty()){
+						
+						if(companyCreatedCount > 1){
+							identity.setCompanyId(userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c());
+						}
+					}
+					
+					
 					if (null != password && !password.isEmpty()) {
 						createdFedId = authenticatedUserManagerSoapServiceSync.createUIMSUserWithPassword(
 								UimsConstants.CALLER_FID, identity, password, forcedFederatedId);
@@ -155,13 +164,10 @@ public class UIMSUserManagerSoapServiceSync {
 					 * When user is creating from BFO then no need of creating
 					 * company, bfo account id act as company
 					 */
-					if (null != userRequest.getUserRecord().getAdminCompanyFederatedId()
+					/*if (null != userRequest.getUserRecord().getAdminCompanyFederatedId()
 							&& !userRequest.getUserRecord().getAdminCompanyFederatedId().isEmpty()) {
 						createdCompanyFedId = userRequest.getUserRecord().getAdminCompanyFederatedId();
-					} else if (null != userRequest.getUserRecord().getBFO_ACCOUNT_ID__c()
-							&& !userRequest.getUserRecord().getBFO_ACCOUNT_ID__c().isEmpty()) {
-						createdCompanyFedId = userRequest.getUserRecord().getBFO_ACCOUNT_ID__c();
-					} else if ((null != userRequest.getUserRecord().getAdminCompanyFederatedId()
+					}else if ((null != userRequest.getUserRecord().getAdminCompanyFederatedId()
 							&& !userRequest.getUserRecord().getAdminCompanyFederatedId().isEmpty())
 							&& (null != userRequest.getUserRecord().getAdminCompanyFederatedId()
 									&& !userRequest.getUserRecord().getAdminCompanyFederatedId().isEmpty())) {
@@ -172,10 +178,20 @@ public class UIMSUserManagerSoapServiceSync {
 						createdCompanyFedId = userRequest.getUserRecord().getCompanyFederatedId();
 					} else {
 
-						createdCompanyFedId = companyManagerSoapServiceSync.createUIMSCompany(createdFedId,
-								UimsConstants.VNEW, company);
-					}
-
+						// createdCompanyFedId = companyManagerSoapServiceSync.createUIMSCompany(createdFedId,UimsConstants.VNEW, company);
+						createdCompanyFedId = companyManagerSoapServiceSync.createUIMSCompanyWithCompanyForceIdmsId(identity.getCompanyId(), UimsConstants.VNEW, company);
+						
+					}*/
+					
+					if (null != userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c()
+							&& !userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c().isEmpty()) {
+						if (companyCreatedCount == 1) {
+							createdCompanyFedId = companyManagerSoapServiceSync.createUIMSCompanyWithCompanyForceIdmsId(createdFedId,
+									userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c(), UimsConstants.VNEW, company);
+						} 
+					} 
+					
+					
 					if (null != createdCompanyFedId) {
 						String companyFedID = "{" + "\"companyFederatedID\": \"" + createdCompanyFedId + "\"" + "}";
 						LOGGER.info("companyFedID in creating UIMS Company: " + companyFedID);

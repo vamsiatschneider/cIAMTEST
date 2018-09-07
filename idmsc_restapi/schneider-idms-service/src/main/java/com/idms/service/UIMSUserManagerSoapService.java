@@ -13,6 +13,7 @@ import javax.xml.ws.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
@@ -32,6 +33,8 @@ import com.idms.model.UserRegistrationInfoRequest;
 import com.idms.model.digital.Authentication;
 import com.idms.product.client.OpenAMService;
 import com.idms.service.digital.GoDigitalUserService;
+import com.schneider.ims.service.uimsv2.CompanyV3;
+import com.se.idms.cache.validate.IValidator;
 import com.se.idms.util.SamlAssertionTokenGenerator;
 import com.se.idms.util.UimsConstants;
 import com.se.idms.util.UserConstants;
@@ -48,7 +51,6 @@ import com.se.uims.usermanager.UserManagerUIMSV22;
 import com.se.uims.usermanager.UserV6;
 import com.uims.authenticatedUsermanager.AccessElement;
 import com.uims.authenticatedUsermanager.Type;
-import com.uims.companymanager.CompanyV3;
 
 /**
  * The Soap Service interface layer to call the UIMS user manager stubs.
@@ -72,6 +74,10 @@ public class UIMSUserManagerSoapService {
 	
 	@Inject
 	private OpenAMService productService;
+	
+	@Inject
+	@Qualifier("pickListValidator")
+	private IValidator pickListValidator;
 	
 	private SendEmail sendEmail;
 	
@@ -505,7 +511,7 @@ public class UIMSUserManagerSoapService {
 	public String createUIMSUserAndCompany(String callerFid, com.uims.authenticatedUsermanager.UserV6 identity,
 			String context, CompanyV3 company, String userName,
 			String iPlanetDirectoryKey, String v_new, String password, String forcedFederatedId,
-			CreateUserRequest userRequest) {
+			CreateUserRequest userRequest,int companyCreatedCount) {
 		LOGGER.info("Entered createUIMSUserAndCompany() -> Start");
 		LOGGER.info("Parameter callerFid -> " + callerFid+" ,identity -> "+identity);
 		LOGGER.info("Parameter context -> " + context+" ,company -> "+company);
@@ -542,6 +548,14 @@ public class UIMSUserManagerSoapService {
 		try {
 			Callable<Boolean> callableUser = new Callable<Boolean>() {
 				public Boolean call() throws Exception {
+					
+					if (null != userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c()
+							&& !userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c().isEmpty()) {
+
+						if (companyCreatedCount > 1) {
+							identity.setCompanyId(userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c());
+						}
+					}
 
 					if (null != password && !password.isEmpty()) {
 						createdFedId = authenticatedUserManagerSoapService.createUIMSUserWithPassword(
@@ -593,10 +607,7 @@ public class UIMSUserManagerSoapService {
 					 * When user is creating from BFO then no need of creating
 					 * company, bfo account id act as company
 					 */
-					if (null != userRequest.getUserRecord().getAdminCompanyFederatedId()
-							&& !userRequest.getUserRecord().getAdminCompanyFederatedId().isEmpty()) {
-						createdCompanyFedId = userRequest.getUserRecord().getAdminCompanyFederatedId();
-					} else if (null != userRequest.getUserRecord().getBFO_ACCOUNT_ID__c()
+					/*if (null != userRequest.getUserRecord().getBFO_ACCOUNT_ID__c()
 							&& !userRequest.getUserRecord().getBFO_ACCOUNT_ID__c().isEmpty()) {
 						createdCompanyFedId = userRequest.getUserRecord().getBFO_ACCOUNT_ID__c();
 					} else if ((null != userRequest.getUserRecord().getAdminCompanyFederatedId()
@@ -604,16 +615,25 @@ public class UIMSUserManagerSoapService {
 							&& (null != userRequest.getUserRecord().getAdminCompanyFederatedId()
 									&& !userRequest.getUserRecord().getAdminCompanyFederatedId().isEmpty())) {
 						createdCompanyFedId = userRequest.getUserRecord().getAdminCompanyFederatedId();
-					} else if (null != userRequest.getUserRecord().getIDMS_Registration_Source__c() 
-							&& UserConstants.PRM.equals(userRequest.getUserRecord().getIDMS_Registration_Source__c())){
+					} else if ((null != userRequest.getUserRecord().getIDMS_Registration_Source__c() && !userRequest.getUserRecord().getIDMS_Registration_Source__c().isEmpty()) 
+							&& pickListValidator.validate(UserConstants.IDMS_BFO_profile,userRequest.getUserRecord().getIDMS_Registration_Source__c())){
 						//if registration source is PRM then accept and force the company FederatedId from IFW/IDMS global
 						createdCompanyFedId = userRequest.getUserRecord().getCompanyFederatedId();
+						companyManagerSoapService.createUIMSCompanyWithCompanyForceIdmsId(createdFedId,UimsConstants.VNEW, company);
 					} else {
 
-						createdCompanyFedId = companyManagerSoapService.createUIMSCompany(createdFedId,
-								UimsConstants.VNEW, company);
-					}
+						//createdCompanyFedId = companyManagerSoapService.createUIMSCompany(createdFedId,UimsConstants.VNEW, company);
+						companyManagerSoapService.createUIMSCompany(createdFedId,UimsConstants.VNEW, company);
+					}*/
 
+					if (null != userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c()
+							&& !userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c().isEmpty()) {
+						if (companyCreatedCount == 1) {
+							createdCompanyFedId = companyManagerSoapService.createUIMSCompanyWithCompanyForceIdmsId(createdFedId,
+									userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c(), UimsConstants.VNEW, company);
+						} 
+					} 
+					
 					if (null != createdCompanyFedId) {
 						String companyFedID = "{" + "\"companyFederatedID\": \"" + createdCompanyFedId + "\"" + "}";
 						LOGGER.info("companyFedID in creating UIMS Company: " + companyFedID);

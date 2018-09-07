@@ -211,5 +211,17 @@ public interface UserService {
 	@Path("/apexrest/oauth2iplanet")
 	@Consumes("application/json")
 	Response oauthToIplanet(@HeaderParam("Authorization") String token);
+	
+	@POST
+	@Path("/apexrest/IDMSUserService")
+	@Consumes("application/json")
+	Response userRegistration_4_1(@HeaderParam("client_id")String clientId,
+			@HeaderParam("client_secret")String clientSecret, @Valid CreateUserRequest userRequest);
+	
+	@PUT
+	@Path("/apexrest/IDMSUserService")
+	@Consumes("application/json")
+	Response updateIDMSUserService(@HeaderParam("Authorization")String authorizedToken,@HeaderParam("client_id")String clientId,
+			@HeaderParam("client_secret")String clientSecret,UpdateUserRequest userRequest);
 
 }

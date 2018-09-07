@@ -1,6 +1,7 @@
 package com.idms.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.springframework.stereotype.Component;
 
@@ -402,6 +403,9 @@ public class IDMSUserResponse implements Serializable {
 
 	@JsonProperty
 	private String contactId;
+	
+	/*@JsonProperty
+	private List<RegistrationAttributes> attributes;*/
 
 	/*
 	 * @JsonProperty("attributes") public Attributes getAttributes() { return

@@ -244,6 +244,9 @@ public class OpenAmUser {
 		RegistrationAttributes__c = registrationAttributes__c;
 	}
 
+	@JsonInclude(Include.NON_NULL)
+	private String bfoAccountId;
+
 	@JsonProperty("emailcount")
 	@JsonInclude(Include.NON_NULL)
 	public String getEmailcount() {
@@ -922,6 +925,14 @@ public class OpenAmUser {
 
 	public void setContactId(String contactId) {
 		this.contactId = contactId;
+	}
+
+	public String getBfoAccountId() {
+		return bfoAccountId;
+	}
+
+	public void setBfoAccountId(String bfoAccountId) {
+		this.bfoAccountId = bfoAccountId;
 	}
 
 	@Override
