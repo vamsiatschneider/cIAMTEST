@@ -7062,13 +7062,12 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@SuppressWarnings({ "unchecked" })
 	public Response getOIDCAutoDiscoveryConfig() {
-		Object entity = null;
-		JsonNode jsonNode = null;
 		ObjectMapper oMapper = new ObjectMapper();
 		Response oidcAutoDiscoveryConfig = openAMTokenService.getOIDCAutoDiscoveryConfig();
 		
 		if(oidcAutoDiscoveryConfig.getStatus() == Response.Status.OK.getStatusCode()) {
-			entity = oidcAutoDiscoveryConfig.getEntity();
+			JsonNode jsonNode = null;
+			Object entity = oidcAutoDiscoveryConfig.getEntity();
 			try {
 				String respString = IOUtils.toString((InputStream) entity);
 				jsonNode = oMapper.readTree(respString);
@@ -7078,7 +7077,7 @@ public class UserServiceImpl implements UserService {
 				e.printStackTrace();
 			}
 			((ObjectNode)jsonNode).put("revocation_endpoint", revocation_endpoint_url);
-			return Response.status(Response.Status.OK).entity(entity).build();
+			return Response.status(Response.Status.OK).entity(jsonNode).build();
 		} else {
 			try {
 				LOGGER.error("Received error from OpenAM OIDC discovery endpoint: " + 
