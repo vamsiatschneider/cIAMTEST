@@ -43,7 +43,7 @@ public interface UserService {
 	
 	@GET
 	@Path("/apexrest/users/IDMS_Federated_ID__c/{federationId}")
-	Response getUserByFederationId(@PathParam("federationId") String federationId);
+	Response getUserByFederationId(@HeaderParam("Authorization") String authorizationToken,@PathParam("federationId") String federationId);
 		
 	
 	@GET
@@ -228,5 +228,9 @@ public interface UserService {
 	@Path("/apexrest/oidcautodiscovery")
 	@Consumes("application/json")
 	Response getOIDCAutoDiscoveryConfig();
+	
+	@POST
+	@Path("/apexrest/securedlogin")
+	Response securedLogin(@HeaderParam("X-OpenAM-Username") String userName,@HeaderParam("X-OpenAM-Password") String password,@QueryParam("realm") String realm);
 	
 }

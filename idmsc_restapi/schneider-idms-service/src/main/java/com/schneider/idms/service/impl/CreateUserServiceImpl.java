@@ -145,7 +145,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 					LOGGER.error("Error while processing is " + errorResponse.getMessage());
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+					return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 				}
 				
 				/**

@@ -43,7 +43,7 @@ public interface OpenAMService {
 	String checkUserExistsWithEmailMobile(@HeaderParam("Cookie") String iPlanetDirectoryKey,@QueryParam("_queryFilter") String emailOrMobile);
 	
 	@POST
-	@Path("/mobilesso/authenticate")
+	@Path("/se/authenticate")
 	@Consumes("application/json")
 	Response otpAuthentication(@HeaderParam("Cookie") String cookieValue, @QueryParam("service") String service,@QueryParam("authIndexType") String authIndexType, @QueryParam("authIndexValue") String authIndexValue,String request);
 	
@@ -78,7 +78,7 @@ public interface OpenAMService {
 	String authenticateIdmsChinaUser(@HeaderParam("X-OpenAM-Username") String userName,@HeaderParam("X-OpenAM-Password") String password,@QueryParam("realm") String realm);
 	
 	@POST
-	@Path("/mobilesso/authenticate")
+	@Path("/se/authenticate")
 	@Consumes("application/json")
 	Response oauth2iplanet(@HeaderParam("Cache-Control") String cacheControl,@HeaderParam("access_token") String accessToken, @QueryParam("service") String service,@QueryParam("authIndexType") String authIndexType, @QueryParam("authIndexValue") String authIndexValue,String auth);
 	

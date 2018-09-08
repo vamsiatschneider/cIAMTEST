@@ -105,6 +105,7 @@ import com.idms.model.UpdateUserResponse;
 import com.idms.product.client.IFWService;
 import com.idms.product.client.OpenAMService;
 import com.idms.product.client.OpenAMTokenService;
+import com.idms.product.client.OpenDjService;
 import com.idms.product.client.SalesForceService;
 import com.idms.product.model.Attributes;
 import com.idms.product.model.OpenAMGetUserHomeResponse;
@@ -119,6 +120,8 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+import com.schneider.idms.common.DirectApiConstants;
+import com.schneider.idms.common.ErrorCodeConstants;
 import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.cache.CacheTypes;
 import com.se.idms.cache.utils.EmailConstants;
@@ -180,6 +183,9 @@ public class UserServiceImpl implements UserService {
 
 	@Inject
 	private SalesForceService salesForceService;
+	
+	@Inject
+	protected OpenDjService openDJService;
 
 	@Inject
 	private IdmsMapper mapper;
@@ -5915,13 +5921,20 @@ public class UserServiceImpl implements UserService {
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Response getUserByFederationId(String federationId) {
+	public Response getUserByFederationId(String authorizationToken,String federationId) {
 		LOGGER.info("Entered getUserByFederationId() -> Start");
 		LOGGER.info("Parameter federationId -> " + federationId);
-		
+		JSONObject errorResponse = new JSONObject();
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		String userId = null;
+		
+		String[] tokenSplit = authorizationToken.split("Bearer ");
+		if(!getTechnicalUserDetails(authorizationToken)){
+			errorResponse.put(UserConstants.MESSAGE, ErrorCodeConstants.BADREQUEST_MESSAGE);
+			return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+		}
 		/**
 		 * Get iPlanetDirectory Pro Admin token for admin
 		 */
@@ -7092,5 +7105,104 @@ public class UserServiceImpl implements UserService {
 		errorResponse.put("code", "SERVER_ERROR");
 		errorResponse.put(UserConstants.MESSAGE, "Error generating OIDC Discovery data");
 		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
+	}
+	
+	public boolean getTechnicalUserDetails(String authorizationToken) {
+
+		try {
+
+			String userInfo = openDJService.getUserDetails(authorizationToken);
+			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+			DocumentContext productDocCtx = JsonPath.using(conf).parse(userInfo);
+
+			String userSubject = getValue(productDocCtx.read("$.userGroup").toString());
+
+			if (userSubject.contains(DirectApiConstants.TECHNICAL_USER)) {
+				return true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		return false;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Response securedLogin(String userName, String password, String realm) {
+		LOGGER.info("Entered authenticateUser() -> Start");
+		LOGGER.info("Parameter userName -> " + userName+" ,password -> "+password+" ,realm -> "+realm);
+		
+		String successResponse = null;
+		String regSource = "Test";
+		Response checkUserExistsResponse = null;
+		UserExistsResponse checkUserExistsFlag = null;
+		JSONObject jsonObject = new JSONObject();
+		LOGGER.info(JsonConstants.JSON_STRING + userName);
+		LOGGER.info(AUDIT_REQUESTING_USER.concat(userName).concat(AUDIT_IMPERSONATING_USER).concat(AUDIT_API_ADMIN)
+				.concat(AUDIT_OPENAM_API).concat(AUDIT_OPENAM_AUTHENTICATE_CALL).concat(AUDIT_LOG_CLOSURE));
+
+		cache = (EhCacheCache) cacheManager.getCache("iPlanetToken");
+
+		if (null != cache) {
+			LOGGER.info("cacahe NotNull");
+			// cache.evictExpiredElements();
+		}
+		//Response authenticateResponse = productService.authenticateIdmsChinaUser(userName, password, realm);
+				
+		try {
+			
+			//The below snippet for authentication logs.
+			String PlanetDirectoryKey = getSSOToken();
+
+			LOGGER.info("Going to checkUserExistsWithEmailMobile() of OpenAMService for userName="+userName);
+			
+			Response authenticateResponse = ChinaIdmsUtil.executeHttpClient(prefixStartUrl, realm, userName, password);
+			successResponse = (String) authenticateResponse.getEntity();
+			if(401 == authenticateResponse.getStatus() && successResponse.contains(UserConstants.ACCOUNT_BLOCKED)){
+				jsonObject.put("message", UserConstants.ACCOUNT_BLOCKED);
+				AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource);
+				return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
+				
+			}else if (401 == authenticateResponse.getStatus()) {
+				checkUserExistsResponse = checkUserExists(userName, UserConstants.FALSE);
+
+				checkUserExistsFlag = (UserExistsResponse)checkUserExistsResponse.getEntity();
+
+				if (UserConstants.TRUE.equalsIgnoreCase(checkUserExistsFlag.getMessage())) {
+
+					jsonObject.put("user_store", "CN");
+					AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource);
+					return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
+				} else {
+					checkUserExistsResponse = checkUserExists(userName, UserConstants.TRUE);
+					checkUserExistsFlag = (UserExistsResponse)checkUserExistsResponse.getEntity();
+
+					if (UserConstants.TRUE.equalsIgnoreCase(checkUserExistsFlag.getMessage())) {
+						jsonObject.put("user_store", "GLOBAL");
+						AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource);
+						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
+					} else {
+						jsonObject.put("user_store", "None");
+						AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource);
+						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
+					}
+				}
+			}
+
+			//successResponse = IOUtils.toString((InputStream) authenticateResponse.getEntity());
+		} catch (Exception e) {
+			LOGGER.error("Problem in authenticateUser():"+e.getMessage());
+			e.printStackTrace();
+			jsonObject.put("user_store", "None");
+			AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + successStatus + "," + regSource);
+			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
+		}
+
+
+		LOGGER.debug(JsonConstants.JSON_STRING, successResponse);
+		AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + successStatus + "," + regSource);
+		LOGGER.info("authenticateUser() -> Ending");
+		return Response.status(Response.Status.OK.getStatusCode()).entity(successResponse).build();
 	}
 }
