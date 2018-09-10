@@ -193,6 +193,9 @@ public class IdmsUserRequest {
 
 	@JsonInclude(Include.NON_NULL)
 	private String subChannel;
+	
+	@JsonInclude(Include.NON_NULL)
+	private String contactId;
 
 	public String getUserContext() {
 		return userContext;
@@ -696,6 +699,14 @@ public class IdmsUserRequest {
 
 	public void setSubChannel(String subChannel) {
 		this.subChannel = subChannel;
+	}
+
+	public String getContactId() {
+		return contactId;
+	}
+
+	public void setContactId(String contactId) {
+		this.contactId = contactId;
 	}
 
 }

@@ -3,7 +3,7 @@ package com.schneider.idms.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-public class IdmsUpdateUserResponse extends IdmsUpdateUserRequest{
+public class IdmsUpdateUserResponse extends IdmsUpdateUserRequest {
 
 	@JsonInclude(Include.NON_NULL)
 	private String userId;
@@ -82,6 +82,15 @@ public class IdmsUpdateUserResponse extends IdmsUpdateUserRequest{
 
 	@JsonInclude(Include.NON_NULL)
 	private String accountGoldenID;
+
+	@JsonInclude(Include.NON_NULL)
+	private String channel;
+
+	@JsonInclude(Include.NON_NULL)
+	private String subChannel;
+
+	@JsonInclude(Include.NON_NULL)
+	private String contactId;
 
 	public String getUserId() {
 		return userId;
@@ -289,6 +298,30 @@ public class IdmsUpdateUserResponse extends IdmsUpdateUserRequest{
 
 	public void setAccountGoldenID(String accountGoldenID) {
 		this.accountGoldenID = accountGoldenID;
+	}
+
+	public String getChannel() {
+		return channel;
+	}
+
+	public void setChannel(String channel) {
+		this.channel = channel;
+	}
+
+	public String getSubChannel() {
+		return subChannel;
+	}
+
+	public void setSubChannel(String subChannel) {
+		this.subChannel = subChannel;
+	}
+
+	public String getContactId() {
+		return contactId;
+	}
+
+	public void setContactId(String contactId) {
+		this.contactId = contactId;
 	}
 
 }

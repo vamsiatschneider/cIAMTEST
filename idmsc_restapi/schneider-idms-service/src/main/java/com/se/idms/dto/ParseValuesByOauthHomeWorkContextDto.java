@@ -680,6 +680,9 @@ public class ParseValuesByOauthHomeWorkContextDto {
 		
 		userResponse.setSubChannel__c(null != userProductDocCtx.read("$.subchannel")
 				? getValue(userProductDocCtx.read("$.subchannel").toString()) : getDelimeter());
+		
+		userResponse.setContactId(null != userProductDocCtx.read("$.contactId")
+				? getValue(userProductDocCtx.read("$.contactId").toString()) : getDelimeter());
 	}
 
 	

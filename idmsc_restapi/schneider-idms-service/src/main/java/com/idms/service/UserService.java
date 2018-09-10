@@ -43,7 +43,7 @@ public interface UserService {
 	
 	@GET
 	@Path("/apexrest/users/IDMS_Federated_ID__c/{federationId}")
-	Response getUserByFederationId(@PathParam("federationId") String federationId);
+	Response getUserByFederationId(@HeaderParam("Authorization") String authorizationToken,@PathParam("federationId") String federationId);
 		
 	
 	@GET
@@ -211,5 +211,26 @@ public interface UserService {
 	@Path("/apexrest/oauth2iplanet")
 	@Consumes("application/json")
 	Response oauthToIplanet(@HeaderParam("Authorization") String token);
+	
+	@POST
+	@Path("/apexrest/IDMSUserService")
+	@Consumes("application/json")
+	Response userRegistration_4_1(@HeaderParam("client_id")String clientId,
+			@HeaderParam("client_secret")String clientSecret, @Valid CreateUserRequest userRequest);
+	
+	@PUT
+	@Path("/apexrest/IDMSUserService")
+	@Consumes("application/json")
+	Response updateIDMSUserService(@HeaderParam("Authorization")String authorizedToken,@HeaderParam("client_id")String clientId,
+			@HeaderParam("client_secret")String clientSecret,UpdateUserRequest userRequest);
 
+	@GET
+	@Path("/apexrest/oidcautodiscovery")
+	@Consumes("application/json")
+	Response getOIDCAutoDiscoveryConfig();
+	
+	@POST
+	@Path("/apexrest/securedlogin")
+	Response securedLogin(@HeaderParam("X-OpenAM-Username") String userName,@HeaderParam("X-OpenAM-Password") String password,@QueryParam("realm") String realm);
+	
 }

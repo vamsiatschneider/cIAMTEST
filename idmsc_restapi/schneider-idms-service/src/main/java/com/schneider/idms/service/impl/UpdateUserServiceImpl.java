@@ -34,10 +34,10 @@ import com.schneider.idms.common.ResponseCodeStatus;
 import com.schneider.idms.model.IdmsUpdateUserResponse;
 import com.schneider.idms.model.IdmsUserRequest;
 import com.schneider.idms.service.IUpdateUserService;
+import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.cache.utils.EmailConstants;
 import com.se.idms.util.JsonConstants;
 import com.se.idms.util.UserConstants;
-import com.uims.companymanager.CompanyV3;
 
 @Service("updateUserService")
 public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpdateUserService {

@@ -68,6 +68,15 @@ public class IdmsCreateUserResponse extends IdmsUserRequest {
 	@JsonInclude(Include.NON_NULL)
 	private String accountGoldenID;
 
+	/*@JsonInclude(Include.NON_NULL)
+	private String channel;
+
+	@JsonInclude(Include.NON_NULL)
+	private String subChannel;
+
+	@JsonInclude(Include.NON_NULL)
+	private String contactId;*/
+
 	public String getUserId() {
 		return userId;
 	}
@@ -235,5 +244,4 @@ public class IdmsCreateUserResponse extends IdmsUserRequest {
 	public void setAccountGoldenID(String accountGoldenID) {
 		this.accountGoldenID = accountGoldenID;
 	}
-
 }

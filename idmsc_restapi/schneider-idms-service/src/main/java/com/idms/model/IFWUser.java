@@ -225,6 +225,22 @@ public class IFWUser extends BaseEntity {
 	@JsonProperty
 	private String SubChannel__c;
 
+	@JsonProperty
+	private String contactId;
+	
+	@JsonProperty
+	private String RegistrationAttributes__c;
+	
+	@JsonProperty("RegistrationAttributes__c")
+	public String getRegistrationAttributes__c() {
+		return RegistrationAttributes__c;
+	}
+
+	@JsonProperty("RegistrationAttributes__c")
+	public void setRegistrationAttributes__c(String registrationAttributes__c) {
+		RegistrationAttributes__c = registrationAttributes__c;
+	}
+
 	@JsonProperty("isActivated")
 	public String getIsActivated() {
 		return isActivated;
@@ -865,12 +881,24 @@ public class IFWUser extends BaseEntity {
 		Channel__c = channel__c;
 	}
 
+	@JsonProperty("SubChannel__c")
 	public String getSubChannel__c() {
 		return SubChannel__c;
 	}
 
+	@JsonProperty("SubChannel__c")
 	public void setSubChannel__c(String subChannel__c) {
 		SubChannel__c = subChannel__c;
+	}
+
+	@JsonProperty("ContactId")
+	public String getContactId() {
+		return contactId;
+	}
+
+	@JsonProperty("ContactId")
+	public void setContactId(String contactId) {
+		this.contactId = contactId;
 	}
 
 	@Override

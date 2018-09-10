@@ -1,6 +1,7 @@
 package com.idms.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.springframework.stereotype.Component;
 
@@ -15,13 +16,13 @@ import com.idms.product.model.Attributes;
 
 @Component
 public class IDMSUserResponse implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
 
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private Attributes attributes;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String id;
@@ -29,7 +30,7 @@ public class IDMSUserResponse implements Serializable {
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String iDMS_Federated_ID__c;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String iDMS_User_Context__c;
@@ -41,11 +42,11 @@ public class IDMSUserResponse implements Serializable {
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String lastName;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String country;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String email;
@@ -53,11 +54,11 @@ public class IDMSUserResponse implements Serializable {
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String mobilePhone;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String iDMS_PreferredLanguage__c;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String iDMS_Email_opt_in__c;
@@ -77,7 +78,7 @@ public class IDMSUserResponse implements Serializable {
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String company_City__c;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String company_Postal_Code__c;
@@ -85,11 +86,11 @@ public class IDMSUserResponse implements Serializable {
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String company_State__c;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String iDMSCompanyPoBox__c;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String iDMSCompanyCounty__c;
@@ -101,7 +102,7 @@ public class IDMSUserResponse implements Serializable {
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String company_Address2__c;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String company_Website__c;
@@ -121,7 +122,7 @@ public class IDMSUserResponse implements Serializable {
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String iDMSMarketSubSegment__c;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String iDMSCompanyMarketServed__c;
@@ -129,11 +130,11 @@ public class IDMSUserResponse implements Serializable {
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String iDMSCompanyNbrEmployees__c;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String department;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String iDMSCompanyHeadquarters__c;
@@ -157,10 +158,10 @@ public class IDMSUserResponse implements Serializable {
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String iDMSJobDescription__c;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
-	private String phone;	
+	private String phone;
 
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
@@ -185,15 +186,15 @@ public class IDMSUserResponse implements Serializable {
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String iDMS_POBox__c;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String iDMS_AdditionalAddress__c;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String iDMSMiddleName__c;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String iDMSSalutation__c;
@@ -201,11 +202,11 @@ public class IDMSUserResponse implements Serializable {
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String iDMSSuffix__c;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String fax;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String accountId;
@@ -216,7 +217,7 @@ public class IDMSUserResponse implements Serializable {
 
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
-	private String iDMS_Profile_update_source__c;	
+	private String iDMS_Profile_update_source__c;
 
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
@@ -228,12 +229,12 @@ public class IDMSUserResponse implements Serializable {
 
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
-	private String iDMS_RejectionComments__c;	
-	
+	private String iDMS_RejectionComments__c;
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private boolean isActive;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String bFO_ACCOUNT_ID__c;
@@ -253,27 +254,27 @@ public class IDMSUserResponse implements Serializable {
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String tncFlag;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String iDMSPrimaryContact__c;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String companyFederatedId;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String adminFederatedId;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String adminCompanyFederatedId;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String aboutMe;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String federationIdentifier;
@@ -389,33 +390,38 @@ public class IDMSUserResponse implements Serializable {
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String socialProviders__c;
-	
+
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String trustedAdmin;
-	
+
 	@JsonProperty
 	private String Channel__c;
 
 	@JsonProperty
 	private String SubChannel__c;
+
+	@JsonProperty
+	private String contactId;
 	
-	
-	/*@JsonProperty("attributes")
-	public Attributes getAttributes() {
-		return attributes;
-	}*/
-	
+	/*@JsonProperty
+	private List<RegistrationAttributes> attributes;*/
+
+	/*
+	 * @JsonProperty("attributes") public Attributes getAttributes() { return
+	 * attributes; }
+	 */
+
 	@JsonProperty("attributes")
 	public void setAttributes(Attributes attributes) {
 		this.attributes = attributes;
 	}
-	
+
 	@JsonProperty("Id")
 	public String getId() {
 		return id;
 	}
-	
+
 	@JsonProperty("Id")
 	public void setId(String id) {
 		this.id = id;
@@ -425,122 +431,122 @@ public class IDMSUserResponse implements Serializable {
 	public String getiDMS_Federated_ID__c() {
 		return iDMS_Federated_ID__c;
 	}
-	
+
 	@JsonProperty("IDMS_Federated_ID__c")
 	public void setiDMS_Federated_ID__c(String iDMS_Federated_ID__c) {
 		this.iDMS_Federated_ID__c = iDMS_Federated_ID__c;
 	}
-	
+
 	@JsonProperty("IDMS_User_Context__c")
 	public String getiDMS_User_Context__c() {
 		return iDMS_User_Context__c;
 	}
-	
+
 	@JsonProperty("IDMS_User_Context__c")
 	public void setiDMS_User_Context__c(String iDMS_User_Context__c) {
 		this.iDMS_User_Context__c = iDMS_User_Context__c;
 	}
-	
+
 	@JsonProperty("FirstName")
 	public String getFirstName() {
 		return firstName;
 	}
-	
+
 	@JsonProperty("FirstName")
 	public void setFirstName(String firstName) {
 		this.firstName = firstName;
 	}
-	
+
 	@JsonProperty("LastName")
 	public String getLastName() {
 		return lastName;
 	}
-	
+
 	@JsonProperty("LastName")
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
 	}
-	
+
 	@JsonProperty("Country")
 	public String getCountry() {
 		return country;
 	}
-	
+
 	@JsonProperty("Country")
 	public void setCountry(String country) {
 		this.country = country;
 	}
-	
+
 	@JsonProperty("Email")
 	public String getEmail() {
 		return email;
 	}
-	
+
 	@JsonProperty("Email")
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	
+
 	@JsonProperty("MobilePhone")
 	public String getMobilePhone() {
 		return mobilePhone;
 	}
-	
+
 	@JsonProperty("MobilePhone")
 	public void setMobilePhone(String mobilePhone) {
 		this.mobilePhone = mobilePhone;
 	}
-	
+
 	@JsonProperty("IDMS_PreferredLanguage__c")
 	public String getiDMS_PreferredLanguage__c() {
 		return iDMS_PreferredLanguage__c;
 	}
-	
+
 	@JsonProperty("IDMS_PreferredLanguage__c")
 	public void setiDMS_PreferredLanguage__c(String iDMS_PreferredLanguage__c) {
 		this.iDMS_PreferredLanguage__c = iDMS_PreferredLanguage__c;
 	}
-	
+
 	@JsonProperty("IDMS_Email_opt_in__c")
 	public String getiDMS_Email_opt_in__c() {
 		return iDMS_Email_opt_in__c;
 	}
-	
+
 	@JsonProperty("IDMS_Email_opt_in__c")
 	public void setiDMS_Email_opt_in__c(String iDMS_Email_opt_in__c) {
 		this.iDMS_Email_opt_in__c = iDMS_Email_opt_in__c;
 	}
-	
+
 	@JsonProperty("DefaultCurrencyIsoCode")
 	public String getDefaultCurrencyIsoCode() {
 		return defaultCurrencyIsoCode;
 	}
-	
+
 	@JsonProperty("DefaultCurrencyIsoCode")
 	public void setDefaultCurrencyIsoCode(String defaultCurrencyIsoCode) {
 		this.defaultCurrencyIsoCode = defaultCurrencyIsoCode;
 	}
-	
+
 	@JsonProperty("CompanyName")
 	public String getCompanyName() {
 		return companyName;
 	}
-	
+
 	@JsonProperty("CompanyName")
 	public void setCompanyName(String companyName) {
 		this.companyName = companyName;
 	}
-	
+
 	@JsonProperty("Company_Address1__c")
 	public String getCompany_Address1__c() {
 		return company_Address1__c;
 	}
-	
+
 	@JsonProperty("Company_Address1__c")
 	public void setCompany_Address1__c(String company_Address1__c) {
 		this.company_Address1__c = company_Address1__c;
 	}
-	
+
 	@JsonProperty("Company_City__c")
 	public String getCompany_City__c() {
 		return company_City__c;
@@ -1040,10 +1046,9 @@ public class IDMSUserResponse implements Serializable {
 	public void setAboutMe(String aboutMe) {
 		this.aboutMe = aboutMe;
 	}
-	
-	
-////
-	
+
+	////
+
 	@JsonProperty("FederationIdentifier")
 	public String getFederationIdentifier() {
 		return federationIdentifier;
@@ -1343,7 +1348,7 @@ public class IDMSUserResponse implements Serializable {
 	public void setTrustedAdmin(String trustedAdmin) {
 		this.trustedAdmin = trustedAdmin;
 	}
-	
+
 	@JsonProperty("Channel__c")
 	public String getChannel__c() {
 		return Channel__c;
@@ -1363,6 +1368,15 @@ public class IDMSUserResponse implements Serializable {
 	public void setSubChannel__c(String subChannel__c) {
 		SubChannel__c = subChannel__c;
 	}
-	
+
+	@JsonProperty("ContactId")
+	public String getContactId() {
+		return contactId;
+	}
+
+	@JsonProperty("ContactId")
+	public void setContactId(String contactId) {
+		this.contactId = contactId;
+	}
 
 }

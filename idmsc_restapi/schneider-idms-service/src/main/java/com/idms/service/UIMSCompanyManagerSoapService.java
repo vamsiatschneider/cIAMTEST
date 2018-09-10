@@ -10,20 +10,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.schneider.ims.service.company.impl.uimsv2.AuthenticatedCompanyManagerUIMSV2;
+import com.schneider.ims.service.company.impl.uimsv2.ForcedFidAlreadyExistException;
+import com.schneider.ims.service.company.impl.uimsv2.IMSServiceSecurityCallNotAllowedException;
+import com.schneider.ims.service.company.impl.uimsv2.InvalidImsServiceMethodArgumentException;
+import com.schneider.ims.service.company.impl.uimsv2.LdapTemplateNotReadyException;
+import com.schneider.ims.service.company.impl.uimsv2.RequestedEntryNotExistsException;
+import com.schneider.ims.service.company.impl.uimsv2.RequestedInternalUserException;
+import com.schneider.ims.service.company.impl.uimsv2.SecuredImsException;
+import com.schneider.ims.service.company.impl.uimsv2.UnexpectedLdapResponseException;
+import com.schneider.ims.service.company.impl.uimsv2.UnexpectedRuntimeImsException;
+import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.util.SamlAssertionTokenGenerator;
 import com.se.idms.util.UimsConstants;
 import com.uims.companymanager.CompanyManagerUIMSV2;
-import com.uims.companymanager.CompanyV3;
-import com.uims.companymanager.IMSServiceSecurityCallNotAllowedException_Exception;
-import com.uims.companymanager.InvalidImsServiceMethodArgumentException_Exception;
-import com.uims.companymanager.LdapTemplateNotReadyException_Exception;
-import com.uims.companymanager.RequestedEntryNotExistsException_Exception;
-import com.uims.companymanager.RequestedInternalUserException_Exception;
-import com.uims.companymanager.SecuredImsException_Exception;
-import com.uims.companymanager.UnexpectedLdapResponseException_Exception;
-import com.uims.companymanager.UnexpectedRuntimeImsException_Exception;
 
 /**
  * The Soap Service interface layer to call the UIMS company manager stubs.
@@ -40,6 +42,11 @@ public class UIMSCompanyManagerSoapService {
 	 */
 	private static final Logger uimsLog = LoggerFactory.getLogger(UIMSCompanyManagerSoapService.class);
 	
+	/**
+	 * Logger instance.
+	 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(UIMSUserManagerSoapService.class);
+
 	@Value("${uimsCompanyManagerWsdl}")
 	private String uimsCompanyManagerWsdl;
 	
@@ -49,35 +56,99 @@ public class UIMSCompanyManagerSoapService {
 	@Value("${uimsCompanyManagerPortName}")
 	private String uimsCompanyManagerPortName;
 
-	public CompanyManagerUIMSV2 getCompanyManager() throws MalformedURLException {
-		URL url = new URL(uimsCompanyManagerWsdl);
-		QName qname = new QName(uimsCompanyManagerQname,uimsCompanyManagerPortName);
-		Service service = Service.create(url, qname);
+	public CompanyManagerUIMSV2 getCompanyManager(){
+		URL url;
+		CompanyManagerUIMSV2 userManagerUIMSV2 = null;
+		try {
+			url = new URL(uimsCompanyManagerWsdl);
 
-		CompanyManagerUIMSV2 userManagerUIMSV2 = service.getPort(CompanyManagerUIMSV2.class);
+			QName qname = new QName(uimsCompanyManagerQname,uimsCompanyManagerPortName);
+			Service service = Service.create(url, qname);
+
+			userManagerUIMSV2 = service.getPort(CompanyManagerUIMSV2.class);
+
+		}catch (MalformedURLException e) {
+			LOGGER.error("Exception while UIMSCompanyManagerSoapService :: getAuthenticatedUserManager()::" + e.getMessage());
+			e.printStackTrace();
+		}
+		catch (Exception e) {
+			LOGGER.error("Exception while UIMSCompanyManagerSoapService :: getAuthenticatedUserManager()::" + e.getMessage());
+			e.printStackTrace();
+		}
 		return userManagerUIMSV2;
 	}
 
+	/**
+	 * This is implementing to user forceCompanyFederatedId
+	 * @return
+	 * @throws MalformedURLException
+	 */
+	public AuthenticatedCompanyManagerUIMSV2 getAuthenitcatedCompanyManager(){
+		URL url;
+		AuthenticatedCompanyManagerUIMSV2 userManagerUIMSV2 = null;
+		try {
+			url = new URL(uimsCompanyManagerWsdl);
+
+			QName qname = new QName(uimsCompanyManagerQname,uimsCompanyManagerPortName);
+			Service service = Service.create(url, qname);
+
+			userManagerUIMSV2 = service.getPort(AuthenticatedCompanyManagerUIMSV2.class);
+		}catch (MalformedURLException e) {
+				LOGGER.error("Exception while getAuthenticatedUserManager()::" + e.getMessage());
+				e.printStackTrace();
+			}
+			catch (Exception e) {
+				LOGGER.error("Exception while getAuthenticatedUserManager()::" + e.getMessage());
+				e.printStackTrace();
+			}
+			return userManagerUIMSV2;
+		}
+	
 	public String createUIMSCompany(String fedId, String vnew, CompanyV3 company) {
 		String uimsUserResponse = "";
 		String samlAssertion = null;
-		CompanyManagerUIMSV2 companyManagerUIMSV2 = null;
+		AuthenticatedCompanyManagerUIMSV2 companyManagerUIMSV2 = null;
 		try {
-			companyManagerUIMSV2 = getCompanyManager();
+			companyManagerUIMSV2 =  getAuthenitcatedCompanyManager();
 			samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(fedId, vnew);
 		} catch (Exception e) {
 			uimsLog.error("Error executing while createUIMSCompany::" + e.getMessage());
 			e.printStackTrace();
 		}
+			try {
+				uimsUserResponse = companyManagerUIMSV2.createCompany(UimsConstants.CALLER_FID, samlAssertion, company);
+			} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
+					| LdapTemplateNotReadyException | RequestedEntryNotExistsException | RequestedInternalUserException
+					| UnexpectedLdapResponseException | UnexpectedRuntimeImsException e) {
+				uimsLog.error("Error executing while createUIMSCompany::" + e.getMessage());
+				e.printStackTrace();
+			}
+		
+		return uimsUserResponse;
+	}
+	
+	public String createUIMSCompanyWithCompanyForceIdmsId(String idmsFederationId, String companyForceFederationId, String vnew, CompanyV3 company) {
+		String uimsUserResponse = "";
+		String samlAssertion = null;
+		AuthenticatedCompanyManagerUIMSV2 authenticatedCompanyManagerUIMSV2 = null;
+		ObjectMapper objMapper = new ObjectMapper();
 		try {
-			uimsUserResponse = companyManagerUIMSV2.createCompany(UimsConstants.CALLER_FID, samlAssertion, company);
-		} catch (IMSServiceSecurityCallNotAllowedException_Exception
-				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
-				| RequestedEntryNotExistsException_Exception | RequestedInternalUserException_Exception
-				| SecuredImsException_Exception | UnexpectedLdapResponseException_Exception
-				| UnexpectedRuntimeImsException_Exception e) {
+			uimsLog.info("Parameter fedId -> " + idmsFederationId +" ,vnew="+vnew);
+			uimsLog.info("Parameter company -> " + objMapper.writeValueAsString(company));
+			authenticatedCompanyManagerUIMSV2 = getAuthenitcatedCompanyManager();
+			//samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(idmsFederationId, vnew);
+		} catch (Exception e) {
 			uimsLog.error("Error executing while createUIMSCompany::" + e.getMessage());
 			e.printStackTrace();
+		}
+		try {
+			uimsUserResponse = authenticatedCompanyManagerUIMSV2.createCompanyForceIdmsId(UimsConstants.CALLER_FID, idmsFederationId, company, companyForceFederationId);
+		} catch (ForcedFidAlreadyExistException | IMSServiceSecurityCallNotAllowedException
+				| InvalidImsServiceMethodArgumentException | LdapTemplateNotReadyException
+				| RequestedEntryNotExistsException | RequestedInternalUserException | SecuredImsException
+				| UnexpectedLdapResponseException | UnexpectedRuntimeImsException e) {
+			e.printStackTrace();
+			uimsLog.error("Error executing while createUIMSCompany::" + e.getMessage());
 		}
 		return uimsUserResponse;
 	}
@@ -92,15 +163,15 @@ public class UIMSCompanyManagerSoapService {
 			uimsLog.error("Error executing while updateUIMSCompany::" + e.getMessage());
 			e.printStackTrace();
 		}
+		//CompanyManagerUIMSV2 companyManagerUIMSV2 = getCompanyManager();
+		AuthenticatedCompanyManagerUIMSV2 companyManagerUIMSV2 = getAuthenitcatedCompanyManager();
+		//TODO check with Prasenjit what to pass as fedId
 		try {
-			CompanyManagerUIMSV2 companyManagerUIMSV2 = getCompanyManager();
-			//TODO check with Prasenjit what to pass as fedId
 			uimsUserResponse = companyManagerUIMSV2.updateCompany(UimsConstants.CALLER_FID, samlAssertion, fedId, company);
-		} catch (IMSServiceSecurityCallNotAllowedException_Exception
-				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
-				| RequestedEntryNotExistsException_Exception | SecuredImsException_Exception
-				| UnexpectedLdapResponseException_Exception | UnexpectedRuntimeImsException_Exception e) {
-			uimsLog.error("Error executing while updateUIMSCompany::" + e.getMessage());
+		} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
+				| LdapTemplateNotReadyException | RequestedEntryNotExistsException | SecuredImsException
+				| UnexpectedLdapResponseException | UnexpectedRuntimeImsException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return uimsUserResponse;
@@ -108,7 +179,7 @@ public class UIMSCompanyManagerSoapService {
 
 	public CompanyV3 getUIMSCompany(String callerFid, String federatedId, String vnew, CompanyV3 company)
 			throws MalformedURLException {
-		CompanyManagerUIMSV2 companyManagerUIMSV2 = getCompanyManager();
+		AuthenticatedCompanyManagerUIMSV2 companyManagerUIMSV2 = getAuthenitcatedCompanyManager();
 		CompanyV3 uimsUserResponse = null;
 		String samlAssertionOrToken = null;
 		try {
@@ -118,13 +189,11 @@ public class UIMSCompanyManagerSoapService {
 			e.printStackTrace();
 		}
 		try {
-			companyManagerUIMSV2 = getCompanyManager();
 			uimsUserResponse = companyManagerUIMSV2.getCompany(callerFid, samlAssertionOrToken, federatedId);
-		} catch (IMSServiceSecurityCallNotAllowedException_Exception
-				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
-				| RequestedEntryNotExistsException_Exception | SecuredImsException_Exception
-				| UnexpectedLdapResponseException_Exception | UnexpectedRuntimeImsException_Exception e) {
-			uimsLog.error("Error executing while getUIMSCompany::" + e.getMessage());
+		} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
+				| LdapTemplateNotReadyException | RequestedEntryNotExistsException | UnexpectedLdapResponseException
+				| UnexpectedRuntimeImsException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return uimsUserResponse;

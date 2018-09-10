@@ -75,11 +75,24 @@ public class UIMSAccessManagerSoapService {
 	@Value("${userAccessManagerUIMSVPortName}")
 	private String userAccessManagerUIMSVPortName;
 
-	public UserAccessManagerUIMSV2 getAccessManager() throws MalformedURLException {
-		URL url = new URL(userAccessManagerUIMSVWsdl);
-		QName qname = new QName(userAccessManagerUIMSQname,userAccessManagerUIMSVPortName);
-		Service service = Service.create(url, qname);
-		UserAccessManagerUIMSV2 accessManagerUIMSV2 = service.getPort(UserAccessManagerUIMSV2.class);
+	public UserAccessManagerUIMSV2 getAccessManager(){
+		URL url;
+		UserAccessManagerUIMSV2 accessManagerUIMSV2 = null;
+		try {
+			url = new URL(userAccessManagerUIMSVWsdl);
+
+			QName qname = new QName(userAccessManagerUIMSQname,userAccessManagerUIMSVPortName);
+			Service service = Service.create(url, qname);
+			accessManagerUIMSV2 = service.getPort(UserAccessManagerUIMSV2.class);
+
+		} catch (MalformedURLException e) {
+			LOGGER.error("Exception while UIMSAccessManagerSoapService :: getAccessManager()::" + e.getMessage());
+			e.printStackTrace();
+		}
+		catch (Exception e) {
+			LOGGER.error("Exception while UIMSAccessManagerSoapService :: getAccessManager()::" + e.getMessage());
+			e.printStackTrace();
+		}
 		return accessManagerUIMSV2;
 	}
 

@@ -334,6 +334,15 @@ public class IdmsCommonServiceImpl {
 				errorResponse.setMessage(UserConstants.EMAIL_VALIDATION + userRequest.getEmail());
 				return true;
 			}
+			
+			if (userRequest.getEmail().contains(UserConstants.SE_MAIL)
+					|| userRequest.getEmail().contains(UserConstants.NON_SE_MAIL)
+					|| userRequest.getEmail().contains(UserConstants.SCHNEIDER_MAIL)
+					|| userRequest.getEmail().contains(UserConstants.NON_SCHNEIDER_MAIL)) {
+
+				errorResponse.setMessage(UserConstants.EMAIL_VALIDATION + userRequest.getEmail());
+				return true;
+			}
 		}
 		
 		/**
@@ -921,7 +930,7 @@ public class IdmsCommonServiceImpl {
 		LOGGER.info("Parameter firstName -> " + firstName + " ,lastName" + lastName);
 
 		if (userPassword.contains(firstName) | userPassword.contains(lastName)
-				| !userPassword.matches(UserConstants.PR_REGEX))
+				| !userPassword.matches(UserConstants.PASSWORD_REGEX))
 			return false;
 		else
 			return true;

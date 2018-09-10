@@ -226,6 +226,27 @@ public class OpenAmUser {
 	@JsonInclude(Include.NON_NULL)
 	private String subchannel;
 
+	@JsonInclude(Include.NON_NULL)
+	private String contactId;
+	
+	@JsonInclude(Include.NON_NULL)
+	private String RegistrationAttributes__c;
+	
+	@JsonProperty("RegistrationAttributes__c")
+	@JsonInclude(Include.NON_NULL)
+	public String getRegistrationAttributes__c() {
+		return RegistrationAttributes__c;
+	}
+
+	@JsonProperty("RegistrationAttributes__c")
+	@JsonInclude(Include.NON_NULL)
+	public void setRegistrationAttributes__c(String registrationAttributes__c) {
+		RegistrationAttributes__c = registrationAttributes__c;
+	}
+
+	@JsonInclude(Include.NON_NULL)
+	private String bfoAccountId;
+
 	@JsonProperty("emailcount")
 	@JsonInclude(Include.NON_NULL)
 	public String getEmailcount() {
@@ -896,6 +917,22 @@ public class OpenAmUser {
 
 	public void setSubchannel(String subchannel) {
 		this.subchannel = subchannel;
+	}
+
+	public String getContactId() {
+		return contactId;
+	}
+
+	public void setContactId(String contactId) {
+		this.contactId = contactId;
+	}
+
+	public String getBfoAccountId() {
+		return bfoAccountId;
+	}
+
+	public void setBfoAccountId(String bfoAccountId) {
+		this.bfoAccountId = bfoAccountId;
 	}
 
 	@Override

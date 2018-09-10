@@ -96,6 +96,7 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
         .field("delegatedIdp", "input.user.delegatedIDP")
         .field("channel", "input.user.channel")
         .field("subChannel", "input.user.subchannel")
+        .field("contactId", "input.user.contactId")
         
         /*.field("userRecord.tncFlag", "input.user.tncFlag")
         .field(UserConstants.MAPPER_CREATE_USER_PR_REQUEST,UserConstants.MAPPER_OPENAM_USER_PR_REQUEST)
@@ -159,6 +160,9 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
         .field("trustedAdmin", "trustedAdmin")
         .field("companyFederatedId", "companyFederatedId")
         .field("currencyCode", "currencyCode") 
+        .field("channel", "channel")
+        .field("subChannel", "subChannel")
+        .field("contactId", "contactId")
         .byDefault()
         .register();
     }
@@ -214,6 +218,9 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
         .field("jobDescription", "jobDescription")
         .field("workPhone", "workPhone")
         .field("trustedAdmin", "trustedAdmin")
+        .field("channel", "channel")
+        .field("subChannel", "subChannel")
+        .field("contactId", "contactId")
         .byDefault()
         .register();
     }
@@ -308,6 +315,7 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
         .field("channel", "channel")
         .field("subChannel", "subChannel")
         .field("primaryContact", "primaryContact")
+        .field("contactId", "bfoId")
         //.field("userRecord.mobilePhone", "phoneId")
         //.field("userRecord.country", "input.countrycode")
         ////.field("userRecord.IDMS_Email_opt_in__c", "input.emailOptIn")
@@ -342,6 +350,7 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
         .field("mobilePhone", "phoneId")
         .field("channel", "channel")
         .field("subChannel", "subChannel")
+        .field("contactId", "bfoId")
         //.field("userRecord.mobilePhone", "phoneId")
         //.field("userRecord.country", "input.countrycode")
         ////.field("userRecord.IDMS_Email_opt_in__c", "input.emailOptIn")
@@ -403,6 +412,7 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
         .field("primaryContact", "input.user.primaryContact")
         .field("channel", "input.user.channel")
         .field("subChannel", "input.user.subchannel")
+        .field("contactId", "input.user.contactId")
         /*.field("companyFederatedId", "input.user.companyFederatedID")
         .field("adminCompanyFederatedId", "input.user.admin_company_id")
         .field("profileLastUpdateSource", "input.user.updateSource")
