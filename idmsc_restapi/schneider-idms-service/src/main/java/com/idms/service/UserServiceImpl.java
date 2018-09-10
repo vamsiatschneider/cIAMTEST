@@ -291,9 +291,6 @@ public class UserServiceImpl implements UserService {
 	@Value("${openAMService.url}")
 	private String prefixStartUrl;
 	
-	@Value("$revocationEndpoint.url")
-	private String revocation_endpoint_url;
-
 	private static String userAction = "submitRequirements";
 
 	private static String errorStatus = "Error";
@@ -7089,7 +7086,18 @@ public class UserServiceImpl implements UserService {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			((ObjectNode)jsonNode).put("revocation_endpoint", revocation_endpoint_url);
+			
+			/* OpenAM OIDC discovery well-know REST response is missing the revoke endpoint
+			 * hence, adding it explicitly.
+			 * Note: This has to be taken care when OAM is upgraded to next versions, and if
+			 * the OIDC discovery result is already having the revocation endpoint, this code
+			 * should be removed
+			 * Sample revocation endpoint URL for OpenAM
+			 * https://<server-host>/accessmanager/oauth2/se/token/revoke
+			 */
+			
+			String issuerUrl = ((ObjectNode)jsonNode).get("issuer").asText();
+			((ObjectNode)jsonNode).put("revocation_endpoint", issuerUrl + "/token/revoke");
 			return Response.status(Response.Status.OK).entity(jsonNode).build();
 		} else {
 			try {
