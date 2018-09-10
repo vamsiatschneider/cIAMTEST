@@ -63,11 +63,11 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 			authenticatedUserManagerUIMSV2 = service.getPort(AuthenticatedUserManagerUIMSV22.class);
 			LOGGER.info("getPort() of UIMS -> End, response is:" + authenticatedUserManagerUIMSV2);
 		} catch (MalformedURLException e) {
-			LOGGER.error("Exception while getAuthenticatedUserManager()::" + e.getMessage());
+			LOGGER.error("Exception while UIMSAuthenticatedUserManagerSoapServiceSync :: getAuthenticatedUserManager()::" + e.getMessage());
 			e.printStackTrace();
 		}
 		catch (Exception e) {
-			LOGGER.error("Exception while getAuthenticatedUserManager()::" + e.getMessage());
+			LOGGER.error("Exception while UIMSAuthenticatedUserManagerSoapServiceSync :: getAuthenticatedUserManager()::" + e.getMessage());
 			e.printStackTrace();
 		}
 		return authenticatedUserManagerUIMSV2;

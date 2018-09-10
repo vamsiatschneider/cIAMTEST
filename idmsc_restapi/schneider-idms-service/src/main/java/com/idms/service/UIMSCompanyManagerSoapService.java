@@ -42,6 +42,11 @@ public class UIMSCompanyManagerSoapService {
 	 */
 	private static final Logger uimsLog = LoggerFactory.getLogger(UIMSCompanyManagerSoapService.class);
 	
+	/**
+	 * Logger instance.
+	 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(UIMSUserManagerSoapService.class);
+
 	@Value("${uimsCompanyManagerWsdl}")
 	private String uimsCompanyManagerWsdl;
 	
@@ -51,12 +56,25 @@ public class UIMSCompanyManagerSoapService {
 	@Value("${uimsCompanyManagerPortName}")
 	private String uimsCompanyManagerPortName;
 
-	public CompanyManagerUIMSV2 getCompanyManager() throws MalformedURLException {
-		URL url = new URL(uimsCompanyManagerWsdl);
-		QName qname = new QName(uimsCompanyManagerQname,uimsCompanyManagerPortName);
-		Service service = Service.create(url, qname);
+	public CompanyManagerUIMSV2 getCompanyManager(){
+		URL url;
+		CompanyManagerUIMSV2 userManagerUIMSV2 = null;
+		try {
+			url = new URL(uimsCompanyManagerWsdl);
 
-		CompanyManagerUIMSV2 userManagerUIMSV2 = service.getPort(CompanyManagerUIMSV2.class);
+			QName qname = new QName(uimsCompanyManagerQname,uimsCompanyManagerPortName);
+			Service service = Service.create(url, qname);
+
+			userManagerUIMSV2 = service.getPort(CompanyManagerUIMSV2.class);
+
+		}catch (MalformedURLException e) {
+			LOGGER.error("Exception while UIMSCompanyManagerSoapService :: getAuthenticatedUserManager()::" + e.getMessage());
+			e.printStackTrace();
+		}
+		catch (Exception e) {
+			LOGGER.error("Exception while UIMSCompanyManagerSoapService :: getAuthenticatedUserManager()::" + e.getMessage());
+			e.printStackTrace();
+		}
 		return userManagerUIMSV2;
 	}
 
@@ -65,15 +83,26 @@ public class UIMSCompanyManagerSoapService {
 	 * @return
 	 * @throws MalformedURLException
 	 */
-	public AuthenticatedCompanyManagerUIMSV2 getAuthenitcatedCompanyManager() throws MalformedURLException {
-		URL url = new URL(uimsCompanyManagerWsdl);
-		QName qname = new QName(uimsCompanyManagerQname,uimsCompanyManagerPortName);
-		Service service = Service.create(url, qname);
+	public AuthenticatedCompanyManagerUIMSV2 getAuthenitcatedCompanyManager(){
+		URL url;
+		AuthenticatedCompanyManagerUIMSV2 userManagerUIMSV2 = null;
+		try {
+			url = new URL(uimsCompanyManagerWsdl);
 
-		AuthenticatedCompanyManagerUIMSV2 userManagerUIMSV2 = service.getPort(AuthenticatedCompanyManagerUIMSV2.class);
-		
-		return userManagerUIMSV2;
-	}
+			QName qname = new QName(uimsCompanyManagerQname,uimsCompanyManagerPortName);
+			Service service = Service.create(url, qname);
+
+			userManagerUIMSV2 = service.getPort(AuthenticatedCompanyManagerUIMSV2.class);
+		}catch (MalformedURLException e) {
+				LOGGER.error("Exception while getAuthenticatedUserManager()::" + e.getMessage());
+				e.printStackTrace();
+			}
+			catch (Exception e) {
+				LOGGER.error("Exception while getAuthenticatedUserManager()::" + e.getMessage());
+				e.printStackTrace();
+			}
+			return userManagerUIMSV2;
+		}
 	
 	public String createUIMSCompany(String fedId, String vnew, CompanyV3 company) {
 		String uimsUserResponse = "";

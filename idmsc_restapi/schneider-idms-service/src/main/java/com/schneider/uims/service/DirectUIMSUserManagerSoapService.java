@@ -138,16 +138,28 @@ public class DirectUIMSUserManagerSoapService {
 	 * Service to fetch information about {@link Product}s.
 	 */
 
-	public UserManagerUIMSV22 getUserManager() throws MalformedURLException {
+	public UserManagerUIMSV22 getUserManager(){
 		LOGGER.info("Entered getUserManager() of UIMS -> Start");
 		UIMSLOGGER.info("Entered getUserManager() of UIMS -> Start");
 
-		URL url = new URL(userManagerUIMSWsdl);
-		QName qname = new QName(userManagerUIMSWsdlQname, userManagerUIMSWsdlPortName);
-		Service service = Service.create(url, qname);
+		URL url;
+		UserManagerUIMSV22 userManagerUIMSV2 = null;
+		try {
+			url = new URL(userManagerUIMSWsdl);
 
-		UserManagerUIMSV22 userManagerUIMSV2 = service.getPort(UserManagerUIMSV22.class);
-		LOGGER.info("getUserManager() of UIMS -> End");
+			QName qname = new QName(userManagerUIMSWsdlQname, userManagerUIMSWsdlPortName);
+			Service service = Service.create(url, qname);
+
+			userManagerUIMSV2 = service.getPort(UserManagerUIMSV22.class);
+			LOGGER.info("getUserManager() of UIMS -> End");
+		}catch (MalformedURLException e) {
+			LOGGER.error("Exception while getUserManager()::" + e.getMessage());
+			e.printStackTrace();
+		}
+		catch (Exception e) {
+			LOGGER.error("Exception while getUserManager()::" + e.getMessage());
+			e.printStackTrace();
+		}
 		return userManagerUIMSV2;
 	}
 
