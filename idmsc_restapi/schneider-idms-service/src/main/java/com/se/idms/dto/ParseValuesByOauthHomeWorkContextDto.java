@@ -393,11 +393,11 @@ public class ParseValuesByOauthHomeWorkContextDto {
 
 		// ail update properties
 
-		userResponse.setContactId(null != userProductDocCtx.read("$.uid")
-				? getValue(userProductDocCtx.read("$.uid").toString()) : getDelimeter());
+		userResponse.setContactId(null != userProductDocCtx.read("$.contactId")
+				? getValue(userProductDocCtx.read("$.contactId").toString()) : getDelimeter());
 
-		userResponse.setAccountId(null != userProductDocCtx.read("$.uid")
-				? getValue(userProductDocCtx.read("$.uid").toString()) : getDelimeter());
+		userResponse.setAccountId(null != userProductDocCtx.read("$.bfoAccountId")
+				? getValue(userProductDocCtx.read("$.bfoAccountId").toString()) : getDelimeter());
 
 		userResponse.setIDMS_federatedidentity__c(null != userProductDocCtx.read("$.uid")
 				? getValue(userProductDocCtx.read("$.uid").toString()) : getDelimeter());
@@ -619,8 +619,8 @@ public class ParseValuesByOauthHomeWorkContextDto {
 
 		// ail update properties
 
-		userResponse.setContactId(null != userProductDocCtx.read("$.uid")
-				? getValue(userProductDocCtx.read("$.uid").toString()) : getDelimeter());
+		userResponse.setContactId(null != userProductDocCtx.read("$.contactId")
+				? getValue(userProductDocCtx.read("$.contactId").toString()) : getDelimeter());
 
 		/*
 		 * userResponse.setAccountId(null != userProductDocCtx.read("$.uid") ?
@@ -683,6 +683,8 @@ public class ParseValuesByOauthHomeWorkContextDto {
 		
 		userResponse.setContactId(null != userProductDocCtx.read("$.contactId")
 				? getValue(userProductDocCtx.read("$.contactId").toString()) : getDelimeter());
+		userResponse.setAccountId(null != userProductDocCtx.read("$.bfoAccountId")
+				? getValue(userProductDocCtx.read("$.bfoAccountId").toString()) : getDelimeter());
 	}
 
 	

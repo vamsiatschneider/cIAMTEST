@@ -823,12 +823,12 @@ public class OpenAMGetUserWorkResponse {
 		Username = username;
 	}
 
-	@JsonProperty("contactId")
+	@JsonProperty("ContactId")
 	public String getContactId() {
 		return contactId;
 	}
 
-	@JsonProperty("contactId")
+	@JsonProperty("ContactId")
 	public void setContactId(String contactId) {
 		this.contactId = contactId;
 	}
