@@ -67,23 +67,23 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 				return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 			}
 
+			// Authorization
+			if (null == authorization || authorization.isEmpty()) {
+				responseCode.setStatus(ErrorCodeConstants.ERROR);
+				responseCode.setMessage("Mandatory Check: Authorization token is null or empty");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
+				LOGGER.error("Mandatory check: Header field authorization is Missing or Null/Empty");
+				return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
+			}
+			
 			// Validation_authorization_token
 			if (!getTechnicalUserDetails(authorization)) {
-				responseCode.setMessage("Mandatory Validation: IDMS-Authorization token is invalid");
+				responseCode.setMessage("Mandatory Validation: Authorization token is invalid");
 				responseCode.setStatus(ErrorCodeConstants.ERROR);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Error while processing is " + responseCode.getMessage());
-				return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
-			}
-
-			// Authorization
-			if (null == authorization || authorization.isEmpty()) {
-				responseCode.setStatus(ErrorCodeConstants.ERROR);
-				responseCode.setMessage("Mandatory Check: IDMS-Authorization token is null or empty");
-				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-				LOGGER.error("Mandatory check: Header field authorization is Missing or Null/Empty");
 				return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 			}
 
@@ -272,13 +272,13 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 						modifiedAILValue = modifiedAILValue.substring(0, modifiedAILValue.length() - 1);
 					}
 
-					if (null == modifiedAILValue.trim() || modifiedAILValue.trim().isEmpty()) {
+					if (null == modifiedAILValue || modifiedAILValue.isEmpty()) {
 						PRODUCT_JSON_STRING = "{\"" + inOpenAMAILType + "\": ".concat("[]}");
 					} else {
-						PRODUCT_JSON_STRING = "{\"" + inOpenAMAILType + ": \"" + modifiedAILValue.trim() + "\"" + "}";
+						PRODUCT_JSON_STRING = "{\"" + inOpenAMAILType + "\": \"" + modifiedAILValue.trim() + "\"" + "}";
 					}
 
-					if (null == modifiedAILFullValues.trim() || modifiedAILFullValues.trim().isEmpty()) {
+					if (null == modifiedAILFullValues || modifiedAILFullValues.isEmpty()) {
 						PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
 								.concat(",\"IDMSAil_c\": ".concat("[]}"));
 					} else {
