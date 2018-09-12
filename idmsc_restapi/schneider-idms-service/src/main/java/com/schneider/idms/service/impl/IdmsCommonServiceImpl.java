@@ -925,9 +925,9 @@ public class IdmsCommonServiceImpl {
 	 * 
 	 */
 	protected boolean checkPasswordPolicy(String userPassword, String firstName, String lastName) {
-		LOGGER.info("Entered checkPasswordPolicy() -> Start");
-		LOGGER.info("Parameter userPassword -> " + userPassword);
-		LOGGER.info("Parameter firstName -> " + firstName + " ,lastName" + lastName);
+		//LOGGER.info("Entered checkPasswordPolicy() -> Start");
+		//LOGGER.info("Parameter userPassword -> " + userPassword);
+		//LOGGER.info("Parameter firstName -> " + firstName + " ,lastName" + lastName);
 
 		if (userPassword.contains(firstName) | userPassword.contains(lastName)
 				| !userPassword.matches(UserConstants.PASSWORD_REGEX))
@@ -966,14 +966,14 @@ public class IdmsCommonServiceImpl {
 	 * 
 	 */
 	protected String generateRamdomPassWord() {
-		LOGGER.info("Entered generateRamdomPassWord() -> Start");
+		//LOGGER.info("Entered generateRamdomPassWord() -> Start");
 		String tmpPr = RandomStringUtils.random(10, UserConstants.RANDOM_PR_CHARS);
 		return tmpPr;
 	}
 
 	public static String getValue(String key) {
-		LOGGER.info("Entered getValue() -> Start");
-		LOGGER.info("Parameter key -> " + key);
+		//LOGGER.info("Entered getValue() -> Start");
+		//LOGGER.info("Parameter key -> " + key);
 		if (null != key) {
 			if (!key.contains("[")) {
 				return key;
@@ -1015,8 +1015,8 @@ public class IdmsCommonServiceImpl {
 	}
 
 	public static String getValues(String key) {
-		LOGGER.info("Entered getValues() -> Start");
-		LOGGER.info("Parameter key -> " + key);
+		//LOGGER.info("Entered getValues() -> Start");
+		//LOGGER.info("Parameter key -> " + key);
 		if (null != key) {
 			if (!key.contains("[" + '"' + "[")) {
 				return key;
@@ -1034,9 +1034,9 @@ public class IdmsCommonServiceImpl {
 	}
 
 	public StringBuilder getContentFromTemplate(String scenarioName, String prefferedLanguage) throws IOException {
-		LOGGER.info("Entered getContentFromTemplate() -> Start");
-		LOGGER.info("Parameter scenarioName -> " + scenarioName);
-		LOGGER.info("Parameter prefferedLanguage -> " + prefferedLanguage);
+		//LOGGER.info("Entered getContentFromTemplate() -> Start");
+		//LOGGER.info("Parameter scenarioName -> " + scenarioName);
+		//LOGGER.info("Parameter prefferedLanguage -> " + prefferedLanguage);
 		StringBuilder contentBuilder = new StringBuilder();
 		BufferedReader in = null;
 		FileReader file = null;
@@ -1073,8 +1073,8 @@ public class IdmsCommonServiceImpl {
 	}
 
 	protected boolean validateMobile(String mobileNumber) {
-		LOGGER.info("Entered validateMobile() -> Start");
-		LOGGER.info("Parameter mobileNumber -> " + mobileNumber);
+		//LOGGER.info("Entered validateMobile() -> Start");
+		//LOGGER.info("Parameter mobileNumber -> " + mobileNumber);
 
 		if (mobileNumber.matches("\\d{11}")) {
 			return true;
