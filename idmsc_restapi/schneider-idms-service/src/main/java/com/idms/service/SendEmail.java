@@ -138,7 +138,6 @@ public class SendEmail {
 	}
 	
 	
-	@SuppressWarnings("unused")
 	public void sendOpenAmEmail(String code, String hotpOperationType,String userId, String appid ){
 		LOGGER.info("Entered sendOpenAmEmail() -> Start");
 		LOGGER.info("Parameter hotpOperationType -> "+hotpOperationType+" ,userId -> "+userId);
@@ -211,7 +210,7 @@ public class SendEmail {
 					"sendOpenAmEmail : Content Builder Length cleared:" + contentBuilder.length());
 
 			// if section for chinese user
-			if ((lang != null && lang.equals("zh")) || (hotpLanguage != null && hotpLanguage.equals("zh"))) {
+			if ((lang != null && lang.equalsIgnoreCase("zh")) || (hotpLanguage != null && hotpLanguage.equalsIgnoreCase("zh"))) {
 				LOGGER.info("sendOpenAmEmail :  Building Chinese email content..");
 				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,firstName);
 			}
@@ -354,7 +353,7 @@ public class SendEmail {
 		LOGGER.info("Parameter to -> " + to+" ,subject -> "+subject);
 		LOGGER.info("Parameter lang -> " + lang+" ,hotpOperationType -> "+hotpOperationType);
 		String filePath;
-		boolean chineseLangCheck = (lang != null && lang.equals(EmailConstants.HOTP_LAN_CN)) || (hotpLanguage != null && hotpLanguage.equals(EmailConstants.HOTP_LAN_CN));
+		boolean chineseLangCheck = ((lang != null && lang.equalsIgnoreCase(EmailConstants.HOTP_LAN_CN)) || (hotpLanguage != null && hotpLanguage.equalsIgnoreCase(EmailConstants.HOTP_LAN_CN)));
 		int startIndex=0;
 		int endIndex=0;
 		
@@ -368,7 +367,7 @@ public class SendEmail {
 			String filePathone = new File("").getAbsolutePath();
 			LOGGER.info("Current File Path : " + filePathone);
 
-			if (hotpOperationType != null && hotpOperationType.equals(EmailConstants.SETUSERPWD_OPT_TYPE)) {
+			if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.SETUSERPWD_OPT_TYPE)) {
 				LOGGER.info("emailContentTemplate : Inside SetUserPwd OperationType  :  " + hotpOperationType);
 				// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_Reset_password.html";
 				if (chineseLangCheck) {
@@ -379,7 +378,7 @@ public class SendEmail {
 				file = new FileReader(filePath);
 				LOGGER.info("filePath is"+filePath);
 				in = new BufferedReader(file);
-			} else if (hotpOperationType != null && hotpOperationType.equals(EmailConstants.USERREGISTRATION_OPT_TYPE)) {
+			} else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.USERREGISTRATION_OPT_TYPE)) {
 				LOGGER.info("emailContentTemplate : Inside userRegistration OperationType Create " + hotpOperationType);
 				// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_registration_with_password.html";
 				if (chineseLangCheck) {
@@ -390,7 +389,7 @@ public class SendEmail {
 				file = new FileReader(filePath);
 				LOGGER.info("filePath is"+filePath);
 				in = new BufferedReader(file);
-			} else if (hotpOperationType != null && hotpOperationType.equals(EmailConstants.UPDATEUSERRECORD_OPT_TYPE)) {
+			} else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.UPDATEUSERRECORD_OPT_TYPE)) {
 				LOGGER.info("emailContentTemplate : Inside OperationType UpdateUserRecord " + hotpOperationType);
 				// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_registration_with_password.html";
 				if (chineseLangCheck) {
@@ -401,7 +400,7 @@ public class SendEmail {
 				file = new FileReader(filePath);
 				LOGGER.info("filePath is"+filePath);
 				in = new BufferedReader(file);
-			}else if (hotpOperationType != null && hotpOperationType.equals(EmailConstants.SENDINVITATION_OPT_TYPE)) {
+			}else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.SENDINVITATION_OPT_TYPE)) {
 				LOGGER.info("emailContentTemplate : Inside OperationType sendInvitation " + hotpOperationType);
 				// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_registration_with_password.html";
 				if (chineseLangCheck) {
@@ -457,7 +456,7 @@ public class SendEmail {
 			endIndex = startIndex+10;
 		}else{
 			
-			if(hotpOperationType != null && EmailConstants.USERREGISTRATION_OPT_TYPE.equals(hotpOperationType)){
+			if(hotpOperationType != null && EmailConstants.USERREGISTRATION_OPT_TYPE.equalsIgnoreCase(hotpOperationType)){
 				
 				if(0 < contentBuilder.indexOf("{!registrationSource}")){
 				startIndex = contentBuilder.indexOf("{!registrationSource}");
@@ -608,7 +607,7 @@ public class SendEmail {
 					"sendInvitationEmail : Content Builder Length cleared:" + contentBuilder.length());
 
 			// if section for chinese user
-			if ((lang != null && lang.equals("zh")) || (hotpLanguage != null && hotpLanguage.equals("zh"))) {
+			if ((lang != null && lang.equalsIgnoreCase("zh")) || (hotpLanguage != null && hotpLanguage.equalsIgnoreCase("zh"))) {
 				LOGGER.info("sendInvitationEmail :  Building Chinese email content..");
 				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,email);
 			}
@@ -680,7 +679,7 @@ public class SendEmail {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			LOGGER.error("Exception in sendSMSMessage() while sending HOTP code : ", e.getMessage());
+			LOGGER.error("Exception in sendSMSMessage() while sending HOTP code : "+ e.getMessage());
 			// throw new AuthLoginException("Failed to send OTP code to " + to,
 			// e);
 		}
@@ -692,7 +691,6 @@ public class SendEmail {
 	 * 
 	 * */
 	
-	@SuppressWarnings("unused")
 	public void sendOpenAmMobileEmail(String code, String hotpOperationType,String userId, String appid ){
 		LOGGER.info("Entered sendOpenAmMobileEmail() -> Start");
 		LOGGER.info("Parameter hotpOperationType -> " + hotpOperationType+" ,userId -> "+userId+" ,appid -> "+appid);
@@ -740,7 +738,7 @@ public class SendEmail {
 					"Content Builder Length cleared:" + contentBuilder.length());
 
 			// if section for chinese user
-			if ((lang != null && lang.equals("zh")) || (hotpLanguage != null && hotpLanguage.equals("zh"))) {
+			if ((lang != null && lang.equalsIgnoreCase("zh")) || (hotpLanguage != null && hotpLanguage.equalsIgnoreCase("zh"))) {
 				LOGGER.info("Building Chinese email content..");
 				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,to);
 			}

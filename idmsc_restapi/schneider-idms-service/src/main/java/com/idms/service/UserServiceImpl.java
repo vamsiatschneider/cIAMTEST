@@ -376,8 +376,11 @@ public class UserServiceImpl implements UserService {
 					? getValue(productDocCtx.read("$.result[0].registerationSource[0]").toString()) : null;
 			LOGGER.info("regSource: " + regSource);
 			}
+			LOGGER.info("Calling aunthenticate User of OPENAMService for username="+userName);
 			Response authenticateResponse = ChinaIdmsUtil.executeHttpClient(prefixStartUrl, realm, userName, password);
+			LOGGER.info("Finished aunthenticate User of OPENAMService for username="+userName);
 			successResponse = (String) authenticateResponse.getEntity();
+			LOGGER.info("Response from OPENAMService:"+successResponse);
 			if(401 == authenticateResponse.getStatus() && successResponse.contains(UserConstants.ACCOUNT_BLOCKED)){
 				jsonObject.put("message", UserConstants.ACCOUNT_BLOCKED);
 				AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource);
@@ -4289,14 +4292,21 @@ public class UserServiceImpl implements UserService {
 
 						if (UserConstants.EMAIL.equalsIgnoreCase(identifierType) && null !=updatingUser) {
 							String prefferedLanguage = null != productDocCtxUser.read("$.preferredlanguage")
-									? getValue(productDocCtxUser.read("$.preferredlanguage").toString()) : getDelimeter();;
+									? getValue(productDocCtxUser.read("$.preferredlanguage").toString()) : getDelimeter();
 							
+							String subject=null;
 							/**
 							 * Adding for social lgoin 
 							 * */
 							
 							if(isUserFromSocialLogin){
 								prefferedLanguage = UserConstants.LANGUAGE_CHINA;
+							}
+							if(prefferedLanguage.equalsIgnoreCase(UserConstants.LANGUAGE_CHINA)){
+								subject = UserConstants.UPDATE_EMAIL_NOTIFICATION_ZH;
+							}
+							else{
+								subject = UserConstants.UPDATE_EMAIL_NOTIFICATION;
 							}
 							
 							// cal send email
@@ -4315,7 +4325,7 @@ public class UserServiceImpl implements UserService {
 							try {
 								// sending email to old user
 								sendEmail.emailReadyToSendEmail(updatingUser, fromUserName,
-										UserConstants.UPDATE_EMAIL_NOTIFICATION, contentBuilder.toString());
+										subject, contentBuilder.toString());
 							} catch (Exception e) {
 								e.getStackTrace();
 								LOGGER.error("Exception while sending email to old User :: -> " + e.getMessage());
@@ -7161,12 +7171,13 @@ public class UserServiceImpl implements UserService {
 		try {
 			
 			//The below snippet for authentication logs.
-			String PlanetDirectoryKey = getSSOToken();
+			//String PlanetDirectoryKey = getSSOToken();
 
-			LOGGER.info("Going to checkUserExistsWithEmailMobile() of OpenAMService for userName="+userName);
-			
+			LOGGER.info("Calling aunthenticate User of OPENAMService for username="+userName);			
 			Response authenticateResponse = ChinaIdmsUtil.executeHttpClient(prefixStartUrl, realm, userName, password);
+			LOGGER.info("Finished aunthenticate User of OPENAMService for username="+userName);
 			successResponse = (String) authenticateResponse.getEntity();
+			LOGGER.info("Response from OPENAMService:"+successResponse);
 			if(401 == authenticateResponse.getStatus() && successResponse.contains(UserConstants.ACCOUNT_BLOCKED)){
 				jsonObject.put("message", UserConstants.ACCOUNT_BLOCKED);
 				AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource);

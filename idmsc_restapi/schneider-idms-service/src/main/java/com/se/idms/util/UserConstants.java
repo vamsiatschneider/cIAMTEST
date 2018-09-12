@@ -424,6 +424,7 @@ public class UserConstants {
 	public static final String EMAIL_BODY ="You have requested to change your email address, this address will not be used after confirmation for using Schneider Electric applications. If you didn't request the email change or if you have questions, please contact support immediately @ Secure_Identity-L2@schneider-electric.com";
 	public static final String LANGUAGE_CHINA="ZH";
 	public static final String UPDATE_EMAIL_NOTIFICATION ="UPDATE EMAIL NOTIFICATION";
+	public static final String UPDATE_EMAIL_NOTIFICATION_ZH ="更新电子邮件通知";
 	public static final String UID_PREFIX ="cn00";
 	public static final String INVALID_UIMS_CREDENTIALS ="Uims ClientId and ClientSecret are not matching with the system ";
 	public static final String UIMS_CLIENTID_SECRET ="Uims ClientId and ClientSecret are mandatory";
