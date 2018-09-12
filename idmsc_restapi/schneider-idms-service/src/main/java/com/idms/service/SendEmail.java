@@ -210,7 +210,10 @@ public class SendEmail {
 					"sendOpenAmEmail : Content Builder Length cleared:" + contentBuilder.length());
 
 			// if section for chinese user
-			if ((lang != null && lang.equalsIgnoreCase("zh")) || (hotpLanguage != null && hotpLanguage.equalsIgnoreCase("zh"))) {
+		if ((lang != null
+				&& (lang.equalsIgnoreCase("zh") || lang.equalsIgnoreCase("zh_cn") || lang.equalsIgnoreCase("zh_tw")))
+				|| (hotpLanguage != null && (hotpLanguage.equalsIgnoreCase("zh")
+						|| hotpLanguage.equalsIgnoreCase("zh_cn") || hotpLanguage.equalsIgnoreCase("zh_tw")))) {
 				LOGGER.info("sendOpenAmEmail :  Building Chinese email content..");
 				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,firstName);
 			}
