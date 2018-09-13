@@ -71,6 +71,7 @@
 			<ref bean="uimsCompManagSoapService"/>
 			<ref bean="uimsUserManagSoapService"/>
 			<ref bean="uimsSetPasswordSoapService"/>
+			<ref bean="saleforceService"/>
 			
 			<ref bean="uimsAuthUserManagSoapServiceSync"/>
 			<ref bean="uimsCompManagSoapServiceSync"/>

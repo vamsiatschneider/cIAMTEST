@@ -122,6 +122,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.schneider.idms.common.DirectApiConstants;
 import com.schneider.idms.common.ErrorCodeConstants;
+import com.schneider.idms.salesforce.service.SaleforceServiceImpl;
 import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.cache.CacheTypes;
 import com.se.idms.cache.utils.EmailConstants;
@@ -183,6 +184,9 @@ public class UserServiceImpl implements UserService {
 
 	@Inject
 	private SalesForceService salesForceService;
+	
+	@Inject
+	private SaleforceServiceImpl datePopulationSerivce;
 	
 	@Inject
 	protected OpenDjService openDJService;
@@ -2971,23 +2975,11 @@ public class UserServiceImpl implements UserService {
 				 * */
 				
 				if(pickListValidator.validate(UserConstants.IDMS_BFO_profile, confirmRequest.getIDMS_Profile_update_source())){
-					
+
 					PRODUCT_JSON_STRING = "{" + "\"federationId\": \"" + uniqueIdentifier + "\",\"appName\": \"" + confirmRequest.getIDMS_Profile_update_source() + "\"" + "}";
-					
-					LOGGER.info("going to call getSaleforceToken()");
-					String salesForceToken = getSaleforceToken();
-					LOGGER.info("getSaleforceToken() call finsihed");					
-					LOGGER.info("Request sending to  salesForceService.populateActivationDate : "+ PRODUCT_JSON_STRING);
-					LOGGER.info("going to call populateActivationDate() of SalesForceService");
-					Response activationResponse = salesForceService.populateActivationDate(UserConstants.ACCEPT_TYPE_APP_JSON,salesForceToken, PRODUCT_JSON_STRING); 
-					LOGGER.info("populateActivationDate() of SalesForceService finished");
-					LOGGER.info("populateActivationDate Status :: "+ activationResponse.getStatus());
-					if(200 != activationResponse.getStatus()){
-						LOGGER.error("Failed to populate the activate date on PRM :: populateActivationDate -> " + IOUtils.toString((InputStream) activationResponse.getEntity()));
-					}else{
-						LOGGER.info("Successfully populated the activation date on PRM :: populateActivationDate -> " + IOUtils.toString((InputStream) activationResponse.getEntity()));
-					}
-					
+
+					datePopulationSerivce.populatePrmActivationDate(PRODUCT_JSON_STRING);
+
 				}
 				
 			}
