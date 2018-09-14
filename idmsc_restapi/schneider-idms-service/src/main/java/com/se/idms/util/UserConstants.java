@@ -94,6 +94,8 @@ public class UserConstants {
 	
 	public static final String EMAIL_VALIDATION = "Email error - ";
 	
+	public static final String EMAIL_VALIDATION_INTERNALUSER = "Employees are restricted from User registration";
+	
 	
 	/**
 	 * Mandatory fields for create user
