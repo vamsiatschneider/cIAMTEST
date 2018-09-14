@@ -336,12 +336,12 @@ public class SendEmail {
 				// compare Stored hashkey and generated hash key
 				if (newHashedValue.equals(storedHashedValue) && checkTimeStamp(localDTInMilli)) {
 					validatePin = true;
-					product_json_string = "{" + "\"authId\": \"" + "[]" + "\"}";
+					//product_json_string = "{" + "\"authId\": \"" + "[]" + "\"}";
 					// Need add the timestamp
 					// update hashkey in openAM.
 					LOGGER.info("Going to call updateUser() of openamservice to update hashkey for userid ="+userId);
-					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN+userService.getSSOToken(), userId,
-							product_json_string);
+					/*productService.updateUser(UserConstants.CHINA_IDMS_TOKEN+userService.getSSOToken(), userId,
+							product_json_string);*/
 					LOGGER.info("updateUser() of openamservice to update hashkey finsihed");
 				}
 			}else{

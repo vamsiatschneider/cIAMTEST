@@ -25,9 +25,7 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
-import com.se.idms.util.UimsConstants;
 import com.se.idms.util.UserConstants;
-import com.se.uims.usermanager.UserManagerUIMSV22;
 
 /**
  * 
@@ -62,13 +60,14 @@ public class SaleforceServiceImpl {
 	private String salesForcePassword;
 	
 	@Async
-	public void populatePrmActivationDate(String jsonData) {
+	public void populatePrmActivationDate(String federationId,String appName) {
 
 		try {
 			Callable<Boolean> datePopulated = new Callable<Boolean>() {
 				public Boolean call() throws Exception {
 
 					LOGGER.info("going to call getSaleforceToken()");
+					String jsonData = "{" + "\"federationId\": \"" + federationId + "\",\"appName\": \"" + appName + "\"" + "}";
 					String salesForceToken = getSaleforceToken();
 					LOGGER.info("getSaleforceToken() call finsihed");
 					LOGGER.info("Request sending to  salesForceService.populateActivationDate : " + jsonData);
