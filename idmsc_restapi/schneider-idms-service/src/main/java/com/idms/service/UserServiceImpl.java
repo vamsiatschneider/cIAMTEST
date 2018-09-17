@@ -5315,11 +5315,8 @@ public class UserServiceImpl implements UserService {
 					userId = (String) uimsResponse.get("userId");
 					PRODUCT_JSON_STRING = "{" + "\"userPassword\": \"" + setPasswordRequest.getNewPwd().trim()
 							+ "\"" + "}";
-					/**
-					 * Commenting below line updateuser since we are updating after uims sync
-					 */
-					/*productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
-							PRODUCT_JSON_STRING);*/
+					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+							PRODUCT_JSON_STRING);
 				} else {
 					return fedResponse;
 				}
