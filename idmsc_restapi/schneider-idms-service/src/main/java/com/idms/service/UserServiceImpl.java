@@ -490,7 +490,6 @@ public class UserServiceImpl implements UserService {
 	
 	
 	@SuppressWarnings("unchecked")
-	@Override
 	public Response getUser(String userId) {
 		LOGGER.info("Entered getUser() -> Start");
 		LOGGER.info("Parameter userId -> " + userId);
@@ -5954,7 +5953,6 @@ public class UserServiceImpl implements UserService {
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		String userId = null;
 		
-		String[] tokenSplit = authorizationToken.split("Bearer ");
 		if(!getTechnicalUserDetails(authorizationToken)){
 			errorResponse.put(UserConstants.MESSAGE, ErrorCodeConstants.BADREQUEST_MESSAGE);
 			return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
@@ -7260,5 +7258,24 @@ public class UserServiceImpl implements UserService {
 		
 		productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 				federatioId, jsonData);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Response getUser(String authorizationToken, String userId) {
+		// TODO Auto-generated method stub
+		
+		LOGGER.info("Entered getUser() -> Start");
+		LOGGER.info("Parameter userId -> " + userId);
+		JSONObject errorResponse = new JSONObject();
+		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
+		Response response = null;
+		
+		if(!getTechnicalUserDetails(authorizationToken)){
+			errorResponse.put(UserConstants.MESSAGE, ErrorCodeConstants.BADREQUEST_MESSAGE);
+			return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+		}
+		 response = getUser(userId);
+		return response;
 	}
 }

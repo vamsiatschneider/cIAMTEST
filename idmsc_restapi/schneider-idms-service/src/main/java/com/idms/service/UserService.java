@@ -48,7 +48,9 @@ public interface UserService {
 	
 	@GET
 	@Path("/apexrest/users/{userId}")
-	Response getUser(@PathParam("userId") String userId);
+	Response getUser(@HeaderParam("Authorization") String authorizationToken,@PathParam("userId") String userId);
+	
+	//Response getUser(String userId);
 	
 	@GET
 	@Path("/oauth2/userinfo")
