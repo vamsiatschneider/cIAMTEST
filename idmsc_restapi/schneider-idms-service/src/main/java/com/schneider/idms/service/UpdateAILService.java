@@ -19,7 +19,7 @@ public interface UpdateAILService {
 
 	@PUT
 	@Consumes("application/json")
-	Response updateAIL(@HeaderParam("Authorization") String authorization,
+	Response updateAIL(@HeaderParam("Authorization") String authorization, @HeaderParam("IDMS-Authorization")String secretToken,
 			@HeaderParam("Accept") String accept, @HeaderParam("IDMS-Region") String region, IdmsUserAilRequest userAilRequest);
 
 }

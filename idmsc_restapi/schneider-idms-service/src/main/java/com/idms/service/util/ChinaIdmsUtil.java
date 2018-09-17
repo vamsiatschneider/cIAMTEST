@@ -1,7 +1,6 @@
 package com.idms.service.util;
 
 import java.io.BufferedReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.MessageDigest;
@@ -76,5 +75,10 @@ public class ChinaIdmsUtil {
         fedId += '-' + RandomStringUtils.random(12, UserConstants.RANDOM_CHARS);;
         return fedId;
     } 
+	
+	/*public static void main(String[] args) {
+		String longvalue = generateHashValue("tY4MomqIwjg34932ZhTx651K38WJcZ");
+		System.out.println(longvalue);
+	}*/
 	
 }

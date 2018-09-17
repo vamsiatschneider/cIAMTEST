@@ -366,13 +366,16 @@ public class UIMSUserManagerSoapService {
 	@Async
 	public boolean updateUIMSUser(String fedId, UserV6 user, String vnew) throws MalformedURLException {
 		LOGGER.info("Entered updateUIMSUser() -> Start");
-		LOGGER.info("Parameter fedId -> " + fedId + " ,user -> " + user + " ,vnew -> " + vnew);
+		LOGGER.info("Parameter fedId -> " + fedId + " ,vnew -> " + vnew);
 		UIMSLOGGER.info("Entered updateUIMSUser() -> Start");
-		UIMSLOGGER.info("Parameter fedId -> " + fedId + " ,user -> " + user + " ,vnew -> " + vnew);
+		UIMSLOGGER.info("Parameter fedId -> " + fedId + " ,vnew -> " + vnew);
 		boolean status = false;
 		UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
 		String samlAssertion = null;
+		ObjectMapper objMapper = new ObjectMapper();
 		try {
+			LOGGER.info("Parameter user -> " + objMapper.writeValueAsString(user));
+			UIMSLOGGER.info("Parameter user -> " + objMapper.writeValueAsString(user));
 			LOGGER.info("Going to call getSamlAssertionToken() of UIMS for fedId:" + fedId);
 			samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(fedId, vnew);
 			LOGGER.info("getSamlAssertionToken() of UIMS finished for fedId:" + fedId);
@@ -763,19 +766,24 @@ public class UIMSUserManagerSoapService {
 	public String updateUIMSUserAndCompany(String fedId, UserV6 identity, String context, CompanyV3 company,
 			String vnew, OpenAMService productService, String iPlanetDirectoryKey, String userName, String email) {
 		LOGGER.info("Entered updateUIMSUserAndCompany() -> Start");
-		LOGGER.info("Parameter fedId -> " + fedId + " ,identity -> " + identity);
-		LOGGER.info("Parameter context -> " + context + " ,company -> " + company);
+		LOGGER.info("Parameter fedId -> " + fedId);
+		LOGGER.info("Parameter context -> " + context);
 		LOGGER.info("Parameter userName -> " + userName + " ,email -> " + email);
 		UIMSLOGGER.info("Entered updateUIMSUserAndCompany() -> Start");
-		UIMSLOGGER.info("Parameter fedId -> " + fedId + " ,identity -> " + identity);
-		UIMSLOGGER.info("Parameter context -> " + context + " ,company -> " + company);
+		UIMSLOGGER.info("Parameter fedId -> " + fedId);
+		UIMSLOGGER.info("Parameter context -> " + context);
 		UIMSLOGGER.info("Parameter userName -> " + userName + " ,email -> " + email);
 
 		AccessElement application = new AccessElement();
 		application.setId(applicationName);
 		application.setType(Type.APPLICATION);
+		ObjectMapper objectMapper = new ObjectMapper();
 
 		try {
+			LOGGER.info("Parameter company -> " + objectMapper.writeValueAsString(company));
+			LOGGER.info("Parameter identity -> " + objectMapper.writeValueAsString(identity));
+			UIMSLOGGER.info("Parameter company -> " + objectMapper.writeValueAsString(company));
+			UIMSLOGGER.info("Parameter identity -> " + objectMapper.writeValueAsString(identity));
 			UIMSCompanyManagerSoapService companyManagerSoapService = new UIMSCompanyManagerSoapService();
 			Callable<Boolean> callableUpdateUIMSUserAndComapany = new Callable<Boolean>() {
 				public Boolean call() throws Exception {

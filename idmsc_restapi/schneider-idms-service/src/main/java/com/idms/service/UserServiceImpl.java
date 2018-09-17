@@ -3046,7 +3046,6 @@ public class UserServiceImpl implements UserService {
 					(null != confirmRequest.getOperation() && UserConstants.USER_REGISTRATION .equalsIgnoreCase(confirmRequest.getOperation())) ) {
 				confirmRequest.setId(uniqueIdentifier);
 				confirmRequest.setIDMS_Federated_ID__c(federationID);
-				LOGGER.info("Going to call activateUIMSUserConfirmPIN() of UIMSUserManagerSoapService for loginIdentifierType="+loginIdentifierType+" ,emailOrMobile="+emailOrMobile);
 				
 				if(pickListValidator.validate(UserConstants.UIMSPasswordSync, UserConstants.TRUE)){
 					LOGGER.info("Calling SYNC activateUIMSUserConfirmPIN() of UimsSetPasswordSoapService");
@@ -3063,9 +3062,6 @@ public class UserServiceImpl implements UserService {
 					updateOpenamDetails(iPlanetDirectoryKey, uniqueIdentifier, PRODUCT_JSON_STRING);
 					LOGGER.info("SYNC activateUIMSUserConfirmPIN() of UimsSetPasswordSoapService finished");
 				}
-				
-				
-				LOGGER.info("activateUIMSUserConfirmPIN() of UIMSUserManagerSoapService finished for loginIdentifierType="+loginIdentifierType+" ,emailOrMobile="+emailOrMobile);
 			} else if(null != confirmRequest.getIDMS_Profile_update_source()
 					&& !UserConstants.UIMS.equalsIgnoreCase(confirmRequest.getIDMS_Profile_update_source()) 
 					&& (null != confirmRequest.getOperation() && UserConstants.SET_USER_PR .equalsIgnoreCase(confirmRequest.getOperation()))
@@ -7257,8 +7253,9 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	public void updateOpenamDetails(String iPlanetDirectoryKey,String federatioId,String jsonData){
-		
+		LOGGER.info("Start:After UIMS update, calling updateUser of OpenAMService");
 		productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 				federatioId, jsonData);
+		LOGGER.info("End:After UIMS update, finished updateUser of OpenAMService");
 	}
 }

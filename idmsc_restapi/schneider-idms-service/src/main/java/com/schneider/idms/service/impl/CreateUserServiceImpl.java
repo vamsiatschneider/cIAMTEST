@@ -85,7 +85,8 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 
 			LOGGER.info("Entered userRegistration() -> Start");
 			LOGGER.info("Parameter userRequest -> " + objMapper.writeValueAsString(userRequest));
-		//	LOGGER.info("Parameter clientId -> " + clientId + " ,clientSecret -> " + clientSecret);
+			LOGGER.info("Parameter authorization -> " + authorization + " ,secretToken -> " + secretToken);
+			LOGGER.info("Parameter accept -> " + accept + " ,region -> " + region);
 
 			// Step 1:
 			/**
@@ -130,17 +131,13 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				
 				if(null != secretToken && !secretToken.isEmpty()){
 					longLiveHashedToken = ChinaIdmsUtil.generateHashValue(secretToken);
+					LOGGER.info("longLiveHashedToken="+longLiveHashedToken);
 				}
 				
-				if ((null != longLiveHashedToken && longLiveHashedToken.equalsIgnoreCase(directApiSecretToken))) {
-					errorResponse.setMessage(ErrorCodeConstants.BADREQUEST_MESSAGE);
-					errorResponse.setStatus(ErrorCodeConstants.ERROR);
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-					LOGGER.error("Error while processing is " + errorResponse.getMessage());
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-				}else if(!getTechnicalUserDetails(DirectApiConstants.BEAR_STRING+authorization)){
-					errorResponse.setMessage(ErrorCodeConstants.BADREQUEST_MESSAGE);
+				// Validation_authorization_token
+				if (!((null!=secretToken && directApiSecretToken.equalsIgnoreCase(longLiveHashedToken)) ||
+						(null!=authorization && getTechnicalUserDetails(DirectApiConstants.BEAR_STRING+authorization)))) {
+					errorResponse.setMessage("Mandatory Validation: Authorization/IDMS-Authorization token is invalid");
 					errorResponse.setStatus(ErrorCodeConstants.ERROR);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
@@ -163,7 +160,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			} 
 			catch (NotAuthorizedException e) {
 				e.printStackTrace();
-				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
+				LOGGER.error("DirectAPI:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(ErrorCodeConstants.UNAUTHORIZED_MESSAGE);
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -173,7 +170,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			}
 			catch (BadRequestException e) {
 				e.printStackTrace();
-				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
+				LOGGER.error("DirectAPI:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -183,7 +180,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			}
 			catch (IllegalArgumentException e) {
 				e.printStackTrace();
-				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
+				LOGGER.error("DirectAPI:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(ErrorCodeConstants.BADREQUEST_MESSAGE);
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -193,7 +190,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			}
 			catch (Exception e) {
 				e.printStackTrace();
-				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
+				LOGGER.error("DirectAPI:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -296,7 +293,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 						"loginid eq " + "\"" + URLEncoder.encode(loginIdentifier, "UTF-8") + "\"");
 			}
 			LOGGER.info(
-					"UserServiceImpl:userRegistration -> productService.checkUserExistsWithEmailMobile :  userExists -> "
+					"DirectAPI:userRegistration -> productService.checkUserExistsWithEmailMobile :  userExists -> "
 							+ userExists);
 			productDocCtx = JsonPath.using(conf).parse(userExists);
 			Integer resultCount = productDocCtx.read(JsonConstants.RESULT_COUNT);
@@ -437,12 +434,12 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				json = objMapper.writeValueAsString(openAmReq.getInput().getUser());
 				json = json.replace("\"\"", "[]");
 				LOGGER.info(
-						"UserServiceImpl:userRegistration -> productService.userRegistration :  Request -> " + json);
+						"DirectAPI:userRegistration -> Json Request -> " + json);
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userName, json);
 
 			} else {
 				LOGGER.info(
-						"UserServiceImpl:userRegistration -> productService.userRegistration :  Request -> " + json);
+						"DirectAPI:userRegistration -> productService Request -> " + json);
 				userCreation = productService.userRegistration(iPlanetDirectoryKey, userAction, json);
 				// return productDocCtx;
 				if (userCreation.getStatus() != 200) {
@@ -462,7 +459,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			String version = "{" + "\"V_Old\": \"" + UserConstants.V_OLD + "\",\"V_New\": \"" + UserConstants.V_NEW
 					+ "\"" + "}";
 			// Adding v_old and v_new
-			LOGGER.info("UserServiceImpl:userRegistration -> productService.updateUser :  version -> " + version);
+			LOGGER.info("DirectAPI:userRegistration -> productService.updateUser :  version -> " + version);
 			productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userName, version);
 
 			// Checking profile update and update login id
@@ -530,7 +527,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 
 		userRequest.setFederationId(userName);
 		LOGGER.info(
-				"UserServiceImpl:userRegistration -> uimsUserManagerSoapService :  !uimsAlreadyCreatedFlag Value is -> "
+				"DirectAPI:userRegistration -> uimsUserManagerSoapService :  !uimsAlreadyCreatedFlag Value is -> "
 						+ !uimsAlreadyCreatedFlag);
 		if (!uimsAlreadyCreatedFlag && null != userRequest.getRegistrationSource()
 				&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource())) {

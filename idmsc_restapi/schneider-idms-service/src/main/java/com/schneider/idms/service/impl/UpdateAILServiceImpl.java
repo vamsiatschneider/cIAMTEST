@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 
@@ -13,10 +14,12 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.idms.service.util.ChinaIdmsUtil;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+import com.schneider.idms.common.DirectApiConstants;
 import com.schneider.idms.common.ErrorCodeConstants;
 import com.schneider.idms.common.ResponseCodeStatus;
 import com.schneider.idms.model.IdmsUserAilRequest;
@@ -31,10 +34,10 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 	private static final Logger LOGGER = LoggerFactory.getLogger(UpdateAILServiceImpl.class);
 
 	@Override
-	public Response updateAIL(String authorization, String accept, String region, IdmsUserAilRequest userAilRequest) {
+	public Response updateAIL(String authorization, String secretToken, String accept, String region, IdmsUserAilRequest userAilRequest) {
 		LOGGER.info("Entered updateAIL() -> Start");
-		LOGGER.info("Paramters are region=" + region);
-		LOGGER.info("Paramters are authorization=" + authorization + " ,accept=" + accept);
+		LOGGER.info("Paramters are authorization=" + authorization + " ,secretToken=" + secretToken);
+		LOGGER.info("Paramters are accept=" + accept + " ,region=" + region);
 
 		ObjectMapper objectMapper = new ObjectMapper();
 		ResponseCodeStatus responseCode = new ResponseCodeStatus();
@@ -52,6 +55,7 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 		String PRODUCT_JSON_STRING = "";
 		ResponseCodeStatus responseCodeStatus = new ResponseCodeStatus();
 		String federatedId = null;
+		String longLiveHashedToken = null;
 
 		try {
 			LOGGER.info("userAilRequest=" + objectMapper.writeValueAsString(userAilRequest));
@@ -67,24 +71,30 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 				return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 			}
 
-			// Authorization
-			if (null == authorization || authorization.isEmpty()) {
+			// Authorization(Any authorization value should be present)
+			if ((null == authorization || authorization.isEmpty()) && (null == secretToken || secretToken.isEmpty())) {
 				responseCode.setStatus(ErrorCodeConstants.ERROR);
-				responseCode.setMessage("Mandatory Check: Authorization token is null or empty");
+				responseCode.setMessage("Mandatory Check: Both Authorization & IDMS-Authorization token is null or empty");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-				LOGGER.error("Mandatory check: Header field authorization is Missing or Null/Empty");
+				LOGGER.error("Mandatory check: Header field authorization & IDMS-Authorization are Missing or Null/Empty");
 				return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 			}
 			
+			if(null != secretToken && !secretToken.isEmpty()){
+				longLiveHashedToken = ChinaIdmsUtil.generateHashValue(secretToken);
+				LOGGER.info("longLiveHashedToken="+longLiveHashedToken);
+			}
+			
 			// Validation_authorization_token
-			if (!getTechnicalUserDetails(authorization)) {
-				responseCode.setMessage("Mandatory Validation: Authorization token is invalid");
+			if (!((null!=secretToken && directApiSecretToken.equalsIgnoreCase(longLiveHashedToken)) ||
+					(null!=authorization && getTechnicalUserDetails(DirectApiConstants.BEAR_STRING+authorization)))) {
+				responseCode.setMessage("Mandatory Validation: Authorization/IDMS-Authorization token is invalid");
 				responseCode.setStatus(ErrorCodeConstants.ERROR);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Error while processing is " + responseCode.getMessage());
-				return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
+				return Response.status(Response.Status.UNAUTHORIZED).entity(responseCode).build();
 			}
 
 			// accept
@@ -97,7 +107,7 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 				return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 			}
 
-			if (null != accept && !accept.equals("*/*") && !accept.equalsIgnoreCase("application/json")) {
+			if (null != accept && !UserConstants.ACCEPT_TYPE_APP_JSON.equalsIgnoreCase(accept)) {
 				responseCode.setStatus(ErrorCodeConstants.ERROR);
 				responseCode.setMessage("Header field accept must be application/json");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -177,7 +187,7 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 			}
 
 			// writing business logic - start
-			userId = federatedId;
+			userId = federatedId.trim();
 			iPlanetDirectoryKey = getSSOToken();
 
 			aclType = getIDMSAclType(userAilRequest.getAclType().trim());
@@ -311,7 +321,7 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 			responseCode.setStatus(ErrorCodeConstants.ERROR);
 			responseCode.setMessage("JSON Parsing error, Please try again");
 			LOGGER.error("JSON Parsing error, Please try again");
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(responseCode).build();
+			return Response.status(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE).entity(responseCode).build();
 		} catch (NotFoundException e) {
 			e.printStackTrace();
 			responseCode.setStatus(ErrorCodeConstants.ERROR);
@@ -321,7 +331,16 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 			LOGGER.error("Executing while updateAIL() :: -> " + responseCode.getMessage());
 			LOGGER.error("Executing while updateAIL() :: -> " + e.getMessage());
 			return Response.status(Response.Status.NOT_FOUND).entity(responseCode).build();
-		} catch (Exception e) {
+		} catch (NotAuthorizedException e) {
+			e.printStackTrace();
+			responseCode.setStatus(ErrorCodeConstants.ERROR);
+			responseCode.setMessage("HTTP 401 Unauthorized or Session expired");
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by UserServiceImpl.updateAIL() : " + elapsedTime);
+			LOGGER.error("Executing while updateAIL() :: -> " + responseCode.getMessage());
+			LOGGER.error("Executing while updateAIL() :: -> " + e.getMessage());
+			return Response.status(Response.Status.UNAUTHORIZED).entity(responseCode).build();
+		}catch (Exception e) {
 			e.printStackTrace();
 			responseCode.setStatus(ErrorCodeConstants.ERROR);
 			responseCode.setMessage("Error in Updating the AIL Object");

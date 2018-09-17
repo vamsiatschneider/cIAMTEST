@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.rholder.retry.RetryException;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
@@ -211,14 +212,15 @@ public class UimsSetPasswordSoapService {
 	 */
 	public void activateUIMSUserConfirmPIN(ConfirmPinRequest confirmRequest,
 			String openamVnew, String iPlanetDirectoryKey,String loginIdentifierType,String emailOrMobile) {
-		LOGGER.info("Entered activateUIMSUserConfirmPIN() -> Start");
-		LOGGER.info("Parameter confirmRequest -> " + confirmRequest);
+		LOGGER.info("Entered activateUIMSUserConfirmPIN() -> Start");		
 		LOGGER.info("Parameter loginIdentifierType -> " + loginIdentifierType+" ,emailOrMobile -> "+emailOrMobile);
 		UIMSLOGGER.info("Entered activateUIMSUserConfirmPIN() -> Start");
-		UIMSLOGGER.info("Parameter confirmRequest -> " + confirmRequest);
 		UIMSLOGGER.info("Parameter loginIdentifierType -> " + loginIdentifierType+" ,emailOrMobile -> "+emailOrMobile);
+		ObjectMapper objMapper = new ObjectMapper();
 		
 		try {
+			LOGGER.info("Parameter confirmRequest -> " + objMapper.writeValueAsString(confirmRequest));
+			LOGGER.info("Parameter confirmRequest -> " + objMapper.writeValueAsString(confirmRequest));
 			if ((null != confirmRequest.getPassword() && !confirmRequest.getPassword().isEmpty())) {
 				setUIMSPassword(iPlanetDirectoryKey, confirmRequest.getId(),
 						confirmRequest.getIDMS_Federated_ID__c(), confirmRequest.getPassword().trim(), openamVnew, loginIdentifierType,emailOrMobile);
