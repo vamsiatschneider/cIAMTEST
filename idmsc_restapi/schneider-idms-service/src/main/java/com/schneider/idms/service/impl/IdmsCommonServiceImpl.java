@@ -1093,17 +1093,21 @@ public class IdmsCommonServiceImpl {
 		return userLevel;
 	}
 
-	public boolean getTechnicalUserDetails(String authorizationToken){
+	public boolean getTechnicalUserDetails(String authorizationToken) {
+		try {
+			String userInfo = openDJService.getUserDetails(authorizationToken);
+			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+			DocumentContext productDocCtx = JsonPath.using(conf).parse(userInfo);
 
-		String userInfo = openDJService.getUserDetails(authorizationToken);
-		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
-		DocumentContext productDocCtx = JsonPath.using(conf).parse(userInfo);
+			String userSubject = getValue(productDocCtx.read("$.sub").toString());
 
-		String userSubject =  getValue(productDocCtx.read("$.sub").toString());
+			if (userSubject.contains(DirectApiConstants.TECHNICAL_USER)) {
+				return true;
+			}
 
-		if(userSubject.contains(DirectApiConstants.TECHNICAL_USER))
-		{
-			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
 		}
 		return false;
 	}

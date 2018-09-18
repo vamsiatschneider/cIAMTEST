@@ -22,4 +22,8 @@ public interface SalesForceService {
 	@POST
 	@Path("/services/apexrest/IDMSSetActivationDate/")
 	Response populateActivationDate(@HeaderParam("Content-Type") String contetType,@HeaderParam("Authorization") String salesForceToken,String request);
+	
+	@POST
+	@Path("/services/apexrest/IDMSServices/CheckUser/1.0")
+	Response checkUserExistWithSalesforce(@HeaderParam("Accept") String accept,@HeaderParam("Authorization") String salesForceToken,@HeaderParam("Content-Type") String contetType, String checkUserExistsRequest);
 }
