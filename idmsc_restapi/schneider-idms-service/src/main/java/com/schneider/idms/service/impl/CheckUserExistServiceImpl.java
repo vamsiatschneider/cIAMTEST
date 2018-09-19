@@ -126,7 +126,7 @@ public class CheckUserExistServiceImpl extends IdmsCommonServiceImpl implements 
 		if (null != checkUserExistsRequest.getEmail() && !checkUserExistsRequest.getEmail().isEmpty()) {
 			email = checkUserExistsRequest.getEmail().trim();
 			if (null != email && !email.isEmpty()) {
-				boolean validEmail = EmailValidator.getInstance().validate(email);
+				boolean validEmail = EmailValidator.getInstance().validate1(email);
 				if (!validEmail) {
 					responseCode.setStatus(ErrorCodeConstants.ERROR);
 					responseCode.setMessage("Email is not valid");
