@@ -78,8 +78,7 @@
 			<ref bean="uimsUserManagerSoapServiceSync"/>
 			
 			<ref bean="commonService"/>
-			<ref bean="createUserService"/>
-			<ref bean="confirmPinService"/>
+			<ref bean="createUserService"/>			
 			<ref bean="updateUserService"/>
 			<ref bean="getUserService"/>
 			<ref bean="updateAILService"/>
