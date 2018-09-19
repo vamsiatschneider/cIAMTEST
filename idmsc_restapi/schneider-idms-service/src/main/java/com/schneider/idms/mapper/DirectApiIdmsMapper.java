@@ -22,14 +22,14 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
     @Override
     protected void configure(MapperFactory mapperFactory) {
     	configureIdmsUserRequestToOpenAmUserRequest(mapperFactory);
-    	configureIdmsUserRequestToUimsCompanyV3(mapperFactory);
     	configureIdmsUserRequestToUimsUserV6(mapperFactory);
+    	configureIdmsUserRequestToUimsCompanyV3(mapperFactory);
     	configureIdmsUserRequestToIdmsUserResponse(mapperFactory);
     	
-    	configureIdmsUpdateUserRequestToOpenAmUserRequest(mapperFactory);
-    	configureIdmsUpdateUserRequestToUimsCompanyV3(mapperFactory);
-    	configureIdmsUpdateUserRequestToUimsUserV6(mapperFactory);
-    	configureIdmsUpdareUserRequestToIdmsUpdateUserResponse(mapperFactory);
+    	//configureIdmsUpdateUserRequestToOpenAmUserRequest(mapperFactory);
+    	//configureIdmsUpdateUserRequestToUimsCompanyV3(mapperFactory);
+    	//configureIdmsUpdateUserRequestToUimsUserV6(mapperFactory);
+    	//configureIdmsUpdareUserRequestToIdmsUpdateUserResponse(mapperFactory);
     }
     
    
@@ -90,7 +90,7 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
         .field("profileLastUpdateSource", "input.user.updateSource")
         .field("currencyCode", "input.user.currency") 
         .field("isActivated", "input.user.isActivated")
-        .field("accountId", "input.user.companyID")
+        .field("accountId", "input.user.bfoAccountId")
         .field("primaryContact", "input.user.primaryContact")
         .field("identityType", "input.user.identityType")
         .field("delegatedIdp", "input.user.delegatedIDP")
@@ -229,7 +229,7 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
         mapperFactory.classMap(IdmsUserRequest.class,CompanyV3.class)
         .field("idmsFederatedId", "federatedId") 
         .field("companyName", "organizationName")
-        .field("countryCode", "countryCode")
+        /*.field("countryCode", "countryCode")
         .field("currencyCode", "currencyCode")
         .field("classLevel2", "customerClass")
         .field("companyCity", "localityName")
@@ -251,14 +251,14 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
         .field("companyPOBox", "postOfficeBoxCode")
         .field("classLevel1", "businessType")
         .field("marketSegment", "marketSegment")
-        .field("annualRevenue", "annualSales")
+        .field("annualRevenue", "annualSales")*/
         .byDefault()
         .register();
     }
 	
-	private void configureIdmsUpdateUserRequestToUimsCompanyV3(MapperFactory mapperFactory) {
+	/*private void configureIdmsUpdateUserRequestToUimsCompanyV3(MapperFactory mapperFactory) {
         mapperFactory.classMap(IdmsUpdateUserRequest.class,CompanyV3.class)
-       /* .field("idmsFederatedId", "federatedId") */
+        .field("idmsFederatedId", "federatedId") 
         .field("companyName", "organizationName")
         .field("countryCode", "countryCode")
         .field("currencyCode", "currencyCode")
@@ -285,7 +285,7 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
         .field("annualRevenue", "annualSales")
         .byDefault()
         .register();
-    }
+    }*/
 	
 	
 	private void configureIdmsUserRequestToUimsUserV6(MapperFactory mapperFactory) {
@@ -359,7 +359,7 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
         .register();
     }
 	
-	private void configureIdmsUpdateUserRequestToOpenAmUserRequest(MapperFactory mapperFactory) {
+	/*private void configureIdmsUpdateUserRequestToOpenAmUserRequest(MapperFactory mapperFactory) {
         mapperFactory.classMap(IdmsUserRequest.class,OpenAmUserRequest.class)
         
         .field("salutation", "input.user.initials")
@@ -413,7 +413,7 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
         .field("channel", "input.user.channel")
         .field("subChannel", "input.user.subchannel")
         .field("contactId", "input.user.contactId")
-        /*.field("companyFederatedId", "input.user.companyFederatedID")
+        .field("companyFederatedId", "input.user.companyFederatedID")
         .field("adminCompanyFederatedId", "input.user.admin_company_id")
         .field("profileLastUpdateSource", "input.user.updateSource")
         .field("currencyCode", "input.user.currency") 
@@ -421,13 +421,13 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
         .field("accountId", "input.user.companyID")
         
         .field("identityType", "input.user.identityType")
-        .field("delegatedIdp", "input.user.delegatedIDP")*/
+        .field("delegatedIdp", "input.user.delegatedIDP")
         
-        /*.field("userRecord.tncFlag", "input.user.tncFlag")
+        .field("userRecord.tncFlag", "input.user.tncFlag")
         .field(UserConstants.MAPPER_CREATE_USER_PR_REQUEST,UserConstants.MAPPER_OPENAM_USER_PR_REQUEST)
         .field("userRecord.adminFederatedId", "input.user.admin_federated_id")
-        .field("userRecord.invitationCode", "input.user.invitationCode")*/
+        .field("userRecord.invitationCode", "input.user.invitationCode")
         .byDefault()
         .register();
-    }
+    }*/
 }

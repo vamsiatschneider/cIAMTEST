@@ -910,7 +910,7 @@ public class IdmsCommonServiceImpl {
 		 *  subChannel picklist validation check
 		 */
 		if ((null != userRequest.getSubChannel()&& !userRequest.getSubChannel().isEmpty())) {
-			if (!pickListValidator.validate(UserConstants.IAM_A1, userRequest.getSubChannel())) {
+			if (!pickListValidator.validate(UserConstants.IAM_A2, userRequest.getSubChannel())) {
 				errorResponse.setMessage(UserConstants.INVALID_VALUE + DirectApiConstants.CHANNEL);
 				return true;
 			}

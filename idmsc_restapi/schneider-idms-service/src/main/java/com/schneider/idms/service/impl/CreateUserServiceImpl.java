@@ -222,6 +222,18 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 					&& !userRequest.getAdminCompanyFederatedId().isEmpty()) {
 				userRequest.setPrimaryContact(UserConstants.FALSE);
 			}
+			
+			/**
+			 * Checking companyFederation is not passing generating new one and adding
+			 */
+			
+			if ((UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(userRequest.getUserContext())
+					|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(userRequest.getUserContext()))
+					&& (null == userRequest.getCompanyFederatedId() || userRequest.getCompanyFederatedId().isEmpty())) {
+
+				userRequest.setCompanyFederatedId(ChinaIdmsUtil.generateFedId());
+
+			}
 
 			// Step 2:
 
@@ -529,6 +541,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 		LOGGER.info(
 				"DirectAPI:userRegistration -> uimsUserManagerSoapService :  !uimsAlreadyCreatedFlag Value is -> "
 						+ !uimsAlreadyCreatedFlag);
+		Integer resultCountCheck = checkCompanyMappedOtherUsers(userRequest.getCompanyFederatedId());
 		if (!uimsAlreadyCreatedFlag && null != userRequest.getRegistrationSource()
 				&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource())) {
 			// mapping IFW request to UserCompany
@@ -539,7 +552,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			directUIMSUserManagerSoapService.createUIMSUserAndCompany(UimsConstants.CALLER_FID, identity,
 					userRequest.getUserContext(), company, userName,
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, UserConstants.V_NEW,
-					userName,userRequest);
+					userName,userRequest,resultCountCheck.intValue());
 			userRequest.setFederationId(userName);
 		}
 
@@ -550,5 +563,18 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 		return Response.status(Response.Status.OK).entity(idmsResponse).build();
+	}
+	
+	public Integer checkCompanyMappedOtherUsers(String companyId){
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		DocumentContext productDocCtxCheck = null;
+		
+		String iPlanetDirectoryKey = getSSOToken();
+		String companyMapped = productService.checkUserExistsWithEmailMobile(
+				UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "companyFederatedID eq " + "\"" + companyId + "\"");
+		productDocCtxCheck = JsonPath.using(conf).parse(companyMapped);
+		Integer resultCountCheck = productDocCtxCheck.read(JsonConstants.RESULT_COUNT);
+		
+		return resultCountCheck;
 	}
 }

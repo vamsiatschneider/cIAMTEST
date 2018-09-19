@@ -528,7 +528,7 @@ public class DirectUIMSUserManagerSoapService {
 	@Async
 	public String createUIMSUserAndCompany(String callerFid, com.uims.authenticatedUsermanager.UserV6 identity,
 			String context, CompanyV3 company, String userName, String iPlanetDirectoryKey, String v_new,
-			String forcedFederatedId, IdmsUserRequest userRequest) {
+			String forcedFederatedId, IdmsUserRequest userRequest,int companyCreatedCount) {
 		LOGGER.info("Entered createUIMSUserAndCompany() -> Start");
 		LOGGER.info("Parameter callerFid -> " + callerFid + " ,identity -> " + identity);
 		LOGGER.info("Parameter context -> " + context + " ,company -> " + company);
@@ -565,6 +565,14 @@ public class DirectUIMSUserManagerSoapService {
 		try {
 			Callable<Boolean> callableUser = new Callable<Boolean>() {
 				public Boolean call() throws Exception {
+					
+					if(null != userRequest.getCompanyFederatedId() && !userRequest.getCompanyFederatedId().isEmpty()){
+
+						if(companyCreatedCount > 1){
+							identity.setCompanyId(userRequest.getCompanyFederatedId());
+						}
+					}
+					
 
 					createdFedId = authenticatedUserManagerSoapService.createUIMSUser(UimsConstants.CALLER_FID,
 							identity, forcedFederatedId);
@@ -615,7 +623,7 @@ public class DirectUIMSUserManagerSoapService {
 					 * When user is creating from BFO then no need of creating
 					 * company, bfo account id act as company
 					 */
-					if (null != userRequest.getAdminCompanyFederatedId()
+					/*if (null != userRequest.getAdminCompanyFederatedId()
 							&& !userRequest.getAdminCompanyFederatedId().isEmpty()) {
 						createdCompanyFedId = userRequest.getAdminCompanyFederatedId();
 					} else if (null != userRequest.getAccountId() && !userRequest.getAccountId().isEmpty()) {
@@ -634,8 +642,17 @@ public class DirectUIMSUserManagerSoapService {
 
 						createdCompanyFedId = companyManagerSoapService.createUIMSCompany(createdFedId,
 								UimsConstants.VNEW, company);
-					}
+					}*/
 
+					if (null != userRequest.getCompanyFederatedId()
+							&& !userRequest.getCompanyFederatedId().isEmpty()) {
+						if (companyCreatedCount == 1) {
+							createdCompanyFedId = companyManagerSoapService.createUIMSCompanyWithCompanyForceIdmsId(createdFedId,
+									userRequest.getCompanyFederatedId(), UimsConstants.VNEW, company);
+						} 
+					} 
+					
+					
 					if (null != createdCompanyFedId) {
 						String companyFedID = "{" + "\"companyFederatedID\": \"" + createdCompanyFedId + "\"" + "}";
 						LOGGER.info("companyFedID in creating UIMS Company: " + companyFedID);
@@ -663,7 +680,7 @@ public class DirectUIMSUserManagerSoapService {
 					.retryIfResult(Predicates.<Boolean> isNull()).retryIfExceptionOfType(Exception.class)
 					.retryIfRuntimeException().withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
 			try {
-				if (null != context && UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)) {
+				if (null != context && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context))) {
 
 					companyCreated = retryerCompany.call(callableCompany);
 					if (userCreated && companyCreated) {
