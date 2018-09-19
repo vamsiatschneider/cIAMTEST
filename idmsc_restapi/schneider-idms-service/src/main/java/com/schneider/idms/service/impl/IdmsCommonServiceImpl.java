@@ -85,9 +85,6 @@ public class IdmsCommonServiceImpl {
 	protected SalesForceService salesForceService;
 
 	@Inject
-	public DirectApiIdmsMapper mapper;
-
-	@Inject
 	@Qualifier("pickListValidator")
 	protected IValidator pickListValidator;
 
