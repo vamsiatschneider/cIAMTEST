@@ -1021,7 +1021,7 @@ public class UIMSUserManagerSoapService {
 
 		try {
 			if ((null != confirmRequest.getPassword() && !confirmRequest.getPassword().isEmpty())) {
-				setUIMSPassword(iPlanetDirectoryKey, confirmRequest.getId(), confirmRequest.getIDMS_Federated_ID__c(),
+				activateIdentity(iPlanetDirectoryKey, confirmRequest.getId(), confirmRequest.getIDMS_Federated_ID__c(),
 						confirmRequest.getPassword().trim(), openamVnew, loginIdentifierType, emailOrMobile);
 			} else if (null == confirmRequest.getPassword() || "".equals(confirmRequest.getPassword())) {
 				activateIdentityNoPassword(confirmRequest.getId(), confirmRequest.getIDMS_Federated_ID__c(), openamVnew,
