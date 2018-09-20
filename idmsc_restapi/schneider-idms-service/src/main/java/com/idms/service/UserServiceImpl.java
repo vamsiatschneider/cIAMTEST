@@ -1049,6 +1049,11 @@ public class UserServiceImpl implements UserService {
 			// setting isInternal value to false
 			openAmReq.getInput().getUser().setIDMSisInternal__c("FALSE");
 			openAmReq.getInput().getUser().setEmailcount("0");
+			
+			if(null != openAmReq.getInput().getUser().getMail() && openAmReq.getInput().getUser().getMail().isEmpty()){
+				openAmReq.getInput().getUser().setMail(null);
+			}
+			
 			String json = objMapper.writeValueAsString(openAmReq);
 			json = json.replace("\"\"", "[]");
 			LOGGER.info("Open AM  user  Request ------------->" + json);
@@ -2928,7 +2933,7 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info(AUDIT_REQUESTING_USER + uniqueIdentifier + AUDIT_IMPERSONATING_USER
 							+ AUDIT_API_ADMIN + AUDIT_OPENAM_API + AUDIT_OPENAM_UPDATE_CALL + uniqueIdentifier
 							+ AUDIT_LOG_CLOSURE);
-					LOGGER.info("Email/Mobile userPinConfirmation(): Request :  -> "+PRODUCT_JSON_STRING);
+					LOGGER.info("Email/Mobile userPinConfirmation(): Request :  -> ");
 					/**
 					 * Commenting below line updateuser since we are updating after uims sync
 					 */
@@ -3022,7 +3027,7 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info(AUDIT_REQUESTING_USER + uniqueIdentifier + AUDIT_IMPERSONATING_USER
 							+ AUDIT_API_ADMIN + AUDIT_OPENAM_API + AUDIT_OPENAM_GET_CALL + uniqueIdentifier
 							+ AUDIT_LOG_CLOSURE);
-					LOGGER.info("productService.updateUser: Requset :  -> "+PRODUCT_JSON_STRING);
+					LOGGER.info("productService.updateUser: Requset :  -> ");
 					
 					/**
 					 * Commenting below line updateuser since we are updating after uims sync
