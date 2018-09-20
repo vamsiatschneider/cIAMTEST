@@ -299,17 +299,17 @@ public class DirectApiIdmsMapper extends ConfigurableMapper{
         .field("identityType", "input.user.identityType")
         .field("delegatedIdp", "input.user.delegatedIDP")
         
-        .field("userRecord.tncFlag", "input.user.tncFlag")
-        .field(UserConstants.MAPPER_CREATE_USER_PR_REQUEST,UserConstants.MAPPER_OPENAM_USER_PR_REQUEST)
-        .field("userRecord.adminFederatedId", "input.user.admin_federated_id")
-        .field("userRecord.invitationCode", "input.user.invitationCode")
+        /*.field("userRecord.tncFlag", "input.user.tncFlag")*/
+        //.field(UserConstants.MAPPER_CREATE_USER_PR_REQUEST,UserConstants.MAPPER_OPENAM_USER_PR_REQUEST)
+       /* .field("userRecord.adminFederatedId", "input.user.admin_federated_id")
+        .field("userRecord.invitationCode", "input.user.invitationCode")*/
         .byDefault()
         .register();
     }
 	
 	private void configureIdmsUpdateUserRequestToUimsCompanyV3(MapperFactory mapperFactory) {
         mapperFactory.classMap(IdmsUpdateUserRequest.class,CompanyV3.class)
-        .field("idmsFederatedId", "federatedId") 
+       // .field("idmsFederatedId", "federatedId") 
         .field("companyName", "organizationName")
         .field("countryCode", "countryCode")
         .field("currencyCode", "currencyCode")
