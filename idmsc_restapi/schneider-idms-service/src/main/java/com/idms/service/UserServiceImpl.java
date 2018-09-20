@@ -880,6 +880,9 @@ public class UserServiceImpl implements UserService {
 						.setIdmsuid(userRequest.getUserRecord().getMobilePhone() + "bridge-fo.com");
 				loginIdentifier = userRequest.getUserRecord().getMobilePhone();
 				identifierType = UserConstants.MOBILE;
+				if(null != userRequest.getUserRecord().getEmail() && userRequest.getUserRecord().getEmail().isEmpty()){
+					userRequest.getUserRecord().setEmail(null);
+				}
 			}
 
 			LOGGER.info("LoginIdentifier Assigned,  identifierType -> " + identifierType+" ,value -> "+loginIdentifier);
@@ -892,7 +895,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 					+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + loginIdentifier + AUDIT_LOG_CLOSURE);
 
-			LOGGER.info("Going to call checkUserExistsWithEmailMobile() of OpenAMService");
+			LOGGER.info("Start: checkUserExistsWithEmailMobile() of OpenAMService");
 			if (null != openAmReq.getInput().getUser().getRegisterationSource()
 					&& UserConstants.UIMS.equalsIgnoreCase(openAmReq.getInput().getUser().getRegisterationSource())) {
 
@@ -903,7 +906,7 @@ public class UserServiceImpl implements UserService {
 				userExists = productService.checkUserExistsWithEmailMobile(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						"loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginIdentifier,"UTF-8"),"UTF-8") + "\"");
 			}
-			LOGGER.info("checkUserExistsWithEmailMobile() of OpenAMService finished:  userExists -> " + userExists);
+			LOGGER.info("End: checkUserExistsWithEmailMobile() of OpenAMService finished");
 			productDocCtx = JsonPath.using(conf).parse(userExists);
 			Integer resultCount = productDocCtx.read(JsonConstants.RESULT_COUNT);
 			LOGGER.info("resultCount = "+resultCount);
@@ -912,9 +915,8 @@ public class UserServiceImpl implements UserService {
 				errorResponse.setMessage(UserConstants.USER_EXISTS);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-				LOGGER.error("Error while creating user is "+errorResponse.getMessage());
+				LOGGER.error("User exists/registered in OpenAM");
 				return Response.status(Response.Status.CONFLICT).entity(errorResponse).build();
-
 			}
 
 			LOGGER.info("CheckUserExistsWithEmailMobile Success");
@@ -939,9 +941,11 @@ public class UserServiceImpl implements UserService {
 			}
 
 			//new logic
+			LOGGER.info("Start: checkUserExistsWithEmailMobile() for unverified user to delete and create new reg with same email/mobile");
 			String userExistsInOpenam = productService.checkUserExistsWithEmailMobile(
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 					"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginIdentifier,"UTF-8"),"UTF-8") + "\" or mobile eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginIdentifier,"UTF-8"),"UTF-8") + "\""); 
+			LOGGER.info("End: checkUserExistsWithEmailMobile() for unverified user to delete and create new reg with same email/mobile");
 			productDocCtxCheck = JsonPath.using(conf).parse(userExistsInOpenam);
 			Integer resultCountCheck = productDocCtxCheck.read(JsonConstants.RESULT_COUNT);
 			
@@ -957,10 +961,10 @@ public class UserServiceImpl implements UserService {
 								UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 								productDocCtxCheck.read("$.result[" +i+ "].username"));
 						if (deleteResponse.getStatus() == 200) {
-							LOGGER.info("Deleted the old entry from openam"
+							LOGGER.info("Deleted the old PRM entry from openam"
 									+ IOUtils.toString((InputStream) deleteResponse.getEntity()));
 						} else {
-							LOGGER.error("Failed to delete the old entry from openam"
+							LOGGER.error("Failed to delete the old PRM entry from openam"
 									+ IOUtils.toString((InputStream) deleteResponse.getEntity()) + " Status="
 									+ deleteResponse.getStatus());
 						}
@@ -7257,8 +7261,6 @@ public class UserServiceImpl implements UserService {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Response getUser(String authorizationToken, String userId) {
-		// TODO Auto-generated method stub
-		
 		LOGGER.info("Entered getUser() -> Start");
 		LOGGER.info("Parameter userId -> " + userId);
 		JSONObject errorResponse = new JSONObject();
@@ -7266,7 +7268,7 @@ public class UserServiceImpl implements UserService {
 		Response response = null;
 		
 		if(!getTechnicalUserDetails(authorizationToken)){
-			errorResponse.put(UserConstants.MESSAGE, ErrorCodeConstants.BADREQUEST_MESSAGE);
+			errorResponse.put(UserConstants.MESSAGE, "Unauthorized or session expired");
 			return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 		}
 		 response = getUser(userId);

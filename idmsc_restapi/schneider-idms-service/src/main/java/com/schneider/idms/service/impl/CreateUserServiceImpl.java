@@ -11,6 +11,7 @@ import static com.se.idms.util.UserConstants.AUDIT_REQUESTING_USER;
 import static com.se.idms.util.UserConstants.AUDIT_TECHNICAL_USER;
 
 import java.io.InputStream;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Date;
 
@@ -102,7 +103,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 					errorResponse.setStatus(ErrorCodeConstants.ERROR);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-					LOGGER.error("Error while processing is " + errorResponse.getMessage());
+					LOGGER.error("Authorization is null or empty");
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 				
@@ -112,7 +113,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 					errorResponse.setStatus(ErrorCodeConstants.ERROR);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-					LOGGER.error("Error while processing is " + errorResponse.getMessage());
+					LOGGER.error("Header Param Accept is invalid");
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 				
@@ -121,7 +122,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 					errorResponse.setStatus(ErrorCodeConstants.ERROR);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-					LOGGER.error("Error while processing is " + errorResponse.getMessage());
+					LOGGER.error("Region is not China");
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 				
@@ -141,7 +142,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 					errorResponse.setStatus(ErrorCodeConstants.ERROR);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-					LOGGER.error("Error while processing is " + errorResponse.getMessage());
+					LOGGER.error("Unauthorized or session expired");
 					return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 				}
 				
@@ -154,7 +155,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 					errorResponse.setStatus(ErrorCodeConstants.ERROR);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-					LOGGER.error("Error while processing is " + errorResponse.getMessage());
+					LOGGER.error("DirectAPI:userRegistration - Error is: " + errorResponse.getMessage());
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 			} 
@@ -165,7 +166,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-				LOGGER.error("Error while processing is " + errorResponse.getMessage());
+				LOGGER.error("Unauthorized or session expired"+e.getMessage());
 				return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 			}
 			catch (BadRequestException e) {
@@ -175,7 +176,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-				LOGGER.error("Error while processing is " + errorResponse.getMessage());
+				LOGGER.error("DirectAPI:userRegistration Bad request:"+e.getMessage());
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 			catch (IllegalArgumentException e) {
@@ -185,7 +186,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-				LOGGER.error("Error while processing is " + errorResponse.getMessage());
+				LOGGER.error("DirectAPI:userRegistration - IllegalArgumentException:"+e.getMessage());
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 			catch (Exception e) {
@@ -195,7 +196,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-				LOGGER.error("Error while processing is " + errorResponse.getMessage());
+				LOGGER.error("DirectAPI:userRegistration - some other Exception:"+e.getMessage());
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 			}
 
@@ -247,7 +248,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			openAmReq.getInput().getUser().setRegisterationSource(userRequest.getRegistrationSource());
 			/*openAmReq.getInput().getUser().setChannel(userRequest.getChannel());
 			openAmReq.getInput().getUser().setSubchannel(userRequest.getSubChannel());*/
-			LOGGER.info("Admin Token Generated SuccessFully {} "+objMapper.writeValueAsString(openAmReq));
+			LOGGER.info("Mapped openAmRequest: "+objMapper.writeValueAsString(openAmReq));
 			
 			/**
 			 * call /json/authenticate to iplanetDirectoryPro token for admin
@@ -280,6 +281,9 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 						.setIdmsuid(userRequest.getMobilePhone() + "bridge-fo.com");
 				loginIdentifier = userRequest.getMobilePhone();
 				identifierType = UserConstants.MOBILE;
+				if(null != userRequest.getEmail() && userRequest.getEmail().isEmpty()){
+					userRequest.setEmail(null);
+				}
 			}
 
 			LOGGER.info("LoginIdentifier Assigned SuccessFully  identifierType -> " + identifierType + " ,value -> "
@@ -293,28 +297,32 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 
 			if (null != openAmReq.getInput().getUser().getRegisterationSource()
 					&& UserConstants.UIMS.equalsIgnoreCase(openAmReq.getInput().getUser().getRegisterationSource())) {
-
+				LOGGER.info("Start: For reg source UIMS, calling checkUserExistsWithEmailMobile() of OpenAMService");
 				userExists = productService
 						.checkUserExistsWithEmailMobile(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 								"federationID eq " + "\"" + openAmReq.getInput().getUser().getFederationID()
-										+ "\" or loginid eq " + "\"" + URLEncoder.encode(loginIdentifier, "UTF-8")
+										+ "\" or loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginIdentifier,"UTF-8"), "UTF-8")
 										+ "\"");
+				LOGGER.info("End: For reg source UIMS, calling checkUserExistsWithEmailMobile() of OpenAMService finished");
 			} else {
+				LOGGER.info("Start: For reg source non-UIMS, calling checkUserExistsWithEmailMobile() of OpenAMService");
 				userExists = productService.checkUserExistsWithEmailMobile(
 						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-						"loginid eq " + "\"" + URLEncoder.encode(loginIdentifier, "UTF-8") + "\"");
+						"loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginIdentifier,"UTF-8"), "UTF-8") + "\"");
+				LOGGER.info("End: For reg source non-UIMS, calling checkUserExistsWithEmailMobile() of OpenAMService finished");
 			}
 			LOGGER.info(
 					"DirectAPI:userRegistration -> productService.checkUserExistsWithEmailMobile :  userExists -> "
 							+ userExists);
 			productDocCtx = JsonPath.using(conf).parse(userExists);
 			Integer resultCount = productDocCtx.read(JsonConstants.RESULT_COUNT);
+			LOGGER.info("ResultCount from checkUserExist:"+resultCount);
 			if (resultCount.intValue() > 0) {
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
 				errorResponse.setMessage(ErrorCodeConstants.CONFLICT_MESSAGE);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-				LOGGER.error("Error while creating user is " + errorResponse.getMessage());
+				LOGGER.error("User already exist/registered in openAM");
 				return Response.status(Response.Status.CONFLICT).entity(errorResponse).build();
 
 			}
@@ -341,10 +349,10 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 								UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 								productDocCtxCheck.read("$.result[" + i + "].username"));
 						if (deleteResponse.getStatus() == 200) {
-							LOGGER.info("Deleted the old entry from openam"
+							LOGGER.info("Deleted the old not activated PRM entry from openam"
 									+ IOUtils.toString((InputStream) deleteResponse.getEntity()));
 						} else {
-							LOGGER.error("Failed to delete the old entry from openam"
+							LOGGER.error("Failed to delete the old not activated PRM entry from openam"
 									+ IOUtils.toString((InputStream) deleteResponse.getEntity()) + " Status="
 									+ deleteResponse.getStatus());
 						}
@@ -424,7 +432,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			openAmReq.getInput().getUser().setEmailcount("0");
 			String json = objMapper.writeValueAsString(openAmReq);
 			json = json.replace("\"\"", "[]");
-			LOGGER.info("Open AM  user  Request ------------->" + json);
+			LOGGER.info("Open AM  new user  Request ------------->" + json);
 			LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 					+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_REGISTRATION_CALL + userAction + AUDIT_LOG_CLOSURE);
 
@@ -446,21 +454,25 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				json = objMapper.writeValueAsString(openAmReq.getInput().getUser());
 				json = json.replace("\"\"", "[]");
 				LOGGER.info(
-						"DirectAPI:userRegistration -> Json Request -> " + json);
+						"DirectAPI:userRegistration -> Json Request social login user -> " + json);
+				LOGGER.info("Start: calling updateUser() of OPENAM for social login");
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userName, json);
+				LOGGER.info("End: calling updateUser() of OPENAM for social login");
 
 			} else {
 				LOGGER.info(
-						"DirectAPI:userRegistration -> productService Request -> " + json);
+						"Start: DirectAPI:userRegistration -> calling  userRegistration() to create new user:" + json);
 				userCreation = productService.userRegistration(iPlanetDirectoryKey, userAction, json);
+				LOGGER.info(
+						"End: DirectAPI:userRegistration -> finished  userRegistration() to create new user:");
 				// return productDocCtx;
 				if (userCreation.getStatus() != 200) {
 					// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
 					// "logout");
-					throw new Exception("Exception while Registering User in Open "
+					throw new Exception("Exception while Registering User in OpenAM "
 							+ IOUtils.toString((InputStream) userCreation.getEntity()));
 				}
-				LOGGER.info("User Registered Succssfully :: -> "
+				LOGGER.info("User Registered Succssfully in OpenAM:: -> "
 						+ IOUtils.toString((InputStream) userCreation.getEntity()));
 			}
 			// log for user stats
@@ -471,8 +483,9 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			String version = "{" + "\"V_Old\": \"" + UserConstants.V_OLD + "\",\"V_New\": \"" + UserConstants.V_NEW
 					+ "\"" + "}";
 			// Adding v_old and v_new
-			LOGGER.info("DirectAPI:userRegistration -> productService.updateUser :  version -> " + version);
+			LOGGER.info("Start: DirectAPI:userRegistration -> For new user, updating version in openam-> " + version);
 			productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userName, version);
+			LOGGER.info("End: DirectAPI:userRegistration -> For new user, updating version in openam-> " + version);
 
 			// Checking profile update and update login id
 
@@ -487,7 +500,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 									userRequest.getRegistrationSource()))) {
 
 						String otp = sendEmail.generateOtp(userName);
-						LOGGER.info("Successfully OTP generated for " + userName);
+						LOGGER.info("Successfully OTP generated for email user, userName=" + userName+" ,OTP="+otp);
 						sendEmail.sendOpenAmEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
 								userRequest.getRegistrationSource());
 					} else if (null != userRequest.getRegistrationSource()
@@ -504,7 +517,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 					 */
 
 					String otp = sendEmail.generateOtp(userName);
-					LOGGER.info("Successfully OTP generated for " + userName);
+					LOGGER.info("Successfully OTP generated for mobile user, userName=" + userName+" ,OTP="+otp);
 					sendEmail.sendSMSMessage(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
 							userRequest.getRegistrationSource());
 					sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
@@ -538,9 +551,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 		}
 
 		userRequest.setFederationId(userName);
-		LOGGER.info(
-				"DirectAPI:userRegistration -> uimsUserManagerSoapService :  !uimsAlreadyCreatedFlag Value is -> "
-						+ !uimsAlreadyCreatedFlag);
+		LOGGER.info("DirectAPI:userRegistration -> !uimsAlreadyCreatedFlag Value is -> "+ !uimsAlreadyCreatedFlag);
 		Integer resultCountCheck = checkCompanyMappedOtherUsers(userRequest.getCompanyFederatedId());
 		if (!uimsAlreadyCreatedFlag && null != userRequest.getRegistrationSource()
 				&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource())) {
@@ -549,10 +560,12 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			UserV6 identity = mapper.map(userRequest, UserV6.class);
 			// forcedFederatedId = "cn00"+ UUID.randomUUID().toString();
 			// Calling Async method createUIMSUserAndCompany
+			LOGGER.info("Start: Async createUIMSUserAndCompany() of UIMS to create user & company");
 			directUIMSUserManagerSoapService.createUIMSUserAndCompany(UimsConstants.CALLER_FID, identity,
 					userRequest.getUserContext(), company, userName,
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, UserConstants.V_NEW,
 					userName,userRequest,resultCountCheck.intValue());
+			LOGGER.info("End: Async createUIMSUserAndCompany() of UIMS to create user & company");
 			userRequest.setFederationId(userName);
 		}
 

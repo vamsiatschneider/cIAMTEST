@@ -100,7 +100,6 @@ public class SendEmail {
 	public void emailReadyToSendEmail(String to, String from, String subject, String msgBody) {
 		LOGGER.info("Entered emailReadyToSendEmail() -> Start");
 		LOGGER.info("Parameter to -> " + to+" ,from -> "+from+" ,subject -> "+subject);
-		//LOGGER.info("Parameter msgBody -> " + msgBody);
 		
 		MimeMessage mailMessage = mailSender.createMimeMessage();
 		InternetAddress fromAddress = null;
@@ -119,20 +118,20 @@ public class SendEmail {
 			 */
 			// helper.setText(msgBody,true);
 
-			LOGGER.info("started sending email");
+			LOGGER.info("Start: sending email to:"+to);
 			mailSender.send(mailMessage); 
-			LOGGER.info("sending email finsihed");
+			LOGGER.info("End: sending email finsihed to:"+to);
 		} 
 		catch (SMTPSendFailedException e) {
-			LOGGER.error("SMTPSendFailedException while sending email :: -> " + e.getMessage());
+			LOGGER.error("SMTPSendFailedException while sending email to "+to+" :: -> " + e.getMessage());
 			e.printStackTrace();
 		}
 		catch (MessagingException e) {
-			LOGGER.error("MessagingException while sending email :: -> " + e.getMessage());
+			LOGGER.error("MessagingException while sending email to "+to+" :: -> " + e.getMessage());
 			e.printStackTrace();
 		}
 		catch (Exception e) {
-			LOGGER.error("Exception while sending email :: -> " + e.getMessage());
+			LOGGER.error("Exception while sending email to "+to+" :: -> " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -152,9 +151,9 @@ public class SendEmail {
 
 			encodedHOTPcode = code;
 			// get sso token.. iPlanetDirectoryKey
-			LOGGER.info("Going to call getUser() of openamService");
+			LOGGER.info("Start: SendMail - Going to call getUser() of openamService");
 			userData = productService.getUser(userService.getSSOToken(), userId);
-			LOGGER.info("getUser() call of openamService finished with data from Openam: " + userData);
+			LOGGER.info("End: SendMail - getUser() call of openamService finished, userData: " + userData);
 			productDocCtxUser = JsonPath.using(conf).parse(userData);
 			
 			
@@ -203,14 +202,10 @@ public class SendEmail {
 			// compiled to : "+msg);
 
 			contentBuilder = new StringBuilder();
-			LOGGER.info(
-					"sendOpenAmEmail : Content Builder Length initial:" + contentBuilder.length());
 			contentBuilder.setLength(0);
-			LOGGER.info(
-					"sendOpenAmEmail : Content Builder Length cleared:" + contentBuilder.length());
 
 			// if section for chinese user
-		if ((lang != null
+			if ((lang != null
 				&& (lang.equalsIgnoreCase("zh") || lang.equalsIgnoreCase("zh_cn") || lang.equalsIgnoreCase("zh_tw")))
 				|| (hotpLanguage != null && (hotpLanguage.equalsIgnoreCase("zh")
 						|| hotpLanguage.equalsIgnoreCase("zh_cn") || hotpLanguage.equalsIgnoreCase("zh_tw")))) {
@@ -269,10 +264,10 @@ public class SendEmail {
 		product_json_string = "{" + "\"authId\": \"" + hexpin + "\"}";
 		// Need add the timestamp
 		// update hashkey in openAM.
-		LOGGER.info("Going to call updateUser() of openamservice to update hashkey");
+		LOGGER.info("Start: updateUser() of openamservice to update hashkey");
 		productService.updateUser(UserConstants.CHINA_IDMS_TOKEN+userService.getSSOToken(), userId,
 				product_json_string);
-		LOGGER.info("updateUser() of openamservice to update hashkey finsihed");
+		LOGGER.info("End: updateUser() of openamservice to update hashkey finished");
 		return pin;
 	}
 	
@@ -292,10 +287,10 @@ public class SendEmail {
 		product_json_string = "{" + "\"authId\": \"" + hashedPin + "\"}";
 		// update hashkey in openAM.
 		LOGGER.info("hashedPin is " + hashedPin);
-		LOGGER.info("Going to call updateUser() of openamservice to update hashedPin");
+		LOGGER.info("Start: updateUser() of openamservice to store PRM hashedPin");
 		productService.updateUser(UserConstants.CHINA_IDMS_TOKEN+userService.getSSOToken(), userId,
 				product_json_string);
-		LOGGER.info("updateUser() of openamservice to update hashedPin finsihed");
+		LOGGER.info("End: updateUser() of openamservice to store PRM hashedPin finished");
 
 	}
 	
@@ -645,7 +640,7 @@ public class SendEmail {
 	@Async
 	public void sendSMSMessage(String code, String hotpOperationType, String userId, String appid) {
 		LOGGER.info("Entered sendSMSMessage() -> Start");
-		LOGGER.info("Parameter hotpOperationType -> " + hotpOperationType+" ,userId -> "+userId+" ,appid -> "+appid);
+		LOGGER.info("Parameter hotpOperationType -> " + hotpOperationType+" ,userId -> "+userId+" ,appid -> "+appid+" ,code="+code);
 
 		String userData = "";
 		String to = "";
@@ -656,9 +651,9 @@ public class SendEmail {
 				+code+"%20%EF%BC%8C30%E5%88%86%E9%92%9F%E5%86%85%E6%9C%89%E6%95%88";
 		try {
 
-			LOGGER.info("Going to call getUser() of openamservice for sending SMS");
+			LOGGER.info("Start: getUser() of openamservice for sending SMS of user:"+userId);
 			userData = productService.getUser(userService.getSSOToken(), userId);
-			LOGGER.info("getUser() call of openamservice finished for sending SMS with data from Openam: " + userData);
+			LOGGER.info("End: getUser() of openamservice finished for sending SMS of user:"+userId);
 			productDocCtxUser = JsonPath.using(conf).parse(userData);
 
 			if (hotpOperationType.equalsIgnoreCase(EmailConstants.UPDATEUSERRECORD_OPT_TYPE)) {
@@ -667,11 +662,9 @@ public class SendEmail {
 				to = productDocCtxUser.read("$.mobile[0]");
 			}
 
-			//LOGGER.info("productService.getUser : Response -> ", userData);
-
-			LOGGER.info("Going to call sendSMSCode() of smsservice to "+to);
+			LOGGER.info("Start: sendSMSCode() of smsservice to "+to);
 			Response smsResponse = smsService.sendSMSCode(SMSAdmin, SMSAdminPassword, to, smsContent, template);
-			LOGGER.info("sendSMSCode() finished, Response status :: -> " + smsResponse.getStatus());
+			LOGGER.info("End: sendSMSCode() finished, Response status :: -> " + smsResponse.getStatus());
 			if (200 == smsResponse.getStatus()) {
 				LOGGER.info("sendSMSCode sent Succssfully :: -> "
 						+ IOUtils.toString((InputStream) smsResponse.getEntity()));
@@ -682,9 +675,8 @@ public class SendEmail {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			LOGGER.error("Exception in sendSMSMessage() while sending HOTP code : "+ e.getMessage());
-			// throw new AuthLoginException("Failed to send OTP code to " + to,
-			// e);
+			LOGGER.error("Exception in sendSMSMessage() while sending code to: "+to);
+			LOGGER.error(e.getMessage());
 		}
 
 	}
@@ -708,11 +700,10 @@ public class SendEmail {
 
 			encodedHOTPcode = code;
 			// get sso token.. iPlanetDirectoryKey
-			LOGGER.info("Going to call getUser() of openamservice for sendOpenAmMobileEmail");
+			LOGGER.info("Start: getUser() of openamservice for sendOpenAmMobileEmail of userid:"+userId);
 			userData = productService.getUser(userService.getSSOToken(), userId);
-			LOGGER.info("getUser() call of openamuser finished with data from Openam: " + userData);
-			productDocCtxUser = JsonPath.using(conf).parse(userData);
-			
+			LOGGER.info("End: getUser() of openamservice finished for sendOpenAmMobileEmail of userid:"+userId);
+			productDocCtxUser = JsonPath.using(conf).parse(userData);			
 			
 			if(hotpOperationType.equalsIgnoreCase(EmailConstants.UPDATEUSERRECORD_OPT_TYPE)){
 				subject=appid;
@@ -734,11 +725,7 @@ public class SendEmail {
 			LOGGER.info("URL compiled to : " + url);
 			
 			contentBuilder = new StringBuilder();
-			LOGGER.info(
-					"Content Builder Length initial:" + contentBuilder.length());
 			contentBuilder.setLength(0);
-			LOGGER.info(
-					"Content Builder Length cleared:" + contentBuilder.length());
 
 			// if section for chinese user
 			if ((lang != null && lang.equalsIgnoreCase("zh")) || (hotpLanguage != null && hotpLanguage.equalsIgnoreCase("zh"))) {
