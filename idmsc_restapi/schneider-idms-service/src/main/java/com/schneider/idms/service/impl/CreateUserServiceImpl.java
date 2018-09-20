@@ -15,6 +15,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Date;
 
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.NotFoundException;
@@ -36,6 +37,7 @@ import com.jayway.jsonpath.Option;
 import com.schneider.idms.common.DirectApiConstants;
 import com.schneider.idms.common.ErrorCodeConstants;
 import com.schneider.idms.common.ResponseCodeStatus;
+import com.schneider.idms.mapper.DirectApiIdmsMapper;
 import com.schneider.idms.model.IdmsCreateUserResponse;
 import com.schneider.idms.model.IdmsUserRequest;
 import com.schneider.idms.service.ICreateUserService;
@@ -53,6 +55,9 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 	 * Logger instance.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(CreateUserServiceImpl.class);
+	
+	@Inject
+	private DirectApiIdmsMapper mapper;
 
 	@Override
 	public Response userRegistration(String authorization, String secretToken, String accept, String region,

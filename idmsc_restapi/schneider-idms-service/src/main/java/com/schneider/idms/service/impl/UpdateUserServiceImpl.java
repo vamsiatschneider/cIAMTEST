@@ -11,6 +11,7 @@ import static com.se.idms.util.UserConstants.AUDIT_REQUESTING_USER;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotAuthorizedException;
@@ -31,6 +32,7 @@ import com.jayway.jsonpath.Option;
 import com.schneider.idms.common.DirectApiConstants;
 import com.schneider.idms.common.ErrorCodeConstants;
 import com.schneider.idms.common.ResponseCodeStatus;
+import com.schneider.idms.mapper.DirectApiIdmsMapper;
 import com.schneider.idms.model.IdmsUpdateUserResponse;
 import com.schneider.idms.model.IdmsUserRequest;
 import com.schneider.idms.service.IUpdateUserService;
@@ -46,6 +48,9 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 	 * Logger instance.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(UpdateUserServiceImpl.class);
+	
+	@Inject
+	private DirectApiIdmsMapper mapper;
 
 	@Override
 	public Response updateUser(String authorizedToken, String accept, String region, IdmsUserRequest userRequest) {
