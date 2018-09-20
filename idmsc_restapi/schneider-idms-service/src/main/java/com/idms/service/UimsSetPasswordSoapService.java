@@ -68,6 +68,8 @@ public class UimsSetPasswordSoapService {
 	
 	private boolean ispasswordupdated = false;
 	
+	private boolean isIdentityActvated = false;
+	
 	/**
 	 * 
 	 * @return
@@ -97,6 +99,112 @@ public class UimsSetPasswordSoapService {
 			e.printStackTrace();
 		}
 		return userManagerUIMSV2;
+	}
+	
+	
+	/**
+	 * 
+	 * @param iPlanetDirectoryKey
+	 * @param userId
+	 * @param callerFid
+	 * @param password
+	 * @param openamVnew
+	 * @param loginIdentifierType
+	 * @param emailOrMobile
+	 * @throws MalformedURLException
+	 */
+	public void activateIdentity(String iPlanetDirectoryKey, String userId,
+			String callerFid, String password, String openamVnew, String loginIdentifierType,String emailOrMobile) throws MalformedURLException {
+		LOGGER.info("Entered activateIdentity() -> Start");
+		LOGGER.info("Parameter iPlanetDirectoryKey -> " + iPlanetDirectoryKey+" ,userId -> "+userId);
+		LOGGER.info("Parameter callerFid -> " + callerFid);
+		LOGGER.info("Parameter openamVnew -> " + openamVnew+" ,loginIdentifierType -> "+loginIdentifierType);
+		LOGGER.info("Parameter emailOrMobile -> " + emailOrMobile);
+		UIMSLOGGER.info("Entered activateIdentity() -> Start");
+		UIMSLOGGER.info("Parameter iPlanetDirectoryKey -> " + iPlanetDirectoryKey+" ,userId -> "+userId);
+		UIMSLOGGER.info("Parameter callerFid -> " + callerFid);
+		UIMSLOGGER.info("Parameter openamVnew -> " + openamVnew+" ,loginIdentifierType -> "+loginIdentifierType);
+		UIMSLOGGER.info("Parameter emailOrMobile -> " + emailOrMobile);
+		
+		try {
+			if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
+				LOGGER.info("Going to call getSamlAssertionToken() of sync UIMS for userId:"+userId);
+				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(userId, openamVnew);
+				LOGGER.info("getSamlAssertionToken() of sync UIMS finished for userId:"+userId);
+			}else{
+				LOGGER.info("Going to call getSamlAssertionToken() of sync UIMS for callerFid:"+callerFid);
+				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, openamVnew);
+				LOGGER.info("getSamlAssertionToken() of sync UIMS finished for callerFid:"+callerFid);
+			}
+		} catch (Exception e) {
+			LOGGER.error("Exception while getting samlAssertion::" + e.getMessage());
+			UIMSLOGGER.error("Exception while getting samlAssertion::" + e.getMessage());
+			e.printStackTrace();
+		}
+		try {
+			Callable<Boolean> callableUIMSPassword = new Callable<Boolean>() {
+				public Boolean call() throws Exception {
+					LOGGER.info("Going to call getUserManager() of sync UserManagerUIMSV22");
+					UserManagerUIMSV22 userManagerUIMSV22 = userManagerSoapService.getUserManager();
+					LOGGER.info("getUserManager() of sync UserManagerUIMSV22 finished");
+					if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
+						LOGGER.info("Going to call activateIdentity() of sync UserManagerUIMSV22 of loginIdentifierType:"+loginIdentifierType);
+						
+						isIdentityActvated = userManagerUIMSV22.activateIdentity(UimsConstants.CALLER_FID,password, samlAssertion);
+						
+						LOGGER.info("activateIdentity() of sync UserManagerUIMSV22 finished of loginIdentifierType:"+loginIdentifierType);
+					} else {
+						LOGGER.info("Going to call setPasswordWithSms() of sync UserManagerUIMSV22 of emailOrMobile:"+emailOrMobile);
+						
+						isIdentityActvated = userManagerUIMSV22.setPasswordWithSms(UimsConstants.CALLER_FID, emailOrMobile, samlAssertion, UserConstants.TOKEN_TYPE, password);
+						LOGGER.info("setPasswordWithSms() of sync UserManagerUIMSV22 finished of emailOrMobile:"+emailOrMobile);
+					}
+					LOGGER.info("isIdentityActvated: " + isIdentityActvated);
+					UIMSLOGGER.info("isIdentityActvated: " + isIdentityActvated);
+					return true;
+				}
+			};
+
+			Retryer<Boolean> retryer = RetryerBuilder.<Boolean> newBuilder()
+					.retryIfResult(Predicates.<Boolean> isNull()).retryIfExceptionOfType(Exception.class)
+					.retryIfRuntimeException().withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
+			try {
+				retryer.call(callableUIMSPassword);
+				// after successful setUIMSPassword , we need to update the
+				// v_old
+				if (isIdentityActvated) {
+					String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
+					LOGGER.info("Going to call updateUser() of OpenAMService for userId:"+userId+" ,version:"+version);
+					productService.updateUser(iPlanetDirectoryKey, userId, version);
+					LOGGER.info("updateUser() of OpenAMService finished for userId:"+userId+" ,version:"+version);
+				}
+			} catch (RetryException e) {
+				LOGGER.error("Retry failed while calling activateIdentity::" + e.getMessage());
+				UIMSLOGGER.error("Retry failed while calling activateIdentity::" + e.getMessage());
+				e.printStackTrace();
+				
+			} catch (ExecutionException e) {
+				LOGGER.error("ExecutionException while calling activateIdentity::" + e.getMessage());
+				UIMSLOGGER.error("ExecutionException while calling activateIdentity::" + e.getMessage());
+				e.printStackTrace();
+			}
+			if(!isIdentityActvated) {
+				LOGGER.info("UIMS UserpinConfirmation activateIdentity got failed -----> ::sending mail notification for userid::"+userId);
+				UIMSLOGGER.info("UIMS UserpinConfirmation activateIdentity got failed -----> ::sending mail notification for userid::"+userId);
+				sendEmail.emailReadyToSendEmail(supportUser, fromUserName,
+						"UIMS UserpinConfirmation activateIdentity failed.", userId);
+				LOGGER.info("sending mail notification finished for userid::"+userId);
+				UIMSLOGGER.info("sending mail notification finished for userid::"+userId);
+			}
+		} catch (Exception e) {
+			// productService.sessionLogout(iPlanetDirectoryKey, "logout");
+			LOGGER.error("Error executing while activateIdentity::" + e.getMessage());
+			UIMSLOGGER.error("Error executing while activateIdentity::" + e.getMessage());
+			e.printStackTrace();
+		}
+		// productService.sessionLogout(iPlanetDirectoryKey, "logout");
+		LOGGER.info("activateIdentity() finished!");
+		UIMSLOGGER.info("activateIdentity() finished!");
 	}
 	
 	/**
