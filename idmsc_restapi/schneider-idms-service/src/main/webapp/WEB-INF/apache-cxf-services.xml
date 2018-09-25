@@ -57,7 +57,7 @@
 								  location="classpath:config/properties/application.properties" />
 
 	<!-- scans and register beans using annotation-config (metadata) -->
-	<context:component-scan base-package="com.idms.*,com.se.idms.*,com.schneider.*,com.se.uims.*" />
+	<context:component-scan base-package="com.idms.*,com.se.idms.*,com.schneider.*,com.se.uims.*,com.uimsv22.*" />
 
 	<bean name="defaultMapper" class="ma.glasnost.orika.impl.ConfigurableMapper" />
 
