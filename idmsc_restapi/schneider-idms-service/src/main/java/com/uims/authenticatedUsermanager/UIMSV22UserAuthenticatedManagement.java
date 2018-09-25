@@ -17,7 +17,7 @@ import javax.xml.ws.WebServiceFeature;
  * Generated source version: 2.2
  * 
  */
-@WebServiceClient(name = "UIMSV22_UserAuthenticatedManagement", targetNamespace = "http://uimsv22.impl.service.ims.schneider.com/", wsdlLocation = "https://ims-int.btsec.dev.schneider-electric.com/IMS-UserManager/UIMSV22/2WAuthenticated-UserManager?wsdl")
+@WebServiceClient(name = "UIMSV22_UserAuthenticatedManagement", targetNamespace = "http://uimsv22.impl.service.ims.schneider.com/", wsdlLocation = "https://ims-sqe.btsec.dev.schneider-electric.com/IMS-UserManager/UIMSV22/2WAuthenticated-UserManager?wsdl")
 public class UIMSV22UserAuthenticatedManagement
     extends Service
 {
@@ -30,7 +30,7 @@ public class UIMSV22UserAuthenticatedManagement
         URL url = null;
         WebServiceException e = null;
         try {
-            url = new URL("https://ims-int.btsec.dev.schneider-electric.com/IMS-UserManager/UIMSV22/2WAuthenticated-UserManager?wsdl");
+            url = new URL("https://ims-sqe.btsec.dev.schneider-electric.com/IMS-UserManager/UIMSV22/2WAuthenticated-UserManager?wsdl");
         } catch (MalformedURLException ex) {
             e = new WebServiceException(ex);
         }

@@ -93,8 +93,9 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 				application.setId("Uims");
 				application.setType(Type.APPLICATION);
 				LOGGER.info("Going to call createIdentityWithMobileWithPassword() of UIMS for phone:"+identity.getPhoneId());
-				uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithMobileWithPassword(callerFid,
-						identity,application,password);
+				/*uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithMobileWithPassword(callerFid,
+						identity,application,password);*/
+				uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithMobileWithPasswordForceIdmsId(callerFid, identity, password, forcedFederatedId);
 				LOGGER.info("createIdentityWithMobileWithPassword() of UIMS finished, response:"+uimsUserResponse);
 			} else {
 				LOGGER.info("Going to call createIdentityWithPasswordForceIdmsId() of UIMS for phone:"+identity.getPhoneId());
@@ -136,7 +137,8 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 				application.setId("Uims");
 				application.setType(Type.APPLICATION);
 				LOGGER.info("Going to call createIdentityWithPhoneId() of UIMS for phone:"+identity.getPhoneId());
-				uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithPhoneId(callerFid, identity, application);
+				//uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithPhoneId(callerFid, identity, application);
+				uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithPhoneIdForceIdmsId(callerFid, identity, forcedFederatedId);
 				LOGGER.info("createIdentityWithPhoneId() of UIMS finished, response:"+uimsUserResponse);
 			}else{
 				LOGGER.info("Going to call createIdentityForceIdmsId() of UIMS for phone:"+identity.getPhoneId());

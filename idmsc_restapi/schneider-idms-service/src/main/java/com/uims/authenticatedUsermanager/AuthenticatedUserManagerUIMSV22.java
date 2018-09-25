@@ -30,15 +30,15 @@ public interface AuthenticatedUserManagerUIMSV22 {
      * @param callerFid
      * @return
      *     returns com.uims.authenticatedUsermanager.CreatedIdentityReport
-     * @throws UnexpectedLdapResponseException_Exception
-     * @throws UnexpectedRuntimeImsException_Exception
-     * @throws RequestedInternalUserException_Exception
-     * @throws ImsMailerException_Exception
      * @throws SecuredImsException_Exception
-     * @throws RequestedEntryNotExistsException_Exception
-     * @throws LdapTemplateNotReadyException_Exception
      * @throws InvalidImsServiceMethodArgumentException_Exception
+     * @throws LdapTemplateNotReadyException_Exception
+     * @throws ImsMailerException_Exception
+     * @throws RequestedInternalUserException_Exception
      * @throws IMSServiceSecurityCallNotAllowedException_Exception
+     * @throws UnexpectedRuntimeImsException_Exception
+     * @throws RequestedEntryNotExistsException_Exception
+     * @throws UnexpectedLdapResponseException_Exception
      */
     @WebMethod
     @WebResult(targetNamespace = "")
@@ -56,20 +56,55 @@ public interface AuthenticatedUserManagerUIMSV22 {
 
     /**
      * 
+     * @param password
+     * @param identity
+     * @param forcedFederatedId
+     * @param callerFid
+     * @return
+     *     returns com.uims.authenticatedUsermanager.CreatedIdentityReport
+     * @throws SecuredImsException_Exception
+     * @throws InvalidImsServiceMethodArgumentException_Exception
+     * @throws ImsMailerException_Exception
+     * @throws LdapTemplateNotReadyException_Exception
+     * @throws RequestedInternalUserException_Exception
+     * @throws UnexpectedRuntimeImsException_Exception
+     * @throws IMSServiceSecurityCallNotAllowedException_Exception
+     * @throws ForcedFidAlreadyExistException_Exception
+     * @throws RequestedEntryNotExistsException_Exception
+     * @throws UnexpectedLdapResponseException_Exception
+     */
+    @WebMethod
+    @WebResult(targetNamespace = "")
+    @RequestWrapper(localName = "createIdentityWithMobileWithPasswordForceIdmsId", targetNamespace = "http://uimsv22.service.ims.schneider.com/", className = "com.uims.authenticatedUsermanager.CreateIdentityWithMobileWithPasswordForceIdmsId")
+    @ResponseWrapper(localName = "createIdentityWithMobileWithPasswordForceIdmsIdResponse", targetNamespace = "http://uimsv22.service.ims.schneider.com/", className = "com.uims.authenticatedUsermanager.CreateIdentityWithMobileWithPasswordForceIdmsIdResponse")
+    public CreatedIdentityReport createIdentityWithMobileWithPasswordForceIdmsId(
+        @WebParam(name = "callerFid", targetNamespace = "")
+        String callerFid,
+        @WebParam(name = "identity", targetNamespace = "")
+        UserV6 identity,
+        @WebParam(name = "password", targetNamespace = "")
+        String password,
+        @WebParam(name = "forcedFederatedId", targetNamespace = "")
+        String forcedFederatedId)
+        throws ForcedFidAlreadyExistException_Exception, IMSServiceSecurityCallNotAllowedException_Exception, ImsMailerException_Exception, InvalidImsServiceMethodArgumentException_Exception, LdapTemplateNotReadyException_Exception, RequestedEntryNotExistsException_Exception, RequestedInternalUserException_Exception, SecuredImsException_Exception, UnexpectedLdapResponseException_Exception, UnexpectedRuntimeImsException_Exception
+    ;
+
+    /**
+     * 
      * @param application
      * @param identity
      * @param callerFid
      * @return
      *     returns com.uims.authenticatedUsermanager.CreatedIdentityReport
-     * @throws UnexpectedLdapResponseException_Exception
-     * @throws UnexpectedRuntimeImsException_Exception
-     * @throws RequestedInternalUserException_Exception
-     * @throws ImsMailerException_Exception
      * @throws SecuredImsException_Exception
-     * @throws RequestedEntryNotExistsException_Exception
-     * @throws LdapTemplateNotReadyException_Exception
      * @throws InvalidImsServiceMethodArgumentException_Exception
+     * @throws ImsMailerException_Exception
+     * @throws LdapTemplateNotReadyException_Exception
+     * @throws RequestedInternalUserException_Exception
+     * @throws UnexpectedRuntimeImsException_Exception
      * @throws IMSServiceSecurityCallNotAllowedException_Exception
+     * @throws RequestedEntryNotExistsException_Exception
+     * @throws UnexpectedLdapResponseException_Exception
      */
     @WebMethod
     @WebResult(targetNamespace = "")
@@ -93,16 +128,16 @@ public interface AuthenticatedUserManagerUIMSV22 {
      * @param callerFid
      * @return
      *     returns com.uims.authenticatedUsermanager.CreatedIdentityReport
-     * @throws UnexpectedLdapResponseException_Exception
+     * @throws SecuredImsException_Exception
+     * @throws InvalidImsServiceMethodArgumentException_Exception
+     * @throws ImsMailerException_Exception
+     * @throws LdapTemplateNotReadyException_Exception
+     * @throws RequestedInternalUserException_Exception
      * @throws ForcedFidAlreadyExistException_Exception
      * @throws UnexpectedRuntimeImsException_Exception
-     * @throws RequestedInternalUserException_Exception
-     * @throws ImsMailerException_Exception
-     * @throws SecuredImsException_Exception
-     * @throws RequestedEntryNotExistsException_Exception
-     * @throws LdapTemplateNotReadyException_Exception
-     * @throws InvalidImsServiceMethodArgumentException_Exception
      * @throws IMSServiceSecurityCallNotAllowedException_Exception
+     * @throws RequestedEntryNotExistsException_Exception
+     * @throws UnexpectedLdapResponseException_Exception
      */
     @WebMethod
     @WebResult(targetNamespace = "")
@@ -122,19 +157,51 @@ public interface AuthenticatedUserManagerUIMSV22 {
 
     /**
      * 
+     * @param identity
+     * @param forcedFederatedId
+     * @param callerFid
+     * @return
+     *     returns com.uims.authenticatedUsermanager.CreatedIdentityReport
+     * @throws SecuredImsException_Exception
+     * @throws InvalidImsServiceMethodArgumentException_Exception
+     * @throws ImsMailerException_Exception
+     * @throws LdapTemplateNotReadyException_Exception
+     * @throws RequestedInternalUserException_Exception
+     * @throws UnexpectedRuntimeImsException_Exception
+     * @throws IMSServiceSecurityCallNotAllowedException_Exception
+     * @throws ForcedFidAlreadyExistException_Exception
+     * @throws RequestedEntryNotExistsException_Exception
+     * @throws UnexpectedLdapResponseException_Exception
+     */
+    @WebMethod
+    @WebResult(targetNamespace = "")
+    @RequestWrapper(localName = "createIdentityWithPhoneIdForceIdmsId", targetNamespace = "http://uimsv22.service.ims.schneider.com/", className = "com.uims.authenticatedUsermanager.CreateIdentityWithPhoneIdForceIdmsId")
+    @ResponseWrapper(localName = "createIdentityWithPhoneIdForceIdmsIdResponse", targetNamespace = "http://uimsv22.service.ims.schneider.com/", className = "com.uims.authenticatedUsermanager.CreateIdentityWithPhoneIdForceIdmsIdResponse")
+    public CreatedIdentityReport createIdentityWithPhoneIdForceIdmsId(
+        @WebParam(name = "callerFid", targetNamespace = "")
+        String callerFid,
+        @WebParam(name = "identity", targetNamespace = "")
+        UserV6 identity,
+        @WebParam(name = "forcedFederatedId", targetNamespace = "")
+        String forcedFederatedId)
+        throws ForcedFidAlreadyExistException_Exception, IMSServiceSecurityCallNotAllowedException_Exception, ImsMailerException_Exception, InvalidImsServiceMethodArgumentException_Exception, LdapTemplateNotReadyException_Exception, RequestedEntryNotExistsException_Exception, RequestedInternalUserException_Exception, SecuredImsException_Exception, UnexpectedLdapResponseException_Exception, UnexpectedRuntimeImsException_Exception
+    ;
+
+    /**
+     * 
      * @param phoneId
      * @param callerFid
      * @return
      *     returns com.uims.authenticatedUsermanager.UserFederatedIdAndType
-     * @throws UnexpectedLdapResponseException_Exception
-     * @throws UnexpectedRuntimeImsException_Exception
-     * @throws RequestedInternalUserException_Exception
      * @throws SecuredImsException_Exception
-     * @throws RequestedEntryNotExistsException_Exception
+     * @throws InvalidImsServiceMethodArgumentException_Exception
      * @throws InactiveUserImsException_Exception
      * @throws LdapTemplateNotReadyException_Exception
-     * @throws InvalidImsServiceMethodArgumentException_Exception
+     * @throws RequestedInternalUserException_Exception
      * @throws IMSServiceSecurityCallNotAllowedException_Exception
+     * @throws UnexpectedRuntimeImsException_Exception
+     * @throws RequestedEntryNotExistsException_Exception
+     * @throws UnexpectedLdapResponseException_Exception
      */
     @WebMethod
     @WebResult(targetNamespace = "")
@@ -154,15 +221,15 @@ public interface AuthenticatedUserManagerUIMSV22 {
      * @param callerFid
      * @return
      *     returns com.uims.authenticatedUsermanager.UserFederatedIdAndType
-     * @throws UnexpectedLdapResponseException_Exception
-     * @throws UnexpectedRuntimeImsException_Exception
-     * @throws RequestedInternalUserException_Exception
      * @throws SecuredImsException_Exception
-     * @throws RequestedEntryNotExistsException_Exception
+     * @throws InvalidImsServiceMethodArgumentException_Exception
      * @throws InactiveUserImsException_Exception
      * @throws LdapTemplateNotReadyException_Exception
-     * @throws InvalidImsServiceMethodArgumentException_Exception
+     * @throws RequestedInternalUserException_Exception
+     * @throws UnexpectedRuntimeImsException_Exception
      * @throws IMSServiceSecurityCallNotAllowedException_Exception
+     * @throws RequestedEntryNotExistsException_Exception
+     * @throws UnexpectedLdapResponseException_Exception
      */
     @WebMethod
     @WebResult(targetNamespace = "")
@@ -184,15 +251,15 @@ public interface AuthenticatedUserManagerUIMSV22 {
      * @param callerFid
      * @return
      *     returns com.uims.authenticatedUsermanager.CreatedIdentityReport
-     * @throws UnexpectedLdapResponseException_Exception
-     * @throws UnexpectedRuntimeImsException_Exception
-     * @throws RequestedInternalUserException_Exception
      * @throws SecuredImsException_Exception
-     * @throws ImsMailerException_Exception
-     * @throws RequestedEntryNotExistsException_Exception
-     * @throws LdapTemplateNotReadyException_Exception
      * @throws InvalidImsServiceMethodArgumentException_Exception
+     * @throws LdapTemplateNotReadyException_Exception
+     * @throws ImsMailerException_Exception
+     * @throws RequestedInternalUserException_Exception
+     * @throws UnexpectedRuntimeImsException_Exception
      * @throws IMSServiceSecurityCallNotAllowedException_Exception
+     * @throws RequestedEntryNotExistsException_Exception
+     * @throws UnexpectedLdapResponseException_Exception
      */
     @WebMethod
     @WebResult(targetNamespace = "")
@@ -217,14 +284,14 @@ public interface AuthenticatedUserManagerUIMSV22 {
      * @param callerFid
      * @return
      *     returns boolean
-     * @throws UnexpectedLdapResponseException_Exception
-     * @throws UnexpectedRuntimeImsException_Exception
      * @throws SecuredImsException_Exception
-     * @throws RequestedEntryNotExistsException_Exception
+     * @throws InvalidImsServiceMethodArgumentException_Exception
      * @throws InactiveUserImsException_Exception
      * @throws LdapTemplateNotReadyException_Exception
-     * @throws InvalidImsServiceMethodArgumentException_Exception
+     * @throws UnexpectedRuntimeImsException_Exception
      * @throws IMSServiceSecurityCallNotAllowedException_Exception
+     * @throws RequestedEntryNotExistsException_Exception
+     * @throws UnexpectedLdapResponseException_Exception
      */
     @WebMethod
     @WebResult(targetNamespace = "")
@@ -247,16 +314,16 @@ public interface AuthenticatedUserManagerUIMSV22 {
      * @param callerFid
      * @return
      *     returns java.lang.String
-     * @throws UnexpectedLdapResponseException_Exception
-     * @throws UnexpectedRuntimeImsException_Exception
-     * @throws ImsMailerException_Exception
      * @throws SecuredImsException_Exception
-     * @throws RequestedEntryNotExistsException_Exception
-     * @throws InactiveUserImsException_Exception
-     * @throws InvalidImsPropertiesFileException_Exception
-     * @throws LdapTemplateNotReadyException_Exception
      * @throws InvalidImsServiceMethodArgumentException_Exception
+     * @throws InvalidImsPropertiesFileException_Exception
+     * @throws InactiveUserImsException_Exception
+     * @throws LdapTemplateNotReadyException_Exception
+     * @throws ImsMailerException_Exception
+     * @throws UnexpectedRuntimeImsException_Exception
      * @throws IMSServiceSecurityCallNotAllowedException_Exception
+     * @throws RequestedEntryNotExistsException_Exception
+     * @throws UnexpectedLdapResponseException_Exception
      */
     @WebMethod
     @WebResult(targetNamespace = "")
@@ -279,16 +346,16 @@ public interface AuthenticatedUserManagerUIMSV22 {
      * @param callerFid
      * @return
      *     returns com.uims.authenticatedUsermanager.CreatedIdentityReport
-     * @throws UnexpectedLdapResponseException_Exception
-     * @throws ForcedFidAlreadyExistException_Exception
-     * @throws UnexpectedRuntimeImsException_Exception
-     * @throws RequestedInternalUserException_Exception
      * @throws SecuredImsException_Exception
-     * @throws ImsMailerException_Exception
-     * @throws RequestedEntryNotExistsException_Exception
-     * @throws LdapTemplateNotReadyException_Exception
      * @throws InvalidImsServiceMethodArgumentException_Exception
+     * @throws LdapTemplateNotReadyException_Exception
+     * @throws ImsMailerException_Exception
+     * @throws RequestedInternalUserException_Exception
+     * @throws ForcedFidAlreadyExistException_Exception
      * @throws IMSServiceSecurityCallNotAllowedException_Exception
+     * @throws UnexpectedRuntimeImsException_Exception
+     * @throws RequestedEntryNotExistsException_Exception
+     * @throws UnexpectedLdapResponseException_Exception
      */
     @WebMethod
     @WebResult(targetNamespace = "")
@@ -312,15 +379,15 @@ public interface AuthenticatedUserManagerUIMSV22 {
      * @param callerFid
      * @return
      *     returns com.uims.authenticatedUsermanager.CreatedIdentityReport
-     * @throws UnexpectedLdapResponseException_Exception
-     * @throws UnexpectedRuntimeImsException_Exception
-     * @throws RequestedInternalUserException_Exception
-     * @throws ImsMailerException_Exception
      * @throws SecuredImsException_Exception
-     * @throws RequestedEntryNotExistsException_Exception
-     * @throws LdapTemplateNotReadyException_Exception
      * @throws InvalidImsServiceMethodArgumentException_Exception
+     * @throws ImsMailerException_Exception
+     * @throws LdapTemplateNotReadyException_Exception
+     * @throws RequestedInternalUserException_Exception
+     * @throws UnexpectedRuntimeImsException_Exception
      * @throws IMSServiceSecurityCallNotAllowedException_Exception
+     * @throws RequestedEntryNotExistsException_Exception
+     * @throws UnexpectedLdapResponseException_Exception
      */
     @WebMethod
     @WebResult(targetNamespace = "")
@@ -345,16 +412,16 @@ public interface AuthenticatedUserManagerUIMSV22 {
      * @param callerFid
      * @return
      *     returns java.lang.String
-     * @throws UnexpectedLdapResponseException_Exception
-     * @throws UnexpectedRuntimeImsException_Exception
      * @throws SecuredImsException_Exception
-     * @throws ImsMailerException_Exception
-     * @throws InactiveUserImsException_Exception
-     * @throws RequestedEntryNotExistsException_Exception
-     * @throws InvalidImsPropertiesFileException_Exception
-     * @throws LdapTemplateNotReadyException_Exception
      * @throws InvalidImsServiceMethodArgumentException_Exception
+     * @throws InvalidImsPropertiesFileException_Exception
+     * @throws InactiveUserImsException_Exception
+     * @throws ImsMailerException_Exception
+     * @throws LdapTemplateNotReadyException_Exception
+     * @throws UnexpectedRuntimeImsException_Exception
      * @throws IMSServiceSecurityCallNotAllowedException_Exception
+     * @throws RequestedEntryNotExistsException_Exception
+     * @throws UnexpectedLdapResponseException_Exception
      */
     @WebMethod
     @WebResult(targetNamespace = "")
@@ -377,14 +444,14 @@ public interface AuthenticatedUserManagerUIMSV22 {
      * @param callerFid
      * @return
      *     returns java.lang.String
-     * @throws UnexpectedLdapResponseException_Exception
-     * @throws UnexpectedRuntimeImsException_Exception
      * @throws SecuredImsException_Exception
-     * @throws ImsMailerException_Exception
-     * @throws RequestedEntryNotExistsException_Exception
-     * @throws LdapTemplateNotReadyException_Exception
      * @throws InvalidImsServiceMethodArgumentException_Exception
+     * @throws LdapTemplateNotReadyException_Exception
+     * @throws ImsMailerException_Exception
+     * @throws UnexpectedRuntimeImsException_Exception
      * @throws IMSServiceSecurityCallNotAllowedException_Exception
+     * @throws RequestedEntryNotExistsException_Exception
+     * @throws UnexpectedLdapResponseException_Exception
      */
     @WebMethod
     @WebResult(targetNamespace = "")
@@ -406,13 +473,13 @@ public interface AuthenticatedUserManagerUIMSV22 {
      * @param callerFid
      * @return
      *     returns com.uims.authenticatedUsermanager.UserV6
-     * @throws UnexpectedLdapResponseException_Exception
-     * @throws UnexpectedRuntimeImsException_Exception
      * @throws SecuredImsException_Exception
-     * @throws RequestedEntryNotExistsException_Exception
-     * @throws LdapTemplateNotReadyException_Exception
      * @throws InvalidImsServiceMethodArgumentException_Exception
+     * @throws LdapTemplateNotReadyException_Exception
+     * @throws UnexpectedRuntimeImsException_Exception
      * @throws IMSServiceSecurityCallNotAllowedException_Exception
+     * @throws RequestedEntryNotExistsException_Exception
+     * @throws UnexpectedLdapResponseException_Exception
      */
     @WebMethod
     @WebResult(targetNamespace = "")

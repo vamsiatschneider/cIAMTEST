@@ -33,6 +33,7 @@ public class ObjectFactory {
     private final static QName _CreateIdentityWithPhoneIdResponse_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "createIdentityWithPhoneIdResponse");
     private final static QName _UpdateUserResponse_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "updateUserResponse");
     private final static QName _CreateIdentityWithPasswordForceIdmsId_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "createIdentityWithPasswordForceIdmsId");
+    private final static QName _CreateIdentityWithPhoneIdForceIdmsIdResponse_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "createIdentityWithPhoneIdForceIdmsIdResponse");
     private final static QName _RequestedInternalUserException_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "RequestedInternalUserException");
     private final static QName _CreateIdentityWithPasswordForceIdmsIdResponse_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "createIdentityWithPasswordForceIdmsIdResponse");
     private final static QName _ResetPasswordResponse_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "resetPasswordResponse");
@@ -51,12 +52,15 @@ public class ObjectFactory {
     private final static QName _GetUser_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "getUser");
     private final static QName _CreatedIdentityReport_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "CreatedIdentityReport");
     private final static QName _SearchUserByPhoneIdResponse_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "searchUserByPhoneIdResponse");
+    private final static QName _CreateIdentityWithMobileWithPasswordForceIdmsId_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "createIdentityWithMobileWithPasswordForceIdmsId");
     private final static QName _ForcedFidAlreadyExistException_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "ForcedFidAlreadyExistException");
     private final static QName _InactiveUserImsException_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "InactiveUserImsException");
     private final static QName _ReactivateResponse_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "reactivateResponse");
     private final static QName _CreateIdentity_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "createIdentity");
     private final static QName _InvalidImsPropertiesFileException_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "InvalidImsPropertiesFileException");
     private final static QName _User_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "user");
+    private final static QName _CreateIdentityWithMobileWithPasswordForceIdmsIdResponse_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "createIdentityWithMobileWithPasswordForceIdmsIdResponse");
+    private final static QName _CreateIdentityWithPhoneIdForceIdmsId_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "createIdentityWithPhoneIdForceIdmsId");
     private final static QName _SearchUserResponse_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "searchUserResponse");
     private final static QName _IMSServiceSecurityCallNotAllowedException_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "IMSServiceSecurityCallNotAllowedException");
     private final static QName _SearchUser_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "searchUser");
@@ -64,8 +68,8 @@ public class ObjectFactory {
     private final static QName _UpdateUser_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "updateUser");
     private final static QName _CreateIdentityWithMobileWithPasswordResponse_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "createIdentityWithMobileWithPasswordResponse");
     private final static QName _Reactivate_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "reactivate");
-    private final static QName _RequestedEntryNotExistsException_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "RequestedEntryNotExistsException");
     private final static QName _UnexpectedLdapResponseException_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "UnexpectedLdapResponseException");
+    private final static QName _RequestedEntryNotExistsException_QNAME = new QName("http://uimsv22.service.ims.schneider.com/", "RequestedEntryNotExistsException");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: com.uims.authenticatedUsermanager
@@ -195,6 +199,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link CreateIdentityWithPhoneIdForceIdmsIdResponse }
+     * 
+     */
+    public CreateIdentityWithPhoneIdForceIdmsIdResponse createCreateIdentityWithPhoneIdForceIdmsIdResponse() {
+        return new CreateIdentityWithPhoneIdForceIdmsIdResponse();
+    }
+
+    /**
      * Create an instance of {@link RequestedInternalUserException }
      * 
      */
@@ -307,19 +319,19 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link RequestedEntryNotExistsException }
-     * 
-     */
-    public RequestedEntryNotExistsException createRequestedEntryNotExistsException() {
-        return new RequestedEntryNotExistsException();
-    }
-
-    /**
      * Create an instance of {@link UnexpectedLdapResponseException }
      * 
      */
     public UnexpectedLdapResponseException createUnexpectedLdapResponseException() {
         return new UnexpectedLdapResponseException();
+    }
+
+    /**
+     * Create an instance of {@link RequestedEntryNotExistsException }
+     * 
+     */
+    public RequestedEntryNotExistsException createRequestedEntryNotExistsException() {
+        return new RequestedEntryNotExistsException();
     }
 
     /**
@@ -339,11 +351,27 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link CreateIdentityWithMobileWithPasswordForceIdmsIdResponse }
+     * 
+     */
+    public CreateIdentityWithMobileWithPasswordForceIdmsIdResponse createCreateIdentityWithMobileWithPasswordForceIdmsIdResponse() {
+        return new CreateIdentityWithMobileWithPasswordForceIdmsIdResponse();
+    }
+
+    /**
      * Create an instance of {@link SearchUser }
      * 
      */
     public SearchUser createSearchUser() {
         return new SearchUser();
+    }
+
+    /**
+     * Create an instance of {@link CreateIdentityWithPhoneIdForceIdmsId }
+     * 
+     */
+    public CreateIdentityWithPhoneIdForceIdmsId createCreateIdentityWithPhoneIdForceIdmsId() {
+        return new CreateIdentityWithPhoneIdForceIdmsId();
     }
 
     /**
@@ -384,6 +412,14 @@ public class ObjectFactory {
      */
     public SearchUserByPhoneIdResponse createSearchUserByPhoneIdResponse() {
         return new SearchUserByPhoneIdResponse();
+    }
+
+    /**
+     * Create an instance of {@link CreateIdentityWithMobileWithPasswordForceIdmsId }
+     * 
+     */
+    public CreateIdentityWithMobileWithPasswordForceIdmsId createCreateIdentityWithMobileWithPasswordForceIdmsId() {
+        return new CreateIdentityWithMobileWithPasswordForceIdmsId();
     }
 
     /**
@@ -537,6 +573,15 @@ public class ObjectFactory {
     @XmlElementDecl(namespace = "http://uimsv22.service.ims.schneider.com/", name = "createIdentityWithPasswordForceIdmsId")
     public JAXBElement<CreateIdentityWithPasswordForceIdmsId> createCreateIdentityWithPasswordForceIdmsId(CreateIdentityWithPasswordForceIdmsId value) {
         return new JAXBElement<CreateIdentityWithPasswordForceIdmsId>(_CreateIdentityWithPasswordForceIdmsId_QNAME, CreateIdentityWithPasswordForceIdmsId.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link CreateIdentityWithPhoneIdForceIdmsIdResponse }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://uimsv22.service.ims.schneider.com/", name = "createIdentityWithPhoneIdForceIdmsIdResponse")
+    public JAXBElement<CreateIdentityWithPhoneIdForceIdmsIdResponse> createCreateIdentityWithPhoneIdForceIdmsIdResponse(CreateIdentityWithPhoneIdForceIdmsIdResponse value) {
+        return new JAXBElement<CreateIdentityWithPhoneIdForceIdmsIdResponse>(_CreateIdentityWithPhoneIdForceIdmsIdResponse_QNAME, CreateIdentityWithPhoneIdForceIdmsIdResponse.class, null, value);
     }
 
     /**
@@ -702,6 +747,15 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link CreateIdentityWithMobileWithPasswordForceIdmsId }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://uimsv22.service.ims.schneider.com/", name = "createIdentityWithMobileWithPasswordForceIdmsId")
+    public JAXBElement<CreateIdentityWithMobileWithPasswordForceIdmsId> createCreateIdentityWithMobileWithPasswordForceIdmsId(CreateIdentityWithMobileWithPasswordForceIdmsId value) {
+        return new JAXBElement<CreateIdentityWithMobileWithPasswordForceIdmsId>(_CreateIdentityWithMobileWithPasswordForceIdmsId_QNAME, CreateIdentityWithMobileWithPasswordForceIdmsId.class, null, value);
+    }
+
+    /**
      * Create an instance of {@link JAXBElement }{@code <}{@link ForcedFidAlreadyExistException }{@code >}}
      * 
      */
@@ -753,6 +807,24 @@ public class ObjectFactory {
     @XmlElementDecl(namespace = "http://uimsv22.service.ims.schneider.com/", name = "user")
     public JAXBElement<Object> createUser(Object value) {
         return new JAXBElement<Object>(_User_QNAME, Object.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link CreateIdentityWithMobileWithPasswordForceIdmsIdResponse }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://uimsv22.service.ims.schneider.com/", name = "createIdentityWithMobileWithPasswordForceIdmsIdResponse")
+    public JAXBElement<CreateIdentityWithMobileWithPasswordForceIdmsIdResponse> createCreateIdentityWithMobileWithPasswordForceIdmsIdResponse(CreateIdentityWithMobileWithPasswordForceIdmsIdResponse value) {
+        return new JAXBElement<CreateIdentityWithMobileWithPasswordForceIdmsIdResponse>(_CreateIdentityWithMobileWithPasswordForceIdmsIdResponse_QNAME, CreateIdentityWithMobileWithPasswordForceIdmsIdResponse.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link CreateIdentityWithPhoneIdForceIdmsId }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://uimsv22.service.ims.schneider.com/", name = "createIdentityWithPhoneIdForceIdmsId")
+    public JAXBElement<CreateIdentityWithPhoneIdForceIdmsId> createCreateIdentityWithPhoneIdForceIdmsId(CreateIdentityWithPhoneIdForceIdmsId value) {
+        return new JAXBElement<CreateIdentityWithPhoneIdForceIdmsId>(_CreateIdentityWithPhoneIdForceIdmsId_QNAME, CreateIdentityWithPhoneIdForceIdmsId.class, null, value);
     }
 
     /**
@@ -819,21 +891,21 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link RequestedEntryNotExistsException }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://uimsv22.service.ims.schneider.com/", name = "RequestedEntryNotExistsException")
-    public JAXBElement<RequestedEntryNotExistsException> createRequestedEntryNotExistsException(RequestedEntryNotExistsException value) {
-        return new JAXBElement<RequestedEntryNotExistsException>(_RequestedEntryNotExistsException_QNAME, RequestedEntryNotExistsException.class, null, value);
-    }
-
-    /**
      * Create an instance of {@link JAXBElement }{@code <}{@link UnexpectedLdapResponseException }{@code >}}
      * 
      */
     @XmlElementDecl(namespace = "http://uimsv22.service.ims.schneider.com/", name = "UnexpectedLdapResponseException")
     public JAXBElement<UnexpectedLdapResponseException> createUnexpectedLdapResponseException(UnexpectedLdapResponseException value) {
         return new JAXBElement<UnexpectedLdapResponseException>(_UnexpectedLdapResponseException_QNAME, UnexpectedLdapResponseException.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link RequestedEntryNotExistsException }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://uimsv22.service.ims.schneider.com/", name = "RequestedEntryNotExistsException")
+    public JAXBElement<RequestedEntryNotExistsException> createRequestedEntryNotExistsException(RequestedEntryNotExistsException value) {
+        return new JAXBElement<RequestedEntryNotExistsException>(_RequestedEntryNotExistsException_QNAME, RequestedEntryNotExistsException.class, null, value);
     }
 
 }
