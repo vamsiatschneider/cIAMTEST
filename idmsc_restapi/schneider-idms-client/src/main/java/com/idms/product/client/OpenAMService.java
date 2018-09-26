@@ -52,6 +52,11 @@ public interface OpenAMService {
 	@Consumes("application/json")
 	String updateUser(@HeaderParam("Cookie") String iPlanetDirectoryKey,@PathParam("userId") String userId,String authId);
 	
+	@PUT
+	@Path("/se/users/{userId}")
+	@Consumes("application/json")
+	Response updateUserForPassword(@HeaderParam("Cookie") String iPlanetDirectoryKey,@PathParam("userId") String userId,String authId);
+	
 	@POST
 	@Path("/se/sessions/")
 	@Consumes("application/json")

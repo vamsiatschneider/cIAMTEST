@@ -7258,8 +7258,14 @@ public class UserServiceImpl implements UserService {
 	
 	public void updateOpenamDetails(String iPlanetDirectoryKey,String federatioId,String jsonData){
 		LOGGER.info("Start:After UIMS update, calling updateUser of OpenAMService");
-		productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-				federatioId, jsonData);
+		
+		try {
+			Response updateResponse = productService.updateUserForPassword(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,federatioId, jsonData);
+			
+			LOGGER.info("Deleted the old entry from openam"+ IOUtils.toString((InputStream) updateResponse.getEntity()));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		LOGGER.info("End:After UIMS update, finished updateUser of OpenAMService");
 	}
 
