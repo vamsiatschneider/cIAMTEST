@@ -133,10 +133,10 @@ public class UIMSAuthenticatedUserManagerSoapService {
 				AccessElement application = new AccessElement();
 				application.setId("Uims");
 				application.setType(Type.APPLICATION);
-				LOGGER.info("Going to call createIdentityWithMobileWithPassword() of UIMS for phone:"+identity.getPhoneId());
-				uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithMobileWithPassword(callerFid,
-						identity,application,password);
-				LOGGER.info("createIdentityWithMobileWithPassword() of UIMS finished, response:"+uimsUserResponse);
+				LOGGER.info("Going to call createIdentityWithMobileWithPasswordForceIdmsId() of UIMS for phone:"+identity.getPhoneId());
+				//uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithMobileWithPassword(callerFid,identity,application,password);
+				uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithMobileWithPasswordForceIdmsId(callerFid, identity, password, forcedFederatedId);
+				LOGGER.info("createIdentityWithMobileWithPasswordForceIdmsId() of UIMS finished, response:"+uimsUserResponse);
 			} else {
 				LOGGER.info("Going to call createIdentityWithPasswordForceIdmsId() of UIMS for phone:"+identity.getPhoneId());
 				uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithPasswordForceIdmsId(callerFid,
