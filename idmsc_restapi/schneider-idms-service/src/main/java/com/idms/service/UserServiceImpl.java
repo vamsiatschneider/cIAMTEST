@@ -341,7 +341,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Response authenticateUser(String userName, String password, String realm) {
 		LOGGER.info("Entered authenticateUser() -> Start");
-		LOGGER.info("Parameter userName -> " + userName+" ,password -> "+password+" ,realm -> "+realm);
+		LOGGER.info("Parameter userName -> " + userName+" ,realm -> "+realm);
 		
 		String successResponse = null;
 		String regSource = "";
@@ -3658,6 +3658,9 @@ public class UserServiceImpl implements UserService {
 
 	}
 
+	/**
+	 * Resending email with PIN in case of forget password
+	 */
 	@Override
 	public Response passwordRecovery(PasswordRecoveryRequest passwordRecoveryRequest) {
 		LOGGER.info("Entered passwordRecovery() -> Start");
@@ -4640,6 +4643,9 @@ public class UserServiceImpl implements UserService {
 		this.legthValidator = legthValidator;
 	}
 
+	/**
+	 * For mobile scenario
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public Response resendPIN(String token, ResendPinRequest resendPinRequest) {
@@ -4835,7 +4841,7 @@ public class UserServiceImpl implements UserService {
 
 	/**
 	 * This method will update the existing user password
-	 * 
+	 * to new password
 	 * 
 	 */
 	@Override
@@ -5089,6 +5095,9 @@ public class UserServiceImpl implements UserService {
 		return false;
 	}
 
+	/**
+	 * From UIMS side when user want to activate 
+	 */
 	@Override
 	public Response setPassword(String authorizedToken, String clientId, String clientSecret,
 			SetPasswordRequest setPasswordRequest) {
@@ -5525,6 +5534,10 @@ public class UserServiceImpl implements UserService {
 
 	}
 
+	/**
+	 * To activate user if he lost registeration email, 
+	 * Admin will active, we update login Id identifier
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public Response activateUser(String token,String clientId,
@@ -5845,6 +5858,13 @@ public class UserServiceImpl implements UserService {
 		return Response.status(Response.Status.OK).entity(activeToken).build();
 	}
 
+	/**
+	 * IFW is calling
+	 * @param iPlanetDirectoryToken
+	 * @param federationId
+	 * @param startTime
+	 * @return
+	 */
 	@SuppressWarnings({ "unchecked" })
 	private Response checkUserExistsWithFederationID(String iPlanetDirectoryToken, String federationId,
 			long startTime) {
@@ -5946,6 +5966,9 @@ public class UserServiceImpl implements UserService {
 		return null;
 	}
 
+	/**
+	 * IFW calling
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public Response getUserByFederationId(String authorizationToken,String federationId) {
@@ -5973,6 +5996,9 @@ public class UserServiceImpl implements UserService {
 		return getUser(userId);
 	}
 
+	/**
+	 * Invite someone by email
+	 */
 	@Override
 	public Response sendInvitation(String authorizedToken,SendInvitationRequest sendInvitaionRequest) {
 		LOGGER.info("Entered sendInvitation() -> Start");
@@ -6008,6 +6034,9 @@ public class UserServiceImpl implements UserService {
 		return Response.status(Response.Status.OK).entity(userResponse).build();
 	}
 
+	/**
+	 * Resending email to user with token
+	 */
 	@Override
 	public Response resendRegEmail(ResendRegEmailRequest resendRegEmail) {
 		LOGGER.info("Entered resendRegEmail() -> Start");
@@ -6084,6 +6113,9 @@ public class UserServiceImpl implements UserService {
 			return Response.status(Response.Status.OK).entity(userResponse).build();
 	}
 
+	/**
+	 * from UI, this method called 
+	 */
 	@Override
 	public Response idmsIdpChaning(String idToken1, String idToken2, String idButton, String gotoUrl, String gotoOnFail,
 			String sunQueryParamsString, String encoded, String errorMessage, String gxCharset) {
@@ -6153,6 +6185,9 @@ public class UserServiceImpl implements UserService {
 		return response;
 	}
 
+	/**
+	 * In update user, resending email
+	 */
 	@Override
 	public Response resendChangeEmail(ResendEmailChangeRequest emailChangeRequest) {
 		LOGGER.info("Entered resendChangeEmail() -> Start");
@@ -6248,6 +6283,9 @@ public class UserServiceImpl implements UserService {
 		return Response.status(Response.Status.OK).entity(userResponse).build();
 	}
 
+	/**
+	 * 
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public Response initSocialLogin(String service) {
@@ -7257,16 +7295,15 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	public void updateOpenamDetails(String iPlanetDirectoryKey,String federatioId,String jsonData){
-		LOGGER.info("Start:After UIMS update, calling updateUser of OpenAMService");
+		LOGGER.info("Entered updateOpenamDetails()");
 		
 		try {
-			Response updateResponse = productService.updateUserForPassword(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,federatioId, jsonData);
-			
-			LOGGER.info("Deleted the old entry from openam"+ IOUtils.toString((InputStream) updateResponse.getEntity()));
+			Response updateResponse = productService.updateUserForPassword(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,federatioId, jsonData);			
+			LOGGER.info("Information from OPENAM="+ IOUtils.toString((InputStream) updateResponse.getEntity()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		LOGGER.info("End:After UIMS update, finished updateUser of OpenAMService");
+		LOGGER.info("Ended updateOpenamDetails()");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -7285,4 +7322,51 @@ public class UserServiceImpl implements UserService {
 		 response = getUser(userId);
 		return response;
 	}
+
+	/**
+	 * Added For MySE
+	 * Requirement given by Prasenjit
+	 */
+	@Override
+	public Response verifyPIN(String federationId, String pin) {
+		LOGGER.info("Entered verifyPIN() -> Start");
+		LOGGER.info("Parameter federationId -> " + federationId+" ,pin="+pin);
+		boolean validPinStatus = false;
+		ErrorResponse errorResponse = new ErrorResponse();
+		
+		if(null == federationId || federationId.isEmpty()){
+			errorResponse.setStatus(ErrorCodeConstants.ERROR);
+			errorResponse.setMessage(UserConstants.MANDATORY_FEDERATION_ID);
+			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		if(null == pin || pin.isEmpty()){
+			errorResponse.setStatus(ErrorCodeConstants.ERROR);
+			errorResponse.setMessage("PIN is missing or null");
+			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		try {
+			validPinStatus = sendEmail.validatePin(pin, federationId);
+			if(validPinStatus){
+				errorResponse.setStatus(ErrorCodeConstants.SUCCESS);
+				errorResponse.setMessage(UserConstants.PIN_VALIDATED_SUCCESS);
+				return Response.status(Response.Status.OK).entity(errorResponse).build();
+			}
+		} catch (NotAuthorizedException e) {
+			e.printStackTrace();
+			errorResponse.setStatus(errorStatus);
+			errorResponse.setMessage(e.getMessage());
+			LOGGER.error(UserConstants.INVALID_PINCODE);
+			return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			errorResponse.setStatus(errorStatus);
+			errorResponse.setMessage(e.getMessage());
+			LOGGER.error("Exception while verifying the User pin:: -> " + e.getMessage());
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
+		}
+		errorResponse.setStatus(ErrorCodeConstants.ERROR);
+		errorResponse.setMessage(ErrorCodeConstants.BAD_REQUEST);
+		return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+	}
+	
 }

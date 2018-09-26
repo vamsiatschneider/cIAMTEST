@@ -684,7 +684,11 @@ public class ParseValuesByOauthHomeWorkContextDto {
 		userResponse.setContactId(null != userProductDocCtx.read("$.contactId")
 				? getValue(userProductDocCtx.read("$.contactId").toString()) : getDelimeter());
 		userResponse.setAccountId(null != userProductDocCtx.read("$.bfoAccountId")
-				? getValue(userProductDocCtx.read("$.bfoAccountId").toString()) : getDelimeter());
+				? getValue(userProductDocCtx.read("$.bfoAccountId").toString()) : getDelimeter());		
+		userResponse.setIDMSWorkPhone__c(null != userProductDocCtx.read("$.IDMSWorkPhone__c")
+				? getValue(userProductDocCtx.read("$.IDMSWorkPhone__c").toString()) : getDelimeter());
+		
+		
 	}
 
 	

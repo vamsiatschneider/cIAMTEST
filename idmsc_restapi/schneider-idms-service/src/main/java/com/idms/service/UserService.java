@@ -235,4 +235,8 @@ public interface UserService {
 	@Path("/apexrest/securedlogin")
 	Response securedLogin(@HeaderParam("X-OpenAM-Username") String userName,@HeaderParam("X-OpenAM-Password") String password,@QueryParam("realm") String realm,@QueryParam("app") String app);
 	
+	@POST
+	@Path("/apexrest/verifyPIN")
+	Response verifyPIN(String federationId, String pin);
+	
 }

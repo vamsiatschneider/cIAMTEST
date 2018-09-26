@@ -231,6 +231,9 @@ public class IFWUser extends BaseEntity {
 	@JsonProperty
 	private String RegistrationAttributes__c;
 	
+	@JsonProperty
+	private String IDMSWorkPhone__c;
+	
 	@JsonProperty("RegistrationAttributes__c")
 	public String getRegistrationAttributes__c() {
 		return RegistrationAttributes__c;
@@ -905,4 +908,15 @@ public class IFWUser extends BaseEntity {
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);
 	}
+
+	@JsonProperty("IDMSWorkPhone__c")
+	public String getIDMSWorkPhone__c() {
+		return IDMSWorkPhone__c;
+	}
+
+	@JsonProperty("IDMSWorkPhone__c")
+	public void setIDMSWorkPhone__c(String iDMSWorkPhone__c) {
+		IDMSWorkPhone__c = iDMSWorkPhone__c;
+	}
+	
 }

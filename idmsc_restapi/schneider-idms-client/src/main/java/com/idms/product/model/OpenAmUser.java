@@ -232,6 +232,21 @@ public class OpenAmUser {
 	@JsonInclude(Include.NON_NULL)
 	private String RegistrationAttributes__c;
 	
+	@JsonInclude(Include.NON_NULL)
+	private String IDMSWorkPhone__c;
+	
+	@JsonProperty("IDMSWorkPhone__c")
+	@JsonInclude(Include.NON_NULL)
+	public String getIDMSWorkPhone__c() {
+		return IDMSWorkPhone__c;
+	}
+
+	@JsonProperty("IDMSWorkPhone__c")
+	@JsonInclude(Include.NON_NULL)
+	public void setIDMSWorkPhone__c(String iDMSWorkPhone__c) {
+		IDMSWorkPhone__c = iDMSWorkPhone__c;
+	}
+
 	@JsonProperty("RegistrationAttributes__c")
 	@JsonInclude(Include.NON_NULL)
 	public String getRegistrationAttributes__c() {
