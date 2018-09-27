@@ -185,6 +185,7 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.BFO_ACCOUNT_ID__c", "input.user.bfoAccountId")
         .field("userRecord.contactId", "input.user.contactId")
         .field("userRecord.IDMSWorkPhone__c", "input.user.IDMSWorkPhone__c")
+        .field("userRecord.registrationAttributes__c", "input.user.registrationAttributes__c")
         .byDefault()
         .register();
     }
