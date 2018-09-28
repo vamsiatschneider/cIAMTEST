@@ -271,7 +271,7 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.phone", "phone")
         .field("userRecord.fax", "fax")
         .field("userRecord.IDMS_County__c", "county")
-        .field("userRecord.mobilePhone", "phoneId")
+        //.field("userRecord.mobilePhone", "phoneId")
         .field("userRecord.channel__c", "channel")
         .field("userRecord.subChannel__c", "subChannel")
         .field("userRecord.IDMSPrimaryContact__c", "primaryContact")
