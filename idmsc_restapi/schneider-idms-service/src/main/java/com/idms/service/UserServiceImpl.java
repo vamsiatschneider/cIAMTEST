@@ -7140,6 +7140,15 @@ public class UserServiceImpl implements UserService {
 			identity.setLanguageCode(identity.getLanguageCode().toLowerCase());
 		}
 
+		/**
+		 * In case mobile registration
+		 */
+		if ((null == userRequest.getUserRecord().getEmail() && userRequest.getUserRecord().getEmail().isEmpty())
+				&& (null != userRequest.getUserRecord().getMobilePhone()
+						&& !userRequest.getUserRecord().getMobilePhone().isEmpty())) {
+			identity.setPhoneId(userRequest.getUserRecord().getMobilePhone());
+		}
+		
 		Integer resultCountCheck = checkCompanyMappedOtherUsers(
 				userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c());
 
