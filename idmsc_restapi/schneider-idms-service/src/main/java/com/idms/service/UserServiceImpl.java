@@ -3075,6 +3075,9 @@ public class UserServiceImpl implements UserService {
 					&& (null != confirmRequest.getUIFlag() && !confirmRequest.getUIFlag().isEmpty())){
 				//Set password and validating against password history
 				passwordOpenAMResponse = updatePasswordHistory(iPlanetDirectoryKey, uniqueIdentifier, PRODUCT_JSON_STRING);
+				if(200 != passwordOpenAMResponse.getStatus()){
+					return passwordOpenAMResponse;
+				}
 				// check UIMSPasswordSync to call sync or Async method  
 				if(pickListValidator.validate(UserConstants.UIMSPasswordSync, UserConstants.TRUE)){
 					//Calling Sync method of setUIMSPassword
@@ -5018,6 +5021,9 @@ public class UserServiceImpl implements UserService {
 			// updating new password in openAM
 			LOGGER.info("Start: updating new password in openam for userId=" + userId);
 			passwordOpenAMResponse = updatePasswordHistory(iPlanetDirectoryKey, userId, PRODUCT_JSON_STRING);
+			if(200 != passwordOpenAMResponse.getStatus()){
+				return passwordOpenAMResponse;
+			}
 			LOGGER.info("End: updating new password in openam finished for userId=" + userId);
 
 			// check UIMSPasswordSync to call sync or Async method
@@ -7336,7 +7342,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Message from OpenAM=" + message);
 			if (200 != jsonResponse.getStatus()) {
 				errorResponse.setStatus(errorStatus);
-				errorResponse.setMessage(message);
+				errorResponse.setMessage("New password has been used previously.");
 				LOGGER.error("Error in updatePasswordHistory()=" + message);
 				return Response.status(Response.Status.PRECONDITION_FAILED).entity(errorResponse).build();
 			}
