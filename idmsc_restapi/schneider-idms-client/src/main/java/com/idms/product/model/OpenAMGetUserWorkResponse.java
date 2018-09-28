@@ -192,6 +192,8 @@ public class OpenAMGetUserWorkResponse {
 	private String Channel__c;
 
 	private String SubChannel__c;
+	
+	private String IDMSWorkPhone__c;
 
 	@JsonProperty("IDMSCompanyFederationIdentifier__c")
 	public String getIDMSCompanyFederationIdentifier__c() {
@@ -1003,4 +1005,14 @@ public class OpenAMGetUserWorkResponse {
 		SubChannel__c = subChannel__c;
 	}
 
+	@JsonProperty("IDMSWorkPhone__c")
+	public String getIDMSWorkPhone__c() {
+		return IDMSWorkPhone__c;
+	}
+
+	@JsonProperty("IDMSWorkPhone__c")
+	public void setIDMSWorkPhone__c(String iDMSWorkPhone__c) {
+		IDMSWorkPhone__c = iDMSWorkPhone__c;
+	}
+	
 }

@@ -41,7 +41,10 @@ public class IdmsMapper extends ConfigurableMapper{
     }
     
    
-	
+	/**
+	 * User Registration
+	 * @param mapperFactory
+	 */
 	private void configureIFWUserRequestToOpenAmUserRequest(MapperFactory mapperFactory) {
         mapperFactory.classMap(CreateUserRequest.class,OpenAmUserRequest.class)
         .field("userRecord.email", "input.user.mail")
@@ -110,10 +113,14 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.subChannel__c", "input.user.subchannel")
         .field("userRecord.contactId", "input.user.contactId")
         .field("userRecord.registrationAttributes__c", "input.user.registrationAttributes__c")
+        .field("userRecord.IDMSWorkPhone__c", "input.user.IDMSWorkPhone__c")
         .byDefault()
         .register();
     }
 	
+	/*
+	 * Update User
+	 */
 	private void configureUpdateUserRequest(MapperFactory mapperFactory) {
         mapperFactory.classMap(UpdateUserRequest.class,OpenAmUserRequest.class)
         .field("userRecord.email", "input.user.mail")
@@ -177,10 +184,15 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.subChannel__c", "input.user.subchannel")
         .field("userRecord.BFO_ACCOUNT_ID__c", "input.user.bfoAccountId")
         .field("userRecord.contactId", "input.user.contactId")
+        .field("userRecord.IDMSWorkPhone__c", "input.user.IDMSWorkPhone__c")
+        .field("userRecord.registrationAttributes__c", "input.user.registrationAttributes__c")
         .byDefault()
         .register();
     }
 	
+	/*
+	 * PasswordRecoveryRequest
+	 */
 	private void configurePasswordRecoveryRequest(MapperFactory mapperFactory) {
         mapperFactory.classMap(PasswordRecoveryRequest.class,OpenAMPasswordRecoveryInput.class)
         .field("userRecord.email", "userRecord.email")
@@ -190,6 +202,10 @@ public class IdmsMapper extends ConfigurableMapper{
         .register();
     }
 	
+	/**
+	 * Currently not in use
+	 * @param mapperFactory
+	 */
 	private void configureIFWUserRequestToUimsUserRequest(MapperFactory mapperFactory) {
         mapperFactory.classMap(CreateUserRequest.class,UimsUserRequest.class)
         .field("userRecord.email", "input.email") 
@@ -248,6 +264,10 @@ public class IdmsMapper extends ConfigurableMapper{
         .register();
     }	
 	
+	/**
+	 * UIMS Create User
+	 * @param mapperFactory
+	 */
 	private void configureIFWUserRequestToUserV5Request(MapperFactory mapperFactory) {
         mapperFactory.classMap(CreateUserRequest.class,UserV6.class)
         .field("userRecord.email", "email") 
@@ -282,6 +302,10 @@ public class IdmsMapper extends ConfigurableMapper{
         .register();
     }
 	
+	/**
+	 * UpdateUser for UIMS User
+	 * @param mapperFactory
+	 */
 	private void configureUpdateUserRequestToUserV5Request(MapperFactory mapperFactory) {
         mapperFactory.classMap(UpdateUserRequest.class,com.se.uims.usermanager.UserV5.class)
         .field("userRecord.email", "email") 
@@ -312,7 +336,10 @@ public class IdmsMapper extends ConfigurableMapper{
         .byDefault()
         .register();
     }
-	
+	/**
+	 * UserRegitstation to UIMS Create Company
+	 * @param mapperFactory
+	 */
 	private void configureIFWUserRequestToCompanyV3Request(MapperFactory mapperFactory) {
         mapperFactory.classMap(CreateUserRequest.class,CompanyV3.class)
        // .field("userRecord.IDMSCompanyFederationIdentifier__c", "federatedId") 
@@ -341,10 +368,15 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.IDMSCompanyMarketServed__c", "marketSegment")
         .field("userRecord.IDMSAnnualRevenue__c", "annualSales")
         .field("userRecord.BFO_ACCOUNT_ID__c", "bfoId")
+        .field("userRecord.IDMSWorkPhone__c", "telephoneNumber")
         .byDefault()
         .register();
     }
 	
+	/**
+	 * UpdateUser to UIMS Company
+	 * @param mapperFactory
+	 */
 	private void configureUpdateUserToCompanyV3Request(MapperFactory mapperFactory) {
         mapperFactory.classMap(UpdateUserRequest.class,CompanyV3.class)
        // .field("userRecord.IDMSCompanyFederationIdentifier__c", "federatedId") 
@@ -360,6 +392,7 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.company_Address1__c", "street")
         .field("userRecord.IDMSCompanyHeadquarters__c", "headQuarter")
         .field("userRecord.company_Address2__c", "addInfoAddress")
+        .field("userRecord.company_Address2__c", "postalAddress")
         .field("userRecord.IDMSCompanyCounty__c", "county")
         .field("userRecord.company_Website__c", "webSite")
         .field("userRecord.IDMSCompanyMarketServed__c", "marketServed")
@@ -373,6 +406,7 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.IDMSCompanyMarketServed__c", "marketSegment")
         .field("userRecord.IDMSAnnualRevenue__c", "annualSales")
         .field("userRecord.BFO_ACCOUNT_ID__c", "bfoId")
+        .field("userRecord.IDMSWorkPhone__c", "telephoneNumber")
         .byDefault()
         .register();
     }
@@ -490,7 +524,10 @@ public class IdmsMapper extends ConfigurableMapper{
         .register();
     }
 	
-	
+	/**
+	 * GoDigital Registration
+	 * @param mapperFactory
+	 */
 	private void configureIFWUserRequestToGoDigitalUserRequest(MapperFactory mapperFactory) {
         mapperFactory.classMap(CreateUserRequest.class,UserRegistrationInfoRequest.class)
         
@@ -525,6 +562,10 @@ public class IdmsMapper extends ConfigurableMapper{
         .register();
     }
 	
+	/**
+	 * User Registration Response
+	 * @param mapperFactory
+	 */
 	private void configureIFWUserRequestToIDMSUserRecord(MapperFactory mapperFactory) {
         mapperFactory.classMap(CreateUserRequest.class,IDMSUserResponse.class)
         
@@ -629,6 +670,10 @@ public class IdmsMapper extends ConfigurableMapper{
         .register();
     }
 	
+	/**
+	 * From global fail to create user then in confirm pin user not found then get the user from global and create it in china
+	 * @param mapperFactory
+	 */
 	private void configureIFWGetUserResponseToIDMSCreateUserRequest(MapperFactory mapperFactory){
 		mapperFactory.classMap(IFWCustomAttributesForWork.class, IFWUser.class)
 		 .field("userId", "id")
