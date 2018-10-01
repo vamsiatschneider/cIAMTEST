@@ -404,6 +404,9 @@ public class IDMSUserResponse implements Serializable {
 	@JsonProperty
 	private String contactId;
 	
+	@JsonProperty
+	private String IDMSWorkPhone__c;
+	
 	/*@JsonProperty
 	private List<RegistrationAttributes> attributes;*/
 
@@ -1379,4 +1382,15 @@ public class IDMSUserResponse implements Serializable {
 		this.contactId = contactId;
 	}
 
+	@JsonProperty("IDMSWorkPhone__c")
+	public String getIDMSWorkPhone__c() {
+		return IDMSWorkPhone__c;
+	}
+
+	@JsonProperty("IDMSWorkPhone__c")
+	public void setIDMSWorkPhone__c(String iDMSWorkPhone__c) {
+		IDMSWorkPhone__c = iDMSWorkPhone__c;
+	}
+
+	
 }

@@ -665,6 +665,7 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.defaultCurrencyIsoCode", "iDMS_Company_Currency_ISO_Code__c")
         /*.field("", "userStatus__c")
         .field("", "socialProviders__c")*/
+        .field("userRecord.IDMSWorkPhone__c", "IDMSWorkPhone__c")
         
         .byDefault()
         .register();

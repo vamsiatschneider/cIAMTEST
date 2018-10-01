@@ -195,6 +195,8 @@ public class ParseValuesByOauthHomeWorkContextDto {
 		
 		userResponse.getCustomAttributes().setCompanyFederatedId(null != userProductDocCtx.read("$.companyFederatedID")
 				? getValue(userProductDocCtx.read("$.companyFederatedID").toString()) : getDelimeter());
+		userResponse.getCustomAttributes().setCompanyPhone(null != userProductDocCtx.read("$.IDMSWorkPhone__c")
+				? getValue(userProductDocCtx.read("$.IDMSWorkPhone__c").toString()) : getDelimeter());
 		
 	}
 	

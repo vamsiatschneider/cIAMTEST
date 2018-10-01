@@ -223,6 +223,9 @@ public class IFWCustomAttributesForWork {
 	@JsonProperty
 	private String idmsHashedToken;
 	
+	@JsonProperty
+	private String companyPhone;
+	
 	public String getCompanyFederatedId() {
 		return companyFederatedId;
 	}
@@ -806,5 +809,13 @@ public class IFWCustomAttributesForWork {
 
 	public void setIdmsHashedToken(String idmsHashedToken) {
 		this.idmsHashedToken = idmsHashedToken;
+	}
+
+	public String getCompanyPhone() {
+		return companyPhone;
+	}
+
+	public void setCompanyPhone(String companyPhone) {
+		this.companyPhone = companyPhone;
 	}
 }

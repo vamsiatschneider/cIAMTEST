@@ -4854,7 +4854,8 @@ public class UserServiceImpl implements UserService {
 	public Response updatePassword(String token, UpdatePasswordRequest updatePasswordRequest) {
 		LOGGER.info("Entered updatePassword() -> Start");
 		LOGGER.info("Parameter token -> " + token);
-		LOGGER.info("Parameter updatePasswordRequest -> " + updatePasswordRequest);
+		LOGGER.info("Source -> " + updatePasswordRequest.getIDMS_Profile_update_source());
+		LOGGER.info("UIFlag -> " + updatePasswordRequest.getUIFlag());
 
 		DocumentContext productDocCtx = null;
 		String iPlanetDirectoryKey = null;
@@ -4873,8 +4874,7 @@ public class UserServiceImpl implements UserService {
 		Response passwordOpenAMResponse = null;
 		boolean isPasswordUpdatedInUIMS = false;
 		try {
-			LOGGER.info("UserServiceImpl:updatePassword : sendOtp : Request    -> "
-					+ objMapper.writeValueAsString(updatePasswordRequest));
+			//LOGGER.info("UserServiceImpl:updatePassword : sendOtp : Request    -> "+ objMapper.writeValueAsString(updatePasswordRequest));
 			// Fetching the userid from the Authorization Token
 
 			if ((null == updatePasswordRequest.getUIFlag()
@@ -5128,7 +5128,9 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Entered setPassword() -> Start");
 		LOGGER.info("Parameter authorizedToken -> " + authorizedToken);
 		LOGGER.info("Parameter clientId -> " + clientId+" ,clientSecret -> "+clientSecret);
-		LOGGER.info("Parameter setPasswordRequest -> " + setPasswordRequest);
+		LOGGER.info("id -> " + setPasswordRequest.getId()+" ,FederationIdentifier -> "+setPasswordRequest.getFederationIdentifier());
+		LOGGER.info("IDMS_Federated_ID__c -> " + setPasswordRequest.getIDMS_Federated_ID__c()+" ,IDMS_Profile_update_source -> "+setPasswordRequest.getIDMS_Profile_update_source());
+		LOGGER.info("Token -> " + setPasswordRequest.getToken()+" ,UIFlag -> "+setPasswordRequest.getUIFlag());
 		
 		SetPasswordErrorResponse response = new SetPasswordErrorResponse();
 		DocumentContext productDocCtx = null;
@@ -5153,7 +5155,7 @@ public class UserServiceImpl implements UserService {
 		String PRODUCT_JSON_STRING = null;
 
 		try {
-			LOGGER.info("UserServiceImpl:updatePassword : setPassword : Request   -> " + objMapper.writeValueAsString(setPasswordRequest));
+			//LOGGER.info("UserServiceImpl:updatePassword : setPassword : Request   -> " + objMapper.writeValueAsString(setPasswordRequest));
 			
 			if ((!UserConstants.UIMS.equalsIgnoreCase(setPasswordRequest.getIDMS_Profile_update_source()))&&(null == setPasswordRequest.getUIFlag() ||  !UserConstants.TRUE.equalsIgnoreCase(setPasswordRequest.getUIFlag()))) {
 
