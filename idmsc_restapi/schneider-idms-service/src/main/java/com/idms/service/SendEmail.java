@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -784,13 +786,15 @@ public class SendEmail {
 		String userData = "";
 		String to = "";
 		String sn = "SDK-BBX-010-28365";
-		String SMSPassword = "EEc1-61E0-4";
+		String password = "EEc1-61E0-4";
+		String SMSPassword = getMD5(sn+password);
+		LOGGER.info("SMSPassword="+SMSPassword);
 		//String template = "1139";
 		//String smsContent = "%E3%80%90%E6%96%BD%E8%80%90%E5%BE%B7%E7%94%B5%E6%B0%94%E3%80%91%E9%AA%8C%E8%AF%81%E7%A0%81%EF%BC%9A"
 		//		+code+"%20%EF%BC%8C30%E5%88%86%E9%92%9F%E5%86%85%E6%9C%89%E6%95%88";
 		String smsContent = "【施耐德电气】验证码为："+code+"（请妥善保存，切勿告知他人），在页面输入以完成验证。";
 		smsContent   =   java.net.URLEncoder.encode(smsContent,"utf-8");  
-		String ext=" ", stime=" ", rrid=" ", msgfmt=" ";
+		//String ext=" ", stime=" ", rrid=" ", msgfmt=" ";
 		
 		try {
 
@@ -806,7 +810,7 @@ public class SendEmail {
 			}
 
 			LOGGER.info("Start: sendSMSCode() of smsservice to "+to);
-			Response smsResponse = newSmsService.sendSMSCode(sn, SMSPassword, to, smsContent, ext, stime, rrid, msgfmt);
+			Response smsResponse = newSmsService.sendSMSCode(sn, SMSPassword, to, smsContent);
 			LOGGER.info("smsResponse="+smsResponse.getEntity());
 			
 			LOGGER.info("End: sendSMSCode() finished, Response status :: -> " + smsResponse.getStatus());
@@ -824,5 +828,28 @@ public class SendEmail {
 			LOGGER.error(e.getMessage());
 		}
 
+	}
+	
+	public String getMD5(String sourceStr) throws UnsupportedEncodingException {
+		String resultStr = "";
+		try {
+			byte[] temp = sourceStr.getBytes();
+			MessageDigest md5 = MessageDigest.getInstance("MD5");
+			md5.update(temp);
+			// resultStr = new String(md5.digest());
+			byte[] b = md5.digest();
+			for (int i = 0; i < b.length; i++) {
+				char[] digit = { '0', '1', '2', '3', '4', '5', '6', '7', '8',
+						'9', 'A', 'B', 'C', 'D', 'E', 'F' };
+				char[] ob = new char[2];
+				ob[0] = digit[(b[i] >>> 4) & 0X0F];
+				ob[1] = digit[b[i] & 0X0F];
+				resultStr += new String(ob);
+			}
+			return resultStr;
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 }

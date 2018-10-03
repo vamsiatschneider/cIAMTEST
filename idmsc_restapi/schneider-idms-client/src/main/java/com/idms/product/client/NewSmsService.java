@@ -12,8 +12,6 @@ public interface NewSmsService {
 	@GET
 	@Path("/mdsmssend")
 	Response sendSMSCode(@QueryParam("sn") String sn, @QueryParam("pwd") String pwd,
-			@QueryParam("mobile") String mobile, @QueryParam("content") String content,
-			@QueryParam("ext") String ext, @QueryParam("stime") String stime,@QueryParam("rrid") String rrid,
-			@QueryParam("msgfmt") String msgfmt);
+			@QueryParam("mobile") String mobile, @QueryParam("content") String content);
 
 }
