@@ -400,7 +400,7 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 
 				String otp = sendEmail.generateOtp(userId);
 				LOGGER.info("Successfully OTP generated for " + userId);
-				sendEmail.sendSMSMessage(otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userName,
+				sendEmail.sendSMSNewGateway(otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userName,
 						userRequest.getProfileLastUpdateSource());
 
 				sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userId,

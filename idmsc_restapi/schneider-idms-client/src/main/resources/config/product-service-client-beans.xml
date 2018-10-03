@@ -84,5 +84,15 @@
 			<entry key="Cache-Control" value="no-cache" />
 		</jaxrs:headers>	
 	</jaxrs:client>
+	
+	<jaxrs:client id="newSmsServiceApi" address="${newSmsService.url}"
+		serviceClass="com.idms.product.client.NewSmsService">	
+		<jaxrs:headers> 
+			<entry key="Accept" value="text/xml"/>
+			<entry key="Host" value="${newSMSHostName}" />
+			<entry key="Connection" value="keep-alive" />
+			<entry key="Cache-Control" value="no-cache" />
+		</jaxrs:headers>	
+	</jaxrs:client>
 
 </beans>

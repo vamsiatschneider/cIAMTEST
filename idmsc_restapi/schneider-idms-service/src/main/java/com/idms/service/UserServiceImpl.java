@@ -731,7 +731,7 @@ public class UserServiceImpl implements UserService {
 					errorResponse.setStatus(userResponse.getStatus());
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-					LOGGER.error("Error while processing is "+errorResponse.getMessage());
+					LOGGER.error("Error while processing checkMandatoryFields is "+errorResponse.getMessage());
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 				
@@ -893,7 +893,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 					+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + loginIdentifier + AUDIT_LOG_CLOSURE);
 
-			LOGGER.info("Start: checkUserExistsWithEmailMobile() of OpenAMService");
+			LOGGER.info("Start: checkUserExistsWithEmailMobile() of OpenAMService for loginIdentifier="+loginIdentifier);
 			if (null != openAmReq.getInput().getUser().getRegisterationSource()
 					&& UserConstants.UIMS.equalsIgnoreCase(openAmReq.getInput().getUser().getRegisterationSource())) {
 
@@ -904,7 +904,7 @@ public class UserServiceImpl implements UserService {
 				userExists = productService.checkUserExistsWithEmailMobile(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						"loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginIdentifier,"UTF-8"),"UTF-8") + "\"");
 			}
-			LOGGER.info("End: checkUserExistsWithEmailMobile() of OpenAMService finished");
+			LOGGER.info("End: checkUserExistsWithEmailMobile() of OpenAMService finished for loginIdentifier="+loginIdentifier);
 			productDocCtx = JsonPath.using(conf).parse(userExists);
 			Integer resultCount = productDocCtx.read(JsonConstants.RESULT_COUNT);
 			LOGGER.info("resultCount = "+resultCount);
@@ -917,7 +917,7 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.CONFLICT).entity(errorResponse).build();
 			}
 
-			LOGGER.info("CheckUserExistsWithEmailMobile Success");
+			//LOGGER.info("CheckUserExistsWithEmailMobile Success");
 			/**
 			 * check login identifier e-email or mobile already handled in step2
 			 */
@@ -946,6 +946,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("End: checkUserExistsWithEmailMobile() for unverified user to delete and create new reg with same email/mobile");
 			productDocCtxCheck = JsonPath.using(conf).parse(userExistsInOpenam);
 			Integer resultCountCheck = productDocCtxCheck.read(JsonConstants.RESULT_COUNT);
+			LOGGER.info("resultCountCheck for loginIdentifier="+loginIdentifier+" is:"+resultCountCheck);
 			
 			//delete records from OPENAM if application is PRM
 			if ((resultCountCheck.intValue() > 0)
@@ -1071,15 +1072,15 @@ public class UserServiceImpl implements UserService {
 					json = objMapper.writeValueAsString(openAmReq.getInput().getUser());
 					json = json.replace("\"\"", "[]");
 					LOGGER.info("productService.userRegistration :  Request -> "+ json);
-					LOGGER.info("Going to call updateUser() of OpenAMService...userName="+userName);
+					LOGGER.info("Start: calling updateUser() of OpenAMService...userName="+userName);
 					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userName, json);
-					LOGGER.info("updateUser() call of OpenAMService finished for userName: "+userName);
+					LOGGER.info("End: updateUser() of OpenAMService finished for userName: "+userName);
 
 			}else {
 				LOGGER.info("productService.userRegistration :  Request -> " + json);
-				LOGGER.info("Going to call userRegistration() of OpenAMService...userAction="+userAction);
+				LOGGER.info("Start: calling userRegistration() of OpenAMService...userAction="+userAction);
 				userCreation = productService.userRegistration(iPlanetDirectoryKey, userAction, json);
-				LOGGER.info("userRegistration() call of OpenAMService finished: "+userCreation.getEntity());
+				LOGGER.info("End: userRegistration() of OpenAMService finished with status code: "+userCreation.getStatus());
 				// return productDocCtx;
 				if (userCreation.getStatus() != 200) {
 					// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
@@ -1097,16 +1098,17 @@ public class UserServiceImpl implements UserService {
 					+ UserConstants.V_NEW  + "\"" + "}";
 			//Adding v_old and v_new
 			LOGGER.info("version -> " + version);
-			LOGGER.info("Going to call updateUser() of openamservice with username="+userName+" ,version ="+version);
+			LOGGER.info("Start: calling updateUser() of openamservice with username="+userName+" ,version ="+version);
 			productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userName,
 					version); 
-			LOGGER.info("updateUser() call of openamservice finished for username="+userName+" ,version ="+version);
+			LOGGER.info("End: updateUser() call of openamservice finished for username="+userName+" ,version ="+version);
 			// Checking profile update and update login id
 
 			if (null == openAmReq.getInput().getUser().getRegisterationSource()
 					|| !UserConstants.UIMS.equalsIgnoreCase(openAmReq.getInput().getUser().getRegisterationSource())) {
 
 				if (UserConstants.EMAIL.equalsIgnoreCase(identifierType)) {
+					LOGGER.info("For Email users--");
 
 						/*PRODUCT_JSON_STRING = sendOtp(UserConstants.HOTP_EMAIL, userName,
 							openAmReq.getInput().getUser().getUserPassword(), UserConstants.CREATE_USER_SERVICE);*/
@@ -1115,19 +1117,19 @@ public class UserServiceImpl implements UserService {
 					if (null != userRequest.getUserRecord().getIDMS_Registration_Source__c() && (!pickListValidator.validate(UserConstants.IDMS_BFO_profile,
 							userRequest.getUserRecord().getIDMS_Registration_Source__c()))) { 
 		 
-					LOGGER.info("going to call generateOtp() of SendEmail for non-PRM, userName:"+userName);
+					LOGGER.info("Start: generateOtp() of SendEmail for non-PRM, userName:"+userName);
 					String otp = sendEmail.generateOtp(userName);	
-					LOGGER.info("OTP generated for userName:"+userName);
-					LOGGER.info("going to call sendOpenAmEmail() of SendEmail for non-PRM, userName:"+userName);
+					LOGGER.info("End: OTP generated: "+otp+" for userName:"+userName);
+					LOGGER.info("Start: sendOpenAmEmail() of SendEmail for non-PRM, userName:"+userName);
 					sendEmail.sendOpenAmEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName ,userRequest.getUserRecord().getIDMS_Registration_Source__c());
-					LOGGER.info("sendOpenAmEmail() of SendEmail finsihed for non-PRM, userName:"+userName);
+					LOGGER.info("End: sendOpenAmEmail() of SendEmail finished for non-PRM, userName:"+userName);
 					} else if (null != userRequest.getUserRecord().getIDMS_Registration_Source__c() && (pickListValidator.validate(UserConstants.IDMS_BFO_profile,
 							userRequest.getUserRecord().getIDMS_Registration_Source__c()))) { 
 						
 						//HashedToken field is to store the hashed pin which comes from global IDMS
-						LOGGER.info("going to call storePRMOtp() of SendEmail for PRM to store the hashed pin which comes from global IDMS, userName:"+userName);
+						LOGGER.info("Start: storePRMOtp() of SendEmail for PRM to store the hashed pin which comes from global IDMS, userName:"+userName);
 						sendEmail.storePRMOtp(userName, userRequest.getUserRecord().getIdmsHashedToken());
-						LOGGER.info("storePRMOtp() of SendEmail finsihed for PRM, userName:"+userName);
+						LOGGER.info("End: storePRMOtp() of SendEmail finsihed for PRM, userName:"+userName);
 					}
 					/**
 					 * To update authId in openAM extended attribute
@@ -1145,19 +1147,20 @@ public class UserServiceImpl implements UserService {
 					}*/
 
 				} else if (identifierType.equalsIgnoreCase(UserConstants.MOBILE)) {
+					LOGGER.info("For Mobile users--");
 
 					/**
 					 * we need check when we are working for mobile scenario
 					 * */
-					LOGGER.info("going to call generateOtp() of SendEmail for userName:"+userName);
+					LOGGER.info("Start: generateOtp() for mobile, userName:"+userName);
 					String otp = sendEmail.generateOtp(userName);
-					LOGGER.info("OTP generated for userName:"+userName);
-					LOGGER.info("going to call sendSMSMessage() of SendEmail for mobile scenario, userName:"+userName);
-					sendEmail.sendSMSMessage(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName ,userRequest.getUserRecord().getIDMS_Registration_Source__c());
-					LOGGER.info("sendSMSMessage() of SendEmail finsihed for  mobile scenario, userName:"+userName);
-					LOGGER.info("going to call sendOpenAmMobileEmail() of SendEmail for mobile scenario, userName:"+userName);
+					LOGGER.info("End: OTP generated:"+otp+" for mobile userName:"+userName);
+					LOGGER.info("Start: sendSMSMessage() for mobile userName:"+userName);
+					sendEmail.sendSMSNewGateway(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName ,userRequest.getUserRecord().getIDMS_Registration_Source__c());
+					LOGGER.info("End: sendSMSMessage() finished for  mobile userName:"+userName);
+					LOGGER.info("Start: sendOpenAmMobileEmail() for mobile userName:"+userName);
 					sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName, userRequest.getUserRecord().getIDMS_Profile_update_source__c());
-					LOGGER.info("sendOpenAmMobileEmail() of SendEmail finsihed for  mobile scenario, userName:"+userName);
+					LOGGER.info("End: sendOpenAmMobileEmail() finsihed for  mobile userName:"+userName);
 						PRODUCT_JSON_STRING = "";/*sendOtp(UserConstants.HOTP_MOBILE_USER_REGISTRATION, userName,
 							openAmReq.getInput().getUser().getUserPassword(), UserConstants.CREATE_USER_SERVICE);*/
 					/**
@@ -1206,10 +1209,13 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("!uimsAlreadyCreatedFlag Value is -> " + !uimsAlreadyCreatedFlag);
 		if (!uimsAlreadyCreatedFlag && null != userRequest.getUserRecord().getIDMS_Registration_Source__c() && 
 				!UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())) {
+			LOGGER.info("Now ready to create UIMS users, userRequest="+userRequest);
 
 			Thread thread = new Thread(new Runnable() {
 				public void run() {
+					LOGGER.info("Start: In thread, UIMS executeCreateUserAndCompany()");
 					executeCreateUserAndCompany(userRequest);
+					LOGGER.info("End: In thread, UIMS executeCreateUserAndCompany()");
 				}
 			});
 
@@ -3815,7 +3821,7 @@ public class UserServiceImpl implements UserService {
 				} else if (UserConstants.HOTP_MOBILE_RESET_PR.equalsIgnoreCase(hotpService)) {
 					sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,
 							passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c());
-					sendEmail.sendSMSMessage(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,
+					sendEmail.sendSMSNewGateway(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,
 							passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c());
 
 				}
@@ -4353,7 +4359,7 @@ public class UserServiceImpl implements UserService {
 					
 					String otp = sendEmail.generateOtp(userId);
 					LOGGER.info("Successfully OTP generated for "+userId);
-					sendEmail.sendSMSMessage(otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userName ,userRequest.getUserRecord().getIDMS_Registration_Source__c());
+					sendEmail.sendSMSNewGateway(otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userName ,userRequest.getUserRecord().getIDMS_Registration_Source__c());
 					
 					sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userId, userRequest.getUserRecord().getIDMS_Profile_update_source__c());
 					if(null != updatingUser){
@@ -4772,7 +4778,7 @@ public class UserServiceImpl implements UserService {
 							|| EmailConstants.SETUSERPWD_OPT_TYPE.equalsIgnoreCase(sendEmailOptType)) {
 						String otp = sendEmail.generateOtp(resendId);
 						LOGGER.info("Successfully OTP generated for "+resendId);
-						sendEmail.sendSMSMessage(otp, sendEmailOptType, resendId, regestrationSource);
+						sendEmail.sendSMSNewGateway(otp, sendEmailOptType, resendId, regestrationSource);
 						
 						sendEmail.sendOpenAmMobileEmail(otp, sendEmailOptType, resendId, regestrationSource);
 						//sendEmail.sendOpenAmEmail(otp, sendEmailOptType, resendId, regestrationSource);
@@ -6582,13 +6588,9 @@ public class UserServiceImpl implements UserService {
 				NewCookie newCookie = new NewCookie(cookie);
 				rb.cookie(newCookie);
 				
-				LOGGER.info(" UserServiceImpl :: idmsDirectLogin Start");
-				LOGGER.info("UserServiceImpl:idmsDirectLogin -> CookieValue : -> " + newCookie);
-				LOGGER.info("UserServiceImpl:idmsDirectLogin -> Request builder : -> " + rb);
-				
-				LOGGER.info("Cookievalue"+newCookie);
-				LOGGER.info("Request builder"+rb);
-				LOGGER.info("Token "+token);
+				LOGGER.info("New Cookievalue:"+newCookie);
+				LOGGER.info("Request builder:"+rb);
+				LOGGER.info("Token:"+token);
 				
 				//startUrl = startUrl.substring(0, startUrl.indexOf(valueToFind)+valueToFind.length()).concat(URLEncoder.encode(valueToFind.substring(valueToFind.indexOf(valueToFind)+5, valueToFind.length()), "UTF-8" ));
 				
@@ -6603,7 +6605,7 @@ public class UserServiceImpl implements UserService {
 			}
 
 		} catch (Exception e) {
-			LOGGER.error("UserServiceImpl :: idmsDirectLogin Exception occured!!!!"+e.getMessage());
+			LOGGER.error("idmsDirectLogin Exception occured!!!!"+e.getMessage());
 			e.printStackTrace();
 			jsonObject.put("error_code", "L9101");
 			jsonObject.put("error_message","Invalid username or password");
@@ -6822,7 +6824,7 @@ public class UserServiceImpl implements UserService {
 							sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
 									regestrationSource);
 
-							sendEmail.sendSMSMessage(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
+							sendEmail.sendSMSNewGateway(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
 									regestrationSource);
 						} else {
 							sendEmail.sendOpenAmEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
@@ -7130,6 +7132,7 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	public void executeCreateUserAndCompany(CreateUserRequest userRequest) {
+		LOGGER.info("Entered executeCreateUserAndCompany() -> Start");
 
 		String iPlanetDirectoryKey = getSSOToken();
 		// mapping IFW request to UserCompany
@@ -7145,7 +7148,7 @@ public class UserServiceImpl implements UserService {
 		/**
 		 * In case mobile registration
 		 */
-		if ((null == userRequest.getUserRecord().getEmail() && userRequest.getUserRecord().getEmail().isEmpty())
+		if ((null == userRequest.getUserRecord().getEmail() || userRequest.getUserRecord().getEmail().isEmpty())
 				&& (null != userRequest.getUserRecord().getMobilePhone()
 						&& !userRequest.getUserRecord().getMobilePhone().isEmpty())) {
 			identity.setPhoneId(userRequest.getUserRecord().getMobilePhone());
@@ -7153,22 +7156,25 @@ public class UserServiceImpl implements UserService {
 		
 		Integer resultCountCheck = checkCompanyMappedOtherUsers(
 				userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c());
+		LOGGER.info("resultCount:"+resultCountCheck+" for Company id="+userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c());
 
 		// forcedFederatedId = "cn00"+ UUID.randomUUID().toString();
 		if (pickListValidator.validate(UserConstants.UIMSCreateUserSync, UserConstants.TRUE)) {
 			// Calling SYNC method createUIMSUserAndCompany
+			LOGGER.info("Start: Sync createUIMSUserAndCompany() for userName:"
+					+ userRequest.getUserRecord().getIDMS_Federated_ID__c());
 			uimsUserManagerSync.createUIMSUserAndCompany(UimsConstants.CALLER_FID, identity,
 					userRequest.getUserRecord().getIDMS_User_Context__c(), company,
 					userRequest.getUserRecord().getIDMS_Federated_ID__c(),
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, UserConstants.V_NEW,
 					userRequest.getPassword(), userRequest.getUserRecord().getIDMS_Federated_ID__c(), userRequest,
 					resultCountCheck.intValue());
-			LOGGER.info("End: Sync createUIMSUserAndCompany() of UIMSUserManagerSync finished for userName:"
+			LOGGER.info("End: Sync createUIMSUserAndCompany() finished for userName:"
 					+ userRequest.getUserRecord().getIDMS_Federated_ID__c());
 
 		} else {
 			// Calling Async method createUIMSUserAndCompany
-			LOGGER.info("Start: calling Async createUIMSUserAndCompany() of UIMSUserManagerSoapService for userName:"
+			LOGGER.info("Start: Async createUIMSUserAndCompany() of UIMSUserManagerSoapService for userName:"
 					+ userRequest.getUserRecord().getIDMS_Federated_ID__c());
 			uimsUserManagerSoapService.createUIMSUserAndCompany(UimsConstants.CALLER_FID, identity,
 					userRequest.getUserRecord().getIDMS_User_Context__c(), company,

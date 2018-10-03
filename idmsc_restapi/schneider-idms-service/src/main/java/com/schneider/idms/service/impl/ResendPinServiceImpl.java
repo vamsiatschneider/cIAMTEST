@@ -143,7 +143,7 @@ public class ResendPinServiceImpl extends IdmsCommonServiceImpl implements IRese
 							|| EmailConstants.SETUSERPWD_OPT_TYPE.equalsIgnoreCase(sendEmailOptType)) {
 						String otp = sendEmail.generateOtp(resendId);
 						LOGGER.info("Successfully OTP generated for "+resendId);
-						sendEmail.sendSMSMessage(otp, sendEmailOptType, resendId, regestrationSource);
+						sendEmail.sendSMSNewGateway(otp, sendEmailOptType, resendId, regestrationSource);
 						
 						sendEmail.sendOpenAmMobileEmail(otp, sendEmailOptType, resendId, regestrationSource);
 						//sendEmail.sendOpenAmEmail(otp, sendEmailOptType, resendId, regestrationSource);

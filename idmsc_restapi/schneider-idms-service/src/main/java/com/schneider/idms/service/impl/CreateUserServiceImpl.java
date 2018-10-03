@@ -523,7 +523,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 
 					String otp = sendEmail.generateOtp(userName);
 					LOGGER.info("Successfully OTP generated for mobile user, userName=" + userName+" ,OTP="+otp);
-					sendEmail.sendSMSMessage(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
+					sendEmail.sendSMSNewGateway(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
 							userRequest.getRegistrationSource());
 					sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
 							userRequest.getProfileLastUpdateSource());

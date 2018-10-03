@@ -76,9 +76,9 @@ public class UIMSUserManagerSoapServiceSync {
 			String context, CompanyV3 company, String userName,
 			String iPlanetDirectoryKey, String v_new, String password, String forcedFederatedId,
 			CreateUserRequest userRequest,int companyCreatedCount) {
-		LOGGER.info("Entered createUIMSUserAndCompany() -> Start");
+		LOGGER.info("Entered SYNC createUIMSUserAndCompany() -> Start");
 		LOGGER.info("Parameter callerFid -> " + callerFid);
-		LOGGER.info("Parameter context -> " + context);
+		LOGGER.info("Parameter context -> " + context+" ,companyCreatedCount="+companyCreatedCount);
 		LOGGER.info("Parameter userName -> " + userName+" ,iPlanetDirectoryKey -> "+iPlanetDirectoryKey);
 		LOGGER.info("Parameter v_new -> " + v_new+" ,forcedFederatedId -> "+forcedFederatedId);
 			
@@ -146,16 +146,16 @@ public class UIMSUserManagerSoapServiceSync {
 					LOGGER.info("UIMS user created successfully::" + userCreated);
 				}
 			} catch (RetryException e) {
-				LOGGER.error("Retry failed while calling the UIMS create user::" + e.getMessage());
+				LOGGER.error("RetryException while UIMS create user::" + e.getMessage());
 				e.printStackTrace();
 				
 			} catch (ExecutionException e) {
-				LOGGER.error("ExecutionException while calling the UIMS create user::" + e.getMessage());
+				LOGGER.error("ExecutionException while UIMS create user::" + e.getMessage());
 				e.printStackTrace();
 			}
 
 			if((!userCreated || null == createdFedId) && (null != context && (UserConstants.USER_CONTEXT_HOME.equalsIgnoreCase(context)||UserConstants.USER_CONTEXT_HOME_1.equalsIgnoreCase(context)))) {
-				LOGGER.error("CreateUser got failed -----> ::sending mail notification for userRequestjsonString::"+userRequestjsonString);
+				LOGGER.error("UIMS CreateUser failed -----> ::sending mail notification for userRequestjsonString::"+userRequestjsonString);
 				sendEmail.emailReadyToSendEmail(supportUser, fromUserName, "UIMS CreateUser failed.", userRequestjsonString);
 			}
 			Callable<Boolean> callableCompany = new Callable<Boolean>() {
@@ -222,6 +222,9 @@ public class UIMSUserManagerSoapServiceSync {
 				if (null != context && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context))) {
 
 					companyCreated = retryerCompany.call(callableCompany);
+					if (companyCreated) {
+						LOGGER.info("UIMS company created successfully::" + companyCreated);
+					}
 					if (userCreated && companyCreated) {
 						// after successful creation of user and company, we
 						// need to update the v_old
@@ -234,27 +237,27 @@ public class UIMSUserManagerSoapServiceSync {
 
 			} catch (RetryException e) {
 				// productService.sessionLogout(iPlanetDirectoryKey, "logout");
-				LOGGER.error("Retry failed while calling the UIMS create company::" + e.getMessage());
+				LOGGER.error("RetryException while UIMS create company::" + e.getMessage());
 				e.printStackTrace();
 			} catch (ExecutionException e) {
 				// productService.sessionLogout(iPlanetDirectoryKey, "logout");
-				LOGGER.error("ExecutionException while calling the UIMS create company::" + e.getMessage());
+				LOGGER.error("ExecutionException while UIMS create company::" + e.getMessage());
 				e.printStackTrace();
 			}
 			if((!(userCreated && companyCreated) || (null == createdCompanyFedId && null == createdFedId)) && 
 					(null != context && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context)))){
-				LOGGER.error("UIMS CreateUser and CreateCompany got failed -----> ::sending mail notification::"+userRequestjsonString);
+				LOGGER.error("UIMS CreateUser and CreateCompany failed -----> ::sending mail notification::"+userRequestjsonString);
 				sendEmail.emailReadyToSendEmail(supportUser, fromUserName,
 						"UIMS CreateUser and CreateCompany failed.", userRequestjsonString);
 			}
 		} catch (Exception e) {
 			// productService.sessionLogout(iPlanetDirectoryKey, "logout");
-			LOGGER.error("Exception in UIMSUserManagerSoapService.createUIMSUserAndCompany::" + e.getMessage());
+			LOGGER.error("Exception in createUIMSUserAndCompany ::" + e.getMessage());
 			e.printStackTrace();
 		}
 		createdFedId = null;
 		// productService.sessionLogout(iPlanetDirectoryKey, "logout");
-		LOGGER.info("Completed the createUIMSUserAndCompany Async method!!");
+		LOGGER.info("Completed Sync createUIMSUserAndCompany() method!!");
 		return null;
 
 	}

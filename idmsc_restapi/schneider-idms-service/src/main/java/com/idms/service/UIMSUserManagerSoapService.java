@@ -67,7 +67,7 @@ public class UIMSUserManagerSoapService {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(UIMSUserManagerSoapService.class);
 
-	private static final Logger UIMSLOGGER = LoggerFactory.getLogger("uimsLogger");
+	//private static final Logger UIMSLOGGER = LoggerFactory.getLogger("uimsLogger");
 
 	@Inject
 	private IdmsMapper mapper;
@@ -149,8 +149,7 @@ public class UIMSUserManagerSoapService {
 
 	public UserManagerUIMSV22 getUserManager(){
 		LOGGER.info("Entered getUserManager() of UIMS -> Start");
-		UIMSLOGGER.info("Entered getUserManager() of UIMS -> Start");
-		UserManagerUIMSV22 userManagerUIMSV2 = null;
+		UserManagerUIMSV22 userManagerUIMSV22 = null;
 		URL url;
 		try {
 			url = new URL(userManagerUIMSWsdl);
@@ -158,49 +157,43 @@ public class UIMSUserManagerSoapService {
 			QName qname = new QName(userManagerUIMSWsdlQname, userManagerUIMSWsdlPortName);
 			Service service = Service.create(url, qname);
 
-			userManagerUIMSV2 = service.getPort(UserManagerUIMSV22.class);
-			LOGGER.info("getUserManager() of UIMS -> End");
+			LOGGER.info("Start: getPort() ");
+			userManagerUIMSV22 = service.getPort(UserManagerUIMSV22.class);
+			LOGGER.info("End: getPort()");
 
 		}catch (MalformedURLException e) {
-			LOGGER.error("Exception while UIMSUserManagerSoapService :: getUserManager()::" + e.getMessage());
+			LOGGER.error("MalformedURLException in getUserManager()::" + e.getMessage());
 			e.printStackTrace();
 		}
 		catch (Exception e) {
-			LOGGER.error("Exception while UIMSUserManagerSoapService :: getUserManager()::" + e.getMessage());
+			LOGGER.error("Exception in getUserManager()::" + e.getMessage());
 			e.printStackTrace();
 		}
-		return userManagerUIMSV2;
+		return userManagerUIMSV22;
 	}
 
 	@Async
 	public void getUIMSUser(String callerFid, String vnew) throws MalformedURLException {
 		LOGGER.info("Entered getUIMSUser() -> Start");
 		LOGGER.info("Parameter callerFid -> " + callerFid + " ,vnew -> " + vnew);
-		UIMSLOGGER.info("Entered getUIMSUser() -> Start");
-		UIMSLOGGER.info("Parameter callerFid -> " + callerFid + " ,vnew -> " + vnew);
 
 		String samlAssertionOrToken = null;
 		try {
-			LOGGER.info("Going to call getSamlAssertionToken() of UIMS for callerFid:" + callerFid);
 			samlAssertionOrToken = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, vnew);
-			LOGGER.info("getSamlAssertionToken() of UIMS finished.. samlAssertionOrToken:" + samlAssertionOrToken);
-		} catch (Exception e1) {
-			LOGGER.error("Exception while getting samlAssertionOrToken in getUIMSUser()::" + e1.getMessage());
-			UIMSLOGGER.error("Exception while getting samlAssertionOrToken in getUIMSUser()::" + e1.getMessage());
-			e1.printStackTrace();
-		}
-		try {
+		
 			UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
-			LOGGER.info("Going to call getUser() of UIMS for callerFid:" + callerFid);
+			LOGGER.info("Start: UIMS getUser() for callerFid:" + callerFid);
 			userManagerUIMSV22.getUser(callerFid, samlAssertionOrToken);
-			LOGGER.info("getUser() of UIMS finished for callerFid:" + callerFid);
+			LOGGER.info("End: UIMS getUser() finished for callerFid:" + callerFid);
 		} catch (IMSServiceSecurityCallNotAllowedException_Exception
 				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
 				| RequestedEntryNotExistsException_Exception | SecuredImsException_Exception
 				| UnexpectedLdapResponseException_Exception | UnexpectedRuntimeImsException_Exception e) {
-			LOGGER.error("Exception while getUser() of UIMS::" + e.getMessage());
-			UIMSLOGGER.error("Exception while getUser() of UIMS::" + e.getMessage());
+			LOGGER.error("Exception in UIMS getUser()::" + e.getMessage());
 			e.printStackTrace();
+		}catch (Exception e1) {
+			LOGGER.error("Exception in getUIMSUser()::" + e1.getMessage());
+			e1.printStackTrace();
 		}
 	}
 
@@ -212,45 +205,29 @@ public class UIMSUserManagerSoapService {
 		LOGGER.info("Parameter callerFid -> " + callerFid);
 		LOGGER.info("Parameter openamVnew -> " + openamVnew + " ,loginIdentifierType -> " + loginIdentifierType);
 		LOGGER.info("Parameter emailOrMobile -> " + emailOrMobile);
-		UIMSLOGGER.info("Entered activateIdentity() -> Start");
-		UIMSLOGGER.info("Parameter iPlanetDirectoryKey -> " + iPlanetDirectoryKey + " ,userId -> " + userId);
-		UIMSLOGGER.info("Parameter callerFid -> " + callerFid);
-		UIMSLOGGER.info("Parameter openamVnew -> " + openamVnew + " ,loginIdentifierType -> " + loginIdentifierType);
-		UIMSLOGGER.info("Parameter emailOrMobile -> " + emailOrMobile);
 
 		try {
 			if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
-				LOGGER.info("Going to call getSamlAssertionToken() of UIMS for EMAIL.. userId:" + userId);
 				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(userId, openamVnew);
-				LOGGER.info("getSamlAssertionToken() of UIMS finished for EMAIL.. userId:" + userId);
 			} else {
-				LOGGER.info("Going to call getSamlAssertionToken() of UIMS.. callerFid:" + callerFid);
 				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, openamVnew);
-				LOGGER.info("getSamlAssertionToken() of UIMS finished.. callerFid:" + callerFid);
 			}
-		} catch (Exception e) {
-			LOGGER.error("Exception while getting getSamlAssertionToken() of UIMS::" + e.getMessage());
-			UIMSLOGGER.error("Exception while getting getSamlAssertionToken() of UIMS::" + e.getMessage());
-			e.printStackTrace();
-		}
-		try {
-			Callable<Boolean> callableUIMSPassword = new Callable<Boolean>() {
+
+			LOGGER.info("samlAssertion="+samlAssertion);
+			Callable<Boolean> callableActivateIdentity = new Callable<Boolean>() {
 				public Boolean call() throws Exception {
 					UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
 					if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
-						LOGGER.info("Going to call activateIdentity() of UIMS for EMAIL.. userId:" + userId);
-						
-						isIdentityActvated =userManagerUIMSV22.activateIdentity(UimsConstants.CALLER_FID,password, samlAssertion);
-						
-						LOGGER.info("activateIdentity() of UIMS finished for EMAIL.. userId:" + userId);
+						LOGGER.info("Start: activateIdentity() of UIMS for EMAIL.. userId:" + userId);						
+						isIdentityActvated =userManagerUIMSV22.activateIdentity(UimsConstants.CALLER_FID,password, samlAssertion);						
+						LOGGER.info("End: activateIdentity() of UIMS finished for EMAIL.. userId:" + userId);
 					} else {
-						LOGGER.info("Going to call setPasswordWithSms() of UIMS for non-EMAIL.. userId:" + userId);
+						LOGGER.info("Start: setPasswordWithSms() of UIMS for non-EMAIL.. userId:" + userId);
 						isIdentityActvated = userManagerUIMSV22.setPasswordWithSms(UimsConstants.CALLER_FID,
 								emailOrMobile, samlAssertion, UserConstants.TOKEN_TYPE, password);
-						LOGGER.info("setPasswordWithSms() of UIMS finished for non-EMAIL.. userId:" + userId);
+						LOGGER.info("End: setPasswordWithSms() of UIMS finished for non-EMAIL.. userId:" + userId);
 					}
 					LOGGER.info("isIdentityActvated: " + isIdentityActvated);
-					UIMSLOGGER.info("isIdentityActvated: " + isIdentityActvated);
 					return true;
 				}
 			};
@@ -258,47 +235,36 @@ public class UIMSUserManagerSoapService {
 			Retryer<Boolean> retryer = RetryerBuilder.<Boolean> newBuilder()
 					.retryIfResult(Predicates.<Boolean> isNull()).retryIfExceptionOfType(Exception.class)
 					.retryIfRuntimeException().withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
-			try {
-				retryer.call(callableUIMSPassword);
-				// after successful setUIMSPassword , we need to update the
-				// v_old
-				if (isIdentityActvated) {
-					String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
-					LOGGER.info("Going to call updateUser() of openamservice to update version for userId:" + userId);
-					productService.updateUser(iPlanetDirectoryKey, userId, version);
-					LOGGER.info("updateUser() call of openamservice finished for userId:" + userId);
-				}
-			} catch (RetryException e) {
-				LOGGER.error("Retry failed while calling activateIdentity() of UIMS::" + e.getMessage());
-				UIMSLOGGER.error("Retry failed while calling activateIdentity() of UIMS::" + e.getMessage());
-				e.printStackTrace();
 
-			} catch (ExecutionException e) {
-				LOGGER.error("ExecutionException while calling activateIdentity() of UIMS::" + e.getMessage());
-				UIMSLOGGER.error("ExecutionException while calling activateIdentity() of UIMS::" + e.getMessage());
-				e.printStackTrace();
+			retryer.call(callableActivateIdentity);
+			// after successful setUIMSPassword , we need to update the
+			// v_old
+			if (isIdentityActvated) {
+				String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
+				LOGGER.info("Start: updateUser() of openamservice to update version for userId:" + userId);
+				productService.updateUser(iPlanetDirectoryKey, userId, version);
+				LOGGER.info("End: updateUser() of openamservice to update version finished for userId:" + userId);
 			}
-			if (!setPasswordStatus) {
-				LOGGER.info(
-						"UIMS UserpinConfirmation activateIdentity got failed -----> ::sending mail notification for userid::"
-								+ userId);
-				UIMSLOGGER
-						.info("UIMS UserpinConfirmation activateIdentity got failed -----> ::sending mail notification for userid::"
-								+ userId);
-				LOGGER.info("Going to call emailReadyToSendEmail() for userId:" + userId);
+			if (!isIdentityActvated) {
+				LOGGER.info("UIMS activateIdentity() failed -> ::sending mail notification, userid::"+ userId);
+
+				LOGGER.info("Start: emailReadyToSendEmail() for userId:" + userId);
 				sendEmail.emailReadyToSendEmail(supportUser, fromUserName,
 						"UIMS UserpinConfirmation activateIdentity failed.", userId);
-				LOGGER.info("emailReadyToSendEmail() finished for userId:" + userId);
+				LOGGER.info("End: emailReadyToSendEmail() finished for userId:" + userId);
 			}
+		} catch (RetryException e) {
+			LOGGER.error("RetryException in activateIdentity() of UIMS::" + e.getMessage());
+			e.printStackTrace();
+
+		} catch (ExecutionException e) {
+			LOGGER.error("ExecutionException in activateIdentity() of UIMS::" + e.getMessage());
+			e.printStackTrace();
 		} catch (Exception e) {
-			// productService.sessionLogout(iPlanetDirectoryKey, "logout");
-			LOGGER.error("Exception while activateIdentity::" + e.getMessage());
-			UIMSLOGGER.error("Exception while activateIdentity::" + e.getMessage());
+			LOGGER.error("Exception in activateIdentity() of UIMS::" + e.getMessage());
 			e.printStackTrace();
 		}
-		// productService.sessionLogout(iPlanetDirectoryKey, "logout");
 		LOGGER.info("activateIdentity() Async Method -> End");
-		UIMSLOGGER.info("activateIdentity Async Method -> End");
 	}
 	
 	@Async
@@ -309,44 +275,30 @@ public class UIMSUserManagerSoapService {
 		LOGGER.info("Parameter callerFid -> " + callerFid);
 		LOGGER.info("Parameter openamVnew -> " + openamVnew + " ,loginIdentifierType -> " + loginIdentifierType);
 		LOGGER.info("Parameter emailOrMobile -> " + emailOrMobile);
-		UIMSLOGGER.info("Entered setUIMSPassword() -> Start");
-		UIMSLOGGER.info("Parameter iPlanetDirectoryKey -> " + iPlanetDirectoryKey + " ,userId -> " + userId);
-		UIMSLOGGER.info("Parameter callerFid -> " + callerFid);
-		UIMSLOGGER.info("Parameter openamVnew -> " + openamVnew + " ,loginIdentifierType -> " + loginIdentifierType);
-		UIMSLOGGER.info("Parameter emailOrMobile -> " + emailOrMobile);
 
 		try {
 			if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
-				LOGGER.info("Going to call getSamlAssertionToken() of UIMS for EMAIL.. userId:" + userId);
 				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(userId, openamVnew);
-				LOGGER.info("getSamlAssertionToken() of UIMS finished for EMAIL.. userId:" + userId);
 			} else {
-				LOGGER.info("Going to call getSamlAssertionToken() of UIMS.. callerFid:" + callerFid);
 				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, openamVnew);
-				LOGGER.info("getSamlAssertionToken() of UIMS finished.. callerFid:" + callerFid);
 			}
-		} catch (Exception e) {
-			LOGGER.error("Exception while getting getSamlAssertionToken() of UIMS::" + e.getMessage());
-			UIMSLOGGER.error("Exception while getting getSamlAssertionToken() of UIMS::" + e.getMessage());
-			e.printStackTrace();
-		}
-		try {
-			Callable<Boolean> callableUIMSPassword = new Callable<Boolean>() {
+			LOGGER.info("samlAssertion="+samlAssertion);
+
+			Callable<Boolean> callableSetUIMSPassword = new Callable<Boolean>() {
 				public Boolean call() throws Exception {
 					UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
 					if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
-						LOGGER.info("Going to call setPassword() of UIMS for EMAIL.. userId:" + userId);
+						LOGGER.info("Start: setPassword() of UIMS for EMAIL.. userId:" + userId);
 						setPasswordStatus = userManagerUIMSV22.setPassword(UimsConstants.CALLER_FID, samlAssertion,
 								password);
-						LOGGER.info("setPassword() of UIMS finished for EMAIL.. userId:" + userId);
+						LOGGER.info("End: setPassword() of UIMS finished for EMAIL.. userId:" + userId);
 					} else {
-						LOGGER.info("Going to call setPasswordWithSms() of UIMS for non-EMAIL.. userId:" + userId);
+						LOGGER.info("Start: setPasswordWithSms() of UIMS for non-EMAIL.. userId:" + userId);
 						setPasswordStatus = userManagerUIMSV22.setPasswordWithSms(UimsConstants.CALLER_FID,
 								emailOrMobile, samlAssertion, UserConstants.TOKEN_TYPE, password);
-						LOGGER.info("setPasswordWithSms() of UIMS finished for non-EMAIL.. userId:" + userId);
+						LOGGER.info("End: setPasswordWithSms() of UIMS finished for non-EMAIL.. userId:" + userId);
 					}
 					LOGGER.info("setPasswordStatus: " + setPasswordStatus);
-					UIMSLOGGER.info("setPasswordStatus: " + setPasswordStatus);
 					return true;
 				}
 			};
@@ -354,47 +306,36 @@ public class UIMSUserManagerSoapService {
 			Retryer<Boolean> retryer = RetryerBuilder.<Boolean> newBuilder()
 					.retryIfResult(Predicates.<Boolean> isNull()).retryIfExceptionOfType(Exception.class)
 					.retryIfRuntimeException().withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
-			try {
-				retryer.call(callableUIMSPassword);
-				// after successful setUIMSPassword , we need to update the
-				// v_old
-				if (setPasswordStatus) {
-					String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
-					LOGGER.info("Going to call updateUser() of openamservice to update version for userId:" + userId);
-					productService.updateUser(iPlanetDirectoryKey, userId, version);
-					LOGGER.info("updateUser() call of openamservice finished for userId:" + userId);
-				}
-			} catch (RetryException e) {
-				LOGGER.error("Retry failed while calling setUIMSPassword() of UIMS::" + e.getMessage());
-				UIMSLOGGER.error("Retry failed while calling setUIMSPassword() of UIMS::" + e.getMessage());
-				e.printStackTrace();
-
-			} catch (ExecutionException e) {
-				LOGGER.error("ExecutionException while calling setUIMSPassword() of UIMS::" + e.getMessage());
-				UIMSLOGGER.error("ExecutionException while calling setUIMSPassword() of UIMS::" + e.getMessage());
-				e.printStackTrace();
+			retryer.call(callableSetUIMSPassword);
+			// after successful setUIMSPassword , we need to update the
+			// v_old
+			if (setPasswordStatus) {
+				String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
+				LOGGER.info("Start: updateUser() of openamservice to update version for userId:" + userId);
+				productService.updateUser(iPlanetDirectoryKey, userId, version);
+				LOGGER.info("End: updateUser() call of openamservice to update version finished for userId:" + userId);
 			}
 			if (!setPasswordStatus) {
 				LOGGER.info(
-						"UIMS UserpinConfirmation setPassword got failed -----> ::sending mail notification for userid::"
+						"UIMS UserpinConfirmation setPassword failed -> ::sending mail notification for userid::"
 								+ userId);
-				UIMSLOGGER
-						.info("UIMS UserpinConfirmation setPassword got failed -----> ::sending mail notification for userid::"
-								+ userId);
-				LOGGER.info("Going to call emailReadyToSendEmail() for userId:" + userId);
+				LOGGER.info("Start: emailReadyToSendEmail() for userId:" + userId);
 				sendEmail.emailReadyToSendEmail(supportUser, fromUserName,
 						"UIMS UserpinConfirmation setPassword failed.", userId);
-				LOGGER.info("emailReadyToSendEmail() finished for userId:" + userId);
+				LOGGER.info("End: emailReadyToSendEmail() finished for userId:" + userId);
 			}
+		}catch (RetryException e) {
+			LOGGER.error("RetryException in setUIMSPassword() of UIMS::" + e.getMessage());
+			e.printStackTrace();
+
+		} catch (ExecutionException e) {
+			LOGGER.error("ExecutionException in setUIMSPassword() of UIMS::" + e.getMessage());
+			e.printStackTrace();
 		} catch (Exception e) {
-			// productService.sessionLogout(iPlanetDirectoryKey, "logout");
 			LOGGER.error("Exception while setUIMSPassword::" + e.getMessage());
-			UIMSLOGGER.error("Exception while setUIMSPassword::" + e.getMessage());
 			e.printStackTrace();
 		}
-		// productService.sessionLogout(iPlanetDirectoryKey, "logout");
 		LOGGER.info("setUIMSPassword() Async Method -> End");
-		UIMSLOGGER.info("setUIMSPassword Async Method -> End");
 	}
 
 	@Async
@@ -404,29 +345,19 @@ public class UIMSUserManagerSoapService {
 		LOGGER.info("Parameter iPlanetDirectoryKey -> " + iPlanetDirectoryKey + " ,userId -> " + userId);
 		LOGGER.info("Parameter callerFid -> " + callerFid);
 		LOGGER.info("Parameter openamVnew -> " + openamVnew);
-		UIMSLOGGER.info("Entered updateUIMSPassword() -> Start");
-		UIMSLOGGER.info("Parameter iPlanetDirectoryKey -> " + iPlanetDirectoryKey + " ,userId -> " + userId);
-		UIMSLOGGER.info("Parameter callerFid -> " + callerFid);
-		UIMSLOGGER.info("Parameter openamVnew -> " + openamVnew);
+
 		try {
-			LOGGER.info("Going to call getSamlAssertionToken() of UIMS for callerFid:" + callerFid);
 			samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, openamVnew);
-			LOGGER.info("getSamlAssertionToken() of UIMS finished for callerFid:" + callerFid);
-		} catch (Exception e1) {
-			LOGGER.error("Exception while getting samlAssertion ::" + e1.getMessage());
-			UIMSLOGGER.error("Exception while getting samlAssertion::" + e1.getMessage());
-			e1.printStackTrace();
-		}
-		try {
+			LOGGER.info("samlAssertion="+samlAssertion);
+
 			Callable<Boolean> callableUpdateUIMSPassword = new Callable<Boolean>() {
 				public Boolean call() throws Exception {
 					UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
-					LOGGER.info("Going to call updatePassword() of UIMS for callerFid:" + callerFid);
+					LOGGER.info("Start: updatePassword() of UIMS for callerFid:" + callerFid);
 					ispasswordupdated = userManagerUIMSV22.updatePassword(UimsConstants.CALLER_FID, samlAssertion,
 							oldPassword, newPassword);
-					LOGGER.info("updatePassword() of UIMS finished for callerFid:" + callerFid);
+					LOGGER.info("End: updatePassword() of UIMS finished for callerFid:" + callerFid);
 					LOGGER.info("Update password status is::" + ispasswordupdated);
-					UIMSLOGGER.info("Update password status is::" + ispasswordupdated);
 					return true;
 				}
 			};
@@ -434,30 +365,25 @@ public class UIMSUserManagerSoapService {
 			Retryer<Boolean> retryer = RetryerBuilder.<Boolean> newBuilder()
 					.retryIfResult(Predicates.<Boolean> isNull()).retryIfExceptionOfType(Exception.class)
 					.retryIfRuntimeException().withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
-			try {
-				retryer.call(callableUpdateUIMSPassword);
-				// after successful activateIdentityNoPassword, we need to
-				// update the v_old
-				if (ispasswordupdated) {
-					String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
-					LOGGER.info("Going to call updateUser() of openamservice to update version for userId:" + userId);
-					productService.updateUser(iPlanetDirectoryKey, userId, version);
-					LOGGER.info("updateUser() call of openamservice finished for userId:" + userId);
-				}
-			} catch (RetryException e) {
-				LOGGER.error("Retry failed while calling UIMS update user::" + e.getMessage());
-				UIMSLOGGER.error("Retry failed while calling UIMS update user::" + e.getMessage());
-				e.printStackTrace();
 
-			} catch (ExecutionException e) {
-				LOGGER.error("ExecutionException while calling UIMS update user::" + e.getMessage());
-				UIMSLOGGER.error("ExecutionException while calling UIMS update user::" + e.getMessage());
-				e.printStackTrace();
+			retryer.call(callableUpdateUIMSPassword);
+			// after successful activateIdentityNoPassword, we need to
+			// update the v_old
+			if (ispasswordupdated) {
+				String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
+				LOGGER.info("Start: updateUser() of openamservice to update version for userId:" + userId);
+				productService.updateUser(iPlanetDirectoryKey, userId, version);
+				LOGGER.info("End: updateUser() call of openamservice to update version finished for userId:" + userId);
 			}
+		} catch (RetryException e) {
+			LOGGER.error("RetryException in UIMS updateUIMSPassword()::" + e.getMessage());
+			e.printStackTrace();
 
+		} catch (ExecutionException e) {
+			LOGGER.error("ExecutionException in UIMS updateUIMSPassword()::" + e.getMessage());
+			e.printStackTrace();
 		} catch (Exception e) {
-			LOGGER.error("Exception while updateUIMSPassword()::" + e.getMessage());
-			UIMSLOGGER.error("Exception while updateUIMSPassword()::" + e.getMessage());
+			LOGGER.error("Exception in updateUIMSPassword()::" + e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -466,36 +392,36 @@ public class UIMSUserManagerSoapService {
 	public boolean updateUIMSUser(String fedId, UserV6 user, String vnew) throws MalformedURLException {
 		LOGGER.info("Entered updateUIMSUser() -> Start");
 		LOGGER.info("Parameter fedId -> " + fedId + " ,vnew -> " + vnew);
-		UIMSLOGGER.info("Entered updateUIMSUser() -> Start");
-		UIMSLOGGER.info("Parameter fedId -> " + fedId + " ,vnew -> " + vnew);
+
 		boolean status = false;
 		UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
 		String samlAssertion = null;
 		ObjectMapper objMapper = new ObjectMapper();
 		try {
 			LOGGER.info("Parameter user -> " + objMapper.writeValueAsString(user));
-			UIMSLOGGER.info("Parameter user -> " + objMapper.writeValueAsString(user));
-			LOGGER.info("Going to call getSamlAssertionToken() of UIMS for fedId:" + fedId);
+
 			samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(fedId, vnew);
-			LOGGER.info("getSamlAssertionToken() of UIMS finished for fedId:" + fedId);
-		} catch (Exception e) {
-			LOGGER.error("Error executing while getting samlAssertion::" + e.getMessage());
-			UIMSLOGGER.error("Error executing while getting samlAssertion::" + e.getMessage());
-			e.printStackTrace();
-		}
-		try {
-			LOGGER.info("Going to call updateUser() of UIMS for user:" + user.getFirstName());
+			LOGGER.info("samlAssertion="+samlAssertion);
+
+			LOGGER.info("Start: updateUser() of UIMS for user:" + user.getFirstName());
 			status = userManagerUIMSV22.updateUser(UimsConstants.CALLER_FID, samlAssertion, user);
-			LOGGER.info("updateUser() of UIMS finished for user:" + user.getFirstName());
+			LOGGER.info("End: updateUser() of UIMS finished for user:" + user.getFirstName());
+
+			if(status){
+				LOGGER.info("UIMS updateUIMSUser() successful, status:" + status);
+			}else{
+				LOGGER.info("UIMS updateUIMSUser() failed, status:" + status);
+			}
 		} catch (IMSServiceSecurityCallNotAllowedException_Exception | InactiveUserImsException_Exception
 				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
 				| RequestedEntryNotExistsException_Exception | SecuredImsException_Exception
 				| UnexpectedLdapResponseException_Exception | UnexpectedRuntimeImsException_Exception e) {
 			LOGGER.error("Error executing while getting status in updateUIMSUser()::" + e.getMessage());
-			UIMSLOGGER.error("Error executing while getting status in updateUIMSUser::" + e.getMessage());
 			e.printStackTrace();
-		}
-		LOGGER.info("Status got from updateUIMSUser() in UIMS is:" + status);
+		} catch (Exception e) {
+			LOGGER.error("Error executing while getting samlAssertion::" + e.getMessage());
+			e.printStackTrace();
+		}		
 		return status;
 	}
 
@@ -503,31 +429,26 @@ public class UIMSUserManagerSoapService {
 	public void activateUIMSIdentity(String callerFid, String password, String vnew) throws MalformedURLException {
 		LOGGER.info("Entered activateUIMSIdentity() -> Start");
 		LOGGER.info("Parameter callerFid -> " + callerFid + " ,vnew -> " + vnew);
-		UIMSLOGGER.info("Entered activateUIMSIdentity() -> Start");
-		UIMSLOGGER.info("Parameter callerFid -> " + callerFid + " ,vnew -> " + vnew);
+
 		UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
 
 		String authentificationToken = null;
 		try {
-			LOGGER.info("Going to call getSamlAssertionToken() of UIMS for callerFid:" + callerFid);
 			authentificationToken = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, vnew);
-			LOGGER.info("getSamlAssertionToken() of UIMS finished for callerFid:" + callerFid);
-		} catch (Exception e) {
-			UIMSLOGGER.error("Error while getting authentificationToken in UIMS::" + e.getMessage());
-			LOGGER.error("Error while getting authentificationToken in UIMS::" + e.getMessage());
-			e.printStackTrace();
-		}
-		try {
-			LOGGER.info("Going to call activateIdentity() of UIMS for callerFid:" + callerFid);
+			LOGGER.info("authentificationToken="+authentificationToken);
+
+			LOGGER.info("Start: activateIdentity() of UIMS for callerFid:" + callerFid);
 			userManagerUIMSV22.activateIdentity(UimsConstants.CALLER_FID, password, authentificationToken);
-			LOGGER.info("activateIdentity() of UIMS finished for callerFid:" + callerFid);
+			LOGGER.info("End: activateIdentity() of UIMS finished for callerFid:" + callerFid);
 		} catch (IMSServiceSecurityCallNotAllowedException_Exception
 				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
 				| RequestedEntryNotExistsException_Exception | RequestedInternalUserException_Exception
 				| SecuredImsException_Exception | UnexpectedLdapResponseException_Exception
 				| UnexpectedRuntimeImsException_Exception e) {
-			UIMSLOGGER.error("Error executing while activateUIMSIdentity()::" + e.getMessage());
-			LOGGER.error("Error executing while activateUIMSIdentity()::" + e.getMessage());
+			LOGGER.error("Error in activateUIMSIdentity()::" + e.getMessage());
+			e.printStackTrace();
+		} catch (Exception e) {
+			LOGGER.error("Exception in activateUIMSIdentity()::" + e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -539,98 +460,70 @@ public class UIMSUserManagerSoapService {
 		LOGGER.info("Parameter userId -> " + userId + " ,callerFid -> " + callerFid);
 		LOGGER.info("Parameter openamVnew -> " + openamVnew + " ,iPlanetDirectoryKey -> " + iPlanetDirectoryKey);
 		LOGGER.info("Parameter loginIdentifierType -> " + loginIdentifierType + " ,emailOrMobile -> " + emailOrMobile);
-		UIMSLOGGER.info("Entered activateIdentityNoPassword() -> Start");
-		UIMSLOGGER.info("Parameter userId -> " + userId + " ,callerFid -> " + callerFid);
-		UIMSLOGGER.info("Parameter openamVnew -> " + openamVnew + " ,iPlanetDirectoryKey -> " + iPlanetDirectoryKey);
-		UIMSLOGGER.info(
-				"Parameter loginIdentifierType -> " + loginIdentifierType + " ,emailOrMobile -> " + emailOrMobile);
 
 		try {
 			// samlAssertion =
 			// SamlAssertionTokenGenerator.getSamlAssertionToken(userId,openamVnew);
 
 			if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
-				LOGGER.info("Going to call getSamlAssertionToken() of UIMS for EMAIL.. userId:" + userId);
 				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(userId, openamVnew);
-				LOGGER.info("getSamlAssertionToken() of UIMS finished for EMAIL.. userId:" + userId);
 			} else {
-				LOGGER.info("Going to call getSamlAssertionToken() of UIMS for non-EMAIL.. callerFid:" + callerFid);
 				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, openamVnew);
-				LOGGER.info("getSamlAssertionToken() of UIMS finished for non-EMAIL.. callerFid:" + callerFid);
 			}
+			LOGGER.info("samlAssertion="+samlAssertion);
 
-		} catch (Exception e) {
-			// productService.sessionLogout(iPlanetDirectoryKey, "logout");
-			LOGGER.error("Error executing while getting samlAssertion::" + e.getMessage());
-			UIMSLOGGER.error("Error executing while getting samlAssertion::" + e.getMessage());
-			e.printStackTrace();
-		}
-		try {
 			Callable<Boolean> callableActivateIdentityNoPassword = new Callable<Boolean>() {
 				public Boolean call() throws Exception {
 					UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
 					if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
-						LOGGER.info("Going to call activateIdentityNoPassword() of UIMS for EMAIL.. userId:" + userId);
+						LOGGER.info("Start: activateIdentityNoPassword() of UIMS for EMAIL.. userId:" + userId);
 						isNoPwdactivated = userManagerUIMSV22.activateIdentityNoPassword(UimsConstants.CALLER_FID,
 								samlAssertion);
-						LOGGER.info("activateIdentityNoPassword() of UIMS finished for EMAIL.. userId:" + userId);
+						LOGGER.info("End: activateIdentityNoPassword() of UIMS finished for EMAIL.. userId:" + userId);
 
 					} else {
-						LOGGER.info("Going to call activateIdentityWithMobileNoPassword() of UIMS.. emailOrMobile:"
+						LOGGER.info("Start: activateIdentityWithMobileNoPassword() of UIMS.. emailOrMobile:"
 								+ emailOrMobile);
 						isNoPwdactivated = userManagerUIMSV22.activateIdentityWithMobileNoPassword(
 								UimsConstants.CALLER_FID, emailOrMobile, samlAssertion);
-						LOGGER.info("activateIdentityWithMobileNoPassword() of UIMS finished.. emailOrMobile:"
+						LOGGER.info("End: activateIdentityWithMobileNoPassword() of UIMS finished.. emailOrMobile:"
 								+ emailOrMobile);
 					}
-					LOGGER.info("UIMS user activateIdentityNoPassword isactivated status:" + isNoPwdactivated);
-					UIMSLOGGER.info("UIMS user activateIdentityNoPassword isactivated status:" + isNoPwdactivated);
+					LOGGER.info("UIMS activateIdentityNoPassword isactivated status:" + isNoPwdactivated);
 					return true;
 				}
 			};
 			Retryer<Boolean> retryer = RetryerBuilder.<Boolean> newBuilder()
 					.retryIfResult(Predicates.<Boolean> isNull()).retryIfExceptionOfType(Exception.class)
 					.retryIfRuntimeException().withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
-			try {
-				retryer.call(callableActivateIdentityNoPassword);
-				// after successful activateIdentityNoPassword, we need to
-				// update the v_old
-				if (isNoPwdactivated) {
-					String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
-					LOGGER.info("Going to call updateUser() of openamservice to update version for userID:" + userId);
-					productService.updateUser(iPlanetDirectoryKey, userId, version);
-					LOGGER.info("updateUser() of openamservice finsihed to update version for userID:" + userId);
-				}
-			} catch (RetryException e) {
-				// productService.sessionLogout(iPlanetDirectoryKey, "logout");
-				UIMSLOGGER.error("RetryException while calling activateIdentityNoPassword::" + e.getMessage());
-				LOGGER.error("RetryException while calling activateIdentityNoPassword::" + e.getMessage());
-				e.printStackTrace();
-			} catch (ExecutionException e) {
-				// productService.sessionLogout(iPlanetDirectoryKey, "logout");
-				UIMSLOGGER.error("ExecutionException while calling activateIdentityNoPassword::" + e.getMessage());
-				LOGGER.error("ExecutionException while calling activateIdentityNoPassword::" + e.getMessage());
-				e.printStackTrace();
+
+			retryer.call(callableActivateIdentityNoPassword);
+			// after successful activateIdentityNoPassword, we need to
+			// update the v_old
+			if (isNoPwdactivated) {
+				String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
+				LOGGER.info("Start: updateUser() of openamservice to update version for userID:" + userId);
+				productService.updateUser(iPlanetDirectoryKey, userId, version);
+				LOGGER.info("End: updateUser() of openamservice finished to update version for userID:" + userId);
 			}
 			if (!isNoPwdactivated) {
-				UIMSLOGGER
-						.error("UIMS UserpinConfirmation activateIdentityNoPassword got failed -----> ::sending mail notification for userId::"
-								+ userId);
 				LOGGER.error(
-						"UIMS UserpinConfirmation activateIdentityNoPassword got failed -----> ::sending mail notification for userId::"
+						"UIMS UserpinConfirmation activateIdentityNoPassword got failed -> ::sending mail notification for userId::"
 								+ userId);
 				sendEmail.emailReadyToSendEmail(supportUser, fromUserName,
 						"UIMS UserpinConfirmation activateIdentityNoPassword failed.", userId);
 			}
+		} catch (RetryException e) {
+			LOGGER.error("RetryException in activateIdentityNoPassword()::" + e.getMessage());
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			LOGGER.error("ExecutionException in activateIdentityNoPassword()::" + e.getMessage());
+			e.printStackTrace();
 		} catch (Exception e) {
-			// productService.sessionLogout(iPlanetDirectoryKey, "logout");
-			UIMSLOGGER.error("Exception while activateIdentityNoPassword::" + e.getMessage());
-			LOGGER.error("Exception while activateIdentityNoPassword::" + e.getMessage());
+			LOGGER.error("Exception in activateIdentityNoPassword()::" + e.getMessage());
 			e.printStackTrace();
 		}
-		// productService.sessionLogout(iPlanetDirectoryKey, "logout");
-		UIMSLOGGER.info("Completed UIMS activateIdentityNoPassword UIMS Async method!");
-		LOGGER.info("Completed UIMS activateIdentityNoPassword UIMS Async method!");
+		LOGGER.info("Completed UIMS activateIdentityNoPassword() Async method!");
 
 	}
 
@@ -644,12 +537,6 @@ public class UIMSUserManagerSoapService {
 		LOGGER.info("Parameter userName -> " + userName + " ,iPlanetDirectoryKey -> " + iPlanetDirectoryKey);
 		LOGGER.info("Parameter v_new -> " + v_new + " ,forcedFederatedId -> " + forcedFederatedId);
 		LOGGER.info("Parameter userRequest -> " + userRequest);
-		UIMSLOGGER.info("Entered createUIMSUserAndCompany() -> Start");
-		UIMSLOGGER.info("Parameter callerFid -> " + callerFid + " ,identity -> " + identity);
-		UIMSLOGGER.info("Parameter context -> " + context + " ,company -> " + company);
-		UIMSLOGGER.info("Parameter userName -> " + userName + " ,iPlanetDirectoryKey -> " + iPlanetDirectoryKey);
-		UIMSLOGGER.info("Parameter v_new -> " + v_new + " ,forcedFederatedId -> " + forcedFederatedId);
-		UIMSLOGGER.info("Parameter userRequest -> " + userRequest);
 
 		Boolean companyCreated = false;
 		Boolean userCreated = false;
@@ -663,7 +550,6 @@ public class UIMSUserManagerSoapService {
 			userRequestjsonString = objMapper.writeValueAsString(userRequest);
 			userRequestjsonString = userRequestjsonString.replace("\"\"", "[]");
 		} catch (JsonProcessingException e) {
-			UIMSLOGGER.error("Error while converting the userRequest to Json" + e.getMessage());
 			LOGGER.error("Error while converting the userRequest to Json" + e.getMessage());
 			e.printStackTrace();
 		} finally {
@@ -674,7 +560,6 @@ public class UIMSUserManagerSoapService {
 		try {
 			Callable<Boolean> callableUser = new Callable<Boolean>() {
 				public Boolean call() throws Exception {
-
 					if (null != userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c()
 							&& !userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c().isEmpty()) {
 
@@ -694,7 +579,6 @@ public class UIMSUserManagerSoapService {
 					if (null != createdFedId) {
 						String fedID = "{" + "\"federationID\": \"" + createdFedId + "\"" + "}";
 						LOGGER.info("fedID in creating UIMS user: " + fedID);
-						UIMSLOGGER.info("fedID in creating UIMS user: " + fedID);
 						productService.updateUser(iPlanetDirectoryKey, userName, fedID);
 					}
 
@@ -705,29 +589,16 @@ public class UIMSUserManagerSoapService {
 			Retryer<Boolean> retryer = RetryerBuilder.<Boolean> newBuilder()
 					.retryIfResult(Predicates.<Boolean> isNull()).retryIfExceptionOfType(Exception.class)
 					.retryIfRuntimeException().withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
-			try {
-				userCreated = retryer.call(callableUser);
-				if (userCreated) {
-					UIMSLOGGER.info("UIMS user created successfully::" + userCreated);
-					LOGGER.info("UIMS user created successfully::" + userCreated);
-				}
-			} catch (RetryException e) {
-				UIMSLOGGER.error("Retry failed while calling the UIMS create user::" + e.getMessage());
-				LOGGER.error("Retry failed while calling the UIMS create user::" + e.getMessage());
-				e.printStackTrace();
-
-			} catch (ExecutionException e) {
-				UIMSLOGGER.error("ExecutionException while calling the UIMS create user::" + e.getMessage());
-				LOGGER.error("ExecutionException while calling the UIMS create user::" + e.getMessage());
-				e.printStackTrace();
+			userCreated = retryer.call(callableUser);
+			if (userCreated) {
+				LOGGER.info("UIMS user created successfully::" + userCreated);
 			}
 
 			if ((!userCreated || null == createdFedId)
 					&& (null != context && (UserConstants.USER_CONTEXT_HOME.equalsIgnoreCase(context)
 							|| UserConstants.USER_CONTEXT_HOME_1.equalsIgnoreCase(context)))) {
-				UIMSLOGGER.error("CreateUser got failed -----> ::sending mail notification for userRequestjsonString::"
-						+ userRequestjsonString);
-				LOGGER.error("CreateUser got failed -----> ::sending mail notification for userRequestjsonString::"
+
+				LOGGER.error("CreateUser got failed -> ::sending mail notification for userRequestjsonString::"
 						+ userRequestjsonString);
 				sendEmail.emailReadyToSendEmail(supportUser, fromUserName, "UIMS CreateUser failed.",
 						userRequestjsonString);
@@ -787,7 +658,6 @@ public class UIMSUserManagerSoapService {
 					if (null != createdCompanyFedId) {
 						String companyFedID = "{" + "\"companyFederatedID\": \"" + createdCompanyFedId + "\"" + "}";
 						LOGGER.info("companyFedID in creating UIMS Company: " + companyFedID);
-						UIMSLOGGER.info("companyFedID in creating UIMS Company: " + companyFedID);
 						productService.updateUser(iPlanetDirectoryKey, userName, companyFedID);
 
 						if ((null == userRequest.getUserRecord().getBFO_ACCOUNT_ID__c()
@@ -811,54 +681,45 @@ public class UIMSUserManagerSoapService {
 			Retryer<Boolean> retryerCompany = RetryerBuilder.<Boolean> newBuilder()
 					.retryIfResult(Predicates.<Boolean> isNull()).retryIfExceptionOfType(Exception.class)
 					.retryIfRuntimeException().withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
-			try {
-				if (null != context && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)
-						|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context))) {
 
-					companyCreated = retryerCompany.call(callableCompany);
-					if (userCreated && companyCreated) {
-						// after successful creation of user and company, we
-						// need to update the v_old
-						String version = "{" + "\"V_Old\": \"" + v_new + "\"" + "}";
-						productService.updateUser(iPlanetDirectoryKey, userName, version);
-						// productService.sessionLogout(iPlanetDirectoryKey,
-						// "logout");
-					}
+			if (null != context && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)
+					|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context))) {
+
+				companyCreated = retryerCompany.call(callableCompany);
+				if (companyCreated) {
+					LOGGER.info("UIMS company created successfully::" + companyCreated);
 				}
-
-			} catch (RetryException e) {
-				// productService.sessionLogout(iPlanetDirectoryKey, "logout");
-				UIMSLOGGER.error("Retry failed while calling the UIMS create company::" + e.getMessage());
-				LOGGER.error("Retry failed while calling the UIMS create company::" + e.getMessage());
-				e.printStackTrace();
-			} catch (ExecutionException e) {
-				// productService.sessionLogout(iPlanetDirectoryKey, "logout");
-				UIMSLOGGER.error("ExecutionException while calling the UIMS create company::" + e.getMessage());
-				LOGGER.error("ExecutionException while calling the UIMS create company::" + e.getMessage());
-				e.printStackTrace();
+				if (userCreated && companyCreated) {
+					// after successful creation of user and company, we
+					// need to update the v_old
+					String version = "{" + "\"V_Old\": \"" + v_new + "\"" + "}";
+					productService.updateUser(iPlanetDirectoryKey, userName, version);
+				}
 			}
+
 			if ((!(userCreated && companyCreated) || (null == createdCompanyFedId && null == createdFedId))
 					&& (null != context && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)
 							|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context)))) {
-				UIMSLOGGER.error("UIMS CreateUser and CreateCompany got failed -----> ::sending mail notification::"
-						+ userRequestjsonString);
-				LOGGER.error("UIMS CreateUser and CreateCompany got failed -----> ::sending mail notification::"
+
+				LOGGER.error("UIMS CreateUser and CreateCompany got failed --> ::sending mail notification::"
 						+ userRequestjsonString);
 				sendEmail.emailReadyToSendEmail(supportUser, fromUserName, "UIMS CreateUser and CreateCompany failed.",
 						userRequestjsonString);
 			}
+		}catch (RetryException e) {
+			LOGGER.error("RetryException in createUIMSUserAndCompany()::" + e.getMessage());
+			e.printStackTrace();
+
+		} catch (ExecutionException e) {
+			LOGGER.error("ExecutionException in createUIMSUserAndCompany()::" + e.getMessage());
+			e.printStackTrace();
 		} catch (Exception e) {
-			// productService.sessionLogout(iPlanetDirectoryKey, "logout");
-			UIMSLOGGER.error("Exception in UIMSUserManagerSoapService.createUIMSUserAndCompany::" + e.getMessage());
-			LOGGER.error("Exception in UIMSUserManagerSoapService.createUIMSUserAndCompany::" + e.getMessage());
+			LOGGER.error("Exception in createUIMSUserAndCompany()::" + e.getMessage());
 			e.printStackTrace();
 		}
 		createdFedId = null;
-		// productService.sessionLogout(iPlanetDirectoryKey, "logout");
-		LOGGER.info("Completed the createUIMSUserAndCompany Async method!!");
-		UIMSLOGGER.info("Completed the createUIMSUserAndCompany Async method!!");
+		LOGGER.info("Completed the createUIMSUserAndCompany() Async method!!");
 		return null;
-
 	}
 
 	@Async
@@ -868,10 +729,6 @@ public class UIMSUserManagerSoapService {
 		LOGGER.info("Parameter fedId -> " + fedId);
 		LOGGER.info("Parameter context -> " + context);
 		LOGGER.info("Parameter userName -> " + userName + " ,email -> " + email);
-		UIMSLOGGER.info("Entered updateUIMSUserAndCompany() -> Start");
-		UIMSLOGGER.info("Parameter fedId -> " + fedId);
-		UIMSLOGGER.info("Parameter context -> " + context);
-		UIMSLOGGER.info("Parameter userName -> " + userName + " ,email -> " + email);
 
 		AccessElement application = new AccessElement();
 		application.setId(applicationName);
@@ -881,8 +738,7 @@ public class UIMSUserManagerSoapService {
 		try {
 			LOGGER.info("Parameter company -> " + objectMapper.writeValueAsString(company));
 			LOGGER.info("Parameter identity -> " + objectMapper.writeValueAsString(identity));
-			UIMSLOGGER.info("Parameter company -> " + objectMapper.writeValueAsString(company));
-			UIMSLOGGER.info("Parameter identity -> " + objectMapper.writeValueAsString(identity));
+
 			UIMSCompanyManagerSoapService companyManagerSoapService = new UIMSCompanyManagerSoapService();
 			Callable<Boolean> callableUpdateUIMSUserAndComapany = new Callable<Boolean>() {
 				public Boolean call() throws Exception {
@@ -892,10 +748,9 @@ public class UIMSUserManagerSoapService {
 
 					// Answer from Subrat: Remaining fields should not be
 					// updated.
-					LOGGER.info("Going to call updateUIMSUser() of UIMS for fedId:" + fedId);
+					LOGGER.info("Start: updateUIMSUser() for fedId:" + fedId);
 					updateUIMSUser = updateUIMSUser(fedId, identity, vnew);
-					LOGGER.info(
-							"updateUIMSUser() of UIMS finished for fedId:" + fedId + " with status:" + updateUIMSUser);
+					LOGGER.info("End: updateUIMSUser() finished for fedId:" + fedId + " with status:" + updateUIMSUser);
 
 					return true;
 				}
@@ -904,36 +759,23 @@ public class UIMSUserManagerSoapService {
 			Retryer<Boolean> retryer = RetryerBuilder.<Boolean> newBuilder()
 					.retryIfResult(Predicates.<Boolean> isNull()).retryIfExceptionOfType(Exception.class)
 					.retryIfRuntimeException().withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
-			try {
-				retryer.call(callableUpdateUIMSUserAndComapany);
 
-				if (updateUIMSUser) {
-					LOGGER.info("UIMS User updated Successfully::" + updateUIMSUser);
-					UIMSLOGGER.info("UIMS User updated Successfully::" + updateUIMSUser);
-				}
-			} catch (RetryException e) {
-				UIMSLOGGER.error("Retry failed while calling updateUIMSUser() of UIMS for fedId :" + fedId + "->"
-						+ e.getMessage());
-				LOGGER.error("Retry failed while calling updateUIMSUser() of UIMS for fedId :" + fedId + "->"
-						+ e.getMessage());
-				e.printStackTrace();
-			} catch (ExecutionException e) {
-				UIMSLOGGER.error("ExecutionException while calling updateUIMSUser() of UIMS for fedId :" + fedId + "->"
-						+ e.getMessage());
-				LOGGER.error("ExecutionException while calling updateUIMSUser() of UIMS for fedId :" + fedId + "->"
-						+ e.getMessage());
-				e.printStackTrace();
+			retryer.call(callableUpdateUIMSUserAndComapany);
+
+			if (updateUIMSUser) {
+				LOGGER.info("UIMS User updated Successfully::" + updateUIMSUser);
 			}
-
 			if (!updateUIMSUser && (null != context && (UserConstants.USER_CONTEXT_HOME.equalsIgnoreCase(context)
 					|| UserConstants.USER_CONTEXT_HOME_1.equalsIgnoreCase(context)))) {
-				UIMSLOGGER.error("updateUIMSUser() of UIMS got failed -----> ::sending mail notification for userName::"
-						+ userName);
-				LOGGER.error("updateUIMSUser() of UIMS got failed -----> ::sending mail notification for userName::"
+
+				LOGGER.error("updateUIMSUser() got failed -> ::sending mail notification for userName::"
 						+ userName);
 
 				sendEmail.emailReadyToSendEmail(supportUser, fromUserName, "UIMS Update user failed.", userName);
 			}
+
+
+
 			Callable<Boolean> callableUpdateCompany = new Callable<Boolean>() {
 				public Boolean call() throws Exception {
 
@@ -948,55 +790,46 @@ public class UIMSUserManagerSoapService {
 			Retryer<Boolean> retryerCompany = RetryerBuilder.<Boolean> newBuilder()
 					.retryIfResult(Predicates.<Boolean> isNull()).retryIfExceptionOfType(Exception.class)
 					.retryIfRuntimeException().withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
-			try {
 
-				if (null != context && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)
-						|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context))) {
 
-					retryerCompany.call(callableUpdateCompany);
-					if (updateUIMSUser && updateUIMSCompany) {
-						// after successful creation of user and company, we
-						// need to update the v_old
-						String version = "{" + "\"V_Old\": \"" + vnew + "\"" + "}";
-						productService.updateUser(iPlanetDirectoryKey, userName, version);
-					}
+			if (null != context && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)
+					|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context))) {
+
+				retryerCompany.call(callableUpdateCompany);
+				if(updateUIMSCompany){
+					LOGGER.info("UIMS company updated Successfully:"+updateUIMSCompany);
 				}
-
-			} catch (RetryException e) {
-				UIMSLOGGER.error("Retry failed while calling the UIMS create company::" + e.getMessage());
-				LOGGER.error("Retry failed while calling the UIMS create company::" + e.getMessage());
-				e.printStackTrace();
-
-			} catch (ExecutionException e) {
-				UIMSLOGGER.error("ExecutionException while calling the UIMS create company::" + e.getMessage());
-				LOGGER.error("ExecutionException while calling the UIMS create company::" + e.getMessage());
-				e.printStackTrace();
-			}
-			if (!(updateUIMSUser && updateUIMSCompany)
-					&& (null != context && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)
-							|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context)))) {
-				UIMSLOGGER
-						.error("UIMS User and Company updated got failed -----> ::sending mail notification for userName::"
-								+ userName);
-				LOGGER.error(
-						"UIMS User and Company updated got failed -----> ::sending mail notification for userName::"
-								+ userName);
-				sendEmail.emailReadyToSendEmail(supportUser, fromUserName, "UIMS Update user and company failed.",
-						userName);
+				if (updateUIMSUser && updateUIMSCompany) {
+					// after successful creation of user and company, we
+					// need to update the v_old
+					String version = "{" + "\"V_Old\": \"" + vnew + "\"" + "}";
+					productService.updateUser(iPlanetDirectoryKey, userName, version);
+				}
+				if (!(updateUIMSUser && updateUIMSCompany)
+						&& (null != context && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)
+								|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context)))) {
+					LOGGER.error(
+							"UIMS User and Company updated got failed -----> ::sending mail notification for userName::"
+									+ userName);
+					sendEmail.emailReadyToSendEmail(supportUser, fromUserName, "UIMS Update user and company failed.",
+							userName);
+				}
 			}
 
+		} catch (RetryException e) {
+			LOGGER.error("RetryException in updateUIMSUserAndCompany()::" + e.getMessage());
+			e.printStackTrace();
+
+		} catch (ExecutionException e) {
+			LOGGER.error("ExecutionException in updateUIMSUserAndCompany()::" + e.getMessage());
+			e.printStackTrace();
 		} catch (Exception e) {
-			// productService.sessionLogout(iPlanetDirectoryKey, "logout");
-			// TODO Auto-generated catch block
-			UIMSLOGGER.error("Exception for userName::" + userName);
-			LOGGER.error("Exception for userName::" + userName);
+			LOGGER.error("Exception in updateUIMSUserAndCompany()::" + e.getMessage());
 			// LOGGER.error("UIMS User and Company updated got failed ----->
 			// ::sending mail notification for userName::"+userName);
 			e.printStackTrace();
 		}
 
-		// productService.sessionLogout(iPlanetDirectoryKey, "logout");
-		UIMSLOGGER.info("UIMS updateUIMSUserAndCompany Async method completed!!");
 		LOGGER.info("UIMS updateUIMSUserAndCompany Async method completed!!");
 		return null;
 
@@ -1014,10 +847,6 @@ public class UIMSUserManagerSoapService {
 		LOGGER.info("Entered activateUIMSUserConfirmPIN() -> Start");
 		LOGGER.info("Parameter confirmRequest -> " + confirmRequest);
 		LOGGER.info("Parameter loginIdentifierType -> " + loginIdentifierType + " ,emailOrMobile -> " + emailOrMobile);
-		UIMSLOGGER.info("Entered activateUIMSUserConfirmPIN() -> Start");
-		UIMSLOGGER.info("Parameter confirmRequest -> " + confirmRequest);
-		UIMSLOGGER.info(
-				"Parameter loginIdentifierType -> " + loginIdentifierType + " ,emailOrMobile -> " + emailOrMobile);
 
 		try {
 			if ((null != confirmRequest.getPassword() && !confirmRequest.getPassword().isEmpty())) {
@@ -1028,12 +857,7 @@ public class UIMSUserManagerSoapService {
 						iPlanetDirectoryKey, loginIdentifierType, emailOrMobile);
 			}
 		} catch (Exception e) {
-			UIMSLOGGER
-					.error("Exception while calling UIMS UserManager API of setUIMSPassword/activateIdentityNoPassword:: -> "
-							+ e.getMessage());
-			LOGGER.error(
-					"Exception while calling UIMS UserManager API of setUIMSPassword/activateIdentityNoPassword:: -> "
-							+ e.getMessage());
+			LOGGER.error("Exception in activateUIMSUserConfirmPIN():: -> "+ e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -1046,11 +870,6 @@ public class UIMSUserManagerSoapService {
 		LOGGER.info("Parameter callerFid -> " + callerFid);
 		LOGGER.info("Parameter openamVnew -> " + openamVnew + " ,loginIdentifierType -> " + loginIdentifierType);
 		LOGGER.info("Parameter emailOrMobile -> " + newEmailOrMobile);
-		UIMSLOGGER.info("Entered updateChangeEmailOrMobile() -> Start");
-		UIMSLOGGER.info("Parameter iPlanetDirectoryKey -> " + iPlanetDirectoryKey + " ,userId -> " + userId);
-		UIMSLOGGER.info("Parameter callerFid -> " + callerFid);
-		UIMSLOGGER.info("Parameter openamVnew -> " + openamVnew + " ,loginIdentifierType -> " + loginIdentifierType);
-		UIMSLOGGER.info("Parameter emailOrMobile -> " + newEmailOrMobile);
 
 		com.se.uims.usermanager.AccessElement application = new com.se.uims.usermanager.AccessElement();
 		application.setId(applicationName);
@@ -1058,40 +877,31 @@ public class UIMSUserManagerSoapService {
 
 		try {
 			if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
-				LOGGER.info("Going to call getSamlAssertionToken() of UIMS for EMAIL.. userId:" + userId);
 				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(userId, openamVnew);
-				LOGGER.info("getSamlAssertionToken() of UIMS finished for EMAIL.. userId:" + userId);
 			} else {
-				LOGGER.info("Going to call getSamlAssertionToken() of UIMS.. callerFid:" + callerFid);
 				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, openamVnew);
-				LOGGER.info("getSamlAssertionToken() of UIMS finished.. callerFid:" + callerFid);
 			}
-		} catch (Exception e) {
-			LOGGER.error("Exception while getting getSamlAssertionToken() of UIMS::" + e.getMessage());
-			UIMSLOGGER.error("Exception while getting getSamlAssertionToken() of UIMS::" + e.getMessage());
-			e.printStackTrace();
-		}
-		try {
+			LOGGER.info("samlAssertion="+samlAssertion);
+
 			Callable<Boolean> callableUIMSPassword = new Callable<Boolean>() {
 				public Boolean call() throws Exception {
 					UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
-					if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
-						LOGGER.info("Going to call requestEmailChange() of UIMS for EMAIL.. userId:" + userId);
+					if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {						
+						LOGGER.info("Start: requestEmailChange() of UIMS for EMAIL.. userId:" + userId);
 
 						changeEmailUpdated = userManagerUIMSV22.requestEmailChange(UimsConstants.CALLER_FID,
 								samlAssertion, application, newEmailOrMobile);
 
-						LOGGER.info("requestEmailChange() of UIMS finished for EMAIL.. userId:" + userId);
+						LOGGER.info("End: requestEmailChange() of UIMS finished for EMAIL.. userId:" + userId);
 					} else {
-						LOGGER.info("Going to call requestPhoneIdChange() of UIMS for non-EMAIL.. userId:" + userId);
+						LOGGER.info("Start: requestPhoneIdChange() of UIMS for non-EMAIL.. userId:" + userId);
 
 						changeEmailUpdated = userManagerUIMSV22.requestPhoneIdChange(UimsConstants.CALLER_FID,
 								samlAssertion, application, newEmailOrMobile);
 
-						LOGGER.info("requestPhoneIdChange() of UIMS finished for non-EMAIL.. userId:" + userId);
+						LOGGER.info("End: requestPhoneIdChange() of UIMS finished for non-EMAIL.. userId:" + userId);
 					}
-					LOGGER.info("requestPhoneIdChange: " + changeEmailUpdated);
-					UIMSLOGGER.info("requestPhoneIdChange: " + changeEmailUpdated);
+					LOGGER.info("request Email/PhoneId Change status: " + changeEmailUpdated);
 
 					if (changeEmailUpdated) {
 						changeEmailUpdated = userManagerUIMSV22.updateEmail(UimsConstants.CALLER_FID, samlAssertion);
@@ -1104,49 +914,38 @@ public class UIMSUserManagerSoapService {
 			Retryer<Boolean> retryer = RetryerBuilder.<Boolean> newBuilder()
 					.retryIfResult(Predicates.<Boolean> isNull()).retryIfExceptionOfType(Exception.class)
 					.retryIfRuntimeException().withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
-			try {
-				retryer.call(callableUIMSPassword);
-				// after successful setUIMSPassword , we need to update the
-				// v_old
-				if (changeEmailUpdated) {
 
-					String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
-					LOGGER.info("Going to call updateUser() of openamservice to update version for userId:" + userId);
-					// productService.updateUser(iPlanetDirectoryKey, userId,
-					// version);
-					LOGGER.info("updateUser() call of openamservice finished for userId:" + userId);
-				}
-			} catch (RetryException e) {
-				LOGGER.error("Retry failed while calling requestEmailChange() of UIMS::" + e.getMessage());
-				UIMSLOGGER.error("Retry failed while calling requestEmailChange() of UIMS::" + e.getMessage());
-				e.printStackTrace();
+			retryer.call(callableUIMSPassword);
+			// after successful setUIMSPassword , we need to update the
+			// v_old
+			if (changeEmailUpdated) {
 
-			} catch (ExecutionException e) {
-				LOGGER.error("ExecutionException while calling requestEmailChange() of UIMS::" + e.getMessage());
-				UIMSLOGGER.error("ExecutionException while calling requestEmailChange() of UIMS::" + e.getMessage());
-				e.printStackTrace();
+				String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
+				LOGGER.info("Start: updateUser() of openamservice to update version for userId:" + userId);
+				// productService.updateUser(iPlanetDirectoryKey, userId,
+				// version);
+				LOGGER.info("End: updateUser() call of openamservice to update version finished for userId:" + userId);
 			}
 			if (!changeEmailUpdated) {
 				LOGGER.info(
-						"UIMS UserpinConfirmation requestEmailChange got failed -----> ::sending mail notification for userid::"
+						"UIMS requestEmailChange got failed -----> ::sending mail notification for userid::"
 								+ userId);
-				UIMSLOGGER
-						.info("UIMS UserpinConfirmation requestEmailChange got failed -----> ::sending mail notification for userid::"
-								+ userId);
-				LOGGER.info("Going to call emailReadyToSendEmail() for userId:" + userId);
+				LOGGER.info("Start: emailReadyToSendEmail() for userId:" + userId);
 				sendEmail.emailReadyToSendEmail(supportUser, fromUserName, "UIMS updateChangeEmailOrMobile failed.",
 						userId);
-				LOGGER.info("emailReadyToSendEmail() finished for userId:" + userId);
+				LOGGER.info("End: emailReadyToSendEmail() finished for userId:" + userId);
 			}
+		} catch (RetryException e) {
+			LOGGER.error("RetryException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage());
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			LOGGER.error("ExecutionException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage());
+			e.printStackTrace();
 		} catch (Exception e) {
-			// productService.sessionLogout(iPlanetDirectoryKey, "logout");
-			LOGGER.error("Exception while requestEmailChange::" + e.getMessage());
-			UIMSLOGGER.error("Exception while requestEmailChange::" + e.getMessage());
+			LOGGER.error("Exception in updateChangeEmailOrMobile()::" + e.getMessage());
 			e.printStackTrace();
 		}
-		// productService.sessionLogout(iPlanetDirectoryKey, "logout");
-		LOGGER.info("requestEmailChange() Async Method -> End");
-		UIMSLOGGER.info("requestEmailChange Async Method -> End");
+		LOGGER.info("updateChangeEmailOrMobile() Async Method -> End");
 	}
 
 	public static void main(String[] args) {
@@ -1168,7 +967,6 @@ public class UIMSUserManagerSoapService {
 	private String buildGoDigitalRequest(CreateUserRequest userRequest) {
 		LOGGER.info("Entered buildGoDigitalRequest() -> Start");
 		LOGGER.info("Parameter userRequest -> " + userRequest);
-		UIMSLOGGER.info("Entered buildGoDigitalRequest() -> Start");
 		LOGGER.info("Parameter userRequest -> " + userRequest);
 
 		ObjectMapper objMapper = new ObjectMapper();
@@ -1184,7 +982,6 @@ public class UIMSUserManagerSoapService {
 			jsonString = objMapper.writeValueAsString(userRegistrationInfoRequest);
 			jsonString = jsonString.replace("\"\"", "[]");
 		} catch (JsonProcessingException e) {
-			UIMSLOGGER.error("JsonProcessingException while converting the digitalRequest to Json" + e.getMessage());
 			LOGGER.error("JsonProcessingException while converting the digitalRequest to Json" + e.getMessage());
 			e.printStackTrace();
 		}

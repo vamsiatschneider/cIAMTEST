@@ -22,7 +22,6 @@ import com.schneider.ims.service.company.impl.uimsv2.SecuredImsException;
 import com.schneider.ims.service.company.impl.uimsv2.UnexpectedLdapResponseException;
 import com.schneider.ims.service.company.impl.uimsv2.UnexpectedRuntimeImsException;
 import com.schneider.ims.service.uimsv2.CompanyV3;
-import com.se.idms.util.SamlAssertionTokenGenerator;
 import com.se.idms.util.UimsConstants;
 import com.uims.companymanager.CompanyManagerUIMSV2;
 
@@ -46,6 +45,7 @@ public class UIMSCompanyManagerSoapServiceSync {
 	private String uimsCompanyManagerPortName;
 	
 	public CompanyManagerUIMSV2 getCompanyManager(){
+		LOGGER.info("Entered getCompanyManager() method -> Start");
 		URL url;
 		CompanyManagerUIMSV2 userManagerUIMSV2 = null;
 		try {
@@ -54,14 +54,16 @@ public class UIMSCompanyManagerSoapServiceSync {
 			QName qname = new QName(uimsCompanyManagerQname,uimsCompanyManagerPortName);
 			Service service = Service.create(url, qname);
 
+			LOGGER.info("Start: getPort() of UIMS");
 			userManagerUIMSV2 = service.getPort(CompanyManagerUIMSV2.class);
+			LOGGER.info("End: getPort() of UIMS -> End, response is:" + userManagerUIMSV2);
 
 		}catch (MalformedURLException e) {
-			LOGGER.error("Exception while UIMSCompanyManagerSoapServiceSync :: getCompanyManager()::" + e.getMessage());
+			LOGGER.error("MalformedURLException in getCompanyManager()::" + e.getMessage());
 			e.printStackTrace();
 		}
 		catch (Exception e) {
-			LOGGER.error("Exception while UIMSCompanyManagerSoapServiceSync ::getCompanyManager()::" + e.getMessage());
+			LOGGER.error("Exception in getCompanyManager()::" + e.getMessage());
 			e.printStackTrace();
 		}
 		return userManagerUIMSV2;
@@ -80,39 +82,40 @@ public class UIMSCompanyManagerSoapServiceSync {
 		
 		QName qname = new QName(uimsCompanyManagerQname,uimsCompanyManagerPortName);
 		Service service = Service.create(url, qname);
-		LOGGER.info("Going to call getPort() of UIMS");
+		LOGGER.info("Start: getPort() of UIMS");
 		 userManagerUIMSV2 = service.getPort(AuthenticatedCompanyManagerUIMSV2.class);
-		 LOGGER.info("getPort() of UIMS -> End, response is:" + userManagerUIMSV2);
+		 LOGGER.info("End: getPort() of UIMS -> End, response is:" + userManagerUIMSV2);
 		} catch (MalformedURLException e) {
-			LOGGER.error("Exception while UIMSCompanyManagerSoapServiceSync :: getAuthenitcatedCompanyManager()::" + e.getMessage());
+			LOGGER.error("Exception in getAuthenitcatedCompanyManager()::" + e.getMessage());
 			e.printStackTrace();
 		}
 		catch (Exception e) {
-			LOGGER.error("Exception while UIMSCompanyManagerSoapServiceSync :: getAuthenitcatedCompanyManager()::" + e.getMessage());
+			LOGGER.error("Exception in getAuthenitcatedCompanyManager()::" + e.getMessage());
 			e.printStackTrace();
 		}
 		return userManagerUIMSV2;
 	}
 	
 	public String createUIMSCompany(String fedId, String vnew, CompanyV3 company) {
+		LOGGER.info("Entered createUIMSCompany() method -> Start");
 		String uimsUserResponse = "";
-		String samlAssertion = null;
+		//String samlAssertion = null;
 		AuthenticatedCompanyManagerUIMSV2 companyManagerUIMSV2 = null;
 		ObjectMapper objMapper = new ObjectMapper();
 		try {
 			LOGGER.info("Parameter fedId -> " + fedId +" ,vnew="+vnew);
 			LOGGER.info("Parameter company -> " + objMapper.writeValueAsString(company));
 			companyManagerUIMSV2 = getAuthenitcatedCompanyManager();
-			samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(fedId, vnew);
-		} catch (Exception e) {
-			LOGGER.error("Error executing while createUIMSCompany::" + e.getMessage());
-			e.printStackTrace();
-		}
-			try {
-				uimsUserResponse = companyManagerUIMSV2.createCompany(UimsConstants.CALLER_FID, fedId, company);
+			//samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(fedId, vnew);
+			LOGGER.info("Start: UIMS createCompany()");
+			uimsUserResponse = companyManagerUIMSV2.createCompany(UimsConstants.CALLER_FID, fedId, company);
+			LOGGER.info("End: UIMS createCompany()");
 			} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
 					| LdapTemplateNotReadyException | RequestedEntryNotExistsException | RequestedInternalUserException
 					| UnexpectedLdapResponseException | UnexpectedRuntimeImsException e) {
+				LOGGER.error("Error executing while createUIMSCompany()::" + e.getMessage());
+				e.printStackTrace();
+			}catch (Exception e) {
 				LOGGER.error("Error executing while createUIMSCompany::" + e.getMessage());
 				e.printStackTrace();
 			}
@@ -121,26 +124,28 @@ public class UIMSCompanyManagerSoapServiceSync {
 	}
 	
 	public String createUIMSCompanyWithCompanyForceIdmsId(String idmsFederationId, String companyForceFederationId,String vnew, CompanyV3 company) {
+		LOGGER.info("Entered createUIMSCompanyWithCompanyForceIdmsId() method -> Start");
 		String uimsUserResponse = "";
-		String samlAssertion = null;
+		//String samlAssertion = null;
 		AuthenticatedCompanyManagerUIMSV2 authenticatedCompanyManagerUIMSV2 = null;
 		ObjectMapper objMapper = new ObjectMapper();
 		try {
 			LOGGER.info("Parameter fedId -> " + idmsFederationId +" ,vnew="+vnew);
+			LOGGER.info("Parameter companyForceFederationId -> " + companyForceFederationId);
 			LOGGER.info("Parameter company -> " + objMapper.writeValueAsString(company));
 			authenticatedCompanyManagerUIMSV2 = getAuthenitcatedCompanyManager();
 			//samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(idmsFederationId, vnew);
-		} catch (Exception e) {
-			LOGGER.error("Error executing while createUIMSCompany::" + e.getMessage());
-			e.printStackTrace();
-		}
-		try {
+			LOGGER.info("Start: UIMS createCompanyForceIdmsId()");
 			uimsUserResponse = authenticatedCompanyManagerUIMSV2.createCompanyForceIdmsId(UimsConstants.CALLER_FID, idmsFederationId, company, companyForceFederationId);
+			LOGGER.info("End: UIMS createCompanyForceIdmsId()");
 		} catch (ForcedFidAlreadyExistException | IMSServiceSecurityCallNotAllowedException
 				| InvalidImsServiceMethodArgumentException | LdapTemplateNotReadyException
 				| RequestedEntryNotExistsException | RequestedInternalUserException | SecuredImsException
 				| UnexpectedLdapResponseException | UnexpectedRuntimeImsException e) {
-			LOGGER.error("Error executing while createUIMSCompany::" + e.getMessage());
+			LOGGER.error("Error in createUIMSCompanyWithCompanyForceIdmsId()::" + e.getMessage());
+			e.printStackTrace();
+		}catch (Exception e) {
+			LOGGER.error("Error in createUIMSCompanyWithCompanyForceIdmsId()::" + e.getMessage());
 			e.printStackTrace();
 		}
 		return uimsUserResponse;
