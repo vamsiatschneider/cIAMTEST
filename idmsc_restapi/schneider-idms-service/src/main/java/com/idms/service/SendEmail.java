@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -772,10 +773,11 @@ public class SendEmail {
 	/**
 	 * Sending SMS 
 	 * New SMS Gateway
+	 * @throws UnsupportedEncodingException 
 	 **/
 	
 	@Async
-	public void sendSMSNewGateway(String code, String hotpOperationType, String userId, String appid) {
+	public void sendSMSNewGateway(String code, String hotpOperationType, String userId, String appid) throws UnsupportedEncodingException {
 		LOGGER.info("Entered sendSMSNewGateway() -> Start");
 		LOGGER.info("Parameter hotpOperationType -> " + hotpOperationType+" ,userId -> "+userId+" ,appid -> "+appid+" ,code="+code);
 
@@ -787,7 +789,9 @@ public class SendEmail {
 		//String smsContent = "%E3%80%90%E6%96%BD%E8%80%90%E5%BE%B7%E7%94%B5%E6%B0%94%E3%80%91%E9%AA%8C%E8%AF%81%E7%A0%81%EF%BC%9A"
 		//		+code+"%20%EF%BC%8C30%E5%88%86%E9%92%9F%E5%86%85%E6%9C%89%E6%95%88";
 		String smsContent = "【施耐德电气】验证码为："+code+"（请妥善保存，切勿告知他人），在页面输入以完成验证。";
-		String ext="", stime="", rrid="", msgfmt="";
+		smsContent   =   java.net.URLEncoder.encode(smsContent,"utf-8");  
+		String ext=" ", stime=" ", rrid=" ", msgfmt=" ";
+		
 		try {
 
 			LOGGER.info("Start: getUser() of openamservice for sending SMS of user:"+userId);
@@ -803,7 +807,7 @@ public class SendEmail {
 
 			LOGGER.info("Start: sendSMSCode() of smsservice to "+to);
 			Response smsResponse = newSmsService.sendSMSCode(sn, SMSPassword, to, smsContent, ext, stime, rrid, msgfmt);
-			LOGGER.info("smsResponse="+smsResponse);
+			LOGGER.info("smsResponse="+smsResponse.getEntity());
 			
 			LOGGER.info("End: sendSMSCode() finished, Response status :: -> " + smsResponse.getStatus());
 			if (200 == smsResponse.getStatus()) {

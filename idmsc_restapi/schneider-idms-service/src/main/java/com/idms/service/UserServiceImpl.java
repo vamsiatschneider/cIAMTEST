@@ -717,7 +717,7 @@ public class UserServiceImpl implements UserService {
 			
 			LOGGER.info("Entered userRegistration() -> Start");
 			LOGGER.info("Parameter userRequest -> " + objMapper.writeValueAsString(userRequest));
-			LOGGER.info("Parameter clientId -> " + clientId+" ,clientSecret -> " + clientSecret);
+			//LOGGER.info("Parameter clientId -> " + clientId+" ,clientSecret -> " + clientSecret);
 
 			// Step 1:
 			/**
@@ -2322,7 +2322,7 @@ public class UserServiceImpl implements UserService {
 						LOGGER.info("UserServiceImpl:checkUserExists -> ifwService.getIFWToken : Request are :  -> ");
 						LOGGER.info("UserConstants.CONTENT_TYPE_URL_FROM = "+UserConstants.CONTENT_TYPE_URL_FROM);
 						LOGGER.info("UserConstants.IFW_GRANT_TYPE = "+UserConstants.IFW_GRANT_TYPE);
-						LOGGER.info("ifwClientId -> "+ifwClientId+ " ,ifwClientSecret ->"+ifwClientSecret);
+						//LOGGER.info("ifwClientId -> "+ifwClientId+ " ,ifwClientSecret ->"+ifwClientSecret);
 						LOGGER.info("Going to call getIFWToken() of IFWService");
 						ifwAccessToken = ifwService.getIFWToken(UserConstants.CONTENT_TYPE_URL_FROM,
 								UserConstants.IFW_GRANT_TYPE, ifwClientId, ifwClientSecret);
@@ -2331,10 +2331,10 @@ public class UserServiceImpl implements UserService {
 						productDocCtx = JsonPath.using(conf).parse(ifwAccessToken);
 						String accessToken = productDocCtx.read("$.access_token");
 
-						LOGGER.info("getSalesForceToken : => " + "PASSWORD_GRANT_TYPE : " + UserConstants.PR_GRANT_TYPE
+						/*LOGGER.info("getSalesForceToken : => " + "PASSWORD_GRANT_TYPE : " + UserConstants.PR_GRANT_TYPE
 								+ " salesForceClientId: " + salesForceClientId + " salesForceClientSecret :"
 								+ salesForceClientSecret + " salesForceUserName: " + salesForceUserName
-								+ " salesForcePassword :" + salesForcePassword);
+								+ " salesForcePassword :" + salesForcePassword);*/
 						LOGGER.info("Going to call getSalesForceToken() of SalesForceService");
 						String bfoAuthorization = salesForceService.getSalesForceToken(
 								UserConstants.CONTENT_TYPE_URL_FROM, UserConstants.PR_GRANT_TYPE, salesForceClientId,
@@ -2705,9 +2705,9 @@ public class UserServiceImpl implements UserService {
 			/**
 			 * call /json/authenticate to iplanetDirectoryPro token for admins
 			 */
-			LOGGER.info("Calling getSSOToken()");
+			//LOGGER.info("Calling getSSOToken()");
 			iPlanetDirectoryKey = getSSOToken();
-			LOGGER.info("getSSOToken() finished");
+			//LOGGER.info("getSSOToken() finished");
 
 			/**
 			 * Call GET : /se/users/{userId}
@@ -3135,10 +3135,10 @@ public class UserServiceImpl implements UserService {
 				productDocCtx = JsonPath.using(conf).parse(ifwAccessToken);
 				String accessToken = productDocCtx.read("$.access_token");
 
-				LOGGER.info("getSalesForceToken : => " + "PASSWORD_GRANT_TYPE : " + UserConstants.PR_GRANT_TYPE
+				/*LOGGER.info("getSalesForceToken : => " + "PASSWORD_GRANT_TYPE : " + UserConstants.PR_GRANT_TYPE
 						+ " salesForceClientId: " + salesForceClientId + " salesForceClientSecret :"
 						+ salesForceClientSecret + " salesForceUserName: " + salesForceUserName
-						+ " salesForcePassword :" + salesForcePassword);
+						+ " salesForcePassword :" + salesForcePassword);*/
 				LOGGER.info("Going to call getSalesForceToken() of SalesForceService");
 				String bfoAuthorization = salesForceService.getSalesForceToken(
 						UserConstants.CONTENT_TYPE_URL_FROM, UserConstants.PR_GRANT_TYPE, salesForceClientId,
@@ -3261,7 +3261,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Response updateAIL(String clientId, String clientSecret,AILRequest ailRequest) {
 		LOGGER.info("Entered updateAIL() -> Start");
-		LOGGER.info("Parameter clientId -> "+clientId+" ,clientSecret -> "+clientSecret);
+		//LOGGER.info("Parameter clientId -> "+clientId+" ,clientSecret -> "+clientSecret);
 		LOGGER.info("Parameter ailRequest -> "+ailRequest);
 
 		String IDMSAil__c = "";
@@ -3931,7 +3931,7 @@ public class UserServiceImpl implements UserService {
 			UpdateUserRequest userRequest) {
 		LOGGER.info("Entered updateUser() -> Start");
 		LOGGER.info("Parameter authorizedToken -> "+authorizedToken);
-		LOGGER.info("Parameter clientId -> "+clientId+" ,clientSecret ->"+clientSecret);
+		//LOGGER.info("Parameter clientId -> "+clientId+" ,clientSecret ->"+clientSecret);
 		LOGGER.info("Parameter userRequest -> "+userRequest);
 		UpdateUserResponse sucessRespone = null;
 		String userName = null;
@@ -5133,7 +5133,7 @@ public class UserServiceImpl implements UserService {
 			SetPasswordRequest setPasswordRequest) {
 		LOGGER.info("Entered setPassword() -> Start");
 		LOGGER.info("Parameter authorizedToken -> " + authorizedToken);
-		LOGGER.info("Parameter clientId -> " + clientId+" ,clientSecret -> "+clientSecret);
+		//LOGGER.info("Parameter clientId -> " + clientId+" ,clientSecret -> "+clientSecret);
 		LOGGER.info("id -> " + setPasswordRequest.getId()+" ,FederationIdentifier -> "+setPasswordRequest.getFederationIdentifier());
 		LOGGER.info("IDMS_Federated_ID__c -> " + setPasswordRequest.getIDMS_Federated_ID__c()+" ,IDMS_Profile_update_source -> "+setPasswordRequest.getIDMS_Profile_update_source());
 		LOGGER.info("Token -> " + setPasswordRequest.getToken()+" ,UIFlag -> "+setPasswordRequest.getUIFlag());
@@ -5576,7 +5576,7 @@ public class UserServiceImpl implements UserService {
 			String clientSecret, ActivateUserRequest activateUserRequest) {
 		LOGGER.info("Entered activateUser() -> Start");
 		LOGGER.info("Parameter token -> " + token);
-		LOGGER.info("Parameter clientId -> " + clientId+" ,clientSecret -> "+clientSecret);
+		//LOGGER.info("Parameter clientId -> " + clientId+" ,clientSecret -> "+clientSecret);
 		LOGGER.info("Parameter activateUserRequest -> " + activateUserRequest);
 		String userData = null;
 		String userId = null;
@@ -6682,19 +6682,19 @@ public class UserServiceImpl implements UserService {
 				} else {
 					if (UserConstants.TRUE.equalsIgnoreCase(request.getWithGlobalUsers())) {
 
-						LOGGER.info("UserServiceImpl:checkUserExists -> ifwService.getIFWToken : Request :  -> "
+						/*LOGGER.info("UserServiceImpl:checkUserExists -> ifwService.getIFWToken : Request :  -> "
 								+ UserConstants.CONTENT_TYPE_URL_FROM + " ," + UserConstants.IFW_GRANT_TYPE + " ,"
-								+ ifwClientId + " ," + ifwClientSecret);
+								+ ifwClientId + " ," + ifwClientSecret);*/
 						ifwAccessToken = ifwService.getIFWToken(UserConstants.CONTENT_TYPE_URL_FROM,
 								UserConstants.IFW_GRANT_TYPE, ifwClientId, ifwClientSecret);
 
 						productDocCtx = JsonPath.using(conf).parse(ifwAccessToken);
 						String accessToken = productDocCtx.read("$.access_token");
 
-						LOGGER.info("getSalesForceToken : => " + "PASSWORD_GRANT_TYPE : " + UserConstants.PR_GRANT_TYPE
+						/*LOGGER.info("getSalesForceToken : => " + "PASSWORD_GRANT_TYPE : " + UserConstants.PR_GRANT_TYPE
 								+ " salesForceClientId: " + salesForceClientId + " salesForceClientSecret :"
 								+ salesForceClientSecret + " salesForceUserName: " + salesForceUserName
-								+ " salesForcePassword :" + salesForcePassword);
+								+ " salesForcePassword :" + salesForcePassword);*/
 						String bfoAuthorization = salesForceService.getSalesForceToken(
 								UserConstants.CONTENT_TYPE_URL_FROM, UserConstants.PR_GRANT_TYPE, salesForceClientId,
 								salesForceClientSecret, salesForceUserName, salesForcePassword);
@@ -7046,9 +7046,9 @@ public class UserServiceImpl implements UserService {
 		DocumentContext productDocCtx = null;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		
-		LOGGER.info("getSalesForceToken : => " + "PASSWORD_GRANT_TYPE : " + UserConstants.PR_GRANT_TYPE
+		/*LOGGER.info("getSalesForceToken : => " + "PASSWORD_GRANT_TYPE : " + UserConstants.PR_GRANT_TYPE
 				+ " salesForceClientId: " + salesForceClientId + " salesForceClientSecret :" + salesForceClientSecret
-				+ " salesForceUserName: " + salesForceUserName + " salesForcePassword :" + salesForcePassword);
+				+ " salesForceUserName: " + salesForceUserName + " salesForcePassword :" + salesForcePassword);*/
 		String bfoAuthorization = salesForceService.getSalesForceToken(UserConstants.CONTENT_TYPE_URL_FROM,
 				UserConstants.PR_GRANT_TYPE, salesForceClientId, salesForceClientSecret, salesForceUserName,
 				salesForcePassword);
