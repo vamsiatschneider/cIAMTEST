@@ -24,6 +24,7 @@ import com.idms.model.digital.Authentication;
 import com.idms.product.client.OpenAMService;
 import com.idms.service.SendEmail;
 import com.idms.service.digital.GoDigitalUserService;
+import com.idms.service.util.ChinaIdmsUtil;
 import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.util.UimsConstants;
 import com.se.idms.util.UserConstants;
@@ -92,7 +93,7 @@ public class UIMSUserManagerSoapServiceSync {
 		ObjectMapper objMapper = new ObjectMapper();
 		String userRequestjsonString = "";
 		try {
-			LOGGER.info("Parameter userRequest -> " + objMapper.writeValueAsString(userRequest));
+			LOGGER.info("Parameter userRequest -> " + ChinaIdmsUtil.printData(objMapper.writeValueAsString(userRequest)));
 			LOGGER.info("Parameter identity -> " + objMapper.writeValueAsString(identity));
 			LOGGER.info("Parameter company -> " + objMapper.writeValueAsString(company));
 			
@@ -275,7 +276,7 @@ public class UIMSUserManagerSoapServiceSync {
 
 		String jsonString = "";
 		try {
-			LOGGER.info("Parameter userRequest -> " + objMapper.writeValueAsString(userRequest));
+			LOGGER.info("Parameter userRequest -> " + ChinaIdmsUtil.printData(objMapper.writeValueAsString(userRequest)));
 			jsonString = objMapper.writeValueAsString(userRegistrationInfoRequest);
 			jsonString = jsonString.replace("\"\"", "[]");
 		} catch (JsonProcessingException e) {

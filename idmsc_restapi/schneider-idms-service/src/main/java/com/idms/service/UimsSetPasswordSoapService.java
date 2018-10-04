@@ -22,6 +22,7 @@ import com.github.rholder.retry.StopStrategies;
 import com.google.common.base.Predicates;
 import com.idms.model.ConfirmPinRequest;
 import com.idms.product.client.OpenAMService;
+import com.idms.service.util.ChinaIdmsUtil;
 import com.se.idms.util.SamlAssertionTokenGenerator;
 import com.se.idms.util.UimsConstants;
 import com.se.idms.util.UserConstants;
@@ -284,7 +285,7 @@ public class UimsSetPasswordSoapService {
 		ObjectMapper objMapper = new ObjectMapper();
 
 		try {
-			LOGGER.info("Parameter confirmRequest -> " + objMapper.writeValueAsString(confirmRequest));
+			LOGGER.info("Parameter confirmRequest -> " + ChinaIdmsUtil.printData(objMapper.writeValueAsString(confirmRequest)));
 
 			if ((null != confirmRequest.getPassword() && !confirmRequest.getPassword().isEmpty())) {
 				activateIdentity(iPlanetDirectoryKey, confirmRequest.getId(),

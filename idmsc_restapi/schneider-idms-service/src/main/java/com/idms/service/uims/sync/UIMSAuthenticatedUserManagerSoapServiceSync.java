@@ -108,7 +108,7 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 				| RequestedEntryNotExistsException_Exception | RequestedInternalUserException_Exception
 				| SecuredImsException_Exception | UnexpectedLdapResponseException_Exception
 				| UnexpectedRuntimeImsException_Exception e) {
-			LOGGER.error("Exception while createUIMSUserWithPassword()::" + e.getMessage());
+			LOGGER.error("Exception in createUIMSUserWithPassword()::" + e.getMessage());
 			e.printStackTrace();
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
@@ -150,7 +150,7 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 				| RequestedEntryNotExistsException_Exception | RequestedInternalUserException_Exception
 				| SecuredImsException_Exception | UnexpectedLdapResponseException_Exception
 				| UnexpectedRuntimeImsException_Exception e) {
-			LOGGER.error("Exception while createUIMSUser() of UIMS::" + e.getMessage());
+			LOGGER.error("Exception in createUIMSUser() of UIMS::" + e.getMessage());
 			e.printStackTrace();
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();

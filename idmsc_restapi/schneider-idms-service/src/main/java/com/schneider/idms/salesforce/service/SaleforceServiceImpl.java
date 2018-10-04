@@ -42,7 +42,7 @@ public class SaleforceServiceImpl {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(SaleforceServiceImpl.class);
 
-	private static final Logger UIMSLOGGER = LoggerFactory.getLogger("uimsLogger");
+	//private static final Logger UIMSLOGGER = LoggerFactory.getLogger("uimsLogger");
 	
 	@Inject
 	private SalesForceService salesForceService;
@@ -66,15 +66,15 @@ public class SaleforceServiceImpl {
 			Callable<Boolean> datePopulated = new Callable<Boolean>() {
 				public Boolean call() throws Exception {
 
-					LOGGER.info("going to call getSaleforceToken()");
+					//LOGGER.info("going to call getSaleforceToken()");
 					String jsonData = "{" + "\"federationId\": \"" + federationId + "\",\"appName\": \"" + appName + "\"" + "}";
 					String salesForceToken = getSaleforceToken();
-					LOGGER.info("getSaleforceToken() call finsihed");
-					LOGGER.info("Request sending to  salesForceService.populateActivationDate : " + jsonData);
-					LOGGER.info("going to call populateActivationDate() of SalesForceService");
+					//LOGGER.info("getSaleforceToken() call finsihed");
+					//LOGGER.info("Request sending to  salesForceService.populateActivationDate : " + jsonData);
+					LOGGER.info("Start: populateActivationDate() of SalesForceService");
 					Response activationResponse = salesForceService
 							.populateActivationDate(UserConstants.ACCEPT_TYPE_APP_JSON, salesForceToken, jsonData);
-					LOGGER.info("populateActivationDate() of SalesForceService finished");
+					LOGGER.info("End: populateActivationDate() of SalesForceService finished");
 					LOGGER.info("populateActivationDate Status :: " + activationResponse.getStatus());
 					try {
 						if (200 != activationResponse.getStatus()) {
@@ -102,22 +102,17 @@ public class SaleforceServiceImpl {
 			try {
 				retryer.call(datePopulated);
 			} catch (RetryException e) {
-				LOGGER.error("Retry failed while calling populatePrmActivationDate() of Salesforce::" + e.getMessage());
-				UIMSLOGGER.error(
-						"Retry failed while calling populatePrmActivationDate() of Salesforce::" + e.getMessage());
+				LOGGER.error("RetryException in populatePrmActivationDate() of Salesforce::" + e.getMessage());
 				e.printStackTrace();
 
 			} catch (ExecutionException e) {
-				LOGGER.error("ExecutionException while calling populatePrmActivationDate() of Salesforce::"
-						+ e.getMessage());
-				UIMSLOGGER.error("ExecutionException while calling populatePrmActivationDate() of Salesforce::"
+				LOGGER.error("ExecutionException in populatePrmActivationDate() of Salesforce::"
 						+ e.getMessage());
 				e.printStackTrace();
 			}
 
 		} catch (Exception e) {
-			LOGGER.error("Exception while populatePrmActivationDate::" + e.getMessage());
-			UIMSLOGGER.error("Exception while populatePrmActivationDate::" + e.getMessage());
+			LOGGER.error("Exception in populatePrmActivationDate()::" + e.getMessage());
 			e.printStackTrace();
 		}
 
@@ -128,9 +123,9 @@ public class SaleforceServiceImpl {
 		DocumentContext productDocCtx = null;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 
-		LOGGER.info("getSalesForceToken : => " + "PASSWORD_GRANT_TYPE : " + UserConstants.PR_GRANT_TYPE
+		/*LOGGER.info("getSalesForceToken : => " + "PASSWORD_GRANT_TYPE : " + UserConstants.PR_GRANT_TYPE
 				+ " salesForceClientId: " + salesForceClientId + " salesForceClientSecret :" + salesForceClientSecret
-				+ " salesForceUserName: " + salesForceUserName + " salesForcePassword :" + salesForcePassword);
+				+ " salesForceUserName: " + salesForceUserName + " salesForcePassword :" + salesForcePassword);*/
 		String bfoAuthorization = salesForceService.getSalesForceToken(UserConstants.CONTENT_TYPE_URL_FROM,
 				UserConstants.PR_GRANT_TYPE, salesForceClientId, salesForceClientSecret, salesForceUserName,
 				salesForcePassword);

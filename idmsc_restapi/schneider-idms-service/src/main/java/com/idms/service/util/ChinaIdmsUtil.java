@@ -74,7 +74,21 @@ public class ChinaIdmsUtil {
         fedId += '-' + RandomStringUtils.random(4, UserConstants.RANDOM_CHARS);;
         fedId += '-' + RandomStringUtils.random(12, UserConstants.RANDOM_CHARS);;
         return fedId;
-    } 
+    }
+	
+	public static String printData(String rawData){	
+		String newrawdata = rawData;
+        if (rawData.toLowerCase().contains("Password".toLowerCase())){
+        	int i = rawData.indexOf(",\"Password");
+        	int y = rawData.indexOf(",", i+1);
+        	String chars = rawData.substring(i, y);
+        	newrawdata = rawData.replace(chars, "");
+        	
+        }else{
+        	//System.out.println("false");
+        }
+        return newrawdata;
+    }
 	
 	/*public static void main(String[] args) {
 		String longvalue = generateHashValue("tY4MomqIwjg34932ZhTx651K38WJcZ");

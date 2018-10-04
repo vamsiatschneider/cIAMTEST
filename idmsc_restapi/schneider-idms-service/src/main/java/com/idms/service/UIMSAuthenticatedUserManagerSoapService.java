@@ -122,7 +122,7 @@ public class UIMSAuthenticatedUserManagerSoapService {
 
 		LOGGER.info("Entered createUIMSUserWithPassword() Async -> Start");
 		LOGGER.info("Parameter callerFid -> " + callerFid+" ,identity -> "+identity);
-		LOGGER.info("Parameter password -> " + password+" ,forcedFederatedId -> "+forcedFederatedId);
+		LOGGER.info("forcedFederatedId -> "+forcedFederatedId);
 		CreatedIdentityReport uimsUserResponse = null;
 		try {
 			AuthenticatedUserManagerUIMSV22 authenticatedUserManagerUIMSV2 = getAuthenticatedUserManager();
@@ -133,22 +133,22 @@ public class UIMSAuthenticatedUserManagerSoapService {
 				AccessElement application = new AccessElement();
 				application.setId("Uims");
 				application.setType(Type.APPLICATION);
-				LOGGER.info("Going to call createIdentityWithMobileWithPasswordForceIdmsId() of UIMS for phone:"+identity.getPhoneId());
+				LOGGER.info("Start: createIdentityWithMobileWithPasswordForceIdmsId() of UIMS for phone:"+identity.getPhoneId());
 				//uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithMobileWithPassword(callerFid,identity,application,password);
 				uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithMobileWithPasswordForceIdmsId(callerFid, identity, password, forcedFederatedId);
-				LOGGER.info("createIdentityWithMobileWithPasswordForceIdmsId() of UIMS finished, response:"+uimsUserResponse);
+				LOGGER.info("End: createIdentityWithMobileWithPasswordForceIdmsId() of UIMS finished, response:"+uimsUserResponse);
 			} else {
-				LOGGER.info("Going to call createIdentityWithPasswordForceIdmsId() of UIMS for phone:"+identity.getPhoneId());
+				LOGGER.info("Start: createIdentityWithPasswordForceIdmsId() of UIMS for phone:"+identity.getPhoneId());
 				uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithPasswordForceIdmsId(callerFid,
 						identity, password, forcedFederatedId);
-				LOGGER.info("createIdentityWithPasswordForceIdmsId() of UIMS finished, response:"+uimsUserResponse);
+				LOGGER.info("End: createIdentityWithPasswordForceIdmsId() of UIMS finished, response:"+uimsUserResponse);
 			}
 		} catch (IMSServiceSecurityCallNotAllowedException_Exception | ImsMailerException_Exception
 				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
 				| RequestedEntryNotExistsException_Exception | RequestedInternalUserException_Exception
 				| SecuredImsException_Exception | UnexpectedLdapResponseException_Exception
 				| UnexpectedRuntimeImsException_Exception e) {
-			LOGGER.error("Exception while createUIMSUserWithPassword()::" + e.getMessage());
+			LOGGER.error("Exception in createUIMSUserWithPassword()::" + e.getMessage());
 			e.printStackTrace();
 		}
 		LOGGER.info("createUIMSUserWithPassword() UIMS Async method -> End.. with FederatedID:"+uimsUserResponse.getFederatedID());
@@ -161,15 +161,15 @@ public class UIMSAuthenticatedUserManagerSoapService {
 		LOGGER.info("Entered resetUIMSPassword() UIMS Async method -> Start");
 		try {
 			AuthenticatedUserManagerUIMSV22 authenticatedUserManagerUIMSV2 = getAuthenticatedUserManager();
-			LOGGER.info("Going to call resetPassword() of UIMS for federatedId:"+federatedId);
+			LOGGER.info("Start: resetPassword() of UIMS for federatedId:"+federatedId);
 			authenticatedUserManagerUIMSV2.resetPassword(callerFid, federatedId, application);
-			LOGGER.info("resetPassword() of UIMS finishedfor federatedId:"+federatedId);
+			LOGGER.info("End: resetPassword() of UIMS finishedfor federatedId:"+federatedId);
 		} catch (IMSServiceSecurityCallNotAllowedException_Exception | ImsMailerException_Exception
 				| InactiveUserImsException_Exception | InvalidImsPropertiesFileException_Exception
 				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
 				| RequestedEntryNotExistsException_Exception | SecuredImsException_Exception
 				| UnexpectedLdapResponseException_Exception | UnexpectedRuntimeImsException_Exception e) {
-			LOGGER.error("Exception while resetPassword() of UIMS::" + e.getMessage());
+			LOGGER.error("Exception in resetPassword() of UIMS::" + e.getMessage());
 			e.printStackTrace();
 		}
 		LOGGER.info("resetUIMSPassword() UIMS Async method -> End");

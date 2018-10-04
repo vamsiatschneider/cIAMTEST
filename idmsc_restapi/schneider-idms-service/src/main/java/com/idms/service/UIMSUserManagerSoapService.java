@@ -33,6 +33,7 @@ import com.idms.model.UserRegistrationInfoRequest;
 import com.idms.model.digital.Authentication;
 import com.idms.product.client.OpenAMService;
 import com.idms.service.digital.GoDigitalUserService;
+import com.idms.service.util.ChinaIdmsUtil;
 import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.cache.validate.IValidator;
 import com.se.idms.util.SamlAssertionTokenGenerator;
@@ -536,7 +537,7 @@ public class UIMSUserManagerSoapService {
 		LOGGER.info("Parameter context -> " + context + " ,company -> " + company);
 		LOGGER.info("Parameter userName -> " + userName + " ,iPlanetDirectoryKey -> " + iPlanetDirectoryKey);
 		LOGGER.info("Parameter v_new -> " + v_new + " ,forcedFederatedId -> " + forcedFederatedId);
-		LOGGER.info("Parameter userRequest -> " + userRequest);
+		//LOGGER.info("Parameter userRequest -> " + userRequest);
 
 		Boolean companyCreated = false;
 		Boolean userCreated = false;
@@ -547,6 +548,7 @@ public class UIMSUserManagerSoapService {
 		ObjectMapper objMapper = new ObjectMapper();
 		String userRequestjsonString = "";
 		try {
+			LOGGER.info("Parameter userRequest -> " + ChinaIdmsUtil.printData(objMapper.writeValueAsString(userRequest)));
 			userRequestjsonString = objMapper.writeValueAsString(userRequest);
 			userRequestjsonString = userRequestjsonString.replace("\"\"", "[]");
 		} catch (JsonProcessingException e) {
@@ -845,10 +847,13 @@ public class UIMSUserManagerSoapService {
 	public void activateUIMSUserConfirmPIN(ConfirmPinRequest confirmRequest, String openamVnew,
 			String iPlanetDirectoryKey, String loginIdentifierType, String emailOrMobile) {
 		LOGGER.info("Entered activateUIMSUserConfirmPIN() -> Start");
-		LOGGER.info("Parameter confirmRequest -> " + confirmRequest);
+		//LOGGER.info("Parameter confirmRequest -> " + confirmRequest);
 		LOGGER.info("Parameter loginIdentifierType -> " + loginIdentifierType + " ,emailOrMobile -> " + emailOrMobile);
+		ObjectMapper objMapper=new ObjectMapper();
 
 		try {
+			LOGGER.info("Parameter confirmRequest -> "+ ChinaIdmsUtil.printData(objMapper.writeValueAsString(confirmRequest)));
+			
 			if ((null != confirmRequest.getPassword() && !confirmRequest.getPassword().isEmpty())) {
 				activateIdentity(iPlanetDirectoryKey, confirmRequest.getId(), confirmRequest.getIDMS_Federated_ID__c(),
 						confirmRequest.getPassword().trim(), openamVnew, loginIdentifierType, emailOrMobile);
@@ -966,19 +971,18 @@ public class UIMSUserManagerSoapService {
 
 	private String buildGoDigitalRequest(CreateUserRequest userRequest) {
 		LOGGER.info("Entered buildGoDigitalRequest() -> Start");
-		LOGGER.info("Parameter userRequest -> " + userRequest);
-		LOGGER.info("Parameter userRequest -> " + userRequest);
 
 		ObjectMapper objMapper = new ObjectMapper();
-		UserRegistrationInfoRequest userRegistrationInfoRequest = mapper.map(userRequest,
-				UserRegistrationInfoRequest.class);
-
-		Authentication authentication = new Authentication();
-		authentication.setToken(goDitalToken);
-		userRegistrationInfoRequest.getUserRegistrationInfoRequest().setAuthentication(authentication);
-
 		String jsonString = "";
 		try {
+			LOGGER.info("Parameter userRequest -> " + ChinaIdmsUtil.printData(objMapper.writeValueAsString(userRequest)));
+			UserRegistrationInfoRequest userRegistrationInfoRequest = mapper.map(userRequest,
+					UserRegistrationInfoRequest.class);
+
+			Authentication authentication = new Authentication();
+			authentication.setToken(goDitalToken);
+			userRegistrationInfoRequest.getUserRegistrationInfoRequest().setAuthentication(authentication);
+
 			jsonString = objMapper.writeValueAsString(userRegistrationInfoRequest);
 			jsonString = jsonString.replace("\"\"", "[]");
 		} catch (JsonProcessingException e) {
