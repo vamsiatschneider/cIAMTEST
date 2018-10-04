@@ -355,6 +355,7 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.company_Address1__c", "street")
         .field("userRecord.IDMSCompanyHeadquarters__c", "headQuarter")
         .field("userRecord.company_Address2__c", "addInfoAddress")
+        .field("userRecord.company_Address2__c", "postalAddress")
         .field("userRecord.IDMSCompanyCounty__c", "county")
         .field("userRecord.company_Website__c", "webSite")
         .field("userRecord.IDMSCompanyMarketServed__c", "marketServed")
