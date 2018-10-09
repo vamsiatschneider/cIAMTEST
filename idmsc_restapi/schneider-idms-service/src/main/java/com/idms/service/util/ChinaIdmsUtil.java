@@ -76,10 +76,34 @@ public class ChinaIdmsUtil {
         return fedId;
     }
 	
+	/**
+	 * Print user request without password
+	 * @param rawData
+	 * @return
+	 */
 	public static String printData(String rawData){	
 		String newrawdata = rawData;
         if (rawData.toLowerCase().contains("Password".toLowerCase())){
         	int i = rawData.indexOf(",\"Password");
+        	int y = rawData.indexOf(",", i+1);
+        	String chars = rawData.substring(i, y);
+        	newrawdata = rawData.replace(chars, "");
+        	
+        }else{
+        	//System.out.println("false");
+        }
+        return newrawdata;
+    }
+	
+	/**
+	 * Print user request without PIN
+	 * @param rawData
+	 * @return
+	 */
+	public static String printInfo(String rawData){	
+		String newrawdata = rawData;
+        if (rawData.toLowerCase().contains("PinCode".toLowerCase())){
+        	int i = rawData.indexOf(",\"PinCode");
         	int y = rawData.indexOf(",", i+1);
         	String chars = rawData.substring(i, y);
         	newrawdata = rawData.replace(chars, "");

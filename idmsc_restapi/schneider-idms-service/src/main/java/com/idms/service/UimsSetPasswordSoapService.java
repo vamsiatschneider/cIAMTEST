@@ -285,7 +285,7 @@ public class UimsSetPasswordSoapService {
 		ObjectMapper objMapper = new ObjectMapper();
 
 		try {
-			LOGGER.info("Parameter confirmRequest -> " + ChinaIdmsUtil.printData(objMapper.writeValueAsString(confirmRequest)));
+			LOGGER.info("Parameter confirmRequest -> " + ChinaIdmsUtil.printInfo(ChinaIdmsUtil.printData(objMapper.writeValueAsString(confirmRequest))));
 
 			if ((null != confirmRequest.getPassword() && !confirmRequest.getPassword().isEmpty())) {
 				activateIdentity(iPlanetDirectoryKey, confirmRequest.getId(),

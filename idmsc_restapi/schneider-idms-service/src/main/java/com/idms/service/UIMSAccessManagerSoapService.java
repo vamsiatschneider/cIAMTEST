@@ -76,6 +76,7 @@ public class UIMSAccessManagerSoapService {
 	private String userAccessManagerUIMSVPortName;
 
 	public UserAccessManagerUIMSV2 getAccessManager(){
+		LOGGER.info("Entered getAccessManager(): -. Start ");
 		URL url;
 		UserAccessManagerUIMSV2 accessManagerUIMSV2 = null;
 		try {
@@ -83,14 +84,16 @@ public class UIMSAccessManagerSoapService {
 
 			QName qname = new QName(userAccessManagerUIMSQname,userAccessManagerUIMSVPortName);
 			Service service = Service.create(url, qname);
+			LOGGER.info("Start: getPort() of UIMS");
 			accessManagerUIMSV2 = service.getPort(UserAccessManagerUIMSV2.class);
+			LOGGER.info("End: getPort() of UIMS");
 
 		} catch (MalformedURLException e) {
-			LOGGER.error("Exception while UIMSAccessManagerSoapService :: getAccessManager()::" + e.getMessage());
+			LOGGER.error("MalformedURLException in getAccessManager()::" + e.getMessage());
 			e.printStackTrace();
 		}
 		catch (Exception e) {
-			LOGGER.error("Exception while UIMSAccessManagerSoapService :: getAccessManager()::" + e.getMessage());
+			LOGGER.error("Exception in getAccessManager()::" + e.getMessage());
 			e.printStackTrace();
 		}
 		return accessManagerUIMSV2;
@@ -185,7 +188,7 @@ public class UIMSAccessManagerSoapService {
 			OpenAMService productService, String iPlanetDirectoryKey, String usermail) {
 		uimsLog.info("inside updateUIMSUserAIL Async Method");
 		try {
-			LOGGER.info("In UserServiceImpl.updateAIL():-->Caling Async UIMS method of grant/revoke access manager control method");
+			//LOGGER.info("In UserServiceImpl.updateAIL():-->Caling Async UIMS method of grant/revoke access manager control method");
 			AccessElement access = new AccessElement();
 			if ("APPLICATION".equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMSAclType__c())) {
 				access.setType(Type.APPLICATION);
@@ -220,7 +223,7 @@ public class UIMSAccessManagerSoapService {
 			}
 		} catch (Exception e) {
 			//productService.sessionLogout(iPlanetDirectoryKey, "logout");
-			LOGGER.error("While calling Async methods of UIMS api in updateUserAil IDMS api remote exception occured:"+ e.getMessage());
+			uimsLog.error("Exception in updateUIMSUserAIL():"+ e.getMessage());
 			e.printStackTrace();
 		}
 		//productService.sessionLogout(iPlanetDirectoryKey, "logout");

@@ -261,7 +261,7 @@ public class SendEmail {
 		String pin = "";
 		pin = generateRamdomPin();
 		hexpin = ChinaIdmsUtil.generateHashValue(pin);
-		LOGGER.info("hexa string is " + hexpin);
+		//LOGGER.info("hexa string is " + hexpin);
 		
 		LocalDateTime currentDatenTime = LocalDateTime.now();
 		long currentDatenTimeInMillisecs = currentDatenTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
@@ -283,7 +283,7 @@ public class SendEmail {
 
 		// Proper Exception handling
 		String product_json_string = "";
-		LOGGER.info("hexa string is " + hashedPin);
+		//LOGGER.info("hexa string is " + hashedPin);
 		LOGGER.info("Parameter userId -> " + userId);
 		
 		LocalDateTime currentDatenTime = LocalDateTime.now();
@@ -293,7 +293,7 @@ public class SendEmail {
 		// open Attribute AuthID and Timestamp
 		product_json_string = "{" + "\"authId\": \"" + hashedPin + "\"}";
 		// update hashkey in openAM.
-		LOGGER.info("hashedPin is " + hashedPin);
+		//LOGGER.info("hashedPin is " + hashedPin);
 		LOGGER.info("Start: updateUser() of openamservice to store PRM hashedPin");
 		productService.updateUser(UserConstants.CHINA_IDMS_TOKEN+userService.getSSOToken(), userId,
 				product_json_string);
@@ -781,7 +781,7 @@ public class SendEmail {
 	@Async
 	public void sendSMSNewGateway(String code, String hotpOperationType, String userId, String appid) throws UnsupportedEncodingException {
 		LOGGER.info("Entered sendSMSNewGateway() -> Start");
-		LOGGER.info("Parameter hotpOperationType -> " + hotpOperationType+" ,userId -> "+userId+" ,appid -> "+appid+" ,code="+code);
+		LOGGER.info("Parameter hotpOperationType -> " + hotpOperationType+" ,userId -> "+userId+" ,appid -> "+appid);
 
 		String userData = "";
 		String to = "";
