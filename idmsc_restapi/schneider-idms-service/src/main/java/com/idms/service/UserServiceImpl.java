@@ -1258,9 +1258,9 @@ public class UserServiceImpl implements UserService {
 
 				LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 						+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_INFO_CALL + "/se" + AUDIT_LOG_CLOSURE);
-				LOGGER.info("Going to call getUserInfoByAccessToken() of OpenAMTokenService");
+				LOGGER.info("Start: getUserInfoByAccessToken() of OpenAMTokenService");
 				String userInfoByAccessToken = openAMTokenService.getUserInfoByAccessToken(token, "/se");
-				LOGGER.info("getUserInfoByAccessToken() of OpenAMTokenService finished");
+				LOGGER.info("End: getUserInfoByAccessToken() of OpenAMTokenService finished");
 				LOGGER.info("Accesstoken from the API call: " + userInfoByAccessToken);
 
 				Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
@@ -1300,9 +1300,9 @@ public class UserServiceImpl implements UserService {
 
 				LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 						+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_INFO_CALL + "/se" + AUDIT_LOG_CLOSURE);
-				LOGGER.info("Going to call getUserInfoByAccessToken() of OpenAMTokenService");
+				LOGGER.info("Start: getUserInfoByAccessToken() of OpenAMTokenService");
 				String userInfoByAccessToken = openAMTokenService.getUserInfoByAccessToken(token, "/se");
-				LOGGER.info("getUserInfoByAccessToken() of OpenAMTokenService finished");
+				LOGGER.info("End: getUserInfoByAccessToken() of OpenAMTokenService finished");
 				LOGGER.info("Accesstoken from the API call: " + userInfoByAccessToken);
 
 				Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
@@ -3059,19 +3059,22 @@ public class UserServiceImpl implements UserService {
 				confirmRequest.setId(uniqueIdentifier);
 				confirmRequest.setIDMS_Federated_ID__c(federationID);
 				
+				//Updating records in OPENAM 
+				updateOpenamDetails(iPlanetDirectoryKey, uniqueIdentifier, PRODUCT_JSON_STRING);
+				
 				if(pickListValidator.validate(UserConstants.UIMSPasswordSync, UserConstants.TRUE)){
 					LOGGER.info("Start: SYNC activateUIMSUserConfirmPIN() of UimsSetPasswordSoapService");
 					uimsSetPasswordSoapService.activateUIMSUserConfirmPIN(confirmRequest,
 							vNewCntValue.toString(), UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 							loginIdentifierType,emailOrMobile);
-					updateOpenamDetails(iPlanetDirectoryKey, uniqueIdentifier, PRODUCT_JSON_STRING);
+					//updateOpenamDetails(iPlanetDirectoryKey, uniqueIdentifier, PRODUCT_JSON_STRING);
 					LOGGER.info("End: SYNC activateUIMSUserConfirmPIN() of UimsSetPasswordSoapService finished");
 				}else{
 					LOGGER.info("Start: ASYNC activateUIMSUserConfirmPIN() of UimsSetPasswordSoapService");
 					uimsUserManagerSoapService.activateUIMSUserConfirmPIN(confirmRequest,
 						vNewCntValue.toString(), UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						loginIdentifierType,emailOrMobile);
-					updateOpenamDetails(iPlanetDirectoryKey, uniqueIdentifier, PRODUCT_JSON_STRING);
+					//updateOpenamDetails(iPlanetDirectoryKey, uniqueIdentifier, PRODUCT_JSON_STRING);
 					LOGGER.info("End: ASYNC activateUIMSUserConfirmPIN() of UimsSetPasswordSoapService finished");
 				}
 			} else if(null != confirmRequest.getIDMS_Profile_update_source()
