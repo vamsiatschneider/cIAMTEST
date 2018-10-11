@@ -47,6 +47,9 @@ public class ConfirmPinRequest {
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
 	private String FederationIdentifier;
+	
+	@JsonProperty
+	private String Email;
 
 	@JsonProperty("id")
 	public String getId() {
@@ -128,8 +131,6 @@ public class ConfirmPinRequest {
 		this.tncFlag = tncFlag;
 	}
 
-	
-	
 	@JsonProperty("UIFlag")
 	public String getUIFlag() {
 		return UIFlag;
@@ -149,6 +150,14 @@ public class ConfirmPinRequest {
 	@JsonProperty("FederationIdentifier")
 	public void setFederationIdentifier(String federationIdentifier) {
 		FederationIdentifier = federationIdentifier;
+	}
+	
+	public String getEmail() {
+		return Email;
+	}
+
+	public void setEmail(String email) {
+		Email = email;
 	}
 
 	@Override

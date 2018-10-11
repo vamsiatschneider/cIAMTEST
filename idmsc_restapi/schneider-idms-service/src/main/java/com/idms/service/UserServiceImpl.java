@@ -2724,7 +2724,23 @@ public class UserServiceImpl implements UserService {
 				
 				String loginIdCheck = null != productDocCtx.read(JsonConstants.LOGIN_ID_UPPER_0)
 						? getValue(productDocCtx.read(JsonConstants.LOGIN_ID_UPPER_0)) : getDelimeter();
-						
+				
+				//Start: New Requirement to check passed email with openam email
+				if ((null != confirmRequest.getEmail() && !confirmRequest.getEmail().isEmpty()) && 
+						UserConstants.USER_REGISTRATION.equalsIgnoreCase(confirmRequest.getOperation())) {
+					String userEmailFromOpenAm = productDocCtx.read(JsonConstants.MAIL_0);
+					String userPassedEmail = confirmRequest.getEmail();
+					if(!userEmailFromOpenAm.equalsIgnoreCase(userPassedEmail)){
+						response.setStatus(errorStatus);
+						response.setMessage(UserConstants.EMAIL_SOURCE_NOT_MATCHING_WITH_OPENAM_EMAIL);
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
+						LOGGER.error(response.getMessage());
+						return Response.status(Response.Status.BAD_REQUEST).entity(response).build();						
+					}					
+				}
+				//End: New Requirement to check passed email with openam email
+				
 				if(null != loginIdCheck && "userRegistration".equals(confirmRequest.getOperation())){
 					response.setMessage("The user is already activated");
 					response.setId(uniqueIdentifier);
