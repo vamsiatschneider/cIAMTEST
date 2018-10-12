@@ -50,6 +50,9 @@ public class ConfirmPinRequest {
 	
 	@JsonProperty
 	private String Email;
+	
+	@JsonProperty
+	private String MobilePhone;
 
 	@JsonProperty("id")
 	public String getId() {
@@ -158,6 +161,14 @@ public class ConfirmPinRequest {
 
 	public void setEmail(String email) {
 		Email = email;
+	}
+
+	public String getMobilePhone() {
+		return MobilePhone;
+	}
+
+	public void setMobilePhone(String mobilePhone) {
+		MobilePhone = mobilePhone;
 	}
 
 	@Override

@@ -2721,25 +2721,33 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("End: getUser() of OpenAMService finished for uniqueIdentifier="+uniqueIdentifier);
 				LOGGER.info("getUser(): Response :  -> " + getUserResponse);
 				productDocCtx = JsonPath.using(conf).parse(getUserResponse);
-				
+
 				String loginIdCheck = null != productDocCtx.read(JsonConstants.LOGIN_ID_UPPER_0)
 						? getValue(productDocCtx.read(JsonConstants.LOGIN_ID_UPPER_0)) : getDelimeter();
-				
-				//Start: New Requirement to check passed email with openam email
-				if ((null != confirmRequest.getEmail() && !confirmRequest.getEmail().isEmpty()) && 
+
+				//Start: New Requirement to check passed email/mobile with openam email
+				String userPassedEmailorMobile = confirmRequest.getEmail();
+				if(null == userPassedEmailorMobile || userPassedEmailorMobile.isEmpty()){
+					userPassedEmailorMobile = confirmRequest.getMobilePhone();
+				}
+
+				if ((null != userPassedEmailorMobile && !userPassedEmailorMobile.isEmpty()) && 
 						UserConstants.USER_REGISTRATION.equalsIgnoreCase(confirmRequest.getOperation())) {
-					String userEmailFromOpenAm = productDocCtx.read(JsonConstants.MAIL_0);
-					String userPassedEmail = confirmRequest.getEmail();
-					if(!userEmailFromOpenAm.equalsIgnoreCase(userPassedEmail)){
+					String userEmailorMobileFromOpenAm = productDocCtx.read(JsonConstants.MAIL_0);
+					if(null == userEmailorMobileFromOpenAm || userEmailorMobileFromOpenAm.isEmpty()){
+						userEmailorMobileFromOpenAm = productDocCtx.read(JsonConstants.MOBILE_0);
+					}
+					
+					if(!userEmailorMobileFromOpenAm.equalsIgnoreCase(userPassedEmailorMobile)){
 						response.setStatus(errorStatus);
-						response.setMessage(UserConstants.EMAIL_SOURCE_NOT_MATCHING_WITH_OPENAM_EMAIL);
+						response.setMessage(UserConstants.EMAIL_OR_MOBILE_NOT_MATCHING);
 						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 						LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
 						LOGGER.error(response.getMessage());
 						return Response.status(Response.Status.BAD_REQUEST).entity(response).build();						
 					}					
 				}
-				//End: New Requirement to check passed email with openam email
+				//End: New Requirement to check passed email/mobile with openam email
 				
 				if(null != loginIdCheck && "userRegistration".equals(confirmRequest.getOperation())){
 					response.setMessage("The user is already activated");

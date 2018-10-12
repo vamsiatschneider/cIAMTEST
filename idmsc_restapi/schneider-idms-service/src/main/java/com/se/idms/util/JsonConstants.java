@@ -26,4 +26,5 @@ public class JsonConstants {
 	
 	public static final String USER_LEVEL = "_registrationLevel";
 	public static final String MAIL_0 = "$.mail[0]";
+	public static final String MOBILE_0 = "$.mobile[0]";
 }

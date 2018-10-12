@@ -399,7 +399,7 @@ public class UserConstants {
 	public static final String USER_ACTIVATED = "User has been activated successfully";
 	public static final String REGISTRATION_SOURCE_MISSING = "Registration source is missing";
 	public static final String REGISTRATION_SOURCE_NOT_MATCHING = "Registration source not matching with openAM";
-	public static final String EMAIL_SOURCE_NOT_MATCHING_WITH_OPENAM_EMAIL = "Wrong Email passed by user";
+	public static final String EMAIL_OR_MOBILE_NOT_MATCHING = "Wrong Email or Mobile passed by user";
 	
 	//IFW Constants
 	
