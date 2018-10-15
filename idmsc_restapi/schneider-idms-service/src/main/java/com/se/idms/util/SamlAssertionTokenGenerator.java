@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.springframework.util.ResourceUtils;
+import org.springframework.beans.factory.annotation.Value;
 
 import sun.misc.BASE64Encoder;
 
@@ -25,6 +26,8 @@ import sun.misc.BASE64Encoder;
 public class SamlAssertionTokenGenerator {
 	
 	private final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+	
+	private static final SamlAssertionTokenGenerator m_Instance = new SamlAssertionTokenGenerator();
 	
 	@Value("${keystore.samlAssertionSigning.path}")
 	private String samlAssertionSigningKeystore;
@@ -41,7 +44,6 @@ public class SamlAssertionTokenGenerator {
 	@Value("${crypto.algo.samlAssertionSigning}")
 	private String samlAssertionSigningAlgo;
 	
-
 	/**
 	 * Generates the SAML Assertion token, using the private key loaded from the Keystore
 	 * Data input format for signing:
@@ -58,9 +60,9 @@ public class SamlAssertionTokenGenerator {
 	
 	public static String getSamlAssertionToken(String fedId, String vnew) throws Exception {
 		Date date = new Date();
-		String strDate = dateFormatter.format(date);
+		String strDate = m_Instance.dateFormatter.format(date);
 		String data = fedId + ";" + strDate + ";" + vnew;
-		String encrypted = signNverify(samlAssertionSigningAlgo, data, samlAssertionSigningCert);
+		String encrypted = m_Instance.signNverify(m_Instance.samlAssertionSigningAlgo, data, m_Instance.samlAssertionSigningCert);
 
 		return data + ";" + encrypted;
 	}
@@ -73,7 +75,7 @@ public class SamlAssertionTokenGenerator {
 	 * @throws Exception
 	 */
 	
-	private static KeyPair getKeyPairFromKeyStore(String alias) throws Exception {
+	private KeyPair getKeyPairFromKeyStore(String alias) throws Exception {
 		FileInputStream is = new FileInputStream(ResourceUtils.getFile(this.samlAssertionSigningKeystore));
 
 		KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -95,7 +97,7 @@ public class SamlAssertionTokenGenerator {
 	}
 
 	@SuppressWarnings("restriction")
-	private static String signNverify(String algorithm, String data, String certName) throws Exception {
+	private String signNverify(String algorithm, String data, String certName) throws Exception {
 		KeyPair keyPair = getKeyPairFromKeyStore(certName);
 
 		byte[] dataInBytes = data.getBytes("UTF-8");
@@ -112,9 +114,4 @@ public class SamlAssertionTokenGenerator {
 
 		return new BASE64Encoder().encode(signatureBytes);
 	}
-
-	public static void main(String args[]) throws Exception{
-		System.out.println(getSamlAssertionToken("7abb7286-60c7-4f58-a856-8b55c4b45d9a","1"));
-	}
-
 }
