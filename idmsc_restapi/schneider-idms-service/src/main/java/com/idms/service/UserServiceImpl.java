@@ -103,6 +103,7 @@ import com.idms.model.UpdatePasswordRequest;
 import com.idms.model.UpdateUserRequest;
 import com.idms.model.UpdateUserResponse;
 import com.idms.product.client.IFWService;
+import com.idms.product.client.IdentityService;
 import com.idms.product.client.OpenAMService;
 import com.idms.product.client.OpenAMTokenService;
 import com.idms.product.client.OpenDjService;
@@ -176,6 +177,9 @@ public class UserServiceImpl implements UserService {
 
 	@Inject
 	private OpenAMTokenService openAMTokenService;
+	
+	@Inject
+	private IdentityService identityService;
 
 	@Inject
 	private IFWService ifwService;
@@ -7318,7 +7322,7 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Entered getOIDCAutoDiscoveryConfig() -> Start");
 		ObjectMapper oMapper = new ObjectMapper();
 		LOGGER.info("Start: getOIDCAutoDiscoveryConfig() of openam");
-		Response oidcAutoDiscoveryConfig = openAMTokenService.getOIDCAutoDiscoveryConfig();
+		Response oidcAutoDiscoveryConfig = identityService.getOIDCAutoDiscoveryConfig();
 		LOGGER.info("End: getOIDCAutoDiscoveryConfig() of openam");
 		
 		if(oidcAutoDiscoveryConfig.getStatus() == Response.Status.OK.getStatusCode()) {
