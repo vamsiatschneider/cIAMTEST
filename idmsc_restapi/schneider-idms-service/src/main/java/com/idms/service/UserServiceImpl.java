@@ -6687,12 +6687,15 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Token:"+token);
 				
 				//startUrl = startUrl.substring(0, startUrl.indexOf(valueToFind)+valueToFind.length()).concat(URLEncoder.encode(valueToFind.substring(valueToFind.indexOf(valueToFind)+5, valueToFind.length()), "UTF-8" ));
-				
+				if(startUrl.contains(valueToFind)){
 				prefix.append(prefixStartUrl)
 					  .append("/ui/#!")
 					  .append(startUrl.substring(0, startUrl.indexOf(valueToFind)+valueToFind.length()))
 					  .append(URLEncoder.encode(startUrl.substring(startUrl.indexOf(valueToFind)+valueToFind.length(), startUrl.length()), "UTF-8" ));
-				
+				} else {
+					prefix.append(prefixStartUrl)					  
+					  .append(startUrl);
+				}
         
 				response = rb.header("Location", prefix.toString()).build(); 
 				
@@ -6707,9 +6710,25 @@ public class UserServiceImpl implements UserService {
 				  .append("?startUrl=")*/
 			/*prefix.append("startUrl=")
 				  .append(startUrl)*/
-				prefix.append(prefixStartUrl)
-					  .append("/ui/#!")
-					  .append("/login?login_error=L9101");
+			
+			try {
+				prefix = new StringBuffer();
+				if(startUrl.contains(valueToFind)){
+					prefix.append(prefixStartUrl)
+						  .append("/ui/#!")
+						  .append(startUrl.substring(0, startUrl.indexOf(valueToFind)+valueToFind.length()))
+						  .append(URLEncoder.encode(startUrl.substring(startUrl.indexOf(valueToFind)+valueToFind.length(), startUrl.length()), "UTF-8" ));
+					} else {
+						prefix.append(prefixStartUrl)					  
+						  .append(startUrl)
+						  .append("&login_error=L9101");
+					}
+			} catch (UnsupportedEncodingException e1) {
+				e1.printStackTrace();
+			}
+				/*prefix.append(prefixStartUrl)
+					  .append("/ui/#!")*/
+					 // .append("/login?login_error=L9101");
 
 			response = rb.header("Location", prefix.toString()).build();
 			//return Response.status(Response.Status.UNAUTHORIZED).entity(jsonObject).build();
