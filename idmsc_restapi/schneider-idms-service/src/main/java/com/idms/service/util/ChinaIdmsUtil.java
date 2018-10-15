@@ -1,122 +1,117 @@
-package com.idms.service.util;
+package com.se.idms.util;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.io.FileInputStream;
+import java.security.Key;
+import java.security.KeyPair;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.cert.Certificate;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-import javax.ws.rs.core.Response;
+import org.springframework.util.ResourceUtils;
+import org.springframework.beans.factory.annotation.Value;
 
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
+import sun.misc.BASE64Encoder;
 
-import com.se.idms.util.UserConstants;
+/**
+ * SAML assertion token generator
+ * 
+ * @author Aravindh Kumar
+ *
+ */
 
-public class ChinaIdmsUtil {
-
-	public static String generateHashValue(String generatedPin) {
-
-		MessageDigest md;
-		String hexString = null;
-		try {
-			md = MessageDigest.getInstance("SHA-256");
-			md.update(generatedPin.getBytes());
-
-			byte byteData[] = md.digest();
-
-			hexString = new String(Hex.encodeHex(byteData));
-			
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}
-
-		return hexString;
-	}
+public class SamlAssertionTokenGenerator {
 	
-	public static Response executeHttpClient(String uri, String realm, String userName, String password)
-			throws ClientProtocolException, IOException {
+	private final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+	
+	private static final SamlAssertionTokenGenerator m_Instance = new SamlAssertionTokenGenerator();
+	
+	@Value("${keystore.samlAssertionSigning.path}")
+	private String samlAssertionSigningKeystore;
+	
+	@Value("${keystore.samlAssertionSigning.keystore.password}")
+	private String samlAssertionKeystorePassword;
+	
+	@Value("${keystore.samlAssertionSigning.keystore.privateKey.password}")
+	private String samlAssertionKeyPassword;
+	
+	@Value("${keystore.samlAssertionSigning.keystore.certAlias}")
+	private String samlAssertionSigningCert;
+	
+	@Value("${crypto.algo.samlAssertionSigning}")
+	private String samlAssertionSigningAlgo;
+	
+	/**
+	 * Generates the SAML Assertion token, using the private key loaded from the Keystore
+	 * Data input format for signing:
+	 * <FederationId>;<Date>;vnew
+	 * 
+	 * Example:
+	 * c5e601cf-864d-4a85-8343-ef2c8a259690;2017-06-29 10:06:05;3
+	 * 
+	 * @param fedId
+	 * @param vnew
+	 * @return
+	 * @throws Exception
+	 */
+	
+	public static String getSamlAssertionToken(String fedId, String vnew) throws Exception {
+		Date date = new Date();
+		String strDate = m_Instance.dateFormatter.format(date);
+		String data = fedId + ";" + strDate + ";" + vnew;
+		String encrypted = m_Instance.signNverify(m_Instance.samlAssertionSigningAlgo, data, m_Instance.samlAssertionSigningCert);
 
-		HttpClient client = new DefaultHttpClient();
-		HttpPost request = new HttpPost(uri + "/accessmanager/json/authenticate?realm=" + realm);
-		request.setHeader("X-OpenAM-Username", userName);
-		request.setHeader("X-OpenAM-Password", password);
-		HttpResponse response = client.execute(request);
-		BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+		return data + ";" + encrypted;
+	}
 
-		StringBuffer result = new StringBuffer();
-		String line = "";
-		while ((line = rd.readLine()) != null) {
-			result.append(line);
-		}
-		if (401 == response.getStatusLine().getStatusCode()) {
-			return Response.status(Response.Status.UNAUTHORIZED).entity(result.toString()).build();
+	/**
+	 * Loads the keystore and returns the private key pair
+	 * 
+	 * @param alias
+	 * @return
+	 * @throws Exception
+	 */
+	
+	private KeyPair getKeyPairFromKeyStore(String alias) throws Exception {
+		FileInputStream is = new FileInputStream(ResourceUtils.getFile(this.samlAssertionSigningKeystore));
+
+		KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+		keystore.load(is, samlAssertionKeystorePassword.toCharArray());
+
+		Key key = keystore.getKey(alias, samlAssertionKeyPassword.toCharArray());
+		if (key instanceof PrivateKey) {
+			// Get certificate of public key
+			Certificate cert = keystore.getCertificate(alias);
+
+			// Get public key
+			PublicKey publicKey = cert.getPublicKey();
+
+			// Return a key pair
+			return new KeyPair(publicKey, (PrivateKey) key);
 		}
 		
-		return Response.status(response.getStatusLine().getStatusCode()).entity(result.toString()).build();
+		return null;
 	}
-	
-	/**
-	 * returns the UID with 36 random characters.
-	 * @return
-	 */
-	public static String generateFedId(){		 
-		
-        String fedId = "cn00";
-        fedId += RandomStringUtils.random(4, UserConstants.RANDOM_CHARS);; 
-        fedId += '-' + RandomStringUtils.random(4, UserConstants.RANDOM_CHARS);;
-        fedId += '-' + RandomStringUtils.random(4, UserConstants.RANDOM_CHARS);;
-        fedId += '-' + RandomStringUtils.random(4, UserConstants.RANDOM_CHARS);;
-        fedId += '-' + RandomStringUtils.random(12, UserConstants.RANDOM_CHARS);;
-        return fedId;
-    }
-	
-	/**
-	 * Print user request without password
-	 * @param rawData
-	 * @return
-	 */
-	public static String printData(String rawData){	
-		String newrawdata = rawData;
-        if (rawData.toLowerCase().contains("Password".toLowerCase())){
-        	int i = rawData.indexOf(",\"Password");
-        	int y = rawData.indexOf(",", i+1);
-        	String chars = rawData.substring(i, y);
-        	newrawdata = rawData.replace(chars, "");
-        	
-        }else{
-        	//System.out.println("false");
-        }
-        return newrawdata;
-    }
-	
-	/**
-	 * Print user request without PIN
-	 * @param rawData
-	 * @return
-	 */
-	public static String printInfo(String rawData){	
-		String newrawdata = rawData;
-        if (rawData.toLowerCase().contains("PinCode".toLowerCase())){
-        	int i = rawData.indexOf(",\"PinCode");
-        	int y = rawData.indexOf(",", i+1);
-        	String chars = rawData.substring(i, y);
-        	newrawdata = rawData.replace(chars, "");
-        	
-        }else{
-        	//System.out.println("false");
-        }
-        return newrawdata;
-    }
-	
-	/*public static void main(String[] args) {
-		String longvalue = generateHashValue("tY4MomqIwjg34932ZhTx651K38WJcZ");
-		System.out.println(longvalue);
-	}*/
-	
+
+	@SuppressWarnings("restriction")
+	private String signNverify(String algorithm, String data, String certName) throws Exception {
+		KeyPair keyPair = getKeyPairFromKeyStore(certName);
+
+		byte[] dataInBytes = data.getBytes("UTF-8");
+
+		Signature sig = Signature.getInstance(algorithm);
+		sig.initSign(keyPair.getPrivate());
+		sig.update(dataInBytes);
+		byte[] signatureBytes = sig.sign();
+
+		sig.initVerify(keyPair.getPublic());
+		sig.update(dataInBytes);
+
+		sig.verify(signatureBytes);
+
+		return new BASE64Encoder().encode(signatureBytes);
+	}
 }
