@@ -21,7 +21,6 @@ import com.se.idms.util.UserConstants;
 public class ChinaIdmsUtil {
 
 	public static String generateHashValue(String generatedPin) {
-
 		MessageDigest md;
 		String hexString = null;
 		try {

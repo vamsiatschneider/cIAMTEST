@@ -12,41 +12,76 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.springframework.util.ResourceUtils;
+import org.springframework.beans.factory.annotation.Value;
 
 import sun.misc.BASE64Encoder;
 
 /**
- * The Saml assertion token generator class.
+ * SAML assertion token generator
  * 
  * @author Aravindh Kumar
  *
  */
+
 public class SamlAssertionTokenGenerator {
-
-	// This method encrypts the signed certificate.
+	
+	private final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+	
+	private static final SamlAssertionTokenGenerator m_Instance = new SamlAssertionTokenGenerator();
+	
+	@Value("${keystore.samlAssertionSigning.path}")
+	private String samlAssertionSigningKeystore;
+	
+	@Value("${keystore.samlAssertionSigning.keystore.password}")
+	private String samlAssertionKeystorePassword;
+	
+	@Value("${keystore.samlAssertionSigning.keystore.privateKey.password}")
+	private String samlAssertionKeyPassword;
+	
+	@Value("${keystore.samlAssertionSigning.keystore.certAlias}")
+	private String samlAssertionSigningCert;
+	
+	@Value("${crypto.algo.samlAssertionSigning}")
+	private String samlAssertionSigningAlgo;
+	
+	/**
+	 * Generates the SAML Assertion token, using the private key loaded from the Keystore
+	 * Data input format for signing:
+	 * <FederationId>;<Date>;vnew
+	 * 
+	 * Example:
+	 * c5e601cf-864d-4a85-8343-ef2c8a259690;2017-06-29 10:06:05;3
+	 * 
+	 * @param fedId
+	 * @param vnew
+	 * @return
+	 * @throws Exception
+	 */
+	
 	public static String getSamlAssertionToken(String fedId, String vnew) throws Exception {
-
 		Date date = new Date();
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-		String strDate = formatter.format(date);
-		// the data is of the form :
-		// c5e601cf-864d-4a85-8343-ef2c8a259690;2017-06-29 10:06:05;3
+		String strDate = m_Instance.dateFormatter.format(date);
 		String data = fedId + ";" + strDate + ";" + vnew;
-		String certName = "bfo_idms_uims_sync_sit";
-		String algorithm = "SHA1WithRSA";
-		String encrypted = signNverify(algorithm, data, certName);
+		String encrypted = m_Instance.signNverify(m_Instance.samlAssertionSigningAlgo, data, m_Instance.samlAssertionSigningCert);
 
 		return data + ";" + encrypted;
 	}
 
-	public static KeyPair getKeyPairFromKeyStore(String alias) throws Exception {
-
-		FileInputStream is = new FileInputStream(ResourceUtils.getFile("classpath:sit_keystore.jks"));
+	/**
+	 * Loads the keystore and returns the private key pair
+	 * 
+	 * @param alias
+	 * @return
+	 * @throws Exception
+	 */
+	
+	private KeyPair getKeyPairFromKeyStore(String alias) throws Exception {
+		FileInputStream is = new FileInputStream(ResourceUtils.getFile(this.samlAssertionSigningKeystore));
 
 		KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-		keystore.load(is, "IDMS_SIT_2017".toCharArray());
+		keystore.load(is, samlAssertionKeystorePassword.toCharArray());
 
-		Key key = keystore.getKey(alias, "IDMS_SIT_2017".toCharArray());
+		Key key = keystore.getKey(alias, samlAssertionKeyPassword.toCharArray());
 		if (key instanceof PrivateKey) {
 			// Get certificate of public key
 			Certificate cert = keystore.getCertificate(alias);
@@ -57,16 +92,17 @@ public class SamlAssertionTokenGenerator {
 			// Return a key pair
 			return new KeyPair(publicKey, (PrivateKey) key);
 		}
+		
 		return null;
 	}
 
 	@SuppressWarnings("restriction")
-	public static String signNverify(String algorithm, String data, String certName) throws Exception {
+	private String signNverify(String algorithm, String data, String certName) throws Exception {
 		KeyPair keyPair = getKeyPairFromKeyStore(certName);
 
 		byte[] dataInBytes = data.getBytes("UTF-8");
 
-		Signature sig = Signature.getInstance("SHA1WithRSA");
+		Signature sig = Signature.getInstance(algorithm);
 		sig.initSign(keyPair.getPrivate());
 		sig.update(dataInBytes);
 		byte[] signatureBytes = sig.sign();
@@ -77,11 +113,5 @@ public class SamlAssertionTokenGenerator {
 		sig.verify(signatureBytes);
 
 		return new BASE64Encoder().encode(signatureBytes);
-
 	}
-
-	public static void main(String args[]) throws Exception{
-		System.out.println(getSamlAssertionToken("7abb7286-60c7-4f58-a856-8b55c4b45d9a","1"));
-	}
-
 }
