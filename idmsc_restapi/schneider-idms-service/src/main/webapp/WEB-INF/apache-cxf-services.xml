@@ -84,6 +84,7 @@
 			<ref bean="updateAILService"/>
 			<ref bean="directUIMSUserManagerSoapService"/>
 			<ref bean="checkUserExistService"/>
+			<ref bean="getAILService"/>
 			
 		</jaxrs:serviceBeans>
 		<jaxrs:providers>
