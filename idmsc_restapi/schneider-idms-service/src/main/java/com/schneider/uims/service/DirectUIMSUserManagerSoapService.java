@@ -71,6 +71,9 @@ public class DirectUIMSUserManagerSoapService {
 
 	@Inject
 	private IdmsMapper mapper;
+	
+	@Inject
+	private SamlAssertionTokenGenerator samlTokenService;
 
 	@Inject
 	private OpenAMService productService;
@@ -173,7 +176,7 @@ public class DirectUIMSUserManagerSoapService {
 		String samlAssertionOrToken = null;
 		try {
 			LOGGER.info("Going to call getSamlAssertionToken() of UIMS for callerFid:" + callerFid);
-			samlAssertionOrToken = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, vnew);
+			samlAssertionOrToken = samlTokenService.getSamlAssertionToken(callerFid, vnew);
 			LOGGER.info("getSamlAssertionToken() of UIMS finished.. samlAssertionOrToken:" + samlAssertionOrToken);
 		} catch (Exception e1) {
 			LOGGER.error("Exception while getting samlAssertionOrToken in getUIMSUser()::" + e1.getMessage());
@@ -212,11 +215,11 @@ public class DirectUIMSUserManagerSoapService {
 		try {
 			if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
 				LOGGER.info("Going to call getSamlAssertionToken() of UIMS for EMAIL.. userId:" + userId);
-				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(userId, openamVnew);
+				samlAssertion = samlTokenService.getSamlAssertionToken(userId, openamVnew);
 				LOGGER.info("getSamlAssertionToken() of UIMS finished for EMAIL.. userId:" + userId);
 			} else {
 				LOGGER.info("Going to call getSamlAssertionToken() of UIMS.. callerFid:" + callerFid);
-				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, openamVnew);
+				samlAssertion = samlTokenService.getSamlAssertionToken(callerFid, openamVnew);
 				LOGGER.info("getSamlAssertionToken() of UIMS finished.. callerFid:" + callerFid);
 			}
 		} catch (Exception e) {
@@ -304,7 +307,7 @@ public class DirectUIMSUserManagerSoapService {
 		UIMSLOGGER.info("Parameter openamVnew -> " + openamVnew);
 		try {
 			LOGGER.info("Going to call getSamlAssertionToken() of UIMS for callerFid:" + callerFid);
-			samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, openamVnew);
+			samlAssertion = samlTokenService.getSamlAssertionToken(callerFid, openamVnew);
 			LOGGER.info("getSamlAssertionToken() of UIMS finished for callerFid:" + callerFid);
 		} catch (Exception e1) {
 			LOGGER.error("Exception while getting samlAssertion ::" + e1.getMessage());
@@ -367,7 +370,7 @@ public class DirectUIMSUserManagerSoapService {
 		String samlAssertion = null;
 		try {
 			LOGGER.info("Going to call getSamlAssertionToken() of UIMS for fedId:" + fedId);
-			samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(fedId, vnew);
+			samlAssertion = samlTokenService.getSamlAssertionToken(fedId, vnew);
 			LOGGER.info("getSamlAssertionToken() of UIMS finished for fedId:" + fedId);
 		} catch (Exception e) {
 			LOGGER.error("Error executing while getting samlAssertion::" + e.getMessage());
@@ -401,7 +404,7 @@ public class DirectUIMSUserManagerSoapService {
 		String authentificationToken = null;
 		try {
 			LOGGER.info("Going to call getSamlAssertionToken() of UIMS for callerFid:" + callerFid);
-			authentificationToken = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, vnew);
+			authentificationToken = samlTokenService.getSamlAssertionToken(callerFid, vnew);
 			LOGGER.info("getSamlAssertionToken() of UIMS finished for callerFid:" + callerFid);
 		} catch (Exception e) {
 			UIMSLOGGER.error("Error while getting authentificationToken in UIMS::" + e.getMessage());
@@ -442,11 +445,11 @@ public class DirectUIMSUserManagerSoapService {
 
 			if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
 				LOGGER.info("Going to call getSamlAssertionToken() of UIMS for EMAIL.. userId:" + userId);
-				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(userId, openamVnew);
+				samlAssertion = samlTokenService.getSamlAssertionToken(userId, openamVnew);
 				LOGGER.info("getSamlAssertionToken() of UIMS finished for EMAIL.. userId:" + userId);
 			} else {
 				LOGGER.info("Going to call getSamlAssertionToken() of UIMS for non-EMAIL.. callerFid:" + callerFid);
-				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, openamVnew);
+				samlAssertion = samlTokenService.getSamlAssertionToken(callerFid, openamVnew);
 				LOGGER.info("getSamlAssertionToken() of UIMS finished for non-EMAIL.. callerFid:" + callerFid);
 			}
 

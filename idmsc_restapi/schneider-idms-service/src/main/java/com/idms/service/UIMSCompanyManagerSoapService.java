@@ -3,6 +3,7 @@ package com.idms.service;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import javax.inject.Inject;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 
@@ -46,6 +47,9 @@ public class UIMSCompanyManagerSoapService {
 	 * Logger instance.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(UIMSUserManagerSoapService.class);
+	
+	@Inject
+	private SamlAssertionTokenGenerator samlTokenService;
 
 	@Value("${uimsCompanyManagerWsdl}")
 	private String uimsCompanyManagerWsdl;
@@ -110,7 +114,7 @@ public class UIMSCompanyManagerSoapService {
 		AuthenticatedCompanyManagerUIMSV2 companyManagerUIMSV2 = null;
 		try {
 			companyManagerUIMSV2 =  getAuthenitcatedCompanyManager();
-			samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(fedId, vnew);
+			samlAssertion = samlTokenService.getSamlAssertionToken(fedId, vnew);
 		} catch (Exception e) {
 			uimsLog.error("Error executing while createUIMSCompany::" + e.getMessage());
 			e.printStackTrace();
@@ -158,7 +162,7 @@ public class UIMSCompanyManagerSoapService {
 		boolean uimsUserResponse = false;
 		String samlAssertion = null;
 		try {
-			samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(fedId, vnew);
+			samlAssertion = samlTokenService.getSamlAssertionToken(fedId, vnew);
 		} catch (Exception e) {
 			uimsLog.error("Error executing while updateUIMSCompany::" + e.getMessage());
 			e.printStackTrace();
@@ -183,7 +187,7 @@ public class UIMSCompanyManagerSoapService {
 		CompanyV3 uimsUserResponse = null;
 		String samlAssertionOrToken = null;
 		try {
-			samlAssertionOrToken = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, vnew);
+			samlAssertionOrToken = samlTokenService.getSamlAssertionToken(callerFid, vnew);
 		} catch (Exception e) {
 			uimsLog.error("Error executing while getUIMSCompany::" + e.getMessage());
 			e.printStackTrace();

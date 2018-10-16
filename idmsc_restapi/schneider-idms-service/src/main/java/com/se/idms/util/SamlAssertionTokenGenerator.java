@@ -11,8 +11,9 @@ import java.security.cert.Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.springframework.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 
 import sun.misc.BASE64Encoder;
 
@@ -23,11 +24,10 @@ import sun.misc.BASE64Encoder;
  *
  */
 
+@Service("samlAssertionTokenService")
 public class SamlAssertionTokenGenerator {
 	
 	private final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-	
-	private static final SamlAssertionTokenGenerator m_Instance = new SamlAssertionTokenGenerator();
 	
 	@Value("${keystore.samlAssertionSigning.path}")
 	private String samlAssertionSigningKeystore;
@@ -58,11 +58,11 @@ public class SamlAssertionTokenGenerator {
 	 * @throws Exception
 	 */
 	
-	public static String getSamlAssertionToken(String fedId, String vnew) throws Exception {
+	public String getSamlAssertionToken(String fedId, String vnew) throws Exception {
 		Date date = new Date();
-		String strDate = m_Instance.dateFormatter.format(date);
+		String strDate = this.dateFormatter.format(date);
 		String data = fedId + ";" + strDate + ";" + vnew;
-		String encrypted = m_Instance.signNverify(m_Instance.samlAssertionSigningAlgo, data, m_Instance.samlAssertionSigningCert);
+		String encrypted = this.signNverify(this.samlAssertionSigningAlgo, data, this.samlAssertionSigningCert);
 
 		return data + ";" + encrypted;
 	}

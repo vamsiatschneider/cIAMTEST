@@ -38,6 +38,9 @@ public class UimsSetPasswordSoapService {
 
 	//private static final Logger UIMSLOGGER = LoggerFactory.getLogger("uimsLogger");
 	
+	@Inject
+	private SamlAssertionTokenGenerator samlTokenService;
+	
 	@Autowired
 	private UIMSUserManagerSoapService userManagerSoapService;
 	
@@ -124,9 +127,9 @@ public class UimsSetPasswordSoapService {
 
 		try {
 			if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
-				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(userId, openamVnew);
+				samlAssertion = samlTokenService.getSamlAssertionToken(userId, openamVnew);
 			}else{
-				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, openamVnew);
+				samlAssertion = samlTokenService.getSamlAssertionToken(callerFid, openamVnew);
 			}
 			LOGGER.info("samlAssertion="+samlAssertion);
 
@@ -203,9 +206,9 @@ public class UimsSetPasswordSoapService {
 
 		try {
 			if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
-				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(userId, openamVnew);
+				samlAssertion = samlTokenService.getSamlAssertionToken(userId, openamVnew);
 			} else {
-				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, openamVnew);
+				samlAssertion = samlTokenService.getSamlAssertionToken(callerFid, openamVnew);
 			}
 
 			LOGGER.info("samlAssertion="+samlAssertion);
@@ -318,9 +321,9 @@ public class UimsSetPasswordSoapService {
 
 		try {
 			if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
-				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(userId, openamVnew);
+				samlAssertion = samlTokenService.getSamlAssertionToken(userId, openamVnew);
 			} else {
-				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, openamVnew);
+				samlAssertion = samlTokenService.getSamlAssertionToken(callerFid, openamVnew);
 			}
 			LOGGER.info("samlAssertion="+samlAssertion);
 
@@ -391,7 +394,7 @@ public class UimsSetPasswordSoapService {
 		LOGGER.info("Parameter openamVnew -> " + openamVnew);
 		
 		try {
-			samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, openamVnew);
+			samlAssertion = samlTokenService.getSamlAssertionToken(callerFid, openamVnew);
 			LOGGER.info("samlAssertion="+samlAssertion);
 
 			Callable<Boolean> callableUpdateUIMSPassword = new Callable<Boolean>() {

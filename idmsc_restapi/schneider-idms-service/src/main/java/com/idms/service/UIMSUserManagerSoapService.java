@@ -71,6 +71,9 @@ public class UIMSUserManagerSoapService {
 	//private static final Logger UIMSLOGGER = LoggerFactory.getLogger("uimsLogger");
 
 	@Inject
+	private SamlAssertionTokenGenerator samlTokenService;
+	
+	@Inject
 	private IdmsMapper mapper;
 	
 	@Inject
@@ -180,7 +183,7 @@ public class UIMSUserManagerSoapService {
 
 		String samlAssertionOrToken = null;
 		try {
-			samlAssertionOrToken = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, vnew);
+			samlAssertionOrToken = samlTokenService.getSamlAssertionToken(callerFid, vnew);
 		
 			UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
 			LOGGER.info("Start: UIMS getUser() for callerFid:" + callerFid);
@@ -209,9 +212,9 @@ public class UIMSUserManagerSoapService {
 
 		try {
 			if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
-				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(userId, openamVnew);
+				samlAssertion = samlTokenService.getSamlAssertionToken(userId, openamVnew);
 			} else {
-				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, openamVnew);
+				samlAssertion = samlTokenService.getSamlAssertionToken(callerFid, openamVnew);
 			}
 
 			LOGGER.info("samlAssertion="+samlAssertion);
@@ -279,9 +282,9 @@ public class UIMSUserManagerSoapService {
 
 		try {
 			if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
-				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(userId, openamVnew);
+				samlAssertion = samlTokenService.getSamlAssertionToken(userId, openamVnew);
 			} else {
-				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, openamVnew);
+				samlAssertion = samlTokenService.getSamlAssertionToken(callerFid, openamVnew);
 			}
 			LOGGER.info("samlAssertion="+samlAssertion);
 
@@ -348,7 +351,7 @@ public class UIMSUserManagerSoapService {
 		LOGGER.info("Parameter openamVnew -> " + openamVnew);
 
 		try {
-			samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, openamVnew);
+			samlAssertion = samlTokenService.getSamlAssertionToken(callerFid, openamVnew);
 			LOGGER.info("samlAssertion="+samlAssertion);
 
 			Callable<Boolean> callableUpdateUIMSPassword = new Callable<Boolean>() {
@@ -401,7 +404,7 @@ public class UIMSUserManagerSoapService {
 		try {
 			LOGGER.info("Parameter user -> " + objMapper.writeValueAsString(user));
 
-			samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(fedId, vnew);
+			samlAssertion = samlTokenService.getSamlAssertionToken(fedId, vnew);
 			LOGGER.info("samlAssertion="+samlAssertion);
 
 			LOGGER.info("Start: updateUser() of UIMS for user:" + user.getFirstName());
@@ -435,7 +438,7 @@ public class UIMSUserManagerSoapService {
 
 		String authentificationToken = null;
 		try {
-			authentificationToken = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, vnew);
+			authentificationToken = samlTokenService.getSamlAssertionToken(callerFid, vnew);
 			LOGGER.info("authentificationToken="+authentificationToken);
 
 			LOGGER.info("Start: activateIdentity() of UIMS for callerFid:" + callerFid);
@@ -467,9 +470,9 @@ public class UIMSUserManagerSoapService {
 			// SamlAssertionTokenGenerator.getSamlAssertionToken(userId,openamVnew);
 
 			if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
-				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(userId, openamVnew);
+				samlAssertion = samlTokenService.getSamlAssertionToken(userId, openamVnew);
 			} else {
-				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, openamVnew);
+				samlAssertion = samlTokenService.getSamlAssertionToken(callerFid, openamVnew);
 			}
 			LOGGER.info("samlAssertion="+samlAssertion);
 
@@ -882,9 +885,9 @@ public class UIMSUserManagerSoapService {
 
 		try {
 			if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
-				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(userId, openamVnew);
+				samlAssertion = samlTokenService.getSamlAssertionToken(userId, openamVnew);
 			} else {
-				samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(callerFid, openamVnew);
+				samlAssertion = samlTokenService.getSamlAssertionToken(callerFid, openamVnew);
 			}
 			LOGGER.info("samlAssertion="+samlAssertion);
 
