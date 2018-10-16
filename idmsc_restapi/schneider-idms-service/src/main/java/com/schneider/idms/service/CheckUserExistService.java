@@ -20,7 +20,7 @@ import com.idms.model.CheckUserExistsRequest;
 public interface CheckUserExistService {
 	
 	@POST
-	@Path("/IDMSServices/CheckUser/1.0")
+	@Path("/CheckUser/1.0")
 	Response idmsCheckUserExists(@HeaderParam("Authorization") String authorization,@HeaderParam("IDMS-Authorization")String secretToken, @HeaderParam("Accept") String accept,
 			@HeaderParam("IDMS-Region") String region, CheckUserExistsRequest checkUserExistsRequest);
 }
