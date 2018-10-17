@@ -83,7 +83,7 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 			
 			if(null != secretToken && !secretToken.isEmpty()){
 				longLiveHashedToken = ChinaIdmsUtil.generateHashValue(secretToken);
-				LOGGER.info("longLiveHashedToken="+longLiveHashedToken);
+				//LOGGER.info("longLiveHashedToken="+longLiveHashedToken);
 			}
 			
 			// Validation_authorization_token
