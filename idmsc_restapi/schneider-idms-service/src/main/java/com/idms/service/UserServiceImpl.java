@@ -4097,32 +4097,42 @@ public class UserServiceImpl implements UserService {
 						+ AUDIT_LOG_CLOSURE);
 
 				
-				
+				LOGGER.info("IDMS_Profile_update_source__c="+userRequest.getUserRecord().getIDMS_Profile_update_source__c());
 				if (pickListValidator.validate(UserConstants.IDMS_BFO_profile,
 						userRequest.getUserRecord().getIDMS_Profile_update_source__c())) {
 					//userId = userRequest.getUserRecord().getIDMS_Federated_ID__c();
 					//fedId = userRequest.getUserRecord().getIDMS_Federated_ID__c();
 
+					LOGGER.info("In BFO Profile block");
+					LOGGER.info("Start: getUserInfoByAccessToken() of openamtokenservice");
 					String userInfoByAccessToken = openAMTokenService.getUserInfoByAccessToken(authorizedToken, "/se");
+					LOGGER.info("End: getUserInfoByAccessToken() of openamtokenservice, userInfoByAccessToken="+userInfoByAccessToken);
+					
 					productDocCtx = JsonPath.using(conf).parse(userInfoByAccessToken);
 
 					if(null != productDocCtx.read("$.email") && productDocCtx.read("$.email").toString().contains(UserConstants.TECHNICAL_USER)){
+						LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for email="+userRequest.getUserRecord().getEmail());
 						String userExistsInOpenam = productService.checkUserExistsWithEmailMobile(
 								UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 								"loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(userRequest.getUserRecord().getEmail(),"UTF-8"),"UTF-8") + "\"");
 
+						LOGGER.info("End: checkUserExistsWithEmailMobile() of openam for email="+userRequest.getUserRecord().getEmail());
 						productDocCtx = JsonPath.using(conf).parse(userExistsInOpenam);
 						userId = productDocCtx.read("$.result[0].username");
 						fedId = productDocCtx.read("$.result[0].federationID[0]");
+						LOGGER.info("userId="+userId+" ,fedId="+fedId);
 					}else{
 						userId = productDocCtx.read("$.sub");
 						fedId = productDocCtx.read("$.federationID");
+						LOGGER.info("in else block: userId="+userId+" ,fedId="+fedId);
 					}
 					usermail = productDocCtx.read("$.email");
 					if (usermail == null) {
 						usermail = productDocCtx.read("$.Email");
 					}
+					LOGGER.info("usermail="+usermail);
 				} else {
+					LOGGER.info("In non-BFO Profile block");
 					String userInfoByAccessToken = openAMTokenService.getUserInfoByAccessToken(authorizedToken, "/se");
 					productDocCtx = JsonPath.using(conf).parse(userInfoByAccessToken);
 					userId = productDocCtx.read("$.sub");
@@ -4132,6 +4142,7 @@ public class UserServiceImpl implements UserService {
 					if (usermail == null) {
 						usermail = productDocCtx.read("$.Email");
 					}
+					LOGGER.info("In non-bfo block: userId="+userId+" ,fedId="+fedId+" ,usermail="+usermail);
 				}
 				userResponse.setId(userId);
 
