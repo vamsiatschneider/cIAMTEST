@@ -85,6 +85,6 @@ public interface OpenAMService {
 	@POST
 	@Path("/se/authenticate")
 	@Consumes("application/json")
-	Response oauth2iplanet(@HeaderParam("Cache-Control") String cacheControl,@HeaderParam("access_token") String accessToken, @QueryParam("service") String service,@QueryParam("authIndexType") String authIndexType, @QueryParam("authIndexValue") String authIndexValue,String auth);
+	Response oauth2iplanet(@HeaderParam("Cookie") String cookie,@HeaderParam("Cache-Control") String cacheControl,@HeaderParam("access_token") String accessToken, @QueryParam("service") String service,@QueryParam("authIndexType") String authIndexType, @QueryParam("authIndexValue") String authIndexValue,String auth);
 	
 }

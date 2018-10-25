@@ -99,7 +99,7 @@ public class ChinaIdmsUtil {
 	 * @param rawData
 	 * @return
 	 */
-	public static String printInfo(String rawData){	
+	public static String printInfo(String rawData){
 		String newrawdata = rawData;
         if (rawData.toLowerCase().contains("PinCode".toLowerCase())){
         	int i = rawData.indexOf(",\"PinCode");
@@ -112,6 +112,51 @@ public class ChinaIdmsUtil {
         }
         return newrawdata;
     }
+	
+	/**
+	 * Get cookies values from response
+	 * @param response
+	 * @return
+	 * @throws Exception
+	 */
+	public static String getCookie(Response response, String haMode){
+		String amlbcookieArray[] = null;
+		String amlbcookie = "";
+
+		if (UserConstants.TRUE.equalsIgnoreCase(haMode)) {
+			amlbcookieArray = response.getHeaderString("Set-Cookie").split(";");
+			if (null != amlbcookieArray && amlbcookieArray.length > 0) {
+				for (String cookie : amlbcookieArray) {
+					if (cookie.contains("AWSELB") && !cookie.contains("path")) {
+						amlbcookie = cookie.substring(cookie.indexOf("AWSELB"), cookie.length());
+						// amlbcookieValue =
+						// cookie.substring(cookie.lastIndexOf("=") + 1,
+						// cookie.length());
+						break;
+					}
+				}
+				for (String cookie : amlbcookieArray) {
+					if (cookie.contains("amlbcookie") && !cookie.contains("path")) {
+						amlbcookie = amlbcookie.concat(";")
+								.concat(cookie.substring(cookie.indexOf("amlbcookie"), cookie.length()));
+						// amlbcookieValue =
+						// cookie.substring(cookie.lastIndexOf("=") + 1,
+						// cookie.length());
+						break;
+					}
+				}
+			}
+			if(amlbcookie.startsWith(";")){
+				String amlbcookie1 = amlbcookie.substring(1);
+				amlbcookie=amlbcookie1;				
+			}			
+		} else {
+			amlbcookie = "amlbcookie=01";
+		}
+
+		return amlbcookie; 
+	}
+
 	
 	/*public static void main(String[] args) {
 		String longvalue = generateHashValue("tY4MomqIwjg34932ZhTx651K38WJcZ");

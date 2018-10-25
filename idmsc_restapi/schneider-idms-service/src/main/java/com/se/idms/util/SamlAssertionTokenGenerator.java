@@ -102,7 +102,7 @@ public class SamlAssertionTokenGenerator {
 
 		byte[] dataInBytes = data.getBytes("UTF-8");
 
-		Signature sig = Signature.getInstance(algorithm);
+		Signature sig = Signature.getInstance(samlAssertionSigningAlgo);
 		sig.initSign(keyPair.getPrivate());
 		sig.update(dataInBytes);
 		byte[] signatureBytes = sig.sign();

@@ -7211,16 +7211,18 @@ public class UserServiceImpl implements UserService {
 		try {
 			Response authenticate = productService.otpAuthentication("", "OAuth2IPlanet", UserConstants.HOTP_SERVICE,
 					"OAuth2IPlanet", "");
+			String cookieOath = ChinaIdmsUtil.getCookie(authenticate, ha_mode);
+			LOGGER.info("cookieOath="+cookieOath);
 			String authResponseAsString = authenticate.readEntity(String.class);
 			LOGGER.info("authenticate JSON request: " + authResponseAsString);
 			if (token.contains("Bearer")) {
 				String[] tokenSplit = token.split("Bearer ");
 				LOGGER.info("Start: oauth2iplanet() of openam");
-				oauth2iplanetResponse = productService.oauth2iplanet("no-cache", tokenSplit[1], "OAuth2IPlanet",
+				oauth2iplanetResponse = productService.oauth2iplanet(cookieOath,"no-cache", tokenSplit[1], "OAuth2IPlanet",
 						UserConstants.HOTP_SERVICE, "OAuth2IPlanet", authResponseAsString);
 				LOGGER.info("End: oauth2iplanet() of openam finsihed");
 			} else {
-				oauth2iplanetResponse = productService.oauth2iplanet("no-cache", token, "OAuth2IPlanet",
+				oauth2iplanetResponse = productService.oauth2iplanet(cookieOath,"no-cache", token, "OAuth2IPlanet",
 						UserConstants.HOTP_SERVICE, "OAuth2IPlanet", authResponseAsString);
 			}
 			if (Response.Status.UNAUTHORIZED.getStatusCode() == oauth2iplanetResponse.getStatus()) {
