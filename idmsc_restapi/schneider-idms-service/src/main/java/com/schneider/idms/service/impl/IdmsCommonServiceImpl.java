@@ -45,7 +45,6 @@ import com.schneider.idms.common.DirectApiConstants;
 import com.schneider.idms.common.EmailOption;
 import com.schneider.idms.common.ErrorResponseCode;
 import com.schneider.idms.common.UserContext;
-import com.schneider.idms.mapper.DirectApiIdmsMapper;
 import com.schneider.idms.model.IdmsUserRequest;
 import com.schneider.uims.service.DirectUIMSUserManagerSoapService;
 import com.se.idms.cache.CacheTypes;

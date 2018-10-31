@@ -729,7 +729,7 @@ public class UIMSUserManagerSoapService {
 
 	@Async
 	public String updateUIMSUserAndCompany(String fedId, UserV6 identity, String context, CompanyV3 company,
-			String vnew, OpenAMService productService, String iPlanetDirectoryKey, String userName, String email) {
+			String vnew, OpenAMService productService, String iPlanetDirectoryKey, String userName,String companyFedId, String email) {
 		LOGGER.info("Entered updateUIMSUserAndCompany() -> Start");
 		LOGGER.info("Parameter fedId -> " + fedId);
 		LOGGER.info("Parameter context -> " + context);
@@ -744,7 +744,7 @@ public class UIMSUserManagerSoapService {
 			LOGGER.info("Parameter company -> " + objectMapper.writeValueAsString(company));
 			LOGGER.info("Parameter identity -> " + objectMapper.writeValueAsString(identity));
 
-			UIMSCompanyManagerSoapService companyManagerSoapService = new UIMSCompanyManagerSoapService();
+			//UIMSCompanyManagerSoapService companyManagerSoapService = new UIMSCompanyManagerSoapService();
 			Callable<Boolean> callableUpdateUIMSUserAndComapany = new Callable<Boolean>() {
 				public Boolean call() throws Exception {
 
@@ -787,7 +787,7 @@ public class UIMSUserManagerSoapService {
 					// TODO logic to get the federatedId
 					String federatedId = "";
 
-					updateUIMSCompany = companyManagerSoapService.updateUIMSCompany(fedId, vnew, company);
+					updateUIMSCompany = companyManagerSoapService.updateUIMSCompany(fedId, vnew, company,companyFedId);
 					return updateUIMSCompany;
 				}
 			};

@@ -98,7 +98,8 @@ public class UIMSAuthenticatedUserManagerSoapService {
 				application.setId("Uims");
 				application.setType(Type.APPLICATION);
 				LOGGER.info("Going to call createIdentityWithPhoneId() of UIMS for phone:"+identity.getPhoneId());
-				uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithPhoneId(callerFid, identity, application);
+				//uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithPhoneId(callerFid, identity, application);
+				uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithPhoneIdForceIdmsId(callerFid, identity, forcedFederatedId);
 				LOGGER.info("createIdentityWithPhoneId() of UIMS finished, response:"+uimsUserResponse);
 			}else{
 				LOGGER.info("Going to call createIdentityForceIdmsId() of UIMS for phone:"+identity.getPhoneId());

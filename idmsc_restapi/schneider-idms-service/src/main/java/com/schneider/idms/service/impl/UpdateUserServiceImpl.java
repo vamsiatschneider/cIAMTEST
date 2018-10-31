@@ -88,6 +88,7 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 			boolean booleanTrue = true;
 			String fedId = null;
 			Integer vNewCntValue = 0;
+			String companyFedId="";
 			String usermail = "";
 			boolean isUserFromSocialLogin = false;
 			// Step 1:
@@ -258,6 +259,7 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 			userName = productDocCtxUser.read(JsonConstants.USER_NAME);
 			openAmReq = mapper.map(userRequest, OpenAmUserRequest.class);
 			openAmReq.getInput().setUser(user);
+			companyFedId = productDocCtxUser.read("$.companyFederatedID[0]");
 
 			/**
 			 * Adding for social login
@@ -459,6 +461,8 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				if (null != company.getLanguageCode()) {
 					company.setLanguageCode(company.getLanguageCode().toLowerCase());
 				}
+				company.setFederatedId(companyFedId);
+				
 				com.se.uims.usermanager.UserV6 identity = mapper.map(userRequest, com.se.uims.usermanager.UserV6.class);
 
 				if (null != identity.getLanguageCode()) {
@@ -469,7 +473,7 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 
 				directUIMSUserManagerSoapService.updateUIMSUserAndCompany(fedId, identity, userRequest.getUserContext(),
 						company, vNewCntValue.toString(), productService,
-						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, usermail);
+						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, companyFedId, usermail);
 
 			}
 

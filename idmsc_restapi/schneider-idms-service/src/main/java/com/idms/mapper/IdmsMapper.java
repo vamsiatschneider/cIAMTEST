@@ -34,6 +34,7 @@ public class IdmsMapper extends ConfigurableMapper{
     	configureIFWUserRequestToCompanyV3Request(mapperFactory);
     	configureUpdateUserToCompanyV3Request(mapperFactory);
     	configureUpdateUserRequestToUserV5Request(mapperFactory);
+    	configureUpdateUserRequestToUserV6Request(mapperFactory);
     	configureIFWUserRequestToGoDigitalUserRequest(mapperFactory);
     	
     	configureIFWUserRequestToIDMSUserRecord(mapperFactory);
@@ -303,11 +304,46 @@ public class IdmsMapper extends ConfigurableMapper{
     }
 	
 	/**
-	 * UpdateUser for UIMS User
+	 * UpdateUser for UIMS User - V5
 	 * @param mapperFactory
 	 */
 	private void configureUpdateUserRequestToUserV5Request(MapperFactory mapperFactory) {
         mapperFactory.classMap(UpdateUserRequest.class,com.se.uims.usermanager.UserV5.class)
+        .field("userRecord.email", "email") 
+        .field("userRecord.mobilePhone", "cell")
+        .field("userRecord.firstName", "firstName")
+        .field("userRecord.lastName", "lastName")
+        .field("userRecord.IDMS_Federated_ID__c", "federatedID")
+        .field("userRecord.IDMS_PreferredLanguage__c", "languageCode")
+        .field("userRecord.country", "countryCode")
+        .field("userRecord.IDMS_AdditionalAddress__c", "addInfoAddress")
+        .field("userRecord.IDMSJobDescription__c", "jobDescription")
+        .field("userRecord.job_Function__c", "jobFunction")
+        .field("userRecord.job_Title__c", "jobTitle")
+        .field("userRecord.city", "localityName")
+        .field("userRecord.IDMSMiddleName__c", "middleName")
+        .field("userRecord.IDMS_POBox__c", "postOfficeBox")
+        .field("userRecord.IDMSSalutation__c", "salutation")
+        .field("userRecord.street", "street")
+        .field("userRecord.postalCode", "postalCode")
+        .field("userRecord.state", "state")
+        .field("userRecord.phone", "phone")
+        .field("userRecord.fax", "fax")
+        .field("userRecord.IDMS_County__c", "county")
+        .field("userRecord.channel__c", "channel")
+        .field("userRecord.subChannel__c", "subChannel")
+        .field("userRecord.IDMSPrimaryContact__c", "primaryContact")
+        .field("userRecord.contactId", "bfoId")
+        .byDefault()
+        .register();
+    }
+	
+	/**
+	 * UpdateUser for UIMS User - V6
+	 * @param mapperFactory
+	 */
+	private void configureUpdateUserRequestToUserV6Request(MapperFactory mapperFactory) {
+        mapperFactory.classMap(UpdateUserRequest.class,com.se.uims.usermanager.UserV6.class)
         .field("userRecord.email", "email") 
         .field("userRecord.mobilePhone", "cell")
         .field("userRecord.firstName", "firstName")

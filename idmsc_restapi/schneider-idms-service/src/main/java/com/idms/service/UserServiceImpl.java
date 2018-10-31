@@ -297,6 +297,9 @@ public class UserServiceImpl implements UserService {
 	@Value("${openAMService.url}")
 	private String prefixStartUrl;
 	
+	@Value("${identityService.url}")
+	private String prefixIdentityUrl;
+	
 	private static String userAction = "submitRequirements";
 
 	private static String errorStatus = "Error";
@@ -4001,6 +4004,7 @@ public class UserServiceImpl implements UserService {
 			boolean booleanTrue = true;
 			String fedId=null;
 			Integer vNewCntValue=0;
+			String companyFedId="";
 			String usermail = "";
 			boolean isUserFromSocialLogin = false;
 			// Step 1:
@@ -4167,6 +4171,7 @@ public class UserServiceImpl implements UserService {
 				userName = productDocCtxUser.read(JsonConstants.USER_NAME);
 				openAmReq = mapper.map(userRequest, OpenAmUserRequest.class);
 				openAmReq.getInput().setUser(user);
+				companyFedId = productDocCtxUser.read("$.companyFederatedID[0]");
 				
 				/**
 				 * Setting attributes in openam registration 
@@ -4491,6 +4496,8 @@ public class UserServiceImpl implements UserService {
 				if(null != company.getLanguageCode()){
 				company.setLanguageCode(company.getLanguageCode().toLowerCase());
 				}
+				company.setFederatedId(companyFedId);
+				
 				//Setting publicVisibility value to company.publicVisibility
 				if(null != userRequest.getAttributes() && userRequest.getAttributes().size() > 0){
 					String KeyName = userRequest.getAttributes().get(0).getKeyName();
@@ -4508,7 +4515,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Start: ASYNC updateUIMSUserAndCompany() for userId:"+userId);
 				uimsUserManagerSoapService.updateUIMSUserAndCompany(fedId, identity,
 						userRequest.getUserRecord().getIDMS_User_Context__c(), company, vNewCntValue.toString(),
-						productService, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, usermail);
+						productService, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, companyFedId, usermail);
 				LOGGER.info("End: ASYNC updateUIMSUserAndCompany() finished for userId:"+userId);
 			} else {
 				//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
@@ -6699,12 +6706,12 @@ public class UserServiceImpl implements UserService {
 				
 				//startUrl = startUrl.substring(0, startUrl.indexOf(valueToFind)+valueToFind.length()).concat(URLEncoder.encode(valueToFind.substring(valueToFind.indexOf(valueToFind)+5, valueToFind.length()), "UTF-8" ));
 				if(startUrl.contains(valueToFind)){
-				prefix.append(prefixStartUrl)
+				prefix.append(prefixIdentityUrl)
 					  .append("/ui/#!")
 					  .append(startUrl.substring(0, startUrl.indexOf(valueToFind)+valueToFind.length()))
 					  .append(URLEncoder.encode(startUrl.substring(startUrl.indexOf(valueToFind)+valueToFind.length(), startUrl.length()), "UTF-8" ));
 				} else {
-					prefix.append(prefixStartUrl)					  
+					prefix.append(prefixIdentityUrl)					  
 					  .append(startUrl);
 				}
         
@@ -6725,12 +6732,12 @@ public class UserServiceImpl implements UserService {
 			try {
 				prefix = new StringBuffer();
 				if(startUrl.contains(valueToFind)){
-					prefix.append(prefixStartUrl)
+					prefix.append(prefixIdentityUrl)
 						  .append("/ui/#!")
 						  .append(startUrl.substring(0, startUrl.indexOf(valueToFind)+valueToFind.length()))
 						  .append(URLEncoder.encode(startUrl.substring(startUrl.indexOf(valueToFind)+valueToFind.length(), startUrl.length()), "UTF-8" ));
 					} else {
-						prefix.append(prefixStartUrl)					  
+						prefix.append(prefixIdentityUrl)					  
 						  .append(startUrl)
 						  .append("&login_error=L9101");
 					}

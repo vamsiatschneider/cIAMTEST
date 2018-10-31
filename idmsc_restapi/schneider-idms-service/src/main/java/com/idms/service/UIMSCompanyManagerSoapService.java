@@ -110,17 +110,17 @@ public class UIMSCompanyManagerSoapService {
 	
 	public String createUIMSCompany(String fedId, String vnew, CompanyV3 company) {
 		String uimsUserResponse = "";
-		String samlAssertion = null;
+		//String samlAssertion = null;
 		AuthenticatedCompanyManagerUIMSV2 companyManagerUIMSV2 = null;
 		try {
 			companyManagerUIMSV2 =  getAuthenitcatedCompanyManager();
-			samlAssertion = samlTokenService.getSamlAssertionToken(fedId, vnew);
+			//samlAssertion = samlTokenService.getSamlAssertionToken(fedId, vnew);
 		} catch (Exception e) {
 			uimsLog.error("Error executing while createUIMSCompany::" + e.getMessage());
 			e.printStackTrace();
 		}
 			try {
-				uimsUserResponse = companyManagerUIMSV2.createCompany(UimsConstants.CALLER_FID, samlAssertion, company);
+				uimsUserResponse = companyManagerUIMSV2.createCompany(UimsConstants.CALLER_FID, fedId, company);
 			} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
 					| LdapTemplateNotReadyException | RequestedEntryNotExistsException | RequestedInternalUserException
 					| UnexpectedLdapResponseException | UnexpectedRuntimeImsException e) {
@@ -133,7 +133,7 @@ public class UIMSCompanyManagerSoapService {
 	
 	public String createUIMSCompanyWithCompanyForceIdmsId(String idmsFederationId, String companyForceFederationId, String vnew, CompanyV3 company) {
 		String uimsUserResponse = "";
-		String samlAssertion = null;
+		//String samlAssertion = null;
 		AuthenticatedCompanyManagerUIMSV2 authenticatedCompanyManagerUIMSV2 = null;
 		ObjectMapper objMapper = new ObjectMapper();
 		try {
@@ -157,21 +157,21 @@ public class UIMSCompanyManagerSoapService {
 		return uimsUserResponse;
 	}
 
-	public boolean updateUIMSCompany(String fedId, String vnew, CompanyV3 company)
+	public boolean updateUIMSCompany(String fedId, String vnew, CompanyV3 company, String companyFedId)
 			throws MalformedURLException {
 		boolean uimsUserResponse = false;
-		String samlAssertion = null;
+		/*String samlAssertion = null;
 		try {
 			samlAssertion = samlTokenService.getSamlAssertionToken(fedId, vnew);
 		} catch (Exception e) {
 			uimsLog.error("Error executing while updateUIMSCompany::" + e.getMessage());
 			e.printStackTrace();
-		}
+		}*/
 		//CompanyManagerUIMSV2 companyManagerUIMSV2 = getCompanyManager();
 		AuthenticatedCompanyManagerUIMSV2 companyManagerUIMSV2 = getAuthenitcatedCompanyManager();
 		//TODO check with Prasenjit what to pass as fedId
 		try {
-			uimsUserResponse = companyManagerUIMSV2.updateCompany(UimsConstants.CALLER_FID, samlAssertion, fedId, company);
+			uimsUserResponse = companyManagerUIMSV2.updateCompany(UimsConstants.CALLER_FID, fedId, companyFedId, company);
 		} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
 				| LdapTemplateNotReadyException | RequestedEntryNotExistsException | SecuredImsException
 				| UnexpectedLdapResponseException | UnexpectedRuntimeImsException e) {
@@ -181,19 +181,19 @@ public class UIMSCompanyManagerSoapService {
 		return uimsUserResponse;
 	}
 
-	public CompanyV3 getUIMSCompany(String callerFid, String federatedId, String vnew, CompanyV3 company)
+	public CompanyV3 getUIMSCompany(String callerFid, String federatedId, String vnew, CompanyV3 company, String companyFedId)
 			throws MalformedURLException {
 		AuthenticatedCompanyManagerUIMSV2 companyManagerUIMSV2 = getAuthenitcatedCompanyManager();
 		CompanyV3 uimsUserResponse = null;
-		String samlAssertionOrToken = null;
-		try {
+		//String samlAssertionOrToken = null;
+		/*try {
 			samlAssertionOrToken = samlTokenService.getSamlAssertionToken(callerFid, vnew);
 		} catch (Exception e) {
 			uimsLog.error("Error executing while getUIMSCompany::" + e.getMessage());
 			e.printStackTrace();
-		}
+		}*/
 		try {
-			uimsUserResponse = companyManagerUIMSV2.getCompany(callerFid, samlAssertionOrToken, federatedId);
+			uimsUserResponse = companyManagerUIMSV2.getCompany(callerFid, federatedId, companyFedId);
 		} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
 				| LdapTemplateNotReadyException | RequestedEntryNotExistsException | UnexpectedLdapResponseException
 				| UnexpectedRuntimeImsException e) {

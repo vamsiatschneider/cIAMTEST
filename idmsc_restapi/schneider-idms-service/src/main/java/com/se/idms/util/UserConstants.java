@@ -415,7 +415,7 @@ public class UserConstants {
 	public static final String LANGUAGE_CODE = "EN";
 	public static final String REQUEST_ID = "10001";
 	public static final String PR_GRANT_TYPE = "password";
-	public static final String RESET_PR_SUCCESS = "Reset Password Done successfully";
+	public static final String RESET_PR_SUCCESS = "Reset Password Done successfully.";
 	public static final String USER_NOT_FOUND_EMAIL_MOBILE ="User not found based on Email/Mobile";
 	public static final String ERROR_RESET_PR= "Error in Reset Password.";
 	public static final String GLOBAL_USER_BOOLEAN = "Globaluser value should be boolean";

@@ -732,7 +732,7 @@ public class DirectUIMSUserManagerSoapService {
 
 	@Async
 	public String updateUIMSUserAndCompany(String fedId, UserV6 identity, String context, CompanyV3 company,
-			String vnew, OpenAMService productService, String iPlanetDirectoryKey, String userName, String email) {
+			String vnew, OpenAMService productService, String iPlanetDirectoryKey, String userName, String companyFedId, String email) {
 		LOGGER.info("Entered updateUIMSUserAndCompany() -> Start");
 		LOGGER.info("Parameter fedId -> " + fedId + " ,identity -> " + identity);
 		LOGGER.info("Parameter context -> " + context + " ,company -> " + company);
@@ -803,7 +803,7 @@ public class DirectUIMSUserManagerSoapService {
 					// TODO logic to get the federatedId
 					String federatedId = "";
 
-					updateUIMSCompany = companyManagerSoapService.updateUIMSCompany(fedId, vnew, company);
+					updateUIMSCompany = companyManagerSoapService.updateUIMSCompany(fedId, vnew, company, companyFedId);
 					return updateUIMSCompany;
 				}
 			};
