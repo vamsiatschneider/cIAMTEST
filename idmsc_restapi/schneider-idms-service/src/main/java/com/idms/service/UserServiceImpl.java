@@ -3625,6 +3625,7 @@ public class UserServiceImpl implements UserService {
 			attributes.setType("IDMSUserAIL__c");
 			idmsUserAIL.setAttributes(attributes);
 			idmsUserAIL.setId(userId);
+			idmsUserAIL.setIDMS_Federated_ID__c(userId);
 			idmsUserAIL
 					.setIdms_Profile_update_source__c(ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c());
 			idmsUserAIL.setIdmsaclType__c(ailRequest.getUserAILRecord().getIDMSAclType__c());

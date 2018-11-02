@@ -42,6 +42,9 @@ public class IDMSUserAIL {
 	
 	@JsonProperty("IDMS_Profile_update_source__c")
 	private String idms_Profile_update_source__c;
+	
+	@JsonProperty("IDMS_Federated_ID__c")
+	private String IDMS_Federated_ID__c;
 
 	@JsonProperty("IDMSUser__c")
 	private  String idmsuser__c;
@@ -128,5 +131,12 @@ public class IDMSUserAIL {
 		this.id = id;
 	}
 
+	public String getIDMS_Federated_ID__c() {
+		return IDMS_Federated_ID__c;
+	}
 
+	public void setIDMS_Federated_ID__c(String iDMS_Federated_ID__c) {
+		IDMS_Federated_ID__c = iDMS_Federated_ID__c;
+	}
+	
 }
