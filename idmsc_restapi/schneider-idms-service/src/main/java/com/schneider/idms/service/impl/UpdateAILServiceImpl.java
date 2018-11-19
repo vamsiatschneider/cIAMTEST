@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.idms.product.model.Attributes;
 import com.idms.service.util.ChinaIdmsUtil;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
@@ -24,6 +26,9 @@ import com.schneider.idms.common.ErrorCodeConstants;
 import com.schneider.idms.common.ResponseCodeStatus;
 import com.schneider.idms.model.IdmsUserAilRequest;
 import com.schneider.idms.service.UpdateAILService;
+import com.schneider.uims.service.DirectUIMSUserManagerSoapService;
+import com.se.idms.dto.AILResponse;
+import com.se.idms.dto.IDMSUserAIL;
 import com.se.idms.util.UserConstants;
 
 /**
@@ -32,6 +37,9 @@ import com.se.idms.util.UserConstants;
 @Service("updateAILService")
 public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements UpdateAILService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UpdateAILServiceImpl.class);
+	
+	@Inject 
+	private DirectUIMSUserManagerSoapService directUIMSUserManagerSoapService;
 
 	@Override
 	public Response updateAIL(String authorization, String secretToken, String accept, String region, IdmsUserAilRequest userAilRequest) {
@@ -53,9 +61,13 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 		String inOpenAMAILValue = null, modifiedAILValue = "";
 		List<String> listOfAilValues = null;
 		String PRODUCT_JSON_STRING = "";
-		ResponseCodeStatus responseCodeStatus = new ResponseCodeStatus();
 		String federatedId = null;
 		String longLiveHashedToken = null;
+		AILResponse ailResponse = new AILResponse();
+		Integer vNewCntValue=0;
+		String usermail = "";
+		String openamVnew=null;
+		IDMSUserAIL idmsUserAil = new IDMSUserAIL();
 
 		try {
 			LOGGER.info("userAilRequest=" + objectMapper.writeValueAsString(userAilRequest));
@@ -188,6 +200,11 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 
 			// writing business logic - start
 			userId = federatedId.trim();
+			if ("REVOKE".equalsIgnoreCase(userAilRequest.getOperation()))
+				idmsUserAil.setIdmsisRevokedOperation__c(true);
+			else
+				idmsUserAil.setIdmsisRevokedOperation__c(false);
+			
 			iPlanetDirectoryKey = getSSOToken();
 
 			aclType = getIDMSAclType(userAilRequest.getAclType().trim());
@@ -205,6 +222,7 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 			LOGGER.info("Returned User Data from OpenAM=" + userData);
 			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
+			usermail = productDocCtx.read("$.mail[0]");
 
 			inOpenAMAILFullValues = productDocCtx.read("$.IDMSAil_c[0]");
 			inOpenAMAILType = "IDMSAIL_" + aclType + "_c";
@@ -241,15 +259,23 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 				LOGGER.info("Grant Operation: JSON string to update -> " + PRODUCT_JSON_STRING);
 				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:GET/getUser/{userId}");
-				LOGGER.info("Start: Calling updateUser() of OpenAMService to update AIL for userId=" + userId);
+				LOGGER.info("Start: updateUser() of OpenAMService to update AIL for userId=" + userId);
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 						PRODUCT_JSON_STRING);
 				LOGGER.info("End: updateUser() of OpenAMService to update AIL finished for userId=" + userId);
 				// response
-				responseCodeStatus.setStatus(ErrorCodeConstants.SUCCESS);
-				responseCodeStatus.setMessage("AIL was granted successfully ");
-
-				return Response.status(Response.Status.OK.getStatusCode()).entity(responseCodeStatus).build();
+				ailResponse = generateUserAILResponse(userAilRequest);
+				
+				openamVnew = null != productDocCtx.read("$.V_New[0]") ? getValue(productDocCtx.read("$.V_New[0]")) : getDelimeter();
+				
+				if(null != vNewCntValue && null != openamVnew){
+					vNewCntValue = Integer.parseInt(openamVnew)+ 1;
+				}
+				
+				//calling Async methods of UIMS api in updateUserAil IDMS api
+				updateInUIMS(userAilRequest, iPlanetDirectoryKey, vNewCntValue, usermail, idmsUserAil);
+				
+				return Response.status(Response.Status.OK.getStatusCode()).entity(ailResponse).build();
 
 			} else
 				// Revoke Operation
@@ -297,16 +323,23 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 					}
 
 					LOGGER.info("Revoke Operation: JSON String to Update=" + PRODUCT_JSON_STRING);
-					LOGGER.info("Start: calling updateUser() of OpenAMService to update AIL values for userId=" + userId);
+					LOGGER.info("Start: updateUser() of OpenAMService to update AIL values for userId=" + userId);
 
 					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 							PRODUCT_JSON_STRING);
 					LOGGER.info("End: updateUser() of OpenAMService to update AIL values finished for userId=" + userId);
+					// response
+					ailResponse = generateUserAILResponse(userAilRequest);
+					
+					openamVnew = null != productDocCtx.read("$.V_New[0]") ? getValue(productDocCtx.read("$.V_New[0]")) : getDelimeter();
+					
+					if(null != vNewCntValue && null != openamVnew){
+						vNewCntValue = Integer.parseInt(openamVnew)+ 1;
+					}
+					
+					updateInUIMS(userAilRequest, iPlanetDirectoryKey, vNewCntValue, usermail, idmsUserAil);
 
-					responseCodeStatus.setStatus(ErrorCodeConstants.SUCCESS);
-					responseCodeStatus.setMessage("AIL was revoked successfully ");
-
-					return Response.status(Response.Status.OK.getStatusCode()).entity(responseCodeStatus).build();
+					return Response.status(Response.Status.OK.getStatusCode()).entity(ailResponse).build();
 				} else {
 					responseCode
 					.setMessage("Can not perform Grant/Revoke operation. AIL Value/s already present/removed.");
@@ -353,6 +386,22 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 
 	}
 
+	private void updateInUIMS(IdmsUserAilRequest userAilRequest, String iPlanetDirectoryKey, Integer vNewCntValue,
+		String usermail, IDMSUserAIL idmsUserAIL) {
+		LOGGER.info("Inside updateInUIMS() --> Start");
+			
+		if (null != userAilRequest.getProfileLastUpdateSource() && 
+				!UserConstants.UIMS.equalsIgnoreCase(userAilRequest.getProfileLastUpdateSource())) {
+			LOGGER.info("Start: updateUIMSUserAIL() of DirectUIMSUserManagerSoapService for userid="+usermail);
+			directUIMSUserManagerSoapService.updateUIMSUserAIL(userAilRequest, idmsUserAIL,vNewCntValue.toString(),productService,
+					UserConstants.CHINA_IDMS_TOKEN +iPlanetDirectoryKey, usermail);
+			LOGGER.info("End: updateUIMSUserAIL() of DirectUIMSUserManagerSoapService finished for usermail="+usermail);
+		} else {
+			//to nothing
+		}
+		LOGGER.info("Inside updateInUIMS() --> End");
+	}
+
 	private String getIDMSAclType(String aclType) {
 		if (UserConstants.ACLTYPE_APPLICATION.equalsIgnoreCase(aclType))
 			return UserConstants.ACLTYPE_APPLICATIONS;
@@ -363,5 +412,30 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 
 		return null;
 	}
-
+	
+	private AILResponse generateUserAILResponse(IdmsUserAilRequest userAilRequest) {		
+		IDMSUserAIL idmsUserAIL = new IDMSUserAIL();
+		Attributes attributes = new Attributes();
+		attributes.setType("IDMSUserAIL__c");
+		idmsUserAIL.setAttributes(attributes);
+		idmsUserAIL.setId(userAilRequest.getFederatedId());
+		idmsUserAIL.setIDMS_Federated_Id__c(userAilRequest.getFederatedId());
+		idmsUserAIL
+				.setIdms_Profile_update_source__c(userAilRequest.getProfileLastUpdateSource());
+		idmsUserAIL.setIdmsaclType__c(userAilRequest.getAclType());
+		if ("REVOKE".equalsIgnoreCase(userAilRequest.getOperation()))
+			idmsUserAIL.setIdmsisRevokedOperation__c(true);
+		else
+			idmsUserAIL.setIdmsisRevokedOperation__c(false);
+		idmsUserAIL.setIdmsoperation__c(userAilRequest.getOperation());
+		idmsUserAIL.setIdmsacl__c(userAilRequest.getAcl());
+		idmsUserAIL.setIdmsuser__c(userAilRequest.getFederatedId());
+		
+		AILResponse ailResponse = new AILResponse();
+		ailResponse.setStatus(successStatus);
+		ailResponse.setMessage("User AIL updated successfully");
+		ailResponse.setIdmsUserAil(idmsUserAIL);
+		
+		return ailResponse;
+	}
 }

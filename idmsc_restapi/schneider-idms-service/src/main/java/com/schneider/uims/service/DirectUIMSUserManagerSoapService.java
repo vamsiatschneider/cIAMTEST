@@ -26,6 +26,7 @@ import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.google.common.base.Predicates;
 import com.idms.mapper.IdmsMapper;
+import com.idms.model.AILRequest;
 import com.idms.model.UserRegistrationInfoRequest;
 import com.idms.model.digital.Authentication;
 import com.idms.product.client.OpenAMService;
@@ -33,9 +34,11 @@ import com.idms.service.SendEmail;
 import com.idms.service.UIMSAuthenticatedUserManagerSoapService;
 import com.idms.service.UIMSCompanyManagerSoapService;
 import com.idms.service.digital.GoDigitalUserService;
+import com.schneider.idms.model.IdmsUserAilRequest;
 import com.schneider.idms.model.IdmsUserConfirmRequest;
 import com.schneider.idms.model.IdmsUserRequest;
 import com.schneider.ims.service.uimsv2.CompanyV3;
+import com.se.idms.dto.IDMSUserAIL;
 import com.se.idms.util.SamlAssertionTokenGenerator;
 import com.se.idms.util.UimsConstants;
 import com.se.idms.util.UserConstants;
@@ -50,6 +53,7 @@ import com.se.uims.usermanager.UnexpectedLdapResponseException_Exception;
 import com.se.uims.usermanager.UnexpectedRuntimeImsException_Exception;
 import com.se.uims.usermanager.UserManagerUIMSV22;
 import com.se.uims.usermanager.UserV6;
+import com.uims.accessmanager.UserAccessManagerUIMSV2;
 import com.uims.authenticatedUsermanager.AccessElement;
 import com.uims.authenticatedUsermanager.Type;
 
@@ -115,6 +119,15 @@ public class DirectUIMSUserManagerSoapService {
 
 	@Value("${userManagerUIMSWsdlPortName}")
 	private String userManagerUIMSWsdlPortName;
+	
+	@Value("${userAccessManagerUIMSVWsdl}")
+	private String userAccessManagerUIMSVWsdl;
+	
+	@Value("${userAccessManagerUIMSQname}")
+	private String userAccessManagerUIMSQname;
+	
+	@Value("${userAccessManagerUIMSVPortName}")
+	private String userAccessManagerUIMSVPortName;
 
 	// private T uimsIdentity;
 
@@ -136,6 +149,10 @@ public class DirectUIMSUserManagerSoapService {
 	private String createdFedId = null;
 
 	String createdCompanyFedId = null;
+	
+	private boolean isrevokeresult = false;
+
+	private boolean isgrantresult = false;
 
 	/**
 	 * Service to fetch information about {@link Product}s.
@@ -164,6 +181,31 @@ public class DirectUIMSUserManagerSoapService {
 			e.printStackTrace();
 		}
 		return userManagerUIMSV2;
+	}
+	
+	
+	public UserAccessManagerUIMSV2 getAccessManager(){
+		LOGGER.info("Entered getAccessManager(): -. Start ");
+		URL url;
+		UserAccessManagerUIMSV2 accessManagerUIMSV2 = null;
+		try {
+			url = new URL(userAccessManagerUIMSVWsdl);
+
+			QName qname = new QName(userAccessManagerUIMSQname,userAccessManagerUIMSVPortName);
+			Service service = Service.create(url, qname);
+			LOGGER.info("Start: getPort() of UIMS");
+			accessManagerUIMSV2 = service.getPort(UserAccessManagerUIMSV2.class);
+			LOGGER.info("End: getPort() of UIMS");
+
+		} catch (MalformedURLException e) {
+			LOGGER.error("MalformedURLException in getAccessManager()::" + e.getMessage());
+			e.printStackTrace();
+		}
+		catch (Exception e) {
+			LOGGER.error("Exception in getAccessManager()::" + e.getMessage());
+			e.printStackTrace();
+		}
+		return accessManagerUIMSV2;
 	}
 
 	@Async
@@ -893,6 +935,132 @@ public class DirectUIMSUserManagerSoapService {
 							+ e.getMessage());
 			e.printStackTrace();
 		}
+	}
+	
+	
+	@Async
+	public void updateUIMSUserAIL(IdmsUserAilRequest userAilRequest, IDMSUserAIL idmsUserAIL, String vNewCntValue,
+			OpenAMService productService, String iPlanetDirectoryKey, String usermail) {
+		LOGGER.info("inside updateUIMSUserAIL Async Method");
+		try {
+			//LOGGER.info("In UserServiceImpl.updateAIL():-->Caling Async UIMS method of grant/revoke access manager control method");
+			com.uims.accessmanager.AccessElement access = new com.uims.accessmanager.AccessElement();
+			if ("APPLICATION".equalsIgnoreCase(userAilRequest.getAclType())) {
+				access.setType(com.uims.accessmanager.Type.APPLICATION);
+				access.setId(userAilRequest.getAcl());
+			} else if ("FEATURE".equalsIgnoreCase(userAilRequest.getAclType())) {
+				access.setType(com.uims.accessmanager.Type.FEATURE);
+				access.setId(userAilRequest.getAcl());
+			} else if ("PROGRAM".equalsIgnoreCase(userAilRequest.getAclType())) {
+				access.setType(com.uims.accessmanager.Type.PROGRAM);
+				access.setId(userAilRequest.getAcl());
+			} else {
+				access.setType(com.uims.accessmanager.Type.PROGRAM_LEVEL);
+				access.setId(userAilRequest.getAcl());
+			}
+			
+			if (userAilRequest.getOperation().equalsIgnoreCase("GRANT") && !(idmsUserAIL.isIdmsisRevokedOperation__c())) {
+				grantAccessControlToUser(UimsConstants.CALLER_FID,
+						userAilRequest.getFederatedId(),
+						userAilRequest.getFederatedId(), access, vNewCntValue, productService,
+						iPlanetDirectoryKey, usermail);
+			} else if (userAilRequest.getOperation().equalsIgnoreCase("REVOKE") && idmsUserAIL.isIdmsisRevokedOperation__c()) {
+				revokeAccessControlToUser(UimsConstants.CALLER_FID,
+						userAilRequest.getFederatedId(),
+						userAilRequest.getFederatedId(), access, vNewCntValue, productService,
+						iPlanetDirectoryKey, usermail);
+			}
+		} catch (Exception e) {
+			//productService.sessionLogout(iPlanetDirectoryKey, "logout");
+			LOGGER.error("Exception in updateUIMSUserAIL():"+ e.getMessage());
+			e.printStackTrace();
+		}
+		//productService.sessionLogout(iPlanetDirectoryKey, "logout");
+		LOGGER.info("UIMS updateAIL Async Method completed!");
+	}
+	
+	@Async
+	public void grantAccessControlToUser(String callerFid, String federatedId, String userId, com.uims.accessmanager.AccessElement access,
+			String openamVnew, OpenAMService productService, String iPlanetDirectoryKey, String email) throws MalformedURLException {
+		LOGGER.info("inside grantAccessControToUser Async method");
+		try {
+			Callable<Boolean> callableGrantAccess = new Callable<Boolean>() {
+				public Boolean call() throws Exception {
+					UserAccessManagerUIMSV2 accessManagerUIMSV2 = getAccessManager();
+					isgrantresult = accessManagerUIMSV2.grantAccessControlToUser(callerFid, federatedId, access);
+					LOGGER.info("grantAccessControlToUser result:" + isgrantresult);
+					return true;
+				}
+			};
+			Retryer<Boolean> retryer = RetryerBuilder.<Boolean> newBuilder()
+					.retryIfResult(Predicates.<Boolean> isNull()).retryIfExceptionOfType(Exception.class)
+					.retryIfRuntimeException().withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
+			try {
+				retryer.call(callableGrantAccess);
+				// after successful grantAccessControlToUser, we need to update
+				// the v_old
+				if (isgrantresult) {
+					String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
+					productService.updateUser(iPlanetDirectoryKey, userId, version);
+				}
+			} catch (RetryException e) {
+				e.printStackTrace();
+				LOGGER.error("Retry failed while calling the grantAccessControlToUser::" + e.getMessage());
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+			/*if(!isgrantresult) {
+				LOGGER.info("UIMS UpdateAIL Grant Access got failed -----> ::sending mail notification::");
+				sendEmail.emailReadyToSendEmail(supportUser, fromUserName,
+						"UIMS UpdateAIL Grant Access failed.", userId);
+			}*/
+		} catch (Exception e) {
+			LOGGER.error("Remote Soap Exception while consuming grantAccessControlToUser :-->" + e.getMessage());
+			e.printStackTrace();
+		}
+		LOGGER.info("Completed grantAccessControToUser Async method!");
+	}
+
+	@Async
+	public void revokeAccessControlToUser(String callerFid, String federatedId, String userId, com.uims.accessmanager.AccessElement access,
+			String openamVnew, OpenAMService productService, String iPlanetDirectoryKey, String email) throws MalformedURLException {
+		LOGGER.info("inside revokeAccessControlToUser Async method");
+		try {
+			Callable<Boolean> callableRevokeAccess = new Callable<Boolean>() {
+				public Boolean call() throws Exception {
+					UserAccessManagerUIMSV2 accessManagerUIMSV2 = getAccessManager();
+					isrevokeresult = accessManagerUIMSV2.revokeAccessControlToUser(callerFid, federatedId, access);
+					LOGGER.info("revokeAccessControlToUser::" + isrevokeresult);
+					return true;
+				}
+			};
+			Retryer<Boolean> retryer = RetryerBuilder.<Boolean> newBuilder()
+					.retryIfResult(Predicates.<Boolean> isNull()).retryIfExceptionOfType(Exception.class)
+					.retryIfRuntimeException().withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
+			try {
+				retryer.call(callableRevokeAccess);
+				// after successful revokeAccessControlToUser, we need to update
+				// the v_old
+				if (isrevokeresult) {
+					String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
+					productService.updateUser(iPlanetDirectoryKey, userId, version);
+				}
+			} catch (RetryException e) {
+				e.printStackTrace();
+				LOGGER.error("Retry failed while calling the revokeAccessControlToUser::" + e.getMessage());
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+			/*if(!isrevokeresult) {
+				LOGGER.info("UIMS UpdateAIL revoke access got failed -----> ::sending mail notification::");
+				sendEmail.emailReadyToSendEmail(supportUser, fromUserName,
+						"UIMS UpdateAIL revoke failed.", userId);
+			}*/
+		} catch (Exception e) {
+			LOGGER.error("Remote Soap Exception while consuming revokeAccessControlToUser:-->" + e.getMessage());
+			e.printStackTrace();
+		}
+		LOGGER.info("inside revokeAccessControlToUser Async method!");
 	}
 
 	public static void main(String[] args) {
