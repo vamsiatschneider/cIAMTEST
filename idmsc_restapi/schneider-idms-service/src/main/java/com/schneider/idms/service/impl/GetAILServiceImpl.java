@@ -11,6 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.idms.service.util.ChinaIdmsUtil;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
@@ -28,6 +32,8 @@ import com.se.idms.util.UserConstants;
 @Service("getAILService")
 public class GetAILServiceImpl extends IdmsCommonServiceImpl implements GetAILService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GetAILServiceImpl.class);
+	
+	private ObjectMapper mapper = new ObjectMapper();
 
 	@Override
 	public Response getUserAIL(String authorization, String accept, String region, String federationId) {
@@ -43,6 +49,7 @@ public class GetAILServiceImpl extends IdmsCommonServiceImpl implements GetAILSe
 		String longLiveHashedToken = null;
 		String iPlanetDirectoryKey = null;
 		String userData = null;
+		JsonNode responseJason = mapper.createObjectNode();
 
 		try {
 			// Authorization
@@ -98,18 +105,10 @@ public class GetAILServiceImpl extends IdmsCommonServiceImpl implements GetAILSe
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
 
 			LOGGER.info("productDocCtx="+productDocCtx);
-			UserAILInfoDTO userAILInfoDTO = new UserAILInfoDTO();
 			
-			userAILInfoDTO.setIdmsAil_c(null != productDocCtx.read("$.IDMSAil_c")
-					? getValue(productDocCtx.read("$.IDMSAil_c").toString()) : getDelimeter());
-			userAILInfoDTO.setIdmsAIL_Applications(null != productDocCtx.read("$.IDMSAIL_Applications_c")
-					? getValue(productDocCtx.read("$.IDMSAIL_Applications_c").toString()) : getDelimeter());
-			userAILInfoDTO.setIdmsAIL_Features(null != productDocCtx.read("$.IDMSAIL_Features_c")
-					? getValue(productDocCtx.read("$.IDMSAIL_Features_c").toString()) : getDelimeter());
-			userAILInfoDTO.setIdmsAIL_Programs(null != productDocCtx.read("$.IDMSAIL_Programs_c")
-					? getValue(productDocCtx.read("$.IDMSAIL_Programs_c").toString()) : getDelimeter());
-
-			return Response.status(Response.Status.OK.getStatusCode()).entity(userAILInfoDTO).build();
+			responseJason = successAILResponse(productDocCtx);
+			
+			return Response.status(Response.Status.OK.getStatusCode()).entity(responseJason).build();
 		} catch (NotFoundException e) {
 			e.printStackTrace();
 			responseCode.setStatus(ErrorCodeConstants.ERROR);
@@ -129,17 +128,46 @@ public class GetAILServiceImpl extends IdmsCommonServiceImpl implements GetAILSe
 		}catch (Exception e) {
 			e.printStackTrace();
 			responseCode.setStatus(ErrorCodeConstants.ERROR);
-			responseCode.setMessage("Error in Updating the AIL Object");
+			responseCode.setMessage("Error in Getting the AIL Object is="+e.getMessage());
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-			LOGGER.info("Time taken by UserServiceImpl.updateAIL() : " + elapsedTime);
+			LOGGER.info("Time taken by getUserAIL() : " + elapsedTime);
 			LOGGER.error("Exception in getUserAIL() :: -> " + e.getMessage());
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(responseCode).build();
 		}
 	}
 
-
+	private JsonNode successAILResponse(DocumentContext productDocCtx){
+		JsonNode AILInfo = mapper.createObjectNode();
+		((ObjectNode) AILInfo).put("status", "Success");
+		((ObjectNode) AILInfo).put("message", "AIL retrieved successfully");
+		((ObjectNode) AILInfo).put("federationidentifier",null != productDocCtx.read("$.uid")
+				? getValue(productDocCtx.read("$.uid").toString()) : getDelimeter());
+		ArrayNode array = mapper.createArrayNode();
+		String appType[] = {"Application","Program","Feature"};
+		
+		for(String appName:appType){
+			JsonNode dataAIL = mapper.createObjectNode();
+			((ObjectNode) dataAIL).put("aclType", appName);
+			((ObjectNode) dataAIL).put("acl", null != productDocCtx.read("$.IDMSAIL_"+appName+"s_c")
+					? getValue(productDocCtx.read("$.IDMSAIL_"+appName+"s_c").toString()) : getDelimeter());
+			array.add(dataAIL);
+		}
+		
+		((ObjectNode) AILInfo).put("applicationAil", array);
+		
+		return AILInfo;
+	}
+	/*private JsonObject failureAILResponse(){
+		JsonObject AILInfo = new JsonObject();
+		AILInfo.addProperty(property, value);
+		
+		return AILInfo;
+	}*/
 
 }
+
+
+
 
 class UserAILInfoDTO {
 
