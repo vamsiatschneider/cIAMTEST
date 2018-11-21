@@ -136,6 +136,7 @@ public class GetAILServiceImpl extends IdmsCommonServiceImpl implements GetAILSe
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	private JsonNode successAILResponse(DocumentContext productDocCtx){
 		JsonNode AILInfo = mapper.createObjectNode();
 		((ObjectNode) AILInfo).put("status", "Success");
@@ -153,7 +154,7 @@ public class GetAILServiceImpl extends IdmsCommonServiceImpl implements GetAILSe
 			array.add(dataAIL);
 		}
 		
-		((ObjectNode) AILInfo).put("applicationAil", array);
+		((ObjectNode) AILInfo).put("ails", array);
 		
 		return AILInfo;
 	}
