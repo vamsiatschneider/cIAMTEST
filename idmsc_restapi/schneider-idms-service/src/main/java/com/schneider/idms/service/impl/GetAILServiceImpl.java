@@ -112,7 +112,7 @@ public class GetAILServiceImpl extends IdmsCommonServiceImpl implements GetAILSe
 		} catch (NotFoundException e) {
 			e.printStackTrace();
 			responseCode.setStatus(ErrorCodeConstants.ERROR);
-			responseCode.setMessage("User not found based on federationId");
+			responseCode.setMessage("User Not Found");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by getUserAIL() : " + elapsedTime);
 			LOGGER.error("NotFoundException in getUserAIL() :: -> " + e.getMessage());
@@ -128,7 +128,7 @@ public class GetAILServiceImpl extends IdmsCommonServiceImpl implements GetAILSe
 		}catch (Exception e) {
 			e.printStackTrace();
 			responseCode.setStatus(ErrorCodeConstants.ERROR);
-			responseCode.setMessage("Error in Getting the AIL Object is="+e.getMessage());
+			responseCode.setMessage("Internal Server Error");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by getUserAIL() : " + elapsedTime);
 			LOGGER.error("Exception in getUserAIL() :: -> " + e.getMessage());

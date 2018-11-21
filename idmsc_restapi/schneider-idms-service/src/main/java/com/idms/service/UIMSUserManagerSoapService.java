@@ -797,8 +797,14 @@ public class UIMSUserManagerSoapService {
 					.retryIfRuntimeException().withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
 
 
-			if (null != context && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)
-					|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context))) {
+			/*if (null != context && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)
+					* || UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context))) {
+					
+					* removing the check to fire uims update company even in null context
+					* as in some scenario we are getting company info even context is null
+					* company object's organization name attribute is sometime empty
+					* so not checking on organization name also 					
+					* */
 
 				retryerCompany.call(callableUpdateCompany);
 				if(updateUIMSCompany){
@@ -819,7 +825,7 @@ public class UIMSUserManagerSoapService {
 					sendEmail.emailReadyToSendEmail(supportUser, fromUserName, "UIMS Update user and company failed.",
 							userName);
 				}
-			}
+			//}
 
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in updateUIMSUserAndCompany()::" + e.getMessage());
