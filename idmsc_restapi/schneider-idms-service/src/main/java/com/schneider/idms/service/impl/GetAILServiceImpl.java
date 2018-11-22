@@ -50,6 +50,7 @@ public class GetAILServiceImpl extends IdmsCommonServiceImpl implements GetAILSe
 		String iPlanetDirectoryKey = null;
 		String userData = null;
 		JsonNode responseJason = mapper.createObjectNode();
+		String idmsAIL_Features = null, idmsAIL_Programs = null, idmsAIL_Applications = null;
 
 		try {
 			// Authorization
@@ -103,12 +104,23 @@ public class GetAILServiceImpl extends IdmsCommonServiceImpl implements GetAILSe
 
 			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
+			LOGGER.info("productDocCtx = "+productDocCtx.jsonString());
+			
+			idmsAIL_Features = (null != productDocCtx.read("$.IDMSAIL_Features_c")
+					? getValue(productDocCtx.read("$.IDMSAIL_Features_c").toString()) : getDelimeter());
+			idmsAIL_Programs = (null != productDocCtx.read("$.IDMSAIL_Programs_c")
+					? getValue(productDocCtx.read("$.IDMSAIL_Programs_c").toString()) : getDelimeter());
+			idmsAIL_Applications = (null != productDocCtx.read("$.IDMSAIL_Applications_c")
+					? getValue(productDocCtx.read("$.IDMSAIL_Applications_c").toString()) : getDelimeter());
 
-			LOGGER.info("productDocCtx="+productDocCtx);
-			
-			responseJason = successAILResponse(productDocCtx);
-			
+			if(null == idmsAIL_Features && null == idmsAIL_Programs && null == idmsAIL_Applications){
+				responseCode.setStatus(ErrorCodeConstants.ERROR);
+				responseCode.setMessage("No AIL Data Available");				
+				return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
+			}else{			
+			responseJason = successAILResponse(productDocCtx);			
 			return Response.status(Response.Status.OK.getStatusCode()).entity(responseJason).build();
+			}
 		} catch (NotFoundException e) {
 			e.printStackTrace();
 			responseCode.setStatus(ErrorCodeConstants.ERROR);
@@ -158,17 +170,16 @@ public class GetAILServiceImpl extends IdmsCommonServiceImpl implements GetAILSe
 		
 		return AILInfo;
 	}
-	/*private JsonObject failureAILResponse(){
-		JsonObject AILInfo = new JsonObject();
-		AILInfo.addProperty(property, value);
+	
+/*	private JsonNode failureAILResponse(){
+		JsonNode AILInfo = mapper.createObjectNode();
+		((ObjectNode) AILInfo).put("status", "Error");
+		((ObjectNode) AILInfo).put("message", "No AIL Data Available");
 		
 		return AILInfo;
 	}*/
 
 }
-
-
-
 
 class UserAILInfoDTO {
 
