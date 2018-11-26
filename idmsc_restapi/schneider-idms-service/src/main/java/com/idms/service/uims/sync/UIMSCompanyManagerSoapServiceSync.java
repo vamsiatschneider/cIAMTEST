@@ -137,7 +137,7 @@ public class UIMSCompanyManagerSoapServiceSync {
 			//samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(idmsFederationId, vnew);
 			LOGGER.info("Start: UIMS createCompanyForceIdmsId()");
 			uimsUserResponse = authenticatedCompanyManagerUIMSV2.createCompanyForceIdmsId(UimsConstants.CALLER_FID, idmsFederationId, company, companyForceFederationId);
-			LOGGER.info("End: UIMS createCompanyForceIdmsId()");
+			LOGGER.info("End: UIMS createCompanyForceIdmsId(), response is "+uimsUserResponse);
 		} catch (ForcedFidAlreadyExistException | IMSServiceSecurityCallNotAllowedException
 				| InvalidImsServiceMethodArgumentException | LdapTemplateNotReadyException
 				| RequestedEntryNotExistsException | RequestedInternalUserException | SecuredImsException

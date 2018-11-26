@@ -89,6 +89,7 @@ import com.idms.model.CreateUserResponse;
 import com.idms.model.IDMSUserResponse;
 import com.idms.model.IFWUser;
 import com.idms.model.PasswordRecoveryRequest;
+import com.idms.model.RegistrationAttributes;
 import com.idms.model.ResendEmailChangeRequest;
 import com.idms.model.ResendPinRequest;
 import com.idms.model.ResendRegEmailRequest;
@@ -833,7 +834,8 @@ public class UserServiceImpl implements UserService {
 					|| UserConstants.USER_CONTEXT_WORK_1
 							.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_User_Context__c()))
 					&& (null == userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c()
-							|| userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c().isEmpty())) {
+							|| userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c().isEmpty())
+					&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c()))) {
 				
 				userRequest.getUserRecord().setIDMSCompanyFederationIdentifier__c(ChinaIdmsUtil.generateFedId());
 
@@ -3981,6 +3983,7 @@ public class UserServiceImpl implements UserService {
 		long elapsedTime;
 		ObjectMapper objMapper = new ObjectMapper();
 		userResponse.setStatus(errorStatus);
+		String companyFedIdInRequest = null;
 		
 		try {
 			LOGGER.info("updateUser -> : Request -> "+objMapper.writeValueAsString(userRequest));
@@ -4005,9 +4008,10 @@ public class UserServiceImpl implements UserService {
 			boolean booleanTrue = true;
 			String fedId=null;
 			Integer vNewCntValue=0;
-			String companyFedId="";
+			String companyFedIdInOpenAM="";
 			String usermail = "";
 			boolean isUserFromSocialLogin = false;
+			String attributeText = null;
 			// Step 1:
 
 			//LOGGER.info(" UserServiceImpl :: updateUser getUserInfoByAccessToken ");
@@ -4114,6 +4118,7 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info("End: getUserInfoByAccessToken() of openamtokenservice, userInfoByAccessToken="+userInfoByAccessToken);
 					
 					productDocCtx = JsonPath.using(conf).parse(userInfoByAccessToken);
+					LOGGER.info("productDocCtx = "+productDocCtx.jsonString());
 
 					if(null != productDocCtx.read("$.email") && productDocCtx.read("$.email").toString().contains(UserConstants.TECHNICAL_USER)){
 						LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for email="+userRequest.getUserRecord().getEmail());
@@ -4140,6 +4145,7 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info("In non-BFO Profile block");
 					String userInfoByAccessToken = openAMTokenService.getUserInfoByAccessToken(authorizedToken, "/se");
 					productDocCtx = JsonPath.using(conf).parse(userInfoByAccessToken);
+					LOGGER.info("productDocCtx = "+productDocCtx.jsonString());
 					userId = productDocCtx.read("$.sub");
 					fedId = productDocCtx.read("$.federationID");
 
@@ -4172,7 +4178,8 @@ public class UserServiceImpl implements UserService {
 				userName = productDocCtxUser.read(JsonConstants.USER_NAME);
 				openAmReq = mapper.map(userRequest, OpenAmUserRequest.class);
 				openAmReq.getInput().setUser(user);
-				companyFedId = productDocCtxUser.read("$.companyFederatedID[0]");
+				companyFedIdInOpenAM = productDocCtxUser.read("$.companyFederatedID[0]");
+				LOGGER.info("companyFedIdInOpenAM = "+companyFedIdInOpenAM);
 				
 				/**
 				 * Setting attributes in openam registration 
@@ -4497,16 +4504,50 @@ public class UserServiceImpl implements UserService {
 				if(null != company.getLanguageCode()){
 				company.setLanguageCode(company.getLanguageCode().toLowerCase());
 				}
-				company.setFederatedId(companyFedId);
+				company.setFederatedId(companyFedIdInOpenAM);
 				
 				//Setting publicVisibility value to company.publicVisibility
 				if(null != userRequest.getAttributes() && userRequest.getAttributes().size() > 0){
-					String KeyName = userRequest.getAttributes().get(0).getKeyName();
+					List<RegistrationAttributes> attributeList = userRequest.getAttributes();
+					for(int i=0;i<attributeList.size();i++){
+						String KeyName = attributeList.get(i).getKeyName();
+						String KeyValue = attributeList.get(i).getKeyValue();
+
+						if(KeyName.equalsIgnoreCase("publicVisibility")){
+							company.setPublicVisibility(Boolean.valueOf(KeyValue));
+							if(null == attributeText || attributeText.isEmpty()){
+								attributeText = "{" + "\"publicVisibility\": \"" + KeyValue + "\"" + "}";
+								LOGGER.info("Start: updateUser() of openam to update publicVisibility for userid="+userId);
+								productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+										attributeText);
+								LOGGER.info("End: updateUser() of openam to update publicVisibility finished for userid="+userId);
+							}
+						}
+						if(KeyName.equalsIgnoreCase("pvtRegPRMCompFedID")){
+							companyFedIdInRequest = KeyValue;
+							attributeText = null;
+							if(null == attributeText || attributeText.isEmpty()){
+								attributeText = "{" + "\"companyFederatedID\": \"" + KeyValue + "\"" + "}";
+								LOGGER.info("Start: updateUser() of openam to update companyFederatedID for userid="+userId);
+								productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+										attributeText);
+								LOGGER.info("End: updateUser() of openam to update companyFederatedID finished for userid="+userId);
+							}
+						}
+					}
+
+					/*String KeyName = userRequest.getAttributes().get(0).getKeyName();
 					Boolean KeyValue = Boolean.valueOf(userRequest.getAttributes().get(0).getKeyValue());
 					if(KeyName.equalsIgnoreCase("publicVisibility")){
 						company.setPublicVisibility(KeyValue);
-					}
+					}*/
 				}
+				
+				/*LOGGER.info("attributeText to update= "+attributeText);
+				LOGGER.info("Start: updateUser() of openam to update publicVisibility & compFedId for userid="+userId);
+				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+						attributeText);
+				LOGGER.info("End: updateUser() of openam to update publicVisibility & compFedId finished for userid="+userId);*/
 				
 				com.se.uims.usermanager.UserV6 identity = mapper.map(userRequest, com.se.uims.usermanager.UserV6.class);
 				if(null != identity.getLanguageCode()){
@@ -4516,7 +4557,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Start: ASYNC updateUIMSUserAndCompany() for userId:"+userId);
 				uimsUserManagerSoapService.updateUIMSUserAndCompany(fedId, identity,
 						userRequest.getUserRecord().getIDMS_User_Context__c(), company, vNewCntValue.toString(),
-						productService, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, companyFedId, usermail);
+						productService, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, companyFedIdInRequest, usermail);
 				LOGGER.info("End: ASYNC updateUIMSUserAndCompany() finished for userId:"+userId);
 			} else {
 				//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
@@ -6012,6 +6053,7 @@ public class UserServiceImpl implements UserService {
 		//LOGGER.info("User Record with fed ID= " + userExists);
 
 		productDocCtx = JsonPath.using(conf).parse(userExists);
+		LOGGER.info("productDocCtx = "+productDocCtx.jsonString());
 		Integer resultCount = productDocCtx.read(JsonConstants.RESULT_COUNT);
 		LOGGER.info("resultCount="+resultCount);
 

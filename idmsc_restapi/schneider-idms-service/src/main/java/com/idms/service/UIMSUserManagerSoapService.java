@@ -33,6 +33,7 @@ import com.idms.model.UserRegistrationInfoRequest;
 import com.idms.model.digital.Authentication;
 import com.idms.product.client.OpenAMService;
 import com.idms.service.digital.GoDigitalUserService;
+import com.idms.service.uims.sync.UIMSCompanyManagerSoapServiceSync;
 import com.idms.service.util.ChinaIdmsUtil;
 import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.cache.validate.IValidator;
@@ -106,6 +107,9 @@ public class UIMSUserManagerSoapService {
 
 	@Autowired
 	private UIMSCompanyManagerSoapService companyManagerSoapService;
+	
+	@Autowired
+	private UIMSCompanyManagerSoapServiceSync companyManagerSoapServiceSync;
 
 	@Value("${goDitalToken}")
 	private String goDitalToken;
@@ -785,9 +789,24 @@ public class UIMSUserManagerSoapService {
 				public Boolean call() throws Exception {
 
 					// TODO logic to get the federatedId
-					String federatedId = "";
-
-					updateUIMSCompany = companyManagerSoapService.updateUIMSCompany(fedId, vnew, company,companyFedId);
+					//String federatedId = ""; 
+					//company.getFederatedId() is compFedIdInOpenAM, companyFedId is from request  
+					if(null == company.getFederatedId() && null != companyFedId){						
+						String uimsUserResponse = companyManagerSoapServiceSync.createUIMSCompanyWithCompanyForceIdmsId(fedId, companyFedId, vnew, company);
+						LOGGER.info("uimsUserResponse = "+uimsUserResponse);
+					} else if(null == company.getFederatedId() && null == companyFedId){
+						String newcompanyFedId = ChinaIdmsUtil.generateFedId();
+						
+						String companyFederatedIDQuery = "{" + "\"companyFederatedID\": \"" + newcompanyFedId + "\"" + "}";
+						LOGGER.info("companyFederatedIDQuery = "+companyFederatedIDQuery);
+						LOGGER.info("Start: updateUser() of openam to update companyFedId for username : "+userName);
+						productService.updateUser(iPlanetDirectoryKey, userName, companyFederatedIDQuery);
+						LOGGER.info("End: updateUser() of openam to update companyFedId finished for username : "+userName);
+						String uimsUserResponse = companyManagerSoapServiceSync.createUIMSCompanyWithCompanyForceIdmsId(fedId, newcompanyFedId, vnew, company);
+						LOGGER.info("uimsUserResponse = "+uimsUserResponse);
+					} else{
+						updateUIMSCompany = companyManagerSoapService.updateUIMSCompany(fedId, vnew, company,company.getFederatedId());
+					}
 					return updateUIMSCompany;
 				}
 			};

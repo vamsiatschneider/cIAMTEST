@@ -157,17 +157,19 @@ public class GetAILServiceImpl extends IdmsCommonServiceImpl implements GetAILSe
 				? getValue(productDocCtx.read("$.uid").toString()) : getDelimeter());
 		ArrayNode array = mapper.createArrayNode();
 		String appType[] = {"Application","Program","Feature"};
-		
+
 		for(String appName:appType){
 			JsonNode dataAIL = mapper.createObjectNode();
-			((ObjectNode) dataAIL).put("aclType", appName);
-			((ObjectNode) dataAIL).put("acl", null != productDocCtx.read("$.IDMSAIL_"+appName+"s_c")
-					? getValue(productDocCtx.read("$.IDMSAIL_"+appName+"s_c").toString()) : getDelimeter());
-			array.add(dataAIL);
+
+			if(null != productDocCtx.read("$.IDMSAIL_"+appName+"s_c")){
+				((ObjectNode) dataAIL).put("aclType", appName);
+				((ObjectNode) dataAIL).put("acl", getValue(productDocCtx.read("$.IDMSAIL_"+appName+"s_c").toString()));
+				array.add(dataAIL);
+			}
 		}
-		
+
 		((ObjectNode) AILInfo).put("ails", array);
-		
+
 		return AILInfo;
 	}
 	
@@ -181,7 +183,7 @@ public class GetAILServiceImpl extends IdmsCommonServiceImpl implements GetAILSe
 
 }
 
-class UserAILInfoDTO {
+/*class UserAILInfoDTO {
 
 	private String idmsAil_c;
 	private String idmsAIL_Features;
@@ -212,4 +214,4 @@ class UserAILInfoDTO {
 	public void setIdmsAIL_Applications(String idmsAIL_Applications) {
 		this.idmsAIL_Applications = idmsAIL_Applications;
 	}
-}
+}*/
