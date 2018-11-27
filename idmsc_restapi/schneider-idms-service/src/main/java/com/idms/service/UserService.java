@@ -239,4 +239,10 @@ public interface UserService {
 	@Path("/apexrest/verifyPIN")
 	Response verifyPIN(String federationId, String pin);
 	
+	@POST
+	@Path("/apexrest/ssopost") 
+	@Consumes("application/x-www-form-urlencoded")
+	Response registerPRMUser(@HeaderParam("RelayState") String relayState,@HeaderParam("SAMLRequest") String SAMLRequest);
+	
+	
 }

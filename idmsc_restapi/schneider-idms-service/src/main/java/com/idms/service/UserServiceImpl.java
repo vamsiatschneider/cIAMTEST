@@ -301,6 +301,9 @@ public class UserServiceImpl implements UserService {
 	@Value("${identityService.url}")
 	private String prefixIdentityUrl;
 	
+	@Value("${register.prmUser.idp}")
+	private String registerPRMUserIdp;
+	
 	private static String userAction = "submitRequirements";
 
 	private static String errorStatus = "Error";
@@ -7650,6 +7653,68 @@ public class UserServiceImpl implements UserService {
 		errorResponse.setStatus(ErrorCodeConstants.ERROR);
 		errorResponse.setMessage(ErrorCodeConstants.BAD_REQUEST);
 		return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+	}
+
+	/**
+	 * This method is used for PRM registration page
+	 */
+	@Override
+	public Response registerPRMUser(String relayState, String samlRequest) {
+		// TODO Auto-generated method stub
+		LOGGER.info("Entered registerPRMUser() -> Start");
+		LOGGER.info("Parameter relayState -> " + relayState+" ,SAMLRequest  -> "+samlRequest);
+		ErrorResponse errorResponse = new ErrorResponse();
+		String message = null;
+		Response jsonResponse = null;
+		Response.ResponseBuilder rb = null;
+		try {
+			/*MultivaluedMap<String, String> formParams = new MultivaluedHashMap<String, String>();
+			formParams.add("RelayState", relayState);
+			formParams.add("SAMLRequest", samlRequest);*/
+			//jsonResponse = openAMTokenService.registerPRMUser(formParams,registerPRMUserIdp);
+			jsonResponse = openAMTokenService.registerPRMUser(relayState,samlRequest,registerPRMUserIdp);
+			//message = IOUtils.toString((InputStream) jsonResponse.getEntity());
+			message=jsonResponse.getEntity().toString();
+			LOGGER.info("Message from OpenAM=" + message);
+			LOGGER.info("Location info from OpenAM=" + jsonResponse.getLocation().toString());
+			LOGGER.info("HTTP status code from OpenAM=" + jsonResponse.getStatus());
+			if (302 != jsonResponse.getStatus()) {//Verifying redirect URL
+				errorResponse.setStatus(errorStatus);
+				errorResponse.setMessage("Error in PRM registration page.");
+				LOGGER.error("Error in registerPRMUser()=" + message);
+				return Response.status(Response.Status.PRECONDITION_FAILED).entity(errorResponse).build();
+			}
+			else{
+		 	String queryParam []=relayState.split("\\?");
+			  for (String name:queryParam)
+		        {
+				  LOGGER.info("Relay state Query Params: " + name);
+		        }
+			if(queryParam.length> 1 && queryParam[1]!=null){
+				rb = Response.status(Response.Status.FOUND).entity(jsonResponse.getEntity()).header("Location",jsonResponse.getLocation().toString());
+				Cookie cookie = new Cookie("regQueryParams", queryParam[1],"/",".schneider-electric.com");
+				NewCookie newCookie = new NewCookie(cookie);
+				String amlbcookieArray[] =jsonResponse.getHeaderString("Set-Cookie").split(",");
+				for(String responseCookie:amlbcookieArray){
+					LOGGER.info("cookie* "+responseCookie);
+					rb=rb.header("Set-Cookie", responseCookie);
+				}
+				rb = rb.cookie(newCookie);//Adding new cookie to the response
+				/*jsonResponse.getCookies().put("regQueryParams",newCookie);
+				  jsonResponse=Response.status(Response.Status.FOUND).entity(jsonResponse.getEntity()).header("Location",jsonResponse.getLocation().toString()).cookie(newCookie).build();
+				  jsonResponse=Response.status(Response.Status.FOUND).header("Set-Cookie",newCookie).build();*/
+				 jsonResponse=rb.build();
+			}
+		  }
+		} catch (Exception e) {
+			e.printStackTrace();
+			errorResponse.setStatus(errorStatus);
+			errorResponse.setMessage(e.getMessage());
+			LOGGER.error("Exception in registerPRMUser()=" + e.getMessage());
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
+		}
+		return jsonResponse;
+		
 	}
 	
 }
