@@ -58,4 +58,5 @@ public class EmailConstants {
 	public static final String SCHE_SEND_INVITATION_NOTIFICATION_CN= "施耐德电气 – 登录名变更通知";
 	public static final String SCHE_SEND_INVITATION_NOTIFICATION_EN = "Schneider Electric - Send Invitation Notification";
 	
+	public static final String USERREGISTRATION_SUPPORT_LINK= "mailto:Secure_Identity-L2@schneider-electric.com";
 }
