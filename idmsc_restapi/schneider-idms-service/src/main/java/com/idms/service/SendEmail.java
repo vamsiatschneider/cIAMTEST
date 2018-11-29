@@ -494,15 +494,6 @@ public class SendEmail {
 					//LOGGER.info("Starting and Ending Index of registrationSource in Email : Start : " + startIndex + " : End : +" + endIndex);
 					contentBuilder.replace(startIndex, endIndex, subject);
 				}
-
-				if(null != bfoSupportUrl && !bfoSupportUrl.isEmpty()){
-					LOGGER.info("now changing support email to support link");
-					if(0 < contentBuilder.indexOf(EmailConstants.USERREGISTRATION_SUPPORT_LINK)){
-						startIndex = contentBuilder.indexOf(EmailConstants.USERREGISTRATION_SUPPORT_LINK);
-						endIndex = startIndex + EmailConstants.USERREGISTRATION_SUPPORT_LINK.length();
-						contentBuilder.replace(startIndex, endIndex, bfoSupportUrl);
-					}
-				}
 			}
 			startIndex = contentBuilder.indexOf("{!firstname}");
 			endIndex = startIndex + 12;
@@ -517,6 +508,15 @@ public class SendEmail {
 		
 		int startURL = contentBuilder.indexOf("{!url}");
 		int endURL = startURL+6;*/
+		
+		if(null != bfoSupportUrl && !bfoSupportUrl.isEmpty()){
+			LOGGER.info("now changing support email to support link");
+			if(0 < contentBuilder.indexOf(EmailConstants.USERREGISTRATION_SUPPORT_LINK)){
+				startIndex = contentBuilder.indexOf(EmailConstants.USERREGISTRATION_SUPPORT_LINK);
+				endIndex = startIndex + EmailConstants.USERREGISTRATION_SUPPORT_LINK.length();
+				contentBuilder.replace(startIndex, endIndex, bfoSupportUrl);
+			}
+		}
 		
 		
 		if (hotpOperationType != null && EmailConstants.SETUSERPWD_OPT_TYPE.equalsIgnoreCase(hotpOperationType)) {
