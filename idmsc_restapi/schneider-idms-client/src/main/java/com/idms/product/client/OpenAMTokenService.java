@@ -76,6 +76,6 @@ public interface OpenAMTokenService {
 	@Path("/SSOPOST/metaAlias/se/{idp}")
 	@Consumes("application/x-www-form-urlencoded")
 	@Produces("text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
-	Response registerPRMUser(@FormParam("RelayState") String relayState,@FormParam("SAMLRequest") String samlRequest,@PathParam("idp") String idp);
+	Response buildQueryParam(@FormParam("RelayState") String relayState,@FormParam("SAMLRequest") String samlRequest,@PathParam("idp") String idp);
 	
 }

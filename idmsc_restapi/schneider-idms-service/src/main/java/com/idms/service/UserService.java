@@ -242,7 +242,7 @@ public interface UserService {
 	@POST
 	@Path("/apexrest/ssopost") 
 	@Consumes("application/x-www-form-urlencoded")
-	Response registerPRMUser(@FormParam("RelayState") String relayState,@FormParam("SAMLRequest") String SAMLRequest);
+	Response buildQueryParam(@FormParam("RelayState") String relayState,@FormParam("SAMLRequest") String SAMLRequest);
 	
 	
 }
