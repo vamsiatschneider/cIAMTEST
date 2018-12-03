@@ -7660,6 +7660,7 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	public Response buildQueryParam(String relayState, String samlRequest) {
+		// TODO Auto-generated method stub
 		LOGGER.info("Entered buildQueryParam() -> Start");
 		LOGGER.info("Parameter relayState -> " + relayState+" ,SAMLRequest  -> "+samlRequest);
 		ErrorResponse errorResponse = new ErrorResponse();
@@ -7667,6 +7668,7 @@ public class UserServiceImpl implements UserService {
 		Response jsonResponse = null;
 		Response.ResponseBuilder rb = null;
 		String strQueryParam=null;
+		int index = 0 ;
 		try {
 			jsonResponse = openAMTokenService.buildQueryParam(relayState,samlRequest,registerPRMUserIdp);
 			//message = IOUtils.toString((InputStream) jsonResponse.getEntity());
@@ -7676,7 +7678,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("HTTP status code from OpenAM=" + jsonResponse.getStatus());
 			if (302 != jsonResponse.getStatus()) {//Verifying redirect URL
 				errorResponse.setStatus(errorStatus);
-				errorResponse.setMessage("Error in buildQueryParam");
+				errorResponse.setMessage("Error in building Query Param.");
 				LOGGER.error("Error in buildQueryParam()=" + message);
 				return Response.status(Response.Status.PRECONDITION_FAILED).entity(errorResponse).build();
 			}
@@ -7686,9 +7688,11 @@ public class UserServiceImpl implements UserService {
 		        {
 				  LOGGER.info("Relay state Query Params: " + name);
 		        }*/
-			int index =relayState.indexOf("?");
+			if(relayState!=null) {
+				index =relayState.indexOf("?");
+			}
 			LOGGER.info("index:"+index);
-			if(index > -1) {
+			if( relayState!=null & index > -1 ) {
 				strQueryParam=relayState.substring(index+1);
 				LOGGER.info("Relay state Query Params:"+strQueryParam);
 				//if(queryParam.length> 1 && queryParam[1]!=null){
