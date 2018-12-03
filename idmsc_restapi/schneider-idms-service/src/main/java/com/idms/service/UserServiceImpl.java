@@ -7660,8 +7660,7 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	public Response buildQueryParam(String relayState, String samlRequest) {
-		// TODO Auto-generated method stub
-		LOGGER.info("Entered registerPRMUser() -> Start");
+		LOGGER.info("Entered buildQueryParam() -> Start");
 		LOGGER.info("Parameter relayState -> " + relayState+" ,SAMLRequest  -> "+samlRequest);
 		ErrorResponse errorResponse = new ErrorResponse();
 		String message = null;
@@ -7677,8 +7676,8 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("HTTP status code from OpenAM=" + jsonResponse.getStatus());
 			if (302 != jsonResponse.getStatus()) {//Verifying redirect URL
 				errorResponse.setStatus(errorStatus);
-				errorResponse.setMessage("Error in PRM registration page.");
-				LOGGER.error("Error in registerPRMUser()=" + message);
+				errorResponse.setMessage("Error in buildQueryParam");
+				LOGGER.error("Error in buildQueryParam()=" + message);
 				return Response.status(Response.Status.PRECONDITION_FAILED).entity(errorResponse).build();
 			}
 			else{
@@ -7712,7 +7711,7 @@ public class UserServiceImpl implements UserService {
 			e.printStackTrace();
 			errorResponse.setStatus(errorStatus);
 			errorResponse.setMessage(e.getMessage());
-			LOGGER.error("Exception in registerPRMUser()=" + e.getMessage());
+			LOGGER.error("Exception in buildQueryParam()=" + e.getMessage());
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		}
 		return jsonResponse;
