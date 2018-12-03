@@ -856,7 +856,16 @@ public class UserServiceImpl implements UserService {
 			 */
 			
 			if(null != userRequest.getAttributes() && userRequest.getAttributes().size() > 0){
-			openAmReq.getInput().getUser().setRegistrationAttributes__c(objMapper.writeValueAsString(userRequest.getAttributes()));
+				openAmReq.getInput().getUser().setRegistrationAttributes__c(objMapper.writeValueAsString(userRequest.getAttributes()));
+
+				List<RegistrationAttributes> attributeList = userRequest.getAttributes();
+				for(int i=0;i<attributeList.size();i++){
+					String KeyName = attributeList.get(i).getKeyName();
+					String KeyValue = attributeList.get(i).getKeyValue();
+					if(KeyName.equalsIgnoreCase("alink")){
+					openAmReq.getInput().getUser().setAlink(KeyValue);
+					}
+				}
 			}
 
 			/**
@@ -4538,19 +4547,7 @@ public class UserServiceImpl implements UserService {
 							}
 						}
 					}
-
-					/*String KeyName = userRequest.getAttributes().get(0).getKeyName();
-					Boolean KeyValue = Boolean.valueOf(userRequest.getAttributes().get(0).getKeyValue());
-					if(KeyName.equalsIgnoreCase("publicVisibility")){
-						company.setPublicVisibility(KeyValue);
-					}*/
 				}
-				
-				/*LOGGER.info("attributeText to update= "+attributeText);
-				LOGGER.info("Start: updateUser() of openam to update publicVisibility & compFedId for userid="+userId);
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
-						attributeText);
-				LOGGER.info("End: updateUser() of openam to update publicVisibility & compFedId finished for userid="+userId);*/
 				
 				com.se.uims.usermanager.UserV6 identity = mapper.map(userRequest, com.se.uims.usermanager.UserV6.class);
 				if(null != identity.getLanguageCode()){

@@ -235,6 +235,8 @@ public class OpenAmUser {
 	@JsonInclude(Include.NON_NULL)
 	private String IDMSWorkPhone__c;
 	
+	private String alink;
+	
 	@JsonProperty("IDMSWorkPhone__c")
 	@JsonInclude(Include.NON_NULL)
 	public String getIDMSWorkPhone__c() {
@@ -948,6 +950,14 @@ public class OpenAmUser {
 
 	public void setBfoAccountId(String bfoAccountId) {
 		this.bfoAccountId = bfoAccountId;
+	}
+
+	public String getAlink() {
+		return alink;
+	}
+
+	public void setAlink(String alink) {
+		this.alink = alink;
 	}
 
 	@Override
