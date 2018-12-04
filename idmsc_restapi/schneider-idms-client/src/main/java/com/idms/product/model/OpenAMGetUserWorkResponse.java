@@ -965,6 +965,7 @@ public class OpenAMGetUserWorkResponse {
 		this.trustedAdmin = trustedAdmin;
 	}
 
+
 	@JsonProperty("isActivated")
 	public String getIsActivated() {
 		return isActivated;

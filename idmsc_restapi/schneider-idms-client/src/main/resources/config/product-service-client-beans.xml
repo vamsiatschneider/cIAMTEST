@@ -23,7 +23,7 @@
 	</jaxrs:client>
 	
 	<jaxrs:client id="provisionalService" address="${openAMService.url}"
-		serviceClass="com.idms.product.client.OpenDjService">
+		serviceClass="${openDJService.interface}">
 		<jaxrs:headers>
 			<entry key="Accept" value="application/json" />
 			<entry key="Host" value="${headerHostname}" />
