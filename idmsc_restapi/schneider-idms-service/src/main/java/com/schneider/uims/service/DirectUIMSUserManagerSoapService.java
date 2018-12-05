@@ -789,7 +789,8 @@ public class DirectUIMSUserManagerSoapService {
 		application.setType(Type.APPLICATION);
 
 		try {
-			UIMSCompanyManagerSoapService companyManagerSoapService = new UIMSCompanyManagerSoapService();
+			//CODE-RE-STRUCTURING: Replaced explicit creation with Spring injected instance
+			//UIMSCompanyManagerSoapService companyManagerSoapService = new UIMSCompanyManagerSoapService();
 			Callable<Boolean> callableUpdateUIMSUserAndComapany = new Callable<Boolean>() {
 				public Boolean call() throws Exception {
 
