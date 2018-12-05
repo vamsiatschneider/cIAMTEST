@@ -8,7 +8,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
 @Produces("application/json")
-public interface OpenDjStgService {
+public interface OpenDjStgService extends OpenDjService {
 
 	@GET
 	@Path("/applications/{applicationName}")
