@@ -92,15 +92,19 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 				AccessElement application = new AccessElement();
 				application.setId("Uims");
 				application.setType(Type.APPLICATION);
+
+				//CODE-RE-STRUCTURING - Staging comment differs
 				LOGGER.info("Start: UIMS createIdentityWithMobileWithPassword() for phone:"+identity.getPhoneId());
 				/*uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithMobileWithPassword(callerFid,
 						identity,application,password);*/
 				uimsUserResponse = authenticatedUserManagerUIMSV22.createIdentityWithMobileWithPasswordForceIdmsId(callerFid, identity, password, forcedFederatedId);
+				//CODE-RE-STRUCTURING - Staging comment differs
 				LOGGER.info("End: UIMS createIdentityWithMobileWithPassword() finished, response:"+uimsUserResponse);
 			} else {
+				//CODE-RE-STRUCTURING - Staging comment differs
 				LOGGER.info("Start: UIMS createIdentityWithPasswordForceIdmsId() for phone:"+identity.getPhoneId());
 				uimsUserResponse = authenticatedUserManagerUIMSV22.createIdentityWithPasswordForceIdmsId(callerFid,
-						identity, password, forcedFederatedId);
+						identity, password, forcedFederatedId);				
 				LOGGER.info("End: UIMS createIdentityWithPasswordForceIdmsId() finished, response:"+uimsUserResponse);
 			}
 		} catch (IMSServiceSecurityCallNotAllowedException_Exception | ImsMailerException_Exception
@@ -136,11 +140,14 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 				AccessElement application = new AccessElement();
 				application.setId("Uims");
 				application.setType(Type.APPLICATION);
+				//CODE-RE-STRUCTURING - Staging comment differs
 				LOGGER.info("Start: UIMS createIdentityWithPhoneId() for phone:"+identity.getPhoneId());
 				//uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithPhoneId(callerFid, identity, application);
 				uimsUserResponse = authenticatedUserManagerUIMSV22.createIdentityWithPhoneIdForceIdmsId(callerFid, identity, forcedFederatedId);
+				//CODE-RE-STRUCTURING - Staging comment differs
 				LOGGER.info("End: UIMS createIdentityWithPhoneId() finished, response:"+uimsUserResponse);
 			}else{
+				//CODE-RE-STRUCTURING - Staging comment differs
 				LOGGER.info("Start: UIMS createIdentityForceIdmsId() for phone:"+identity.getPhoneId());
 			uimsUserResponse =authenticatedUserManagerUIMSV22.createIdentityForceIdmsId(callerFid, identity, forcedFederatedId);
 			LOGGER.info("End: UIMS createIdentityForceIdmsId() finished, response:"+uimsUserResponse);
