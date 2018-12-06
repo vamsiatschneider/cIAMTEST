@@ -48,6 +48,10 @@ public class UIMSCompanyManagerSoapServiceSyncStaging implements UIMSCompanyMana
 	@Value("${uimsCompanyManagerPortName}")
 	private String uimsCompanyManagerPortName;
 	
+	//CODE-RE-STRUCTURING
+	@Value("${caller.fid}")
+	private String CALLER_FID;
+	
 	//CODE-RE-STRUCTURING - Removed the malformed exception throws clause, and instead
 	//catching the error in the method and logging it
 	public AuthenticatedCompanyManagerUIMSV2 getCompanyManager() {
@@ -114,7 +118,7 @@ public class UIMSCompanyManagerSoapServiceSyncStaging implements UIMSCompanyMana
 			companyManagerUIMSV2 = getAuthenitcatedCompanyManager();
 			//samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(fedId, vnew);
 			LOGGER.info("Start: UIMS createCompany()");
-			uimsUserResponse = companyManagerUIMSV2.createCompany(UimsConstants.CALLER_FID, fedId, company);
+			uimsUserResponse = companyManagerUIMSV2.createCompany(CALLER_FID, fedId, company);
 			LOGGER.info("End: UIMS createCompany() and status is =>"+uimsUserResponse);
 			} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
 					| LdapTemplateNotReadyException | RequestedEntryNotExistsException | RequestedInternalUserException
@@ -142,7 +146,7 @@ public class UIMSCompanyManagerSoapServiceSyncStaging implements UIMSCompanyMana
 			authenticatedCompanyManagerUIMSV2 = getAuthenitcatedCompanyManager();
 			//samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(idmsFederationId, vnew);
 			LOGGER.info("Start: UIMS createCompanyForceIdmsId()");
-			uimsUserResponse = authenticatedCompanyManagerUIMSV2.createCompanyForceIdmsId(UimsConstants.CALLER_FID, idmsFederationId, company, companyForceFederationId);
+			uimsUserResponse = authenticatedCompanyManagerUIMSV2.createCompanyForceIdmsId(CALLER_FID, idmsFederationId, company, companyForceFederationId);
 			LOGGER.info("End: UIMS createCompanyForceIdmsId(), response is "+uimsUserResponse);
 		} catch (ForcedFidAlreadyExistException | IMSServiceSecurityCallNotAllowedException
 				| InvalidImsServiceMethodArgumentException | LdapTemplateNotReadyException

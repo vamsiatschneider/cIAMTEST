@@ -78,6 +78,10 @@ public class DirectUIMSUserManagerSoapServiceStaging implements DirectUIMSUserMa
 	private OpenAMService productService;
 
 	private SendEmail sendEmail;
+	
+	//CODE-RE-STRUCTURING
+	@Value("${caller.fid}")
+	private String CALLER_FID;
 
 	@Autowired
 	@Lazy
@@ -270,12 +274,12 @@ public class DirectUIMSUserManagerSoapServiceStaging implements DirectUIMSUserMa
 					UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
 					if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
 						LOGGER.info("Going to call setPassword() of UIMS for EMAIL.. userId:" + userId);
-						setPasswordStatus = userManagerUIMSV22.setPassword(UimsConstants.CALLER_FID, samlAssertion,
+						setPasswordStatus = userManagerUIMSV22.setPassword(CALLER_FID, samlAssertion,
 								password);
 						LOGGER.info("setPassword() of UIMS finished for EMAIL.. userId:" + userId);
 					} else {
 						LOGGER.info("Going to call setPasswordWithSms() of UIMS for non-EMAIL.. userId:" + userId);
-						setPasswordStatus = userManagerUIMSV22.setPasswordWithSms(UimsConstants.CALLER_FID,
+						setPasswordStatus = userManagerUIMSV22.setPasswordWithSms(CALLER_FID,
 								emailOrMobile, samlAssertion, UserConstants.TOKEN_TYPE, password);
 						LOGGER.info("setPasswordWithSms() of UIMS finished for non-EMAIL.. userId:" + userId);
 					}
@@ -356,7 +360,7 @@ public class DirectUIMSUserManagerSoapServiceStaging implements DirectUIMSUserMa
 				public Boolean call() throws Exception {
 					UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
 					LOGGER.info("Going to call updatePassword() of UIMS for callerFid:" + callerFid);
-					ispasswordupdated = userManagerUIMSV22.updatePassword(UimsConstants.CALLER_FID, samlAssertion,
+					ispasswordupdated = userManagerUIMSV22.updatePassword(CALLER_FID, samlAssertion,
 							oldPassword, newPassword);
 					LOGGER.info("updatePassword() of UIMS finished for callerFid:" + callerFid);
 					LOGGER.info("Update password status is::" + ispasswordupdated);
@@ -416,7 +420,7 @@ public class DirectUIMSUserManagerSoapServiceStaging implements DirectUIMSUserMa
 		}
 		/*try {
 			LOGGER.info("Going to call updateUser() of UIMS for user:" + user.getFirstName());
-			status = userManagerUIMSV22.updateUser(UimsConstants.CALLER_FID, samlAssertion, user);
+			status = userManagerUIMSV22.updateUser(CALLER_FID, samlAssertion, user);
 			LOGGER.info("updateUser() of UIMS finished for user:" + user.getFirstName());
 		} catch (IMSServiceSecurityCallNotAllowedException_Exception | InactiveUserImsException_Exception
 				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
@@ -450,7 +454,7 @@ public class DirectUIMSUserManagerSoapServiceStaging implements DirectUIMSUserMa
 		}
 		/*try {
 			LOGGER.info("Going to call activateIdentity() of UIMS for callerFid:" + callerFid);
-			userManagerUIMSV22.activateIdentity(UimsConstants.CALLER_FID, password, authentificationToken);
+			userManagerUIMSV22.activateIdentity(CALLER_FID, password, authentificationToken);
 			LOGGER.info("activateIdentity() of UIMS finished for callerFid:" + callerFid);
 		} catch (IMSServiceSecurityCallNotAllowedException_Exception
 				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
@@ -502,7 +506,7 @@ public class DirectUIMSUserManagerSoapServiceStaging implements DirectUIMSUserMa
 					UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
 					if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
 						LOGGER.info("Going to call activateIdentityNoPassword() of UIMS for EMAIL.. userId:" + userId);
-						isNoPwdactivated = userManagerUIMSV22.activateIdentityNoPassword(UimsConstants.CALLER_FID,
+						isNoPwdactivated = userManagerUIMSV22.activateIdentityNoPassword(CALLER_FID,
 								samlAssertion);
 						LOGGER.info("activateIdentityNoPassword() of UIMS finished for EMAIL.. userId:" + userId);
 
@@ -510,7 +514,7 @@ public class DirectUIMSUserManagerSoapServiceStaging implements DirectUIMSUserMa
 						LOGGER.info("Going to call activateIdentityWithMobileNoPassword() of UIMS.. emailOrMobile:"
 								+ emailOrMobile);
 						isNoPwdactivated = userManagerUIMSV22.activateIdentityWithMobileNoPassword(
-								UimsConstants.CALLER_FID, emailOrMobile, samlAssertion);
+								CALLER_FID, emailOrMobile, samlAssertion);
 						LOGGER.info("activateIdentityWithMobileNoPassword() of UIMS finished.. emailOrMobile:"
 								+ emailOrMobile);
 					}
@@ -614,7 +618,7 @@ public class DirectUIMSUserManagerSoapServiceStaging implements DirectUIMSUserMa
 					}
 					
 
-					createdFedId = authenticatedUserManagerSoapService.createUIMSUser(UimsConstants.CALLER_FID,
+					createdFedId = authenticatedUserManagerSoapService.createUIMSUser(CALLER_FID,
 							identity, forcedFederatedId);
 
 					if (null != createdFedId) {
@@ -958,12 +962,12 @@ public class DirectUIMSUserManagerSoapServiceStaging implements DirectUIMSUserMa
 			}
 			
 			if (userAilRequest.getOperation().equalsIgnoreCase("GRANT") && !(idmsUserAIL.isIdmsisRevokedOperation__c())) {
-				grantAccessControlToUser(UimsConstants.CALLER_FID,
+				grantAccessControlToUser(CALLER_FID,
 						userAilRequest.getFederatedId(),
 						userAilRequest.getFederatedId(), access, vNewCntValue, productService,
 						iPlanetDirectoryKey, usermail);
 			} else if (userAilRequest.getOperation().equalsIgnoreCase("REVOKE") && idmsUserAIL.isIdmsisRevokedOperation__c()) {
-				revokeAccessControlToUser(UimsConstants.CALLER_FID,
+				revokeAccessControlToUser(CALLER_FID,
 						userAilRequest.getFederatedId(),
 						userAilRequest.getFederatedId(), access, vNewCntValue, productService,
 						iPlanetDirectoryKey, usermail);
@@ -1073,7 +1077,7 @@ public class DirectUIMSUserManagerSoapServiceStaging implements DirectUIMSUserMa
 		user.setLanguageCode("zh");
 		user.setCountryCode("CN");
 		CompanyV3 company = new CompanyV3();
-		// service.createUIMSUserAndCompany(UimsConstants.CALLER_FID, user,
+		// service.createUIMSUserAndCompany(CALLER_FID, user,
 		// "@Home", company, null, null, "12345678", null, "Welcome123@");
 	}
 

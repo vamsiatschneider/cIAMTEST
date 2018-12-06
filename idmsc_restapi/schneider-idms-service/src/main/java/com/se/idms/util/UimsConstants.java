@@ -11,6 +11,7 @@ public class UimsConstants {
 	
 	public static final String VOLD = "0";
 	
-	public static final String CALLER_FID = "IDMSAdmin";
+	//CODE-RE-STRUCTURING - Exported to properties file
+	//public static final String CALLER_FID = "IDMSAdmin";
 
 }

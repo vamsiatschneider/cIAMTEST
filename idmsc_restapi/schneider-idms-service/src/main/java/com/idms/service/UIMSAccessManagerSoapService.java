@@ -50,6 +50,10 @@ public class UIMSAccessManagerSoapService {
 	
 	private SendEmail sendEmail;
 	
+	//CODE-RE-STRUCTURING
+	@Value("${caller.fid}")
+	private String CALLER_FID;
+	
 	@Autowired
 	@Lazy
 	public void setSendEmail(SendEmail sendEmail) {
@@ -211,12 +215,12 @@ public class UIMSAccessManagerSoapService {
 			}
 			
 			if (idmsUserAIL.getIdmsoperation__c().equalsIgnoreCase("GRANT") && !(idmsUserAIL.isIdmsisRevokedOperation__c())) {
-				grantAccessControlToUser(UimsConstants.CALLER_FID,
+				grantAccessControlToUser(CALLER_FID,
 						ailRequest.getUserAILRecord().getIDMSUser__c(),
 						ailRequest.getUserAILRecord().getIDMSUser__c(), access, vNewCntValue, productService,
 						iPlanetDirectoryKey, usermail);
 			} else if (idmsUserAIL.getIdmsoperation__c().equalsIgnoreCase("REVOKE") && idmsUserAIL.isIdmsisRevokedOperation__c()) {
-				revokeAccessControlToUser(UimsConstants.CALLER_FID,
+				revokeAccessControlToUser(CALLER_FID,
 						ailRequest.getUserAILRecord().getIDMSUser__c(),
 						ailRequest.getUserAILRecord().getIDMSUser__c(), access, vNewCntValue, productService,
 						iPlanetDirectoryKey, usermail);

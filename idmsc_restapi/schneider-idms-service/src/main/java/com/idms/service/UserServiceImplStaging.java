@@ -184,6 +184,10 @@ public class UserServiceImplStaging implements UserServiceImpl {
 	//CODE-RE-STRUCTURING
 	@Value("${email.template.dir}")
 	private String EMAIL_TEMPLATE_DIR;
+	
+	//CODE-RE-STRUCTURING
+	@Value("${caller.fid}")
+	private String CALLER_FID;
 
 	/**
 	 * Logger instance.
@@ -7409,7 +7413,7 @@ public class UserServiceImplStaging implements UserServiceImpl {
 			// Calling SYNC method createUIMSUserAndCompany
 			LOGGER.info("Start: Sync createUIMSUserAndCompany() for userName:"
 					+ userRequest.getUserRecord().getIDMS_Federated_ID__c());
-			uimsUserManagerSync.createUIMSUserAndCompany(UimsConstants.CALLER_FID, identity,
+			uimsUserManagerSync.createUIMSUserAndCompany(CALLER_FID, identity,
 					userRequest.getUserRecord().getIDMS_User_Context__c(), company,
 					userRequest.getUserRecord().getIDMS_Federated_ID__c(),
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, UserConstants.V_NEW,
@@ -7422,7 +7426,7 @@ public class UserServiceImplStaging implements UserServiceImpl {
 			// Calling Async method createUIMSUserAndCompany
 			LOGGER.info("Start: Async createUIMSUserAndCompany() of UIMSUserManagerSoapService for userName:"
 					+ userRequest.getUserRecord().getIDMS_Federated_ID__c());
-			uimsUserManagerSoapService.createUIMSUserAndCompany(UimsConstants.CALLER_FID, identity,
+			uimsUserManagerSoapService.createUIMSUserAndCompany(CALLER_FID, identity,
 					userRequest.getUserRecord().getIDMS_User_Context__c(), company,
 					userRequest.getUserRecord().getIDMS_Federated_ID__c(),
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, UserConstants.V_NEW,

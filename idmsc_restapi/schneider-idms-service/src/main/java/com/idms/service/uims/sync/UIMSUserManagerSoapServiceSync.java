@@ -65,6 +65,10 @@ public class UIMSUserManagerSoapServiceSync {
 	@Value("${goDitalToken}")
 	private String goDitalToken;
 	
+	//CODE-RE-STRUCTURING
+	@Value("${caller.fid}")
+	private String CALLER_FID;
+	
 	@Autowired
 	private GoDigitalUserService goDigitalUserService;
 	
@@ -122,9 +126,9 @@ public class UIMSUserManagerSoapServiceSync {
 					
 					if (null != password && !password.isEmpty()) {
 						createdFedId = authenticatedUserManagerSoapServiceSync.createUIMSUserWithPassword(
-								UimsConstants.CALLER_FID, identity, password, forcedFederatedId);
+								CALLER_FID, identity, password, forcedFederatedId);
 					} else {
-						createdFedId = authenticatedUserManagerSoapServiceSync.createUIMSUser(UimsConstants.CALLER_FID,
+						createdFedId = authenticatedUserManagerSoapServiceSync.createUIMSUser(CALLER_FID,
 								identity, forcedFederatedId);
 					}
 

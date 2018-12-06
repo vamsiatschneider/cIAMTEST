@@ -54,6 +54,10 @@ public class UIMSCompanyManagerSoapServiceSyncPreProd implements UIMSCompanyMana
 	@Value("${uimsCompanyManagerPortName}")
 	private String uimsCompanyManagerPortName;
 	
+	//CODE-RE-STRUCTURING
+	@Value("${caller.fid}")
+	private String CALLER_FID;
+	
 	//CODE-RE-STRUCTURING - Removed the malformed exception throws clause, and instead
 	//catching the error in the method and logging it
 	public AuthenticatedCompanyManagerUIMSV2 getCompanyManager() {
@@ -120,7 +124,7 @@ public class UIMSCompanyManagerSoapServiceSyncPreProd implements UIMSCompanyMana
 			//samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(fedId, vnew);
 			
 			LOGGER.info("Start: UIMS createCompany() for fedId:"+fedId);
-			uimsUserResponse = companyManagerUIMSV2.createCompany(UimsConstants.CALLER_FID, fedId, company);
+			uimsUserResponse = companyManagerUIMSV2.createCompany(CALLER_FID, fedId, company);
 			LOGGER.info("End: UIMS createCompany() and status is =>"+uimsUserResponse);
 			} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
 					| LdapTemplateNotReadyException | RequestedEntryNotExistsException | RequestedInternalUserException
@@ -148,7 +152,7 @@ public class UIMSCompanyManagerSoapServiceSyncPreProd implements UIMSCompanyMana
 			authenticatedCompanyManagerUIMSV2 = getAuthenitcatedCompanyManager();
 			//samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(idmsFederationId, vnew);
 			LOGGER.info("Start: UIMS createCompanyForceIdmsId()");
-			uimsUserResponse = authenticatedCompanyManagerUIMSV2.createCompanyForceIdmsId(UimsConstants.CALLER_FID, idmsFederationId, company, companyForceFederationId);
+			uimsUserResponse = authenticatedCompanyManagerUIMSV2.createCompanyForceIdmsId(CALLER_FID, idmsFederationId, company, companyForceFederationId);
 			LOGGER.info("End: UIMS createCompanyForceIdmsId(), response is "+uimsUserResponse);
 		} catch (ForcedFidAlreadyExistException | IMSServiceSecurityCallNotAllowedException
 				| InvalidImsServiceMethodArgumentException | LdapTemplateNotReadyException
@@ -171,7 +175,7 @@ public class UIMSCompanyManagerSoapServiceSyncPreProd implements UIMSCompanyMana
 		CompanyV3 uimsCompanyResponse = null;
 		try {
 			LOGGER.info("Start: UIMS getCompany() for federatedId::"+federatedId);
-			uimsCompanyResponse = companyManagerUIMSV2.getCompany(UimsConstants.CALLER_FID, federatedId, companyFedId);
+			uimsCompanyResponse = companyManagerUIMSV2.getCompany(CALLER_FID, federatedId, companyFedId);
 			LOGGER.info("End: UIMS getCompany() finished for federatedId::"+federatedId);
 		} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
 				| LdapTemplateNotReadyException | RequestedEntryNotExistsException | UnexpectedLdapResponseException

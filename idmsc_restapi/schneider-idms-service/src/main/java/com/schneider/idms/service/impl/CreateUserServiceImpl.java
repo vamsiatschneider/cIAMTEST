@@ -24,6 +24,7 @@ import javax.ws.rs.core.Response;
 import org.apache.cxf.helpers.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -58,6 +59,10 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 	
 	@Inject
 	private DirectApiIdmsMapper mapper;
+	
+	//CODE-RE-STRUCTURING
+	@Value("${caller.fid}")
+	private String CALLER_FID;
 
 	@Override
 	public Response userRegistration(String authorization, String secretToken, String accept, String region,
@@ -566,7 +571,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			// forcedFederatedId = "cn00"+ UUID.randomUUID().toString();
 			// Calling Async method createUIMSUserAndCompany
 			LOGGER.info("Start: Async createUIMSUserAndCompany() of UIMS to create user & company");
-			directUIMSUserManagerSoapService.createUIMSUserAndCompany(UimsConstants.CALLER_FID, identity,
+			directUIMSUserManagerSoapService.createUIMSUserAndCompany(CALLER_FID, identity,
 					userRequest.getUserContext(), company, userName,
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, UserConstants.V_NEW,
 					userName,userRequest,resultCountCheck.intValue());

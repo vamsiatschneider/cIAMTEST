@@ -61,6 +61,10 @@ public class UIMSCompanyManagerSoapServiceIntegration implements UIMSCompanyMana
 	
 	@Value("${uimsCompanyManagerPortName}")
 	private String uimsCompanyManagerPortName;
+	
+	//CODE-RE-STRUCTURING
+	@Value("${caller.fid}")
+	private String CALLER_FID;
 
 	public CompanyManagerUIMSV2 getCompanyManager(){
 		URL url;
@@ -122,7 +126,7 @@ public class UIMSCompanyManagerSoapServiceIntegration implements UIMSCompanyMana
 			e.printStackTrace();
 		}
 			try {
-				uimsUserResponse = companyManagerUIMSV2.createCompany(UimsConstants.CALLER_FID, fedId, company);
+				uimsUserResponse = companyManagerUIMSV2.createCompany(CALLER_FID, fedId, company);
 			} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
 					| LdapTemplateNotReadyException | RequestedEntryNotExistsException | RequestedInternalUserException
 					| UnexpectedLdapResponseException | UnexpectedRuntimeImsException e) {
@@ -148,7 +152,7 @@ public class UIMSCompanyManagerSoapServiceIntegration implements UIMSCompanyMana
 			e.printStackTrace();
 		}
 		try {
-			uimsUserResponse = authenticatedCompanyManagerUIMSV2.createCompanyForceIdmsId(UimsConstants.CALLER_FID, idmsFederationId, company, companyForceFederationId);
+			uimsUserResponse = authenticatedCompanyManagerUIMSV2.createCompanyForceIdmsId(CALLER_FID, idmsFederationId, company, companyForceFederationId);
 		} catch (ForcedFidAlreadyExistException | IMSServiceSecurityCallNotAllowedException
 				| InvalidImsServiceMethodArgumentException | LdapTemplateNotReadyException
 				| RequestedEntryNotExistsException | RequestedInternalUserException | SecuredImsException
@@ -173,7 +177,7 @@ public class UIMSCompanyManagerSoapServiceIntegration implements UIMSCompanyMana
 		AuthenticatedCompanyManagerUIMSV2 companyManagerUIMSV2 = getAuthenitcatedCompanyManager();
 		//TODO check with Prasenjit what to pass as fedId
 		try {
-			uimsUserResponse = companyManagerUIMSV2.updateCompany(UimsConstants.CALLER_FID, fedId, companyFedId, company);
+			uimsUserResponse = companyManagerUIMSV2.updateCompany(CALLER_FID, fedId, companyFedId, company);
 		} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
 				| LdapTemplateNotReadyException | RequestedEntryNotExistsException | SecuredImsException
 				| UnexpectedLdapResponseException | UnexpectedRuntimeImsException e) {

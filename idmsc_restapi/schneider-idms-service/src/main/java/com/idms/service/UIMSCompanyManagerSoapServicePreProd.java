@@ -63,6 +63,10 @@ public class UIMSCompanyManagerSoapServicePreProd implements UIMSCompanyManagerS
 	@Value("${uimsCompanyManagerPortName}")
 	private String uimsCompanyManagerPortName;
 	
+	//CODE-RE-STRUCTURING
+	@Value("${caller.fid}")
+	private String CALLER_FID;
+	
 	@Override
 	public AuthenticatedCompanyManagerUIMSV2 getCompanyManager() {
 
@@ -128,7 +132,7 @@ public class UIMSCompanyManagerSoapServicePreProd implements UIMSCompanyManagerS
 			e.printStackTrace();
 		}
 			try {
-				uimsUserResponse = companyManagerUIMSV2.createCompany(UimsConstants.CALLER_FID, fedId, company);
+				uimsUserResponse = companyManagerUIMSV2.createCompany(CALLER_FID, fedId, company);
 			} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
 					| LdapTemplateNotReadyException | RequestedEntryNotExistsException | RequestedInternalUserException
 					| UnexpectedLdapResponseException | UnexpectedRuntimeImsException e) {
@@ -155,7 +159,7 @@ public class UIMSCompanyManagerSoapServicePreProd implements UIMSCompanyManagerS
 			e.printStackTrace();
 		}
 		try {
-			uimsUserResponse = authenticatedCompanyManagerUIMSV2.createCompanyForceIdmsId(UimsConstants.CALLER_FID, idmsFederationId, company, companyForceFederationId);
+			uimsUserResponse = authenticatedCompanyManagerUIMSV2.createCompanyForceIdmsId(CALLER_FID, idmsFederationId, company, companyForceFederationId);
 		} catch (ForcedFidAlreadyExistException | IMSServiceSecurityCallNotAllowedException
 				| InvalidImsServiceMethodArgumentException | LdapTemplateNotReadyException
 				| RequestedEntryNotExistsException | RequestedInternalUserException | SecuredImsException
@@ -188,7 +192,7 @@ public class UIMSCompanyManagerSoapServicePreProd implements UIMSCompanyManagerS
 		try {
 			LOGGER.info("Parameter  company=" + objMapper.writeValueAsString(company));
 			LOGGER.info("Start: updateCompany() of UIMS for fedid ->"+fedId);
-			uimsUserResponse = companyManagerUIMSV2.updateCompany(UimsConstants.CALLER_FID, fedId, companyFedId, company);
+			uimsUserResponse = companyManagerUIMSV2.updateCompany(CALLER_FID, fedId, companyFedId, company);
 			LOGGER.info("End: updateCompany() of UIMS finished for fedid -> "+fedId+" , response is "+uimsUserResponse);
 		} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
 				| LdapTemplateNotReadyException | RequestedEntryNotExistsException | SecuredImsException
@@ -206,7 +210,7 @@ public class UIMSCompanyManagerSoapServicePreProd implements UIMSCompanyManagerS
 		AuthenticatedCompanyManagerUIMSV2 companyManagerUIMSV2 = getAuthenitcatedCompanyManager();
 		CompanyV3 uimsUserResponse = null;
 		try {
-			uimsUserResponse = companyManagerUIMSV2.getCompany(UimsConstants.CALLER_FID, federatedId, companyFedId);
+			uimsUserResponse = companyManagerUIMSV2.getCompany(CALLER_FID, federatedId, companyFedId);
 		} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
 				| LdapTemplateNotReadyException | RequestedEntryNotExistsException | UnexpectedLdapResponseException
 				| UnexpectedRuntimeImsException e) {

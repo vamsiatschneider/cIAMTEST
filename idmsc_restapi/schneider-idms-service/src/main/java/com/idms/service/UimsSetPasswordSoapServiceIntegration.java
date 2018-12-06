@@ -65,6 +65,10 @@ public class UimsSetPasswordSoapServiceIntegration implements UimsSetPasswordSoa
 	
 	@Value("${userManagerUIMSWsdlPortName}")
 	private String userManagerUIMSWsdlPortName;
+	
+	//CODE-RE-STRUCTURING
+	@Value("${caller.fid}")
+	private String CALLER_FID;
 
 	private String samlAssertion = null;
 	
@@ -140,12 +144,12 @@ public class UimsSetPasswordSoapServiceIntegration implements UimsSetPasswordSoa
 					UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
 					if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
 						LOGGER.info("Start: activateIdentity() of sync UserManagerUIMSV22 of loginIdentifierType:"+loginIdentifierType);
-						isIdentityActvated = userManagerUIMSV22.activateIdentity(UimsConstants.CALLER_FID,password, samlAssertion);
+						isIdentityActvated = userManagerUIMSV22.activateIdentity(CALLER_FID,password, samlAssertion);
 						LOGGER.info("End: activateIdentity() of sync UserManagerUIMSV22 finished of loginIdentifierType:"+loginIdentifierType);
 					} else {
 						LOGGER.info("Start: setPasswordWithSms() of sync UserManagerUIMSV22 of emailOrMobile:"+emailOrMobile);
 
-						isIdentityActvated = userManagerUIMSV22.setPasswordWithSms(UimsConstants.CALLER_FID, emailOrMobile, samlAssertion, UserConstants.TOKEN_TYPE, password);
+						isIdentityActvated = userManagerUIMSV22.setPasswordWithSms(CALLER_FID, emailOrMobile, samlAssertion, UserConstants.TOKEN_TYPE, password);
 						LOGGER.info("End: setPasswordWithSms() of sync UserManagerUIMSV22 finished of emailOrMobile:"+emailOrMobile);
 					}
 					LOGGER.info("isIdentityActvated: " + isIdentityActvated);
@@ -221,14 +225,14 @@ public class UimsSetPasswordSoapServiceIntegration implements UimsSetPasswordSoa
 					if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
 						LOGGER.info("Start: setPassword() of SYNC UserManagerUIMSV22 for loginIdentifierType:"
 								+ loginIdentifierType);
-						setPasswordStatus = userManagerUIMSV22.setPassword(UimsConstants.CALLER_FID, samlAssertion,
+						setPasswordStatus = userManagerUIMSV22.setPassword(CALLER_FID, samlAssertion,
 								password);
 						LOGGER.info("End: setPassword() of SYNC UserManagerUIMSV22 finished for loginIdentifierType:"
 								+ loginIdentifierType);
 					} else {
 						LOGGER.info("Start: setPasswordWithSms() of SYNC UserManagerUIMSV22 of emailOrMobile:"
 								+ emailOrMobile);
-						setPasswordStatus = userManagerUIMSV22.setPasswordWithSms(UimsConstants.CALLER_FID,
+						setPasswordStatus = userManagerUIMSV22.setPasswordWithSms(CALLER_FID,
 								emailOrMobile, samlAssertion, UserConstants.TOKEN_TYPE, password);
 						LOGGER.info("End: setPasswordWithSms() of SYNC UserManagerUIMSV22 finished of emailOrMobile:"
 								+ emailOrMobile);
@@ -334,13 +338,13 @@ public class UimsSetPasswordSoapServiceIntegration implements UimsSetPasswordSoa
 					UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
 					if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
 						LOGGER.info("Start: activateIdentityNoPassword() of UIMS for EMAIL.. userId:"+userId);
-						isNoPwdactivated = userManagerUIMSV22.activateIdentityNoPassword(UimsConstants.CALLER_FID,
+						isNoPwdactivated = userManagerUIMSV22.activateIdentityNoPassword(CALLER_FID,
 								samlAssertion);
 						LOGGER.info("End: activateIdentityNoPassword() of UIMS finished for EMAIL.. userId:"+userId);
 
 					}else{
 						LOGGER.info("Start: activateIdentityWithMobileNoPassword() of UIMS.. emailOrMobile:"+emailOrMobile);
-						isNoPwdactivated = userManagerUIMSV22.activateIdentityWithMobileNoPassword(UimsConstants.CALLER_FID, emailOrMobile, samlAssertion);
+						isNoPwdactivated = userManagerUIMSV22.activateIdentityWithMobileNoPassword(CALLER_FID, emailOrMobile, samlAssertion);
 						LOGGER.info("End: activateIdentityWithMobileNoPassword() of UIMS finished.. emailOrMobile:"+emailOrMobile);
 					}
 					LOGGER.info("UIMS user activateIdentityNoPassword() isactivated status:" + isNoPwdactivated);
@@ -403,7 +407,7 @@ public class UimsSetPasswordSoapServiceIntegration implements UimsSetPasswordSoa
 				public Boolean call() throws Exception {
 					UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
 					LOGGER.info("Start: updatePassword() of UIMS for callerFid:" + callerFid);
-					ispasswordupdated = userManagerUIMSV22.updatePassword(UimsConstants.CALLER_FID, samlAssertion,
+					ispasswordupdated = userManagerUIMSV22.updatePassword(CALLER_FID, samlAssertion,
 							oldPassword, newPassword);
 					LOGGER.info("End: updatePassword() of UIMS finished for callerFid:" + callerFid);
 					LOGGER.info("Update password status in UIMS is::" + ispasswordupdated);

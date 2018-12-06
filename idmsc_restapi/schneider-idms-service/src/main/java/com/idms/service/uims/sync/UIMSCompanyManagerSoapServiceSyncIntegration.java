@@ -47,6 +47,10 @@ public class UIMSCompanyManagerSoapServiceSyncIntegration implements UIMSCompany
 	@Value("${uimsCompanyManagerPortName}")
 	private String uimsCompanyManagerPortName;
 	
+	//CODE-RE-STRUCTURING
+	@Value("${caller.fid}")
+	private String CALLER_FID;
+	
 	/* (non-Javadoc)
 	 * @see com.idms.service.uims.sync.UIMSCompanyManagerSoapServiceSync#getCompanyManager()
 	 */
@@ -115,7 +119,7 @@ public class UIMSCompanyManagerSoapServiceSyncIntegration implements UIMSCompany
 			companyManagerUIMSV2 = getAuthenitcatedCompanyManager();
 			//samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(fedId, vnew);
 			LOGGER.info("Start: UIMS createCompany()");
-			uimsUserResponse = companyManagerUIMSV2.createCompany(UimsConstants.CALLER_FID, fedId, company);
+			uimsUserResponse = companyManagerUIMSV2.createCompany(CALLER_FID, fedId, company);
 			LOGGER.info("End: UIMS createCompany()");
 			} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
 					| LdapTemplateNotReadyException | RequestedEntryNotExistsException | RequestedInternalUserException
@@ -146,7 +150,7 @@ public class UIMSCompanyManagerSoapServiceSyncIntegration implements UIMSCompany
 			authenticatedCompanyManagerUIMSV2 = getAuthenitcatedCompanyManager();
 			//samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(idmsFederationId, vnew);
 			LOGGER.info("Start: UIMS createCompanyForceIdmsId()");
-			uimsUserResponse = authenticatedCompanyManagerUIMSV2.createCompanyForceIdmsId(UimsConstants.CALLER_FID, idmsFederationId, company, companyForceFederationId);
+			uimsUserResponse = authenticatedCompanyManagerUIMSV2.createCompanyForceIdmsId(CALLER_FID, idmsFederationId, company, companyForceFederationId);
 			LOGGER.info("End: UIMS createCompanyForceIdmsId(), response is "+uimsUserResponse);
 		} catch (ForcedFidAlreadyExistException | IMSServiceSecurityCallNotAllowedException
 				| InvalidImsServiceMethodArgumentException | LdapTemplateNotReadyException
