@@ -175,6 +175,10 @@ public class IdmsCommonServiceImpl {
 	
 	@Value("${directApiSecretToken}")
 	protected String directApiSecretToken;
+	
+	//CODE-RE-STRUCTURING
+	@Value("${email.template.dir}")
+	private String EMAIL_TEMPLATE_DIR;
 
 	protected static String userAction = "submitRequirements";
 
@@ -1041,9 +1045,9 @@ public class IdmsCommonServiceImpl {
 		// Need to check the scenario //UPDATE EMAIL NOTIFICATION
 		if (UserConstants.UPDATE_EMAIL_NOTIFICATION.equalsIgnoreCase(scenarioName)) {
 			if (UserConstants.LANGUAGE_CHINA.equalsIgnoreCase(prefferedLanguage)) {
-				filePath = CacheTypes.EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_CHINA.html";
+				filePath = EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_CHINA.html";
 			} else {
-				filePath = CacheTypes.EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_ENGLISH.html";
+				filePath = EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_ENGLISH.html";
 			}
 		} else if (UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(scenarioName)) {
 

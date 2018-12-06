@@ -4,6 +4,7 @@ import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.se.idms.cache.api.CacheBuilder;
@@ -16,13 +17,17 @@ import com.se.idms.cache.validate.IValidator;
 public class FieldsMappingValidatorImpl  implements IValidator{
 	private static final Logger LOGGER = LoggerFactory.getLogger(FieldsMappingValidatorImpl.class);
 
+	//CODE-RE-STRUCTURING
+	@Value("${fields.mapping.props.path}")
+	private String IDMS_FIELDSMAPPING_PROPERTIES_PATH;
+	
 	@Override
 	public boolean validate(String key, Object value) {
 		LOGGER.info("Entered validate() -> Start");
 		LOGGER.info("Parameter key -> " + key+" ,value -> "+value);
 		CacheManagerProvider cacheManagerProvider = new CacheManagerProviderImpl();
 		CacheBuilder cacheBuilder = new CacheBuilder(cacheManagerProvider );
-		Properties cacheProperties = cacheBuilder.getProperties(IdmsConstants.IDMS_FIELDSMAPPING_PROPERTIES_PATH);
+		Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSMAPPING_PROPERTIES_PATH);
 		String fieldMapProperty = cacheProperties.getProperty(key);
 		
 		//LOGGER.info("properties from cache::fieldMapProperty="+fieldMapProperty);

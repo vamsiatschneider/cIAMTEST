@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 
@@ -17,6 +18,10 @@ public class CacheManagerProviderImpl implements CacheTypes, CacheManagerProvide
 
 	private static final Logger logger = LoggerFactory.getLogger(CacheManagerProviderImpl.class);
 	private static final CacheManager CACHE_MANAGER = createManager();
+	
+	//CODE-RE-STRUCTURING
+	@Value("${app.properties.dir}")
+	private static String APP_PROPERTIES_DIR;
 	
 	/**
 	 * Constructor
@@ -56,7 +61,7 @@ public class CacheManagerProviderImpl implements CacheTypes, CacheManagerProvide
 	public static String getAppPropertiesDir() {
 
 		File resourcesDirectory = new File("src/main/resources");
-		return CacheTypes.APP_PROPERTIES_DIR;
+		return APP_PROPERTIES_DIR;
 	}
 	
 	

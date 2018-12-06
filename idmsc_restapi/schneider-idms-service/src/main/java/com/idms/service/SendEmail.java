@@ -72,6 +72,37 @@ public class SendEmail {
 	@Value("${openDJUserPassword}")
 	private String djUserPwd;
 	
+	//CODE-RE-STRUCTURING
+	@Value("${user.reset.password.email.template.cn}")
+	private String IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN;
+	
+	@Value("${user.reset.password.email.template.en}")
+	private String IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN;
+	
+	@Value("${user.registration.withpwd.email.template.cn}")
+	private String IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN;
+	
+	@Value("${user.registration.withpwd.email.template.en}")
+	private String IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN;
+
+	@Value("${user.update.email.template.cn}")
+	private String IDMS_USER_UPDATE_EMAILTEMPLATE_CN;
+	
+	@Value("${user.update.email.template.en}")
+	private String IDMS_USER_UPDATE_EMAILTEMPLATE_EN;
+	
+	@Value("${user.default.email.template.cn}")
+	private String IDMS_USER_DEFAULT_EMAILTEMPLATE_CN;
+	
+	@Value("${user.default.email.template.en}")
+	private String IDMS_USER_DEFAULT_EMAILTEMPLATE_EN;	
+	
+	@Value("${send.invitation.email.template.en}")
+	private String IDMS_SEND_INVITATION_EMAILTEMPLATE_EN;
+	
+	@Value("${send.invitation.email.template.cn}")
+	private String IDMS_SEND_INVITATION_EMAILTEMPLATE_CN;
+	
 	private UserServiceImpl userService;
 	
 	@Autowired
@@ -401,9 +432,9 @@ public class SendEmail {
 				LOGGER.info("Inside SetUserPwd OperationType  :  " + hotpOperationType);
 				// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_Reset_password.html";
 				if (chineseLangCheck) {
-					filePath = EmailConstants.IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN;
+					filePath = IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN;
 				} else {
-					filePath = EmailConstants.IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN;
+					filePath = IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN;
 				}
 				file = new FileReader(filePath);
 				LOGGER.info("filePath is"+filePath);
@@ -412,9 +443,9 @@ public class SendEmail {
 				LOGGER.info("Inside userRegistration OperationType Create " + hotpOperationType);
 				// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_registration_with_password.html";
 				if (chineseLangCheck) {
-					filePath = EmailConstants.IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN;
+					filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN;
 				} else {
-					filePath = EmailConstants.IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN;
+					filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN;
 				}
 				file = new FileReader(filePath);
 				LOGGER.info("filePath is"+filePath);
@@ -423,9 +454,9 @@ public class SendEmail {
 				LOGGER.info("Inside OperationType UpdateUserRecord " + hotpOperationType);
 				// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_registration_with_password.html";
 				if (chineseLangCheck) {
-					filePath = EmailConstants.IDMS_USER_UPDATE_EMAILTEMPLATE_CN;
+					filePath = IDMS_USER_UPDATE_EMAILTEMPLATE_CN;
 				} else {
-					filePath = EmailConstants.IDMS_USER_UPDATE_EMAILTEMPLATE_EN;
+					filePath = IDMS_USER_UPDATE_EMAILTEMPLATE_EN;
 				}
 				file = new FileReader(filePath);
 				LOGGER.info("filePath is"+filePath);
@@ -434,9 +465,9 @@ public class SendEmail {
 				LOGGER.info("Inside OperationType sendInvitation " + hotpOperationType);
 				// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_registration_with_password.html";
 				if (chineseLangCheck) {
-					filePath = EmailConstants.IDMS_SEND_INVITATION_EMAILTEMPLATE_CN;
+					filePath = IDMS_SEND_INVITATION_EMAILTEMPLATE_CN;
 				} else {
-					filePath = EmailConstants.IDMS_SEND_INVITATION_EMAILTEMPLATE_EN;
+					filePath = IDMS_SEND_INVITATION_EMAILTEMPLATE_EN;
 				}
 				file = new FileReader(filePath);
 				LOGGER.info("filePath is"+filePath);
@@ -445,9 +476,9 @@ public class SendEmail {
 				LOGGER.info("Inside Common OperationType " + hotpOperationType);
 				// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_registration_with_password.html";
 				if (chineseLangCheck) {
-					filePath = EmailConstants.IDMS_USER_DEFAULT_EMAILTEMPLATE_CN;
+					filePath = IDMS_USER_DEFAULT_EMAILTEMPLATE_CN;
 				} else {
-					filePath = EmailConstants.IDMS_USER_DEFAULT_EMAILTEMPLATE_EN;
+					filePath = IDMS_USER_DEFAULT_EMAILTEMPLATE_EN;
 				}
 				file = new FileReader(filePath);
 				LOGGER.info("filePath is"+filePath);

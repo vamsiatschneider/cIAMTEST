@@ -15,8 +15,10 @@ public interface CacheTypes {
 	
 	public String EMAIL_TEMPLATE_DIR = "C:\\JsonRequestURLs\\EmailTemplates\\";*/
 	
-	public String APP_PROPERTIES_DIR = "/home/ec2-user/idms/";
+	//CODE-RE-STRUCTURING - Commented out and transferred the value to properties file
 	
-	public String EMAIL_TEMPLATE_DIR = "/home/ec2-user/HOTP/EmailTemplates/";
+	//public String APP_PROPERTIES_DIR = "/home/ec2-user/idms/";
+	
+	//public String EMAIL_TEMPLATE_DIR = "/home/ec2-user/HOTP/EmailTemplates/";
 
 }

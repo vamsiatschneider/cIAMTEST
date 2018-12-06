@@ -20,18 +20,18 @@ public class EmailConstants {
 	public static final String IDMS_SEND_INVITATION_EMAILTEMPLATE_EN = "C:\\idms\\HOTP\\EmailTemplates\\English\\Send_Invitation.html";
 	public static final String IDMS_SEND_INVITATION_EMAILTEMPLATE_CN = "";*/
 	
+	//CODE-RE-STRUCTURING - Commented out and transferred the value to properties file
+	//public static final String IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN = "/home/ec2-user/HOTP/EmailTemplates/Chinese/User_Reset_password.html";
+	//public static final String IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN = "/home/ec2-user/HOTP/EmailTemplates/English/User_Reset_password.html";
+	//public static final String IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN = "/home/ec2-user/HOTP/EmailTemplates/Chinese/User_registration_with_password.html";
+	//public static final String IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN = "/home/ec2-user/HOTP/EmailTemplates/English/User_registration_with_password.html";
+	//public static final String IDMS_USER_UPDATE_EMAILTEMPLATE_CN = "/home/ec2-user/HOTP/EmailTemplates/Chinese/User_Update.html";
+	//public static final String IDMS_USER_UPDATE_EMAILTEMPLATE_EN = "/home/ec2-user/HOTP/EmailTemplates/English/User_Update.html";
+	//public static final String IDMS_USER_DEFAULT_EMAILTEMPLATE_CN = "/home/ec2-user/HOTP/EmailTemplates/Chinese/User_default.html";
+	//public static final String IDMS_USER_DEFAULT_EMAILTEMPLATE_EN = "/home/ec2-user/HOTP/EmailTemplates/English/User_default.html";
 	
-	public static final String IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN = "/home/ec2-user/HOTP/EmailTemplates/Chinese/User_Reset_password.html";
-	public static final String IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN = "/home/ec2-user/HOTP/EmailTemplates/English/User_Reset_password.html";
-	public static final String IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN = "/home/ec2-user/HOTP/EmailTemplates/Chinese/User_registration_with_password.html";
-	public static final String IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN = "/home/ec2-user/HOTP/EmailTemplates/English/User_registration_with_password.html";
-	public static final String IDMS_USER_UPDATE_EMAILTEMPLATE_CN = "/home/ec2-user/HOTP/EmailTemplates/Chinese/User_Update.html";
-	public static final String IDMS_USER_UPDATE_EMAILTEMPLATE_EN = "/home/ec2-user/HOTP/EmailTemplates/English/User_Update.html";
-	public static final String IDMS_USER_DEFAULT_EMAILTEMPLATE_CN = "/home/ec2-user/HOTP/EmailTemplates/Chinese/User_default.html";
-	public static final String IDMS_USER_DEFAULT_EMAILTEMPLATE_EN = "/home/ec2-user/HOTP/EmailTemplates/English/User_default.html";
-	
-	public static final String IDMS_SEND_INVITATION_EMAILTEMPLATE_EN = "/home/ec2-user/HOTP/EmailTemplates/English/Send_Invitation.html";
-	public static final String IDMS_SEND_INVITATION_EMAILTEMPLATE_CN = "";
+	//public static final String IDMS_SEND_INVITATION_EMAILTEMPLATE_EN = "/home/ec2-user/HOTP/EmailTemplates/English/Send_Invitation.html";
+	//public static final String IDMS_SEND_INVITATION_EMAILTEMPLATE_CN = "";
 	
 	public static final String HOTP_LAN_CN = "zh";
 	public static final String HOTP_LAN_EN = "en";

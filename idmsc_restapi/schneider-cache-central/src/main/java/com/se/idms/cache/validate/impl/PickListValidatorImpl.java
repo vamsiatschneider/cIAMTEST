@@ -6,6 +6,7 @@ import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.se.idms.cache.api.CacheBuilder;
@@ -18,13 +19,17 @@ import com.se.idms.cache.validate.IValidator;
 public class PickListValidatorImpl implements IValidator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PickListValidatorImpl.class);
 
+	//CODE-RE-STRUCTURING
+	@Value("${fields.picklist.props.path}")
+	private String IDMS_FIELDSPICKLIST_PROPERTIES_PATH;
+		
 	@Override
 	public boolean validate(String key, Object value) {
 		LOGGER.info("Entered validate() -> Start");
 		LOGGER.info("Parameter key -> " + key+" ,value -> "+value);
 		CacheManagerProvider cacheManagerProvider = new CacheManagerProviderImpl();
 		CacheBuilder cacheBuilder = new CacheBuilder(cacheManagerProvider);
-		Properties cacheProperties = cacheBuilder.getProperties(IdmsConstants.IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
+		Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
 		String pickListProperty = cacheProperties.getProperty(key);
 
 		// pickListProperty will be in the form of comma separated string. Eg.

@@ -181,6 +181,9 @@ public class UserServiceImplStaging implements UserServiceImpl {
 		System.setProperty("sun.security.ssl.allowLegacyHelloMessages", "true");
 	}
 	
+	//CODE-RE-STRUCTURING
+	@Value("${email.template.dir}")
+	private String EMAIL_TEMPLATE_DIR;
 
 	/**
 	 * Logger instance.
@@ -6124,9 +6127,9 @@ public class UserServiceImplStaging implements UserServiceImpl {
 		// Need to check the scenario //UPDATE EMAIL NOTIFICATION
 		if (UserConstants.UPDATE_EMAIL_NOTIFICATION.equalsIgnoreCase(scenarioName)) {
 			if (UserConstants.LANGUAGE_CHINA.equalsIgnoreCase(prefferedLanguage)) {
-				filePath = CacheTypes.EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_CHINA.html";
+				filePath = EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_CHINA.html";
 			} else {
-				filePath = CacheTypes.EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_ENGLISH.html";
+				filePath = EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_ENGLISH.html";
 			}
 		} else if (UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(scenarioName)) {
 
