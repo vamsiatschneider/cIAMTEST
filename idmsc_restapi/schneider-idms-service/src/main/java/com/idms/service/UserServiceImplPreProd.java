@@ -17,6 +17,7 @@ import static com.se.idms.util.UserConstants.AUDIT_TECHNICAL_USER;
 import static com.se.idms.util.UserConstants.GET_USER_BY_TOKEN_TIME_LOG;
 import static com.se.idms.util.UserConstants.GET_USER_TIME_LOG;
 
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -154,29 +155,30 @@ import com.se.idms.util.UimsConstants;
 import com.se.idms.util.UserConstants;
 import com.uims.authenticatedUsermanager.UserV6;
 
-@Profile("Staging")
+@Profile("Pre-prod")
 @Service("userService")
-public class UserServiceImplStaging implements UserServiceImpl {
+public class UserServiceImplPreProd implements UserServiceImpl {
 	
 	//TODO: UIMS stage certification issue solution.
 	static {
-		/*System.setProperty("javax.net.ssl.trustStore", "C:\\Software\\apache-tomcat-8.0.41\\NginxTomcat.jks");
-		System.setProperty("javax.net.ssl.trustStorePassword", "Passw0rd");
+		/*System.setProperty("javax.net.ssl.trustStore", "C:\\Software\\apache-tomcat-8.0.43\\cacerts");
+		System.setProperty("javax.net.ssl.trustStorePassword", "changeit");
 		System.setProperty("javax.net.ssl.keyStoreType", "jks");
-		System.setProperty("javax.net.ssl.keyStore", "C:\\Software\\apache-tomcat-8.0.41\\00D0m000000CsZo1.jks");
+		System.setProperty("javax.net.ssl.keyStore", "C:\\Software\\apache-tomcat-8.0.43\\finalCert-pprd.jks");
+
 		System.setProperty("javax.net.ssl.keyStorePassword", "Passw0rd");
 		
+
 		System.setProperty("sun.security.ssl.allowUnsafeRenegotiation", "true");
 		System.setProperty("sun.security.ssl.allowLegacyHelloMessages", "true");*/
+
+		//for PreProd
 		
-		//for stage
-		
-		System.setProperty("javax.net.ssl.trustStore", "/apache-tomcat-8.5.11/NginxTomcat.jks");
-		System.setProperty("javax.net.ssl.trustStorePassword", "Passw0rd");
+		System.setProperty("javax.net.ssl.trustStore", "/data/certs/cacerts");
+		System.setProperty("javax.net.ssl.trustStorePassword", "changeit");
 		System.setProperty("javax.net.ssl.keyStoreType", "jks");
-		System.setProperty("javax.net.ssl.keyStore", "/apache-tomcat-8.5.11/00D0m000000CsZo1.jks");
+		System.setProperty("javax.net.ssl.keyStore", "/data/finalCert-pprd.jks");
 		System.setProperty("javax.net.ssl.keyStorePassword", "Passw0rd");
-		
 		System.setProperty("sun.security.ssl.allowUnsafeRenegotiation", "true");
 		System.setProperty("sun.security.ssl.allowLegacyHelloMessages", "true");
 	}
@@ -188,7 +190,7 @@ public class UserServiceImplStaging implements UserServiceImpl {
 	/**
 	 * Logger instance.
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImplStaging.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImplPreProd.class);
 	
 	private static final Logger EMAIL_CHANGE_LOGGER = LoggerFactory.getLogger("emailChangeLogger");
 	
@@ -359,6 +361,7 @@ public class UserServiceImplStaging implements UserServiceImpl {
 	
 	@Resource(name="cacheManager")
 	private org.springframework.cache.ehcache.EhCacheCacheManager cacheManager;
+
 	
 	
 	//protected static List<String> appList = null;
@@ -367,6 +370,7 @@ public class UserServiceImplStaging implements UserServiceImpl {
 		emailValidator = EmailValidator.getInstance();
 		formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 		userResponse = new UserServiceResponse();
+
 		/*appList = new ArrayList<String>();
 		appList.add("PACE");
 		appList.add("PRM");
@@ -374,6 +378,7 @@ public class UserServiceImplStaging implements UserServiceImpl {
 	}
 	
 	 
+
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -389,6 +394,7 @@ public class UserServiceImplStaging implements UserServiceImpl {
 		//LOGGER.info(JsonConstants.JSON_STRING + userName);
 		LOGGER.info(AUDIT_REQUESTING_USER.concat(userName).concat(AUDIT_IMPERSONATING_USER).concat(AUDIT_API_ADMIN)
 				.concat(AUDIT_OPENAM_API).concat(AUDIT_OPENAM_AUTHENTICATE_CALL).concat(AUDIT_LOG_CLOSURE));
+
 
 		cache = (EhCacheCache) cacheManager.getCache("iPlanetToken");
 
@@ -751,6 +757,7 @@ public class UserServiceImplStaging implements UserServiceImpl {
 		String iPlanetDirectoryKey = null;
 		String userExists = null;
 		boolean uimsAlreadyCreatedFlag = false;
+
 		Response userCreation = null;
 		try {
 
@@ -886,7 +893,16 @@ public class UserServiceImplStaging implements UserServiceImpl {
 			 */
 			
 			if(null != userRequest.getAttributes() && userRequest.getAttributes().size() > 0){
-			openAmReq.getInput().getUser().setRegistrationAttributes__c(objMapper.writeValueAsString(userRequest.getAttributes()));
+				openAmReq.getInput().getUser().setRegistrationAttributes__c(objMapper.writeValueAsString(userRequest.getAttributes()));
+
+				List<RegistrationAttributes> attributeList = userRequest.getAttributes();
+				for(int i=0;i<attributeList.size();i++){
+					String KeyName = attributeList.get(i).getKeyName();
+					String KeyValue = attributeList.get(i).getKeyValue();
+					if(KeyName.equalsIgnoreCase("alink")){
+					openAmReq.getInput().getUser().setAlink(KeyValue);
+					}
+				}
 			}
 
 			/**
@@ -1044,7 +1060,6 @@ public class UserServiceImplStaging implements UserServiceImpl {
 				 * Condition added for social login issue // (null == userRequest.getUserRecord().getIDMS_Federated_ID__c()|| userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty())){
 				 * 
 				 */
-				
 				if((!UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c()))
 					&& (!pickListValidator.validate(UserConstants.APPLICATIONS,userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase()))
 					&& (null == userRequest.getUserRecord().getIDMS_Federated_ID__c()|| userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty())){
@@ -1100,6 +1115,7 @@ public class UserServiceImplStaging implements UserServiceImpl {
 			LOGGER.info("Open AM  user  Request ------------->" + json);
 			LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 					+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_REGISTRATION_CALL + userAction + AUDIT_LOG_CLOSURE);
+
 			
 			/**
 			 * The below or condition added for social login scenario for update user
@@ -1236,6 +1252,7 @@ public class UserServiceImplStaging implements UserServiceImpl {
 			LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 			LOGGER.error("NotFoundException while user Registration :: -> " + e.getMessage());
 			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
+
 			return Response.status(Response.Status.NOT_FOUND).entity(userResponse).build();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -2403,6 +2420,7 @@ public class UserServiceImplStaging implements UserServiceImpl {
 									loginIdentifier, UserConstants.FALSE);
 							LOGGER.info("End: checkUserExistsWithEmail() of IFWService finished for loginIdentifier="+loginIdentifier);
 						}
+
 						
 						if (null != ifwResponse && 200 == ifwResponse.getStatus()) {
 							userResponse.setMessage(UserConstants.TRUE);
@@ -3112,6 +3130,7 @@ public class UserServiceImplStaging implements UserServiceImpl {
 
 			}
 
+			confirmRequest.setId(uniqueIdentifier);
 			LOGGER.info("authToken  " + authId);
 			
 			PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
@@ -3890,6 +3909,7 @@ public class UserServiceImplStaging implements UserServiceImpl {
 					sendEmail.sendOpenAmEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,
 							passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c());
 				} else if (UserConstants.HOTP_MOBILE_RESET_PR.equalsIgnoreCase(hotpService)) {
+
 					sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,
 							passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c());
 					sendEmail.sendSMSNewGateway(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,
@@ -4567,22 +4587,10 @@ public class UserServiceImplStaging implements UserServiceImpl {
 							}
 						}
 					}
-
-					/*String KeyName = userRequest.getAttributes().get(0).getKeyName();
-					Boolean KeyValue = Boolean.valueOf(userRequest.getAttributes().get(0).getKeyValue());
-					if(KeyName.equalsIgnoreCase("publicVisibility")){
-						company.setPublicVisibility(KeyValue);
-					}*/
 				}
 				
-				
-				/*LOGGER.info("attributeText to update= "+attributeText);
-				LOGGER.info("Start: updateUser() of openam to update publicVisibility & compFedId for userid="+userId);
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
-						attributeText);
-				LOGGER.info("End: updateUser() of openam to update publicVisibility & compFedId finished for userid="+userId);*/
-				
 				com.se.uims.usermanager.UserV5 identity = mapper.map(userRequest, com.se.uims.usermanager.UserV5.class);
+
 				if(null != identity.getLanguageCode()){
 				identity.setLanguageCode(identity.getLanguageCode().toLowerCase());
 				}
@@ -6707,6 +6715,7 @@ public class UserServiceImplStaging implements UserServiceImpl {
 	}  
 	
 	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public Response idmsDirectLogin(String startUrl, String idToken1, String idToken2, String submitted,
@@ -6776,9 +6785,9 @@ public class UserServiceImplStaging implements UserServiceImpl {
 				NewCookie newCookie = new NewCookie(cookie);
 				rb.cookie(newCookie);
 				
-				LOGGER.info("New Cookievalue:"+newCookie);
-				LOGGER.info("Request builder:"+rb);
-				LOGGER.info("Token:"+token);
+				LOGGER.info("Cookievalue"+newCookie);
+				LOGGER.info("Request builder"+rb);
+				LOGGER.info("Token "+token);
 				
 				//startUrl = startUrl.substring(0, startUrl.indexOf(valueToFind)+valueToFind.length()).concat(URLEncoder.encode(valueToFind.substring(valueToFind.indexOf(valueToFind)+5, valueToFind.length()), "UTF-8" ));
 				if(startUrl.contains(valueToFind)){
@@ -7706,7 +7715,8 @@ public class UserServiceImplStaging implements UserServiceImpl {
 		try {
 			jsonResponse = openAMTokenService.buildQueryParam(relayState,samlRequest,registerPRMUserIdp);
 			//message = IOUtils.toString((InputStream) jsonResponse.getEntity());
-			message=jsonResponse.getEntity().toString();
+			//message=jsonResponse.getEntity().toString();
+			message=jsonResponse.getStatusInfo().getReasonPhrase();
 			LOGGER.info("Message from OpenAM=" + message);
 			LOGGER.info("Location info from OpenAM=" + jsonResponse.getLocation().toString());
 			LOGGER.info("HTTP status code from OpenAM=" + jsonResponse.getStatus());
@@ -7746,9 +7756,9 @@ public class UserServiceImplStaging implements UserServiceImpl {
 			}
 		  }
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			errorResponse.setStatus(errorStatus);
-			errorResponse.setMessage(e.getMessage());
+			errorResponse.setMessage(jsonResponse.getStatusInfo().getReasonPhrase());
 			LOGGER.error("Exception in buildQueryParam()=" + e.getMessage());
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		}
@@ -7757,4 +7767,3 @@ public class UserServiceImplStaging implements UserServiceImpl {
 	}
 	
 }
-
