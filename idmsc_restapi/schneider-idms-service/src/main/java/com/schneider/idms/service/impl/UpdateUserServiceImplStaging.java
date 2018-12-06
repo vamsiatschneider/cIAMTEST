@@ -43,7 +43,7 @@ import com.se.idms.util.JsonConstants;
 import com.se.idms.util.UserConstants;
 import com.uims.user22.UserV6;
 
-@Profile("Staging")
+@Profile({"Staging", "Pre-prod"})
 @Service("updateUserService")
 public class UpdateUserServiceImplStaging extends UpdateUserServiceImpl {
 
