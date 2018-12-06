@@ -13,5 +13,8 @@ public interface UIMSCompanyManagerSoapServiceSync<T> {
 
 	String createUIMSCompanyWithCompanyForceIdmsId(String idmsFederationId, String companyForceFederationId,
 			String vnew, CompanyV3 company);
+	
+	//CODE-RE-STRUCTURING - Method specific to Pre-prod
+	CompanyV3 getUIMSCompany(String federatedId, String companyFedId);
 
 }

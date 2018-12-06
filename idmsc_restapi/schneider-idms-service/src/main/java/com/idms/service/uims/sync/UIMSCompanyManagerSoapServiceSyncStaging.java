@@ -156,4 +156,14 @@ public class UIMSCompanyManagerSoapServiceSyncStaging implements UIMSCompanyMana
 		}
 		return uimsUserResponse;
 	}
+
+	/**
+	 * CODE-RE-STRUCTURING
+	 * Method present in Pre-prod add for Interface compliance
+	 */
+	
+	@Override
+	public CompanyV3 getUIMSCompany(String federatedId, String companyFedId) {
+		throw new UnsupportedOperationException();
+	}
 }
