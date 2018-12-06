@@ -205,4 +205,10 @@ public class UIMSCompanyManagerSoapServiceIntegration implements UIMSCompanyMana
 		return uimsUserResponse;
 
 	}
+
+	//CODE-RE-STRUCTURING - Unsupported method which is defined in Pre-prod
+	@Override
+	public CompanyV3 getUIMSCompany(String federatedId, String companyFedId) throws MalformedURLException {
+		throw new UnsupportedOperationException();
+	}
 }

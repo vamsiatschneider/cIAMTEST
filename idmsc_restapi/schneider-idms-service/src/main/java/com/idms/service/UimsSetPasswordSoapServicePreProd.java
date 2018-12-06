@@ -1,5 +1,15 @@
 package com.idms.service;
 
+import org.springframework.context.annotation.Profile;
+
+/**
+ * CODE-RE-STRUCTURING - Differect Profile for this class because the package for UserManagerUIMSV22
+ * is different between Staging and Pre-Prod
+ * 
+ * @author SESA513057
+ *
+ */
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.Callable;
@@ -13,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.rholder.retry.RetryException;
@@ -27,21 +36,20 @@ import com.idms.service.util.ChinaIdmsUtil;
 import com.se.idms.util.SamlAssertionTokenGenerator;
 import com.se.idms.util.UimsConstants;
 import com.se.idms.util.UserConstants;
-import com.se.uims.usermanager.UserManagerUIMSV22;
-import com.se.uims.usermanager.UserV5;
 import com.se.uims.usermanager.UserManagerUIMSV2;
+import com.se.uims.usermanager.UserV5;
+import com.uims.user22.UserManagerUIMSV22;
 
-@Profile("Staging")
+@Profile("Pre-prod")
 @org.springframework.stereotype.Service("uimsSetPasswordSoapService")
-public class UimsSetPasswordSoapServiceStaging implements UimsSetPasswordSoapService {
-	
+public class UimsSetPasswordSoapServicePreProd implements UimsSetPasswordSoapService {	
 	/**
 	 * Logger instance.
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(UimsSetPasswordSoapService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(UimsSetPasswordSoapServicePreProd.class);
 
-	//private static final Logger UIMSLOGGER = LoggerFactory.getLogger("uimsLogger");
-	
+	private static final Logger UIMSLOGGER = LoggerFactory.getLogger("uimsLogger");
+
 	@Inject
 	private SamlAssertionTokenGenerator samlTokenService;
 	
@@ -144,9 +152,13 @@ public class UimsSetPasswordSoapServiceStaging implements UimsSetPasswordSoapSer
 
 		try {
 			if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
+				LOGGER.info("Going to call getSamlAssertionToken() of sync UIMS for userId:"+userId);
 				samlAssertion = samlTokenService.getSamlAssertionToken(userId, openamVnew);
+				LOGGER.info("getSamlAssertionToken() of sync UIMS finished for userId:"+userId);
 			}else{
+				LOGGER.info("Going to call getSamlAssertionToken() of sync UIMS for callerFid:"+callerFid);
 				samlAssertion = samlTokenService.getSamlAssertionToken(callerFid, openamVnew);
+				LOGGER.info("getSamlAssertionToken() of sync UIMS finished for callerFid:"+callerFid);
 			}
 			LOGGER.info("samlAssertion="+samlAssertion);
 
@@ -204,14 +216,11 @@ public class UimsSetPasswordSoapServiceStaging implements UimsSetPasswordSoapSer
 	}
 	
 	/**
-	 * CODE-RE-STRUCTURING - Reduced access to private from public
-	 * TODO: Can this method replace the getUserManager() method
 	 * 
 	 * @return
 	 * @throws MalformedURLException
 	 */
-	
-	private UserManagerUIMSV22 getUIMSV22UserManager() {
+	public UserManagerUIMSV22 getUIMSV22UserManager(){
 		LOGGER.info("Entered getUIMSV22UserManager() of UIMS -> Start");
 		URL url;
 		UserManagerUIMSV22 userManagerUIMSV2 = null;
@@ -257,9 +266,13 @@ public class UimsSetPasswordSoapServiceStaging implements UimsSetPasswordSoapSer
 
 		try {
 			if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
+				LOGGER.info("Going to call getSamlAssertionToken() of sync UIMS for userId:"+userId);
 				samlAssertion = samlTokenService.getSamlAssertionToken(userId, openamVnew);
-			} else {
+				LOGGER.info("getSamlAssertionToken() of sync UIMS finished for userId:"+userId);
+			}else{
+				LOGGER.info("Going to call getSamlAssertionToken() of sync UIMS for callerFid:"+callerFid);
 				samlAssertion = samlTokenService.getSamlAssertionToken(callerFid, openamVnew);
+				LOGGER.info("getSamlAssertionToken() of sync UIMS finished for callerFid:"+callerFid);
 			}
 
 			LOGGER.info("samlAssertion="+samlAssertion);
@@ -373,9 +386,13 @@ public class UimsSetPasswordSoapServiceStaging implements UimsSetPasswordSoapSer
 
 		try {
 			if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
+				LOGGER.info("Going to call getSamlAssertionToken() of UIMS for EMAIL.. userId:"+userId);
 				samlAssertion = samlTokenService.getSamlAssertionToken(userId, openamVnew);
+				LOGGER.info("getSamlAssertionToken() of UIMS finished for EMAIL.. userId:"+userId);
 			} else {
+				LOGGER.info("Going to call getSamlAssertionToken() of UIMS for non-EMAIL.. callerFid:"+callerFid);
 				samlAssertion = samlTokenService.getSamlAssertionToken(callerFid, openamVnew);
+				LOGGER.info("getSamlAssertionToken() of UIMS finished for non-EMAIL.. callerFid:"+callerFid);
 			}
 			LOGGER.info("samlAssertion="+samlAssertion);
 
@@ -444,9 +461,12 @@ public class UimsSetPasswordSoapServiceStaging implements UimsSetPasswordSoapSer
 		LOGGER.info("Parameter iPlanetDirectoryKey -> " + iPlanetDirectoryKey+" ,userId -> "+userId);
 		LOGGER.info("Parameter callerFid -> " + callerFid);
 		LOGGER.info("Parameter openamVnew -> " + openamVnew);
-		
+
 		try {
+			LOGGER.info("Going to call getSamlAssertionToken() of UIMS for callerFid:"+callerFid);
 			samlAssertion = samlTokenService.getSamlAssertionToken(callerFid, openamVnew);
+			LOGGER.info("getSamlAssertionToken() of UIMS finished for callerFid:"+callerFid);
+		
 			LOGGER.info("samlAssertion="+samlAssertion);
 
 			Callable<Boolean> callableUpdateUIMSPassword = new Callable<Boolean>() {

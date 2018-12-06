@@ -196,7 +196,8 @@ public class SendEmail {
 		String subject = "";
 		String lang= "";
 		String firstName = "";
-		
+		String aLink="";
+		String linkParam="";
 
 			try {
 				encodedHOTPcode = code;
@@ -228,7 +229,13 @@ public class SendEmail {
 
 				lang=productDocCtxUser.read("$.preferredlanguage[0]");
 				firstName=productDocCtxUser.read("$.givenName[0]");
-				
+				aLink = productDocCtxUser.read("$.alink[0]");
+				LOGGER.info("sendOpenAmEmail** alink:"+aLink);
+				//Setting aLink in case of User Registration
+				if(hotpOperationType.equalsIgnoreCase(EmailConstants.USERREGISTRATION_OPT_TYPE)){
+					linkParam=(aLink==null | aLink =="") ? "" : ("&alink="+aLink);
+				}
+				LOGGER.info("linkParam: "+linkParam);
 				/*				url = hotpEmailVerificationURL + "?userid=" + to + "&pin=" + encodedHOTPcode + "&operationType="
 							+ hotpOperationType + "&lang=" + lang + "&app=" + appid + "&uid=" + uid;
 					subject = appid;
@@ -241,7 +248,7 @@ public class SendEmail {
 				//appid = regsource or updateresource pass from emthod
 				
 				url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + encodedHOTPcode + "&operationType="
-						+ hotpOperationType + "&lang=" + lang + "&app=" + appid + "&uid=" + userId;
+						+ hotpOperationType + "&lang=" + lang + "&app=" + appid + "&uid=" + userId+linkParam;
 				
 				//url = URLEncoder.encode( structurl, "UTF-8");  
 				
