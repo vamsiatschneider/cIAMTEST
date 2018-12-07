@@ -42,7 +42,7 @@ import com.uims.user22.UserManagerUIMSV22;
 
 @Profile("Pre-prod")
 @org.springframework.stereotype.Service("uimsSetPasswordSoapService")
-public class UimsSetPasswordSoapServicePreProd implements UimsSetPasswordSoapService {	
+public class UimsSetPasswordSoapServicePreProd implements UimsSetPasswordSoapService<UserManagerUIMSV22> {	
 	/**
 	 * Logger instance.
 	 */

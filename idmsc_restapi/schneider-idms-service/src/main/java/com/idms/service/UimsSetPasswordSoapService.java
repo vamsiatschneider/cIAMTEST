@@ -3,11 +3,10 @@ package com.idms.service;
 import java.net.MalformedURLException;
 
 import com.idms.model.ConfirmPinRequest;
-import com.se.uims.usermanager.UserManagerUIMSV22;
 
-public interface UimsSetPasswordSoapService {
+public interface UimsSetPasswordSoapService<T> {
 	
-	public UserManagerUIMSV22 getUserManager();
+	public T getUserManager();
 
 	public void activateIdentity(String iPlanetDirectoryKey, String userId,
 			String callerFid, String password, String openamVnew, String loginIdentifierType,String emailOrMobile) 

@@ -17,11 +17,11 @@ import com.se.uims.usermanager.UserManagerUIMSV22;
 import com.se.uims.usermanager.UserV6;
 import com.uims.accessmanager.UserAccessManagerUIMSV2;
 
-public interface DirectUIMSUserManagerSoapService<T> {
+public interface DirectUIMSUserManagerSoapService<T,U> {
 
 	void setSendEmail(SendEmail sendEmail);
 
-	UserManagerUIMSV22 getUserManager();
+	U getUserManager();
 
 	UserAccessManagerUIMSV2 getAccessManager();
 

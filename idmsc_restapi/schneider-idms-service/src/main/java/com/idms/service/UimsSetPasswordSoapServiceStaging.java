@@ -33,7 +33,7 @@ import com.se.uims.usermanager.UserManagerUIMSV2;
 
 @Profile("Staging")
 @org.springframework.stereotype.Service("uimsSetPasswordSoapService")
-public class UimsSetPasswordSoapServiceStaging implements UimsSetPasswordSoapService {
+public class UimsSetPasswordSoapServiceStaging implements UimsSetPasswordSoapService<UserManagerUIMSV22> {
 	
 	/**
 	 * Logger instance.

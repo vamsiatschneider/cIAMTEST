@@ -34,6 +34,7 @@ import com.idms.product.client.OpenAMService;
 import com.idms.service.SendEmail;
 import com.idms.service.UIMSAuthenticatedUserManagerSoapService;
 import com.idms.service.UIMSCompanyManagerSoapService;
+import com.idms.service.UIMSCompanyManagerSoapServiceStaging;
 import com.idms.service.digital.GoDigitalUserService;
 import com.schneider.idms.model.IdmsUserAilRequest;
 import com.schneider.idms.model.IdmsUserConfirmRequest;
@@ -59,7 +60,7 @@ import com.uims.authenticatedUsermanager.Type;
 @Profile({"Staging", "Pre-prod"})
 @org.springframework.stereotype.Service("directUIMSUserManagerSoapService")
 @EnableAsync
-public class DirectUIMSUserManagerSoapServiceStaging implements DirectUIMSUserManagerSoapService<UserV6> {
+public class DirectUIMSUserManagerSoapServiceStaging implements DirectUIMSUserManagerSoapService<UserV6, UserManagerUIMSV22> {
 
 	/**
 	 * Logger instance.
@@ -788,7 +789,7 @@ public class DirectUIMSUserManagerSoapServiceStaging implements DirectUIMSUserMa
 		application.setType(Type.APPLICATION);
 
 		try {
-			UIMSCompanyManagerSoapService companyManagerSoapService = new UIMSCompanyManagerSoapService();
+			UIMSCompanyManagerSoapService companyManagerSoapService = new UIMSCompanyManagerSoapServiceStaging();
 			Callable<Boolean> callableUpdateUIMSUserAndComapany = new Callable<Boolean>() {
 				public Boolean call() throws Exception {
 
@@ -1067,7 +1068,7 @@ public class DirectUIMSUserManagerSoapServiceStaging implements DirectUIMSUserMa
 
 	public static void main(String[] args) {
 
-		DirectUIMSUserManagerSoapService service = new DirectUIMSUserManagerSoapService();
+		DirectUIMSUserManagerSoapServiceStaging service = new DirectUIMSUserManagerSoapServiceStaging();
 		com.uims.authenticatedUsermanager.UserV6 user = new com.uims.authenticatedUsermanager.UserV6();
 		user.setFederatedID("123457");
 		String email = UUID.randomUUID().toString() + "@mailinator.com";

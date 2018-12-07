@@ -33,6 +33,25 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 
 		<!-- Java EE Replaced with individual Spec APIs -->
 		<dependency>
+			<groupId>com.schneider.uims</groupId>
+			<artifactId>uims-ws-int</artifactId>
+			<version>1.0</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.schneider.uims</groupId>
+			<artifactId>uims-ws-stg</artifactId>
+			<version>1.0</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.schneider.uims</groupId>
+			<artifactId>uims-ws-pprd</artifactId>
+			<version>1.0</version>
+		</dependency>
+		
+		<!-- Java EE Replaced with individual Spec APIs -->
+		<dependency>
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>javax.ws.rs-api</artifactId>
 			<scope>compile</scope>

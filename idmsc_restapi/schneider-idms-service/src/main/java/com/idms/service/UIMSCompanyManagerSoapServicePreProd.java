@@ -49,7 +49,7 @@ public class UIMSCompanyManagerSoapServicePreProd implements UIMSCompanyManagerS
 	/**
 	 * Logger instance.
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(UIMSUserManagerSoapService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(UIMSCompanyManagerSoapServicePreProd.class);
 	
 	@Inject
 	private SamlAssertionTokenGenerator samlTokenService;

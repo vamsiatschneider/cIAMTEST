@@ -54,6 +54,7 @@ import com.se.uims.usermanager.UserManagerUIMSV22;
 import com.se.uims.usermanager.UserV6;
 import com.uims.authenticatedUsermanager.AccessElement;
 import com.uims.authenticatedUsermanager.Type;
+import com.uims.companymanager.CompanyManagerUIMSV2;
 
 /**
  * The Soap Service interface layer to call the UIMS user manager stubs.
@@ -65,7 +66,7 @@ import com.uims.authenticatedUsermanager.Type;
 @Profile("Integration")
 @org.springframework.stereotype.Service("uimsUserManagSoapService")
 @EnableAsync
-public class UIMSUserManagerSoapServiceIntegration implements UIMSUserManagerSoapService<UserManagerUIMSV22, UserV6, Object> {
+public class UIMSUserManagerSoapServiceIntegration implements UIMSUserManagerSoapService<UserManagerUIMSV22, com.se.uims.usermanager.UserV6, Object> {
 
 	/**
 	 * Logger instance.
@@ -116,10 +117,10 @@ public class UIMSUserManagerSoapServiceIntegration implements UIMSUserManagerSoa
 	private UIMSAuthenticatedUserManagerSoapService authenticatedUserManagerSoapService;
 
 	@Autowired
-	private UIMSCompanyManagerSoapService companyManagerSoapService;
+	private UIMSCompanyManagerSoapService<CompanyManagerUIMSV2> companyManagerSoapService;
 	
 	@Autowired
-	private UIMSCompanyManagerSoapServiceSync companyManagerSoapServiceSync;
+	private UIMSCompanyManagerSoapServiceSync<CompanyManagerUIMSV2> companyManagerSoapServiceSync;
 
 	@Value("${goDitalToken}")
 	private String goDitalToken;

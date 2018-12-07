@@ -48,7 +48,7 @@ public class UIMSCompanyManagerSoapServiceIntegration implements UIMSCompanyMana
 	/**
 	 * Logger instance.
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(UIMSUserManagerSoapService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(UIMSCompanyManagerSoapServiceIntegration.class);
 	
 	@Inject
 	private SamlAssertionTokenGenerator samlTokenService;

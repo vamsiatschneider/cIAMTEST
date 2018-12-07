@@ -67,7 +67,7 @@ import com.uims.authenticatedUsermanager.Type;
 @Profile("Integration")
 @org.springframework.stereotype.Service("directUIMSUserManagerSoapService")
 @EnableAsync
-public class DirectUIMSUserManagerSoapServiceIntegration implements DirectUIMSUserManagerSoapService<UserV6> {
+public class DirectUIMSUserManagerSoapServiceIntegration implements DirectUIMSUserManagerSoapService<UserV6, UserManagerUIMSV22> {
 
 	/**
 	 * Logger instance.

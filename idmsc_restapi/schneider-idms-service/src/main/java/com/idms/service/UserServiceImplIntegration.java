@@ -152,6 +152,7 @@ import com.se.idms.util.LangSupportUtil;
 import com.se.idms.util.PhoneValidator;
 import com.se.idms.util.UimsConstants;
 import com.se.idms.util.UserConstants;
+import com.se.uims.usermanager.UserManagerUIMSV22;
 import com.uims.authenticatedUsermanager.UserV6;
 
 @Profile("Integration")
@@ -240,13 +241,13 @@ public class UserServiceImplIntegration implements UserServiceImpl {
 	private SendEmail sendEmail;
 	
 	@Inject
-	private UIMSUserManagerSoapService uimsUserManagerSoapService;
+	private UIMSUserManagerSoapService<UserManagerUIMSV22, com.se.uims.usermanager.UserV6, Object> uimsUserManagerSoapService;
 	
 	@Inject 
 	private UIMSAccessManagerSoapService uimsAccessManagerSoapService;
 	
 	@Inject 
-	private UimsSetPasswordSoapService uimsSetPasswordSoapService;
+	private UimsSetPasswordSoapService<UserManagerUIMSV22> uimsSetPasswordSoapService;
 	
 	@Inject 
 	private UIMSUserManagerSoapServiceSync uimsUserManagerSync;

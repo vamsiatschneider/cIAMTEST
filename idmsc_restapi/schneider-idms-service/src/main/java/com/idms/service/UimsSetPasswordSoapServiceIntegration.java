@@ -31,7 +31,7 @@ import com.se.uims.usermanager.UserManagerUIMSV22;
 
 @Profile("Integration")
 @org.springframework.stereotype.Service("uimsSetPasswordSoapService")
-public class UimsSetPasswordSoapServiceIntegration implements UimsSetPasswordSoapService {
+public class UimsSetPasswordSoapServiceIntegration implements UimsSetPasswordSoapService<UserManagerUIMSV22> {
 	
 	/**
 	 * Logger instance.
@@ -44,7 +44,7 @@ public class UimsSetPasswordSoapServiceIntegration implements UimsSetPasswordSoa
 	private SamlAssertionTokenGenerator samlTokenService;
 	
 	@Autowired
-	private UIMSUserManagerSoapService userManagerSoapService;
+	private UIMSUserManagerSoapService<UserManagerUIMSV22, com.se.uims.usermanager.UserV6, Object> userManagerSoapService;
 	
 	@Inject
 	private OpenAMService productService;

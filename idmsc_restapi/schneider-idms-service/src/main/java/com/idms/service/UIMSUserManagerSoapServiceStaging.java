@@ -36,6 +36,7 @@ import com.idms.product.client.OpenAMService;
 import com.idms.service.digital.GoDigitalUserService;
 import com.idms.service.uims.sync.UIMSCompanyManagerSoapServiceSync;
 import com.idms.service.util.ChinaIdmsUtil;
+import com.schneider.ims.service.company.impl.uimsv2.AuthenticatedCompanyManagerUIMSV2;
 import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.cache.validate.IValidator;
 import com.se.idms.util.SamlAssertionTokenGenerator;
@@ -114,10 +115,10 @@ public class UIMSUserManagerSoapServiceStaging implements UIMSUserManagerSoapSer
 	private UIMSAuthenticatedUserManagerSoapService authenticatedUserManagerSoapService;
 
 	@Autowired
-	private UIMSCompanyManagerSoapService companyManagerSoapService;
+	private UIMSCompanyManagerSoapService<AuthenticatedCompanyManagerUIMSV2> companyManagerSoapService;
 	
 	@Autowired
-	private UIMSCompanyManagerSoapServiceSync companyManagerSoapServiceSync;
+	private UIMSCompanyManagerSoapServiceSync<AuthenticatedCompanyManagerUIMSV2> companyManagerSoapServiceSync;
 
 	@Value("${goDitalToken}")
 	private String goDitalToken;
