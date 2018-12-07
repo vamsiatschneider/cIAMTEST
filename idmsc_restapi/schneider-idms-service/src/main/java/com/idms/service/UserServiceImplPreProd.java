@@ -177,13 +177,14 @@ public class UserServiceImplPreProd implements UserServiceImpl {
 
 		//for PreProd
 		
-		System.setProperty("javax.net.ssl.trustStore", "/data/certs/cacerts");
-		System.setProperty("javax.net.ssl.trustStorePassword", "changeit");
-		System.setProperty("javax.net.ssl.keyStoreType", "jks");
-		System.setProperty("javax.net.ssl.keyStore", "/data/finalCert-pprd.jks");
-		System.setProperty("javax.net.ssl.keyStorePassword", "Passw0rd");
-		System.setProperty("sun.security.ssl.allowUnsafeRenegotiation", "true");
-		System.setProperty("sun.security.ssl.allowLegacyHelloMessages", "true");
+		//CODE-RE-STRUCTURING - Moved properties to external properties file
+		//System.setProperty("javax.net.ssl.trustStore", "/data/certs/cacerts");
+		//System.setProperty("javax.net.ssl.trustStorePassword", "changeit");
+		//System.setProperty("javax.net.ssl.keyStoreType", "jks");
+		//System.setProperty("javax.net.ssl.keyStore", "/data/finalCert-pprd.jks");
+		//System.setProperty("javax.net.ssl.keyStorePassword", "Passw0rd");
+		//System.setProperty("sun.security.ssl.allowUnsafeRenegotiation", "true");
+		//System.setProperty("sun.security.ssl.allowLegacyHelloMessages", "true");
 	}
 	
 	//CODE-RE-STRUCTURING

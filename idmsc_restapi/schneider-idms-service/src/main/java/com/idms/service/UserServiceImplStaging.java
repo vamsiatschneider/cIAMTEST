@@ -173,15 +173,15 @@ public class UserServiceImplStaging implements UserServiceImpl {
 		System.setProperty("sun.security.ssl.allowLegacyHelloMessages", "true");*/
 		
 		//for stage
+		//CODE-RE-STRUCTURING - Moved properties to external properties file
+		//System.setProperty("javax.net.ssl.trustStore", "/apache-tomcat-8.5.11/NginxTomcat.jks");
+		//System.setProperty("javax.net.ssl.trustStorePassword", "Passw0rd");
+		//System.setProperty("javax.net.ssl.keyStoreType", "jks");
+		//System.setProperty("javax.net.ssl.keyStore", "/apache-tomcat-8.5.11/00D0m000000CsZo1.jks");
+		//System.setProperty("javax.net.ssl.keyStorePassword", "Passw0rd");
 		
-		System.setProperty("javax.net.ssl.trustStore", "/apache-tomcat-8.5.11/NginxTomcat.jks");
-		System.setProperty("javax.net.ssl.trustStorePassword", "Passw0rd");
-		System.setProperty("javax.net.ssl.keyStoreType", "jks");
-		System.setProperty("javax.net.ssl.keyStore", "/apache-tomcat-8.5.11/00D0m000000CsZo1.jks");
-		System.setProperty("javax.net.ssl.keyStorePassword", "Passw0rd");
-		
-		System.setProperty("sun.security.ssl.allowUnsafeRenegotiation", "true");
-		System.setProperty("sun.security.ssl.allowLegacyHelloMessages", "true");
+		//System.setProperty("sun.security.ssl.allowUnsafeRenegotiation", "true");
+		//System.setProperty("sun.security.ssl.allowLegacyHelloMessages", "true");
 	}
 	
 	//CODE-RE-STRUCTURING

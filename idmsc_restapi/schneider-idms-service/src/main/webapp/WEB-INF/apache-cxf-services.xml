@@ -56,6 +56,23 @@
 	<context:property-placeholder ignore-resource-not-found="true"
 								  location="classpath:config/properties/application.properties" />
 
+	<!-- Set System Properties -->
+	<bean id="sysPropsSetter" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+	    <property name="targetObject" value="#{@systemProperties}" />
+	    <property name="targetMethod" value="putAll" />
+	    <property name="arguments">
+	        <util:properties>
+	            <prop key="javax.net.ssl.trustStore">${idms.ssl.trustStore}</prop>
+	            <prop key="javax.net.ssl.trustStorePassword">${idms.ssl.trustStorePassword}</prop>
+	            <prop key="javax.net.ssl.keyStoreType">${idms.ssl.keyStoreType}</prop>
+	            <prop key="javax.net.ssl.keyStore">${idms.ssl.keyStore}</prop>
+	            <prop key="javax.net.ssl.keyStorePassword">${idms.ssl.keyStorePassword}</prop>
+	            <prop key="sun.security.ssl.allowUnsafeRenegotiation">${idms.ssl.allowUnsafeRenegotiation}</prop>
+	            <prop key="sun.security.ssl.allowLegacyHelloMessages">${idms.ssl.allowLegacyHelloMessages}</prop>
+	        </util:properties>
+	    </property>
+	</bean>
+	
 	<!-- scans and register beans using annotation-config (metadata) -->
 	<context:component-scan base-package="com.idms.*,com.se.idms.*,com.schneider.*,com.se.uims.*,com.uimsv22.*" />
 
