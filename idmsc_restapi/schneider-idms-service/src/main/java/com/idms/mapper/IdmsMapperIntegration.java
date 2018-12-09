@@ -24,7 +24,7 @@ import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.ConfigurableMapper;
 
 @Named
-@Profile("INTG")
+@Profile({"INTG","DEV"})
 public class IdmsMapperIntegration extends IdmsMapper {
 
     @Override

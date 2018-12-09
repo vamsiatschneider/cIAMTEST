@@ -33,7 +33,7 @@ import com.uims.companymanager.CompanyManagerUIMSV2;
  *
  */
 
-@Profile("INTG")
+@Profile({"INTG","DEV"})
 @org.springframework.stereotype.Service("uimsCompManagSoapServiceSync")
 public class UIMSCompanyManagerSoapServiceSyncIntegration implements UIMSCompanyManagerSoapServiceSync<CompanyManagerUIMSV2> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UIMSCompanyManagerSoapServiceSyncIntegration.class);

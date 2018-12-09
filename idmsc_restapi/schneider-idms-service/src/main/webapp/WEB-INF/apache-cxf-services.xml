@@ -54,7 +54,7 @@
 	<!-- <import resource="classpath:config/logback.xml" /> -->
 	
 	<context:property-placeholder ignore-resource-not-found="true"
-								  location="classpath:config/properties/application.#{systemProperties['spring.profiles.active']}.properties" />
+								  location="#{systemProperties['idmsc.app_root.location']}/properties/application.#{systemProperties['spring.profiles.active']}.properties" />
 
 	<!-- Set System Properties -->
 	<bean id="sysPropsSetter" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
@@ -145,7 +145,7 @@
         <property name="cacheManager" ref="ehcache"/>
     </bean>
     <bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
-        <property name="configLocation" value="classpath:config/ehcacheToken.xml"/>
+        <property name="configLocation" value="#{systemProperties['idmsc.app_root.location']}/cache/ehcacheToken.xml"/>
         <!-- <property name="shared" value="true"/> -->
     </bean>
 </beans>

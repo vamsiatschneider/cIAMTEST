@@ -63,7 +63,7 @@ import com.uims.companymanager.CompanyManagerUIMSV2;
  *
  */
 
-@Profile("INTG")
+@Profile({"INTG","DEV"})
 @org.springframework.stereotype.Service("uimsUserManagSoapService")
 @EnableAsync
 public class UIMSUserManagerSoapServiceIntegration implements UIMSUserManagerSoapService<UserManagerUIMSV22, com.se.uims.usermanager.UserV6, Object> {

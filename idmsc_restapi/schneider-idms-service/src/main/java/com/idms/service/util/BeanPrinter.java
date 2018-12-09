@@ -27,7 +27,7 @@ public class BeanPrinter {
 		if(!printBeans)
 			return;
 		
-		Logger.getLogger(BeanPrinter.class.getCanonicalName()).info("~~~~~~~~~~~~~~~~~~ Loaded Beans ~~~~~~~~~~~~~~~~~~");
+		outStr.append("~~~~~~~~~~~~~~~~~~ Loaded Beans ~~~~~~~~~~~~~~~~~~\n");
 		
 		for(String beanDef : beanDefinitionNames) {
 			if(beanDef.toLowerCase().contains("service")) {
