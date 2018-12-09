@@ -33,7 +33,7 @@ import com.se.idms.util.UimsConstants;
  *
  */
 
-@Profile("Staging")
+@Profile("STG")
 @org.springframework.stereotype.Service("uimsCompManagSoapServiceSync")
 public class UIMSCompanyManagerSoapServiceSyncStaging implements UIMSCompanyManagerSoapServiceSync<AuthenticatedCompanyManagerUIMSV2> {
 	

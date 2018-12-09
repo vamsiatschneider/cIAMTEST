@@ -65,7 +65,7 @@ import com.uims.user22.UserManagerUIMSV22;
  *
  */
 
-@Profile("Pre-prod")
+@Profile("PPRD")
 @org.springframework.stereotype.Service("uimsUserManagSoapService")
 @EnableAsync
 public class UIMSUserManagerSoapServicePreProd implements UIMSUserManagerSoapService<UserManagerUIMSV2, UserV5, UserManagerUIMSV22> {

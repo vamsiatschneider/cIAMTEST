@@ -54,7 +54,7 @@
 	<!-- <import resource="classpath:config/logback.xml" /> -->
 	
 	<context:property-placeholder ignore-resource-not-found="true"
-								  location="classpath:config/properties/application.properties" />
+								  location="classpath:config/properties/application.#{systemProperties['spring.profiles.active']}.properties" />
 
 	<!-- Set System Properties -->
 	<bean id="sysPropsSetter" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">

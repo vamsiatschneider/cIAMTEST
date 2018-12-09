@@ -64,7 +64,7 @@ import com.uims.user22.UserManagerUIMSV22;
  *
  */
 
-@Profile("Staging")
+@Profile("STG")
 @org.springframework.stereotype.Service("uimsUserManagSoapService")
 @EnableAsync
 public class UIMSUserManagerSoapServiceStaging implements UIMSUserManagerSoapService<UserManagerUIMSV2, UserV5, UserManagerUIMSV22> {

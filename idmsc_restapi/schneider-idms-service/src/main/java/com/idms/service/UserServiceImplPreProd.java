@@ -158,12 +158,12 @@ import com.se.uims.usermanager.UserV5;
 import com.uims.authenticatedUsermanager.UserV6;
 import com.uims.user22.UserManagerUIMSV22;
 
-@Profile("Pre-prod")
+@Profile("PPRD")
 @Service("userService")
 public class UserServiceImplPreProd implements UserServiceImpl {
 	
 	//TODO: UIMS stage certification issue solution.
-	static {
+	//static {
 		/*System.setProperty("javax.net.ssl.trustStore", "C:\\Software\\apache-tomcat-8.0.43\\cacerts");
 		System.setProperty("javax.net.ssl.trustStorePassword", "changeit");
 		System.setProperty("javax.net.ssl.keyStoreType", "jks");
@@ -185,7 +185,7 @@ public class UserServiceImplPreProd implements UserServiceImpl {
 		//System.setProperty("javax.net.ssl.keyStorePassword", "Passw0rd");
 		//System.setProperty("sun.security.ssl.allowUnsafeRenegotiation", "true");
 		//System.setProperty("sun.security.ssl.allowLegacyHelloMessages", "true");
-	}
+	//}
 	
 	//CODE-RE-STRUCTURING
 	@Value("${email.template.dir}")

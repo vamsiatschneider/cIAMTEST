@@ -40,7 +40,7 @@ import com.se.uims.usermanager.UserManagerUIMSV2;
 import com.se.uims.usermanager.UserV5;
 import com.uims.user22.UserManagerUIMSV22;
 
-@Profile("Pre-prod")
+@Profile("PPRD")
 @org.springframework.stereotype.Service("uimsSetPasswordSoapService")
 public class UimsSetPasswordSoapServicePreProd implements UimsSetPasswordSoapService<UserManagerUIMSV22> {	
 	/**

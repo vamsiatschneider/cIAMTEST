@@ -57,7 +57,7 @@ import com.uims.authenticatedUsermanager.Type;
  *
  */
 
-@Profile({"Staging", "Pre-prod"})
+@Profile({"STG", "PPRD"})
 @org.springframework.stereotype.Service("directUIMSUserManagerSoapService")
 @EnableAsync
 public class DirectUIMSUserManagerSoapServiceStaging implements DirectUIMSUserManagerSoapService<UserV6, UserManagerUIMSV22> {

@@ -37,7 +37,7 @@ import com.se.idms.util.UimsConstants;
  *
  */
 
-@Profile("Pre-prod")
+@Profile("PPRD")
 @org.springframework.stereotype.Service("uimsCompManagSoapServiceSync")
 public class UIMSCompanyManagerSoapServiceSyncPreProd implements UIMSCompanyManagerSoapServiceSync<AuthenticatedCompanyManagerUIMSV2> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UIMSCompanyManagerSoapServiceSyncPreProd.class);

@@ -155,7 +155,7 @@ import com.se.idms.util.UserConstants;
 import com.se.uims.usermanager.UserManagerUIMSV22;
 import com.uims.authenticatedUsermanager.UserV6;
 
-@Profile("Integration")
+@Profile("INTG")
 @Service("userService")
 public class UserServiceImplIntegration implements UserServiceImpl {
 

@@ -36,7 +36,7 @@ import com.se.idms.util.UimsConstants;
  *
  */
 
-@Profile("Pre-prod")
+@Profile("PPRD")
 @org.springframework.stereotype.Service("uimsCompManagSoapService")
 @EnableAsync
 public class UIMSCompanyManagerSoapServicePreProd implements UIMSCompanyManagerSoapService<AuthenticatedCompanyManagerUIMSV2> {

@@ -35,7 +35,7 @@ import com.uims.companymanager.CompanyManagerUIMSV2;
  * @author Aravindh Kumar
  *
  */
-@Profile("Integration")
+@Profile("INTG")
 @org.springframework.stereotype.Service("uimsCompManagSoapService")
 @EnableAsync
 public class UIMSCompanyManagerSoapServiceIntegration implements UIMSCompanyManagerSoapService<CompanyManagerUIMSV2> {

@@ -20,7 +20,6 @@ public class CacheManagerProviderImpl implements CacheTypes, CacheManagerProvide
 	private static final CacheManager CACHE_MANAGER = createManager();
 	
 	//CODE-RE-STRUCTURING
-	@Value("${app.properties.dir}")
 	private static String APP_PROPERTIES_DIR;
 	
 	/**
@@ -59,9 +58,17 @@ public class CacheManagerProviderImpl implements CacheTypes, CacheManagerProvide
 	}
 	
 	public static String getAppPropertiesDir() {
-
 		File resourcesDirectory = new File("src/main/resources");
 		return APP_PROPERTIES_DIR;
+	}
+
+	public String getAPP_PROPERTIES_DIR() {
+		return APP_PROPERTIES_DIR;
+	}
+
+	@Value("${app.properties.dir}")
+	public void setAPP_PROPERTIES_DIR(String appPropsDir) {
+		APP_PROPERTIES_DIR = appPropsDir;
 	}
 	
 	

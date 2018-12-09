@@ -29,7 +29,7 @@ import com.se.idms.util.UimsConstants;
 import com.se.idms.util.UserConstants;
 import com.se.uims.usermanager.UserManagerUIMSV22;
 
-@Profile("Integration")
+@Profile("INTG")
 @org.springframework.stereotype.Service("uimsSetPasswordSoapService")
 public class UimsSetPasswordSoapServiceIntegration implements UimsSetPasswordSoapService<UserManagerUIMSV22> {
 	

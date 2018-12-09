@@ -41,7 +41,7 @@ import com.se.idms.cache.utils.EmailConstants;
 import com.se.idms.util.JsonConstants;
 import com.se.idms.util.UserConstants;
 
-@Profile("Integration")
+@Profile("INTG")
 @Service("updateUserService")
 public class UpdateUserServiceImplIntegration extends UpdateUserServiceImpl {
 

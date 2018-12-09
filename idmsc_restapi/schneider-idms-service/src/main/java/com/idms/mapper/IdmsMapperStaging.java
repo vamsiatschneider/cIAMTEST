@@ -23,7 +23,7 @@ import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.ConfigurableMapper;
 
 @Named
-@Profile({"Staging", "Pre-prod"})
+@Profile({"STG", "PPRD"})
 public class IdmsMapperStaging extends IdmsMapper {
 
 	

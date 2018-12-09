@@ -1,5 +1,6 @@
 package com.idms.mapper;
 
+
 import javax.inject.Named;
 
 import org.springframework.context.annotation.Profile;
@@ -23,9 +24,8 @@ import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.ConfigurableMapper;
 
 @Named
-@Profile("Integration")
+@Profile("INTG")
 public class IdmsMapperIntegration extends IdmsMapper {
-
 
     @Override
     protected void configure(MapperFactory mapperFactory) {

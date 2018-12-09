@@ -35,7 +35,7 @@ import com.se.idms.util.UimsConstants;
  *
  */
 
-@Profile("Staging")
+@Profile("STG")
 @org.springframework.stereotype.Service("uimsCompManagSoapService")
 @EnableAsync
 public class UIMSCompanyManagerSoapServiceStaging implements UIMSCompanyManagerSoapService<AuthenticatedCompanyManagerUIMSV2> {
