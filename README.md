@@ -1,11 +1,11 @@
 # IDMS China - Development Branch #
 
 ### Current Ongoing Release ###
-* Release version: <Version>
+* Release version: IDMS-CHINA-R2-MARCH-2019
 * <Add confluence page>
 
 ### Branch Usage ###
-* The develop/API branch is be used to work on the current release. Details of the current release to be updated in the release section.
+* The develop/API branch serves as the current release branch. Details of the current release should be updated in the release section.
 * This branch should be used to create topic branches and be the target of the pull request created on the topic branch.
 * Serve as origin branch for the Integration branch.
 * Serve as the target for parallel feature branch merges, when those feature needs to be released
