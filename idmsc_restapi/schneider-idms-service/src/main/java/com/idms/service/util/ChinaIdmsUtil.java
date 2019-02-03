@@ -10,11 +10,13 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.se.idms.util.UserConstants;
 
@@ -157,10 +159,43 @@ public class ChinaIdmsUtil {
 		return amlbcookie; 
 	}
 
+	public static boolean mobileValidator(String mobile){
+		boolean checkMobile = true;		
+		mobile = mobileTransformation(mobile);
+
+		if ((!StringUtils.isNumeric(mobile)) || (mobile.length() != 11)) {
+			checkMobile = false;
+		}
+		return checkMobile;
+	}
+	
+	/**
+	 * 
+	 * @param str
+	 * @return
+	 */
+	public static String mobileTransformation(String str) 
+	{ 
+		String mobileNumber = str.trim();
+		str = mobileNumber.replaceAll("[\\(\\)\\-\\+\\s]", "");
+		int i = 0; 
+		while (str.charAt(i) == '0') 
+			i++; 
+
+		str = str.substring(i);
+		
+		if(str.startsWith(UserConstants.MOBILE_CHINA_CODE)) {
+			str = str.substring(UserConstants.MOBILE_CHINA_CODE.length());
+		}
+
+		return str;  // return in String 
+	} 
 	
 	/*public static void main(String[] args) {
-		String longvalue = generateHashValue("tY4MomqIwjg34932ZhTx651K38WJcZ");
-		System.out.println(longvalue);
+		//String longvalue = generateHashValue("tY4MomqIwjg34932ZhTx651K38WJcZ");
+		//System.out.println(longvalue);
+		boolean mobileStr = mobileValidator("5987559777");
+		System.out.println("mobileStr = "+mobileStr);
 	}*/
 	
 }

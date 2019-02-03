@@ -91,9 +91,6 @@ public class DirectUIMSUserManagerSoapServiceIntegration implements DirectUIMSUs
 
 	private SendEmail sendEmail;
 
-	/* (non-Javadoc)
-	 * @see com.schneider.uims.service.DirectUIMSUserManagerSoapService#setSendEmail(com.idms.service.SendEmail)
-	 */
 	@Autowired
 	@Lazy
 	public void setSendEmail(SendEmail sendEmail) {
@@ -164,8 +161,8 @@ public class DirectUIMSUserManagerSoapServiceIntegration implements DirectUIMSUs
 
 	private boolean isgrantresult = false;
 
-	/* (non-Javadoc)
-	 * @see com.schneider.uims.service.DirectUIMSUserManagerSoapService#getUserManager()
+	/**
+	 * Service to fetch information about {@link Product}s.
 	 */
 
 	public UserManagerUIMSV22 getUserManager(){
@@ -943,8 +940,11 @@ public class DirectUIMSUserManagerSoapServiceIntegration implements DirectUIMSUs
 
 	}
 
-	/* (non-Javadoc)
-	 * @see com.schneider.uims.service.DirectUIMSUserManagerSoapService#activateUIMSUserConfirmPIN(com.schneider.idms.model.IdmsUserConfirmRequest, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+	/**
+	 * This method is for UIMS confirm pin
+	 * 
+	 * @param confirmRequest
+	 * @param openamVnew
 	 */
 	@Async
 	public void activateUIMSUserConfirmPIN(IdmsUserConfirmRequest confirmRequest, String openamVnew,

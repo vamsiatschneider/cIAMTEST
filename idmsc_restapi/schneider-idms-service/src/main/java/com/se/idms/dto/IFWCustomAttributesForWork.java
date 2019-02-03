@@ -225,6 +225,12 @@ public class IFWCustomAttributesForWork {
 	
 	@JsonProperty
 	private String companyPhone;
+	//mobile_reg and login_mobile field is added for dual identifier feature 
+	@JsonProperty
+    private String mobile_reg;
+	
+	@JsonProperty
+	private String login_mobile;
 	
 	public String getCompanyFederatedId() {
 		return companyFederatedId;
@@ -817,5 +823,21 @@ public class IFWCustomAttributesForWork {
 
 	public void setCompanyPhone(String companyPhone) {
 		this.companyPhone = companyPhone;
+	}
+
+	public String getMobile_reg() {
+		return mobile_reg;
+	}
+
+	public void setMobile_reg(String mobile_reg) {
+		this.mobile_reg = mobile_reg;
+	}
+
+	public String getLogin_mobile() {
+		return login_mobile;
+	}
+
+	public void setLogin_mobile(String login_mobile) {
+		this.login_mobile = login_mobile;
 	}
 }

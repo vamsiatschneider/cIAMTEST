@@ -36,6 +36,7 @@ import com.schneider.idms.common.ResponseCodeStatus;
 import com.schneider.idms.mapper.DirectApiIdmsMapper;
 import com.schneider.idms.model.IdmsUpdateUserResponse;
 import com.schneider.idms.model.IdmsUserRequest;
+import com.schneider.idms.service.IUpdateUserService;
 import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.cache.utils.EmailConstants;
 import com.se.idms.util.JsonConstants;

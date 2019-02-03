@@ -54,6 +54,14 @@
 		</jaxrs:headers>
 	</jaxrs:client>
 	
+	<!-- CODE-RE-STRUCTURING - 3-Feb-19 merge : Start -->
+	<http:conduit name="{http://client.product.idms.com/}IdentityService.http-conduit">
+		<http:client AllowChunking="false" CacheControl="No-Cache" 
+				ContentType="application/x-www-form-urlencoded" ConnectionTimeout="90000" 
+				ReceiveTimeout="90000" Connection="Keep-Alive" />
+	</http:conduit>
+	<!-- CODE-RE-STRUCTURING - 3-Feb-19 merge : End -->
+	 
 	<jaxrs:client id="ifwService" address="${ifwService.url}"
 		serviceClass="com.idms.product.client.IFWService">
 		<jaxrs:headers>

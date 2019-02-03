@@ -46,6 +46,7 @@ import com.schneider.idms.common.EmailOption;
 import com.schneider.idms.common.ErrorResponseCode;
 import com.schneider.idms.common.UserContext;
 import com.schneider.idms.model.IdmsUserRequest;
+import com.schneider.idms.salesforce.service.SalesforceSyncServiceImpl;
 import com.schneider.uims.service.DirectUIMSUserManagerSoapService;
 import com.se.idms.cache.CacheTypes;
 import com.se.idms.cache.validate.IValidator;
@@ -109,6 +110,9 @@ public class IdmsCommonServiceImpl {
 
 	@Inject
 	public DirectUIMSUserManagerSoapService directUIMSUserManagerSoapService;
+	
+	@Inject
+	private SalesforceSyncServiceImpl sfSyncServiceImpl;
 	
 	@Autowired
 	protected static UserServiceResponse userResponse; 
@@ -998,18 +1002,16 @@ public class IdmsCommonServiceImpl {
 
 	protected String getSaleforceToken() {
 
-		DocumentContext productDocCtx = null;
-		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		//DocumentContext productDocCtx = null;
+		//Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 
 		/*LOGGER.info("getSalesForceToken : => " + "PASSWORD_GRANT_TYPE : " + UserConstants.PR_GRANT_TYPE
 				+ " salesForceClientId: " + salesForceClientId + " salesForceClientSecret :" + salesForceClientSecret
 				+ " salesForceUserName: " + salesForceUserName + " salesForcePassword :" + salesForcePassword);*/
-		String bfoAuthorization = salesForceService.getSalesForceToken(UserConstants.CONTENT_TYPE_URL_FROM,
-				UserConstants.PR_GRANT_TYPE, salesForceClientId, salesForceClientSecret, salesForceUserName,
-				salesForcePassword);
-		conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		String bfoAuthorizationToken = sfSyncServiceImpl.getSFToken();
+		/*conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		productDocCtx = JsonPath.using(conf).parse(bfoAuthorization);
-		String bfoAuthorizationToken = productDocCtx.read("$.access_token");
+		String bfoAuthorizationToken = productDocCtx.read("$.access_token");*/
 
 		return "Bearer " + bfoAuthorizationToken;
 	}

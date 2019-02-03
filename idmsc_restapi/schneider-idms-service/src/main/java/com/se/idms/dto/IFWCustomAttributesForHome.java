@@ -84,6 +84,10 @@ public class IFWCustomAttributesForHome {
 	private String trustedAdmin;
 	
 	private String isActivated;
+	
+	private String mobile_reg;
+	
+	private String login_mobile;
 
 	public String getUserId() {
 		return userId;
@@ -411,5 +415,21 @@ public class IFWCustomAttributesForHome {
 
 	public void setIsActivated(String isActivated) {
 		this.isActivated = isActivated;
+	}
+
+	public String getMobile_reg() {
+		return mobile_reg;
+	}
+
+	public void setMobile_reg(String mobile_reg) {
+		this.mobile_reg = mobile_reg;
+	}
+
+	public String getLogin_mobile() {
+		return login_mobile;
+	}
+
+	public void setLogin_mobile(String login_mobile) {
+		this.login_mobile = login_mobile;
 	}
 }

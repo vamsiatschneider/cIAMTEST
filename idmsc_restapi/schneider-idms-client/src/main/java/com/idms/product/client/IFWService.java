@@ -1,12 +1,11 @@
 package com.idms.product.client;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.HEAD;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
@@ -19,27 +18,26 @@ public interface IFWService {
 	String getIFWToken(@HeaderParam("Content-Type") String contetType, @QueryParam("grant_type") String grantType,
 			@QueryParam("client_id") String clientId, @QueryParam("client_secret") String clientSecret);
 
-	@HEAD
-	@Path("/rest/idms/user/2.0/users")
+	//CODE-RE-STRUCTURING - 3-Feb-19 merge (API upgrade from 2.0 to 4.0)
+	@POST
+	@Path("/rest/idms/user/4.0/users/exist")
 	Response checkUserExistsWithEmail(@HeaderParam("X-BFO-Authorization") String bfoAuthorization,
 			@HeaderParam("X-SE-IFW-ApplicationName") String applicationName,
 			@HeaderParam("X-SE-IFW-CountryCode") String countryCode,
 			@HeaderParam("X-SE-IFW-LanguageCode") String languageCode,
 			@HeaderParam("X-SE-IFW-RequestId") String requestId, 
 			@HeaderParam("Authorization") String authorization,
-			@QueryParam("email") String email,
-			@QueryParam("withGlobalUsers") String withGlobalUsers);
+			@FormParam("email") String email, @FormParam("withGlobalUsers") Boolean withGlobalUsers);
 	
-	@HEAD
-	@Path("/rest/idms/user/2.0/users")
+	//CODE-RE-STRUCTURING - 3-Feb-19 merge (API upgrade from 2.0 to 4.0)
+	@POST
+	@Path("/rest/idms/user/4.0/users/exist")
 	Response checkUserExistsWithMobile(@HeaderParam("X-BFO-Authorization") String bfoAuthorization,
 			@HeaderParam("X-SE-IFW-ApplicationName") String applicationName,
 			@HeaderParam("X-SE-IFW-CountryCode") String countryCode,
 			@HeaderParam("X-SE-IFW-LanguageCode") String languageCode,
 			@HeaderParam("X-SE-IFW-RequestId") String requestId, @HeaderParam("Authorization") String authorization,
-			@QueryParam("mobile") String email,
-			@QueryParam("withGlobalUsers") String withGlobalUsers);
-	
+			@FormParam("mobile") String email, @FormParam("withGlobalUsers") Boolean withGlobalUsers);
 	
 	@POST
 	@Path("/rest/idms/user/2.0/password/resetrequest")

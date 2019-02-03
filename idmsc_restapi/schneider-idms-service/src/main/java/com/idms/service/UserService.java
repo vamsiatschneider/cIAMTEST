@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.CookieParam;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -13,11 +14,15 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Response;
 
 import com.idms.model.AILRequest;
 import com.idms.model.ActivateUserRequest;
+import com.idms.model.AddEmailRequest;
+import com.idms.model.AddMobileRequest;
 import com.idms.model.CheckUserExistsRequest;
+import com.idms.model.CheckUserIdentityRequest;
 import com.idms.model.ConfirmPinRequest;
 import com.idms.model.CreateUserRequest;
 import com.idms.model.PasswordRecoveryRequest;
@@ -25,8 +30,10 @@ import com.idms.model.ResendEmailChangeRequest;
 import com.idms.model.ResendPinRequest;
 import com.idms.model.ResendRegEmailRequest;
 import com.idms.model.SendInvitationRequest;
+import com.idms.model.SendOTPRequest;
 import com.idms.model.UpdatePasswordRequest;
 import com.idms.model.UpdateUserRequest;
+import com.idms.model.VerifyPinRequest;
 import com.se.idms.dto.SetPasswordRequest;
 
 
@@ -64,7 +71,7 @@ public interface UserService {
 	@Path("/apexrest/IDMSUser")
 	@Consumes("application/json")
 	Response userRegistration(@HeaderParam("client_id")String clientId,
-			@HeaderParam("client_secret")String clientSecret,@Valid CreateUserRequest userRequest);
+			@HeaderParam("client_secret")String clientSecret,@Valid CreateUserRequest userRequest,@CookieParam("sendOTPIdentifier") Cookie cookie);
 	
 	@POST
 	@Path("/apexrest/ConfirmPIN")
@@ -79,6 +86,9 @@ public interface UserService {
 	@Path("/apexrest/IDMSCheckUser")
 	Response idmsCheckUserExists(@Valid CheckUserExistsRequest request);
 	
+	@POST
+	@Path("/apexrest/IDMSCheckIdentity")
+	Response idmsCheckIdentity(CheckUserIdentityRequest emailOrMobileReq);
 	
 	@GET
 	@Path("/apexrest/oauth2")
@@ -104,7 +114,7 @@ public interface UserService {
 	@Path("/apexrest/IDMSUser")
 	@Consumes("application/json")
 	Response updateUser(@HeaderParam("Authorization")String authorizedToken,@HeaderParam("client_id")String clientId,
-			@HeaderParam("client_secret")String clientSecret,UpdateUserRequest userRequest);
+			@HeaderParam("client_secret")String clientSecret,UpdateUserRequest userRequest,@CookieParam("sendOTPIdentifier") Cookie cookie);
 	
 	@PUT
 	@Path("/apexrest/IDMSUpdateUserAIL")
@@ -218,7 +228,7 @@ public interface UserService {
 	@Path("/apexrest/IDMSUserService")
 	@Consumes("application/json")
 	Response userRegistration_4_1(@HeaderParam("client_id")String clientId,
-			@HeaderParam("client_secret")String clientSecret, @Valid CreateUserRequest userRequest);
+			@HeaderParam("client_secret")String clientSecret, @Valid CreateUserRequest userRequest,@CookieParam("sendOTPIdentifier") Cookie cookie);
 	
 	@PUT
 	@Path("/apexrest/IDMSUserService")
@@ -237,12 +247,28 @@ public interface UserService {
 	
 	@POST
 	@Path("/apexrest/verifyPIN")
-	Response verifyPIN(String federationId, String pin);
+	Response verifyPIN(VerifyPinRequest pinRequest);
 	
 	@POST
 	@Path("/apexrest/ssopost") 
 	@Consumes("application/x-www-form-urlencoded")
-	Response buildQueryParam(@FormParam("RelayState") String relayState,@FormParam("SAMLRequest") String SAMLRequest);
+	Response buildQueryParam(@FormParam("RelayState") String relayState,@FormParam("SAMLRequest") String SAMLRequest,@HeaderParam("Content-Length") int length);
+	
+	@POST
+	@Path("/apexrest/sendOTP")
+	Response sendOTP(SendOTPRequest pinRequest);
+	
+	@POST
+	@Path("/apexrest/addMobile")
+	Response addMobile(AddMobileRequest addMobileRequest);
+	
+	@POST
+	@Path("/apexrest/addEmail")
+	Response addEmail(AddEmailRequest addEmailRequest);
+	
+	@PUT
+	@Path("/apexrest/addEmail")
+	Response addEmailToUser(AddEmailRequest addEmailRequest);
 	
 	
 }

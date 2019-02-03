@@ -96,6 +96,8 @@ public class UserConstants {
 	
 	public static final String EMAIL_VALIDATION_INTERNALUSER = "Employees are restricted from User registration";
 	
+	public static final String MOBILE_CHINA_CODE = "86";
+	
 	
 	/**
 	 * Mandatory fields for create user
@@ -254,7 +256,17 @@ public class UserConstants {
 	
 	public static final String BFO_ACCOUNT_ID ="BFO_ACCOUNT_ID";
 	
+	public static final String OTP_VALIDATED_SUCCESS ="OTP validated Successfully";
 	
+	public static final String OTP_INVALID = "OTP is not valid";
+	
+	public static final String OTP_EMPTY = "OTP is null or empty";
+	
+	public static final String MOBILE_EMPTY = "mobile is null or empty";
+	
+	public static final String EMAIL_EMPTY = "email is null or empty";
+	
+	public static final String FEDID_EMPTY = "federation ID is null or empty";
 	
 	/**
 	 * HOTP Query parametersConstants
@@ -268,6 +280,10 @@ public class UserConstants {
 	public static final String HOTP_EMAIL_UPDATE ="HOTP_Email_Update";
 	
 	public static final String HOTP_MOBILE_UPDATE ="HOTP_Mobile_Update";
+	
+	public static final String HOTP_EMAIL_ADD ="HOTP_Email_Add";
+	
+	public static final String HOTP_MOBILE_ADD ="HOTP_Mobile_Add";
 	
 	public static final String HOTP_SERVICE ="service";
 	
@@ -320,11 +336,14 @@ public class UserConstants {
 	
 	public static final String SERVER_ERROR = "Internal Server errror";
 	
+	public static final String MANDATORY_ADD_EMAIL_OPT_TYPE = "Operation Type is mandatory for add email";
+	
 	public static final String TRUE ="true";
 	
 	public static final String FALSE ="false";
 	
 	public static final String UPDATE_USER_RECORD= "UpdateUserRecord";
+	public static final String ADD_EMAIL_USER_RECORD= "AddEmailUserRecord";
 	
 	public static final String INVALID_ACL_TYPE="Invalid IDMSAclType__c";
 	
@@ -339,6 +358,8 @@ public class UserConstants {
 	public static final String CREATE_USER_SERVICE = "CREATE_USER";
 	
 	public static final String UPDATE_USER_SERVICE = "UPDATE_USER";
+	
+	public static final String ADD_EM_USER_SERVICE = "ADD_EM_USER";
 	public static final String IDMS_PROFILE_UPDATE_SOURCE = "IDMS_Profile_update_source__c";
 	
 	public static final String CONTENT_TYPE="application/x-www-form-urlencoded";
@@ -412,6 +433,7 @@ public class UserConstants {
 	
 	public static final String APPLICATION_NAME = "China IDMS";
 	public static final String COUNTRY_CODE = "FR";
+	public static final String CHINA_CODE = "CN";
 	public static final String LANGUAGE_CODE = "EN";
 	public static final String REQUEST_ID = "10001";
 	public static final String PR_GRANT_TYPE = "password";
@@ -505,5 +527,36 @@ public class UserConstants {
 	public static final String SCHNEIDER_MAIL = "@schneider-electric.com";
 	
 	public static final String NON_SCHNEIDER_MAIL = "@non.schneider-electric.com";
+	
+	public static final String ADD_MOBILE_IDENTIFIER = "Mobile is added successfully";
+	
+	public static final String ADD_EMAIL_PROFILE = "Email is added, verification is pending";
+	
+	public static final String ADD_EMAIL_PROFILE_SUCCESS = "Email is verified and added as identifier";
+	
+	public static final String PIN_NOT_VERIFIED = "PinNotVerified";
+	
+	public static final String PIN_VERIFIED = "PinVerified";
+	
+	public static final String BAD_REQUEST = "Bad Request";
+	
+	public static final String SERVER_ERROR_IFW = "Internal Server errror from IFW";
+	
+	public static final String AUTHENTICATION_ERROR_IFW = "Authentication error from IFW";
+	
+	public static final String UNKNOWN_ERROR = "Currently Service Unavailable";
+	
+	public static final String LOGZ_IO_DEFAULT_APP = "Miscellaneous";
+	
+	public static final String PRM_DEFAULT_SP_LOGIN = "mySchneiderPartnerPortal.SP";
+	
+	public static final String INCORRECT_PASSWORD ="Incorrect password";
+	
+	public static final String LOGIN_ERROR ="Problem in secure login";
+	
+	public static final String LOGIN_SUCCESS ="Login Successful";
+	
+	public static final String SESSION_TIME_OUT= "900";
+	
 	
 }

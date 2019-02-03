@@ -16,6 +16,9 @@ public class CreateUserRequest {
 
 	@JsonProperty
 	private String UIFlag;
+	
+	@JsonProperty
+	private String mobileRegFlag;
 
 	@JsonProperty
 	private List<RegistrationAttributes> attributes;
@@ -56,6 +59,14 @@ public class CreateUserRequest {
 
 	public void setAttributes(List<RegistrationAttributes> attributes) {
 		this.attributes = attributes;
+	}
+
+	public String getMobileRegFlag() {
+		return mobileRegFlag;
+	}
+
+	public void setMobileRegFlag(String mobileRegFlag) {
+		this.mobileRegFlag = mobileRegFlag;
 	}
 
 	@Override

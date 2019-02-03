@@ -31,7 +31,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	
 	<dependencies>
 
-		<!-- Java EE Replaced with individual Spec APIs -->
+		<!-- UIMS WSDL auto-generated library imports -->
 		<dependency>
 			<groupId>com.schneider.uims</groupId>
 			<artifactId>uims-ws-int</artifactId>

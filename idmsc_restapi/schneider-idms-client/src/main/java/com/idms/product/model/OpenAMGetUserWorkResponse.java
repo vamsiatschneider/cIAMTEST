@@ -195,6 +195,13 @@ public class OpenAMGetUserWorkResponse {
 	
 	private String IDMSWorkPhone__c;
 
+	// mobile_reg and login_mobile field is added for dual identifier feature
+	@JsonProperty
+	private String mobile_reg;
+
+	@JsonProperty
+	private String login_mobile;
+
 	@JsonProperty("IDMSCompanyFederationIdentifier__c")
 	public String getIDMSCompanyFederationIdentifier__c() {
 		return IDMSCompanyFederationIdentifier__c;
@@ -999,6 +1006,38 @@ public class OpenAMGetUserWorkResponse {
 	@JsonProperty("SubChannel__c")
 	public String getSubChannel__c() {
 		return SubChannel__c;
+	}
+
+	/**
+	 * @return the mobile_reg
+	 */
+	@JsonProperty("mobile_reg")
+	public String getMobile_reg() {
+		return mobile_reg;
+	}
+
+	/**
+	 * @param mobile_reg the mobile_reg to set
+	 */
+	@JsonProperty("mobile_reg")
+	public void setMobile_reg(String mobile_reg) {
+		this.mobile_reg = mobile_reg;
+	}
+
+	/**
+	 * @return the login_mobile
+	 */
+	@JsonProperty("login_mobile")
+	public String getLogin_mobile() {
+		return login_mobile;
+	}
+
+	/**
+	 * @param login_mobile the login_mobile to set
+	 */
+	@JsonProperty("login_mobile")
+	public void setLogin_mobile(String login_mobile) {
+		this.login_mobile = login_mobile;
 	}
 
 	@JsonProperty("SubChannel__c")

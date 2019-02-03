@@ -11,7 +11,7 @@ import javax.ws.rs.core.Response;
 public interface OpenDjIntService extends OpenDjService {
 
 	@GET
-	@Path("/opendj/Apps/{applicationName}")
+	@Path("/applications/{applicationName}")
 	Response getUser(@HeaderParam("X-OpenIDM-Username") String userName,@HeaderParam("X-OpenIDM-Password") String password,@PathParam("applicationName") String applicationName);
 	
 	@GET

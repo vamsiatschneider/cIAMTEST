@@ -235,7 +235,17 @@ public class OpenAmUser {
 	@JsonInclude(Include.NON_NULL)
 	private String IDMSWorkPhone__c;
 	
+	@JsonInclude(Include.NON_NULL)
 	private String alink;
+	
+	@JsonInclude(Include.NON_NULL)
+	private String publicVisibility;
+	
+	@JsonInclude(Include.NON_NULL)
+	private String mobile_reg;
+	
+	@JsonInclude(Include.NON_NULL)
+	private String login_mobile;
 	
 	@JsonProperty("IDMSWorkPhone__c")
 	@JsonInclude(Include.NON_NULL)
@@ -958,6 +968,30 @@ public class OpenAmUser {
 
 	public void setAlink(String alink) {
 		this.alink = alink;
+	}
+
+	public String getPublicVisibility() {
+		return publicVisibility;
+	}
+
+	public void setPublicVisibility(String publicVisibility) {
+		this.publicVisibility = publicVisibility;
+	}
+
+	public String getMobile_reg() {
+		return mobile_reg;
+	}
+
+	public void setMobile_reg(String mobile_reg) {
+		this.mobile_reg = mobile_reg;
+	}
+
+	public String getLogin_mobile() {
+		return login_mobile;
+	}
+
+	public void setLogin_mobile(String login_mobile) {
+		this.login_mobile = login_mobile;
 	}
 
 	@Override

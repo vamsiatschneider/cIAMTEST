@@ -161,9 +161,12 @@ public class UIMSUserManagerSoapServiceIntegration implements UIMSUserManagerSoa
 	private String createdCompanyFedId = null;
 	
 	private boolean isIdentityActvated = false;
+	
+	//CODE-RE-STRUCTURING - 3-Feb-19 merge
+	private String checkUserPrimaryContact = null;
 
-	/* (non-Javadoc)
-	 * @see com.idms.service.UIMSUserManagerSoapService1#getUserManager()
+	/**
+	 * Service to fetch information about {@link Product}s.
 	 */
 
 	public UserManagerUIMSV22 getUserManager(){
@@ -804,6 +807,18 @@ public class UIMSUserManagerSoapServiceIntegration implements UIMSUserManagerSoa
 
 					// Answer from Subrat: Remaining fields should not be
 					// updated.
+					// if user or identity not have companyid and request have company id
+					LOGGER.info("checkUserPrimaryContact = "+checkUserPrimaryContact);
+					if(null == identity.getCompanyId() && null != companyFedId){
+						// true means contact is primary of company account
+						// false means linking existing company with this user in uims
+						checkUserPrimaryContact =  Boolean.toString(identity.isPrimaryContact());
+						LOGGER.info("checkUserPrimaryContact = "+checkUserPrimaryContact);
+						if(checkUserPrimaryContact.equalsIgnoreCase("false")){
+							identity.setCompanyId(companyFedId);
+						}
+					}
+					
 					LOGGER.info("Start: updateUIMSUser() for fedId:" + fedId);
 					updateUIMSUser = updateUIMSUser(fedId, identity, vnew);
 					LOGGER.info("End: updateUIMSUser() finished for fedId:" + fedId + " with status:" + updateUIMSUser);
@@ -838,20 +853,31 @@ public class UIMSUserManagerSoapServiceIntegration implements UIMSUserManagerSoa
 					// TODO logic to get the federatedId
 					//String federatedId = ""; 
 					//company.getFederatedId() is compFedIdInOpenAM, companyFedId is from request  
-					if(null == company.getFederatedId() && null != companyFedId){						
-						String uimsUserResponse = companyManagerSoapServiceSync.createUIMSCompanyWithCompanyForceIdmsId(fedId, companyFedId, vnew, company);
-						LOGGER.info("uimsUserResponse = "+uimsUserResponse);
+					if(null == company.getFederatedId() && null != companyFedId){
+						// updating compFedId in OpenAM
+						String companyFederatedIDQuery = "{" + "\"companyFederatedID\": \"" + companyFedId + "\"" + "}";
+						LOGGER.info("companyFederatedIDQuery in case1 = "+companyFederatedIDQuery);
+						LOGGER.info("Start: updateUser() of openam to update companyFedId for username : "+userName);
+						productService.updateUser(iPlanetDirectoryKey, userName, companyFederatedIDQuery);
+						LOGGER.info("End: updateUser() of openam to update companyFedId finished for username : "+userName);
+						
+						//true means create company with this user
+						if(checkUserPrimaryContact.equalsIgnoreCase("true")){
+							String uimsCreateCompanyResponse = companyManagerSoapServiceSync.createUIMSCompanyWithCompanyForceIdmsId(fedId, companyFedId, vnew, company);
+							LOGGER.info("uimsCreateCompanyResponse = "+uimsCreateCompanyResponse);
+						}						
 					} else if(null == company.getFederatedId() && null == companyFedId){
 						String newcompanyFedId = ChinaIdmsUtil.generateFedId();
 						
 						String companyFederatedIDQuery = "{" + "\"companyFederatedID\": \"" + newcompanyFedId + "\"" + "}";
-						LOGGER.info("companyFederatedIDQuery = "+companyFederatedIDQuery);
+						LOGGER.info("companyFederatedIDQuery in case2 = "+companyFederatedIDQuery);
 						LOGGER.info("Start: updateUser() of openam to update companyFedId for username : "+userName);
 						productService.updateUser(iPlanetDirectoryKey, userName, companyFederatedIDQuery);
 						LOGGER.info("End: updateUser() of openam to update companyFedId finished for username : "+userName);
 						String uimsUserResponse = companyManagerSoapServiceSync.createUIMSCompanyWithCompanyForceIdmsId(fedId, newcompanyFedId, vnew, company);
 						LOGGER.info("uimsUserResponse = "+uimsUserResponse);
 					} else{
+						LOGGER.info("inside case3:: calling updateUIMSCompany() of UIMS");
 						updateUIMSCompany = companyManagerSoapService.updateUIMSCompany(fedId, vnew, company,company.getFederatedId());
 					}
 					return updateUIMSCompany;
@@ -912,8 +938,11 @@ public class UIMSUserManagerSoapServiceIntegration implements UIMSUserManagerSoa
 
 	}
 
-	/* (non-Javadoc)
-	 * @see com.idms.service.UIMSUserManagerSoapService1#activateUIMSUserConfirmPIN(com.idms.model.ConfirmPinRequest, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+	/**
+	 * This method is for UIMS confirm pin
+	 * 
+	 * @param confirmRequest
+	 * @param openamVnew
 	 */
 	@Async
 	public void activateUIMSUserConfirmPIN(ConfirmPinRequest confirmRequest, String openamVnew,

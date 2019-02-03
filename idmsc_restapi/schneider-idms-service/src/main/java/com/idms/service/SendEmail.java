@@ -103,6 +103,13 @@ public class SendEmail {
 	@Value("${send.invitation.email.template.cn}")
 	private String IDMS_SEND_INVITATION_EMAILTEMPLATE_CN;
 	
+	//CODE-RE-STRUCTURING - 3-Feb-19 merge
+	@Value("${user.add.email.template.cn}")
+	private String IDMS_USER_ADD_EMAILTEMPLATE_CN;
+	
+	@Value("${user.add.email.template.en}")
+	private String IDMS_USER_ADD_EMAILTEMPLATE_EN;
+	
 	private UserServiceImpl userService;
 	
 	@Autowired
@@ -222,7 +229,10 @@ public class SendEmail {
 					productDocCtxUser = JsonPath.using(conf).parse(userData);*/
 					subject=appid;
 					to = productDocCtxUser.read("$.newmail[0]");
-				}else{
+				}else if(hotpOperationType.equalsIgnoreCase(EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE)){
+					subject=appid;
+					to = productDocCtxUser.read("$.mail[0]");
+				} else {
 					subject=productDocCtxUser.read("$.registerationSource[0]");
 					to = productDocCtxUser.read("$.mail[0]");
 				}
@@ -370,7 +380,6 @@ public class SendEmail {
 		boolean validatePin = false;
 		String authIdTimeStmp = "";
 		String[] authIdTime = null;
-		String product_json_string = "";
 			// convert otp to hash
 			String newHashedValue = ChinaIdmsUtil.generateHashValue(otp);
 			LOGGER.info("hexa string is:" + newHashedValue);
@@ -464,6 +473,17 @@ public class SendEmail {
 					filePath = IDMS_USER_UPDATE_EMAILTEMPLATE_CN;
 				} else {
 					filePath = IDMS_USER_UPDATE_EMAILTEMPLATE_EN;
+				}
+				file = new FileReader(filePath);
+				LOGGER.info("filePath is"+filePath);
+				in = new BufferedReader(file);
+			} else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE)) {
+				LOGGER.info("Inside OperationType AddEmailUserRecord " + hotpOperationType);
+				// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_registration_with_password.html";
+				if (chineseLangCheck) {
+					filePath = IDMS_USER_ADD_EMAILTEMPLATE_CN;
+				} else {
+					filePath = IDMS_USER_ADD_EMAILTEMPLATE_EN;
 				}
 				file = new FileReader(filePath);
 				LOGGER.info("filePath is"+filePath);
@@ -574,7 +594,13 @@ public class SendEmail {
 			} else {
 				subject = subject + EmailConstants.HYPHEN + EmailConstants.SCHE_LOGINID_CHANGE_NOTIFICATION_EN;
 			}
-		}else if (hotpOperationType != null && EmailConstants.SENDINVITATION_OPT_TYPE.equalsIgnoreCase(hotpOperationType)) {
+		} else if (hotpOperationType != null && EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE.equalsIgnoreCase(hotpOperationType)) {
+			if (chineseLangCheck) {
+				subject = subject + EmailConstants.HYPHEN + EmailConstants.SCHE_ADD_EMAIL_NOTIFICATION_CN;
+			} else {
+				subject = subject + EmailConstants.HYPHEN + EmailConstants.SCHE_ADD_EMAIL_NOTIFICATION_EN;
+			}
+		} else if (hotpOperationType != null && EmailConstants.SENDINVITATION_OPT_TYPE.equalsIgnoreCase(hotpOperationType)) {
 			/*LOGGER.info("emailContentTemplate : Inside sendInvitation OperationType " + hotpOperationType
 					+ " .. setting template starte and end value accordingly! ");*/
 			//endURL = startURL + 70;
@@ -789,7 +815,7 @@ public class SendEmail {
 				to = productDocCtxUser.read("$.newmobile[0]");
 			}else{
 				subject=productDocCtxUser.read("$.registerationSource[0]");
-				to = productDocCtxUser.read("$.mobile[0]");
+				to = productDocCtxUser.read("$.mobile_reg[0]");
 			}
 			
 			to = to.concat("@mailinator.com");
@@ -844,6 +870,25 @@ public class SendEmail {
 	}
 	
 	/**
+	 * 
+	 * @param code
+	 * @param mobile
+	 */
+	public void sendMobileEmail(String code, String mobile ){
+		LOGGER.info("Entered sendOpenAmMobileEmail() -> Start");
+		LOGGER.info("Parameter mobile -> "+mobile);
+
+		String to = mobile ;
+		String subject = null;
+
+		to = to.concat("@getnada.com");
+		String emailContent = "Your One Time Password is : " + code +" , valid for 12 minutes only.";
+		subject = "Complete Registration - OTP";
+		
+		emailReadyToSendEmail(to, from, subject, emailContent);
+	}
+	
+	/**
 	 * Sending SMS 
 	 * New SMS Gateway
 	 * @throws UnsupportedEncodingException 
@@ -877,7 +922,7 @@ public class SendEmail {
 			if (hotpOperationType.equalsIgnoreCase(EmailConstants.UPDATEUSERRECORD_OPT_TYPE)) {
 				to = productDocCtxUser.read("$.newmobile[0]");
 			} else {
-				to = productDocCtxUser.read("$.mobile[0]");
+				to = productDocCtxUser.read("$.mobile_reg[0]");
 			}
 
 			LOGGER.info("Start: sendSMSCode() of smsservice to "+to);
@@ -899,6 +944,43 @@ public class SendEmail {
 			LOGGER.error(e.getMessage());
 		}
 
+	}
+	
+	/**
+	 * 
+	 * @param code
+	 * @param mobile
+	 * @throws UnsupportedEncodingException
+	 */
+	@Async
+	public void sendSMS(String code, String mobile) throws UnsupportedEncodingException {
+		LOGGER.info("Entered sendSMS() -> Start");
+		LOGGER.info("Parameter mobile -> "+mobile);
+
+		String sn = "SDK-BBX-010-28365";
+		String password = "EEc1-61E0-4";
+		String SMSPassword = getMD5(sn+password);
+		String smsContent = "【施耐德电气】验证码为："+code+"（请妥善保存，切勿告知他人），在页面输入以完成验证。";
+		smsContent   =   java.net.URLEncoder.encode(smsContent,"utf-8");  
+		
+		try {
+			LOGGER.info("Start: sendSMSCode() of smsservice to "+mobile);
+			Response smsResponse = newSmsService.sendSMSCode(sn, SMSPassword, mobile, smsContent);
+			LOGGER.info("smsResponse="+smsResponse.getEntity());
+			
+			LOGGER.info("End: sendSMSCode() finished, Response status :: -> " + smsResponse.getStatus());
+			if (200 == smsResponse.getStatus()) {
+				LOGGER.info("sendSMSCode sent Succssfully :: -> "
+						+ IOUtils.toString((InputStream) smsResponse.getEntity()));
+			} else {
+				LOGGER.error("Error occured while sendSMSCode() to "+mobile);
+				throw new Exception(IOUtils.toString((InputStream) smsResponse.getEntity()));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			LOGGER.error("Exception in sendSMSNewGateway() while sending code to: "+mobile);
+			LOGGER.error(e.getMessage());
+		}
 	}
 	
 	public String getMD5(String sourceStr) throws UnsupportedEncodingException {
