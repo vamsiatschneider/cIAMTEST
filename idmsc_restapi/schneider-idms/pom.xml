@@ -47,6 +47,13 @@
 				<artifactId>schneider-idms-cache-central</artifactId>
 				<version>1.0</version>
 			</dependency>
+			
+			<dependency>
+				<groupId>com.schneider.idms</groupId>
+				<artifactId>schneider-idms-app</artifactId>
+				<version>1.0</version>
+			</dependency>
+			
 			<dependency>
 				<groupId>javax.ws.rs</groupId>
 				<artifactId>javax.ws.rs-api</artifactId>
@@ -150,5 +157,6 @@
 		<module>../schneider-idms-client</module>
 		<module>../schneider-idms-service</module>
 		<module>../schneider-cache-central</module>
+		<module>../schneider-idms-app</module>
 	</modules>
 </project>

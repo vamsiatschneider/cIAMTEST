@@ -362,4 +362,17 @@
 
 	</dependencies>
 	<!-- <version>1.0</version> -->
+	
+	<profiles>
+		<profile>
+			<id>eclipse</id>
+			<dependencies>
+				<dependency>
+					<groupId>com.schneider.idms</groupId>
+					<artifactId>schneider-idms-app</artifactId>
+					<version>1.0</version>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
 </project>
