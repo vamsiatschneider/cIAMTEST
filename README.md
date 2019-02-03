@@ -1,29 +1,38 @@
-# README #
+# IDMS China - Development Branch #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+### Current Ongoing Release ###
+* Release version: <Version>
+* <Add confluence page>
 
-### What is this repository for? ###
+### Branch Usage ###
+* The develop/API branch is be used to work on the current release. Details of the current release to be updated in the release section.
+* This branch should be used to create topic branches and be the target of the pull request created on the topic branch.
+* Serve as origin branch for the Integration branch.
+* Serve as the target for parallel feature branch merges, when those feature needs to be released
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+### Repository Structure ###
+* Follows the Maven module structure
+* Composed of fours modules
+	- schneider-idms(Root POM project)
+	- schneider-cache-central (Module 1)
+	- schneider-idms-client (Module 2)
+	- schneider-idms-service (Module 3)
+	- schneider-idms-app (Module 4)
 
-### How do I get set up? ###
+### How to build ###
+* To build a development war file
+	- $ cd ./schneider-idms/
+	- $ mvn package
+* To build a server deployable application jar
+	- $ cd ./schneider-idms/
+	- $ mvn package -P server
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+### Runtime properties ###
+* The same WAR file can be ran in an Integration, Staging, Pre-prod or Production mode, using argument
+	-Dspring.profiles.active=<DEV|INTG|STG|PPRD|PROD>
+* The location of the app_root having the externalized configuration can be provided using the argument
+	-Didmsc.app_root.location=<Absolute-path-to-app_root-folder>
+* To ensure the correct Spring beans for the set environment is loaded, the below flag can be set to true
+	-Dsys.print.beans=true
 
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+	
