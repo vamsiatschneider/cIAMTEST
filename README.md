@@ -31,7 +31,7 @@
 * The same WAR file can be ran in an Integration, Staging, Pre-prod or Production mode, using argument
 	-Dspring.profiles.active=<DEV|INTG|STG|PPRD|PROD>
 * The location of the app_root having the externalized configuration can be provided using the argument
-	-Didmsc.app_root.location=<Absolute-path-to-app_root-folder>
+	-Didmsc.app_root.location=<file:/C:/...>
 * To ensure the correct Spring beans for the set environment is loaded, the below flag can be set to true
 	-Dsys.print.beans=true
 
