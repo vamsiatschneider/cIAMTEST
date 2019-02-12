@@ -9,7 +9,10 @@ public interface CacheTypes {
 	
 	public Long SECONDS_PER_HOUR = new Long(3600);
 	
-	public String CACHE_CONFIGURATION_FILE ="ehcache.xml";
+	//CODE-RE-STRUCTURING
+	public static String APP_PROPERTIES_DIR ="";
+	
+	//public String CACHE_CONFIGURATION_FILE ="ehcache.xml";
 	
 	/*public String APP_PROPERTIES_DIR = "C:\\idms\\config\\";
 	

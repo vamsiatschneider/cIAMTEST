@@ -22,15 +22,14 @@
 	http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
 	
 	<!-- these are for configuring ssl support -->
-	<http:conduit name="${openam.cxf.conduit.name}">
+	<http:conduit name="https://openam.schneider-electric.com/.*">
 	    <http:tlsClientParameters disableCNCheck="true">
 	      <sec:trustManagers>
 	        <sec:keyStore type="JKS" password="${jksPassword}" file="${jksFilePath}"/>
 	      </sec:trustManagers>
 	    </http:tlsClientParameters>
 	</http:conduit> 
-	
-	<http:conduit name="${goDigital.cxf.conduit.name}">
+	<http:conduit name="https://godigital.schneider-electric.cn/.*">
 	    <http:tlsClientParameters disableCNCheck="true">
 	      <sec:trustManagers>
 	        <sec:keyStore type="JKS" password="${jksPassword}" file="${jksFilePath}"/>
@@ -54,27 +53,10 @@
 	<!-- <import resource="classpath:config/logback.xml" /> -->
 	
 	<context:property-placeholder ignore-resource-not-found="true"
-								  location="#{systemProperties['idmsc.app_root.location']}/properties/application.#{systemProperties['spring.profiles.active']}.properties" />
-
-	<!-- Set System Properties -->
-	<bean id="sysPropsSetter" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-	    <property name="targetObject" value="#{@systemProperties}" />
-	    <property name="targetMethod" value="putAll" />
-	    <property name="arguments">
-	        <util:properties>
-	            <prop key="javax.net.ssl.trustStore">${idms.ssl.trustStore}</prop>
-	            <prop key="javax.net.ssl.trustStorePassword">${idms.ssl.trustStorePassword}</prop>
-	            <prop key="javax.net.ssl.keyStoreType">${idms.ssl.keyStoreType}</prop>
-	            <prop key="javax.net.ssl.keyStore">${idms.ssl.keyStore}</prop>
-	            <prop key="javax.net.ssl.keyStorePassword">${idms.ssl.keyStorePassword}</prop>
-	            <prop key="sun.security.ssl.allowUnsafeRenegotiation">${idms.ssl.allowUnsafeRenegotiation}</prop>
-	            <prop key="sun.security.ssl.allowLegacyHelloMessages">${idms.ssl.allowLegacyHelloMessages}</prop>
-	        </util:properties>
-	    </property>
-	</bean>
+								  location="file:#{systemProperties['idmsc.app_root.location']}/properties/application.#{systemProperties['spring.profiles.active']}.properties" />
 	
 	<!-- scans and register beans using annotation-config (metadata) -->
-	<context:component-scan base-package="com.idms.*,com.se.idms.*,com.schneider.*,com.se.uims.*,com.uimsv22.*" />
+	<context:component-scan base-package="com.idms.*,com.se.idms.*,com.schneider.*,com.se.uims.*,com.se.idms.cache.*,com.uimsv22.*"/>
 
 	<bean name="defaultMapper" class="ma.glasnost.orika.impl.ConfigurableMapper" />
 
@@ -146,7 +128,24 @@
         <property name="cacheManager" ref="ehcache"/>
     </bean>
     <bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
-        <property name="configLocation" value="#{systemProperties['idmsc.app_root.location']}/cache/ehcacheToken.xml"/>
+        <property name="configLocation" value="file:#{systemProperties['idmsc.app_root.location']}/cache/ehcacheToken.xml"/>
         <!-- <property name="shared" value="true"/> -->
     </bean>
+  <bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor" /> 
+  <!-- Set System Properties -->
+	 <bean id="sysPropsSetter" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+	    <property name="targetObject" value="#{@systemProperties}" />
+	    <property name="targetMethod" value="putAll" />
+	    <property name="arguments">
+	        <util:properties>
+	            <prop key="javax.net.ssl.trustStore">${idms.ssl.trustStore}</prop>
+	            <prop key="javax.net.ssl.trustStorePassword">${idms.ssl.trustStorePassword}</prop>
+	            <prop key="javax.net.ssl.keyStoreType">${idms.ssl.keyStoreType}</prop>
+	            <prop key="javax.net.ssl.keyStore">${idms.ssl.keyStore}</prop>
+	            <prop key="javax.net.ssl.keyStorePassword">${idms.ssl.keyStorePassword}</prop>
+	            <prop key="sun.security.ssl.allowUnsafeRenegotiation">${idms.ssl.allowUnsafeRenegotiation}</prop>
+	            <prop key="sun.security.ssl.allowLegacyHelloMessages">${idms.ssl.allowLegacyHelloMessages}</prop>
+	        </util:properties>
+	    </property>
+	</bean>
 </beans>

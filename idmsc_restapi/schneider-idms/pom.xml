@@ -155,8 +155,8 @@
   
 	<modules>
 		<module>../schneider-idms-client</module>
-		<module>../schneider-idms-service</module>
 		<module>../schneider-cache-central</module>
+		<module>../schneider-idms-service</module>
 		<module>../schneider-idms-app</module>
 	</modules>
 </project>

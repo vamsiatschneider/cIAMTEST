@@ -3,8 +3,11 @@ package com.se.idms.cache.api;
 import java.io.File;
 import java.io.FileInputStream;
 
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
@@ -17,11 +20,11 @@ import net.sf.ehcache.CacheManager;
 public class CacheManagerProviderImpl implements CacheTypes, CacheManagerProvider {
 
 	private static final Logger logger = LoggerFactory.getLogger(CacheManagerProviderImpl.class);
-	private static final CacheManager CACHE_MANAGER = createManager();
-	
+	//private static final CacheManager CACHE_MANAGER = createManager();
+	private static  CacheManager CACHE_MANAGER;
 	//CODE-RE-STRUCTURING
-	private static String APP_PROPERTIES_DIR;
-	
+	private  static String APP_PROPERTIES_DIR;
+
 	/**
 	 * Constructor
 	 */
@@ -38,7 +41,9 @@ public class CacheManagerProviderImpl implements CacheTypes, CacheManagerProvide
 		
 		CacheManager manager = null;
 		try {
-			manager = CacheManager.create(getAppPropertiesDir() + CACHE_CONFIGURATION_FILE);
+			//manager = CacheManager.create(getAppPropertiesDir() + CACHE_CONFIGURATION_FILE);
+			logger.info("cache manager in createManager :"+getAppPropertiesDir());
+			manager = CacheManager.create(getAppPropertiesDir());
 		} catch (Exception e) {
 		//catch (CacheException e) {
 			logger.error("Cache-central was not initialized correctly : " + e.getMessage() 
@@ -66,9 +71,12 @@ public class CacheManagerProviderImpl implements CacheTypes, CacheManagerProvide
 		return APP_PROPERTIES_DIR;
 	}
 
-	@Value("${app.properties.dir}")
+	//@Value("${app.properties.dir}")
+	@Value("${cache_configuration_file}")
 	public void setAPP_PROPERTIES_DIR(String appPropsDir) {
 		APP_PROPERTIES_DIR = appPropsDir;
+		CACHE_MANAGER=createManager();
+		//logger.info("CACHE_MANAGER INFO"+CACHE_MANAGER.getName()+":"+CACHE_MANAGER.getStatus().toString()+":"+CACHE_MANAGER.getOriginalConfigurationText()+":"+CACHE_MANAGER.getConfiguration().getDefaultTransactionTimeoutInSeconds()+":"+CACHE_MANAGER.getInstance().getActiveConfigurationText());
 	}
 	
 	
