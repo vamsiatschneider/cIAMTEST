@@ -132,10 +132,13 @@ public class UIMSUserManagerSoapServiceSync {
 								identity, forcedFederatedId);
 					}
 
-					if (null != createdFedId) {
+					if (null != createdFedId && !createdFedId.isEmpty()) {
 						String fedID = "{" + "\"federationID\": \"" + createdFedId + "\"" + "}";
 						LOGGER.info("fedID in creating UIMS user: " + fedID);
 						productService.updateUser(iPlanetDirectoryKey, userName, fedID);
+					} else {
+						//TODO put into csv file
+						LOGGER.error("User not created in UIMS having fedID "+forcedFederatedId);
 					}
 
 					return true;
@@ -197,7 +200,7 @@ public class UIMSUserManagerSoapServiceSync {
 					} 
 					
 					
-					if (null != createdCompanyFedId) {
+					if (null != createdCompanyFedId && !createdCompanyFedId.isEmpty()) {
 						String companyFedID = "{" + "\"companyFederatedID\": \"" + createdCompanyFedId + "\"" + "}";
 						LOGGER.info("companyFedID in creating UIMS Company: " + companyFedID);
 						productService.updateUser(iPlanetDirectoryKey, userName, companyFedID);
@@ -215,6 +218,8 @@ public class UIMSUserManagerSoapServiceSync {
 							}
 
 						}
+					} else {
+						LOGGER.error("Company not created in UIMS for fedID "+forcedFederatedId);
 					}
 					return true;
 				}
@@ -225,21 +230,26 @@ public class UIMSUserManagerSoapServiceSync {
 					.retryIfRuntimeException().withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
 			try {
 				if (null != context && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context))) {
-
-					companyCreated = retryerCompany.call(callableCompany);
-					if (companyCreated) {
-						LOGGER.info("UIMS company created successfully::" + companyCreated);
+					if (null != userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c()
+							&& !userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c().isEmpty()
+							&& null != userRequest.getUserRecord().getCompanyName()
+							&& !userRequest.getUserRecord().getCompanyName().isEmpty()
+							&& null != createdFedId && !createdFedId.isEmpty()) {
+						LOGGER.info("User has company info and now creating company for user::"+forcedFederatedId);
+						companyCreated = retryerCompany.call(callableCompany);
+						if (companyCreated) {
+							LOGGER.info("UIMS company created successfully::" + companyCreated);
+						}
+						if (userCreated && companyCreated) {
+							// after successful creation of user and company, we
+							// need to update the v_old
+							String version = "{" + "\"V_Old\": \"" + v_new + "\"" + "}";
+							productService.updateUser(iPlanetDirectoryKey, userName, version);
+							// productService.sessionLogout(iPlanetDirectoryKey,
+							// "logout");
+						} 
 					}
-					if (userCreated && companyCreated) {
-						// after successful creation of user and company, we
-						// need to update the v_old
-						String version = "{" + "\"V_Old\": \"" + v_new + "\"" + "}";
-						productService.updateUser(iPlanetDirectoryKey, userName, version);
-						// productService.sessionLogout(iPlanetDirectoryKey,
-						// "logout");
-					} 
 				}
-
 			} catch (RetryException e) {
 				// productService.sessionLogout(iPlanetDirectoryKey, "logout");
 				LOGGER.error("RetryException while UIMS create company::" + e.getMessage());
@@ -249,12 +259,12 @@ public class UIMSUserManagerSoapServiceSync {
 				LOGGER.error("ExecutionException while UIMS create company::" + e.getMessage());
 				e.printStackTrace();
 			}
-			if((!(userCreated && companyCreated) || (null == createdCompanyFedId && null == createdFedId)) && 
+			/*if((!(userCreated && companyCreated) || (null == createdCompanyFedId && null == createdFedId)) && 
 					(null != context && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context)))){
 				LOGGER.error("UIMS CreateUser and CreateCompany failed -----> ::sending mail notification::"+userRequestjsonString);
 				sendEmail.emailReadyToSendEmail(supportUser, fromUserName,
 						"UIMS CreateUser and CreateCompany failed.", userRequestjsonString);
-			}
+			}*/
 		} catch (Exception e) {
 			// productService.sessionLogout(iPlanetDirectoryKey, "logout");
 			LOGGER.error("Exception in createUIMSUserAndCompany ::" + e.getMessage());

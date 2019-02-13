@@ -114,9 +114,4 @@ public class SamlAssertionTokenGenerator {
 
 		return new BASE64Encoder().encode(signatureBytes);
 	}
-	
-	//CODE-RE-STRUCTURING - Merged from Staging
-	/*public static void main(String[] args) throws Exception {
-		System.out.println("Token: " + getSamlAssertionToken("cn001868eb9e-b2d6-4063-b8ad-8797b15257ef", "1"));
-	}*/
 }

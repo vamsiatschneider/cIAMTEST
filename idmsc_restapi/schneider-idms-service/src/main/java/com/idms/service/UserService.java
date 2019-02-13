@@ -260,7 +260,7 @@ public interface UserService {
 	
 	@POST
 	@Path("/apexrest/addMobile")
-	Response addMobile(AddMobileRequest addMobileRequest);
+	Response addMobile(AddMobileRequest addMobileRequest,@CookieParam("sendOTPIdentifier") Cookie cookie);
 	
 	@POST
 	@Path("/apexrest/addEmail")

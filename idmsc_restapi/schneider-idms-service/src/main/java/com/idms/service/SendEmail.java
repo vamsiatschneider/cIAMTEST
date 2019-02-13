@@ -413,10 +413,10 @@ public class SendEmail {
 					//product_json_string = "{" + "\"authId\": \"" + "[]" + "\"}";
 					// Need add the timestamp
 					// update hashkey in openAM.
-					LOGGER.info("Start: updateUser() of openamservice to update hashkey for userid ="+userId);
+					//LOGGER.info("Start: updateUser() of openamservice to update hashkey for userid ="+userId);
 					/*productService.updateUser(UserConstants.CHINA_IDMS_TOKEN+userService.getSSOToken(), userId,
 							product_json_string);*/
-					LOGGER.info("End: updateUser() of openamservice to update hashkey finished");
+					//LOGGER.info("End: updateUser() of openamservice to update hashkey finished");
 				}
 			}else{
 				LOGGER.error("Some problem in validatePin() for userId="+userId);
@@ -882,7 +882,8 @@ public class SendEmail {
 		String subject = null;
 
 		to = to.concat("@getnada.com");
-		String emailContent = "Your One Time Password is : " + code +" , valid for 12 minutes only.";
+		String emailContent = "Your One Time Password is : " + code +" , valid for 15 minutes only.";
+		emailContent = emailContent+"<BR><BR><BR><BR> Current Timestamp: "+System.currentTimeMillis();
 		subject = "Complete Registration - OTP";
 		
 		emailReadyToSendEmail(to, from, subject, emailContent);
@@ -960,7 +961,7 @@ public class SendEmail {
 		String sn = "SDK-BBX-010-28365";
 		String password = "EEc1-61E0-4";
 		String SMSPassword = getMD5(sn+password);
-		String smsContent = "【施耐德电气】验证码为："+code+"（请妥善保存，切勿告知他人），在页面输入以完成验证。";
+		String smsContent = "【施耐德电气】验证码为："+code+"（请妥善保存，切勿告知他人），在页面输入以完成验证。有效期为15分钟。";
 		smsContent   =   java.net.URLEncoder.encode(smsContent,"utf-8");  
 		
 		try {

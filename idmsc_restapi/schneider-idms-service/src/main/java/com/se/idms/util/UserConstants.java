@@ -258,6 +258,8 @@ public class UserConstants {
 	
 	public static final String OTP_VALIDATED_SUCCESS ="OTP validated Successfully";
 	
+	public static final String OTP_EXPIRED = "Expired verification code";
+	
 	public static final String OTP_INVALID = "OTP is not valid";
 	
 	public static final String OTP_EMPTY = "OTP is null or empty";

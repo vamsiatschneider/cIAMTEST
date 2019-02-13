@@ -66,14 +66,13 @@ public class SaleforceServiceImpl {
 
 					//LOGGER.info("going to call getSaleforceToken()");
 					String jsonData = "{" + "\"federationId\": \"" + federationId + "\",\"appName\": \"" + appName + "\"" + "}";
-					LOGGER.info("jsonData:: "+jsonData);
 					String salesForceToken = getSaleforceToken();
 					//LOGGER.info("getSaleforceToken() call finsihed");
 					//LOGGER.info("Request sending to  salesForceService.populateActivationDate : " + jsonData);
-					LOGGER.info("Start: populateActivationDate() of SalesForceService for federationId::"+federationId);
+					LOGGER.info("Start: populateActivationDate() of SalesForceService");
 					Response activationResponse = salesForceService
 							.populateActivationDate(UserConstants.ACCEPT_TYPE_APP_JSON, salesForceToken, jsonData);
-					LOGGER.info("End: populateActivationDate() of SalesForceService finished for federationId::"+federationId);
+					LOGGER.info("End: populateActivationDate() of SalesForceService finished");
 					LOGGER.info("populateActivationDate Status :: " + activationResponse.getStatus());
 					try {
 						if (200 != activationResponse.getStatus()) {
