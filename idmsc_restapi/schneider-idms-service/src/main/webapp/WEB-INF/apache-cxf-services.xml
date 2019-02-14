@@ -133,7 +133,7 @@
     </bean>
   <bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor" /> 
   <!-- Set System Properties -->
-	 <bean id="sysPropsSetter" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+	 <!-- <bean id="sysPropsSetter" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
 	    <property name="targetObject" value="#{@systemProperties}" />
 	    <property name="targetMethod" value="putAll" />
 	    <property name="arguments">
@@ -147,5 +147,5 @@
 	            <prop key="sun.security.ssl.allowLegacyHelloMessages">${idms.ssl.allowLegacyHelloMessages}</prop>
 	        </util:properties>
 	    </property>
-	</bean>
+	</bean> -->
 </beans>

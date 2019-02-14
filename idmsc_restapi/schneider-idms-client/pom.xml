@@ -38,7 +38,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 			<version>1.0</version>
 		</dependency>
 		
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.schneider.uims</groupId>
 			<artifactId>uims-ws-stg</artifactId>
 			<version>1.0</version>
@@ -48,7 +48,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 			<groupId>com.schneider.uims</groupId>
 			<artifactId>uims-ws-pprd</artifactId>
 			<version>1.0</version>
-		</dependency>
+		</dependency> -->
 		
 		<!-- Java EE Replaced with individual Spec APIs -->
 		<dependency>
