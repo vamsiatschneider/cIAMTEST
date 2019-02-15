@@ -355,6 +355,8 @@ public class UserConstants {
 	
 	public static final String MANDATORY_PROFILE_UPDATE_SOURCE="IDMS_Profile_update_source__c is Mandatory";
 	
+	public static final String INVALID_REG_SOURCE="Invalid registration/update source.";
+	
 	/**
 	 * */
 	public static final String CREATE_USER_SERVICE = "CREATE_USER";

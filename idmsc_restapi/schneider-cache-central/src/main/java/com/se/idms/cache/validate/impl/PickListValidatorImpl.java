@@ -32,25 +32,20 @@ public class PickListValidatorImpl implements IValidator {
 		Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
 		String pickListProperty = cacheProperties.getProperty(key);
 
-		// pickListProperty will be in the form of comma separated string. Eg.
-		// AF,AL,DZ,AD,AO,AI,AQ,AG,AR,AM,AW,AU
-
-		//LOGGER.info("properties from cache:" + pickListProperty);
 		List<String> pickListCache = Arrays.asList(pickListProperty.split(","));
-		//LOGGER.info("countryList" + "-->" + pickListCache.size());
 		String pickListValue = (String) value;
 
-		//LOGGER.info("country value=" + pickListValue);
-
-		/*
-		 * for (Object obj : countryPickListValue) {
-		 * LOGGER.info(obj.toString().trim()); if
-		 * (countryPickListCache.contains(obj) == false) { return false; } }
-		 */
-		if (pickListCache.contains(pickListValue)) {
+		for(String str:pickListCache){
+			if(str.toLowerCase().equalsIgnoreCase(pickListValue.toLowerCase())){
+				LOGGER.info("Validation of key:"+key+" ,value:"+value+" is OK! and validate() is Ending");
+				return true;
+			}
+		}
+		
+		/*if (pickListCache.contains(pickListValue)) {
 			LOGGER.info("Validation of key:"+key+" ,value:"+value+" is OK! and validate() is Ending");
 			return true;
-		}
+		}*/
 
 		LOGGER.error("Validation of key:"+key+" ,value:"+value+" is NOT OK! and validate() is Ending");
 		return false;

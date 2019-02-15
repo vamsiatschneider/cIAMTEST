@@ -1525,7 +1525,24 @@ public class UserServiceImpl implements UserService {
 
 		userResponse.setStatus(errorStatus);
 		
+		String regOrUpdateSource = null;
+		if(null != userRequest.getIDMS_Registration_Source__c() && !userRequest.getIDMS_Registration_Source__c().isEmpty()){
+			regOrUpdateSource = userRequest.getIDMS_Registration_Source__c();
+		} else if(null != userRequest.getIDMS_Profile_update_source__c() && !userRequest.getIDMS_Profile_update_source__c().isEmpty()){
+			regOrUpdateSource = userRequest.getIDMS_Profile_update_source__c();
+		}
 		
+		if(null != regOrUpdateSource && !regOrUpdateSource.isEmpty()
+				&& ((pickListValidator.validate(UserConstants.APPLICATIONS,regOrUpdateSource))
+						|| (pickListValidator.validate(UserConstants.IDMS_BFO_profile,regOrUpdateSource))
+						|| (pickListValidator.validate(UserConstants.UPDATE_SOURCE,regOrUpdateSource)))){
+			LOGGER.info("Registration/update source is OK and continues..");
+		} else {
+			userResponse.setStatus(errorStatus);
+			userResponse.setMessage(UserConstants.INVALID_REG_SOURCE);
+			return true;
+		}
+				
 		if (null != userRequest.getIDMS_Registration_Source__c() && ((pickListValidator.validate(UserConstants.APPLICATIONS,userRequest.getIDMS_Registration_Source__c().toUpperCase()))
 				|| UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c()))) {
 

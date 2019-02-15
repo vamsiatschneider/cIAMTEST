@@ -1,17 +1,20 @@
 package com.idms.product.client;
 
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
-/**
- * Interface sub-classed by per-environment interfaces
- * which are used as references by the Apache CXF configuration file
- *
- */
-
+@Produces("application/json")
 public interface OpenDjService {
 
-	Response getUser(String userName, String password, String applicationName);
+	@GET
+	@Path("/applications/{applicationName}")
+	Response getUser(@HeaderParam("X-OpenIDM-Username") String userName,@HeaderParam("X-OpenIDM-Password") String password,@PathParam("applicationName") String applicationName);
 	
-	String getUserDetails(String authorization);
-	
+	@GET
+	@Path("accessmanager/oauth2/se/userinfo")
+	String getUserDetails(@HeaderParam("Authorization") String authorization);
 }
