@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.CookieParam;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -14,7 +13,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Response;
 
 import com.idms.model.AILRequest;
@@ -71,7 +69,7 @@ public interface UserService {
 	@Path("/apexrest/IDMSUser")
 	@Consumes("application/json")
 	Response userRegistration(@HeaderParam("client_id")String clientId,
-			@HeaderParam("client_secret")String clientSecret,@Valid CreateUserRequest userRequest,@CookieParam("sendOTPIdentifier") Cookie cookie);
+			@HeaderParam("client_secret")String clientSecret,@Valid CreateUserRequest userRequest);
 	
 	@POST
 	@Path("/apexrest/ConfirmPIN")
@@ -114,7 +112,7 @@ public interface UserService {
 	@Path("/apexrest/IDMSUser")
 	@Consumes("application/json")
 	Response updateUser(@HeaderParam("Authorization")String authorizedToken,@HeaderParam("client_id")String clientId,
-			@HeaderParam("client_secret")String clientSecret,UpdateUserRequest userRequest,@CookieParam("sendOTPIdentifier") Cookie cookie);
+			@HeaderParam("client_secret")String clientSecret,UpdateUserRequest userRequest);
 	
 	@PUT
 	@Path("/apexrest/IDMSUpdateUserAIL")
@@ -228,7 +226,7 @@ public interface UserService {
 	@Path("/apexrest/IDMSUserService")
 	@Consumes("application/json")
 	Response userRegistration_4_1(@HeaderParam("client_id")String clientId,
-			@HeaderParam("client_secret")String clientSecret, @Valid CreateUserRequest userRequest,@CookieParam("sendOTPIdentifier") Cookie cookie);
+			@HeaderParam("client_secret")String clientSecret, @Valid CreateUserRequest userRequest);
 	
 	@PUT
 	@Path("/apexrest/IDMSUserService")
@@ -260,7 +258,7 @@ public interface UserService {
 	
 	@POST
 	@Path("/apexrest/addMobile")
-	Response addMobile(AddMobileRequest addMobileRequest,@CookieParam("sendOTPIdentifier") Cookie cookie);
+	Response addMobile(AddMobileRequest addMobileRequest);
 	
 	@POST
 	@Path("/apexrest/addEmail")

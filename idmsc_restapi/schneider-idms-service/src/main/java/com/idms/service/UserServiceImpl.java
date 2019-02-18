@@ -747,7 +747,7 @@ public class UserServiceImpl implements UserService {
 	 * @see com.idms.service.UserServiceImpl#userRegistration(java.lang.String, java.lang.String, com.idms.model.CreateUserRequest)
 	 */
 	@Override
-	public Response userRegistration(String clientId, String clientSecret, CreateUserRequest userRequest,Cookie cookie) {
+	public Response userRegistration(String clientId, String clientSecret, CreateUserRequest userRequest) {
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
 		DocumentContext productDocCtx = null;
@@ -1398,12 +1398,12 @@ public class UserServiceImpl implements UserService {
 		sucessRespone.setIDMSUserRecord(idmsResponse);
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-		NewCookie newCookie=null;
-		if(cookie!=null){
+		//NewCookie newCookie=null;
+		/*if(cookie!=null){
 			LOGGER.info("Removed cookie successfully in userRegistration(): Name:"+cookie.getName()+",value:"+cookie.getValue());
 			newCookie = new NewCookie(cookie, "delete cookie", 0, false);
 			return Response.status(Response.Status.OK).entity(sucessRespone).cookie(newCookie).build();
-		} else
+		} else*/
 			return Response.status(Response.Status.OK).entity(sucessRespone).build();
 	}
 
@@ -3417,7 +3417,8 @@ public class UserServiceImpl implements UserService {
 					//creating the user
 					CreateUserRequest createUserRequest = new CreateUserRequest();
 					createUserRequest.setUserRecord(ifwUser);
-					Response userRegistrationResponse = userRegistration("", "", createUserRequest,null);
+					//Response userRegistrationResponse = userRegistration("", "", createUserRequest,null);
+					Response userRegistrationResponse = userRegistration("", "", createUserRequest);
 					if(200 == userRegistrationResponse.getStatus()){
 					//confirm the user
 					ConfirmPinRequest confirmPinRequest = new ConfirmPinRequest();
@@ -4161,7 +4162,7 @@ public class UserServiceImpl implements UserService {
 	 */
  	@SuppressWarnings("unchecked")
 	public Response updateUser(String authorizedToken, String clientId, String clientSecret,
-			UpdateUserRequest userRequest,Cookie cookie) {
+			UpdateUserRequest userRequest) {
 		LOGGER.info("Entered updateUser() -> Start");
 		LOGGER.info("Parameter authorizedToken -> "+authorizedToken);
 		
@@ -4422,7 +4423,7 @@ public class UserServiceImpl implements UserService {
 						addMobileRequest.setMobile(modifiedMobileInRequest);
 						addMobileRequest.setFedId(userId);
 						addMobileRequest.setProfileUpdateSource(userRequest.getUserRecord().getIDMS_Profile_update_source__c());
-						Response res = addMobile(addMobileRequest,cookie);
+						Response res = addMobile(addMobileRequest);
 						LOGGER.info("mobile verification as identifier, status="+res.getStatus());
 						if(200 != res.getStatus()){
 							org.json.simple.JSONObject checkMobileResponse = (org.json.simple.JSONObject) res.getEntity();
@@ -4863,12 +4864,12 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info(" UserServiceImpl :: updateUser End");
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info("Time taken by updateUser() : " + elapsedTime);
-		NewCookie newCookie=null;
-		if(cookie!=null && updateMobileIdentifierCheck){
+		//NewCookie newCookie=null;
+		/*if(cookie!=null && updateMobileIdentifierCheck){
 			LOGGER.info("Removed cookie successfully in updateUser(): Name:"+cookie.getName()+",value:"+cookie.getValue());
 			newCookie = new NewCookie(cookie, "delete cookie", 0, false);
 			return Response.status(Response.Status.OK).entity(sucessRespone).cookie(newCookie).build();
-		} else
+		} else*/
 			return Response.status(Response.Status.OK).entity(sucessRespone).build();
 	}
 
@@ -7707,8 +7708,8 @@ public class UserServiceImpl implements UserService {
 	 * @see com.idms.service.UserServiceImpl#userRegistration_4_1(java.lang.String, java.lang.String, com.idms.model.CreateUserRequest)
 	 */
 	@Override
-	public Response userRegistration_4_1(String clientId, String clientSecret, CreateUserRequest userRequest,Cookie cookie) {
-		return this.userRegistration(clientId, clientSecret, userRequest,cookie);
+	public Response userRegistration_4_1(String clientId, String clientSecret, CreateUserRequest userRequest) {
+		return this.userRegistration(clientId, clientSecret, userRequest);
 	}
 
 	/* (non-Javadoc)
@@ -7717,7 +7718,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Response updateIDMSUserService(String authorizedToken, String clientId, String clientSecret,
 			UpdateUserRequest userRequest) {
-		return this.updateUser(authorizedToken, clientId, clientSecret, userRequest,null);
+		return this.updateUser(authorizedToken, clientId, clientSecret, userRequest);
 	}
 	
 	/* (non-Javadoc)
@@ -8476,7 +8477,7 @@ public class UserServiceImpl implements UserService {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public Response addMobile(AddMobileRequest addMobileRequest,Cookie cookie) {
+	public Response addMobile(AddMobileRequest addMobileRequest) {
 		LOGGER.info("Entered addMobile() -> Start");
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
@@ -8577,18 +8578,18 @@ public class UserServiceImpl implements UserService {
 
 				response.put(UserConstants.STATUS, successStatus);
 				response.put(UserConstants.MESSAGE, UserConstants.ADD_MOBILE_IDENTIFIER);
-				NewCookie newCookie=null;
-				if(cookie!=null){
+				//NewCookie newCookie=null;
+				/*if(cookie!=null){
 					LOGGER.info("Removed cookie successfully in addMobile(): Name:"+cookie.getName()+",value:"+cookie.getValue());
 					newCookie = new NewCookie(cookie, "delete cookie", 0, false);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by addMobile() : " + elapsedTime);
 					return Response.status(Response.Status.OK).entity(response).cookie(newCookie).build();
-				} else{
+				} else{*/
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by addMobile() : " + elapsedTime);
 					return Response.status(Response.Status.OK).entity(response).build();
-				}
+				//}
 			} else {
 				response.put(UserConstants.STATUS, errorStatus);
 				response.put(UserConstants.MESSAGE, "User not found with fedID : " + fedid);
