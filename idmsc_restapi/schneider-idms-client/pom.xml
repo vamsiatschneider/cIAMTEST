@@ -32,11 +32,11 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	<dependencies>
 
 		<!-- UIMS WSDL auto-generated library imports -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.schneider.uims</groupId>
 			<artifactId>uims-ws-int</artifactId>
 			<version>1.0</version>
-		</dependency>
+		</dependency> -->
 		
 		<!-- <dependency>
 			<groupId>com.schneider.uims</groupId>
