@@ -78,11 +78,9 @@ public class UIMSCompanyManagerSoapService {
 
 		}catch (MalformedURLException e) {
 			LOGGER.error("Exception while UIMSCompanyManagerSoapService :: getAuthenticatedUserManager()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		catch (Exception e) {
 			LOGGER.error("Exception while UIMSCompanyManagerSoapService :: getAuthenticatedUserManager()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		return userManagerUIMSV2;
 	}
@@ -104,11 +102,9 @@ public class UIMSCompanyManagerSoapService {
 			userManagerUIMSV2 = service.getPort(AuthenticatedCompanyManagerUIMSV2.class);
 		}catch (MalformedURLException e) {
 				LOGGER.error("Exception while getAuthenticatedUserManager()::" + e.getMessage());
-				e.printStackTrace();
 			}
 			catch (Exception e) {
 				LOGGER.error("Exception while getAuthenticatedUserManager()::" + e.getMessage());
-				e.printStackTrace();
 			}
 			return userManagerUIMSV2;
 		}
@@ -122,7 +118,6 @@ public class UIMSCompanyManagerSoapService {
 			//samlAssertion = samlTokenService.getSamlAssertionToken(fedId, vnew);
 		} catch (Exception e) {
 			uimsLog.error("Error executing while createUIMSCompany::" + e.getMessage());
-			e.printStackTrace();
 		}
 			try {
 				uimsUserResponse = companyManagerUIMSV2.createCompany(CALLER_FID, fedId, company);
@@ -130,7 +125,6 @@ public class UIMSCompanyManagerSoapService {
 					| LdapTemplateNotReadyException | RequestedEntryNotExistsException | RequestedInternalUserException
 					| UnexpectedLdapResponseException | UnexpectedRuntimeImsException e) {
 				uimsLog.error("Error executing while createUIMSCompany::" + e.getMessage());
-				e.printStackTrace();
 			}
 		
 		return uimsUserResponse;
@@ -148,7 +142,6 @@ public class UIMSCompanyManagerSoapService {
 			//samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(idmsFederationId, vnew);
 		} catch (Exception e) {
 			uimsLog.error("Error executing while createUIMSCompany::" + e.getMessage());
-			e.printStackTrace();
 		}
 		try {
 			uimsUserResponse = authenticatedCompanyManagerUIMSV2.createCompanyForceIdmsId(CALLER_FID, idmsFederationId, company, companyForceFederationId);
@@ -156,7 +149,6 @@ public class UIMSCompanyManagerSoapService {
 				| InvalidImsServiceMethodArgumentException | LdapTemplateNotReadyException
 				| RequestedEntryNotExistsException | RequestedInternalUserException | SecuredImsException
 				| UnexpectedLdapResponseException | UnexpectedRuntimeImsException e) {
-			e.printStackTrace();
 			uimsLog.error("Error executing while createUIMSCompany::" + e.getMessage());
 		}
 		return uimsUserResponse;
@@ -176,7 +168,6 @@ public class UIMSCompanyManagerSoapService {
 			samlAssertion = samlTokenService.getSamlAssertionToken(fedId, vnew);
 		} catch (Exception e) {
 			uimsLog.error("Error executing while updateUIMSCompany::" + e.getMessage());
-			e.printStackTrace();
 		}*/
 		//CompanyManagerUIMSV2 companyManagerUIMSV2 = getCompanyManager();
 		AuthenticatedCompanyManagerUIMSV2 companyManagerUIMSV2 = getAuthenitcatedCompanyManager();
@@ -190,7 +181,7 @@ public class UIMSCompanyManagerSoapService {
 				| LdapTemplateNotReadyException | RequestedEntryNotExistsException | SecuredImsException
 				| UnexpectedLdapResponseException | UnexpectedRuntimeImsException | JsonProcessingException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("An error occured."+e.getMessage());
 		}
 		return uimsUserResponse;
 	}
@@ -204,7 +195,7 @@ public class UIMSCompanyManagerSoapService {
 		} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
 				| LdapTemplateNotReadyException | RequestedEntryNotExistsException | UnexpectedLdapResponseException
 				| UnexpectedRuntimeImsException e) {
-			e.printStackTrace();
+			LOGGER.error("An error occured."+e.getMessage());
 		}
 		return uimsUserResponse;
 	}

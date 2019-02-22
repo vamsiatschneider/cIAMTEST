@@ -141,7 +141,6 @@ public class CheckUsersExistsTest {
 	@Test
 	public void testCheckUserSuccess() {
 		
-		System.out.println("Testing Check user exists");
 		given().when().get(ROOT_URL + "arvind.test1@mailinator.com").then().statusCode(200);
 
 	}
@@ -149,7 +148,6 @@ public class CheckUsersExistsTest {
 	@Test
 	public void testCheckUserInvalidUser() {
 		
-		System.out.println("Testing Check user exists endpoint by passing invalid user");
 		Response response = given().when().get(ROOT_URL + "INVALID");
 		assertEquals(404, response.getStatusCode());
 		String json = response.asString();
@@ -160,7 +158,6 @@ public class CheckUsersExistsTest {
 
 	@Test
 	public void testCheckUserData() {
-		System.out.println("Testing Check user exists to verify some attributes");
 		
 		Response response = given().when().get(ROOT_URL + "arvind.test1@mailinator.com");
 		assertEquals(200, response.getStatusCode());

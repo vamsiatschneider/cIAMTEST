@@ -170,7 +170,6 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				}
 			} 
 			catch (NotAuthorizedException e) {
-				e.printStackTrace();
 				LOGGER.error("DirectAPI:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(ErrorCodeConstants.UNAUTHORIZED_MESSAGE);
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
@@ -180,7 +179,6 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 			}
 			catch (BadRequestException e) {
-				e.printStackTrace();
 				LOGGER.error("DirectAPI:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
@@ -190,7 +188,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 			catch (IllegalArgumentException e) {
-				e.printStackTrace();
+				
 				LOGGER.error("DirectAPI:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(ErrorCodeConstants.BADREQUEST_MESSAGE);
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
@@ -200,7 +198,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 			catch (Exception e) {
-				e.printStackTrace();
+				
 				LOGGER.error("DirectAPI:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
@@ -535,7 +533,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				}
 			}
 		} catch (BadRequestException e) {
-			e.printStackTrace();
+			
 			errorResponse.setMessage(ErrorCodeConstants.BADREQUEST_MESSAGE);
 			errorResponse.setStatus(ErrorCodeConstants.ERROR);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -543,7 +541,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			LOGGER.error("Executing while user Registration :: -> " + e.getMessage());
 			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 		} catch (NotFoundException e) {
-			e.printStackTrace();
+			
 			errorResponse.setMessage(ErrorCodeConstants.NOTFOUND_MESSAGE);
 			errorResponse.setStatus(ErrorCodeConstants.ERROR);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -551,7 +549,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			LOGGER.error("Executing while user Registration :: -> " + e.getMessage());
 			return Response.status(Response.Status.NOT_FOUND).entity(errorResponse).build();
 		} catch (Exception e) {
-			e.printStackTrace();
+			
 			errorResponse.setMessage(ErrorCodeConstants.SERVER_ERROR_MESSAGE);
 			errorResponse.setStatus(ErrorCodeConstants.ERROR);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;

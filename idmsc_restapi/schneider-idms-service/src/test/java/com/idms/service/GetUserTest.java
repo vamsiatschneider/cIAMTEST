@@ -20,7 +20,6 @@ public class GetUserTest {
 	@Test
 	public void testGetUserSuccess() {
 		
-		System.out.println("Testing GET user");
 		given().when().get(ROOT_URL + "users/test").then().statusCode(200);
 
 	}
@@ -28,14 +27,12 @@ public class GetUserTest {
 	@Test
 	public void testGetUserInvalidUser() {
 		
-		System.out.println("Testing GET user endpoint by passing invalid user");
 		given().when().get(ROOT_URL + "users/invalid").then().statusCode(404);
 
 	}
 
 	@Test
 	public void testGetUserData() {
-		System.out.println("Testing GET user to verify some attributes");
 		
 		Response response = given().when().get(ROOT_URL + "users/test");
 		assertEquals(200, response.getStatusCode());

@@ -2,15 +2,19 @@ package com.se.sync;
 
 import java.lang.reflect.Method;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 
 public class CustomAsyncExceptionHandler implements AsyncUncaughtExceptionHandler{
 
-	 public void handleUncaughtException(final Throwable throwable, final Method method, final Object... obj) {
-	        System.out.println("Exception message - " + throwable.getMessage());
-	        System.out.println("Method name - " + method.getName());
-	        for (final Object param : obj) {
-	            System.out.println("Param - " + param);
-	        }
-	    }
+	private static final Logger LOGGER = LoggerFactory.getLogger(CustomAsyncExceptionHandler.class);
+
+	public void handleUncaughtException(final Throwable throwable, final Method method, final Object... obj) {
+		LOGGER.info("Exception message - " + throwable.getMessage());
+		LOGGER.info("Method name - " + method.getName());
+		for (final Object param : obj) {
+			LOGGER.info("Param - " + param);
+		}
+	}
 }

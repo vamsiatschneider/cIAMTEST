@@ -100,11 +100,9 @@ public class UimsSetPasswordSoapService {
 
 		}catch (MalformedURLException e) {
 			LOGGER.error("MalformedURLException in getUserManager()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		catch (Exception e) {
 			LOGGER.error("Exception in getUserManager()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		return userManagerUIMSV22;
 	}
@@ -176,14 +174,11 @@ public class UimsSetPasswordSoapService {
 			}
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in activateIdentity()::" + e.getMessage());
-			e.printStackTrace();
 
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in activateIdentity()::" + e.getMessage());
-			e.printStackTrace();
 		} catch (Exception e) {
 			LOGGER.error("Exception in activateIdentity()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		LOGGER.info("activateIdentity() finished!");
 	}
@@ -263,14 +258,11 @@ public class UimsSetPasswordSoapService {
 			}
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in setUIMSPassword()::" + e.getMessage());
-			e.printStackTrace();
 
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in setUIMSPassword()::" + e.getMessage());
-			e.printStackTrace();
 		} catch (Exception e) {
 			LOGGER.error("Exception in setUIMSPassword()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		LOGGER.info("UIMS setUIMSPassword() finished!");
 		return setPasswordStatus;
@@ -303,7 +295,6 @@ public class UimsSetPasswordSoapService {
 			}
 		} catch (Exception e) {			
 			LOGGER.error("Exception in activateUIMSUserConfirmPIN():: -> "+ e.getMessage());
-			e.printStackTrace();
 		}
 	}
 	/**
@@ -369,13 +360,10 @@ public class UimsSetPasswordSoapService {
 			}
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in activateIdentityNoPassword()::" + e.getMessage());
-			e.printStackTrace();
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in activateIdentityNoPassword()::" + e.getMessage());
-			e.printStackTrace();
 		} catch (Exception e) {
 			LOGGER.error("Exception in activateIdentityNoPassword()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		LOGGER.info("Completed UIMS activateIdentityNoPassword() Sync method!");
 	}
@@ -429,14 +417,11 @@ public class UimsSetPasswordSoapService {
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in UIMS updatepassword() for userId::"+ userId);
 			LOGGER.error(e.getMessage());
-			e.printStackTrace();
 
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in UIMS updatepassword() for userId::" +userId+" is ->" + e.getMessage());
-			e.printStackTrace();
 		} catch (Exception e) {
 			LOGGER.error("Exception in updateUIMSPassword() for userId::" +userId +" is ->" + e.getMessage());
-			e.printStackTrace();
 		}
 		return ispasswordupdated;
 	}

@@ -15,7 +15,6 @@ public class MandatoryValidatorImplTest {
 		String key = "IDMS_Mandatory";
 		Object value = "IDMS_User_Context__c";
 
-		System.out.println(mandatoryValidatorImpl.validate(key, value));
 		
 		assertEquals(true, mandatoryValidatorImpl.validate(key, value));
 	}
@@ -28,7 +27,6 @@ public class MandatoryValidatorImplTest {
 		String key = "IDMS_Mandatory";
 		Object value = "IDMS_User_Context__c";
 
-		System.out.println(mandatoryValidatorImpl.validate(key, value));
 		
 		assertNotSame(false, mandatoryValidatorImpl.validate(key, value));
 	}

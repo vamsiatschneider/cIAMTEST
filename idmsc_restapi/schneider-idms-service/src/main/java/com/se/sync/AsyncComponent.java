@@ -5,33 +5,36 @@ import java.util.concurrent.Future;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 public class AsyncComponent {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AsyncComponent.class);
 
 	@Async
 	public void asyncMethodWithVoidReturnType() {
 
-		System.out.println("Execute method asynchronously. " + Thread.currentThread().getName());
+		LOGGER.info("Execute method asynchronously. " + Thread.currentThread().getName());
 	}
 
 	@Async
 	public Future<String> asyncMethodWithReturnType() {
-		System.out.println("Execute method asynchronously " + Thread.currentThread().getName());
+		LOGGER.info("Execute method asynchronously " + Thread.currentThread().getName());
 
 		try {
 			Thread.sleep(5000);
 			return new AsyncResult<>("hello world !!!!");
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("An error occured."+e.getMessage());
 		}
 		return null;
 	}
 
 	@Async("threadPoolTaskExecutor")
 	public void asyncMethodWithConfiguredExecutor() {
-		System.out.println("Execute method asynchronously with configured executor" + Thread.currentThread().getName());
+		LOGGER.info("Execute method asynchronously with configured executor" + Thread.currentThread().getName());
 	}
 
 	@Async

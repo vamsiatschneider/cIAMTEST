@@ -14,7 +14,6 @@ public class LengthValidatorImplTest {
 		String key = "IDMS_Email_opt_in__c";
 		Object value = 1;
 
-		System.out.println(impl.validate(key, value));
 		assertEquals(true, impl.validate(key, value));
 	}
 	
@@ -26,7 +25,6 @@ public class LengthValidatorImplTest {
 		String key = "IDMS_Email_opt_in__c";
 		Object value = 2;
 
-		System.out.println(impl.validate(key, value));
 		
 		assertNotSame("Expecting the result to be 30", "31", impl.validate(key, value));
 	}

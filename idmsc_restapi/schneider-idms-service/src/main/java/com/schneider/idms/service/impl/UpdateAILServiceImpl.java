@@ -349,14 +349,12 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 				}
 			// writing business logic - end
 		} catch (JsonProcessingException e) {
-			e.printStackTrace();
 			LOGGER.error("JsonProcessingException = " + e.getMessage());
 			responseCode.setStatus(ErrorCodeConstants.ERROR);
 			responseCode.setMessage("JSON Parsing error, Please try again");
 			LOGGER.error("JSON Parsing error, Please try again");
 			return Response.status(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE).entity(responseCode).build();
 		} catch (NotFoundException e) {
-			e.printStackTrace();
 			responseCode.setStatus(ErrorCodeConstants.ERROR);
 			responseCode.setMessage("User not found based on user Id");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -365,7 +363,6 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 			LOGGER.error("Executing while updateAIL() :: -> " + e.getMessage());
 			return Response.status(Response.Status.NOT_FOUND).entity(responseCode).build();
 		} catch (NotAuthorizedException e) {
-			e.printStackTrace();
 			responseCode.setStatus(ErrorCodeConstants.ERROR);
 			responseCode.setMessage("HTTP 401 Unauthorized or Session expired");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -374,7 +371,6 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 			LOGGER.error("Executing while updateAIL() :: -> " + e.getMessage());
 			return Response.status(Response.Status.UNAUTHORIZED).entity(responseCode).build();
 		}catch (Exception e) {
-			e.printStackTrace();
 			responseCode.setStatus(ErrorCodeConstants.ERROR);
 			responseCode.setMessage("Error in Updating the AIL Object");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;

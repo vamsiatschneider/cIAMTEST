@@ -132,7 +132,7 @@ public class GetAILServiceImpl extends IdmsCommonServiceImpl implements GetAILSe
 			return Response.status(Response.Status.OK.getStatusCode()).entity(responseJason).build();
 			}
 		} catch (NotFoundException e) {
-			e.printStackTrace();
+			
 			responseCode.setStatus(ErrorCodeConstants.ERROR);
 			responseCode.setMessage("User not found.");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -140,7 +140,7 @@ public class GetAILServiceImpl extends IdmsCommonServiceImpl implements GetAILSe
 			LOGGER.error("NotFoundException in getUserAIL() :: -> " + e.getMessage());
 			return Response.status(Response.Status.NOT_FOUND).entity(responseCode).build();
 		} catch (NotAuthorizedException e) {
-			e.printStackTrace();
+			
 			responseCode.setStatus(ErrorCodeConstants.ERROR);
 			responseCode.setMessage("HTTP 401 Unauthorized or Session expired");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -148,7 +148,7 @@ public class GetAILServiceImpl extends IdmsCommonServiceImpl implements GetAILSe
 			LOGGER.error("NotAuthorizedException in getUserAIL() :: -> " + e.getMessage());
 			return Response.status(Response.Status.UNAUTHORIZED).entity(responseCode).build();
 		}catch (Exception e) {
-			e.printStackTrace();
+			
 			responseCode.setStatus(ErrorCodeConstants.ERROR);
 			responseCode.setMessage("Internal Server Error");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -232,7 +232,7 @@ public Response getUserResponse (String userId,String iPlanetDirectoryToken ){
 		userData = productService.getUser(iPlanetDirectoryToken, userId);
 	}
 	catch (Exception e) {
-		e.printStackTrace();
+		
 		LOGGER.error("Error in getUser() openam service->"+e.getMessage());
 		LOGGER.error(e.toString());
 		if (userData == null) {

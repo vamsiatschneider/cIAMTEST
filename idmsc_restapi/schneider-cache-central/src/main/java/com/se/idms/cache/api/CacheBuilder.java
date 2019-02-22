@@ -149,7 +149,7 @@ public class CacheBuilder implements CacheTypes {
 			IDMSCache idmsFieldCache = getIdmsFieldsCache();
 //			return (Properties) idmsFieldCache.get(idmsFieldsFile);
 			Element element = (Element)idmsFieldCache.get(idmsFieldsFile);
-			System.out.println("Size of the property file :: "+element.getKey() + " Value  "+element.getValue());
+			
 			return (Properties) element.getValue();
 		}
 

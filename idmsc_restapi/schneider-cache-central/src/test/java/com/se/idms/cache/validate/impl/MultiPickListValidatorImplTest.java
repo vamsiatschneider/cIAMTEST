@@ -26,7 +26,6 @@ public class MultiPickListValidatorImplTest {
 		String multiPickList = "BA4;BA5;--";
 
 		boolean flag = multiPickListValidatorImpl.validate(key, multiPickList);
-		System.out.println(flag);
 		assertNotSame(true, flag);
 	}
 

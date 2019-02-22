@@ -214,7 +214,6 @@ public class CheckUserExistServiceImpl extends IdmsCommonServiceImpl implements 
 			responseCode.setStatus(ErrorCodeConstants.ERROR);
 			responseCode.setMessage(UserConstants.FALSE);
 		} catch (BadRequestException e) {
-			e.printStackTrace();
 			responseCode.setStatus(ErrorCodeConstants.ERROR);
 			responseCode.setMessage("Request is not valid");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -222,7 +221,6 @@ public class CheckUserExistServiceImpl extends IdmsCommonServiceImpl implements 
 			LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage());
 			return Response.status(Response.Status.BAD_REQUEST).entity(responseCode).build();
 		} catch (NotAuthorizedException e) {
-			e.printStackTrace();
 			responseCode.setStatus(ErrorCodeConstants.ERROR);
 			responseCode.setMessage("HTTP 401 Unauthorized or Session expired");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -230,7 +228,6 @@ public class CheckUserExistServiceImpl extends IdmsCommonServiceImpl implements 
 			LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage());
 			return Response.status(Response.Status.UNAUTHORIZED).entity(responseCode).build();
 		} catch (NotFoundException e) {
-			e.printStackTrace();
 			responseCode.setStatus(ErrorCodeConstants.ERROR);
 			responseCode.setMessage(UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -238,7 +235,6 @@ public class CheckUserExistServiceImpl extends IdmsCommonServiceImpl implements 
 			LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage());
 			return Response.status(Response.Status.NOT_FOUND).entity(responseCode).build();
 		} catch (Exception e) {
-			e.printStackTrace();
 			responseCode.setStatus(ErrorCodeConstants.ERROR);
 			responseCode.setMessage("Some other error in CheckUserExist");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;

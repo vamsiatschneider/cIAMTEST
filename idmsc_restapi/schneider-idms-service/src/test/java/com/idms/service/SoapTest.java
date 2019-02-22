@@ -34,7 +34,6 @@ public class SoapTest {
 		AuthenticatedUserManagerUIMSV22	 authenticatedUserManager = authenticatedUserManagerSoapService
 				.getAuthenticatedUserManager();
 
-		System.out.println(authenticatedUserManager);
 
 		UserV6 user = new UserV6();
 		user.setFederatedID("123457");
@@ -46,7 +45,6 @@ public class SoapTest {
 		user.setCountryCode("CN");
 
 		CreatedIdentityReport createIdentity = authenticatedUserManager.createIdentity("IDMSAdmin", user, null);
-		System.out.println(createIdentity.getFederatedID());
 		assertEquals(true, createIdentity.isHasBeenCreated());
 	}
 
@@ -59,11 +57,9 @@ public class SoapTest {
 
 		UserManagerUIMSV22 userManagerUIMSV22 = service.getPort(UserManagerUIMSV22.class);
 
-		System.out.println(userManagerUIMSV22);
 
 		String callerFid = "IDMSAdmin";
 		String samlAssertionOrToken = "9aca36f2-45dd-468a-9a5a-e30afd05eb78;2017-07-20 11:35:23;1;hbDnQgh3oXPJzkJeer7DwSuYd/2aezQka4lgejQdR7Q0ubFtazxGV7FD/AqJOyJQKLWZyniKnGYyAEfMVwjfvZlxrOd476xq/8UBP4YinI0pFJZMbxL4J6p0h7zGjsHu2iDC+hJTNDtjFJAWRpDhnt7z8pADDgbwdkZSTLGCAXNaDX4aTAWomeX+f/DkH+Ud/juutV9W8gvFVT9tfkOkaVjnNMjHJvf7ycvSiV9I15gYnsrQzMWJKudgu93HbCF18zUgOBlL6o3vC9BWcwWIDQPfqO4/6tY5D6gZT1RnUftYunx0x9WBiYImIznMsAABi8tl64GeOBervZ2cnEDasw==";
-		System.out.println(userManagerUIMSV22.getUser(callerFid, samlAssertionOrToken));
 
 	}
 }

@@ -94,11 +94,9 @@ public class UIMSAccessManagerSoapService {
 
 		} catch (MalformedURLException e) {
 			LOGGER.error("MalformedURLException in getAccessManager()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		catch (Exception e) {
 			LOGGER.error("Exception in getAccessManager()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		return accessManagerUIMSV2;
 	}
@@ -128,10 +126,8 @@ public class UIMSAccessManagerSoapService {
 					productService.updateUser(iPlanetDirectoryKey, userId, version);
 				}
 			} catch (RetryException e) {
-				e.printStackTrace();
 				uimsLog.error("Retry failed while calling the grantAccessControlToUser::" + e.getMessage());
 			} catch (ExecutionException e) {
-				e.printStackTrace();
 			}
 			if(!isgrantresult) {
 				LOGGER.info("UIMS UpdateAIL Grant Access got failed -----> ::sending mail notification::");
@@ -140,7 +136,6 @@ public class UIMSAccessManagerSoapService {
 			}
 		} catch (Exception e) {
 			uimsLog.error("Remote Soap Exception while consuming grantAccessControlToUser :-->" + e.getMessage());
-			e.printStackTrace();
 		}
 		uimsLog.info("Completed grantAccessControToUser Async method!");
 	}
@@ -170,10 +165,9 @@ public class UIMSAccessManagerSoapService {
 					productService.updateUser(iPlanetDirectoryKey, userId, version);
 				}
 			} catch (RetryException e) {
-				e.printStackTrace();
 				uimsLog.error("Retry failed while calling the revokeAccessControlToUser::" + e.getMessage());
 			} catch (ExecutionException e) {
-				e.printStackTrace();
+				LOGGER.error("An error occured."+e.getMessage());
 			}
 			if(!isrevokeresult) {
 				LOGGER.info("UIMS UpdateAIL revoke access got failed -----> ::sending mail notification::");
@@ -182,7 +176,6 @@ public class UIMSAccessManagerSoapService {
 			}
 		} catch (Exception e) {
 			uimsLog.error("Remote Soap Exception while consuming revokeAccessControlToUser:-->" + e.getMessage());
-			e.printStackTrace();
 		}
 		uimsLog.info("inside revokeAccessControlToUser Async method!");
 	}
@@ -228,7 +221,6 @@ public class UIMSAccessManagerSoapService {
 		} catch (Exception e) {
 			//productService.sessionLogout(iPlanetDirectoryKey, "logout");
 			uimsLog.error("Exception in updateUIMSUserAIL():"+ e.getMessage());
-			e.printStackTrace();
 		}
 		//productService.sessionLogout(iPlanetDirectoryKey, "logout");
 		uimsLog.info("UIMS updateAIL Async Method completed!");

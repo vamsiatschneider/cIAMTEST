@@ -67,11 +67,9 @@ public class UIMSCompanyManagerSoapServiceSync {
 
 		}catch (MalformedURLException e) {
 			LOGGER.error("MalformedURLException in getCompanyManager()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		catch (Exception e) {
 			LOGGER.error("Exception in getCompanyManager()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		return userManagerUIMSV2;
 	}
@@ -94,11 +92,9 @@ public class UIMSCompanyManagerSoapServiceSync {
 		 LOGGER.info("End: getPort() of UIMS -> End, response is:" + userManagerUIMSV2);
 		} catch (MalformedURLException e) {
 			LOGGER.error("Exception in getAuthenitcatedCompanyManager()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		catch (Exception e) {
 			LOGGER.error("Exception in getAuthenitcatedCompanyManager()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		return userManagerUIMSV2;
 	}
@@ -124,10 +120,8 @@ public class UIMSCompanyManagerSoapServiceSync {
 					| LdapTemplateNotReadyException | RequestedEntryNotExistsException | RequestedInternalUserException
 					| UnexpectedLdapResponseException | UnexpectedRuntimeImsException e) {
 				LOGGER.error("Error executing while createUIMSCompany()::" + e.getMessage());
-				e.printStackTrace();
 			}catch (Exception e) {
 				LOGGER.error("Error executing while createUIMSCompany::" + e.getMessage());
-				e.printStackTrace();
 			}
 		
 		return uimsUserResponse;
@@ -156,10 +150,8 @@ public class UIMSCompanyManagerSoapServiceSync {
 				| RequestedEntryNotExistsException | RequestedInternalUserException | SecuredImsException
 				| UnexpectedLdapResponseException | UnexpectedRuntimeImsException e) {
 			LOGGER.error("Error in createUIMSCompanyWithCompanyForceIdmsId()::" + e.getMessage());
-			e.printStackTrace();
 		}catch (Exception e) {
 			LOGGER.error("Error in createUIMSCompanyWithCompanyForceIdmsId()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		return uimsUserResponse;
 	}
@@ -178,7 +170,6 @@ public class UIMSCompanyManagerSoapServiceSync {
 				| LdapTemplateNotReadyException | RequestedEntryNotExistsException | UnexpectedLdapResponseException
 				| UnexpectedRuntimeImsException e) {
 			LOGGER.error("Error in getUIMSCompany()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		return uimsCompanyResponse;
 	}

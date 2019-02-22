@@ -57,14 +57,12 @@
 //				uimsLog.info("");
 //			} catch (RetryException e) {
 //				uimsLog.info("Caught the RetryException::" + e.getMessage());
-//				// e.printStackTrace();
 //			} catch (ExecutionException e) {
-//				e.printStackTrace();
+//				
 //			}
 //			uimsLog.info("out");
 //		} catch (Exception e) {
 //			// TODO Auto-generated catch block
-//			e.printStackTrace();
 //		}
 //
 //	}

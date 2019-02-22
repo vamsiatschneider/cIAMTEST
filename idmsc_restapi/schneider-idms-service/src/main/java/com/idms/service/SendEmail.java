@@ -180,15 +180,12 @@ public class SendEmail {
 		} 
 		catch (SMTPSendFailedException e) {
 			LOGGER.error("SMTPSendFailedException while sending email to "+to+" :: -> " + e.getMessage());
-			e.printStackTrace();
 		}
 		catch (MessagingException e) {
 			LOGGER.error("MessagingException while sending email to "+to+" :: -> " + e.getMessage());
-			e.printStackTrace();
 		}
 		catch (Exception e) {
 			LOGGER.error("Exception while sending email to "+to+" :: -> " + e.getMessage());
-			e.printStackTrace();
 		}
 	}
 	
@@ -320,7 +317,6 @@ public class SendEmail {
 				}
 			} catch (Exception e) {
 				LOGGER.info("Exception in sendOpenAmEmail() => "+e.getMessage());
-				e.printStackTrace();
 			}
 	}
 	
@@ -501,7 +497,6 @@ public class SendEmail {
 				in = new BufferedReader(file);
 			} else {
 				LOGGER.info("Inside Common OperationType " + hotpOperationType);
-				// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_registration_with_password.html";
 				if (chineseLangCheck) {
 					filePath = IDMS_USER_DEFAULT_EMAILTEMPLATE_CN;
 				} else {
@@ -519,7 +514,6 @@ public class SendEmail {
 			file.close();
 		} catch (IOException e) {
 			//throw new FileNotFoundException("Caught Exception!!!!!!!!!!!! " + e);
-			e.printStackTrace();
 			LOGGER.error("Executing while emailContentTemplate :: -> " + e.getMessage());
 		}
 		/*LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : Content Builder Length after reading the file :"
@@ -779,7 +773,6 @@ public class SendEmail {
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
 			LOGGER.error("Exception in sendSMSMessage() while sending code to: "+to);
 			LOGGER.error(e.getMessage());
 		}
@@ -940,7 +933,6 @@ public class SendEmail {
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
 			LOGGER.error("Exception in sendSMSNewGateway() while sending code to: "+to);
 			LOGGER.error(e.getMessage());
 		}
@@ -978,7 +970,6 @@ public class SendEmail {
 				throw new Exception(IOUtils.toString((InputStream) smsResponse.getEntity()));
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
 			LOGGER.error("Exception in sendSMSNewGateway() while sending code to: "+mobile);
 			LOGGER.error(e.getMessage());
 		}
@@ -1002,7 +993,6 @@ public class SendEmail {
 			}
 			return resultStr;
 		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
 			return null;
 		}
 	}

@@ -64,11 +64,9 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 			LOGGER.info("End: getPort() of UIMS -> End, response is:" + authenticatedUserManagerUIMSV22);
 		} catch (MalformedURLException e) {
 			LOGGER.error("MalformedURLException in getAuthenticatedUserManager()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		catch (Exception e) {
 			LOGGER.error("Exception in getAuthenticatedUserManager()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		return authenticatedUserManagerUIMSV22;
 	}
@@ -113,9 +111,7 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 				| SecuredImsException_Exception | UnexpectedLdapResponseException_Exception
 				| UnexpectedRuntimeImsException_Exception e) {
 			LOGGER.error("Exception in createUIMSUserWithPassword()::" + e.getMessage());
-			e.printStackTrace();
 		} catch (JsonProcessingException e) {
-			e.printStackTrace();
 			LOGGER.error("JsonProcessingException in createUIMSUserWithPassword()::" + e.getMessage());
 		}
 		LOGGER.info("createUIMSUserWithPassword() UIMS Sync method -> End.. with FederatedID:"+uimsUserResponse.getFederatedID());
@@ -158,9 +154,7 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 				| SecuredImsException_Exception | UnexpectedLdapResponseException_Exception
 				| UnexpectedRuntimeImsException_Exception e) {
 			LOGGER.error("Exception in createUIMSUser() of UIMS::" + e.getMessage());
-			e.printStackTrace();
 		} catch (JsonProcessingException e) {
-			e.printStackTrace();
 			LOGGER.error("JsonProcessingException in createUIMSUser()::" + e.getMessage());
 		}
 		LOGGER.info("createUIMSUser() Sync method -> End..FederatedID="+uimsUserResponse.getFederatedID());

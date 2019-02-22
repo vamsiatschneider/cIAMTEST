@@ -106,7 +106,6 @@ public class UIMSUserManagerSoapServiceSync {
 			
 		} catch (JsonProcessingException e) {
 			LOGGER.error("Error while converting the userRequest to Json" + e.getMessage());
-			e.printStackTrace();
 		}finally{
 			if(null != objMapper){
 				objMapper = null;
@@ -155,11 +154,9 @@ public class UIMSUserManagerSoapServiceSync {
 				}
 			} catch (RetryException e) {
 				LOGGER.error("RetryException while UIMS create user::" + e.getMessage());
-				e.printStackTrace();
 				
 			} catch (ExecutionException e) {
 				LOGGER.error("ExecutionException while UIMS create user::" + e.getMessage());
-				e.printStackTrace();
 			}
 
 			if((!userCreated || null == createdFedId) && (null != context && (UserConstants.USER_CONTEXT_HOME.equalsIgnoreCase(context)||UserConstants.USER_CONTEXT_HOME_1.equalsIgnoreCase(context)))) {
@@ -253,11 +250,9 @@ public class UIMSUserManagerSoapServiceSync {
 			} catch (RetryException e) {
 				// productService.sessionLogout(iPlanetDirectoryKey, "logout");
 				LOGGER.error("RetryException while UIMS create company::" + e.getMessage());
-				e.printStackTrace();
 			} catch (ExecutionException e) {
 				// productService.sessionLogout(iPlanetDirectoryKey, "logout");
 				LOGGER.error("ExecutionException while UIMS create company::" + e.getMessage());
-				e.printStackTrace();
 			}
 			/*if((!(userCreated && companyCreated) || (null == createdCompanyFedId && null == createdFedId)) && 
 					(null != context && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context)))){
@@ -268,7 +263,6 @@ public class UIMSUserManagerSoapServiceSync {
 		} catch (Exception e) {
 			// productService.sessionLogout(iPlanetDirectoryKey, "logout");
 			LOGGER.error("Exception in createUIMSUserAndCompany ::" + e.getMessage());
-			e.printStackTrace();
 		}
 		createdFedId = null;
 		// productService.sessionLogout(iPlanetDirectoryKey, "logout");
@@ -295,7 +289,6 @@ public class UIMSUserManagerSoapServiceSync {
 			jsonString = jsonString.replace("\"\"", "[]");
 		} catch (JsonProcessingException e) {
 			LOGGER.error("JsonProcessingException while converting the digitalRequest to Json" + e.getMessage());
-			e.printStackTrace();
 		}
 		objMapper = null;
 		return jsonString;

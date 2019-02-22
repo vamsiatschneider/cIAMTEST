@@ -102,7 +102,6 @@ public class SalesforceSyncServiceImpl {
 											+ IOUtils.toString((InputStream) activationResponse.getEntity()));
 						}
 					} catch (IOException e) {
-						e.printStackTrace();
 						LOGGER.error("Failed to populate the activate date on PRM :: populateActivationDate -> "
 								+ e.getMessage());
 					}
@@ -117,17 +116,14 @@ public class SalesforceSyncServiceImpl {
 				retryer.call(datePopulated);
 			} catch (RetryException e) {
 				LOGGER.error("RetryException in populatePrmActivationDate() of Salesforce::" + e.getMessage());
-				e.printStackTrace();
 
 			} catch (ExecutionException e) {
 				LOGGER.error("ExecutionException in populatePrmActivationDate() of Salesforce::"
 						+ e.getMessage());
-				e.printStackTrace();
 			}
 
 		} catch (Exception e) {
 			LOGGER.error("Exception in populatePrmActivationDate()::" + e.getMessage());
-			e.printStackTrace();
 		}
 
 	}
@@ -218,7 +214,6 @@ public class SalesforceSyncServiceImpl {
 				LOGGER.info("SalesForceToken added to HashMap");
 			}
 		} catch (ExecutionException | RetryException e) {
-			e.printStackTrace();
 			LOGGER.error("Error in getGeneratedSFToken() ->"+e.getMessage());
 		}
 		return generatedSFToken;

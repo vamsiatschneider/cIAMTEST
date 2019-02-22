@@ -16,11 +16,16 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.se.idms.cache.api.CacheManagerProviderImpl;
 import com.se.idms.util.UserConstants;
 
 public class ChinaIdmsUtil {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ChinaIdmsUtil.class);
 
 	public static String generateHashValue(String generatedPin) {
 		MessageDigest md;
@@ -34,7 +39,7 @@ public class ChinaIdmsUtil {
 			hexString = new String(Hex.encodeHex(byteData));
 			
 		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
+			LOGGER.error("An error occured."+e.getMessage());
 		}
 
 		return hexString;
@@ -91,7 +96,6 @@ public class ChinaIdmsUtil {
         	newrawdata = rawData.replace(chars, "");
         	
         }else{
-        	//System.out.println("false");
         }
         return newrawdata;
     }
@@ -110,7 +114,6 @@ public class ChinaIdmsUtil {
         	newrawdata = rawData.replace(chars, "");
         	
         }else{
-        	//System.out.println("false");
         }
         return newrawdata;
     }
@@ -193,9 +196,7 @@ public class ChinaIdmsUtil {
 	
 	/*public static void main(String[] args) {
 		//String longvalue = generateHashValue("tY4MomqIwjg34932ZhTx651K38WJcZ");
-		//System.out.println(longvalue);
 		boolean mobileStr = mobileValidator("5987559777");
-		System.out.println("mobileStr = "+mobileStr);
 	}*/
 	
 }

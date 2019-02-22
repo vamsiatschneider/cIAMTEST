@@ -177,7 +177,6 @@ public class UserServiceImplTest implements PropertyVariables{
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Success"));
 		assertThat("Message ", actualResponse.getMessage(), equalTo(UserConstants.CREATE_USER_SUCCESS_MESSAGE));
 		
-		System.out.println("Test");
 		
 	}
 

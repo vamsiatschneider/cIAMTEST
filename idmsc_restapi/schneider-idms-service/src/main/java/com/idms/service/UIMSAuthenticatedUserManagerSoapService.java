@@ -73,11 +73,9 @@ public class UIMSAuthenticatedUserManagerSoapService {
 			LOGGER.info("getPort() of UIMS -> End, response is:"+authenticatedUserManagerUIMSV2);
 		}catch (MalformedURLException e) {
 			LOGGER.error("Exception while UIMSAuthenticatedUserManagerSoapService :: getAuthenticatedUserManager()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		catch (Exception e) {
 			LOGGER.error("Exception while UIMSAuthenticatedUserManagerSoapService ::getAuthenticatedUserManager()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		return authenticatedUserManagerUIMSV2;
 	}
@@ -112,7 +110,6 @@ public class UIMSAuthenticatedUserManagerSoapService {
 				| SecuredImsException_Exception | UnexpectedLdapResponseException_Exception
 				| UnexpectedRuntimeImsException_Exception e) {
 			LOGGER.error("Exception while createUIMSUser() of UIMS::" + e.getMessage());
-			e.printStackTrace();
 		}
 		LOGGER.info("createUIMSUser() Async method -> End..FederatedID="+uimsUserResponse.getFederatedID());
 		return uimsUserResponse.getFederatedID();
@@ -150,7 +147,6 @@ public class UIMSAuthenticatedUserManagerSoapService {
 				| SecuredImsException_Exception | UnexpectedLdapResponseException_Exception
 				| UnexpectedRuntimeImsException_Exception e) {
 			LOGGER.error("Exception in createUIMSUserWithPassword()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		LOGGER.info("createUIMSUserWithPassword() UIMS Async method -> End.. with FederatedID:"+uimsUserResponse.getFederatedID());
 		return uimsUserResponse.getFederatedID();
@@ -171,7 +167,6 @@ public class UIMSAuthenticatedUserManagerSoapService {
 				| RequestedEntryNotExistsException_Exception | SecuredImsException_Exception
 				| UnexpectedLdapResponseException_Exception | UnexpectedRuntimeImsException_Exception e) {
 			LOGGER.error("Exception in resetPassword() of UIMS::" + e.getMessage());
-			e.printStackTrace();
 		}
 		LOGGER.info("resetUIMSPassword() UIMS Async method -> End");
 	}

@@ -22,7 +22,7 @@ public class TestClient {
 		
 		//System.out.println("Test : "+RandomStringUtils.randomAlphanumeric(30));
 		
-		System.out.println("Test : "+ChinaIdmsUtil.generateHashValue("tY4MomqIwjg34932ZhTx651K38WJcZ"));
+		//System.out.println("Test : "+ChinaIdmsUtil.generateHashValue("tY4MomqIwjg34932ZhTx651K38WJcZ"));
 		
 	}
 

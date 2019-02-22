@@ -46,12 +46,12 @@ public class ActivateUsers {
 			if ((null != hostName && !hostName.isEmpty()) && (null != csvFileName && !csvFileName.isEmpty())) {
 				user.readDataFromFile(hostName, csvFileName);
 			} else {
-				System.out.println("HostName and filePath should not be empty");
+				LOGGER.info("HostName and filePath should not be empty");
 			}
 
 		} catch (Exception e) {
 
-			e.printStackTrace();
+
 
 		}
 
@@ -72,14 +72,12 @@ public class ActivateUsers {
 			br = new BufferedReader(new FileReader(csvFile));
 			while ((user = br.readLine()) != null) {
 
-				//System.out.println("User Is : " + user);
 				LOGGER.info("User Is : " + user);
 				try {
 					jsonString = executeRequestApi(hostname + "/services/apexrest/GetIDMSUser/" + user, "GET", null);
-				} catch (Exception e1) {
+				} catch (Exception exp) {
 					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+					LOGGER.error("An error occured."+exp.getMessage());				}
 
 				if (!"{}".equals(jsonString.toString())) {
 					inputRequesr = buildUserRequest(productDocCtx, conf, jsonString);
@@ -88,7 +86,7 @@ public class ActivateUsers {
 						jsonString = executeRequestApi(hostname + "/services/apexrest/ActivateUser", "PUT", inputRequesr);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
-						e.printStackTrace();
+						LOGGER.error("An error occured."+e.getMessage());
 					}
 				} else {
 					dataNotFount.append(user);
@@ -96,21 +94,21 @@ public class ActivateUsers {
 			}
 
 			if(!dataNotFount.toString().isEmpty()){
-				System.out.println("The Following users not activated : " + dataNotFount);
+				LOGGER.info("The Following users not activated : " + dataNotFount);
 			}else{
-				System.out.println("Users Successfully Activated :: ");
+				LOGGER.info("Users Successfully Activated :: ");
 			}
 
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			LOGGER.error("An error occured."+e.getMessage());
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.error("An error occured."+e.getMessage());
 		} finally {
 			if (br != null) {
 				try {
 					br.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					LOGGER.error("An error occured."+e.getMessage());
 				}
 			}
 		}
@@ -188,9 +186,9 @@ public class ActivateUsers {
 
 			BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
 
-			System.out.println("Output from Server .... \n");
+			LOGGER.info("Output from Server .... \n");
 			while ((output = br.readLine()) != null) {
-				System.out.println(output);
+				LOGGER.info(output);
 				jsonString = output;
 			}
 
@@ -198,9 +196,9 @@ public class ActivateUsers {
 			return jsonString;
 
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			LOGGER.error("An error occured."+e.getMessage());
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.error("An error occured."+e.getMessage());
 		}
 		return jsonString;
 	}

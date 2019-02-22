@@ -6,7 +6,13 @@ import java.io.InputStream;
 import java.util.Properties;
 import org.springframework.util.ResourceUtils;
 
+import com.se.sync.AsyncComponent;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class PropertiesLoader {
+	private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesLoader.class);
 
 	private static String getProps(String key) {
 		Properties prop = new Properties();
@@ -23,13 +29,13 @@ public class PropertiesLoader {
 			return prop.getProperty(key);
 
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			LOGGER.error("An error occured."+ex.getMessage());
 		} finally {
 			if (input != null) {
 				try {
 					input.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					LOGGER.error("An error occured."+e.getMessage());
 				}
 			}
 		}

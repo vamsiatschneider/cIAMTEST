@@ -178,11 +178,11 @@ public class DirectUIMSUserManagerSoapService {
 			LOGGER.info("getUserManager() of UIMS -> End");
 		}catch (MalformedURLException e) {
 			LOGGER.error("Exception while getUserManager()::" + e.getMessage());
-			e.printStackTrace();
+			
 		}
 		catch (Exception e) {
 			LOGGER.error("Exception while getUserManager()::" + e.getMessage());
-			e.printStackTrace();
+			
 		}
 		return userManagerUIMSV2;
 	}
@@ -206,11 +206,11 @@ public class DirectUIMSUserManagerSoapService {
 
 		} catch (MalformedURLException e) {
 			LOGGER.error("MalformedURLException in getAccessManager()::" + e.getMessage());
-			e.printStackTrace();
+			
 		}
 		catch (Exception e) {
 			LOGGER.error("Exception in getAccessManager()::" + e.getMessage());
-			e.printStackTrace();
+			
 		}
 		return accessManagerUIMSV2;
 	}
@@ -233,7 +233,7 @@ public class DirectUIMSUserManagerSoapService {
 		} catch (Exception e1) {
 			LOGGER.error("Exception while getting samlAssertionOrToken in getUIMSUser()::" + e1.getMessage());
 			UIMSLOGGER.error("Exception while getting samlAssertionOrToken in getUIMSUser()::" + e1.getMessage());
-			e1.printStackTrace();
+			
 		}
 		try {
 			UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
@@ -246,7 +246,7 @@ public class DirectUIMSUserManagerSoapService {
 				| UnexpectedLdapResponseException_Exception | UnexpectedRuntimeImsException_Exception e) {
 			LOGGER.error("Exception while getUser() of UIMS::" + e.getMessage());
 			UIMSLOGGER.error("Exception while getUser() of UIMS::" + e.getMessage());
-			e.printStackTrace();
+			
 		}
 	}
 
@@ -280,7 +280,7 @@ public class DirectUIMSUserManagerSoapService {
 		} catch (Exception e) {
 			LOGGER.error("Exception while getting getSamlAssertionToken() of UIMS::" + e.getMessage());
 			UIMSLOGGER.error("Exception while getting getSamlAssertionToken() of UIMS::" + e.getMessage());
-			e.printStackTrace();
+			
 		}
 		try {
 			Callable<Boolean> callableUIMSPassword = new Callable<Boolean>() {
@@ -319,12 +319,12 @@ public class DirectUIMSUserManagerSoapService {
 			} catch (RetryException e) {
 				LOGGER.error("Retry failed while calling setUIMSPassword() of UIMS::" + e.getMessage());
 				UIMSLOGGER.error("Retry failed while calling setUIMSPassword() of UIMS::" + e.getMessage());
-				e.printStackTrace();
+				
 
 			} catch (ExecutionException e) {
 				LOGGER.error("ExecutionException while calling setUIMSPassword() of UIMS::" + e.getMessage());
 				UIMSLOGGER.error("ExecutionException while calling setUIMSPassword() of UIMS::" + e.getMessage());
-				e.printStackTrace();
+				
 			}
 			if (!setPasswordStatus) {
 				LOGGER.info(
@@ -342,7 +342,7 @@ public class DirectUIMSUserManagerSoapService {
 			// productService.sessionLogout(iPlanetDirectoryKey, "logout");
 			LOGGER.error("Exception while setUIMSPassword::" + e.getMessage());
 			UIMSLOGGER.error("Exception while setUIMSPassword::" + e.getMessage());
-			e.printStackTrace();
+			
 		}
 		// productService.sessionLogout(iPlanetDirectoryKey, "logout");
 		LOGGER.info("setUIMSPassword() Async Method -> End");
@@ -370,7 +370,7 @@ public class DirectUIMSUserManagerSoapService {
 		} catch (Exception e1) {
 			LOGGER.error("Exception while getting samlAssertion ::" + e1.getMessage());
 			UIMSLOGGER.error("Exception while getting samlAssertion::" + e1.getMessage());
-			e1.printStackTrace();
+			
 		}
 		try {
 			Callable<Boolean> callableUpdateUIMSPassword = new Callable<Boolean>() {
@@ -402,18 +402,18 @@ public class DirectUIMSUserManagerSoapService {
 			} catch (RetryException e) {
 				LOGGER.error("Retry failed while calling UIMS update user::" + e.getMessage());
 				UIMSLOGGER.error("Retry failed while calling UIMS update user::" + e.getMessage());
-				e.printStackTrace();
+				
 
 			} catch (ExecutionException e) {
 				LOGGER.error("ExecutionException while calling UIMS update user::" + e.getMessage());
 				UIMSLOGGER.error("ExecutionException while calling UIMS update user::" + e.getMessage());
-				e.printStackTrace();
+				
 			}
 
 		} catch (Exception e) {
 			LOGGER.error("Exception while updateUIMSPassword()::" + e.getMessage());
 			UIMSLOGGER.error("Exception while updateUIMSPassword()::" + e.getMessage());
-			e.printStackTrace();
+			
 		}
 	}
 
@@ -436,7 +436,7 @@ public class DirectUIMSUserManagerSoapService {
 		} catch (Exception e) {
 			LOGGER.error("Error executing while getting samlAssertion::" + e.getMessage());
 			UIMSLOGGER.error("Error executing while getting samlAssertion::" + e.getMessage());
-			e.printStackTrace();
+			
 		}
 		try {
 			LOGGER.info("Going to call updateUser() of UIMS for user:" + user.getFirstName());
@@ -448,7 +448,7 @@ public class DirectUIMSUserManagerSoapService {
 				| UnexpectedLdapResponseException_Exception | UnexpectedRuntimeImsException_Exception e) {
 			LOGGER.error("Error executing while getting status in updateUIMSUser()::" + e.getMessage());
 			UIMSLOGGER.error("Error executing while getting status in updateUIMSUser::" + e.getMessage());
-			e.printStackTrace();
+			
 		}
 		LOGGER.info("Status got from updateUIMSUser() in UIMS is:" + status);
 		return status;
@@ -473,7 +473,7 @@ public class DirectUIMSUserManagerSoapService {
 		} catch (Exception e) {
 			UIMSLOGGER.error("Error while getting authentificationToken in UIMS::" + e.getMessage());
 			LOGGER.error("Error while getting authentificationToken in UIMS::" + e.getMessage());
-			e.printStackTrace();
+			
 		}
 		try {
 			LOGGER.info("Going to call activateIdentity() of UIMS for callerFid:" + callerFid);
@@ -486,7 +486,7 @@ public class DirectUIMSUserManagerSoapService {
 				| UnexpectedRuntimeImsException_Exception e) {
 			UIMSLOGGER.error("Error executing while activateUIMSIdentity()::" + e.getMessage());
 			LOGGER.error("Error executing while activateUIMSIdentity()::" + e.getMessage());
-			e.printStackTrace();
+			
 		}
 	}
 
@@ -524,7 +524,7 @@ public class DirectUIMSUserManagerSoapService {
 			// productService.sessionLogout(iPlanetDirectoryKey, "logout");
 			LOGGER.error("Error executing while getting samlAssertion::" + e.getMessage());
 			UIMSLOGGER.error("Error executing while getting samlAssertion::" + e.getMessage());
-			e.printStackTrace();
+			
 		}
 		try {
 			Callable<Boolean> callableActivateIdentityNoPassword = new Callable<Boolean>() {
@@ -566,12 +566,12 @@ public class DirectUIMSUserManagerSoapService {
 				// productService.sessionLogout(iPlanetDirectoryKey, "logout");
 				UIMSLOGGER.error("RetryException while calling activateIdentityNoPassword::" + e.getMessage());
 				LOGGER.error("RetryException while calling activateIdentityNoPassword::" + e.getMessage());
-				e.printStackTrace();
+				
 			} catch (ExecutionException e) {
 				// productService.sessionLogout(iPlanetDirectoryKey, "logout");
 				UIMSLOGGER.error("ExecutionException while calling activateIdentityNoPassword::" + e.getMessage());
 				LOGGER.error("ExecutionException while calling activateIdentityNoPassword::" + e.getMessage());
-				e.printStackTrace();
+				
 			}
 			if (!isNoPwdactivated) {
 				UIMSLOGGER
@@ -587,7 +587,7 @@ public class DirectUIMSUserManagerSoapService {
 			// productService.sessionLogout(iPlanetDirectoryKey, "logout");
 			UIMSLOGGER.error("Exception while activateIdentityNoPassword::" + e.getMessage());
 			LOGGER.error("Exception while activateIdentityNoPassword::" + e.getMessage());
-			e.printStackTrace();
+			
 		}
 		// productService.sessionLogout(iPlanetDirectoryKey, "logout");
 		UIMSLOGGER.info("Completed UIMS activateIdentityNoPassword UIMS Async method!");
@@ -629,7 +629,7 @@ public class DirectUIMSUserManagerSoapService {
 		} catch (JsonProcessingException e) {
 			UIMSLOGGER.error("Error while converting the userRequest to Json" + e.getMessage());
 			LOGGER.error("Error while converting the userRequest to Json" + e.getMessage());
-			e.printStackTrace();
+			
 		} finally {
 			if (null != objMapper) {
 				objMapper = null;
@@ -673,12 +673,12 @@ public class DirectUIMSUserManagerSoapService {
 			} catch (RetryException e) {
 				UIMSLOGGER.error("Retry failed while calling the UIMS create user::" + e.getMessage());
 				LOGGER.error("Retry failed while calling the UIMS create user::" + e.getMessage());
-				e.printStackTrace();
+				
 
 			} catch (ExecutionException e) {
 				UIMSLOGGER.error("ExecutionException while calling the UIMS create user::" + e.getMessage());
 				LOGGER.error("ExecutionException while calling the UIMS create user::" + e.getMessage());
-				e.printStackTrace();
+				
 			}
 
 			if ((!userCreated || null == createdFedId)
@@ -770,12 +770,12 @@ public class DirectUIMSUserManagerSoapService {
 				// productService.sessionLogout(iPlanetDirectoryKey, "logout");
 				UIMSLOGGER.error("Retry failed while calling the UIMS create company::" + e.getMessage());
 				LOGGER.error("Retry failed while calling the UIMS create company::" + e.getMessage());
-				e.printStackTrace();
+				
 			} catch (ExecutionException e) {
 				// productService.sessionLogout(iPlanetDirectoryKey, "logout");
 				UIMSLOGGER.error("ExecutionException while calling the UIMS create company::" + e.getMessage());
 				LOGGER.error("ExecutionException while calling the UIMS create company::" + e.getMessage());
-				e.printStackTrace();
+				
 			}
 			if ((!(userCreated && companyCreated) || (null == createdCompanyFedId && null == createdFedId))
 					&& (null != context && UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context))) {
@@ -790,7 +790,7 @@ public class DirectUIMSUserManagerSoapService {
 			// productService.sessionLogout(iPlanetDirectoryKey, "logout");
 			UIMSLOGGER.error("Exception in UIMSUserManagerSoapService.createUIMSUserAndCompany::" + e.getMessage());
 			LOGGER.error("Exception in UIMSUserManagerSoapService.createUIMSUserAndCompany::" + e.getMessage());
-			e.printStackTrace();
+			
 		}
 		createdFedId = null;
 		// productService.sessionLogout(iPlanetDirectoryKey, "logout");
@@ -853,13 +853,13 @@ public class DirectUIMSUserManagerSoapService {
 						+ e.getMessage());
 				LOGGER.error("Retry failed while calling updateUIMSUser() of UIMS for fedId :" + fedId + "->"
 						+ e.getMessage());
-				e.printStackTrace();
+				
 			} catch (ExecutionException e) {
 				UIMSLOGGER.error("ExecutionException while calling updateUIMSUser() of UIMS for fedId :" + fedId + "->"
 						+ e.getMessage());
 				LOGGER.error("ExecutionException while calling updateUIMSUser() of UIMS for fedId :" + fedId + "->"
 						+ e.getMessage());
-				e.printStackTrace();
+				
 			}
 
 			if (!updateUIMSUser && (null != context && UserConstants.USER_CONTEXT_HOME.equalsIgnoreCase(context))) {
@@ -900,12 +900,12 @@ public class DirectUIMSUserManagerSoapService {
 			} catch (RetryException e) {
 				UIMSLOGGER.error("Retry failed while calling the UIMS create company::" + e.getMessage());
 				LOGGER.error("Retry failed while calling the UIMS create company::" + e.getMessage());
-				e.printStackTrace();
+				
 
 			} catch (ExecutionException e) {
 				UIMSLOGGER.error("ExecutionException while calling the UIMS create company::" + e.getMessage());
 				LOGGER.error("ExecutionException while calling the UIMS create company::" + e.getMessage());
-				e.printStackTrace();
+				
 			}
 			if (!(updateUIMSUser && updateUIMSCompany)
 					&& (null != context && UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context))) {
@@ -926,7 +926,7 @@ public class DirectUIMSUserManagerSoapService {
 			LOGGER.error("Exception for userName::" + userName);
 			// LOGGER.error("UIMS User and Company updated got failed ----->
 			// ::sending mail notification for userName::"+userName);
-			e.printStackTrace();
+			
 		}
 
 		// productService.sessionLogout(iPlanetDirectoryKey, "logout");
@@ -964,7 +964,7 @@ public class DirectUIMSUserManagerSoapService {
 			LOGGER.error(
 					"Exception while calling UIMS UserManager API of setUIMSPassword/activateIdentityNoPassword:: -> "
 							+ e.getMessage());
-			e.printStackTrace();
+			
 		}
 	}
 	
@@ -1007,7 +1007,7 @@ public class DirectUIMSUserManagerSoapService {
 		} catch (Exception e) {
 			//productService.sessionLogout(iPlanetDirectoryKey, "logout");
 			LOGGER.error("Exception in updateUIMSUserAIL():"+ e.getMessage());
-			e.printStackTrace();
+			
 		}
 		//productService.sessionLogout(iPlanetDirectoryKey, "logout");
 		LOGGER.info("UIMS updateAIL Async Method completed!");
@@ -1038,10 +1038,10 @@ public class DirectUIMSUserManagerSoapService {
 					productService.updateUser(iPlanetDirectoryKey, userId, version);
 				}
 			} catch (RetryException e) {
-				e.printStackTrace();
+				
 				LOGGER.error("Retry failed while calling the grantAccessControlToUser::" + e.getMessage());
 			} catch (ExecutionException e) {
-				e.printStackTrace();
+				
 			}
 			/*if(!isgrantresult) {
 				LOGGER.info("UIMS UpdateAIL Grant Access got failed -----> ::sending mail notification::");
@@ -1050,7 +1050,7 @@ public class DirectUIMSUserManagerSoapService {
 			}*/
 		} catch (Exception e) {
 			LOGGER.error("Remote Soap Exception while consuming grantAccessControlToUser :-->" + e.getMessage());
-			e.printStackTrace();
+			
 		}
 		LOGGER.info("Completed grantAccessControToUser Async method!");
 	}
@@ -1080,10 +1080,10 @@ public class DirectUIMSUserManagerSoapService {
 					productService.updateUser(iPlanetDirectoryKey, userId, version);
 				}
 			} catch (RetryException e) {
-				e.printStackTrace();
+				
 				LOGGER.error("Retry failed while calling the revokeAccessControlToUser::" + e.getMessage());
 			} catch (ExecutionException e) {
-				e.printStackTrace();
+				
 			}
 			/*if(!isrevokeresult) {
 				LOGGER.info("UIMS UpdateAIL revoke access got failed -----> ::sending mail notification::");
@@ -1092,7 +1092,7 @@ public class DirectUIMSUserManagerSoapService {
 			}*/
 		} catch (Exception e) {
 			LOGGER.error("Remote Soap Exception while consuming revokeAccessControlToUser:-->" + e.getMessage());
-			e.printStackTrace();
+			
 		}
 		LOGGER.info("inside revokeAccessControlToUser Async method!");
 	}
@@ -1134,7 +1134,7 @@ public class DirectUIMSUserManagerSoapService {
 		} catch (JsonProcessingException e) {
 			UIMSLOGGER.error("JsonProcessingException while converting the digitalRequest to Json" + e.getMessage());
 			LOGGER.error("JsonProcessingException while converting the digitalRequest to Json" + e.getMessage());
-			e.printStackTrace();
+			
 		}
 		objMapper = null;
 		return jsonString;

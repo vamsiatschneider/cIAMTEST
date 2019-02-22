@@ -463,8 +463,7 @@ public class UserServiceImpl implements UserService {
 
 			//successResponse = IOUtils.toString((InputStream) authenticateResponse.getEntity());
 		} catch (Exception e) {
-			LOGGER.error("Exception in authenticateUser():"+e.getMessage());
-			e.printStackTrace();
+			LOGGER.error("Exception in authenticateUser():" + e.getMessage());
 			jsonObject.put("user_store", "None");
 			AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + successStatus + "," + regSource);
 			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
@@ -569,8 +568,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("getUser() call of OpenAMService finished with userdata: " + userData);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
-			LOGGER.error("Error in getUser() openam service->"+e.getMessage());
+			LOGGER.error("Error in getUser() openam service->" + e.getMessage());
 			LOGGER.error(e.toString());
 			if (userData == null) {
 				JSONObject jsonObject = new JSONObject();
@@ -894,8 +892,7 @@ public class UserServiceImpl implements UserService {
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
-				LOGGER.error("UserServiceImpl:userRegistration ->"+e.getMessage());
+				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
 				errorResponse.setStatus(userResponse.getStatus());
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -1340,7 +1337,6 @@ public class UserServiceImpl implements UserService {
 				}
 			} 
 		} catch (BadRequestException e) {
-			e.printStackTrace();
 			errorResponse.setStatus(errorStatus);
 			errorResponse.setMessage(UserConstants.ERROR_CREATE_USER);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -1349,7 +1345,6 @@ public class UserServiceImpl implements UserService {
 			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
 			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 		} catch (NotFoundException e) {
-			e.printStackTrace();
 			errorResponse.setStatus(errorStatus);
 			errorResponse.setMessage(UserConstants.ERROR_CREATE_USER);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -1358,7 +1353,6 @@ public class UserServiceImpl implements UserService {
 			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
 			return Response.status(Response.Status.NOT_FOUND).entity(errorResponse).build();
 		} catch (Exception e) {
-			e.printStackTrace();
 			errorResponse.setStatus(errorStatus);
 			errorResponse.setMessage(UserConstants.ERROR_CREATE_USER);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -1484,8 +1478,7 @@ public class UserServiceImpl implements UserService {
 				//LOGGER.info("User details derived from access token: " + userId);
 			}
 		} catch (NotAuthorizedException e) {
-			e.printStackTrace();
-			//LOGGER.debug("InvalidSessionId!");
+			// LOGGER.debug("InvalidSessionId!");
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("errorCode", "INVALID_SESSION_ID");
 			jsonObject.put("message", "Session expired or invalid");
@@ -1497,8 +1490,7 @@ public class UserServiceImpl implements UserService {
 			//LOGGER.error("Error in getUserInfoByAccessToken() of OpenAMTokenService:"+e.getMessage());
 			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonArray).build();
 		} catch (Exception e) {
-			e.printStackTrace();
-			//LOGGER.debug("Unauthorized!");
+			// LOGGER.debug("Unauthorized!");
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("errorCode", "Unauthorized");
 			jsonObject.put("message", "Provided external ID field does not exist or is  not accessible ");
@@ -2582,7 +2574,6 @@ public class UserServiceImpl implements UserService {
 				userResponse.setMessage(UserConstants.FALSE);
 			}
 		} catch (BadRequestException e) {
-			e.printStackTrace();
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -2590,7 +2581,6 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage());
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (NotAuthorizedException e) {
-			e.printStackTrace();
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -2598,7 +2588,6 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage());
 			return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
 		} catch (NotFoundException e) {
-			e.printStackTrace();
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -2606,7 +2595,6 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage());
 			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 		} catch (Exception e) {
-			e.printStackTrace();
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -2652,8 +2640,7 @@ public class UserServiceImpl implements UserService {
 				
 				LOGGER.info("End: checkUserExistsWithEmailMobile() of OpenAMService fisnihed for email="+email);
 			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-				LOGGER.error("Error in userExists() is-> "+e.getMessage());
+				LOGGER.error("Error in userExists() is-> " + e.getMessage());
 			}
 
 			// user exists and resultcount > 0
@@ -2749,7 +2736,6 @@ public class UserServiceImpl implements UserService {
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("Error Message", "Internal Service Error");
 			JSONArray jsonArray = new JSONArray();
@@ -3113,7 +3099,6 @@ public class UserServiceImpl implements UserService {
 					throw new Exception("Pin got expired or invalid!!");
 				}
 			} catch (NotAuthorizedException e) {
-				e.printStackTrace();
 				response.setStatus(errorStatus);
 				response.setMessage(e.getMessage());
 				response.setId(uniqueIdentifier);
@@ -3124,7 +3109,6 @@ public class UserServiceImpl implements UserService {
 				LOGGER.error("Exception while userPinConfirmation :: -> " + e.getMessage());
 				return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
 			} catch (Exception e) {
-				e.printStackTrace();
 				errorResponse.setStatus(errorStatus);
 				errorResponse.setMessage(UserConstants.INVALID_PINCODE);
 				errorResponse.setId(uniqueIdentifier);
@@ -3356,7 +3340,6 @@ public class UserServiceImpl implements UserService {
 			}			
 			LOGGER.info("activateUIMSUserConfirmPIN is completed successfully");
 		} catch (BadRequestException e) {
-			e.printStackTrace();
 			response.setStatus(errorStatus);
 			response.setMessage(e.getMessage());
 			response.setId(uniqueIdentifier);
@@ -3367,12 +3350,12 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("Error while userPinConfirmation :: -> " + e.getMessage());
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (NotFoundException e) {
-			e.printStackTrace();
-			LOGGER.error("Error is "+e.getMessage());
-			//logic for PRM set password, if the user not found, call the Global get user api 
-			//and retrieve the user details and pass it to create user 
-			if(null != confirmRequest.getIDMS_Profile_update_source() 
-				&& (pickListValidator.validate(UserConstants.IDMS_BFO_profile, confirmRequest.getIDMS_Profile_update_source()))){
+			LOGGER.error("Error is " + e.getMessage());
+			// logic for PRM set password, if the user not found, call the
+			// Global get user api
+			// and retrieve the user details and pass it to create user
+			if (null != confirmRequest.getIDMS_Profile_update_source() && (pickListValidator
+					.validate(UserConstants.IDMS_BFO_profile, confirmRequest.getIDMS_Profile_update_source()))) {
 				LOGGER.info("Going to call getIFWToken() of IFWService");
 				ifwAccessToken = ifwService.getIFWToken(UserConstants.CONTENT_TYPE_URL_FROM,
 						UserConstants.IFW_GRANT_TYPE, ifwClientId, ifwClientSecret);
@@ -3438,7 +3421,6 @@ public class UserServiceImpl implements UserService {
 					
 				} catch (IOException e1) {
 					LOGGER.error("IOException in userPinConfirmation()-> " + e1.getMessage());
-					e1.printStackTrace();
 				}
 				
 				//PRM success response
@@ -3469,8 +3451,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		catch (Exception e) {
-			e.printStackTrace();
-			LOGGER.error("Error is "+e.getMessage());
+			LOGGER.error("Error is " + e.getMessage());
 			response.setStatus(errorStatus);
 			response.setMessage(UserConstants.SERVER_ERROR);
 			response.setId(uniqueIdentifier);
@@ -3874,7 +3855,6 @@ public class UserServiceImpl implements UserService {
 			}
 			return updateAILSuccessResponse(idmsUserAIL);
 		} catch (NotFoundException e) {
-			e.printStackTrace();
 			userResponse.setStatus(errorStatus);
 			userResponse.setMessage("User not found based on user Id");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -3884,7 +3864,6 @@ public class UserServiceImpl implements UserService {
 			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
 			return Response.status(Response.Status.NOT_FOUND).entity(userResponse).build();
 		} catch (Exception e) {
-			e.printStackTrace();
 			userResponse.setStatus(errorStatus);
 			userResponse.setMessage("Error in Updating the AIL Object");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -4004,7 +3983,6 @@ public class UserServiceImpl implements UserService {
 				return passwordRecoveryErrorResponse();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
 			LOGGER.error("UserServiceImpl.passwordRecovery() : " + e.getMessage());
 		}
 		return null;
@@ -4122,7 +4100,6 @@ public class UserServiceImpl implements UserService {
 			userData = productService.getUser(iPlanetDirectoryKey, userName);
 			LOGGER.info("getPasswordRecoveryResponse -> "+userData);
 		} catch (BadRequestException e) {
-			e.printStackTrace();
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -4130,7 +4107,6 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("BadRequestException in getPasswordRecoveryResponse() :: -> " + e.getMessage());
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (NotAuthorizedException e) {
-			e.printStackTrace();
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -4138,7 +4114,6 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("NotAuthorizedException in getPasswordRecoveryResponse() :: -> " + e.getMessage());
 			return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
 		} catch (NotFoundException e) {
-			e.printStackTrace();
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -4146,7 +4121,6 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("NotFoundException in getPasswordRecoveryResponse() :: -> " + e.getMessage());
 			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 		} catch (Exception e) {
-			e.printStackTrace();
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.ERROR_RESET_PR);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -4235,7 +4209,6 @@ public class UserServiceImpl implements UserService {
 					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
 				userResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by updateUser() : " + elapsedTime);
@@ -4828,7 +4801,6 @@ public class UserServiceImpl implements UserService {
 			sucessRespone.setIDMSUserRecord(responseObject);
 
 		} catch (BadRequestException e) {
-			e.printStackTrace();
 			userResponse.setMessage(UserConstants.ERROR_UPDATE_USER);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by updateUser() : " + elapsedTime);
@@ -4836,7 +4808,6 @@ public class UserServiceImpl implements UserService {
 			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
 			return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 		} catch (NotAuthorizedException e) {
-			e.printStackTrace();
 			userResponse.setMessage("Session expired or invalid");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by updateUser() : " + elapsedTime);
@@ -4844,7 +4815,6 @@ public class UserServiceImpl implements UserService {
 			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
 			return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
 		} catch (ClientErrorException e) {
-			e.printStackTrace();
 			userResponse.setMessage(UserConstants.NEW_USER_EXISTS);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
@@ -4852,7 +4822,6 @@ public class UserServiceImpl implements UserService {
 			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
 			return Response.status(Response.Status.CONFLICT).entity(userResponse).build();
 		} catch (Exception e) {
-			e.printStackTrace();
 			userResponse.setMessage(UserConstants.ERROR_UPDATE_USER);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by updateUser() : " + elapsedTime);
@@ -5218,7 +5187,6 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 			}
 		} catch (NotFoundException e) {
-			e.printStackTrace();
 			response.put(UserConstants.MESSAGE, UserConstants.ERROR_RESEND_PIN);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by resendPIN() : " + elapsedTime);
@@ -5226,7 +5194,6 @@ public class UserServiceImpl implements UserService {
 			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
 			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 		} catch (BadRequestException e) {
-			e.printStackTrace();
 			response.put(UserConstants.MESSAGE, UserConstants.ERROR_RESEND_PIN);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by resendPIN() : " + elapsedTime);
@@ -5234,19 +5201,20 @@ public class UserServiceImpl implements UserService {
 			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (Exception e) {
-			e.printStackTrace();
 			response.put(UserConstants.MESSAGE, UserConstants.ERROR_RESEND_PIN);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.resendPIN() : " + elapsedTime);
 			LOGGER.error("Exception in Resending User PIN :: -> " + e.getMessage());
-			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
+			// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
+			// "logout");
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 		response.put(UserConstants.STATUS, successStatus);
 		response.put(UserConstants.MESSAGE, "Pin Code has been sent successfully");
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info("Time taken by UserServiceImpl.resendPIN() : " + elapsedTime);
-		//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
+		// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
+		// "logout");
 		return Response.status(Response.Status.OK).entity(response).build();
 	}
 
@@ -5402,7 +5370,6 @@ public class UserServiceImpl implements UserService {
 				productService.authenticateIdmsChinaUser(userId, oldPassword, UserConstants.REALM);
 				LOGGER.info("End: Authenticating oldpassword in OpenDJ finished for userid=" + userId);
 			} catch (Exception e) {
-				e.printStackTrace();
 				errorResponse.setStatus(errorStatus);
 				errorResponse.setMessage("Existing Password is not correct");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -5461,7 +5428,7 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.OK).entity(userResponse).build();
 			}
 		} catch (NotAuthorizedException e) {
-			e.printStackTrace();
+			
 			userResponse.setStatus("INVALID_SESSION_ID");
 			userResponse.setMessage("Session expired or invalid");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -5469,13 +5436,12 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Time taken by updatePassword() : " + elapsedTime);
 			return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
 		} catch (MalformedURLException me) {
-			me.printStackTrace();
 			errorResponse.setStatus(errorStatus);
 			errorResponse.setMessage(me.getMessage());
 			LOGGER.error("MalformedURLException in updatePassword():: ->" + me.getMessage());
 			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 		} catch (Exception e) {
-			e.printStackTrace();
+			
 			errorResponse.setStatus(errorStatus);
 			errorResponse.setMessage(e.getMessage());
 			LOGGER.error("Exception in updatePassword():" + e.getMessage());
@@ -5752,7 +5718,7 @@ public class UserServiceImpl implements UserService {
 					retryerGetUser.call(callableGetUser);
 				}catch(Exception e){
 					LOGGER.error("Exception in getting user details= " + e.getMessage());
-					e.printStackTrace();
+					
 				}
 				
 				Response fedResponse = checkUserExistsWithFederationID(iPlanetDirectoryKey,
@@ -5875,7 +5841,7 @@ public class UserServiceImpl implements UserService {
 					/*productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 							PRODUCT_JSON_STRING);*/
 				} catch (Exception e) {
-					e.printStackTrace();
+					
 					response.setStatus(errorStatus);
 					response.setMessage(UserConstants.PIN_INVALID);
 					response.setId(userId);
@@ -5934,7 +5900,7 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 			catch(Exception e){
-				e.printStackTrace();
+				
 				LOGGER.error("Exception in setUIMSPassword UIMS API:: ->"+e.getMessage());
 			}
 			
@@ -5952,7 +5918,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Time taken by UserServiceImpl.setPassword() : " + elapsedTime);
 			return Response.status(Response.Status.OK).entity(setPasswordResponse).build();
 		} catch (Exception e) {
-			e.printStackTrace();
+			
 			response.setStatus(errorStatus);
 			response.setMessage("Error in Setting User Password");
 			response.setId(userId);
@@ -6158,7 +6124,7 @@ public class UserServiceImpl implements UserService {
 				//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
 			}
 		} catch (BadRequestException e) {
-			e.printStackTrace();
+			
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			response.put(UserConstants.ID, activateUserRequest.getUserRecord().getId());
@@ -6167,7 +6133,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("BadRequestException in ActivateUser the User :: -> " + UserConstants.USER_NOT_FOUND);
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (NotAuthorizedException e) {
-			e.printStackTrace();
+			
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			response.put(UserConstants.ID, activateUserRequest.getUserRecord().getId());
@@ -6176,7 +6142,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("NotAuthorizedException in ActivateUser :: -> " + UserConstants.USER_NOT_FOUND);
 			return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
 		} catch (NotFoundException e) {
-			e.printStackTrace();
+			
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			response.put(UserConstants.ID, activateUserRequest.getUserRecord().getId());
@@ -6185,7 +6151,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("NotFoundException in ActivateUser :: -> " + UserConstants.USER_NOT_FOUND);
 			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 		} catch (Exception e) {
-			e.printStackTrace();
+			
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			response.put(UserConstants.ID, activateUserRequest.getUserRecord().getId());
@@ -6230,7 +6196,7 @@ public class UserServiceImpl implements UserService {
 						"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginIdentifier,"UTF-8"),"UTF-8") + "\" or mobile_reg eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginIdentifier,"UTF-8"),"UTF-8") + "\"");
 				LOGGER.info("End: checkUserExistsWithEmailMobile() of openam finished for loginIdentifier="+loginIdentifier);
 			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
+				
 				LOGGER.error("UnsupportedEncodingException in  getUserByLoginIdentifier():"+e.getMessage());
 			}
 
@@ -6413,7 +6379,7 @@ public class UserServiceImpl implements UserService {
 		try {
 			activate.readDataFromFile(hostname, csvFile);
 		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
+			
 			LOGGER.error(e.getMessage());
 		}
 		return null;
@@ -6479,7 +6445,7 @@ public class UserServiceImpl implements UserService {
 				sendEmail.sendInvitationEmail(EmailConstants.SENDINVITATION_OPT_TYPE, sendInvitaionRequest.getRedirectUrl(), sendInvitaionRequest.getEmail(), sendInvitaionRequest.getInvitationId());
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			
 			LOGGER.error("Exception occured!!!!"+e.getMessage());
 			return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 		}
@@ -6561,7 +6527,7 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 		}catch (Exception e) {
-			e.printStackTrace();
+			
 			LOGGER.error("Exception in resendRegEmail :"+e.getMessage());
 			return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 		}
@@ -6638,7 +6604,7 @@ public class UserServiceImpl implements UserService {
 			}
 		} catch (Exception e) {
 			LOGGER.error("Exception occured!!!!"+e.getMessage());
-			e.printStackTrace();
+			
 			return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 		}
 		return response;
@@ -6731,7 +6697,7 @@ public class UserServiceImpl implements UserService {
 			}
 		} catch (Exception e) {
 			LOGGER.error("Exception occured:"+e.getMessage());
-			e.printStackTrace();
+			
 			userResponse.setStatus(errorStatus);
 			userResponse.setMessage("Exception occured in resendChangeEmail");
 			userResponse.setId(userName);
@@ -6822,12 +6788,12 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			
 			errorResponse.put(UserConstants.MESSAGE, UserConstants.AMLBCOOKIE_EMPTY);
 			LOGGER.error("Error is -> " + e.getMessage());
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		} catch (Exception e) {
-			e.printStackTrace();
+			
 			LOGGER.error("Error is -> " + e.getMessage());
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		}
@@ -6939,7 +6905,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		catch (JsonMappingException e) {
-			e.printStackTrace();
+			
 			errorResponse = new JSONObject();
 			errorResponse.put("code", "INVALID_REQUEST");
 			errorResponse.put(UserConstants.MESSAGE, "Invalid request format");
@@ -6947,7 +6913,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		catch (Exception e) {
-			e.printStackTrace();
+			
 			errorResponse = new JSONObject();
 			errorResponse.put("code", "SERVER_ERROR");
 			errorResponse.put(UserConstants.MESSAGE, "Failed to transliterate");
@@ -7052,7 +7018,7 @@ public class UserServiceImpl implements UserService {
 
 		} catch (Exception e) {
 			LOGGER.error("idmsDirectLogin Exception occured!!!!"+e.getMessage());
-			e.printStackTrace();
+			
 			jsonObject.put("error_code", "L9101");
 			jsonObject.put("error_message","Invalid username or password");
 			/*prefix.append(UserConstants.redirectUrl_Option3)
@@ -7073,7 +7039,7 @@ public class UserServiceImpl implements UserService {
 						  .append("&login_error=L9101");
 					}
 			} catch (UnsupportedEncodingException e1) {
-				e1.printStackTrace();
+				
 			}
 				/*prefix.append(prefixStartUrl)
 					  .append("/ui/#!")*/
@@ -7294,7 +7260,7 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 			}
 		}catch (BadRequestException e) {
-			e.printStackTrace();
+			
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.BAD_REQUEST);
 			LOGGER.error("BadRequestException in idmsCheckUserExists :: -> " + e.getMessage());
@@ -7302,7 +7268,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (NotAuthorizedException e) {
-			e.printStackTrace();
+			
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, "Authorization Failed");
 			LOGGER.error("NotAuthorizedException in idmsCheckUserExists :: -> " + e.getMessage());
@@ -7310,7 +7276,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 			return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
 		} catch (NotFoundException e) {
-			e.printStackTrace();
+			
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			LOGGER.error("NotFoundException in idmsCheckUserExists :: -> " + e.getMessage());
@@ -7318,7 +7284,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 		} catch (Exception e) {
-			e.printStackTrace();
+			
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, e.getMessage());
 			LOGGER.error("Exception in idmsCheckUserExists :: -> " + e.getMessage());
@@ -7411,7 +7377,7 @@ public class UserServiceImpl implements UserService {
 					userNotSendEmail.add(federationId);
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by sendRemainderEmail() : " + elapsedTime);
 				LOGGER.error("Exception in sendRemainderEmail() :: -> " + e.getMessage());
@@ -7592,7 +7558,7 @@ public class UserServiceImpl implements UserService {
 			}
 
 		} catch (JsonMappingException e) {
-			e.printStackTrace();
+			
 			errorResponse = new JSONObject();
 			errorResponse.put("code", "INVALID_REQUEST");
 			errorResponse.put(UserConstants.MESSAGE, "Invalid request format");
@@ -7601,7 +7567,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		catch (Exception e) {
-			e.printStackTrace();
+			
 			errorResponse = new JSONObject();
 			errorResponse.put("code", "SERVER_ERROR");
 			errorResponse.put(UserConstants.MESSAGE, "Failed to transliterate");
@@ -7661,7 +7627,7 @@ public class UserServiceImpl implements UserService {
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(oauth2iplanetResponseAsString);
 			tokenId = productDocCtx.read("$.tokenId");
 		} catch (NotAuthorizedException e) {
-			e.printStackTrace();
+			
 			errorResponse = new JSONObject();
 			errorResponse.put("message", "token invalid");
 			LOGGER.error("NotAuthorizedException in oauth2iplanet: " + e.getMessage());
@@ -7669,7 +7635,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Time taken by oauthToIplanet() : " + elapsedTime);
 			return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 		} catch (Exception e) {
-			e.printStackTrace();
+			
 			errorResponse = new JSONObject();
 			errorResponse.put("code", "SERVER_ERROR");
 			errorResponse.put(UserConstants.MESSAGE, "oauth2iplanet failed.");
@@ -7837,10 +7803,10 @@ public class UserServiceImpl implements UserService {
 			
 			return Response.status(Response.Status.OK).entity(actualObj).build();
 			} catch (JsonProcessingException e) {
-				e.printStackTrace();
+				
 				LOGGER.error("JsonProcessingException in getOIDCAutoDiscoveryConfig() ::"+e.getMessage());
 			} catch (IOException e) {
-				e.printStackTrace();
+				
 				LOGGER.error("IOException in getOIDCAutoDiscoveryConfig() ::"+e.getMessage());
 			}
 		} else {
@@ -7848,7 +7814,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.error("Received error from OpenAM OIDC discovery endpoint: " + 
 						IOUtils.toString((InputStream) oidcAutoDiscoveryConfig.getEntity()));
 			} catch (IOException e) {
-				e.printStackTrace();
+				
 				LOGGER.error("Error reading data stream from OpenAM OIDC discovery endpoint"+e.getMessage());
 			}
 		}
@@ -7876,7 +7842,7 @@ public class UserServiceImpl implements UserService {
 				return true;
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			
 			LOGGER.error("Exception in getTechnicalUserDetails() ::"+e.getMessage());
 			return false;
 		}
@@ -7988,7 +7954,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("End: updateUserForPassword() of openam finished for federatioId="+federationId);
 			LOGGER.info("Information from OPENAM="+ IOUtils.toString((InputStream) updateResponse.getEntity()));
 		} catch (IOException e) {
-			e.printStackTrace();
+			
 			LOGGER.error("Error in updateOpenamDetails() -> "+e.getMessage());
 		}
 		LOGGER.info("Ended updateOpenamDetails()");
@@ -8020,7 +7986,7 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.PRECONDITION_FAILED).entity(errorResponse).build();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			
 			errorResponse.setStatus(errorStatus);
 			errorResponse.setMessage(e.getMessage());
 			LOGGER.error("Exception in updatePasswordHistory()=" + e.getMessage());
@@ -8117,7 +8083,7 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.OK).entity(errorResponse).build();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			
 			errorResponse.setStatus(errorStatus);
 			errorResponse.setMessage(e.getMessage());
 			LOGGER.error("Exception in verifyPIN():: -> " + e.getMessage());
@@ -8201,7 +8167,7 @@ public class UserServiceImpl implements UserService {
 			 jsonResponse=rb.build();
 		  }
 		} catch (Exception e) {
-			//e.printStackTrace();
+			//
 			errorResponse.setStatus(errorStatus);
 			errorResponse.setMessage(jsonResponse.getStatusInfo().getReasonPhrase());
 			LOGGER.error("Exception in buildQueryParam()=" + e.getMessage());
@@ -8367,7 +8333,7 @@ public class UserServiceImpl implements UserService {
 					return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 			}
 		} catch (BadRequestException e) {
-			e.printStackTrace();
+			
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -8375,7 +8341,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("BadRequestException in idmsCheckIdentity() :: -> " + e.getMessage());
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (NotAuthorizedException e) {
-			e.printStackTrace();
+			
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -8383,7 +8349,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("NotAuthorizedException in idmsCheckIdentity() :: -> " + e.getMessage());
 			return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
 		} catch (NotFoundException e) {
-			e.printStackTrace();
+			
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -8391,7 +8357,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("NotFoundException in idmsCheckIdentity() :: -> " + e.getMessage());
 			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 		} catch (Exception e) {
-			e.printStackTrace();
+			
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -8464,7 +8430,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Time taken by sendOTP() : " + elapsedTime);
 			return Response.status(Response.Status.OK).entity(response).cookie(newCookie).build();
 		} catch (Exception e) {
-			e.printStackTrace();
+			
 			LOGGER.error("Exception in sendOTP() :: -> " + e.getMessage());
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, e.getMessage());
@@ -8599,7 +8565,7 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			
 			LOGGER.error("Exception in addMobile() :: -> " + e.getMessage());
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, e.getMessage());
@@ -8724,7 +8690,7 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			
 			LOGGER.error("Exception in addEmail() :: -> " + e.getMessage());
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, e.getMessage());
@@ -8815,7 +8781,7 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			
 			LOGGER.error("Exception in addEmailToUser() :: -> " + e.getMessage());
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, e.getMessage());

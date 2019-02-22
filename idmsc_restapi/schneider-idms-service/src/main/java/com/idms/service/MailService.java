@@ -38,7 +38,6 @@ public class MailService {
        LOGGER.info("message sent successfully....");
 
     }catch (MessagingException mex) {
-    	mex.printStackTrace();
     	LOGGER.error("Error in sending mail"+mex.getMessage());
     	}
 	}

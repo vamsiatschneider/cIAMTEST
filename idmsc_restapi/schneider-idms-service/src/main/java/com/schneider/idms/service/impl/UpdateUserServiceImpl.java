@@ -161,7 +161,6 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				}
 
 			} catch (NotAuthorizedException e) {
-				e.printStackTrace();
 				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(ErrorCodeConstants.UNAUTHORIZED_MESSAGE);
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
@@ -170,7 +169,6 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				LOGGER.error("Error while processing is " + errorResponse.getMessage());
 				return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 			} catch (BadRequestException e) {
-				e.printStackTrace();
 				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
@@ -179,7 +177,6 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				LOGGER.error("Error while processing is " + errorResponse.getMessage());
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
 				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(ErrorCodeConstants.BADREQUEST_MESSAGE);
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
@@ -188,7 +185,6 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				LOGGER.error("Error while processing is " + errorResponse.getMessage());
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			} catch (Exception e) {
-				e.printStackTrace();
 				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
 				errorResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
@@ -481,7 +477,6 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 			sucessRespone = mapper.map(userRequest, IdmsUpdateUserResponse.class);
 
 		} catch (BadRequestException e) {
-			e.printStackTrace();
 			errorResponse.setStatus(ErrorCodeConstants.ERROR);
 			errorResponse.setMessage(UserConstants.ERROR_UPDATE_USER);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -489,7 +484,6 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 			LOGGER.error("Executing while Updating the User :: -> " + e.getMessage());
 			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 		} catch (NotAuthorizedException e) {
-			e.printStackTrace();
 			errorResponse.setStatus(ErrorCodeConstants.ERROR);
 			errorResponse.setMessage("Session expired or invalid");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -497,7 +491,6 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 			LOGGER.error("Executing while Updating the User :: -> " + e.getMessage());
 			return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 		} catch (ClientErrorException e) {
-			e.printStackTrace();
 			errorResponse.setStatus(ErrorCodeConstants.ERROR);
 			errorResponse.setMessage(UserConstants.NEW_USER_EXISTS);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -505,7 +498,6 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 			LOGGER.error("Exception while updating the User :: -> " + errorResponse.getMessage());
 			return Response.status(Response.Status.CONFLICT).entity(errorResponse).build();
 		} catch (Exception e) {
-			e.printStackTrace();
 			errorResponse.setStatus(ErrorCodeConstants.ERROR);
 			errorResponse.setMessage(UserConstants.ERROR_UPDATE_USER);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;

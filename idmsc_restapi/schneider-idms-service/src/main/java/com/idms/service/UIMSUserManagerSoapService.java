@@ -178,11 +178,8 @@ public class UIMSUserManagerSoapService {
 
 		}catch (MalformedURLException e) {
 			LOGGER.error("MalformedURLException in getUserManager()::" + e.getMessage());
-			e.printStackTrace();
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			LOGGER.error("Exception in getUserManager()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		return userManagerUIMSV22;
 	}
@@ -208,10 +205,8 @@ public class UIMSUserManagerSoapService {
 				| RequestedEntryNotExistsException_Exception | SecuredImsException_Exception
 				| UnexpectedLdapResponseException_Exception | UnexpectedRuntimeImsException_Exception e) {
 			LOGGER.error("Exception in UIMS getUser()::" + e.getMessage());
-			e.printStackTrace();
-		}catch (Exception e1) {
+		} catch (Exception e1) {
 			LOGGER.error("Exception in getUIMSUser()::" + e1.getMessage());
-			e1.printStackTrace();
 		}
 	}
 
@@ -276,14 +271,11 @@ public class UIMSUserManagerSoapService {
 			}
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in activateIdentity() of UIMS::" + e.getMessage());
-			e.printStackTrace();
 
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in activateIdentity() of UIMS::" + e.getMessage());
-			e.printStackTrace();
 		} catch (Exception e) {
 			LOGGER.error("Exception in activateIdentity() of UIMS::" + e.getMessage());
-			e.printStackTrace();
 		}
 		LOGGER.info("activateIdentity() Async Method -> End");
 	}
@@ -350,14 +342,11 @@ public class UIMSUserManagerSoapService {
 			}
 		}catch (RetryException e) {
 			LOGGER.error("RetryException in setUIMSPassword() of UIMS::" + e.getMessage());
-			e.printStackTrace();
 
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in setUIMSPassword() of UIMS::" + e.getMessage());
-			e.printStackTrace();
 		} catch (Exception e) {
 			LOGGER.error("Exception while setUIMSPassword::" + e.getMessage());
-			e.printStackTrace();
 		}
 		LOGGER.info("setUIMSPassword() Async Method -> End");
 	}
@@ -404,14 +393,11 @@ public class UIMSUserManagerSoapService {
 			}
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in UIMS updateUIMSPassword()::" + e.getMessage());
-			e.printStackTrace();
 
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in UIMS updateUIMSPassword()::" + e.getMessage());
-			e.printStackTrace();
 		} catch (Exception e) {
 			LOGGER.error("Exception in updateUIMSPassword()::" + e.getMessage());
-			e.printStackTrace();
 		}
 	}
 
@@ -447,11 +433,9 @@ public class UIMSUserManagerSoapService {
 				| RequestedEntryNotExistsException_Exception | SecuredImsException_Exception
 				| UnexpectedLdapResponseException_Exception | UnexpectedRuntimeImsException_Exception e) {
 			LOGGER.error("Error executing while getting status in updateUIMSUser()::" + e.getMessage());
-			e.printStackTrace();
 		} catch (Exception e) {
 			LOGGER.error("Error executing while getting samlAssertion::" + e.getMessage());
-			e.printStackTrace();
-		}		
+		}
 		return status;
 	}
 
@@ -479,10 +463,8 @@ public class UIMSUserManagerSoapService {
 				| SecuredImsException_Exception | UnexpectedLdapResponseException_Exception
 				| UnexpectedRuntimeImsException_Exception e) {
 			LOGGER.error("Error in activateUIMSIdentity()::" + e.getMessage());
-			e.printStackTrace();
 		} catch (Exception e) {
 			LOGGER.error("Exception in activateUIMSIdentity()::" + e.getMessage());
-			e.printStackTrace();
 		}
 	}
 
@@ -551,13 +533,10 @@ public class UIMSUserManagerSoapService {
 			}
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in activateIdentityNoPassword()::" + e.getMessage());
-			e.printStackTrace();
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in activateIdentityNoPassword()::" + e.getMessage());
-			e.printStackTrace();
 		} catch (Exception e) {
 			LOGGER.error("Exception in activateIdentityNoPassword()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		LOGGER.info("Completed UIMS activateIdentityNoPassword() Async method!");
 
@@ -591,7 +570,6 @@ public class UIMSUserManagerSoapService {
 			userRequestjsonString = userRequestjsonString.replace("\"\"", "[]");
 		} catch (JsonProcessingException e) {
 			LOGGER.error("Error while converting the userRequest to Json" + e.getMessage());
-			e.printStackTrace();
 		} finally {
 			if (null != objMapper) {
 				objMapper = null;
@@ -748,14 +726,10 @@ public class UIMSUserManagerSoapService {
 			}
 		}catch (RetryException e) {
 			LOGGER.error("RetryException in createUIMSUserAndCompany()::" + e.getMessage());
-			e.printStackTrace();
-
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in createUIMSUserAndCompany()::" + e.getMessage());
-			e.printStackTrace();
 		} catch (Exception e) {
 			LOGGER.error("Exception in createUIMSUserAndCompany()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		createdFedId = null;
 		LOGGER.info("Completed the createUIMSUserAndCompany() Async method!!");
@@ -907,16 +881,11 @@ public class UIMSUserManagerSoapService {
 
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in updateUIMSUserAndCompany()::" + e.getMessage());
-			e.printStackTrace();
 
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in updateUIMSUserAndCompany()::" + e.getMessage());
-			e.printStackTrace();
 		} catch (Exception e) {
 			LOGGER.error("Exception in updateUIMSUserAndCompany()::" + e.getMessage());
-			// LOGGER.error("UIMS User and Company updated got failed ----->
-			// ::sending mail notification for userName::"+userName);
-			e.printStackTrace();
 		}
 
 		LOGGER.info("UIMS updateUIMSUserAndCompany Async method completed!!");
@@ -949,8 +918,7 @@ public class UIMSUserManagerSoapService {
 						iPlanetDirectoryKey, loginIdentifierType, emailOrMobile);
 			}
 		} catch (Exception e) {
-			LOGGER.error("Exception in activateUIMSUserConfirmPIN():: -> "+ e.getMessage());
-			e.printStackTrace();
+			LOGGER.error("Exception in activateUIMSUserConfirmPIN():: -> " + e.getMessage());
 		}
 	}
 
@@ -1032,13 +1000,10 @@ public class UIMSUserManagerSoapService {
 			}
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage());
-			e.printStackTrace();
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage());
-			e.printStackTrace();
 		} catch (Exception e) {
 			LOGGER.error("Exception in updateChangeEmailOrMobile()::" + e.getMessage());
-			e.printStackTrace();
 		}
 		LOGGER.info("updateChangeEmailOrMobile() Async Method -> End");
 	}
@@ -1077,7 +1042,6 @@ public class UIMSUserManagerSoapService {
 			jsonString = jsonString.replace("\"\"", "[]");
 		} catch (JsonProcessingException e) {
 			LOGGER.error("JsonProcessingException while converting the digitalRequest to Json" + e.getMessage());
-			e.printStackTrace();
 		}
 		objMapper = null;
 		return jsonString;

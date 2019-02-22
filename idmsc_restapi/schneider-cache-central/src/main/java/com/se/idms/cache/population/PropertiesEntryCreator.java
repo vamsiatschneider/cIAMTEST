@@ -19,7 +19,6 @@ public class PropertiesEntryCreator implements CacheEntryFactory {
 	@Override
 	public Object createEntry(Object pathFileAndName) throws Exception {
 
-		System.out.println("Properties file is being retrieved from: "+ pathFileAndName);
 
 		try {
 			Properties properties = readPropertiesFile(pathFileAndName.toString());

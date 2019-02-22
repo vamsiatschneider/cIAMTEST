@@ -13,7 +13,6 @@ public class FieldsMappingValidatorImplTest {
 		String key = "MobilePhone";
 		Object value = "mobile";
 		
-		System.out.println(fieldsMappingValidatorImpl.validate(key, value));
 		assertEquals(true, fieldsMappingValidatorImpl.validate(key, value));
 	}
 	
@@ -25,7 +24,6 @@ public class FieldsMappingValidatorImplTest {
 		String key = "MobilePhone";
 		Object value = "mobile";
 		
-		System.out.println(fieldsMappingValidatorImpl.validate(key, value));
 		assertNotSame(false, fieldsMappingValidatorImpl.validate(key, value));
 		
 	}
