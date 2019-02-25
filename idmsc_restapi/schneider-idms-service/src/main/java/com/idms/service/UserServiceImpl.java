@@ -35,10 +35,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -139,7 +137,6 @@ import com.schneider.idms.common.ErrorCodeConstants;
 import com.schneider.idms.salesforce.service.SaleforceServiceImpl;
 import com.schneider.idms.salesforce.service.SalesforceSyncServiceImpl;
 import com.schneider.ims.service.uimsv2.CompanyV3;
-import com.se.idms.cache.CacheTypes;
 import com.se.idms.cache.utils.EmailConstants;
 import com.se.idms.cache.validate.IValidator;
 import com.se.idms.dto.AILResponse;
@@ -162,7 +159,6 @@ import com.se.idms.util.EmailValidator;
 import com.se.idms.util.JsonConstants;
 import com.se.idms.util.LangSupportUtil;
 import com.se.idms.util.PhoneValidator;
-import com.se.idms.util.UimsConstants;
 import com.se.idms.util.UserConstants;
 import com.uims.authenticatedUsermanager.UserV6;
 
@@ -4386,8 +4382,7 @@ public class UserServiceImpl implements UserService {
 				if(null == mobileIdentityInOpenam || mobileIdentityInOpenam.isEmpty()){
 					mobileIdentityInOpenam = productDocCtxUser.read(JsonConstants.MOBILEREG_0);
 				}
-				LOGGER.info("mobileIdentityInOpenam as identifier= "+mobileIdentityInOpenam);
-				
+				LOGGER.info("mobileIdentityInOpenam as identifier= "+mobileIdentityInOpenam);				
 				String modifiedMobileInRequest = userRequest.getUserRecord().getMobilePhone();
 				
 				if(null != modifiedMobileInRequest && !modifiedMobileInRequest.isEmpty() 
@@ -4415,6 +4410,46 @@ public class UserServiceImpl implements UserService {
 						}
 					}
 				}
+				
+				/**
+				 * Email changes
+				 */
+				
+				String mailIdentityInOpenam = productDocCtxUser.read(JsonConstants.LOGIN_ID_UPPER_0);
+				if(null == mailIdentityInOpenam || mailIdentityInOpenam.isEmpty()){
+					mailIdentityInOpenam = productDocCtxUser.read(JsonConstants.LOGIN_ID_LOWER_0);
+				} else if(null == mailIdentityInOpenam || mailIdentityInOpenam.isEmpty()){
+					mailIdentityInOpenam = productDocCtxUser.read(JsonConstants.MAIL);
+				}
+				LOGGER.info("mailIdentityInOpenam = "+mailIdentityInOpenam);				
+				String modifiedMailInRequest = userRequest.getUserRecord().getEmail();
+				
+				if(null != modifiedMailInRequest && !modifiedMailInRequest.isEmpty() 
+						&& !modifiedMailInRequest.trim().equalsIgnoreCase(mailIdentityInOpenam)){
+					CheckUserExistsRequest checkRequest = new CheckUserExistsRequest();
+					checkRequest.setEmail(modifiedMailInRequest);
+					checkRequest.setWithGlobalUsers("true");
+					Response checkUserExist = idmsCheckUserExists(checkRequest);
+					LOGGER.info("idmsCheckUserExists reponse ::" + objMapper.writeValueAsString(checkUserExist));
+
+					org.json.simple.JSONObject checkUserJson = (org.json.simple.JSONObject) checkUserExist.getEntity();
+					String messageUser = checkUserJson.get("Message").toString();
+					if (!messageUser.equalsIgnoreCase(UserConstants.FALSE)) {
+						if (200 != checkUserExist.getStatus()) {
+							responseCheck.put(UserConstants.STATUS,errorStatus);
+							responseCheck.put(UserConstants.MESSAGE,"Mail identifier cannot be modified :: "+messageUser);
+							LOGGER.error("Error while email updation, idmsCheckUserExists in updateUser() ->  " + messageUser);
+							return Response.status(checkUserExist.getStatus()).entity(responseCheck).build();
+						}
+						if (200 == checkUserExist.getStatus()) {
+							responseCheck.put(UserConstants.STATUS,errorStatus);
+							responseCheck.put(UserConstants.MESSAGE,"Mail identifier cannot be modified :: "+UserConstants.USER_EXISTS);
+							LOGGER.error("Error while email updation, idmsCheckUserExists in updateUser() -> "+UserConstants.USER_EXISTS);
+							return Response.status(Response.Status.CONFLICT).entity(responseCheck).build();
+						}
+					}
+				}
+				
 				
 				if(null != modifiedMobileInRequest && !modifiedMobileInRequest.isEmpty() 
 						&& null != mobileIdentityInOpenam && !mobileIdentityInOpenam.isEmpty()){
