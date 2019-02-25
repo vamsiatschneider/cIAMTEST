@@ -1097,7 +1097,7 @@ public class IdmsCommonServiceImpl {
 
 	public boolean getTechnicalUserDetails(String authorizationToken) {
 		try {
-			String userInfo = openDJService.getUserDetails(authorizationToken);
+			String userInfo = openAMTokenService.getUserDetails(authorizationToken);
 			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userInfo);
 

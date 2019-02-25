@@ -115,7 +115,7 @@ public class UserUpdateAILTest {
 
 		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER_AIL);
 		
-		Response response = userService.updateAIL(anyString(), anyString(), aRequest);
+		Response response = userService.updateAIL(anyString(),anyString(), anyString(), aRequest);
 		
 		AILResponse actualResponse = (AILResponse) response.getEntity();
 		
@@ -150,7 +150,7 @@ public class UserUpdateAILTest {
 
 		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER_AIL);
 		
-		Response response = userService.updateAIL(clientId, clientSecret, aRequest);
+		Response response = userService.updateAIL(anyString(),clientId, clientSecret, aRequest);
 		
 		UserServiceResponse actualResponse = (UserServiceResponse) response.getEntity();
 		
@@ -185,7 +185,7 @@ public class UserUpdateAILTest {
 
 		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER_AIL);
 		
-		Response response = userService.updateAIL(clientId, clientSecret, aRequest);
+		Response response = userService.updateAIL(anyString(),clientId, clientSecret, aRequest);
 		
 		UserServiceResponse actualResponse = (UserServiceResponse) response.getEntity();
 		
@@ -220,7 +220,7 @@ public class UserUpdateAILTest {
 
 		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER_AIL);
 		
-		Response response = userService.updateAIL(clientId, clientSecret, aRequest);
+		Response response = userService.updateAIL(anyString(),clientId, clientSecret, aRequest);
 		
 		UserServiceResponse actualResponse = (UserServiceResponse) response.getEntity();
 		
@@ -255,7 +255,7 @@ public class UserUpdateAILTest {
 
 		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER_AIL);
 		
-		Response response = userService.updateAIL(clientId, clientSecret, aRequest);
+		Response response = userService.updateAIL(anyString(),clientId, clientSecret, aRequest);
 		
 		UserServiceResponse actualResponse = (UserServiceResponse) response.getEntity();
 		
@@ -290,7 +290,7 @@ public class UserUpdateAILTest {
 
 		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER_AIL);
 		
-		Response response = userService.updateAIL(clientId, clientSecret, aRequest);
+		Response response = userService.updateAIL(anyString(),clientId, clientSecret, aRequest);
 		
 		UserServiceResponse actualResponse = (UserServiceResponse) response.getEntity();
 		
@@ -325,7 +325,7 @@ public class UserUpdateAILTest {
 
 		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER_AIL);
 		
-		Response response = userService.updateAIL(clientId, clientSecret, aRequest);
+		Response response = userService.updateAIL(anyString(),clientId, clientSecret, aRequest);
 		
 		UserServiceResponse actualResponse = (UserServiceResponse) response.getEntity();
 		

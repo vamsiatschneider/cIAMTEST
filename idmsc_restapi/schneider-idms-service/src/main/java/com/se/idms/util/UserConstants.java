@@ -34,7 +34,9 @@ public class UserConstants {
 	
 	public static final String SET_INVITATION_SUCCESS_MESSAGE="Sent invitation successfully";
 	
-	public static final String RESEND_REGEMAIL_SUCCESS_MESSAGE="Resend Registration Email successfully";
+	public static final String RESEND_REGEMAIL_SUCCESS_MESSAGE="Resend Registration Email or mobile OTP successful";
+	
+	public static final String RESEND_REGEMAIL_ERROR_MESSAGE="Error in Resend Registration Email or mobile OTP";
 	
 	public static final String IDMSIDPCHANING_SUCCESS_MESSAGE="Idms Idp Chaning completed successfully";
 	
@@ -534,6 +536,8 @@ public class UserConstants {
 	
 	public static final String ADD_MOBILE_IDENTIFIER = "Mobile is added successfully";
 	
+	public static final String DELETE_MOBILE_IDENTIFIER = "Mobile is deleted successfully";
+	
 	public static final String ADD_EMAIL_PROFILE = "Email is added, verification is pending";
 	
 	public static final String ADD_EMAIL_PROFILE_SUCCESS = "Email is verified and added as identifier";
@@ -544,7 +548,7 @@ public class UserConstants {
 	
 	public static final String BAD_REQUEST = "Bad Request";
 	
-	public static final String SERVER_ERROR_IFW = "Internal Server errror from IFW";
+	public static final String SERVER_ERROR_IFW = "Internal Server error from IFW";
 	
 	public static final String AUTHENTICATION_ERROR_IFW = "Authentication error from IFW";
 	
@@ -561,6 +565,7 @@ public class UserConstants {
 	public static final String LOGIN_SUCCESS ="Login Successful";
 	
 	public static final String SESSION_TIME_OUT= "900";
+	public static final String ADMIN_TOKEN_MANDATORY= "Admin token is mandatory";
 	
 	
 }

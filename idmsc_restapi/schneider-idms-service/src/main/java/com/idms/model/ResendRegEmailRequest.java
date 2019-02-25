@@ -17,6 +17,9 @@ public class ResendRegEmailRequest {
 	
 	@JsonProperty
 	private String lastName;
+	
+	@JsonProperty
+	private String mobile;
 
 	public String getEmail() {
 		return email;
@@ -40,6 +43,14 @@ public class ResendRegEmailRequest {
 
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
+	}
+
+	public String getMobile() {
+		return mobile;
+	}
+
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
 	}
 	
 }

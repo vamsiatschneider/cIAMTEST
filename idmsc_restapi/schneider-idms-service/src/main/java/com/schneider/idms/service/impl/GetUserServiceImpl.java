@@ -63,7 +63,7 @@ public class GetUserServiceImpl extends IdmsCommonServiceImpl implements GetUser
 				if(null == region || region.equalsIgnoreCase("CN")){
 					LOGGER.info("Start: calling getUserDetails() of OpenDjService to fetch User Details for bearer id:"+authorization);
 					authorization = "Bearer "+authorization.trim();
-					userData = openDJService.getUserDetails(authorization);
+					userData = openAMTokenService.getUserDetails(authorization);
 					LOGGER.info("End: getUserDetails() of OpenDjService to fetch User Details Finished for bearer id:"+authorization);
 					LOGGER.info("User Data from Openam: " + userData);
 					LOGGER.info("Time took in Processing:" + (System.currentTimeMillis() - startTime));

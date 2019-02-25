@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -117,7 +118,7 @@ public interface UserService {
 	@PUT
 	@Path("/apexrest/IDMSUpdateUserAIL")
 	@Consumes("application/json")
-	Response updateAIL(@HeaderParam("client_id")String clientId,
+	Response updateAIL(@HeaderParam("Authorization")String authorizedToken,@HeaderParam("client_id")String clientId,
 			@HeaderParam("client_secret")String clientSecret,@Valid AILRequest aRequest);
 	
 
@@ -268,5 +269,8 @@ public interface UserService {
 	@Path("/apexrest/addEmail")
 	Response addEmailToUser(AddEmailRequest addEmailRequest);
 	
-	
+	@DELETE
+	@Path("/apexrest/deleteMobile")
+	Response deleteMobile(SendOTPRequest deleteRequest);
+
 }

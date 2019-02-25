@@ -126,6 +126,7 @@ import com.idms.product.model.OpenAMGetUserWorkResponse;
 import com.idms.product.model.OpenAMPasswordRecoveryInput;
 import com.idms.product.model.OpenAmUser;
 import com.idms.product.model.OpenAmUserRequest;
+import com.idms.product.model.PostMobileRecord;
 import com.idms.service.uims.sync.UIMSUserManagerSoapServiceSync;
 import com.idms.service.util.AsyncUtil;
 import com.idms.service.util.ChinaIdmsUtil;
@@ -329,6 +330,12 @@ public class UserServiceImpl implements UserService {
 	@Value("${otpvalidationtimeinminute}")
 	private String otpvalidationtimeinminute;
 	
+	@Value("${openDJUserName}")
+	private String djUserName;
+	
+	@Value("${openDJUserPassword}")
+	private String djUserPwd;
+	
 	private static String userAction = "submitRequirements";
 
 	private static String errorStatus = "Error";
@@ -337,7 +344,7 @@ public class UserServiceImpl implements UserService {
 
 	private static EmailValidator emailValidator = null;
 	
-	private static Map<String,String> userPinMap = null;
+	//private static Map<String,String> userPinMap = null;
 	private static SimpleDateFormat formatter;
 	@Inject
 	private SalesforceSyncServiceImpl sfSyncServiceImpl;
@@ -365,7 +372,7 @@ public class UserServiceImpl implements UserService {
 		emailValidator = EmailValidator.getInstance();
 		formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 		userResponse = new UserServiceResponse();
-		userPinMap = new HashMap<String,String>();
+		//userPinMap = new HashMap<String,String>();
 		/*appList = new ArrayList<String>();
 		appList.add("PACE");
 		appList.add("PRM");
@@ -759,7 +766,7 @@ public class UserServiceImpl implements UserService {
 		String iPlanetDirectoryKey = null;
 		boolean uimsAlreadyCreatedFlag = false, mobileRegFlag = false;
 		Response userCreation = null,checkUserExist = null;
-		String hexPinMobile = null;
+		String otpinOpendj = null, hexPinMobile = null, otpStatus = null;
 		try {
 
 			objMapper = new ObjectMapper();
@@ -783,15 +790,27 @@ public class UserServiceImpl implements UserService {
 				mobileRegFlag = Boolean.parseBoolean(userRequest.getMobileRegFlag());
 				
 				if(mobileRegFlag){
-					String otpText = userPinMap.get(userRequest.getUserRecord().getMobilePhone());
-					if(otpText.contains(UserConstants.PIN_VERIFIED)){
+					String mobileStr = userRequest.getUserRecord().getMobilePhone();
+					LOGGER.info("Start: getMobileOTPDetails() of OpenDjService for mobile="+mobileStr);
+					Response otpDetails = openDJService.getMobileOTPDetails(djUserName, djUserPwd, mobileStr);
+					LOGGER.info("End: getMobileOTPDetails() of OpenDjService finished for mobile="+mobileStr);			
+					LOGGER.info("Response code from OpenDJ for get call: "+otpDetails.getStatus());
+					
+					if (null != otpDetails && 200 == otpDetails.getStatus()) {
+						Configuration confg = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();			
+						DocumentContext productDocCtxt = JsonPath.using(confg).parse(IOUtils.toString((InputStream) otpDetails.getEntity()));
+						otpStatus = productDocCtxt.read("tokenStatus");
+						otpinOpendj = productDocCtxt.read("otpToken");
+					}
+					
+					if(null != otpStatus && otpStatus.equalsIgnoreCase(UserConstants.PIN_VERIFIED)){
 						LOGGER.info("Mobile verified. Registration process continue.");
 					} else {
 						errorResponse.setStatus(errorStatus);
 						errorResponse.setMessage("Mobile not verified. Registration terminated.");
 						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 						LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-						LOGGER.error("Mobile not verified or session stickiness issue. Registration terminated.");
+						LOGGER.error("Mobile not verified. Registration terminated.");
 						return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 					}					
 				}
@@ -1317,10 +1336,8 @@ public class UserServiceImpl implements UserService {
 						LOGGER.info("End: sendOpenAmMobileEmail() finsihed for  mobile userName:" + userName);
 					}
 					if(mobileRegFlag){
-						String otpText = userPinMap.get(userRequest.getUserRecord().getMobilePhone());
-						if(otpText.contains(UserConstants.PIN_VERIFIED)){
-							String otp = otpText.split("::")[0];
-							hexPinMobile = ChinaIdmsUtil.generateHashValue(otp);
+						if(otpStatus.equalsIgnoreCase(UserConstants.PIN_VERIFIED)){							
+							hexPinMobile = ChinaIdmsUtil.generateHashValue(otpinOpendj);
 							LocalDateTime currentDatenTime = LocalDateTime.now();
 							long currentDatenTimeInMillisecs = currentDatenTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 							
@@ -1332,7 +1349,9 @@ public class UserServiceImpl implements UserService {
 									product_pin_string);
 							LOGGER.info("End: updateUser() of openamservice to update hashkey finished for userId:"+userName);
 						}
-						userPinMap.remove(userRequest.getUserRecord().getMobilePhone());
+						SendOTPRequest sendOTPRequest = new SendOTPRequest();
+						sendOTPRequest.setMobile(userRequest.getUserRecord().getMobilePhone());
+						deleteMobile(sendOTPRequest);
 					}
 				}
 			} 
@@ -1392,13 +1411,7 @@ public class UserServiceImpl implements UserService {
 		sucessRespone.setIDMSUserRecord(idmsResponse);
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-		//NewCookie newCookie=null;
-		/*if(cookie!=null){
-			LOGGER.info("Removed cookie successfully in userRegistration(): Name:"+cookie.getName()+",value:"+cookie.getValue());
-			newCookie = new NewCookie(cookie, "delete cookie", 0, false);
-			return Response.status(Response.Status.OK).entity(sucessRespone).cookie(newCookie).build();
-		} else*/
-			return Response.status(Response.Status.OK).entity(sucessRespone).build();
+		return Response.status(Response.Status.OK).entity(sucessRespone).build();
 	}
 
 
@@ -3400,7 +3413,6 @@ public class UserServiceImpl implements UserService {
 					//creating the user
 					CreateUserRequest createUserRequest = new CreateUserRequest();
 					createUserRequest.setUserRecord(ifwUser);
-					//Response userRegistrationResponse = userRegistration("", "", createUserRequest,null);
 					Response userRegistrationResponse = userRegistration("", "", createUserRequest);
 					if(200 == userRegistrationResponse.getStatus()){
 					//confirm the user
@@ -3484,10 +3496,9 @@ public class UserServiceImpl implements UserService {
 	 */
 
 	@Override
-	public Response updateAIL(String clientId, String clientSecret,AILRequest ailRequest) {
+	public Response updateAIL(String authorizedToken, String clientId, String clientSecret,AILRequest ailRequest) {
 		LOGGER.info("Entered updateAIL() -> Start");
 		//LOGGER.info("Parameter clientId -> "+clientId+" ,clientSecret -> "+clientSecret);
-		LOGGER.info("Parameter ailRequest -> "+ailRequest);
 
 		String IDMSAil__c = "";
 		String userData = "";
@@ -3505,34 +3516,45 @@ public class UserServiceImpl implements UserService {
 		// Validate Input Paramenters
 		
 		ObjectMapper objMapper = new ObjectMapper();
-		
+		try {
+			LOGGER.info("UserServiceImpl:updateAIL -> : Requset :  -> "+objMapper.writeValueAsString(ailRequest));
 
-		// Profile Update Source
-		if (null == ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c()
-				|| ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c().isEmpty()) {
-			userResponse.setStatus(errorStatus);
-			userResponse.setMessage(UserConstants.MANDATORY_PROFILE_UPDATE_SOURCE);
-			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-			LOGGER.error("Error is "+userResponse.getMessage());
-			LOGGER.info("Time taken by UserServiceImpl.updateAIL() : " + elapsedTime);
-			return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
-		}
-
-		// UID
-		if (null != ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c() && !UserConstants.UIMS
-				.equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c())) {
-			if ((null == ailRequest.getUserAILRecord().getIDMS_Federated_ID__c()
-					|| ailRequest.getUserAILRecord().getIDMS_Federated_ID__c().isEmpty())
-					&& (null == ailRequest.getUserAILRecord().getIDMSUser__c()
-							|| ailRequest.getUserAILRecord().getIDMSUser__c().isEmpty())) {
+			// Profile Update Source
+			if (null == ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c()
+					|| ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c().isEmpty()) {
 				userResponse.setStatus(errorStatus);
-				userResponse.setMessage(UserConstants.MANDATORY_ID);
+				userResponse.setMessage(UserConstants.MANDATORY_PROFILE_UPDATE_SOURCE);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error is "+userResponse.getMessage());
-				LOGGER.info("Time taken by UserServiceImpl.updateAIL() : " + elapsedTime);
+				LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 			}
-		}
+
+			// Admin token check
+			if (null == authorizedToken || authorizedToken.isEmpty()) {
+				userResponse.setStatus(errorStatus);
+				userResponse.setMessage(UserConstants.ADMIN_TOKEN_MANDATORY);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Error is "+userResponse.getMessage());
+				LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+			}
+
+			// UID
+			if (null != ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c() && !UserConstants.UIMS
+					.equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c())) {
+				if ((null == ailRequest.getUserAILRecord().getIDMS_Federated_ID__c()
+						|| ailRequest.getUserAILRecord().getIDMS_Federated_ID__c().isEmpty())
+						&& (null == ailRequest.getUserAILRecord().getIDMSUser__c()
+						|| ailRequest.getUserAILRecord().getIDMSUser__c().isEmpty())) {
+					userResponse.setStatus(errorStatus);
+					userResponse.setMessage(UserConstants.MANDATORY_ID);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.error("Error is "+userResponse.getMessage());
+					LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+				}
+			}
 
 		// FedrationID
 		if (null != ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c() && UserConstants.UIMS
@@ -3623,11 +3645,19 @@ public class UserServiceImpl implements UserService {
 
 			}
 		}*/
-		try {
-			LOGGER.info("UserServiceImpl:updateAIL -> : Requset :  -> "+objMapper.writeValueAsString(ailRequest));
-			
+
+
+			if(!getTechnicalUserDetails(authorizedToken)){
+				userResponse.setStatus(errorStatus);
+				userResponse.setMessage("Unauthorized or session expired");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Error is "+userResponse.getMessage());
+				LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
+				return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
+			}
+
 			idmsAclType_c = getIDMSAclType(ailRequest.getUserAILRecord().getIDMSAclType__c());
-			LOGGER.info("AIL type="+idmsAclType_c);
+			LOGGER.info("AIL type = "+idmsAclType_c);
 			// Getting the user data
 			//LOGGER.info("Going to call getSSOToken()");
 			iPlanetDirectoryKey = getSSOToken();
@@ -3829,7 +3859,7 @@ public class UserServiceImpl implements UserService {
 			idmsUserAIL.setIdmsacl__c(ailRequest.getUserAILRecord().getIDMSAcl__c());
 			idmsUserAIL.setIdmsuser__c(userId);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-			LOGGER.info("Time taken by UserServiceImpl.updateAIL() : " + elapsedTime);
+			LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
 			userName=productDocCtx.read("$.result[0].username");
 			openamVnew = null != productDocCtx.read("$.V_New[0]") ? getValue(productDocCtx.read("$.V_New[0]")) : getDelimeter();
 			
@@ -4409,7 +4439,6 @@ public class UserServiceImpl implements UserService {
 							LOGGER.info("Time taken by updateUser() : " + elapsedTime);
 							return Response.status(Response.Status.BAD_REQUEST).entity(responseCheck).build();
 						}
-						userPinMap.remove(userRequest.getUserRecord().getMobilePhone());
 					}
 				}
 				
@@ -4833,13 +4862,7 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info(" UserServiceImpl :: updateUser End");
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info("Time taken by updateUser() : " + elapsedTime);
-		//NewCookie newCookie=null;
-		/*if(cookie!=null && updateMobileIdentifierCheck){
-			LOGGER.info("Removed cookie successfully in updateUser(): Name:"+cookie.getName()+",value:"+cookie.getValue());
-			newCookie = new NewCookie(cookie, "delete cookie", 0, false);
-			return Response.status(Response.Status.OK).entity(sucessRespone).cookie(newCookie).build();
-		} else*/
-			return Response.status(Response.Status.OK).entity(sucessRespone).build();
+		return Response.status(Response.Status.OK).entity(sucessRespone).build();
 	}
 
 	private Response passwordRecoverySuccessResponse(String userName, long startTime, String userData) {
@@ -5018,8 +5041,8 @@ public class UserServiceImpl implements UserService {
 		this.legthValidator = legthValidator;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.idms.service.UserServiceImpl#resendPIN(java.lang.String, com.idms.model.ResendPinRequest)
+	/**
+	 * For mobile scenario
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -6385,8 +6408,8 @@ public class UserServiceImpl implements UserService {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.idms.service.UserServiceImpl#getUserByFederationId(java.lang.String, java.lang.String)
+	/**
+	 * IFW calling
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -6416,8 +6439,8 @@ public class UserServiceImpl implements UserService {
 		return getUser(userId);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.idms.service.UserServiceImpl#sendInvitation(java.lang.String, com.idms.model.SendInvitationRequest)
+	/**
+	 * Invite someone by email
 	 */
 	@Override
 	public Response sendInvitation(String authorizedToken,SendInvitationRequest sendInvitaionRequest) {
@@ -6429,9 +6452,6 @@ public class UserServiceImpl implements UserService {
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		
 		try {
-			
-			//LOGGER.info(" inside UserServiceImpl :: sendInvitation ");
-			
 			if ((null == sendInvitaionRequest.getEmail() || sendInvitaionRequest.getEmail().isEmpty()) 
 					|| (null == sendInvitaionRequest.getInvitationId() || sendInvitaionRequest.getInvitationId().isEmpty()) 
 					   ||( null == sendInvitaionRequest.getRedirectUrl() || sendInvitaionRequest.getRedirectUrl().isEmpty()) ) {
@@ -6454,86 +6474,144 @@ public class UserServiceImpl implements UserService {
 		return Response.status(Response.Status.OK).entity(userResponse).build();
 	}
 
-	/* (non-Javadoc)
-	 * @see com.idms.service.UserServiceImpl#resendRegEmail(com.idms.model.ResendRegEmailRequest)
+	/**
+	 * Resending email to user with token
 	 */
 	@Override
 	public Response resendRegEmail(ResendRegEmailRequest resendRegEmail) {
 		LOGGER.info("Entered resendRegEmail() -> Start");
-		LOGGER.info("Parameter resendRegEmail -> " + resendRegEmail);
-		
 		long elapsedTime;
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		
 		String iPlanetDirectoryKey = "";
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		DocumentContext productDocCtx = null;
-		
+		String userId = null, userType = null, userCName = null, userExistsQuery = null;
+		Integer resultCount = 0;
+		ObjectMapper objMapper = new ObjectMapper();
+
 		try {
-			
-			if ((null == resendRegEmail.getEmail() || resendRegEmail.getEmail().isEmpty()) 
-					|| (null == resendRegEmail.getFirstName() || resendRegEmail.getFirstName().isEmpty()) 
-					   ||( null == resendRegEmail.getLastName() || resendRegEmail.getLastName().isEmpty()) ) {
+			LOGGER.info("Parameter userRequest -> " + objMapper.writeValueAsString(resendRegEmail));
+
+			if ((null == resendRegEmail.getEmail() || resendRegEmail.getEmail().isEmpty())
+					&& (null == resendRegEmail.getMobile() || resendRegEmail.getMobile().isEmpty())) {
 				userResponse.setStatus(errorStatus);
-				userResponse.setMessage("Email, FirstNmae and LastName are mandatory");
+				userResponse.setMessage("Email or mobile is mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error is -> " + userResponse.getMessage());
 				LOGGER.info("Time taken by resendRegEmail() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
-			}else{
-				iPlanetDirectoryKey = getSSOToken();
+			}
+			if (null == resendRegEmail.getFirstName() || resendRegEmail.getFirstName().isEmpty()) {
+				userResponse.setStatus(errorStatus);
+				userResponse.setMessage("FirstName is mandatory");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Error is -> " + userResponse.getMessage());
+				LOGGER.info("Time taken by resendRegEmail() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+			}
+			if (null == resendRegEmail.getLastName() || resendRegEmail.getLastName().isEmpty()) {
+				userResponse.setStatus(errorStatus);
+				userResponse.setMessage("LastName is mandatory");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Error is -> " + userResponse.getMessage());
+				LOGGER.info("Time taken by resendRegEmail() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+			}
+			iPlanetDirectoryKey = getSSOToken();
+			
+			if (null != resendRegEmail.getEmail() && !resendRegEmail.getEmail().isEmpty()) {
+				userId = resendRegEmail.getEmail();
+				userType = "mail";
+			} else if (null != resendRegEmail.getMobile() && !resendRegEmail.getMobile().isEmpty()) {
+				userId = resendRegEmail.getMobile();
+				userType = "mobile";
+			}
+			
+			if (null != userId && !userId.isEmpty()) {
+				LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
+						+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + resendRegEmail.getEmail()
+						+ AUDIT_LOG_CLOSURE);
 
-				if (null != resendRegEmail.getEmail()) {
-					LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
-							+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + resendRegEmail.getEmail() + AUDIT_LOG_CLOSURE);
-					
-					LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for email="+resendRegEmail.getEmail());
-					String userExists = productService.checkUserExistsWithEmailMobile(
-							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-							"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(resendRegEmail.getEmail(),"UTF-8"),"UTF-8") + "\" or mobile_reg eq " + "\"" + URLEncoder.encode(URLDecoder.decode(resendRegEmail.getEmail(),"UTF-8"),"UTF-8") + "\"");
+				if(userType.equalsIgnoreCase("mail")){
+				LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for email=" + userId);
+				userExistsQuery = productService.checkUserExistsWithEmailMobile(
+						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+						"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(userId, "UTF-8"), "UTF-8") + "\"");
+				LOGGER.info("End: checkUserExistsWithEmailMobile() of openam for email=" + userId);
+				}
+				if(userType.equalsIgnoreCase("mobile")){
+					LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for mobile=" + userId);
+					userExistsQuery = productService.checkUserExistsWithEmailMobile(
+							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "mobile_reg eq " + "\""
+									+ URLEncoder.encode(URLDecoder.decode(userId, "UTF-8"), "UTF-8") + "\"");
+					LOGGER.info("End: checkUserExistsWithEmailMobile() of openam for mobile=" + userId);
+				}
 
-					LOGGER.info("End: checkUserExistsWithEmailMobile() of openam finished for email="+resendRegEmail.getEmail());
-					productDocCtx = JsonPath.using(conf).parse(userExists);
-					
-					if (UserConstants.TRUE.equalsIgnoreCase(productDocCtx.read("$.result[0].isActivated[0]"))) {
+				productDocCtx = JsonPath.using(conf).parse(userExistsQuery);
+				resultCount = productDocCtx.read("$.resultCount");
+				LOGGER.info("resultCount="+resultCount);
+				
+				if (resultCount.intValue() == 0) {
+					userResponse.setStatus(errorStatus);
+					userResponse.setMessage("User not found based on given email/mobile");
+					userResponse.setId(userCName);
+					LOGGER.error("User not found based on given email/mobile");
+					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+				}
+
+				if (UserConstants.TRUE.equalsIgnoreCase(productDocCtx.read("$.result[0].isActivated[0]"))) {
+					userResponse.setStatus(errorStatus);
+					userResponse.setMessage("You have already registered");
+					LOGGER.error("Error is -> " + userResponse.getMessage());
+					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+				} else {
+
+					userCName = productDocCtx.read("$.result[0].username");
+					String regSource = productDocCtx.read("$.result[0].registerationSource[0]");
+					String fName = null != productDocCtx.read("$.result[0].givenName")
+							? getValue(productDocCtx.read("$.result[0].givenName").toString()) : getDelimeter();
+					String lName = null != productDocCtx.read("$.result[0].sn")
+							? getValue(productDocCtx.read("$.result[0].sn").toString()) : getDelimeter();
+
+					if ((null != fName && !fName.isEmpty()) && (fName.equalsIgnoreCase(resendRegEmail.getFirstName()))
+							&& ((null != lName && !lName.isEmpty())
+									&& (lName.equalsIgnoreCase(resendRegEmail.getLastName())))) {
+						String otp = sendEmail.generateOtp(userCName);
+						LOGGER.info("Successfully OTP generated for " + userCName);
+
+						if (userType.equalsIgnoreCase("mail")) {
+							sendEmail.sendOpenAmEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userCName,
+									regSource);
+						}
+						if (userType.equalsIgnoreCase("mobile")) {
+							LOGGER.info("Start: sendSMSMessage() for mobile userName:" + userCName);
+							sendEmail.sendSMSNewGateway(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userCName,
+									regSource);
+							LOGGER.info("End: sendSMSMessage() finished for  mobile userName:" + userCName);
+							LOGGER.info("Start: sendOpenAmMobileEmail() for mobile userName:" + userCName);
+							sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userCName,
+									regSource);
+							LOGGER.info("End: sendOpenAmMobileEmail() finsihed for  mobile userName:" + userCName);
+						}
+					} else {
 						userResponse.setStatus(errorStatus);
-						userResponse.setMessage("You have already registered");
+						userResponse.setMessage("FirstName and LastName are not matched with Email/mobile given!!");
 						LOGGER.error("Error is -> " + userResponse.getMessage());
 						return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
-					} else {
-
-						String userName = productDocCtx.read("$.result[0].username");
-						String regSource = productDocCtx.read("$.result[0].registerationSource[0]");
-						String fName = null != productDocCtx.read("$.result[0].givenName")
-								? getValue(productDocCtx.read("$.result[0].givenName").toString()) : getDelimeter();
-						String lName = null != productDocCtx.read("$.result[0].sn")
-								? getValue(productDocCtx.read("$.result[0].sn").toString()) : getDelimeter();
-
-						if ((null != fName && !fName.isEmpty())
-								&& (fName.equalsIgnoreCase(resendRegEmail.getFirstName()))
-								&& ((null != lName && !lName.isEmpty())
-										&& (lName.equalsIgnoreCase(resendRegEmail.getLastName())))) {
-							String otp = sendEmail.generateOtp(userName);
-							LOGGER.info("Successfully OTP generated for " + userName);
-							sendEmail.sendOpenAmEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
-									regSource);
-						} else {
-							userResponse.setStatus(errorStatus);
-							userResponse.setMessage("FirstName and LastName are not mached with Email given!!");
-							LOGGER.error("Error is -> " + userResponse.getMessage());
-							return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
-						}
 					}
 				}
 			}
-		}catch (Exception e) {
-			
-			LOGGER.error("Exception in resendRegEmail :"+e.getMessage());
+		} catch (Exception e) {			
+			LOGGER.error("Exception in resendRegEmail :" + e.getMessage());
+			userResponse.setStatus(errorStatus);
+			userResponse.setMessage(UserConstants.RESEND_REGEMAIL_ERROR_MESSAGE);
 			return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 		}
-			userResponse.setStatus(successStatus);
-			userResponse.setMessage(UserConstants.RESEND_REGEMAIL_SUCCESS_MESSAGE);
-			return Response.status(Response.Status.OK).entity(userResponse).build();
+		userResponse.setStatus(successStatus);
+		userResponse.setMessage(UserConstants.RESEND_REGEMAIL_SUCCESS_MESSAGE);
+		userResponse.setId(userCName);
+		return Response.status(Response.Status.OK).entity(userResponse).build();
 	}
 
 	/**
@@ -6610,8 +6688,8 @@ public class UserServiceImpl implements UserService {
 		return response;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.idms.service.UserServiceImpl#resendChangeEmail(com.idms.model.ResendEmailChangeRequest)
+	/**
+	 * In update user, resending email
 	 */
 	@Override
 	public Response resendChangeEmail(ResendEmailChangeRequest emailChangeRequest) {
@@ -7057,7 +7135,7 @@ public class UserServiceImpl implements UserService {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Response idmsCheckUserExists(CheckUserExistsRequest request) {
-
+		LOGGER.info("Entered idmsCheckUserExists() -> Start");
 		DocumentContext productDocCtx = null;
 		String iPlanetDirectoryKey = null;
 		String ifwAccessToken = null;
@@ -7173,7 +7251,8 @@ public class UserServiceImpl implements UserService {
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 				return Response.status(Response.Status.OK).entity(response).build();
-			} else if(resultCount.intValue() == 0 && UserConstants.TRUE.equalsIgnoreCase(request.getWithGlobalUsers())) {
+			} else if(resultCount.intValue() == 0 && UserConstants.TRUE.equalsIgnoreCase(request.getWithGlobalUsers())
+					&& loginId.contains("@")) {
 				LOGGER.info("Start: getIFWToken() of IFWService");
 				ifwAccessToken = ifwService.getIFWToken(UserConstants.CONTENT_TYPE_URL_FROM,
 						UserConstants.IFW_GRANT_TYPE, ifwClientId, ifwClientSecret);
@@ -7184,21 +7263,22 @@ public class UserServiceImpl implements UserService {
 				String bfoAuthorizationToken = sfSyncServiceImpl.getSFToken();
 				String authorization = "Bearer " + accessToken;
 
-				if (loginId.contains("@")) {
-					LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for loginId:"+loginId);
-					ifwResponse = ifwService.checkUserExistsWithEmail(bfoAuthorizationToken,
-							UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE,
-							UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID, authorization, loginId,
-							false);
-					LOGGER.info("End: checkUserExistsWithEmail() of IFWService finished for loginId:"+loginId);
-				} else {
+				//if (loginId.contains("@")) {
+				LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for loginId:"+loginId);
+				ifwResponse = ifwService.checkUserExistsWithEmail(bfoAuthorizationToken,
+						UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE,
+						UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID, authorization, loginId,
+						false);
+				LOGGER.info("End: checkUserExistsWithEmail() of IFWService finished for loginId:"+loginId);
+				//} 
+				/*else {
 					LOGGER.info("Start: checkUserExistsWithMobile() of IFWService for loginId:"+loginId);
 					ifwResponse = ifwService.checkUserExistsWithMobile(bfoAuthorizationToken,
 							UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE,
 							UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID, authorization, loginId,
 							false);
 					LOGGER.info("End: checkUserExistsWithMobile() of IFWService finished for loginId:"+loginId);
-				}
+				}*/
 				/*if(null != ifwResponse && (200 == ifwResponse.getStatus() || 404 == ifwResponse.getStatus() || 409 == ifwResponse.getStatus())){
 							sfSyncServiceImpl.extendSFTokenValidity(bfoAuthorizationToken);
 						}*/
@@ -7831,14 +7911,13 @@ public class UserServiceImpl implements UserService {
 	public boolean getTechnicalUserDetails(String authorizationToken) {
 
 		try {
-
-			String userInfo = openDJService.getUserDetails(authorizationToken);
+			String userInfo = openAMTokenService.getUserDetails(authorizationToken);
 			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userInfo);
 
-			String userSubject = getValue(productDocCtx.read("$.userGroup").toString());
+			String userSubject = productDocCtx.read("$.userGroup");
 
-			if (userSubject.contains(DirectApiConstants.TECHNICAL_USER)) {
+			if (null != userSubject && userSubject.contains(DirectApiConstants.TECHNICAL_USER)) {
 				return true;
 			}
 		} catch (Exception e) {
@@ -8028,7 +8107,8 @@ public class UserServiceImpl implements UserService {
 		long elapsedTime;
 		ObjectMapper objMapper = new ObjectMapper();
 		ErrorResponse errorResponse = new ErrorResponse();
-		String mobileNum = null, pin = null, pinInMap = null;
+		String mobileNum = null, pin = null, pinInOpenDJ = null;
+		String otpStatus = null, otpValidityTime = null;
 		try {
 			LOGGER.info("Parameter userRequest -> " + objMapper.writeValueAsString(verifyPinInfo));
 			if(null == verifyPinInfo.getMobileRegNumber() || verifyPinInfo.getMobileRegNumber().isEmpty()){
@@ -8050,15 +8130,65 @@ public class UserServiceImpl implements UserService {
 			mobileNum = verifyPinInfo.getMobileRegNumber().trim();
 			pin = verifyPinInfo.getPin().trim();
 			
-			String storedPinValue = userPinMap.get(mobileNum);
-			if(null != storedPinValue && !storedPinValue.isEmpty() 
-					&& storedPinValue.contains(UserConstants.PIN_NOT_VERIFIED)
-					&& Long.parseLong(storedPinValue.split("::")[2]) > System.currentTimeMillis()){
-				String[] storedPinArray = storedPinValue.split("::");
-				pinInMap = storedPinArray[0];
-			} else if(null != storedPinValue && !storedPinValue.isEmpty() 
-					&& storedPinValue.contains(UserConstants.PIN_VERIFIED)
-					&& Long.parseLong(storedPinValue.split("::")[2]) > System.currentTimeMillis()){
+			LOGGER.info("Start: getMobileOTPDetails() of OpenDjService for mobile="+mobileNum);
+			Response otpDetails = openDJService.getMobileOTPDetails(djUserName, djUserPwd, mobileNum);
+			LOGGER.info("End: getMobileOTPDetails() of OpenDjService finished for mobile="+mobileNum);			
+			LOGGER.info("Response code from OpenDJ for get call: "+otpDetails.getStatus());
+			
+			if (null != otpDetails && 200 == otpDetails.getStatus()) {
+				Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();			
+				DocumentContext productDocCtx = JsonPath.using(conf).parse(IOUtils.toString((InputStream) otpDetails.getEntity()));
+				pinInOpenDJ = productDocCtx.read("otpToken");
+				otpStatus = productDocCtx.read("tokenStatus");
+				otpValidityTime = productDocCtx.read("tokenExpirationTstamp");
+			}
+			if(null != pinInOpenDJ && !pinInOpenDJ.isEmpty() 
+					&& otpStatus.equalsIgnoreCase(UserConstants.PIN_NOT_VERIFIED)					
+					&& pinInOpenDJ.equalsIgnoreCase(pin)){
+				if(Long.parseLong(otpValidityTime) > System.currentTimeMillis()){
+					LOGGER.info("Pin verified and now changing pin status");
+					
+					PostMobileRecord postMobileRecord = new PostMobileRecord();
+					postMobileRecord.set_id(mobileNum);
+					postMobileRecord.setMobileNumber(mobileNum);
+					postMobileRecord.setOtpToken(pinInOpenDJ);
+					postMobileRecord.setTokenStatus(UserConstants.PIN_VERIFIED);
+					postMobileRecord.setTokenExpirationTstamp(otpValidityTime);
+					
+					String json = objMapper.writeValueAsString(postMobileRecord);
+					json = json.replace("\"\"", "[]");
+					
+					LOGGER.info("Start: putMobileOTPDetails() of OpenDjService for mobile="+mobileNum);
+					Response resPut = openDJService.putMobileOTPDetails("application/json","*",djUserName, djUserPwd, mobileNum, json);
+					LOGGER.info("End: putMobileOTPDetails() of OpenDjService finished for mobile="+mobileNum);
+					LOGGER.info("Response code from OpenDJ for put call="+resPut.getStatus());
+					if(200 == resPut.getStatus()){
+						LOGGER.info("otp details updated into OpenDJ for mobile : "+mobileNum);
+					} else if(200 != resPut.getStatus()){
+						LOGGER.info("Bad request.. Record not updated in OpenDJ");
+						errorResponse.setStatus(errorStatus);
+						errorResponse.setMessage("Server issue, please raise a ticket");
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.info("Time taken by sendOTP() : " + elapsedTime);
+						return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
+					}
+					errorResponse.setStatus(successStatus);
+					errorResponse.setMessage(UserConstants.OTP_VALIDATED_SUCCESS);
+					LOGGER.info(UserConstants.OTP_VALIDATED_SUCCESS+" for mobileNum ::"+mobileNum);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by verifyPIN() : " + elapsedTime);
+					return Response.status(Response.Status.OK).entity(errorResponse).build();
+				}
+				if(Long.parseLong(otpValidityTime) <= System.currentTimeMillis()){
+					errorResponse.setStatus(errorStatus);
+					errorResponse.setMessage(UserConstants.OTP_EXPIRED);
+					LOGGER.info(UserConstants.OTP_EXPIRED+" for mobileNum ::"+mobileNum);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by verifyPIN() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+				}				
+			} else if(null != pinInOpenDJ && !pinInOpenDJ.isEmpty() 
+					&& pinInOpenDJ.equalsIgnoreCase(UserConstants.PIN_VERIFIED)){
 				errorResponse.setStatus(errorStatus);
 				errorResponse.setMessage(UserConstants.OTP_EXPIRED);
 				LOGGER.error(UserConstants.OTP_EXPIRED+" for mobileNum ::"+mobileNum);
@@ -8073,15 +8203,6 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Time taken by verifyPIN() : " + elapsedTime);
 				return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 			}
-			if(pin.equalsIgnoreCase(pinInMap)){
-				userPinMap.put(mobileNum, pinInMap+"::"+UserConstants.PIN_VERIFIED);
-				errorResponse.setStatus(successStatus);
-				errorResponse.setMessage(UserConstants.OTP_VALIDATED_SUCCESS);
-				LOGGER.info(UserConstants.OTP_VALIDATED_SUCCESS+" for mobileNum ::"+mobileNum);
-				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.info("Time taken by verifyPIN() : " + elapsedTime);
-				return Response.status(Response.Status.OK).entity(errorResponse).build();
-			}
 		} catch (Exception e) {
 			
 			errorResponse.setStatus(errorStatus);
@@ -8091,12 +8212,12 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Time taken by verifyPIN() : " + elapsedTime);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		}
-		errorResponse.setStatus(ErrorCodeConstants.ERROR);
+		errorResponse.setStatus(errorStatus);
 		errorResponse.setMessage(UserConstants.OTP_INVALID);
 		LOGGER.error(UserConstants.OTP_INVALID+" for mobileNum ::"+mobileNum);
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info("Time taken by verifyPIN() : " + elapsedTime);
-		return Response.status(Response.Status.NOT_FOUND).entity(errorResponse).build();
+		return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 	}
 
 	/**
@@ -8374,10 +8495,9 @@ public class UserServiceImpl implements UserService {
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
 		ObjectMapper objMapper = new ObjectMapper();
-		String otpMobile = null;
+		String otpMobile = null, otpStatus = null, otpValidityTime = null;
 		String mobile = null;
 		JSONObject response = new JSONObject();
-		String otpStatus =null;
 		try {
 			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(otpRequest));
 			if (null == otpRequest.getMobile() || otpRequest.getMobile().isEmpty()) {
@@ -8393,26 +8513,80 @@ public class UserServiceImpl implements UserService {
 				if(!ChinaIdmsUtil.mobileValidator(mobile)){
 					response.put(UserConstants.STATUS, errorStatus);
 					response.put(UserConstants.MESSAGE, "Mobile validation failed.");
-					LOGGER.error("Error in addMobile() is :: Mobile validation failed.");
+					LOGGER.error("Error in sendOTP() is :: Mobile validation failed.");
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by sendOTP() : " + elapsedTime);
 					return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 				}
 			}
-			if(null != userPinMap.get(mobile) 
-					&& userPinMap.get(mobile).contains(UserConstants.PIN_NOT_VERIFIED) 
-					&& Long.parseLong(userPinMap.get(mobile).split("::")[2]) > System.currentTimeMillis()){
-				String otpText = userPinMap.get(mobile);
-				String[] otpTextArray = otpText.split("::");
-				otpMobile = otpTextArray[0];
+			
+			LOGGER.info("Start: getMobileOTPDetails() of OpenDjService for mobile="+mobile);
+			Response otpDetails = openDJService.getMobileOTPDetails(djUserName, djUserPwd, mobile);
+			LOGGER.info("End: getMobileOTPDetails() of OpenDjService finished for mobile="+mobile);			
+			LOGGER.info("Response code from OpenDJ for get call: "+otpDetails.getStatus());
+			
+			if (null != otpDetails && 200 == otpDetails.getStatus()) {
+				Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();			
+				DocumentContext productDocCtx = JsonPath.using(conf).parse(IOUtils.toString((InputStream) otpDetails.getEntity()));
+				otpMobile = productDocCtx.read("otpToken");
+				otpStatus = productDocCtx.read("tokenStatus");
+				otpValidityTime = productDocCtx.read("tokenExpirationTstamp");
+			}
+			
+			if(null != otpMobile && !otpMobile.isEmpty() && otpStatus.equalsIgnoreCase(UserConstants.PIN_NOT_VERIFIED) 
+					&& Long.parseLong(otpValidityTime) > System.currentTimeMillis()){
+				LOGGER.info("Got valid otp from OpenDJ");
 			} else {
+				LOGGER.info("creating new otp for mobile : "+mobile);
 				otpMobile = RandomStringUtils.random(6, UserConstants.RANDOM_PIN_CHARS);
 				Calendar now = Calendar.getInstance();
 				now.add(Calendar.MINUTE,Integer.parseInt(otpvalidationtimeinminute));
 				long validityTimeStamp = now.getTimeInMillis();
 				
-				otpStatus = otpMobile+"::"+UserConstants.PIN_NOT_VERIFIED+"::"+validityTimeStamp;
-				userPinMap.put(otpRequest.getMobile(), otpStatus);
+				PostMobileRecord postMobileRecord = new PostMobileRecord();
+				postMobileRecord.set_id(mobile);
+				postMobileRecord.setMobileNumber(mobile);
+				postMobileRecord.setOtpToken(otpMobile);
+				postMobileRecord.setTokenStatus(UserConstants.PIN_NOT_VERIFIED);
+				postMobileRecord.setTokenExpirationTstamp(String.valueOf(validityTimeStamp));
+				
+				String json = objMapper.writeValueAsString(postMobileRecord);
+				json = json.replace("\"\"", "[]");
+				
+				if(404 == otpDetails.getStatus()){
+					LOGGER.info("Start: postMobileOTPDetails() of OpenDjService for mobile="+mobile);
+					Response resPost = openDJService.postMobileOTPDetails("application/json",djUserName,djUserPwd,"create",json);
+					LOGGER.info("End: postMobileOTPDetails() of OpenDjService finished for mobile="+mobile);					
+					LOGGER.info("Response code from OpenDJ for post call="+resPost.getStatus());
+					
+					if(201 == resPost.getStatus()){
+						LOGGER.info("OTP details saved into OpenDJ for mobile : "+mobile);
+					} else if(412 == resPost.getStatus()){
+						LOGGER.info("duplicate insertion of mobile is denied by OpenDJ");
+					} else {
+						LOGGER.info("Exception in saving OTP details .. StatusCode: "+resPost.getStatus()+" sent by OpenDJ");
+						response.put(UserConstants.STATUS, errorStatus);
+						response.put(UserConstants.MESSAGE, "Server issue, please raise a ticket");
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.info("Time taken by sendOTP() : " + elapsedTime);
+						return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+					}
+				} else {
+					LOGGER.info("Start: putMobileOTPDetails() of OpenDjService for mobile="+mobile);
+					Response resPut = openDJService.putMobileOTPDetails("application/json","*",djUserName, djUserPwd, mobile, json);
+					LOGGER.info("End: putMobileOTPDetails() of OpenDjService finished for mobile="+mobile);
+					LOGGER.info("Response code from OpenDJ for put call="+resPut.getStatus());
+					if(200 == resPut.getStatus()){
+						LOGGER.info("otp details updated into OpenDJ for mobile : "+mobile);
+					} else if(200 != resPut.getStatus()){
+						LOGGER.info("Bad request.. Record not updated in OpenDJ");
+						response.put(UserConstants.STATUS, errorStatus);
+						response.put(UserConstants.MESSAGE, "Server issue, please raise a ticket");
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.info("Time taken by sendOTP() : " + elapsedTime);
+						return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+					}
+				}
 			}
 			LOGGER.info("Start: sendSMS() for mobile user:"+mobile);
 			sendEmail.sendSMS(otpMobile, mobile);
@@ -8421,14 +8595,11 @@ public class UserServiceImpl implements UserService {
 			sendEmail.sendMobileEmail(otpMobile, mobile);
 			LOGGER.info("End: sendMobileEmail() finished for  mobile user:"+mobile);
 			
-			String cookieIdentifier= "SID:"+RandomStringUtils.random(4,UserConstants.RANDOM_PIN_CHARS);
-			Cookie cookie = new Cookie("sendOTPIdentifier", cookieIdentifier);
-			NewCookie newCookie = new NewCookie(cookie,"sendotp",Integer.parseInt(UserConstants.SESSION_TIME_OUT),false);
 			response.put(UserConstants.STATUS, successStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.PIN_SEND_SUCCESS);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by sendOTP() : " + elapsedTime);
-			return Response.status(Response.Status.OK).entity(response).cookie(newCookie).build();
+			return Response.status(Response.Status.OK).entity(response).build();
 		} catch (Exception e) {
 			
 			LOGGER.error("Exception in sendOTP() :: -> " + e.getMessage());
@@ -8448,7 +8619,7 @@ public class UserServiceImpl implements UserService {
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
 		ObjectMapper objMapper = new ObjectMapper();
-		String mobile = null, fedid= null;
+		String mobile = null, fedid= null, otpStoredStatus = null;
 		JSONObject response = new JSONObject();
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 
@@ -8511,8 +8682,18 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 
-			String otpStoredText = userPinMap.get(mobile);
-			if(null != otpStoredText && !otpStoredText.isEmpty() && otpStoredText.contains(UserConstants.PIN_VERIFIED)){
+			LOGGER.info("Start: getMobileOTPDetails() of OpenDjService for mobile="+mobile);
+			Response otpDetails = openDJService.getMobileOTPDetails(djUserName, djUserPwd, mobile);
+			LOGGER.info("End: getMobileOTPDetails() of OpenDjService finished for mobile="+mobile);			
+			LOGGER.info("Response code from OpenDJ for get call: "+otpDetails.getStatus());
+			
+			if (null != otpDetails && 200 == otpDetails.getStatus()) {
+				Configuration confg = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();			
+				DocumentContext productDocCtx = JsonPath.using(confg).parse(IOUtils.toString((InputStream) otpDetails.getEntity()));
+				otpStoredStatus = productDocCtx.read("tokenStatus");
+			}
+			
+			if(null != otpStoredStatus && !otpStoredStatus.isEmpty() && otpStoredStatus.equalsIgnoreCase(UserConstants.PIN_VERIFIED)){
 				LOGGER.info("User mobile verified and now registering as dual identifier");
 			} else {
 				response.put(UserConstants.STATUS, errorStatus);
@@ -8539,23 +8720,14 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Start: updateUser() of openamservice to add mobile as dual indentifier for userId:"+fedid);
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + ssoToken, fedid,	addMobileString);
 				LOGGER.info("End: updateUser() of openamservice to add mobile as dual indentifier finished for userId:"+fedid);
-
-				userPinMap.remove(mobile);
+				
+				SendOTPRequest sendOTPRequest = new SendOTPRequest();
+				sendOTPRequest.setMobile(mobile);
+				deleteMobile(sendOTPRequest);
 
 				response.put(UserConstants.STATUS, successStatus);
 				response.put(UserConstants.MESSAGE, UserConstants.ADD_MOBILE_IDENTIFIER);
-				//NewCookie newCookie=null;
-				/*if(cookie!=null){
-					LOGGER.info("Removed cookie successfully in addMobile(): Name:"+cookie.getName()+",value:"+cookie.getValue());
-					newCookie = new NewCookie(cookie, "delete cookie", 0, false);
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.info("Time taken by addMobile() : " + elapsedTime);
-					return Response.status(Response.Status.OK).entity(response).cookie(newCookie).build();
-				} else{*/
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.info("Time taken by addMobile() : " + elapsedTime);
-					return Response.status(Response.Status.OK).entity(response).build();
-				//}
+				return Response.status(Response.Status.OK).entity(response).build();
 			} else {
 				response.put(UserConstants.STATUS, errorStatus);
 				response.put(UserConstants.MESSAGE, "User not found with fedID : " + fedid);
@@ -8789,6 +8961,70 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Time taken by addEmailToUser() : " + elapsedTime);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Response deleteMobile(SendOTPRequest deleteRequest) {
+		LOGGER.info("Entered deleteMobile() -> Start");
+		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
+		long elapsedTime;
+		ObjectMapper objMapper = new ObjectMapper();
+		String mobile = null;
+		JSONObject response = new JSONObject();
+		try {
+			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(deleteRequest));
+			if (null == deleteRequest.getMobile() || deleteRequest.getMobile().isEmpty()) {
+				response.put(UserConstants.STATUS, errorStatus);
+				response.put(UserConstants.MESSAGE, UserConstants.MOBILE_EMPTY);
+				LOGGER.error("Error in deleteMobile() is ::"+UserConstants.MOBILE_EMPTY);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by deleteMobile() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+			}
+			if(null != deleteRequest.getMobile()&& !deleteRequest.getMobile().isEmpty()){
+				mobile = ChinaIdmsUtil.mobileTransformation(deleteRequest.getMobile().trim());
+				if(!ChinaIdmsUtil.mobileValidator(mobile)){
+					response.put(UserConstants.STATUS, errorStatus);
+					response.put(UserConstants.MESSAGE, "Mobile validation failed.");
+					LOGGER.error("Error in deleteMobile() is :: Mobile validation failed.");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by deleteMobile() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+				}
+			}
+			
+			LOGGER.info("Start: deleteMobileOTPDetails() of OpenDjService for mobile="+mobile);
+			Response otpDetails = openDJService.deleteMobileOTPDetails("application/json",djUserName, djUserPwd, mobile);
+			LOGGER.info("End: deleteMobileOTPDetails() of OpenDjService finished for mobile="+mobile);
+			LOGGER.info("Response code from OpenDJ for get call: "+otpDetails.getStatus());
+			
+			if (null != otpDetails && 200 == otpDetails.getStatus()) {
+				LOGGER.info("Mobile record deleted successfully from OpenDJ : "+mobile);
+				response.put(UserConstants.STATUS, successStatus);
+				response.put(UserConstants.MESSAGE, UserConstants.DELETE_MOBILE_IDENTIFIER);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by deleteMobile() : " + elapsedTime);
+				return Response.status(Response.Status.OK).entity(response).build();
+			} else if(null != otpDetails && 404 == otpDetails.getStatus()){
+				LOGGER.info("No mobile record found in OpenDJ : "+mobile);
+				response.put(UserConstants.STATUS, errorStatus);
+				response.put(UserConstants.MESSAGE, "Mobile record not found");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by deleteMobile() : " + elapsedTime);
+				return Response.status(Response.Status.NOT_FOUND).entity(response).build();
+			} else {
+				LOGGER.info("Problem in deleting record from OpenDJ"+otpDetails.getStatus());
+			}			
+		} catch(Exception e){			
+			LOGGER.error("Exception in deleteMobile() :: -> " + e.getMessage());
+		}
+		
+		response.put(UserConstants.STATUS, errorStatus);
+		response.put(UserConstants.MESSAGE, UserConstants.SERVER_ERROR);
+		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+		LOGGER.info("Time taken by deleteMobile() : " + elapsedTime);
+		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 	}
 
 }

@@ -21,6 +21,11 @@ public interface OpenAMTokenService {
 
 
 	@GET
+	@Path("/oauth2/se/userinfo")
+	String getUserDetails(@HeaderParam("Authorization") String authorization);
+
+
+	@GET
 	@Path("/oauth2/authorize")
 	@Consumes("application/x-www-form-urlencoded")
 	Response getOauthFromIPlanet(
