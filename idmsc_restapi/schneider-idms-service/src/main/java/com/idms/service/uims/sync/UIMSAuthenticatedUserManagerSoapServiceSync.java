@@ -97,13 +97,13 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 						identity,application,password);*/
 				uimsUserResponse = authenticatedUserManagerUIMSV22.createIdentityWithMobileWithPasswordForceIdmsId(callerFid, identity, password, forcedFederatedId);
 				//CODE-RE-STRUCTURING - Comment differs across Integration, Staging and Preprod
-				LOGGER.info("End: UIMS createIdentityWithMobileWithPassword() finished, response:"+uimsUserResponse);
+				LOGGER.info("End: UIMS createIdentityWithMobileWithPassword() finished, response:"+objMapper.writeValueAsString(uimsUserResponse));
 			} else {
 				//CODE-RE-STRUCTURING - Comment differs across Integration, Staging and Preprod
 				LOGGER.info("Start: UIMS createIdentityWithPasswordForceIdmsId() for phone:"+identity.getPhoneId());
 				uimsUserResponse = authenticatedUserManagerUIMSV22.createIdentityWithPasswordForceIdmsId(callerFid,
 						identity, password, forcedFederatedId);				
-				LOGGER.info("End: UIMS createIdentityWithPasswordForceIdmsId() finished, response:"+uimsUserResponse);
+				LOGGER.info("End: UIMS createIdentityWithPasswordForceIdmsId() finished, response:"+objMapper.writeValueAsString(uimsUserResponse));
 			}
 		} catch (IMSServiceSecurityCallNotAllowedException_Exception | ImsMailerException_Exception
 				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
@@ -141,12 +141,12 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 				//uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithPhoneId(callerFid, identity, application);
 				uimsUserResponse = authenticatedUserManagerUIMSV22.createIdentityWithPhoneIdForceIdmsId(callerFid, identity, forcedFederatedId);
 				//CODE-RE-STRUCTURING - Comment differs across Integration, Staging and Preprod
-				LOGGER.info("End: UIMS createIdentityWithPhoneId() finished, response:"+uimsUserResponse);
+				LOGGER.info("End: UIMS createIdentityWithPhoneId() finished, response:"+objMapper.writeValueAsString(uimsUserResponse));
 			}else{
 				//CODE-RE-STRUCTURING - Comment differs across Integration, Staging and Preprod
 				LOGGER.info("Start: UIMS createIdentityForceIdmsId() for phone:"+identity.getPhoneId());
 			uimsUserResponse =authenticatedUserManagerUIMSV22.createIdentityForceIdmsId(callerFid, identity, forcedFederatedId);
-			LOGGER.info("End: UIMS createIdentityForceIdmsId() finished, response:"+uimsUserResponse);
+			LOGGER.info("End: UIMS createIdentityForceIdmsId() finished, response:"+objMapper.writeValueAsString(uimsUserResponse));
 			}
 		} catch (IMSServiceSecurityCallNotAllowedException_Exception | ImsMailerException_Exception
 				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
