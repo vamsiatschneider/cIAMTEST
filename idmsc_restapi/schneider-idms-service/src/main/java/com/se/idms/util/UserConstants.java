@@ -434,8 +434,8 @@ public class UserConstants {
 	public static final String CONTENT_TYPE_APP_XML = "application/xml";
 	public static final String ACCEPT_TYPE_APP_JSON = "application/json";
 	public static final String IFW_GRANT_TYPE = "client_credentials";
-	public static final String IFW_CLIENT_ID = "N2s0I7Ifmxyf5gIDUUihdinmrRUa";
-	public static final String CLIENT_SECRET = "Qy5VK5oQgquECwhXIugBY1aamQca";
+	//public static final String IFW_CLIENT_ID = "N2s0I7Ifmxyf5gIDUUihdinmrRUa";
+	//public static final String CLIENT_SECRET = "Qy5VK5oQgquECwhXIugBY1aamQca";
 	
 	public static final String APPLICATION_NAME = "China IDMS";
 	public static final String COUNTRY_CODE = "FR";

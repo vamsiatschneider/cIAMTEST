@@ -11,6 +11,7 @@ import com.idms.model.UpdateUserRequest;
 import com.idms.model.UserRegistrationInfoRequest;
 import com.idms.product.model.OpenAMPasswordRecoveryInput;
 import com.idms.product.model.OpenAmUserRequest;
+import com.idms.product.model.PasswordRecoveryUser;
 import com.idms.product.model.UimsUserRequest;
 import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.dto.IFWCustomAttributesForWork;
@@ -29,6 +30,7 @@ public class IdmsMapper extends ConfigurableMapper{
     	configureIFWUserRequestToOpenAmUserRequest(mapperFactory);
     	configureUpdateUserRequest(mapperFactory);
     	configurePasswordRecoveryRequest(mapperFactory);
+    	configurePasswordRecoveryRequestv4(mapperFactory);
     	configureIFWUserRequestToUimsUserRequest(mapperFactory);
     	configureIFWUserRequestToUserV5Request(mapperFactory);
     	configureIFWUserRequestToCompanyV3Request(mapperFactory);
@@ -199,6 +201,18 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.email", "userRecord.email")
         .field("userRecord.mobilePhone", "userRecord.mobile")
         .field("userRecord.IDMS_Profile_update_source__c", "userRecord.profileLastUpdateSource")
+        .byDefault()
+        .register();
+    }
+	
+	/*
+	 * PasswordRecoveryRequest
+	 */
+	private void configurePasswordRecoveryRequestv4(MapperFactory mapperFactory) {
+        mapperFactory.classMap(PasswordRecoveryRequest.class,PasswordRecoveryUser.class)
+        .field("userRecord.email", "email")
+        .field("userRecord.mobilePhone", "mobile")
+        .field("userRecord.IDMS_Profile_update_source__c", "profileLastUpdateSource")
         .byDefault()
         .register();
     }

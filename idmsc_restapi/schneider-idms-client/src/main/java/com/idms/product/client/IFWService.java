@@ -40,7 +40,7 @@ public interface IFWService {
 			@FormParam("mobile") String email, @FormParam("withGlobalUsers") Boolean withGlobalUsers);
 	
 	@POST
-	@Path("/rest/idms/user/2.0/password/resetrequest")
+	@Path("/rest/idms/user/4.0/password/resetrequest")
 	String initiatePasswordRecovery(@HeaderParam("Content-Type") String contetType,
 			@HeaderParam("X-BFO-Authorization") String bfoAuthorization,
 			@HeaderParam("X-SE-IFW-ApplicationName") String applicationName,
