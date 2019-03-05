@@ -48,6 +48,7 @@ public class UIMSCompanyManagerSoapService {
 	 * Logger instance.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(UIMSUserManagerSoapService.class);
+	private static final Logger UIMSSYNCLOGGER = LoggerFactory.getLogger("uimsSyncErrorLogger");
 	
 	@Inject
 	private SamlAssertionTokenGenerator samlTokenService;
@@ -177,11 +178,21 @@ public class UIMSCompanyManagerSoapService {
 			LOGGER.info("Start: updateCompany() of UIMS for fedid ->"+fedId);
 			uimsUserResponse = companyManagerUIMSV2.updateCompany(CALLER_FID, fedId, companyFedId, company);
 			LOGGER.info("End: updateCompany() of UIMS finished for fedid -> "+fedId+" , response is "+uimsUserResponse);
+			
+			if(!uimsUserResponse){
+				UIMSSYNCLOGGER.error("updateUIMSCompany failed in UIMS, fedId = "+fedId+" ,companyFedId = "+companyFedId);
+				UIMSSYNCLOGGER.error("updateUIMSCompany failed in UIMS, company info = "+objMapper.writeValueAsString(company));
+			}
 		} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
 				| LdapTemplateNotReadyException | RequestedEntryNotExistsException | SecuredImsException
 				| UnexpectedLdapResponseException | UnexpectedRuntimeImsException | JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			LOGGER.error("An error occured."+e.getMessage());
+			UIMSSYNCLOGGER.error("Exception occured in updateUIMSCompany = "+e.getMessage());
+			UIMSSYNCLOGGER.error("updateUIMSCompany failed in UIMS, fedId = "+fedId+" ,companyFedId = "+companyFedId);
+			try {
+				UIMSSYNCLOGGER.error("updateUIMSCompany failed in UIMS, company info = "+objMapper.writeValueAsString(company));
+			} catch (JsonProcessingException e1) {
+				LOGGER.error("JsonProcessingException1 in updateUIMSCompany()::" + e1.getMessage());
+			}
 		}
 		return uimsUserResponse;
 	}

@@ -153,6 +153,10 @@ public class UIMSUserManagerSoapServiceSync {
 					LOGGER.info("UIMS user created successfully::" + userCreated);
 				}
 			} catch (RetryException e) {
+				/*Attempt<?> lastFailedAttempt = e.getLastFailedAttempt();
+				Throwable originalException = lastFailedAttempt.getExceptionCause();
+				originalException.printStackTrace();
+				LOGGER.error("Exception from UIMS while create user::" + originalException.getMessage());*/
 				LOGGER.error("RetryException while UIMS create user::" + e.getMessage());
 				
 			} catch (ExecutionException e) {

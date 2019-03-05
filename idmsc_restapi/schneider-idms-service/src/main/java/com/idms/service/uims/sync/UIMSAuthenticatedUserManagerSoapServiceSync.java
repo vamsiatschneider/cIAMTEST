@@ -39,6 +39,7 @@ import com.uims.authenticatedUsermanager.UserV6;
 public class UIMSAuthenticatedUserManagerSoapServiceSync {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(UIMSAuthenticatedUserManagerSoapServiceSync.class);
+	private static final Logger UIMSSYNCLOGGER = LoggerFactory.getLogger("uimsSyncErrorLogger");
 	
 	@Value("${authUserManaUIMSVWsdl}")
 	private String authUserManaUIMSVWsdl;
@@ -104,15 +105,22 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 				uimsUserResponse = authenticatedUserManagerUIMSV22.createIdentityWithPasswordForceIdmsId(callerFid,
 						identity, password, forcedFederatedId);				
 				LOGGER.info("End: UIMS createIdentityWithPasswordForceIdmsId() finished, response:"+objMapper.writeValueAsString(uimsUserResponse));
+				if(null == uimsUserResponse ||(null != uimsUserResponse && !uimsUserResponse.isHasBeenCreated())){
+					UIMSSYNCLOGGER.error("User creation failed in UIMS, identity = "+objMapper.writeValueAsString(identity));
+					UIMSSYNCLOGGER.error("User creation failed in UIMS, errorMessage got from UIMS = "+uimsUserResponse.getErrorMessage());
+				}
 			}
 		} catch (IMSServiceSecurityCallNotAllowedException_Exception | ImsMailerException_Exception
 				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
 				| RequestedEntryNotExistsException_Exception | RequestedInternalUserException_Exception
 				| SecuredImsException_Exception | UnexpectedLdapResponseException_Exception
-				| UnexpectedRuntimeImsException_Exception e) {
-			LOGGER.error("Exception in createUIMSUserWithPassword()::" + e.getMessage());
-		} catch (JsonProcessingException e) {
-			LOGGER.error("JsonProcessingException in createUIMSUserWithPassword()::" + e.getMessage());
+				| UnexpectedRuntimeImsException_Exception | JsonProcessingException e) {
+			UIMSSYNCLOGGER.error("Exception in createUIMSUserWithPassword()::" + e.getMessage());
+			try {
+				UIMSSYNCLOGGER.error("User creation failed in UIMS, identity = "+objMapper.writeValueAsString(identity));
+			} catch (JsonProcessingException e1) {
+				LOGGER.error("JsonProcessingException1 in createUIMSUser()::" + e1.getMessage());
+			}
 		}
 		LOGGER.info("createUIMSUserWithPassword() UIMS Sync method -> End.. with FederatedID:"+uimsUserResponse.getFederatedID());
 		return uimsUserResponse.getFederatedID();
@@ -148,14 +156,21 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 			uimsUserResponse =authenticatedUserManagerUIMSV22.createIdentityForceIdmsId(callerFid, identity, forcedFederatedId);
 			LOGGER.info("End: UIMS createIdentityForceIdmsId() finished, response:"+objMapper.writeValueAsString(uimsUserResponse));
 			}
+			if(null == uimsUserResponse ||(null != uimsUserResponse && !uimsUserResponse.isHasBeenCreated())){
+				UIMSSYNCLOGGER.error("User creation failed in UIMS, identity info = "+objMapper.writeValueAsString(identity));
+				UIMSSYNCLOGGER.error("User creation failed in UIMS, errorMessage got from UIMS = "+uimsUserResponse.getErrorMessage());
+			}
 		} catch (IMSServiceSecurityCallNotAllowedException_Exception | ImsMailerException_Exception
 				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
 				| RequestedEntryNotExistsException_Exception | RequestedInternalUserException_Exception
 				| SecuredImsException_Exception | UnexpectedLdapResponseException_Exception
-				| UnexpectedRuntimeImsException_Exception e) {
-			LOGGER.error("Exception in createUIMSUser() of UIMS::" + e.getMessage());
-		} catch (JsonProcessingException e) {
-			LOGGER.error("JsonProcessingException in createUIMSUser()::" + e.getMessage());
+				| UnexpectedRuntimeImsException_Exception | JsonProcessingException e) {
+			UIMSSYNCLOGGER.error("Exception in createUIMSUser() of UIMS::" + e.getMessage());
+			try {
+				UIMSSYNCLOGGER.error("User creation failed in UIMS, identity = "+objMapper.writeValueAsString(identity));
+			} catch (JsonProcessingException e1) {
+				LOGGER.error("JsonProcessingException1 in createUIMSUser()::" + e1.getMessage());
+			}
 		}
 		LOGGER.info("createUIMSUser() Sync method -> End..FederatedID="+uimsUserResponse.getFederatedID());
 		return uimsUserResponse.getFederatedID();

@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.schneider.ims.service.company.impl.uimsv2.AuthenticatedCompanyManagerUIMSV2;
 import com.schneider.ims.service.company.impl.uimsv2.ForcedFidAlreadyExistException;
@@ -22,7 +23,6 @@ import com.schneider.ims.service.company.impl.uimsv2.SecuredImsException;
 import com.schneider.ims.service.company.impl.uimsv2.UnexpectedLdapResponseException;
 import com.schneider.ims.service.company.impl.uimsv2.UnexpectedRuntimeImsException;
 import com.schneider.ims.service.uimsv2.CompanyV3;
-import com.se.idms.util.UimsConstants;
 import com.uims.companymanager.CompanyManagerUIMSV2;
 
 /**
@@ -34,6 +34,7 @@ import com.uims.companymanager.CompanyManagerUIMSV2;
 @org.springframework.stereotype.Service("uimsCompManagSoapServiceSync")
 public class UIMSCompanyManagerSoapServiceSync {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UIMSCompanyManagerSoapServiceSync.class);
+	private static final Logger UIMSSYNCLOGGER = LoggerFactory.getLogger("uimsSyncErrorLogger");
 	
 	@Value("${uimsCompanyManagerWsdl}")
 	private String uimsCompanyManagerWsdl;
@@ -53,11 +54,12 @@ public class UIMSCompanyManagerSoapServiceSync {
 	 */
 	public CompanyManagerUIMSV2 getCompanyManager() {
 		LOGGER.info("Entered getCompanyManager() method -> Start");
+		
 		URL url;
 		CompanyManagerUIMSV2 userManagerUIMSV2 = null;
+		
 		try {
 			url = new URL(uimsCompanyManagerWsdl);
-
 			QName qname = new QName(uimsCompanyManagerQname,uimsCompanyManagerPortName);
 			Service service = Service.create(url, qname);
 
@@ -80,16 +82,19 @@ public class UIMSCompanyManagerSoapServiceSync {
 	 */
 	public AuthenticatedCompanyManagerUIMSV2 getAuthenitcatedCompanyManager() {
 		LOGGER.info("Entered getAuthenitcatedCompanyManager() method -> Start");
+		
 		URL url;
 		AuthenticatedCompanyManagerUIMSV2 userManagerUIMSV2 = null;
-		try {
-			url = new URL(uimsCompanyManagerWsdl);
 		
+		try {
+			url = new URL(uimsCompanyManagerWsdl);		
 		QName qname = new QName(uimsCompanyManagerQname,uimsCompanyManagerPortName);
 		Service service = Service.create(url, qname);
+		
 		LOGGER.info("Start: getPort() of UIMS");
-		 userManagerUIMSV2 = service.getPort(AuthenticatedCompanyManagerUIMSV2.class);
-		 LOGGER.info("End: getPort() of UIMS -> End, response is:" + userManagerUIMSV2);
+		userManagerUIMSV2 = service.getPort(AuthenticatedCompanyManagerUIMSV2.class);
+		LOGGER.info("End: getPort() of UIMS -> End, response is:" + userManagerUIMSV2);
+		
 		} catch (MalformedURLException e) {
 			LOGGER.error("Exception in getAuthenitcatedCompanyManager()::" + e.getMessage());
 		}
@@ -104,15 +109,19 @@ public class UIMSCompanyManagerSoapServiceSync {
 	 */
 	public String createUIMSCompany(String fedId, String vnew, CompanyV3 company) {
 		LOGGER.info("Entered createUIMSCompany() method -> Start");
+		
 		String uimsUserResponse = "";
 		//String samlAssertion = null;
 		AuthenticatedCompanyManagerUIMSV2 companyManagerUIMSV2 = null;
 		ObjectMapper objMapper = new ObjectMapper();
+		
 		try {
 			LOGGER.info("Parameter fedId -> " + fedId +" ,vnew="+vnew);
 			LOGGER.info("Parameter company -> " + objMapper.writeValueAsString(company));
+			
 			companyManagerUIMSV2 = getAuthenitcatedCompanyManager();
 			//samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(fedId, vnew);
+			
 			LOGGER.info("Start: UIMS createCompany()");
 			uimsUserResponse = companyManagerUIMSV2.createCompany(CALLER_FID, fedId, company);
 			LOGGER.info("End: UIMS createCompany()");
@@ -132,26 +141,49 @@ public class UIMSCompanyManagerSoapServiceSync {
 	 */
 	public String createUIMSCompanyWithCompanyForceIdmsId(String idmsFederationId, String companyForceFederationId,String vnew, CompanyV3 company) {
 		LOGGER.info("Entered createUIMSCompanyWithCompanyForceIdmsId() method -> Start");
+		
 		String uimsUserResponse = "";
 		//String samlAssertion = null;
 		AuthenticatedCompanyManagerUIMSV2 authenticatedCompanyManagerUIMSV2 = null;
 		ObjectMapper objMapper = new ObjectMapper();
+		
 		try {
 			LOGGER.info("Parameter fedId -> " + idmsFederationId +" ,vnew="+vnew);
 			LOGGER.info("Parameter companyForceFederationId -> " + companyForceFederationId);
 			LOGGER.info("Parameter company -> " + objMapper.writeValueAsString(company));
+			
 			authenticatedCompanyManagerUIMSV2 = getAuthenitcatedCompanyManager();
 			//samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(idmsFederationId, vnew);
+			
 			LOGGER.info("Start: UIMS createCompanyForceIdmsId()");
 			uimsUserResponse = authenticatedCompanyManagerUIMSV2.createCompanyForceIdmsId(CALLER_FID, idmsFederationId, company, companyForceFederationId);
 			LOGGER.info("End: UIMS createCompanyForceIdmsId(), response is "+uimsUserResponse);
+			
+			if(null == uimsUserResponse || uimsUserResponse.isEmpty()){
+				UIMSSYNCLOGGER.error("Company creation failed in UIMS, companyForceFederationId = "+companyForceFederationId);
+				UIMSSYNCLOGGER.error("Company creation failed in UIMS, company info = "+objMapper.writeValueAsString(company));
+			}
 		} catch (ForcedFidAlreadyExistException | IMSServiceSecurityCallNotAllowedException
 				| InvalidImsServiceMethodArgumentException | LdapTemplateNotReadyException
 				| RequestedEntryNotExistsException | RequestedInternalUserException | SecuredImsException
 				| UnexpectedLdapResponseException | UnexpectedRuntimeImsException e) {
-			LOGGER.error("Error in createUIMSCompanyWithCompanyForceIdmsId()::" + e.getMessage());
+			UIMSSYNCLOGGER.error("Error in createUIMSCompanyWithCompanyForceIdmsId()::" + e.getMessage());
+			UIMSSYNCLOGGER.error("Company creation failed in UIMS, companyForceFederationId = "+companyForceFederationId);
+			
+			try {
+				UIMSSYNCLOGGER.error("Company creation failed in UIMS, company info = "+objMapper.writeValueAsString(company));
+			} catch (JsonProcessingException e1) {
+				LOGGER.error("JsonProcessingException1 in createUIMSCompanyWithCompanyForceIdmsId()::" + e1.getMessage());
+			}
 		}catch (Exception e) {
-			LOGGER.error("Error in createUIMSCompanyWithCompanyForceIdmsId()::" + e.getMessage());
+			UIMSSYNCLOGGER.error("Exception in createUIMSCompanyWithCompanyForceIdmsId()::" + e.getMessage());
+			UIMSSYNCLOGGER.error("Company creation failed in UIMS, companyForceFederationId = "+companyForceFederationId);
+			
+			try {
+				UIMSSYNCLOGGER.error("Company creation failed in UIMS, company info = "+objMapper.writeValueAsString(company));
+			} catch (JsonProcessingException e1) {
+				LOGGER.error("JsonProcessingException2 in createUIMSCompanyWithCompanyForceIdmsId()::" + e1.getMessage());
+			}
 		}
 		return uimsUserResponse;
 	}
@@ -160,8 +192,10 @@ public class UIMSCompanyManagerSoapServiceSync {
 		LOGGER.info("Entered getUIMSCompany() method -> Start");
 		LOGGER.info("Parameter federatedId -> " + federatedId);
 		LOGGER.info("Parameter companyFedId -> " + companyFedId);
+		
 		AuthenticatedCompanyManagerUIMSV2 companyManagerUIMSV2 = getAuthenitcatedCompanyManager();
 		CompanyV3 uimsCompanyResponse = null;
+		
 		try {
 			LOGGER.info("Start: UIMS getCompany() for federatedId::"+federatedId);
 			uimsCompanyResponse = companyManagerUIMSV2.getCompany(CALLER_FID, federatedId, companyFedId);

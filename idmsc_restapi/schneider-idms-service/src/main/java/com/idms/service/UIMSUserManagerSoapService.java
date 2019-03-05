@@ -68,6 +68,7 @@ public class UIMSUserManagerSoapService {
 	 * Logger instance.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(UIMSUserManagerSoapService.class);
+	private static final Logger UIMSSYNCLOGGER = LoggerFactory.getLogger("uimsSyncErrorLogger");
 
 	//private static final Logger UIMSLOGGER = LoggerFactory.getLogger("uimsLogger");
 
@@ -426,15 +427,29 @@ public class UIMSUserManagerSoapService {
 			if(status){
 				LOGGER.info("UIMS updateUIMSUser() successful, status:" + status);
 			}else{
-				LOGGER.info("UIMS updateUIMSUser() failed, status:" + status);
+				LOGGER.error("UIMS updateUIMSUser() failed, status:" + status);
+				UIMSSYNCLOGGER.error("updateUIMSUser failed in UIMS, fedId = "+fedId);
+				UIMSSYNCLOGGER.error("updateUIMSUser failed in UIMS, user info = "+objMapper.writeValueAsString(user));
 			}
 		} catch (IMSServiceSecurityCallNotAllowedException_Exception | InactiveUserImsException_Exception
 				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
 				| RequestedEntryNotExistsException_Exception | SecuredImsException_Exception
 				| UnexpectedLdapResponseException_Exception | UnexpectedRuntimeImsException_Exception e) {
-			LOGGER.error("Error executing while getting status in updateUIMSUser()::" + e.getMessage());
+			UIMSSYNCLOGGER.error("UIMS updateUIMSUser() failed, Exception ::" + e.getMessage());
+			UIMSSYNCLOGGER.error("updateUIMSUser failed in UIMS, fedId = "+fedId);
+			try {
+				UIMSSYNCLOGGER.error("updateUIMSUser failed in UIMS, user info = "+objMapper.writeValueAsString(user));
+			} catch (JsonProcessingException e1) {
+				LOGGER.error("JsonProcessingException1 in updateUIMSUser()::" + e1.getMessage());
+			}			
 		} catch (Exception e) {
-			LOGGER.error("Error executing while getting samlAssertion::" + e.getMessage());
+			LOGGER.error("Exception executing while getting samlAssertion::" + e.getMessage());
+			UIMSSYNCLOGGER.error("updateUIMSUser failed in UIMS, fedId = "+fedId);
+			try {
+				UIMSSYNCLOGGER.error("updateUIMSUser failed in UIMS, user info = "+objMapper.writeValueAsString(user));
+			} catch (JsonProcessingException e1) {
+				LOGGER.error("JsonProcessingException2 in updateUIMSUser()::" + e1.getMessage());
+			}
 		}
 		return status;
 	}

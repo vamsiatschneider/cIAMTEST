@@ -121,9 +121,9 @@ import com.idms.product.client.SalesForceService;
 import com.idms.product.model.Attributes;
 import com.idms.product.model.OpenAMGetUserHomeResponse;
 import com.idms.product.model.OpenAMGetUserWorkResponse;
-import com.idms.product.model.OpenAMPasswordRecoveryInput;
 import com.idms.product.model.OpenAmUser;
 import com.idms.product.model.OpenAmUserRequest;
+import com.idms.product.model.PasswordRecoveryUser;
 import com.idms.product.model.PostMobileRecord;
 import com.idms.service.uims.sync.UIMSUserManagerSoapServiceSync;
 import com.idms.service.util.AsyncUtil;
@@ -3964,21 +3964,14 @@ public class UserServiceImpl implements UserService {
 					&& !passwordRecoveryRequest.getUserRecord().getEmail().isEmpty())
 					&& (null != passwordRecoveryRequest.getUserRecord().getMobilePhone()
 							&& !passwordRecoveryRequest.getUserRecord().getMobilePhone().isEmpty())) {
-
 				loginIdentifier = passwordRecoveryRequest.getUserRecord().getEmail();
 				identifierType = UserConstants.EMAIL;
-				LOGGER.info("Start: validate() of EmailValidator for email:"+passwordRecoveryRequest.getUserRecord().getEmail());
 				validEmail = emailValidator.validate(passwordRecoveryRequest.getUserRecord().getEmail());
-				LOGGER.info("End: validate() of EmailValidator finished for email:"+passwordRecoveryRequest.getUserRecord().getEmail());
-
 			} else if ((null != passwordRecoveryRequest.getUserRecord().getEmail())
 					&& (!passwordRecoveryRequest.getUserRecord().getEmail().isEmpty())) {
-
 				loginIdentifier = passwordRecoveryRequest.getUserRecord().getEmail();
 				identifierType = UserConstants.EMAIL;
-				LOGGER.info("Start: validate() of EmailValidator for email:"+passwordRecoveryRequest.getUserRecord().getEmail());
 				validEmail = emailValidator.validate(passwordRecoveryRequest.getUserRecord().getEmail());
-				LOGGER.info("End: validate() of EmailValidator finished for email:"+passwordRecoveryRequest.getUserRecord().getEmail());
 			} else if ((null != passwordRecoveryRequest.getUserRecord().getMobilePhone())
 					&& (!passwordRecoveryRequest.getUserRecord().getMobilePhone().isEmpty())) {
 				validMobile = legthValidator.validate(UserConstants.MOBILE_PHONE,passwordRecoveryRequest.getUserRecord().getMobilePhone());
@@ -4019,7 +4012,6 @@ public class UserServiceImpl implements UserService {
 			PasswordRecoveryRequest passwordRecoveryRequest, long startTime, String withGlobalUsers) {
 		LOGGER.info("Entered getPasswordRecoveryResponse() -> Start");
 		LOGGER.info("Parameter hotpService -> " + hotpService+" ,loginIdentifier -> "+loginIdentifier);
-		LOGGER.info("Parameter conf -> " + conf);
 		LOGGER.info("Parameter withGlobalUsers -> "+withGlobalUsers);
 		
 		String userData = null;
@@ -4055,7 +4047,6 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("resultCount=" + resultCount);
 			LOGGER.info("userName=" + userName);
 			if (resultCount.intValue() > 0) {
-
 				/*
 				 * requestHotp(hotpService, userName, iPlanetDirectoryKey,
 				 * passwordRecoveryRequest.getUserRecord().
@@ -4065,7 +4056,6 @@ public class UserServiceImpl implements UserService {
 				String otp = sendEmail.generateOtp(userName);
 				LOGGER.info("Successfully OTP generated for " + userName);
 				if (UserConstants.HOTP_EMAIL_RESET_PR.equalsIgnoreCase(hotpService)) {
-
 					sendEmail.sendOpenAmEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,
 							passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c());
 				} else if (UserConstants.HOTP_MOBILE_RESET_PR.equalsIgnoreCase(hotpService)) {
@@ -4073,37 +4063,27 @@ public class UserServiceImpl implements UserService {
 							passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c());
 					sendEmail.sendSMSNewGateway(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,
 							passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c());
-
 				}
 
 			} else if (resultCount.intValue() < 1) {
-
 				if (UserConstants.TRUE.equalsIgnoreCase(withGlobalUsers)) {
-
-					/*LOGGER.info(
-							"UserServiceImpl:getPasswordRecoveryResponse -> : ifwService.getIFWToken:   Request -> "+
-							UserConstants.CONTENT_TYPE_URL_FROM, UserConstants.IFW_GRANT_TYPE,
-							UserConstants.IFW_CLIENT_ID, UserConstants.CLIENT_SECRET);*/
 					LOGGER.info("Start: getIFWToken() of IFWService");
 					ifwAccessToken = ifwService.getIFWToken(UserConstants.CONTENT_TYPE_URL_FROM,
-							UserConstants.IFW_GRANT_TYPE, UserConstants.IFW_CLIENT_ID, UserConstants.CLIENT_SECRET);
+							UserConstants.IFW_GRANT_TYPE, ifwClientId, ifwClientSecret);
 					LOGGER.info("End: getIFWToken() of IFWService finished");
 
 					productDocCtx = JsonPath.using(conf).parse(ifwAccessToken);
-					String accessToken = productDocCtx.read("$.access_token");
-					
+					String accessToken = productDocCtx.read("$.access_token");					
 					String bfoAuthorizationToken = sfSyncServiceImpl.getSFToken();
-
 					String authorization = "Bearer " + accessToken;
-
-					OpenAMPasswordRecoveryInput input = mapper.map(passwordRecoveryRequest,
-							OpenAMPasswordRecoveryInput.class);
-
+					
+					PasswordRecoveryUser input = mapper.map(passwordRecoveryRequest,
+							PasswordRecoveryUser.class);
 					objMapper = new ObjectMapper();
 					String json = objMapper.writeValueAsString(input);
 
 					LOGGER.info("Start: initiatePasswordRecovery() of IFWService");
-					ifwService.initiatePasswordRecovery(UserConstants.ACCEPT_TYPE_APP_JSON, bfoAuthorizationToken,
+					String ifwResponse = ifwService.initiatePasswordRecovery(UserConstants.ACCEPT_TYPE_APP_JSON, bfoAuthorizationToken,
 							UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE, UserConstants.LANGUAGE_CODE,
 							UserConstants.REQUEST_ID, authorization, UserConstants.ACCEPT_TYPE_APP_JSON,
 							UserConstants.FALSE, json);
