@@ -799,7 +799,12 @@ public class SendEmail {
 			encodedHOTPcode = code;
 			// get sso token.. iPlanetDirectoryKey
 			LOGGER.info("Start: getUser() of openamservice for sendOpenAmMobileEmail of userid:"+userId);
-			userData = productService.getUser(userService.getSSOToken(), userId);
+			try {
+				userData = productService.getUser(userService.getSSOToken(), userId);
+			} catch (IOException ioExp) {
+				// TODO Auto-generated catch block
+				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+			}
 			LOGGER.info("End: getUser() of openamservice finished for sendOpenAmMobileEmail of userid:"+userId);
 			productDocCtxUser = JsonPath.using(conf).parse(userData);			
 			
