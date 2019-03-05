@@ -3778,14 +3778,14 @@ public class UserServiceImpl implements UserService {
 			}
 
 			// Admin token check
-			if (null == authorizedToken || authorizedToken.isEmpty()) {
+			/*if (null == authorizedToken || authorizedToken.isEmpty()) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage(UserConstants.ADMIN_TOKEN_MANDATORY);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error is " + userResponse.getMessage());
 				LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
-			}
+			}*/
 
 			// UID
 			if (null != ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c() && !UserConstants.UIMS
@@ -3900,14 +3900,14 @@ public class UserServiceImpl implements UserService {
 			 * } }
 			 */
 
-			if (!getTechnicalUserDetails(authorizedToken)) {
+			/*if (!getTechnicalUserDetails(authorizedToken)) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage("Unauthorized or session expired");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error is " + userResponse.getMessage());
 				LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
 				return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
-			}
+			}*/
 
 			idmsAclType_c = getIDMSAclType(ailRequest.getUserAILRecord().getIDMSAclType__c());
 			LOGGER.info("AIL type = " + idmsAclType_c);
