@@ -18,7 +18,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
  	</parent>
   
   <groupId>com.schneider.uims</groupId>
-  <artifactId>uims-ws-int</artifactId>
+  <artifactId>schneider-uims-ws</artifactId>
   <packaging>jar</packaging>
   
 	
