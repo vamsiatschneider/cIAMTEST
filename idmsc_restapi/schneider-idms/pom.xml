@@ -154,7 +154,7 @@
 	</dependencyManagement>
   
 	<modules>
-		<module>../uims-ws-int</module>
+		<module>../schneider-uims-ws</module>
 		<module>../schneider-idms-client</module>
 		<module>../schneider-cache-central</module>
 		<module>../schneider-idms-service</module>

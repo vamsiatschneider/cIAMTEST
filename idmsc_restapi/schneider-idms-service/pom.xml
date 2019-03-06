@@ -68,7 +68,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.schneider.uims</groupId>
-			<artifactId>uims-ws-int</artifactId>
+			<artifactId>schneider-uims-ws</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
