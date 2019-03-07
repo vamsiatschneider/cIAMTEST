@@ -8890,10 +8890,10 @@ public class UserServiceImpl implements UserService {
 				if (Long.parseLong(otpValidityTime) <= System.currentTimeMillis()) {
 					errorResponse.setStatus(errorStatus);
 					errorResponse.setMessage(UserConstants.OTP_EXPIRED);
-					LOGGER.info(UserConstants.OTP_EXPIRED + " for mobileNum ::" + mobileNum);
+					LOGGER.error(UserConstants.OTP_EXPIRED + " for mobileNum ::" + mobileNum);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by verifyPIN() : " + elapsedTime);
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+					return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 				}
 			} else if (null != pinInOpenDJ && !pinInOpenDJ.isEmpty()
 					&& pinInOpenDJ.equalsIgnoreCase(UserConstants.PIN_VERIFIED)) {
@@ -8909,7 +8909,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.error(UserConstants.OTP_INVALID + " for mobileNum ::" + mobileNum);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by verifyPIN() : " + elapsedTime);
-				return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 		} catch (Exception e) {
 
@@ -8925,7 +8925,7 @@ public class UserServiceImpl implements UserService {
 		LOGGER.error(UserConstants.OTP_INVALID + " for mobileNum ::" + mobileNum);
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info("Time taken by verifyPIN() : " + elapsedTime);
-		return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+		return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 	}
 
 	/**
