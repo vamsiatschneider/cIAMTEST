@@ -179,13 +179,13 @@ public class SendEmail {
 			LOGGER.info("End: sending email finished to:"+to);
 		} 
 		catch (SMTPSendFailedException e) {
-			LOGGER.error("SMTPSendFailedException while sending email to "+to+" :: -> " + e.getMessage());
+			LOGGER.error("SMTPSendFailedException while sending email to "+to+" :: -> " + e.getMessage(),e);
 		}
 		catch (MessagingException e) {
-			LOGGER.error("MessagingException while sending email to "+to+" :: -> " + e.getMessage());
+			LOGGER.error("MessagingException while sending email to "+to+" :: -> " + e.getMessage(),e);
 		}
 		catch (Exception e) {
-			LOGGER.error("Exception while sending email to "+to+" :: -> " + e.getMessage());
+			LOGGER.error("Exception while sending email to "+to+" :: -> " + e.getMessage(),e);
 		}
 	}
 	
@@ -514,7 +514,7 @@ public class SendEmail {
 			file.close();
 		} catch (IOException e) {
 			//throw new FileNotFoundException("Caught Exception!!!!!!!!!!!! " + e);
-			LOGGER.error("Executing while emailContentTemplate :: -> " + e.getMessage());
+			LOGGER.error("Executing while emailContentTemplate :: -> " + e.getMessage(),e);
 		}
 		/*LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : Content Builder Length after reading the file :"
 				+ contentBuilder.length());*/
@@ -774,7 +774,7 @@ public class SendEmail {
 
 		} catch (Exception e) {
 			LOGGER.error("Exception in sendSMSMessage() while sending code to: "+to);
-			LOGGER.error(e.getMessage());
+			LOGGER.error(e.getMessage(),e);
 		}
 
 	}
@@ -803,7 +803,7 @@ public class SendEmail {
 				userData = productService.getUser(userService.getSSOToken(), userId);
 			} catch (IOException ioExp) {
 				// TODO Auto-generated catch block
-				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+				LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
 			}
 			LOGGER.info("End: getUser() of openamservice finished for sendOpenAmMobileEmail of userid:"+userId);
 			productDocCtxUser = JsonPath.using(conf).parse(userData);			
@@ -939,7 +939,7 @@ public class SendEmail {
 
 		} catch (Exception e) {
 			LOGGER.error("Exception in sendSMSNewGateway() while sending code to: "+to);
-			LOGGER.error(e.getMessage());
+			LOGGER.error(e.getMessage(),e);
 		}
 
 	}
@@ -976,7 +976,7 @@ public class SendEmail {
 			}
 		} catch (Exception e) {
 			LOGGER.error("Exception in sendSMSNewGateway() while sending code to: "+mobile);
-			LOGGER.error(e.getMessage());
+			LOGGER.error(e.getMessage(),e);
 		}
 	}
 	
