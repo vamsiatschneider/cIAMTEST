@@ -413,7 +413,7 @@ public class UserServiceImpl implements UserService {
 			try {
 				PlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExcep) {
-				LOGGER.error("Unable to get SSO Token" + ioExcep.getMessage());
+				LOGGER.error("Unable to get SSO Token" + ioExcep.getMessage(),ioExcep);
 			}
 
 			LOGGER.info("Start: checkUserExistsWithEmailMobile() of OpenAMService for userName=" + userName);
@@ -430,7 +430,7 @@ public class UserServiceImpl implements UserService {
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
 			productDocCtx = JsonPath.using(conf).parse(userData);
 			Integer resultCount = productDocCtx.read("$.resultCount");
-			LOGGER.info("resultCount = " + resultCount);
+			LOGGER.info("resultCount = "+resultCount);
 			if (resultCount.intValue() > 0) {
 				regSource = null != productDocCtx.read("$.result[0].registerationSource[0]")
 						? getValue(productDocCtx.read("$.result[0].registerationSource[0]").toString()) : null;
@@ -478,7 +478,7 @@ public class UserServiceImpl implements UserService {
 			// successResponse = IOUtils.toString((InputStream)
 			// authenticateResponse.getEntity());
 		} catch (Exception e) {
-			LOGGER.error("Exception in authenticateUser():" + e.getMessage());
+			LOGGER.error("Exception in authenticateUser():" + e.getMessage(),e);
 			jsonObject.put("user_store", "None");
 			AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + successStatus + "," + regSource);
 			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
@@ -557,7 +557,7 @@ public class UserServiceImpl implements UserService {
 		try {
 			token = getSSOToken();
 		} catch (IOException ioExp) {
-			LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+			LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 		}
 
 		try {
@@ -582,7 +582,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("getUser() call of OpenAMService finished with userdata: " + userData);
 			}
 		} catch (Exception e) {
-			LOGGER.error("Error in getUser() openam service->" + e.getMessage());
+			LOGGER.error("Error in getUser() openam service->" + e.getMessage(),e);
 			LOGGER.error(e.toString());
 			if (userData == null) {
 				JSONObject jsonObject = new JSONObject();
@@ -647,7 +647,7 @@ public class UserServiceImpl implements UserService {
 			token = getSSOToken();
 		} catch (IOException ioExp) {
 			// TODO Auto-generated catch block
-			LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+			LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
 			token = "";
 		}
 
@@ -662,7 +662,7 @@ public class UserServiceImpl implements UserService {
 			}
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
-			LOGGER.error("UserServiceImpl:getUserByOauthToken() ->" + e.getMessage());
+			LOGGER.error("UserServiceImpl:getUserByOauthToken() ->" + e.getMessage(),e);
 			if (userData == null) {
 				JSONObject jsonObject = new JSONObject();
 				jsonObject.put("errorCode", "NOT_FOUND");
@@ -945,12 +945,12 @@ public class UserServiceImpl implements UserService {
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 			} catch (Exception e) {
-				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
+				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage() , e);
 				errorResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
 				errorResponse.setStatus(userResponse.getStatus());
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-				LOGGER.error("Error while processing is " + errorResponse.getMessage());
+				LOGGER.error("Error while processing is "+errorResponse.getMessage(),e);
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 
@@ -1104,7 +1104,7 @@ public class UserServiceImpl implements UserService {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
 				// TODO Auto-generated catch block
-				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 				iPlanetDirectoryKey = "";
 			}
 			LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
@@ -1465,27 +1465,24 @@ public class UserServiceImpl implements UserService {
 			errorResponse.setMessage(UserConstants.ERROR_CREATE_USER);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-			LOGGER.error("BadRequestException while user Registration :: -> " + e.getMessage());
-			// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
-			// "logout");
+			LOGGER.error("BadRequestException while user Registration :: -> " + e.getMessage(),e);
+			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
 			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 		} catch (NotFoundException e) {
 			errorResponse.setStatus(errorStatus);
 			errorResponse.setMessage(UserConstants.ERROR_CREATE_USER);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-			LOGGER.error("NotFoundException while user Registration :: -> " + e.getMessage());
-			// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
-			// "logout");
+			LOGGER.error("NotFoundException while user Registration :: -> " + e.getMessage(),e);
+			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
 			return Response.status(Response.Status.NOT_FOUND).entity(errorResponse).build();
 		} catch (Exception e) {
 			errorResponse.setStatus(errorStatus);
 			errorResponse.setMessage(UserConstants.ERROR_CREATE_USER);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-			LOGGER.error("Exception while user Registration :: -> " + e.getMessage());
-			// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
-			// "logout");
+			LOGGER.error("Exception while user Registration :: -> " + e.getMessage(),e);
+			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		}
 		userRequest.getUserRecord().setIDMS_Federated_ID__c(userName);
@@ -1562,7 +1559,7 @@ public class UserServiceImpl implements UserService {
 			jsonArray.add(jsonObject);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info(GET_USER_BY_TOKEN_TIME_LOG + elapsedTime);
-			LOGGER.error("Error in getUserInfoByAccessToken() of OpenAMTokenService:" + e.getMessage());
+			LOGGER.error("Error in getUserInfoByAccessToken() of OpenAMTokenService:"+e.getMessage(),e);
 			return Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(jsonArray).build();
 		}
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -2735,28 +2732,28 @@ public class UserServiceImpl implements UserService {
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.checkUserExists() : " + elapsedTime);
-			LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage());
+			LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (NotAuthorizedException e) {
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.checkUserExists() : " + elapsedTime);
-			LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage());
+			LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
 		} catch (NotFoundException e) {
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.ActivateUser() : " + elapsedTime);
-			LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage());
+			LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 		} catch (Exception e) {
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.checkUserExists() : " + elapsedTime);
-			LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage());
+			LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 		LOGGER.error("USER not found while executing checkUserExists()");
@@ -2787,7 +2784,7 @@ public class UserServiceImpl implements UserService {
 			iPlanetDirectoryKey = getSSOToken();
 		} catch (IOException ioExp) {
 			// TODO Auto-generated catch block
-			LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+			LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
 			iPlanetDirectoryKey = "";
 		}
 
@@ -2805,7 +2802,7 @@ public class UserServiceImpl implements UserService {
 
 				LOGGER.info("End: checkUserExistsWithEmailMobile() of OpenAMService fisnihed for email=" + email);
 			} catch (UnsupportedEncodingException e) {
-				LOGGER.error("Error in userExists() is-> " + e.getMessage());
+				LOGGER.error("Error in userExists() is-> " + e.getMessage(),e);
 			}
 
 			// user exists and resultcount > 0
@@ -3085,7 +3082,7 @@ public class UserServiceImpl implements UserService {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
 				// TODO Auto-generated catch block
-				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 				iPlanetDirectoryKey = "";
 			}
 
@@ -3305,7 +3302,7 @@ public class UserServiceImpl implements UserService {
 
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
-				LOGGER.error("Exception while userPinConfirmation :: -> " + e.getMessage());
+				LOGGER.error("Exception while userPinConfirmation :: -> " + e.getMessage(),e);
 				return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
 			} catch (Exception e) {
 				errorResponse.setStatus(errorStatus);
@@ -3313,7 +3310,7 @@ public class UserServiceImpl implements UserService {
 				errorResponse.setId(uniqueIdentifier);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
-				LOGGER.error("Exception while confirming the User pin:: -> " + e.getMessage());
+				LOGGER.error("Exception while confirming the User pin:: -> " + e.getMessage(),e);
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 
@@ -3592,10 +3589,10 @@ public class UserServiceImpl implements UserService {
 
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
-			LOGGER.error("Error while userPinConfirmation :: -> " + e.getMessage());
+			LOGGER.error("Error while userPinConfirmation :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (NotFoundException e) {
-			LOGGER.error("Error is " + e.getMessage());
+			LOGGER.error("Error is " + e.getMessage(),e);
 			// logic for PRM set password, if the user not found, call the
 			// Global get user api
 			// and retrieve the user details and pass it to create user
@@ -3677,7 +3674,7 @@ public class UserServiceImpl implements UserService {
 					}
 
 				} catch (IOException e1) {
-					LOGGER.error("IOException in userPinConfirmation()-> " + e1.getMessage());
+					LOGGER.error("IOException in userPinConfirmation()-> " + e1.getMessage(),e1);
 				}
 
 				// PRM success response
@@ -3702,14 +3699,13 @@ public class UserServiceImpl implements UserService {
 
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by userPinConfirmation() : " + elapsedTime);
-			LOGGER.error("Error in userPinConfirmation -> " + e.getMessage());
-			// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
-			// "logout");
+			LOGGER.error("Error in userPinConfirmation -> " + e.getMessage(),e);
+			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
 			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 		}
 
 		catch (Exception e) {
-			LOGGER.error("Error is " + e.getMessage());
+			LOGGER.error("Error is " + e.getMessage(),e);
 			response.setStatus(errorStatus);
 			response.setMessage(UserConstants.SERVER_ERROR);
 			response.setId(uniqueIdentifier);
@@ -3917,7 +3913,7 @@ public class UserServiceImpl implements UserService {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
 				// TODO Auto-generated catch block
-				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+				LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
 				iPlanetDirectoryKey = "";
 			}
 			// LOGGER.info("call getSSOToken() finished");
@@ -4161,7 +4157,7 @@ public class UserServiceImpl implements UserService {
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.updateAIL() : " + elapsedTime);
 			LOGGER.error("Executing while updateAIL() :: -> " + userResponse.getMessage());
-			LOGGER.error("Executing while updateAIL() :: -> " + e.getMessage());
+			LOGGER.error("Executing while updateAIL() :: -> " + e.getMessage(),e);
 			// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
 			// "logout");
 			return Response.status(Response.Status.NOT_FOUND).entity(userResponse).build();
@@ -4171,7 +4167,7 @@ public class UserServiceImpl implements UserService {
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.updateAIL() : " + elapsedTime);
 			LOGGER.error("Executing while updateAIL() :: -> " + userResponse.getMessage());
-			LOGGER.error("Executing while updateAIL() :: -> " + e.getMessage());
+			LOGGER.error("Executing while updateAIL() :: -> " + e.getMessage(),e);
 			// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
 			// "logout");
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(userResponse).build();
@@ -4282,7 +4278,7 @@ public class UserServiceImpl implements UserService {
 				return passwordRecoveryErrorResponse();
 			}
 		} catch (Exception e) {
-			LOGGER.error("UserServiceImpl.passwordRecovery() : " + e.getMessage());
+			LOGGER.error("UserServiceImpl.passwordRecovery() : " + e.getMessage(),e);
 		}
 		return null;
 	}
@@ -4311,7 +4307,7 @@ public class UserServiceImpl implements UserService {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
 				// TODO Auto-generated catch block
-				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 				iPlanetDirectoryKey = "";
 			}
 			// LOGGER.info("getSSOToken() finished");
@@ -4391,28 +4387,28 @@ public class UserServiceImpl implements UserService {
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.passwordRecovery() : " + elapsedTime);
-			LOGGER.error("BadRequestException in getPasswordRecoveryResponse() :: -> " + e.getMessage());
+			LOGGER.error("BadRequestException in getPasswordRecoveryResponse() :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (NotAuthorizedException e) {
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.passwordRecovery() : " + elapsedTime);
-			LOGGER.error("NotAuthorizedException in getPasswordRecoveryResponse() :: -> " + e.getMessage());
+			LOGGER.error("NotAuthorizedException in getPasswordRecoveryResponse() :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
 		} catch (NotFoundException e) {
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.passwordRecovery() : " + elapsedTime);
-			LOGGER.error("NotFoundException in getPasswordRecoveryResponse() :: -> " + e.getMessage());
+			LOGGER.error("NotFoundException in getPasswordRecoveryResponse() :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 		} catch (Exception e) {
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.ERROR_RESET_PR);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.passwordRecovery() : " + elapsedTime);
-			LOGGER.error("Exception in getPasswordRecoveryResponse() :: -> " + e.getMessage());
+			LOGGER.error("Exception in getPasswordRecoveryResponse() :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 		return passwordRecoverySuccessResponse(userName, startTime, userData);
@@ -4487,7 +4483,7 @@ public class UserServiceImpl implements UserService {
 					iPlanetDirectoryKey = getSSOToken();
 				} catch (IOException ioExp) {
 					// TODO Auto-generated catch block
-					LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+					LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 					iPlanetDirectoryKey = "";
 				}
 
@@ -5060,8 +5056,8 @@ public class UserServiceImpl implements UserService {
 							sendEmail.emailReadyToSendEmail(updatingUser, fromUserName, subject,
 									contentBuilder.toString());
 						} catch (Exception e) {
-							e.getStackTrace();
-							LOGGER.error("Exception while sending email to old User :: -> " + e.getMessage());
+							
+							LOGGER.error("Exception while sending email to old User :: -> " + e.getMessage(),e);
 						}
 
 					}
@@ -5231,7 +5227,7 @@ public class UserServiceImpl implements UserService {
 			userResponse.setMessage(UserConstants.ERROR_UPDATE_USER);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by updateUser() : " + elapsedTime);
-			LOGGER.error("BadRequestException in Updating the User :: -> " + e.getMessage());
+			LOGGER.error("BadRequestException in Updating the User :: -> " + e.getMessage(),e);
 			// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
 			// "logout");
 			return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
@@ -5239,7 +5235,7 @@ public class UserServiceImpl implements UserService {
 			userResponse.setMessage("Session expired or invalid");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by updateUser() : " + elapsedTime);
-			LOGGER.error("NotAuthorizedException in Updating the User :: -> " + e.getMessage());
+			LOGGER.error("NotAuthorizedException in Updating the User :: -> " + e.getMessage(),e);
 			// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
 			// "logout");
 			return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
@@ -5247,7 +5243,7 @@ public class UserServiceImpl implements UserService {
 			userResponse.setMessage(UserConstants.NEW_USER_EXISTS);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
-			LOGGER.error("ClientErrorException in updating the User :: -> " + userResponse.getMessage());
+			LOGGER.error("ClientErrorException in updating the User :: -> " + userResponse.getMessage(),e);
 			// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
 			// "logout");
 			return Response.status(Response.Status.CONFLICT).entity(userResponse).build();
@@ -5255,7 +5251,7 @@ public class UserServiceImpl implements UserService {
 			userResponse.setMessage(UserConstants.ERROR_UPDATE_USER);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by updateUser() : " + elapsedTime);
-			LOGGER.error("Exception in Updating the User :: -> " + e.getMessage());
+			LOGGER.error("Exception in Updating the User :: -> " + e.getMessage(),e);
 			// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
 			// "logout");
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(userResponse).build();
@@ -5500,7 +5496,7 @@ public class UserServiceImpl implements UserService {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
 				// TODO Auto-generated catch block
-				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+				LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
 				iPlanetDirectoryKey = "";
 			}
 
@@ -5671,7 +5667,7 @@ public class UserServiceImpl implements UserService {
 			response.put(UserConstants.MESSAGE, UserConstants.ERROR_RESEND_PIN);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by resendPIN() : " + elapsedTime);
-			LOGGER.error("NotFoundException in Resending User PIN :: -> " + e.getMessage());
+			LOGGER.error("NotFoundException in Resending User PIN :: -> " + e.getMessage(),e);
 			// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
 			// "logout");
 			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
@@ -5679,7 +5675,7 @@ public class UserServiceImpl implements UserService {
 			response.put(UserConstants.MESSAGE, UserConstants.ERROR_RESEND_PIN);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by resendPIN() : " + elapsedTime);
-			LOGGER.error("BadRequestException in Resending User PIN :: -> " + e.getMessage());
+			LOGGER.error("BadRequestException in Resending User PIN :: -> " + e.getMessage(),e);
 			// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
 			// "logout");
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
@@ -5687,7 +5683,7 @@ public class UserServiceImpl implements UserService {
 			response.put(UserConstants.MESSAGE, UserConstants.ERROR_RESEND_PIN);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.resendPIN() : " + elapsedTime);
-			LOGGER.error("Exception in Resending User PIN :: -> " + e.getMessage());
+			LOGGER.error("Exception in Resending User PIN :: -> " + e.getMessage(),e);
 			// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
 			// "logout");
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
@@ -5827,7 +5823,7 @@ public class UserServiceImpl implements UserService {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
 				// TODO Auto-generated catch block
-				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+				LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
 				iPlanetDirectoryKey = "";
 			}
 
@@ -5859,6 +5855,7 @@ public class UserServiceImpl implements UserService {
 				productService.authenticateIdmsChinaUser(userId, oldPassword, UserConstants.REALM);
 				LOGGER.info("End: Authenticating oldpassword in OpenDJ finished for userid=" + userId);
 			} catch (Exception e) {
+				LOGGER.error(e.getMessage(),e);
 				errorResponse.setStatus(errorStatus);
 				errorResponse.setMessage("Existing Password is not correct");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -5923,7 +5920,7 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.OK).entity(userResponse).build();
 			}
 		} catch (NotAuthorizedException e) {
-
+			LOGGER.error( e.getMessage(),e);
 			userResponse.setStatus("INVALID_SESSION_ID");
 			userResponse.setMessage("Session expired or invalid");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -5933,13 +5930,13 @@ public class UserServiceImpl implements UserService {
 		} catch (MalformedURLException me) {
 			errorResponse.setStatus(errorStatus);
 			errorResponse.setMessage(me.getMessage());
-			LOGGER.error("MalformedURLException in updatePassword():: ->" + me.getMessage());
+			LOGGER.error("MalformedURLException in updatePassword():: ->" + me.getMessage(),me);
 			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 		} catch (Exception e) {
 
 			errorResponse.setStatus(errorStatus);
 			errorResponse.setMessage(e.getMessage());
-			LOGGER.error("Exception in updatePassword():" + e.getMessage());
+			LOGGER.error("Exception in updatePassword():" + e.getMessage(),e);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		}
 		// return updatePasswordSuccessResponse(userId, userName, startTime);
@@ -6195,7 +6192,7 @@ public class UserServiceImpl implements UserService {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
 				// TODO Auto-generated catch block
-				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+				LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
 				iPlanetDirectoryKey = "";
 			}
 
@@ -6230,7 +6227,7 @@ public class UserServiceImpl implements UserService {
 				try {
 					retryerGetUser.call(callableGetUser);
 				} catch (Exception e) {
-					LOGGER.error("Exception in getting user details= " + e.getMessage());
+					LOGGER.error("Exception in getting user details= " + e.getMessage(),e);
 
 				}
 
@@ -6258,7 +6255,7 @@ public class UserServiceImpl implements UserService {
 						userData = productService.getUser(iPlanetDirectoryKey, userId);
 						LOGGER.info("End: getUser() of OpenAm finished for userId=" + userId);
 					} catch (NotFoundException e) {
-						e.getStackTrace();
+						LOGGER.error( e.getMessage(),e);
 						SetPasswordResponse setPasswordResponse;
 						setPasswordResponse = new SetPasswordResponse(null);
 						setPasswordResponse.setStatus(errorStatus);
@@ -6268,7 +6265,7 @@ public class UserServiceImpl implements UserService {
 						LOGGER.info("Time taken by UserServiceImpl.setPassword() : " + elapsedTime);
 						return Response.status(Response.Status.NOT_FOUND).entity(setPasswordResponse).build();
 					} catch (Exception e) {
-						e.getStackTrace();
+						LOGGER.error(e.getMessage(),e);
 						SetPasswordResponse setPasswordResponse;
 						setPasswordResponse = new SetPasswordResponse(null);
 						setPasswordResponse.setStatus(errorStatus);
@@ -6361,7 +6358,7 @@ public class UserServiceImpl implements UserService {
 					 * + iPlanetDirectoryKey, userId, PRODUCT_JSON_STRING);
 					 */
 				} catch (Exception e) {
-
+					LOGGER.error( e.getMessage(),e);
 					response.setStatus(errorStatus);
 					response.setMessage(UserConstants.PIN_INVALID);
 					response.setId(userId);
@@ -6429,7 +6426,7 @@ public class UserServiceImpl implements UserService {
 				}
 			} catch (Exception e) {
 
-				LOGGER.error("Exception in setUIMSPassword UIMS API:: ->" + e.getMessage());
+				LOGGER.error("Exception in setUIMSPassword UIMS API:: ->" + e.getMessage(),e);
 			}
 
 			SetPasswordResponse setPasswordResponse;
@@ -6451,7 +6448,7 @@ public class UserServiceImpl implements UserService {
 			response.setMessage("Error in Setting User Password");
 			response.setId(userId);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-			LOGGER.error("Exception is " + e.getMessage());
+			LOGGER.error("Exception is " + e.getMessage(),e);
 			LOGGER.info("Time taken by UserServiceImpl.setPassword() : " + elapsedTime);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
@@ -6549,7 +6546,7 @@ public class UserServiceImpl implements UserService {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
 				// TODO Auto-generated catch block
-				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 				iPlanetDirectoryKey = "";
 			}
 
@@ -6694,7 +6691,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("NotFoundException in ActivateUser :: -> " + UserConstants.USER_NOT_FOUND);
 			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 		} catch (Exception e) {
-
+			LOGGER.error( e.getMessage(),e);
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			response.put(UserConstants.ID, activateUserRequest.getUserRecord().getId());
@@ -6732,8 +6729,7 @@ public class UserServiceImpl implements UserService {
 		try {
 			iPlanetDirectoryKey = getSSOToken();
 		} catch (IOException ioExp) {
-			// TODO Auto-generated catch block
-			LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+			LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
 			iPlanetDirectoryKey = "";
 		}
 
@@ -6752,7 +6748,7 @@ public class UserServiceImpl implements UserService {
 						+ loginIdentifier);
 			} catch (UnsupportedEncodingException e) {
 
-				LOGGER.error("UnsupportedEncodingException in  getUserByLoginIdentifier():" + e.getMessage());
+				LOGGER.error("UnsupportedEncodingException in  getUserByLoginIdentifier():" + e.getMessage(),e);
 			}
 
 			productDocCtx = JsonPath.using(conf).parse(userExists);
@@ -6819,8 +6815,7 @@ public class UserServiceImpl implements UserService {
 		try {
 			amAdminToken = getSSOToken();
 		} catch (IOException ioExp) {
-			// TODO Auto-generated catch block
-			LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+			LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 			amAdminToken = "";
 		}
 		try {
@@ -6959,7 +6954,7 @@ public class UserServiceImpl implements UserService {
 			activate.readDataFromFile(hostname, csvFile);
 		} catch (NoSuchAlgorithmException e) {
 
-			LOGGER.error(e.getMessage());
+			LOGGER.error(e.getMessage(),e);
 		}
 		return null;
 	}
@@ -6987,8 +6982,7 @@ public class UserServiceImpl implements UserService {
 		try {
 			iPlanetDirectoryKey = getSSOToken();
 		} catch (IOException ioExp) {
-			// TODO Auto-generated catch block
-			LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+			LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 			iPlanetDirectoryKey = "";
 		}
 
@@ -7032,7 +7026,7 @@ public class UserServiceImpl implements UserService {
 			}
 		} catch (Exception e) {
 
-			LOGGER.error("Exception occured!!!!" + e.getMessage());
+			LOGGER.error("Exception occured!!!!" + e.getMessage(),e);
 			return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 		}
 		userResponse.setStatus(successStatus);
@@ -7087,8 +7081,7 @@ public class UserServiceImpl implements UserService {
 			try {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
-				// TODO Auto-generated catch block
-				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+				LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
 				iPlanetDirectoryKey = "";
 			}
 
@@ -7175,7 +7168,7 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 		} catch (Exception e) {
-			LOGGER.error("Exception in resendRegEmail :" + e.getMessage());
+			LOGGER.error("Exception in resendRegEmail :" + e.getMessage(), e);
 			userResponse.setStatus(errorStatus);
 			userResponse.setMessage(UserConstants.RESEND_REGEMAIL_ERROR_MESSAGE);
 			return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
@@ -7258,7 +7251,7 @@ public class UserServiceImpl implements UserService {
 				response = rb.header("Location", urlHeaderValue).build();
 			}
 		} catch (Exception e) {
-			LOGGER.error("Exception occured!!!!" + e.getMessage());
+			LOGGER.error("Exception occured!!!!" + e.getMessage(),e);
 
 			return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 		}
@@ -7298,8 +7291,7 @@ public class UserServiceImpl implements UserService {
 				try {
 					iPlanetDirectoryKey = getSSOToken();
 				} catch (IOException ioExp) {
-					// TODO Auto-generated catch block
-					LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+					LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 					iPlanetDirectoryKey = "";
 				}
 
@@ -7363,7 +7355,7 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 		} catch (Exception e) {
-			LOGGER.error("Exception occured:" + e.getMessage());
+			LOGGER.error("Exception occured:" + e.getMessage(),e);
 
 			userResponse.setStatus(errorStatus);
 			userResponse.setMessage("Exception occured in resendChangeEmail");
@@ -7460,11 +7452,11 @@ public class UserServiceImpl implements UserService {
 		} catch (IOException e) {
 
 			errorResponse.put(UserConstants.MESSAGE, UserConstants.AMLBCOOKIE_EMPTY);
-			LOGGER.error("Error is -> " + e.getMessage());
+			LOGGER.error("Error is -> " + e.getMessage(),e);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		} catch (Exception e) {
 
-			LOGGER.error("Error is -> " + e.getMessage());
+			LOGGER.error("Error is -> " + e.getMessage(),e);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		}
 		return Response.status(Response.Status.OK).entity(loginResponse).build();
@@ -7690,7 +7682,7 @@ public class UserServiceImpl implements UserService {
 			}
 
 		} catch (Exception e) {
-			LOGGER.error("idmsDirectLogin Exception occured!!!!" + e.getMessage());
+			LOGGER.error("idmsDirectLogin Exception occured!!!!" + e.getMessage(), e);
 
 			jsonObject.put("error_code", "L9101");
 			jsonObject.put("error_message", "Invalid username or password");
@@ -7833,9 +7825,10 @@ public class UserServiceImpl implements UserService {
 			// log zio alerts
 			try {
 				iPlanetDirectoryKey = getSSOToken();
+				
 			} //// No Exception handling
 			catch (IOException ioExp) {
-				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+				LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
 			}
 			LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 					+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + loginId + AUDIT_LOG_CLOSURE);
@@ -7955,7 +7948,7 @@ public class UserServiceImpl implements UserService {
 
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.BAD_REQUEST);
-			LOGGER.error("BadRequestException in idmsCheckUserExists :: -> " + e.getMessage());
+			LOGGER.error("BadRequestException in idmsCheckUserExists :: -> " + e.getMessage(),e);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
@@ -7963,7 +7956,7 @@ public class UserServiceImpl implements UserService {
 
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, "Authorization Failed");
-			LOGGER.error("NotAuthorizedException in idmsCheckUserExists :: -> " + e.getMessage());
+			LOGGER.error("NotAuthorizedException in idmsCheckUserExists :: -> " + e.getMessage(),e);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 			return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
@@ -7971,7 +7964,7 @@ public class UserServiceImpl implements UserService {
 
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
-			LOGGER.error("NotFoundException in idmsCheckUserExists :: -> " + e.getMessage());
+			LOGGER.error("NotFoundException in idmsCheckUserExists :: -> " + e.getMessage(),e);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
@@ -7979,7 +7972,7 @@ public class UserServiceImpl implements UserService {
 
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, e.getMessage());
-			LOGGER.error("Exception in idmsCheckUserExists :: -> " + e.getMessage());
+			LOGGER.error("Exception in idmsCheckUserExists :: -> " + e.getMessage(),e);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
@@ -8015,7 +8008,7 @@ public class UserServiceImpl implements UserService {
 				try {
 					iPlanetDirectoryKey = getSSOToken();
 				} catch (IOException ioExp) {
-					LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+					LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 				}
 
 				LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
@@ -8078,7 +8071,7 @@ public class UserServiceImpl implements UserService {
 
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by sendRemainderEmail() : " + elapsedTime);
-				LOGGER.error("Exception in sendRemainderEmail() :: -> " + e.getMessage());
+				LOGGER.error("Exception in sendRemainderEmail() :: -> " + e.getMessage(),e);
 				userNotSendEmail.add(federationId);
 			}
 		}
@@ -8357,7 +8350,7 @@ public class UserServiceImpl implements UserService {
 
 			errorResponse = new JSONObject();
 			errorResponse.put("message", "token invalid");
-			LOGGER.error("NotAuthorizedException in oauth2iplanet: " + e.getMessage());
+			LOGGER.error("NotAuthorizedException in oauth2iplanet: " + e.getMessage(),e);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by oauthToIplanet() : " + elapsedTime);
 			return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
@@ -8366,7 +8359,7 @@ public class UserServiceImpl implements UserService {
 			errorResponse = new JSONObject();
 			errorResponse.put("code", "SERVER_ERROR");
 			errorResponse.put(UserConstants.MESSAGE, "oauth2iplanet failed.");
-			LOGGER.error("Error in oauthToIplanet(): " + e.getMessage());
+			LOGGER.error("Error in oauthToIplanet(): " + e.getMessage(),e);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by oauthToIplanet() : " + elapsedTime);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
@@ -8394,7 +8387,7 @@ public class UserServiceImpl implements UserService {
 		try {
 			iPlanetDirectoryKey = getSSOToken();
 		} catch (IOException ioExp) {
-			LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+			LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 			return 0;
 		}
 
@@ -8450,8 +8443,7 @@ public class UserServiceImpl implements UserService {
 		try {
 			iPlanetDirectoryKey = getSSOToken();
 		} catch (IOException ioExp) {
-			// TODO Auto-generated catch block
-			LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+			LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 			iPlanetDirectoryKey = "";
 		}
 		// mapping IFW request to UserCompany
@@ -8566,10 +8558,10 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.OK).entity(actualObj).build();
 			} catch (JsonProcessingException e) {
 
-				LOGGER.error("JsonProcessingException in getOIDCAutoDiscoveryConfig() ::" + e.getMessage());
+				LOGGER.error("JsonProcessingException in getOIDCAutoDiscoveryConfig() ::" + e.getMessage(),e);
 			} catch (IOException e) {
 
-				LOGGER.error("IOException in getOIDCAutoDiscoveryConfig() ::" + e.getMessage());
+				LOGGER.error("IOException in getOIDCAutoDiscoveryConfig() ::" + e.getMessage(),e);
 			}
 		} else {
 			try {
@@ -8577,7 +8569,7 @@ public class UserServiceImpl implements UserService {
 						+ IOUtils.toString((InputStream) oidcAutoDiscoveryConfig.getEntity()));
 			} catch (IOException e) {
 
-				LOGGER.error("Error reading data stream from OpenAM OIDC discovery endpoint" + e.getMessage());
+				LOGGER.error("Error reading data stream from OpenAM OIDC discovery endpoint" + e.getMessage(),e);
 			}
 		}
 
@@ -8607,7 +8599,7 @@ public class UserServiceImpl implements UserService {
 			}
 		} catch (Exception e) {
 
-			LOGGER.error("Exception in getTechnicalUserDetails() ::" + e.getMessage());
+			LOGGER.error("Exception in getTechnicalUserDetails() ::" + e.getMessage(), e);
 			return false;
 		}
 		return false;
@@ -8697,7 +8689,7 @@ public class UserServiceImpl implements UserService {
 			// successResponse = IOUtils.toString((InputStream)
 			// authenticateResponse.getEntity());
 		} catch (Exception e) {
-			LOGGER.error("Problem in securedLogin():" + e.getMessage());
+			LOGGER.error("Problem in securedLogin():" + e.getMessage(),e);
 			jsonObject.put("message", UserConstants.LOGIN_ERROR);
 			elapsedTime = (System.currentTimeMillis() - startTime);
 			AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource + ","
@@ -8734,7 +8726,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Information from OPENAM=" + IOUtils.toString((InputStream) updateResponse.getEntity()));
 		} catch (IOException e) {
 
-			LOGGER.error("Error in updateOpenamDetails() -> " + e.getMessage());
+			LOGGER.error("Error in updateOpenamDetails() -> " + e.getMessage(),e);
 		}
 		LOGGER.info("Ended updateOpenamDetails()");
 	}
@@ -8772,7 +8764,7 @@ public class UserServiceImpl implements UserService {
 
 			errorResponse.setStatus(errorStatus);
 			errorResponse.setMessage(e.getMessage());
-			LOGGER.error("Exception in updatePasswordHistory()=" + e.getMessage());
+			LOGGER.error("Exception in updatePasswordHistory()=" + e.getMessage(),e);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by updatePasswordHistory() : " + elapsedTime);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
@@ -8915,7 +8907,7 @@ public class UserServiceImpl implements UserService {
 
 			errorResponse.setStatus(errorStatus);
 			errorResponse.setMessage(e.getMessage());
-			LOGGER.error("Exception in verifyPIN():: -> " + e.getMessage());
+			LOGGER.error("Exception in verifyPIN():: -> " + e.getMessage(), e);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by verifyPIN() : " + elapsedTime);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
@@ -9010,7 +9002,7 @@ public class UserServiceImpl implements UserService {
 			//
 			errorResponse.setStatus(errorStatus);
 			errorResponse.setMessage(jsonResponse.getStatusInfo().getReasonPhrase());
-			LOGGER.error("Exception in buildQueryParam()=" + e.getMessage());
+			LOGGER.error("Exception in buildQueryParam()=" + e.getMessage(), e);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		}
 		return jsonResponse;
@@ -9081,8 +9073,7 @@ public class UserServiceImpl implements UserService {
 			try {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
-				// TODO Auto-generated catch block
-				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 				iPlanetDirectoryKey = "";
 			}
 
@@ -9182,7 +9173,7 @@ public class UserServiceImpl implements UserService {
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by idmsCheckIdentity() : " + elapsedTime);
-			LOGGER.error("BadRequestException in idmsCheckIdentity() :: -> " + e.getMessage());
+			LOGGER.error("BadRequestException in idmsCheckIdentity() :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (NotAuthorizedException e) {
 
@@ -9190,7 +9181,7 @@ public class UserServiceImpl implements UserService {
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by idmsCheckIdentity() : " + elapsedTime);
-			LOGGER.error("NotAuthorizedException in idmsCheckIdentity() :: -> " + e.getMessage());
+			LOGGER.error("NotAuthorizedException in idmsCheckIdentity() :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
 		} catch (NotFoundException e) {
 
@@ -9198,7 +9189,7 @@ public class UserServiceImpl implements UserService {
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by idmsCheckIdentity() : " + elapsedTime);
-			LOGGER.error("NotFoundException in idmsCheckIdentity() :: -> " + e.getMessage());
+			LOGGER.error("NotFoundException in idmsCheckIdentity() :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 		} catch (Exception e) {
 
@@ -9206,7 +9197,7 @@ public class UserServiceImpl implements UserService {
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by idmsCheckIdentity() : " + elapsedTime);
-			LOGGER.error("Exception in idmsCheckIdentity() :: -> " + e.getMessage());
+			LOGGER.error("Exception in idmsCheckIdentity() :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 	}
@@ -9329,7 +9320,7 @@ public class UserServiceImpl implements UserService {
 			return Response.status(Response.Status.OK).entity(response).build();
 		} catch (Exception e) {
 
-			LOGGER.error("Exception in sendOTP() :: -> " + e.getMessage());
+			LOGGER.error("Exception in sendOTP() :: -> " + e.getMessage(),e);
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, e.getMessage());
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -9438,8 +9429,7 @@ public class UserServiceImpl implements UserService {
 			try {
 				ssoToken = getSSOToken();
 			} catch (IOException ioExp) {
-				// TODO Auto-generated catch block
-				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 				ssoToken = "";
 			}
 			LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for fedid = " + fedid);
@@ -9476,7 +9466,7 @@ public class UserServiceImpl implements UserService {
 			}
 		} catch (Exception e) {
 
-			LOGGER.error("Exception in addMobile() :: -> " + e.getMessage());
+			LOGGER.error("Exception in addMobile() :: -> " + e.getMessage(),e);
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, e.getMessage());
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -9573,8 +9563,7 @@ public class UserServiceImpl implements UserService {
 			try {
 				ssoToken = getSSOToken();
 			} catch (IOException ioExp) {
-				// TODO Auto-generated catch block
-				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 				ssoToken = "";
 			}
 
@@ -9612,7 +9601,7 @@ public class UserServiceImpl implements UserService {
 			}
 		} catch (Exception e) {
 
-			LOGGER.error("Exception in addEmail() :: -> " + e.getMessage());
+			LOGGER.error("Exception in addEmail() :: -> " + e.getMessage(),e);
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, e.getMessage());
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -9672,8 +9661,7 @@ public class UserServiceImpl implements UserService {
 			try {
 				ssoToken = getSSOToken();
 			} catch (IOException ioExp) {
-				// TODO Auto-generated catch block
-				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
+				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 				ssoToken = "";
 			}
 
@@ -9713,7 +9701,7 @@ public class UserServiceImpl implements UserService {
 			}
 		} catch (Exception e) {
 
-			LOGGER.error("Exception in addEmailToUser() :: -> " + e.getMessage());
+			LOGGER.error("Exception in addEmailToUser() :: -> " + e.getMessage(),e);
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, e.getMessage());
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -9777,7 +9765,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Problem in deleting record from OpenDJ" + otpDetails.getStatus());
 			}
 		} catch (Exception e) {
-			LOGGER.error("Exception in deleteMobile() :: -> " + e.getMessage());
+			LOGGER.error("Exception in deleteMobile() :: -> " + e.getMessage(),e);
 		}
 
 		response.put(UserConstants.STATUS, errorStatus);
