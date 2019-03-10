@@ -4,8 +4,8 @@
 > * **Release version**: IDMS-CHINA-R3-APRIL-2019
 
 ### Previous Release Tags ###
-> * **Release Tag**: [IDMS-CHINA-R2-MARCH-2019 (Dated: 10-Mar-2019)](https://bitbucket.org/schneideripo/idms-china/commits/tag/tag-idms-china-ver-r2-10-march-2019)
-
+> * **IDMS-CHINA-R2-MARCH-2019 (Dated: 10-Mar-2019)**
+> [DEV Branch](https://bitbucket.org/schneideripo/idms-china/src/tag-DEV-IDMSC-ver-r2-10-march-2019/) |  [INT Branch](https://bitbucket.org/schneideripo/idms-china/src/tag-INT-IDMSC-ver-r2-10-march-2019/) | [STG Branch](https://bitbucket.org/schneideripo/idms-china/src/tag-STG-IDMSC-ver-r2-10-march-2019/) | [PPRD Branch](https://bitbucket.org/schneideripo/idms-china/src/tag-PREPROD-IDMSC-ver-r2-10-march-2019/) | [PROD Branch](https://bitbucket.org/schneideripo/idms-china/src/tag-PROD-IDMSC-ver-r2-10-march-2019/)
 ### Branch Usage ###
 * The develop/API branch serves as the current release branch. Details of the current release should be updated in the release section.
 * This branch should be used to create topic branches and be the target of the pull request created on the topic branch.
