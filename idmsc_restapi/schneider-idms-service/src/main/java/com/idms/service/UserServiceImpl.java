@@ -7474,7 +7474,6 @@ public class UserServiceImpl implements UserService {
 			}
 			return decodeURL;
 		} catch (UnsupportedEncodingException e) {
-			e.getStackTrace();
 			return "Issue while decoding" + e.getMessage();
 		}
 	}
