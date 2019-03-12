@@ -1,8 +1,9 @@
-# IDMS China - Development Branch #
-
 ### Current Ongoing Release ###
-* Release version: IDMS-CHINA-R2-MARCH-2019
-* <Add confluence page>
+> * **Release version**: IDMS-CHINA-R3-APRIL-2019
+
+### Previous Release Tags ###
+> * **IDMS-CHINA-R2-MARCH-2019 (Dated: 10-Mar-2019)**
+> [DEV Branch](https://bitbucket.org/schneideripo/idms-china/src/tag-DEV-IDMSC-ver-r2-10-march-2019/) |  [INT Branch](https://bitbucket.org/schneideripo/idms-china/src/tag-INT-IDMSC-ver-r2-10-march-2019/) | [STG Branch](https://bitbucket.org/schneideripo/idms-china/src/tag-STG-IDMSC-ver-r2-10-march-2019/) | [PPRD Branch](https://bitbucket.org/schneideripo/idms-china/src/tag-PREPROD-IDMSC-ver-r2-10-march-2019/) | [PROD Branch](https://bitbucket.org/schneideripo/idms-china/src/tag-PROD-IDMSC-ver-r2-10-march-2019/)
 
 ### Branch Usage ###
 * The develop/API branch serves as the current release branch. Details of the current release should be updated in the release section.
@@ -12,7 +13,7 @@
 
 ### Repository Structure ###
 * Follows the Maven module structure
-* Composed of fours modules
+* Composed of four modules
 	- schneider-idms(Root POM project)
 	- schneider-cache-central (Module 1)
 	- schneider-idms-client (Module 2)
@@ -32,7 +33,7 @@
 	-Dspring.profiles.active=<DEV|INTG|STG|PPRD|PROD>
 * The location of the app_root having the externalized configuration can be provided using the argument
 	-Didmsc.app_root.location=<file:/C:/...>
-* To ensure the correct Spring beans for the set environment is loaded, the below flag can be set to true
-	-Dsys.print.beans=true
 
+### Glossary ###
+* Markdown Editor - https://stackedit.io/app#
 	
