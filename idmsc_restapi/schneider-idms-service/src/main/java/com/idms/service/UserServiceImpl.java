@@ -332,6 +332,9 @@ public class UserServiceImpl implements UserService {
 	@Value("${openDJUserPassword}")
 	private String djUserPwd;
 
+	@Value("${domain.name}")
+	private String domainName;
+	
 	private static String userAction = "submitRequirements";
 
 	private static String errorStatus = "Error";
@@ -8975,7 +8978,7 @@ public class UserServiceImpl implements UserService {
 					// Response.status(Response.Status.FOUND).entity(jsonResponse.getEntity()).header("Location",jsonResponse.getLocation().toString());
 					// rb =
 					// Response.status(Response.Status.FOUND).entity(jsonResponse.getEntity()).header("Location",location);
-					Cookie cookie = new Cookie("regQueryParams", strQueryParam, "/", ".schneider-electric.com");
+					Cookie cookie = new Cookie("regQueryParams", strQueryParam, "/", domainName);
 					NewCookie newCookie = new NewCookie(cookie);
 					String amlbcookieArray[] = jsonResponse.getHeaderString("Set-Cookie").split(",");
 					for (String responseCookie : amlbcookieArray) {
