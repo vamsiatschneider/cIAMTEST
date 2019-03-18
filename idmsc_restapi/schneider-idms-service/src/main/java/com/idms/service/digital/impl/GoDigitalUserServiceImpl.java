@@ -124,4 +124,12 @@ public class GoDigitalUserServiceImpl implements GoDigitalUserService {
 		
 	}
 
+	public void setFromUserName(String fromUserName) {
+		this.fromUserName = fromUserName;
+	}
+
+	public void setSupportUser(String supportUser) {
+		this.supportUser = supportUser;
+	}
+
 }
