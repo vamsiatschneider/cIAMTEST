@@ -127,4 +127,20 @@ public class SaleforceServiceImpl {
 
 		return  "Bearer " + bfoAuthorizationToken;
 	}
+
+	public void setSalesForceClientId(String salesForceClientId) {
+		this.salesForceClientId = salesForceClientId;
+	}
+	
+	public void setSalesForceClientSecret(String salesForceClientSecret) {
+		this.salesForceClientSecret = salesForceClientSecret;
+	}
+
+	public void setSalesForceUserName(String salesForceUserName) {
+		this.salesForceUserName = salesForceUserName;
+	}
+	
+	public void setSalesForcePassword(String salesForcePassword) {
+		this.salesForcePassword = salesForcePassword;
+	}
 }

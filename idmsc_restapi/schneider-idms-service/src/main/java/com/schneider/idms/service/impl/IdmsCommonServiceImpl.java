@@ -1112,4 +1112,93 @@ public class IdmsCommonServiceImpl {
 		}
 		return false;
 	}
+
+	
+	public void setAuthCsvPath(String authCsvPath) {
+		this.authCsvPath = authCsvPath;
+	}
+
+	public void setRegistrationCsvPath(String registrationCsvPath) {
+		this.registrationCsvPath = registrationCsvPath;
+	}
+
+	public void setAdminUserName(String adminUserName) {
+		this.adminUserName = adminUserName;
+	}
+
+	public void setAdminPassword(String adminPassword) {
+		this.adminPassword = adminPassword;
+	}
+
+	public void setIfwClientId(String ifwClientId) {
+		this.ifwClientId = ifwClientId;
+	}
+
+	public void setIfwClientSecret(String ifwClientSecret) {
+		this.ifwClientSecret = ifwClientSecret;
+	}
+
+	public void setSalesForceClientId(String salesForceClientId) {
+		this.salesForceClientId = salesForceClientId;
+	}
+
+	public void setSalesForceClientSecret(String salesForceClientSecret) {
+		this.salesForceClientSecret = salesForceClientSecret;
+	}
+
+	public void setSalesForceUserName(String salesForceUserName) {
+		this.salesForceUserName = salesForceUserName;
+	}
+
+	public void setSalesForcePassword(String salesForcePassword) {
+		this.salesForcePassword = salesForcePassword;
+	}
+
+	public void setHa_mode(String ha_mode) {
+		this.ha_mode = ha_mode;
+	}
+
+	public void setFromUserName(String fromUserName) {
+		this.fromUserName = fromUserName;
+	}
+
+	public void setGoDitalToken(String goDitalToken) {
+		this.goDitalToken = goDitalToken;
+	}
+
+	public void setGoDigitalValue(String goDigitalValue) {
+		this.goDigitalValue = goDigitalValue;
+	}
+
+	public void setUimsClientId(String uimsClientId) {
+		this.uimsClientId = uimsClientId;
+	}
+
+	public void setUimsClientSecret(String uimsClientSecret) {
+		this.uimsClientSecret = uimsClientSecret;
+	}
+
+	public void setRedirectUri(String redirectUri) {
+		this.redirectUri = redirectUri;
+	}
+
+	public void setOpenDJUserName(String openDJUserName) {
+		this.openDJUserName = openDJUserName;
+	}
+
+	public void setOpenDJUserPassword(String openDJUserPassword) {
+		this.openDJUserPassword = openDJUserPassword;
+	}
+
+	public void setDirectApiSecretToken(String directApiSecretToken) {
+		this.directApiSecretToken = directApiSecretToken;
+	}
+
+	public void setEMAIL_TEMPLATE_DIR(String eMAIL_TEMPLATE_DIR) {
+		EMAIL_TEMPLATE_DIR = eMAIL_TEMPLATE_DIR;
+	}
+
+	public void setPrefixStartUrl(String prefixStartUrl) {
+		this.prefixStartUrl = prefixStartUrl;
+	}
 }

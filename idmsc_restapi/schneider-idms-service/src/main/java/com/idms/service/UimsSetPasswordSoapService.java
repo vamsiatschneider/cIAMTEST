@@ -441,4 +441,20 @@ public class UimsSetPasswordSoapService {
 		return ispasswordupdated;
 	}
 
+	public void setFromUserName(String fromUserName) {
+		this.fromUserName = fromUserName;
+	}
+
+	public void setSupportUser(String supportUser) {
+		this.supportUser = supportUser;
+	}
+
+	public String getCALLER_FID() {
+		return CALLER_FID;
+	}
+
+	public void setCALLER_FID(String cALLER_FID) {
+		CALLER_FID = cALLER_FID;
+	}
+
 }

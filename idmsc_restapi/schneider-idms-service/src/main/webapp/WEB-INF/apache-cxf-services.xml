@@ -148,4 +148,11 @@
 	        </util:properties>
 	    </property>
 	</bean> -->
+	<bean id ="applicationPropertiesWatcher" class = "com.se.idms.util.ApplicationPropertiesWatcher" >
+	<constructor-arg value = "${app.properties.dir}"/>
+	</bean>
+	 <bean id="configChangeWatcher" class="com.se.idms.util.ConfigChangeInitiator" init-method = "startWatcher" >
+	</bean>
+	<bean id="propertyFileAutoRefresh" class="com.se.idms.util.PropertyFileAutoRefresh">
+	</bean>
 </beans>

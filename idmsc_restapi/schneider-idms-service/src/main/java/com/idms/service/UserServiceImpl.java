@@ -335,6 +335,9 @@ public class UserServiceImpl implements UserService {
 	@Value("${domain.name}")
 	private String domainName;
 	
+	@Value("${enable.sendOtpOverEmail}")
+	private String sendOTPOverEmail;
+	
 	private static String userAction = "submitRequirements";
 
 	private static String errorStatus = "Error";
@@ -1435,10 +1438,20 @@ public class UserServiceImpl implements UserService {
 						sendEmail.sendSMSNewGateway(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
 								userRequest.getUserRecord().getIDMS_Registration_Source__c());
 						LOGGER.info("End: sendSMSMessage() finished for  mobile userName:" + userName);
-						LOGGER.info("Start: sendOpenAmMobileEmail() for mobile userName:" + userName);
-						sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
-								userRequest.getUserRecord().getIDMS_Profile_update_source__c());
-						LOGGER.info("End: sendOpenAmMobileEmail() finsihed for  mobile userName:" + userName);
+						if(Boolean.valueOf(sendOTPOverEmail)){
+							LOGGER.info("Start: sendOpenAmMobileEmail() for mobile userName:" + userName);
+							sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
+									userRequest.getUserRecord().getIDMS_Profile_update_source__c());
+							LOGGER.info("End: sendOpenAmMobileEmail() finsihed for  mobile userName:" + userName);
+							}
+						else{
+							LOGGER.info("Start: sendOpenAmMobileEmail() for mobile userName:" + userName +" disallowed");
+							/**LOGGER.info("Start: sendOpenAmMobileEmail() for mobile userName:" + userName);
+							sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
+									userRequest.getUserRecord().getIDMS_Profile_update_source__c());
+							LOGGER.info("End: sendOpenAmMobileEmail() finsihed for  mobile userName:" + userName);*/
+							
+						}
 					}
 					if (mobileRegFlag) {
 						if (otpStatus.equalsIgnoreCase(UserConstants.PIN_VERIFIED)) {
@@ -9204,14 +9217,17 @@ public class UserServiceImpl implements UserService {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Response sendOTP(SendOTPRequest otpRequest) {
+	public Response sendOTP(SendOTPRequest otpRequest) throws Exception {
 		LOGGER.info("Entered sendOTP() -> Start");
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
+		LOGGER.info("caller ID before:"+ CALLER_FID);
 		ObjectMapper objMapper = new ObjectMapper();
 		String otpMobile = null, otpStatus = null, otpValidityTime = null;
+		//Thread.sleep(5000);
 		String mobile = null;
 		JSONObject response = new JSONObject();
+		LOGGER.info("caller ID after :"+ CALLER_FID);
 		try {
 			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(otpRequest));
 			if (null == otpRequest.getMobile() || otpRequest.getMobile().isEmpty()) {
@@ -9306,12 +9322,17 @@ public class UserServiceImpl implements UserService {
 					}
 				}
 			}
-			LOGGER.info("Start: sendSMS() for mobile user:" + mobile);
-			sendEmail.sendSMS(otpMobile, mobile);
-			LOGGER.info("End: sendSMS() finished for  mobile user:" + mobile);
-			LOGGER.info("Start: sendMobileEmail() for mobile userName:" + mobile);
-			sendEmail.sendMobileEmail(otpMobile, mobile);
-			LOGGER.info("End: sendMobileEmail() finished for  mobile user:" + mobile);
+			if(Boolean.valueOf(sendOTPOverEmail)){
+				LOGGER.info("Start: sendMobileEmail() for mobile userName:" + mobile);
+				sendEmail.sendMobileEmail(otpMobile, mobile);
+				LOGGER.info("End: sendMobileEmail() finished for  mobile user:" + mobile);
+			}
+			else{
+				LOGGER.info("Start: sendMobileEmail() for mobile userName:" + mobile+" disallowed");
+				/**LOGGER.info("Start: sendMobileEmail() for mobile userName:" + mobile);
+				sendEmail.sendMobileEmail(otpMobile, mobile);
+				LOGGER.info("End: sendMobileEmail() finished for  mobile user:" + mobile);*/
+			}
 
 			response.put(UserConstants.STATUS, successStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.PIN_SEND_SUCCESS);
@@ -9775,4 +9796,116 @@ public class UserServiceImpl implements UserService {
 		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 	}
 
+	public void setEMAIL_TEMPLATE_DIR(String eMAIL_TEMPLATE_DIR) {
+		EMAIL_TEMPLATE_DIR = eMAIL_TEMPLATE_DIR;
+	}
+
+	public void setLOGIN_ERROR(String lOGIN_ERROR) {
+		LOGIN_ERROR = lOGIN_ERROR;
+	}
+
+	public void setAuthCsvPath(String authCsvPath) {
+		this.authCsvPath = authCsvPath;
+	}
+
+	public void setRegistrationCsvPath(String registrationCsvPath) {
+		this.registrationCsvPath = registrationCsvPath;
+	}
+
+	public void setAdminUserName(String adminUserName) {
+		this.adminUserName = adminUserName;
+	}
+
+	public void setAdminPassword(String adminPassword) {
+		this.adminPassword = adminPassword;
+	}
+
+	public void setIfwClientId(String ifwClientId) {
+		this.ifwClientId = ifwClientId;
+	}
+
+	public void setIfwClientSecret(String ifwClientSecret) {
+		this.ifwClientSecret = ifwClientSecret;
+	}
+
+	public void setSalesForceClientId(String salesForceClientId) {
+		this.salesForceClientId = salesForceClientId;
+	}
+
+	public void setSalesForceClientSecret(String salesForceClientSecret) {
+		this.salesForceClientSecret = salesForceClientSecret;
+	}
+
+	public void setSalesForceUserName(String salesForceUserName) {
+		this.salesForceUserName = salesForceUserName;
+	}
+
+	public void setSalesForcePassword(String salesForcePassword) {
+		this.salesForcePassword = salesForcePassword;
+	}
+
+	public void setHa_mode(String ha_mode) {
+		this.ha_mode = ha_mode;
+	}
+
+	public void setFromUserName(String fromUserName) {
+		this.fromUserName = fromUserName;
+	}
+
+	public void setGoDitalToken(String goDitalToken) {
+		this.goDitalToken = goDitalToken;
+	}
+
+	public void setGoDigitalValue(String goDigitalValue) {
+		this.goDigitalValue = goDigitalValue;
+	}
+
+	public void setUimsClientId(String uimsClientId) {
+		this.uimsClientId = uimsClientId;
+	}
+
+	public void setUimsClientSecret(String uimsClientSecret) {
+		this.uimsClientSecret = uimsClientSecret;
+	}
+
+	public void setRedirectUri(String redirectUri) {
+		this.redirectUri = redirectUri;
+	}
+
+	public void setPrefixStartUrl(String prefixStartUrl) {
+		this.prefixStartUrl = prefixStartUrl;
+	}
+
+	public void setPrefixIdentityUrl(String prefixIdentityUrl) {
+		this.prefixIdentityUrl = prefixIdentityUrl;
+	}
+
+	public void setRegisterPRMUserIdp(String registerPRMUserIdp) {
+		this.registerPRMUserIdp = registerPRMUserIdp;
+	}
+
+	public void setOtpvalidationtimeinminute(String otpvalidationtimeinminute) {
+		this.otpvalidationtimeinminute = otpvalidationtimeinminute;
+	}
+
+	public void setDjUserName(String djUserName) {
+		this.djUserName = djUserName;
+	}
+
+	public void setDjUserPwd(String djUserPwd) {
+		this.djUserPwd = djUserPwd;
+	}
+
+	public void setCALLER_FID(String cALLER_FID) {
+		CALLER_FID = cALLER_FID;
+	}
+
+	public String getCALLER_FID() {
+		return CALLER_FID;
+	}
+
+	public void setSendOTPOverEmail(String sendOTPOverEmail) {
+		this.sendOTPOverEmail = sendOTPOverEmail;
+	}
+	
 }
