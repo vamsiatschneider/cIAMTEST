@@ -255,7 +255,7 @@ public interface UserService {
 	
 	@POST
 	@Path("/apexrest/sendOTP")
-	Response sendOTP(SendOTPRequest pinRequest);
+	Response sendOTP(SendOTPRequest pinRequest) throws Exception;
 	
 	@POST
 	@Path("/apexrest/addMobile")

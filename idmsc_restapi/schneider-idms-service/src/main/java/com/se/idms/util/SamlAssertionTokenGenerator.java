@@ -114,4 +114,24 @@ public class SamlAssertionTokenGenerator {
 
 		return new BASE64Encoder().encode(signatureBytes);
 	}
+
+	public void setSamlAssertionSigningKeystore(String samlAssertionSigningKeystore) {
+		this.samlAssertionSigningKeystore = samlAssertionSigningKeystore;
+	}
+
+	public void setSamlAssertionKeystorePassword(String samlAssertionKeystorePassword) {
+		this.samlAssertionKeystorePassword = samlAssertionKeystorePassword;
+	}
+
+	public void setSamlAssertionKeyPassword(String samlAssertionKeyPassword) {
+		this.samlAssertionKeyPassword = samlAssertionKeyPassword;
+	}
+
+	public void setSamlAssertionSigningCert(String samlAssertionSigningCert) {
+		this.samlAssertionSigningCert = samlAssertionSigningCert;
+	}
+
+	public void setSamlAssertionSigningAlgo(String samlAssertionSigningAlgo) {
+		this.samlAssertionSigningAlgo = samlAssertionSigningAlgo;
+	}
 }

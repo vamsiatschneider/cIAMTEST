@@ -598,4 +598,12 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 		
 		return resultCountCheck;
 	}
+
+	public String getCALLER_FID() {
+		return CALLER_FID;
+	}
+
+	public void setCALLER_FID(String cALLER_FID) {
+		CALLER_FID = cALLER_FID;
+	}
 }

@@ -228,8 +228,25 @@ public class SalesforceSyncServiceImpl {
 		sftokenMap.put("SalesForceToken", sftokenOnly+"::"+validityTimeStamp);
 		LOGGER.info("SalesForceToken added to HashMap");
 	}
+	
+	public void setSalesForceClientId(String salesForceClientId) {
+		this.salesForceClientId = salesForceClientId;
+	}
+	
+	public void setSalesForceClientSecret(String salesForceClientSecret) {
+		this.salesForceClientSecret = salesForceClientSecret;
+	}
 
+	public void setSalesForceUserName(String salesForceUserName) {
+		this.salesForceUserName = salesForceUserName;
+	}
 
+	public void setSalesForcePassword(String salesForcePassword) {
+		this.salesForcePassword = salesForcePassword;
+	}
 
+	public void setSftokentimeinminute(String sftokentimeinminute) {
+		this.sftokentimeinminute = sftokentimeinminute;
+	}
 
 }
