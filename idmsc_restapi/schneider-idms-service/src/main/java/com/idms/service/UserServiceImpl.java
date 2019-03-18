@@ -9322,6 +9322,9 @@ public class UserServiceImpl implements UserService {
 					}
 				}
 			}
+			LOGGER.info("Start: sendSMS() for mobile user:"+mobile);
+			sendEmail.sendSMS(otpMobile, mobile);
+			LOGGER.info("End: sendSMS() finished for  mobile user:"+mobile);
 			if(Boolean.valueOf(sendOTPOverEmail)){
 				LOGGER.info("Start: sendMobileEmail() for mobile userName:" + mobile);
 				sendEmail.sendMobileEmail(otpMobile, mobile);
@@ -9333,7 +9336,6 @@ public class UserServiceImpl implements UserService {
 				sendEmail.sendMobileEmail(otpMobile, mobile);
 				LOGGER.info("End: sendMobileEmail() finished for  mobile user:" + mobile);*/
 			}
-
 			response.put(UserConstants.STATUS, successStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.PIN_SEND_SUCCESS);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
