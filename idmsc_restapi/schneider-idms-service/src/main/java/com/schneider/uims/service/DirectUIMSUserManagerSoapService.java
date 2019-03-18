@@ -1140,4 +1140,24 @@ public class DirectUIMSUserManagerSoapService {
 		return jsonString;
 	}
 
+	public void setCALLER_FID(String cALLER_FID) {
+		CALLER_FID = cALLER_FID;
+	}
+
+	public void setFromUserName(String fromUserName) {
+		this.fromUserName = fromUserName;
+	}
+
+	public void setSupportUser(String supportUser) {
+		this.supportUser = supportUser;
+	}
+
+	public void setGoDitalToken(String goDitalToken) {
+		this.goDitalToken = goDitalToken;
+	}
+
+	public void setGoDigitalValue(String goDigitalValue) {
+		this.goDigitalValue = goDigitalValue;
+	}
+
 }
