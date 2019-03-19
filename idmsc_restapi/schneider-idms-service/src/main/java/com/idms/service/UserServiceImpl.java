@@ -9014,9 +9014,8 @@ public class UserServiceImpl implements UserService {
 				jsonResponse = rb.build();
 			}
 		} catch (Exception e) {
-			//
 			errorResponse.setStatus(errorStatus);
-			errorResponse.setMessage(jsonResponse.getStatusInfo().getReasonPhrase());
+			//errorResponse.setMessage(jsonResponse.getStatusInfo().getReasonPhrase());
 			LOGGER.error("Exception in buildQueryParam()=" + e.getMessage(), e);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		}
