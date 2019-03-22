@@ -27,10 +27,21 @@ public class FieldsMappingValidatorImpl  implements IValidator{
 		LOGGER.info("Parameter key -> " + key+" ,value -> "+value);
 		CacheManagerProvider cacheManagerProvider = new CacheManagerProviderImpl();
 		CacheBuilder cacheBuilder = new CacheBuilder(cacheManagerProvider );
-		Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSMAPPING_PROPERTIES_PATH);
+		Properties cacheProperties =null;
+		//Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSMAPPING_PROPERTIES_PATH);
+		if(CacheBuilder.getPropertiesMap().size()>0){
+			CacheBuilder.getPropertiesMap().entrySet().forEach(entry -> {
+				LOGGER.info("Key : " + entry.getKey() + " Value : " + entry.getValue());
+			});  
+			cacheProperties=CacheBuilder.getPropertiesMap().get(IDMS_FIELDSMAPPING_PROPERTIES_PATH);
+		}
+		//Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
+		if(cacheProperties==null){
+		   cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSMAPPING_PROPERTIES_PATH);
+		}
 		String fieldMapProperty = cacheProperties.getProperty(key);
 		
-		//LOGGER.info("properties from cache::fieldMapProperty="+fieldMapProperty);
+		LOGGER.info("properties from cache::fieldMapProperty="+fieldMapProperty);
 		
 		if(value.equals(fieldMapProperty)){
 			LOGGER.info("Validation of key:"+key+" ,value:"+value+" is OK! and validate() is Ending");

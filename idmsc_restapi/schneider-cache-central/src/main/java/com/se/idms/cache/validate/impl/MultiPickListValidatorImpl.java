@@ -29,14 +29,22 @@ public class MultiPickListValidatorImpl implements IValidator {
 		LOGGER.info("Parameter key -> " + key+" ,value -> "+value);
 		CacheManagerProvider cacheManagerProvider = new CacheManagerProviderImpl();
 		CacheBuilder cacheBuilder = new CacheBuilder(cacheManagerProvider);
-		Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH);
+		//Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH);
+		Properties cacheProperties=null;
+		if(CacheBuilder.getPropertiesMap().size()>0){
+			CacheBuilder.getPropertiesMap().entrySet().forEach(entry -> {
+				LOGGER.info("Key : " + entry.getKey() + " Value : " + entry.getValue());
+			});  
+			cacheProperties=CacheBuilder.getPropertiesMap().get(IDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH);
+		}
+		if(cacheProperties==null){
+			   cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH);
+		}
 		String pickListProperty = cacheProperties.getProperty(key);
-
 		// multiPickListProperty will be in the form of comma separated string.
 		// Eg.
 		// IDMSCompanyMarketServed__c=BA4,BA5,BDZ,BD1,BD3,BD4,BD6,BD9
-
-		//LOGGER.info("properties from cache:" + pickListProperty);
+		LOGGER.info("multiPickList properties from cache:" + pickListProperty);
 		List<String> companyMarketServedList = Arrays.asList(pickListProperty.split(","));
 
 		//LOGGER.info("companyMarketServedList size" + "-->" + companyMarketServedList.size());

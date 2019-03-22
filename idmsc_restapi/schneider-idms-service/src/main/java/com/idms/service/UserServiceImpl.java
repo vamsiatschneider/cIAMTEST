@@ -9220,6 +9220,7 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Entered sendOTP() -> Start");
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
+
 		LOGGER.info("caller ID before:"+ CALLER_FID);
 		ObjectMapper objMapper = new ObjectMapper();
 		String otpMobile = null, otpStatus = null, otpValidityTime = null;
@@ -9227,6 +9228,7 @@ public class UserServiceImpl implements UserService {
 		String mobile = null;
 		JSONObject response = new JSONObject();
 		LOGGER.info("caller ID after :"+ CALLER_FID);
+
 		try {
 			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(otpRequest));
 			if (null == otpRequest.getMobile() || otpRequest.getMobile().isEmpty()) {

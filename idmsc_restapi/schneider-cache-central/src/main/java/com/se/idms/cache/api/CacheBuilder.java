@@ -1,5 +1,9 @@
 package com.se.idms.cache.api;
 
+import static com.se.idms.cache.utils.CacheUtils.readPropertiesFile;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import net.sf.ehcache.CacheManager;
@@ -29,6 +33,12 @@ public class CacheBuilder implements CacheTypes {
 	private SelfPopulatingCache selfPopulatingPropertiesCache;
 	
 	private SelfPopulatingCache selfPopulatingIdmsFieldsCache;
+	
+	private static  Map<String, Properties> propertiesMap = new HashMap<String, Properties>();
+
+	public static Map<String, Properties> getPropertiesMap() {
+		return propertiesMap;
+	}
 
 	@Autowired
 	public CacheBuilder(CacheManagerProvider cacheManagerProvider) {
@@ -84,6 +94,53 @@ public class CacheBuilder implements CacheTypes {
 		throw new CacheException("The input parameter for getProperties() is Empty or Null");
 	}
 	
+	public void refreshCache(String propertiesFile){
+		LOGGER.info(" CacheBuilder::refreshCache() -> Called");
+		 //String property="";
+		if (StringUtils.isNotEmpty(propertiesFile)) {
+			try {
+				Properties properties = readPropertiesFile(propertiesFile);
+				propertiesMap.put(propertiesFile, properties);
+			} catch (Exception e) {
+				throw new CacheException("The properties file: "+ propertiesFile + " could not be accessed.");
+			}
+		/*if (selfPopulatingPropertiesCache == null){
+			LOGGER.info("propertiesFile="+propertiesFile);
+			if(propertiesFile.contains("LENGTH")){
+				property="lengthProperties";
+			}
+			
+			if(propertiesFile.contains("MANDATORY")){
+				property="mandatoryProperties";
+			}
+			
+			if(propertiesFile.contains("MAPPING")){
+				property="fieldMapProperties";
+			}
+			
+			if(propertiesFile.contains("MULTYPICKLIST")){
+				property="multiPickListProperties";
+			}
+			
+			if(propertiesFile.contains("PICKLIST")){
+				property="pickListProperties";
+			}
+			cacheEntryFactory = new PropertiesEntryCreator();
+			Ehcache ehcache = getRawCache(property);
+			selfPopulatingPropertiesCache = new SelfPopulatingCache(ehcache, cacheEntryFactory);
+			Element element = selfPopulatingPropertiesCache.refresh(propertiesFile);
+			System.out.println("Element value in refresh :"+element.getValue()+"Element Key:"+element.getKey());
+			if(element!=null)
+			selfPopulatingPropertiesCache.put(element);
+		}*/
+	}
+	else{
+		LOGGER.error("propertiesFile:"+propertiesFile+" is Empty or Null");
+		throw new CacheException("The input parameter for getProperties() is Empty or Null");
+		}
+		
+	}
+	
 	/**
 	 * get the configuration property cache
 	 * @return
@@ -130,6 +187,7 @@ public class CacheBuilder implements CacheTypes {
 		Ehcache ehcache = getRawCache(property);
 		
 		selfPopulatingPropertiesCache = new SelfPopulatingCache(ehcache, cacheEntryFactory);
+		
 	}
 	
 	

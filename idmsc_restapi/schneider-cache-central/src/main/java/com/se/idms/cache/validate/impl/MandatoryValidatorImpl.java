@@ -29,13 +29,22 @@ public class MandatoryValidatorImpl  implements IValidator{
 		LOGGER.info("Parameter key -> " + key+" ,value -> "+value);
 		CacheManagerProvider cacheManagerProvider = new CacheManagerProviderImpl();
 		CacheBuilder cacheBuilder = new CacheBuilder(cacheManagerProvider );
-		Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSMANDATORY_PROPERTIES_PATH);
+		Properties cacheProperties =null;
+		//Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSMANDATORY_PROPERTIES_PATH);
+		if(CacheBuilder.getPropertiesMap().size()>0){
+			CacheBuilder.getPropertiesMap().entrySet().forEach(entry -> {
+				LOGGER.info("Key : " + entry.getKey() + " Value : " + entry.getValue());
+			});  
+			cacheProperties=CacheBuilder.getPropertiesMap().get(IDMS_FIELDSMANDATORY_PROPERTIES_PATH);
+		}
+		//Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
+		if(cacheProperties==null){
+		   cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSMANDATORY_PROPERTIES_PATH);
+		}
 		String mandatoryProperty = cacheProperties.getProperty(key);
-		
+		LOGGER.info("mandatoryProperty::"+mandatoryProperty);
 		String[] mandatoryPropertySplitter = mandatoryProperty.split(",");
 		List<String> list = Arrays.asList(mandatoryPropertySplitter);
-		
-		
 		//LOGGER.info("properties from cache::mandatoryProperty="+mandatoryProperty);
 		if(list.contains(value)){
 			LOGGER.info("Mandatory Validation of key:"+key+" ,value:"+value+" is OK! and validate() is Ending");
