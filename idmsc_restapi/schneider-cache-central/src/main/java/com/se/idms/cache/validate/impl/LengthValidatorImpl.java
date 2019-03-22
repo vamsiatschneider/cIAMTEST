@@ -32,15 +32,24 @@ public class LengthValidatorImpl implements IValidator {
 		try {
 			CacheManagerProvider cacheManagerProvider = new CacheManagerProviderImpl();
 			CacheBuilder cacheBuilder = new CacheBuilder(cacheManagerProvider);
-			Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSLENGTH_PROPERTIES_PATH);
+			Properties cacheProperties =null;
+			//Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSLENGTH_PROPERTIES_PATH);
+			if(CacheBuilder.getPropertiesMap().size()>0){
+				CacheBuilder.getPropertiesMap().entrySet().forEach(entry -> {
+					LOGGER.info("Key : " + entry.getKey() + " Value : " + entry.getValue());
+				});  
+				cacheProperties=CacheBuilder.getPropertiesMap().get(IDMS_FIELDSLENGTH_PROPERTIES_PATH);
+			}
+			//Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
+			if(cacheProperties==null){
+			   cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSLENGTH_PROPERTIES_PATH);
+			}
 			String lengthProperty = cacheProperties.getProperty(key).trim();
-
+			LOGGER.info("lengthProperty::"+lengthProperty);
 			//LOGGER.debug("lengthProperty from the cache is:" + lengthProperty);
-
 			String strVal = value.toString();
 			Integer len1 = Integer.valueOf(strVal.length());
 			Integer len2 = Integer.valueOf(lengthProperty);
-
 			if (len1 <= len2) {
 				LOGGER.info("Length Validation of key:"+key+" ,value:"+value+" is OK! and validate() is Ending");
 				return true;

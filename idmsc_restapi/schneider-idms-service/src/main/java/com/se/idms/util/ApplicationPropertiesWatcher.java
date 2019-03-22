@@ -19,12 +19,17 @@ import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import com.se.idms.cache.api.CacheBuilder;
+import com.se.idms.cache.api.CacheManagerProvider;
+import com.se.idms.cache.api.CacheManagerProviderImpl;
 
 @Service("applicationPropertiesWatcher")
 public class ApplicationPropertiesWatcher implements Runnable {
@@ -108,9 +113,16 @@ public class ApplicationPropertiesWatcher implements Runnable {
 				// System.out.println("file name:"+name);
 				Path child = dir.resolve(name);// absolute path
 				// System.out.println("Absolute file name:"+child);
-				if (name.toString().endsWith(".properties")) {
+				if(name.toString().startsWith("IDMS")){
+					LOGGER.info("picklist IDMS data modified !!:"+ event.kind().name()+"::"+ child);
+					CacheManagerProvider cacheManagerProvider = new CacheManagerProviderImpl();
+					CacheBuilder cacheBuilder = new CacheBuilder(cacheManagerProvider);
+					cacheBuilder.refreshCache(child.toAbsolutePath().toString());
+				}
+				else if(name.toString().endsWith(".properties")) {
 					// print out event
-					LOGGER.info("%s: %s\n", event.kind().name(), child);
+					//System.out.printf("%s: %s\n", event.kind().name()+ child);
+					LOGGER.info("Application properties path and file name:"+ event.kind().name()+"::"+ child);
 					configurationChanged(child.toAbsolutePath().toString());
 				}
 

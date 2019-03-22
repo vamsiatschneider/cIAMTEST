@@ -80,9 +80,10 @@ public class PropertyFileAutoRefresh {
 	public void initilize(final String file) {
 		InputStream in = null;
 		try {
+			LOGGER.info("initilize(final String file) start");
 			in = new FileInputStream(new File(file));
 			configuration.load(in);
-			LOGGER.info("Refreshed value:" + configuration.getProperty("caller.fid"));
+			//System.out.println("Refreshed value:" + configuration.getProperty("IDMS_BFO_profile"));
 			// System.out.println("PROPERTY_FILE:"+PROPERTY_FILE);
 			// Update all properties file entries
 			((UserServiceImpl) userService).setCALLER_FID(configuration.getProperty("caller.fid"));
@@ -212,6 +213,7 @@ public class PropertyFileAutoRefresh {
 					configuration.getProperty("keystore.samlAssertionSigning.keystore.certAlias"));
 			samlAssertionTokenService
 					.setSamlAssertionSigningKeystore(configuration.getProperty("keystore.samlAssertionSigning.path"));
+			LOGGER.info("initilize(final String file) end");
 
 		} catch (IOException e) {
 			LOGGER.error("Error in property file  initilizing"+e.getMessage(), e);
