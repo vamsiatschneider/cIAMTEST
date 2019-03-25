@@ -24,6 +24,9 @@ public class LengthValidatorImpl implements IValidator {
 	//CODE-RE-STRUCTURING
 	@Value("${fields.length.props.path}")
 	private String IDMS_FIELDSLENGTH_PROPERTIES_PATH;
+	
+	@Value("${idms.env}")
+	private String IDMS_DEPLOY_ENV;
 
 	@Override
 	public boolean validate(String key, Object value) {
@@ -32,9 +35,11 @@ public class LengthValidatorImpl implements IValidator {
 		try {
 			CacheManagerProvider cacheManagerProvider = new CacheManagerProviderImpl();
 			CacheBuilder cacheBuilder = new CacheBuilder(cacheManagerProvider);
-			Properties cacheProperties =null;
-			//Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSLENGTH_PROPERTIES_PATH);
-			if(CacheBuilder.getPropertiesMap().size()>0){
+			//Properties cacheProperties =null;
+			if(IDMS_DEPLOY_ENV.equalsIgnoreCase("DEV"))
+				IDMS_FIELDSLENGTH_PROPERTIES_PATH=IDMS_FIELDSLENGTH_PROPERTIES_PATH.replaceAll("/", "\\\\");
+			Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSLENGTH_PROPERTIES_PATH);
+			/*if(CacheBuilder.getPropertiesMap().size()>0){
 				CacheBuilder.getPropertiesMap().entrySet().forEach(entry -> {
 					LOGGER.info("Key : " + entry.getKey() + " Value : " + entry.getValue());
 				});  
@@ -43,7 +48,7 @@ public class LengthValidatorImpl implements IValidator {
 			//Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
 			if(cacheProperties==null){
 			   cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSLENGTH_PROPERTIES_PATH);
-			}
+			}*/
 			String lengthProperty = cacheProperties.getProperty(key).trim();
 			LOGGER.info("lengthProperty::"+lengthProperty);
 			//LOGGER.debug("lengthProperty from the cache is:" + lengthProperty);
@@ -59,6 +64,14 @@ public class LengthValidatorImpl implements IValidator {
 		}
 		LOGGER.error("Length Validation of key:"+key+" ,value:"+value+" is NOT OK! and validate() is Ending");
 		return false;
+	}
+
+	public void setIDMS_FIELDSLENGTH_PROPERTIES_PATH(String iDMS_FIELDSLENGTH_PROPERTIES_PATH) {
+		IDMS_FIELDSLENGTH_PROPERTIES_PATH = iDMS_FIELDSLENGTH_PROPERTIES_PATH;
+	}
+
+	public void setIDMS_DEPLOY_ENV(String iDMS_DEPLOY_ENV) {
+		IDMS_DEPLOY_ENV = iDMS_DEPLOY_ENV;
 	}
 
 	

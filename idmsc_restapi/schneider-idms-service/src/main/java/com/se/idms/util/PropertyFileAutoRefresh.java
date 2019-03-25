@@ -8,6 +8,7 @@ import java.util.Properties;
 
 import javax.inject.Inject;
 
+import org.hibernate.validator.internal.constraintvalidators.LengthValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +27,11 @@ import com.schneider.idms.salesforce.service.SalesforceSyncServiceImpl;
 import com.schneider.idms.service.impl.CreateUserServiceImpl;
 import com.schneider.idms.service.impl.IdmsCommonServiceImpl;
 import com.schneider.uims.service.DirectUIMSUserManagerSoapService;
+import com.se.idms.cache.validate.impl.FieldsMappingValidatorImpl;
+import com.se.idms.cache.validate.impl.LengthValidatorImpl;
+import com.se.idms.cache.validate.impl.MandatoryValidatorImpl;
+import com.se.idms.cache.validate.impl.MultiPickListValidatorImpl;
+import com.se.idms.cache.validate.impl.PickListValidatorImpl;
 
 @Service("propertyFileAutoRefresh")
 public class PropertyFileAutoRefresh {
@@ -66,6 +72,16 @@ public class PropertyFileAutoRefresh {
 	DirectUIMSUserManagerSoapService directUIMSUserManagerSoapService;
 	@Inject
 	SamlAssertionTokenGenerator samlAssertionTokenService;
+	@Inject
+	PickListValidatorImpl pickListValidator ;
+	@Inject
+	MultiPickListValidatorImpl multiPickListValidator;
+	@Inject
+	MandatoryValidatorImpl mandatoryValidator;
+	@Inject
+	LengthValidatorImpl legthValidator;
+	@Inject
+	FieldsMappingValidatorImpl fieldsMappingValidator;
 
 	public static PropertyFileAutoRefresh getInstance() {
 		return INSTANCE;
@@ -213,6 +229,22 @@ public class PropertyFileAutoRefresh {
 					configuration.getProperty("keystore.samlAssertionSigning.keystore.certAlias"));
 			samlAssertionTokenService
 					.setSamlAssertionSigningKeystore(configuration.getProperty("keystore.samlAssertionSigning.path"));
+			
+			pickListValidator.setIDMS_DEPLOY_ENV(configuration.getProperty("idms.env"));
+			pickListValidator.setIDMS_FIELDSPICKLIST_PROPERTIES_PATH(configuration.getProperty("fields.picklist.props.path"));
+			
+			multiPickListValidator.setIDMS_DEPLOY_ENV(configuration.getProperty("idms.env"));
+			multiPickListValidator.setIDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH(configuration.getProperty("fields.multi.picklist.props.path"));
+			
+			mandatoryValidator.setIDMS_DEPLOY_ENV(configuration.getProperty("idms.env"));
+			mandatoryValidator.setIDMS_FIELDSMANDATORY_PROPERTIES_PATH(configuration.getProperty("fields.mandatory.props.path"));
+			
+			legthValidator.setIDMS_DEPLOY_ENV(configuration.getProperty("idms.env"));
+			legthValidator.setIDMS_FIELDSLENGTH_PROPERTIES_PATH(configuration.getProperty("fields.length.props.path"));
+			
+			fieldsMappingValidator.setIDMS_DEPLOY_ENV(configuration.getProperty("idms.env"));
+			fieldsMappingValidator.setIDMS_FIELDSMAPPING_PROPERTIES_PATH(configuration.getProperty("fields.mapping.props.path"));
+			
 			LOGGER.info("initilize(final String file) end");
 		} catch (IOException e) {
 			LOGGER.error("Error in property file  initilizing"+e.getMessage(), e);

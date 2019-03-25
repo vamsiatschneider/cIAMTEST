@@ -21,15 +21,20 @@ public class FieldsMappingValidatorImpl  implements IValidator{
 	@Value("${fields.mapping.props.path}")
 	private String IDMS_FIELDSMAPPING_PROPERTIES_PATH;
 	
+	@Value("${idms.env}")
+	private String IDMS_DEPLOY_ENV;
+	
 	@Override
 	public boolean validate(String key, Object value) {
 		LOGGER.info("Entered validate() -> Start");
 		LOGGER.info("Parameter key -> " + key+" ,value -> "+value);
 		CacheManagerProvider cacheManagerProvider = new CacheManagerProviderImpl();
 		CacheBuilder cacheBuilder = new CacheBuilder(cacheManagerProvider );
-		Properties cacheProperties =null;
-		//Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSMAPPING_PROPERTIES_PATH);
-		if(CacheBuilder.getPropertiesMap().size()>0){
+		//Properties cacheProperties =null;
+		if(IDMS_DEPLOY_ENV.equalsIgnoreCase("DEV"))
+			IDMS_FIELDSMAPPING_PROPERTIES_PATH=IDMS_FIELDSMAPPING_PROPERTIES_PATH.replaceAll("/", "\\\\");
+		Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSMAPPING_PROPERTIES_PATH);
+		/*if(CacheBuilder.getPropertiesMap().size()>0){
 			CacheBuilder.getPropertiesMap().entrySet().forEach(entry -> {
 				LOGGER.info("Key : " + entry.getKey() + " Value : " + entry.getValue());
 			});  
@@ -38,7 +43,7 @@ public class FieldsMappingValidatorImpl  implements IValidator{
 		//Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
 		if(cacheProperties==null){
 		   cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSMAPPING_PROPERTIES_PATH);
-		}
+		}*/
 		String fieldMapProperty = cacheProperties.getProperty(key);
 		
 		LOGGER.info("properties from cache::fieldMapProperty="+fieldMapProperty);
@@ -50,6 +55,14 @@ public class FieldsMappingValidatorImpl  implements IValidator{
 
 		LOGGER.error("Validation of key:"+key+" ,value:"+value+" is NOT OK! and validate() is Ending");
 		return false;
+	}
+
+	public void setIDMS_FIELDSMAPPING_PROPERTIES_PATH(String iDMS_FIELDSMAPPING_PROPERTIES_PATH) {
+		IDMS_FIELDSMAPPING_PROPERTIES_PATH = iDMS_FIELDSMAPPING_PROPERTIES_PATH;
+	}
+
+	public void setIDMS_DEPLOY_ENV(String iDMS_DEPLOY_ENV) {
+		IDMS_DEPLOY_ENV = iDMS_DEPLOY_ENV;
 	}
 	
 }
