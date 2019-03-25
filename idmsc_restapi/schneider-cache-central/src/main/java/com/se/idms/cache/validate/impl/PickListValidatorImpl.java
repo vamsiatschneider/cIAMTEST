@@ -23,25 +23,31 @@ public class PickListValidatorImpl implements IValidator {
 	//CODE-RE-STRUCTURING
 	@Value("${fields.picklist.props.path}")
 	private String IDMS_FIELDSPICKLIST_PROPERTIES_PATH;
+	
+	@Value("${idms.env}")
+	private String IDMS_DEPLOY_ENV;
 		
 	@Override
 	public boolean validate(String key, Object value) {
 		LOGGER.info("Entered validate() -> Start");
 		LOGGER.info("Parameter key -> " + key+" ,value -> "+value);
 		CacheManagerProvider cacheManagerProvider = new CacheManagerProviderImpl();
-		Properties cacheProperties=null;
+		//Properties cacheProperties=null;
 		CacheBuilder cacheBuilder = new CacheBuilder(cacheManagerProvider);
-	
-		if(CacheBuilder.getPropertiesMap().size()>0){
+		LOGGER.info("picklist path first:"+IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
+		if(IDMS_DEPLOY_ENV.equalsIgnoreCase("DEV"))
+			IDMS_FIELDSPICKLIST_PROPERTIES_PATH=IDMS_FIELDSPICKLIST_PROPERTIES_PATH.replaceAll("/", "\\\\");
+		LOGGER.info("picklist path after conversion:"+IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
+		Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
+		/*if(CacheBuilder.getPropertiesMap().size()>0){
 			CacheBuilder.getPropertiesMap().entrySet().forEach(entry -> {
 				LOGGER.info("Key : " + entry.getKey() + " Value : " + entry.getValue());
 			});  
 			cacheProperties=CacheBuilder.getPropertiesMap().get(IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
 		}
-		//Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
 		if(cacheProperties==null){
-		   cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
-		}
+		Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
+		}*/
 		String pickListProperty = cacheProperties.getProperty(key);
 		LOGGER.info("pickListProperty::"+pickListProperty);
 		List<String> pickListCache = Arrays.asList(pickListProperty.split(","));
@@ -58,5 +64,17 @@ public class PickListValidatorImpl implements IValidator {
 		}*/
 		LOGGER.error("Validation of key:"+key+" ,value:"+value+" is NOT OK! and validate() is Ending");
 		return false;
+	}
+
+	public void setIDMS_FIELDSPICKLIST_PROPERTIES_PATH(String iDMS_FIELDSPICKLIST_PROPERTIES_PATH) {
+		IDMS_FIELDSPICKLIST_PROPERTIES_PATH = iDMS_FIELDSPICKLIST_PROPERTIES_PATH;
+	}
+
+	public void setIDMS_DEPLOY_ENV(String iDMS_DEPLOY_ENV) {
+		IDMS_DEPLOY_ENV = iDMS_DEPLOY_ENV;
+	}
+
+	public String getIDMS_DEPLOY_ENV() {
+		return IDMS_DEPLOY_ENV;
 	}
 }

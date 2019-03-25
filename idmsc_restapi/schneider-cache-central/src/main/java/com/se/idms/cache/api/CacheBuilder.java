@@ -96,15 +96,15 @@ public class CacheBuilder implements CacheTypes {
 	
 	public void refreshCache(String propertiesFile){
 		LOGGER.info(" CacheBuilder::refreshCache() -> Called");
-		 //String property="";
+		 String property="";
 		if (StringUtils.isNotEmpty(propertiesFile)) {
-			try {
+		/*	try {
 				Properties properties = readPropertiesFile(propertiesFile);
 				propertiesMap.put(propertiesFile, properties);
 			} catch (Exception e) {
 				throw new CacheException("The properties file: "+ propertiesFile + " could not be accessed.");
-			}
-		/*if (selfPopulatingPropertiesCache == null){
+			}*/
+		if (selfPopulatingPropertiesCache == null){
 			LOGGER.info("propertiesFile="+propertiesFile);
 			if(propertiesFile.contains("LENGTH")){
 				property="lengthProperties";
@@ -130,9 +130,9 @@ public class CacheBuilder implements CacheTypes {
 			selfPopulatingPropertiesCache = new SelfPopulatingCache(ehcache, cacheEntryFactory);
 			Element element = selfPopulatingPropertiesCache.refresh(propertiesFile);
 			System.out.println("Element value in refresh :"+element.getValue()+"Element Key:"+element.getKey());
-			if(element!=null)
-			selfPopulatingPropertiesCache.put(element);
-		}*/
+			//if(element!=null)
+			//selfPopulatingPropertiesCache.put(element);
+		}
 	}
 	else{
 		LOGGER.error("propertiesFile:"+propertiesFile+" is Empty or Null");
