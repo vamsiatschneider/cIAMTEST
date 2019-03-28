@@ -2467,13 +2467,13 @@ public class UserServiceImpl implements UserService {
 			/**
 			 * validate e-mail or mobile attribute values should be present
 			 */
-			if ((checkMandatoryFields) && (null == userRequest.getEmail() || userRequest.getEmail().isEmpty())
+		 /*	if ((checkMandatoryFields) && (null == userRequest.getEmail() || userRequest.getEmail().isEmpty())
 					&& (null == userRequest.getMobilePhone() || userRequest.getMobilePhone().isEmpty())) {
 				userResponse.setMessage(
 						UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.EMAIL + " OR " + UserConstants.MOBILE);
 				return true;
 			}
-
+		 */
 			/**
 			 * validate preferred Language attribute values should be present
 			 */
@@ -2576,8 +2576,9 @@ public class UserServiceImpl implements UserService {
 						&& !userRequest.getIDMS_Profile_update_source__c().isEmpty())
 				&& (pickListValidator.validate(UserConstants.IDMS_BFO_profile,
 						userRequest.getIDMS_Profile_update_source__c()))
-				&& (null == userRequest.getEmail() || userRequest.getEmail().isEmpty())) {
-			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.EMAIL);
+				&& (null == userRequest.getEmail() || userRequest.getEmail().isEmpty()) && 
+				(null == userRequest.getMobilePhone() || userRequest.getMobilePhone().isEmpty())) {
+			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.EMAIL+" OR " + UserConstants.MOBILE);
 			return true;
 		}
 
@@ -9222,13 +9223,15 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Entered sendOTP() -> Start");
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
-		System.out.println("caller ID before:"+ CALLER_FID);
+
+		LOGGER.info("caller ID before:"+ CALLER_FID);
 		ObjectMapper objMapper = new ObjectMapper();
 		String otpMobile = null, otpStatus = null, otpValidityTime = null;
-		Thread.sleep(5000);
+		//Thread.sleep(5000);
 		String mobile = null;
 		JSONObject response = new JSONObject();
-		System.out.println("caller ID after :"+ CALLER_FID);
+		LOGGER.info("caller ID after :"+ CALLER_FID);
+
 		try {
 			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(otpRequest));
 			if (null == otpRequest.getMobile() || otpRequest.getMobile().isEmpty()) {
