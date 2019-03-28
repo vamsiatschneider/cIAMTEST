@@ -129,7 +129,7 @@ public class CacheBuilder implements CacheTypes {
 			Ehcache ehcache = getRawCache(property);
 			selfPopulatingPropertiesCache = new SelfPopulatingCache(ehcache, cacheEntryFactory);
 			Element element = selfPopulatingPropertiesCache.refresh(propertiesFile);
-			System.out.println("Element value in refresh :"+element.getValue()+"Element Key:"+element.getKey());
+			LOGGER.info("Element value in refresh :"+element.getValue()+"Element Key:"+element.getKey());
 			//if(element!=null)
 			//selfPopulatingPropertiesCache.put(element);
 		}
