@@ -108,10 +108,11 @@ public class ApplicationPropertiesWatcher implements Runnable {
 				// Context for directory entry event is the file name of entry
 				WatchEvent<Path> ev = cast(event);
 				Path name = ev.context(); // file name
-				// System.out.println("file name:"+name);
+				LOGGER.info("Process events file name:"+name);
 				Path child = dir.resolve(name);// absolute path
-				// System.out.println("Absolute file name:"+child);
-				if(name.toString().startsWith("IDMS")){
+				LOGGER.info("Process events toAbsolutePath():"+child.toAbsolutePath().toString());
+				try{
+				if(name.toString().startsWith("IDMS") & name.toString().endsWith(".properties")){
 					LOGGER.info("picklist IDMS data modified !!:"+ event.kind().name()+"::"+ child);
 					CacheManagerProvider cacheManagerProvider = new CacheManagerProviderImpl();
 					CacheBuilder cacheBuilder = new CacheBuilder(cacheManagerProvider);
@@ -122,6 +123,10 @@ public class ApplicationPropertiesWatcher implements Runnable {
 					//System.out.printf("%s: %s\n", event.kind().name()+ child);
 					LOGGER.info("Application properties path and file name:"+ event.kind().name()+"::"+ child);
 					configurationChanged(child.toAbsolutePath().toString());
+				}
+				}
+				catch(Exception exception){
+					LOGGER.error("Executing while processing events :: -> " + exception.getMessage(),exception);
 				}
 
 			}

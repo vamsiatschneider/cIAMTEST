@@ -1739,7 +1739,8 @@ public class UserServiceImpl implements UserService {
 					UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.EMAIL + " OR " + UserConstants.MOBILE);
 			return true;
 		}
-
+		
+		
 		/**
 		 * FirstName Mandatory validation and length check
 		 */
@@ -2467,13 +2468,13 @@ public class UserServiceImpl implements UserService {
 			/**
 			 * validate e-mail or mobile attribute values should be present
 			 */
-			if ((checkMandatoryFields) && (null == userRequest.getEmail() || userRequest.getEmail().isEmpty())
+		 /*	if ((checkMandatoryFields) && (null == userRequest.getEmail() || userRequest.getEmail().isEmpty())
 					&& (null == userRequest.getMobilePhone() || userRequest.getMobilePhone().isEmpty())) {
 				userResponse.setMessage(
 						UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.EMAIL + " OR " + UserConstants.MOBILE);
 				return true;
 			}
-
+		 */
 			/**
 			 * validate preferred Language attribute values should be present
 			 */
@@ -2576,8 +2577,9 @@ public class UserServiceImpl implements UserService {
 						&& !userRequest.getIDMS_Profile_update_source__c().isEmpty())
 				&& (pickListValidator.validate(UserConstants.IDMS_BFO_profile,
 						userRequest.getIDMS_Profile_update_source__c()))
-				&& (null == userRequest.getEmail() || userRequest.getEmail().isEmpty())) {
-			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.EMAIL);
+				&& (null == userRequest.getEmail() || userRequest.getEmail().isEmpty()) && 
+				(null == userRequest.getMobilePhone() || userRequest.getMobilePhone().isEmpty())) {
+			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.EMAIL+" OR " + UserConstants.MOBILE);
 			return true;
 		}
 
