@@ -398,6 +398,7 @@ public class UserConstants {
 	
 	public static final String ID = "Id";
 	public static final String STATUS = "Status";
+	public static final String STATUS_L = "status";
 	public static final String MESSAGE = "Message";
 	public static final String MESSAGE_L = "message";
 	public static final String STATUS_FAILD = "Failed";

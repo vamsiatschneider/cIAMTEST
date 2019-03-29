@@ -9948,8 +9948,7 @@ public class UserServiceImpl implements UserService {
 			}
 			LOGGER.info("Parameters size(email,mobile,loginid,idmsFedid): " + varList.size());
 			if(varList.size()>1){
-				response.put(UserConstants.STATUS, errorStatus);
-				response.put(UserConstants.MESSAGE, "Only one identifier is allowed");
+				response.put(UserConstants.MESSAGE_L, "Only one identifier is allowed");
 				LOGGER.error("Mandatory check: Only one identifier is allowed");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
@@ -9960,8 +9959,7 @@ public class UserServiceImpl implements UserService {
 					&& (null == request.getMobile() || request.getMobile().isEmpty())
 					&& (null == request.getLoginID() || request.getLoginID().isEmpty())
 					&& (null == request.getIdmsFederatedId() || request.getIdmsFederatedId().isEmpty())) {
-				response.put(UserConstants.STATUS, errorStatus);
-				response.put(UserConstants.MESSAGE, "Either one Email/Mobile/LoginID/FederatedId should have value");
+				response.put(UserConstants.MESSAGE_L, "Either one Email/Mobile/LoginID/FederatedId should have value");
 				LOGGER.error("Mandatory check: Either one Email/Mobile/LoginID/FederatedId should have value");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
@@ -9970,8 +9968,7 @@ public class UserServiceImpl implements UserService {
 			if ((null != request.getWithGlobalUsers() && !request.getWithGlobalUsers().isEmpty())
 					&& (!UserConstants.TRUE.equalsIgnoreCase(request.getWithGlobalUsers())
 							&& !UserConstants.FALSE.equalsIgnoreCase(request.getWithGlobalUsers()))) {
-				response.put(UserConstants.STATUS, errorStatus);
-				response.put(UserConstants.MESSAGE, UserConstants.GLOBAL_USER_BOOLEAN);
+				response.put(UserConstants.MESSAGE_L, UserConstants.GLOBAL_USER_BOOLEAN);
 				LOGGER.error("Error in idmsCheckUserExists is " + UserConstants.GLOBAL_USER_BOOLEAN);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
@@ -9979,8 +9976,7 @@ public class UserServiceImpl implements UserService {
 			}
 			if (null != request.getEmail() && !request.getEmail().isEmpty()) {
 				if (!emailValidator.validate(request.getEmail())) {
-					response.put(UserConstants.STATUS, errorStatus);
-					response.put(UserConstants.MESSAGE, "Email validation failed.");
+					response.put(UserConstants.MESSAGE_L, "Email validation failed.");
 					LOGGER.error("Error in idmsCheckUserExists is :: Email validation failed.");
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
@@ -9990,8 +9986,7 @@ public class UserServiceImpl implements UserService {
 			if (null != request.getMobile() && !request.getMobile().isEmpty()) {
 				mobileNum = ChinaIdmsUtil.mobileTransformation(request.getMobile());
 				if (!ChinaIdmsUtil.mobileValidator(mobileNum)) {
-					response.put(UserConstants.STATUS, errorStatus);
-					response.put(UserConstants.MESSAGE, "Mobile validation failed.");
+					response.put(UserConstants.MESSAGE_L, "Mobile validation failed.");
 					LOGGER.error("Error in idmsCheckUserExists is :: Mobile validation failed.");
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
@@ -10002,16 +9997,14 @@ public class UserServiceImpl implements UserService {
 				String loginString = request.getLoginID().trim();
 				if (loginString.contains("@")) {
 					if (!emailValidator.validate(loginString)) {
-						response.put(UserConstants.STATUS, errorStatus);
-						response.put(UserConstants.MESSAGE, "LoginID validation failed.");
+						response.put(UserConstants.MESSAGE_L, "LoginID validation failed.");
 						LOGGER.error("Error in idmsCheckUserExists is :: LoginID validation failed.");
 						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 						LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 						return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 					}
 				} else if (!ChinaIdmsUtil.mobileValidator(loginString)) {
-					response.put(UserConstants.STATUS, errorStatus);
-					response.put(UserConstants.MESSAGE, "LoginID validation failed.");
+					response.put(UserConstants.MESSAGE_L, "LoginID validation failed.");
 					LOGGER.error("Error in idmsCheckUserExists is :: LoginID validation failed.");
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
@@ -10076,8 +10069,7 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.OK).entity(response).build();
 			}
 			if (resultCount.intValue() > 1) {
-				response.put(UserConstants.STATUS, errorStatus);
-				response.put(UserConstants.MESSAGE, "Multiple users found based on the identifier");
+				response.put(UserConstants.MESSAGE_L, "Multiple users found based on the identifier");
 				LOGGER.error("Error in idmsCheckUserExists is :: Multiple users found based on the identifier");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
@@ -10104,78 +10096,67 @@ public class UserServiceImpl implements UserService {
 	
 				LOGGER.info("ifwResponse response status code for checkUserExist -> " + ifwResponse.getStatus());
 				if (null != ifwResponse && 200 == ifwResponse.getStatus()) {
-					response.put(UserConstants.STATUS, successStatus);
-					response.put(UserConstants.MESSAGE, UserConstants.TRUE);
+					response.put(UserConstants.MESSAGE_L, UserConstants.TRUE);
 					LOGGER.info("User found in IDMS Global");
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 					return Response.status(ifwResponse.getStatus()).entity(response).build();
 				} else if (null != ifwResponse && 404 == ifwResponse.getStatus()) {
-					response.put(UserConstants.STATUS, errorStatus);
-					response.put(UserConstants.MESSAGE, UserConstants.FALSE);
+					response.put(UserConstants.MESSAGE_L, UserConstants.FALSE);
 					LOGGER.info("User NOT found in IDMS Global");
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 					return Response.status(ifwResponse.getStatus()).entity(response).build();
 				} else if (null != ifwResponse && 400 == ifwResponse.getStatus()) {
-					response.put(UserConstants.STATUS, errorStatus);
-					response.put(UserConstants.MESSAGE, UserConstants.BAD_REQUEST);
+					response.put(UserConstants.MESSAGE_L, UserConstants.BAD_REQUEST);
 					LOGGER.error("Error in idmsCheckUserExists is :: " + UserConstants.BAD_REQUEST);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 					return Response.status(ifwResponse.getStatus()).entity(response).build();
 				} else if (null != ifwResponse && 500 == ifwResponse.getStatus()) {
-					response.put(UserConstants.STATUS, errorStatus);
-					response.put(UserConstants.MESSAGE, UserConstants.SERVER_ERROR_IFW);
+					response.put(UserConstants.MESSAGE_L, UserConstants.SERVER_ERROR_IFW);
 					LOGGER.error("Error in idmsCheckUserExists is :: " + UserConstants.SERVER_ERROR_IFW);
 					return Response.status(ifwResponse.getStatus()).entity(response).build();
 				} else if (null != ifwResponse && 401 == ifwResponse.getStatus()) {
-					response.put(UserConstants.STATUS, errorStatus);
-					response.put(UserConstants.MESSAGE, UserConstants.AUTHENTICATION_ERROR_IFW);
+					response.put(UserConstants.MESSAGE_L, UserConstants.AUTHENTICATION_ERROR_IFW);
 					LOGGER.error("Error in idmsCheckUserExists is :: " + UserConstants.AUTHENTICATION_ERROR_IFW);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 					return Response.status(ifwResponse.getStatus()).entity(response).build();
 				}
 
-				response.put(UserConstants.STATUS, errorStatus);
-				response.put(UserConstants.MESSAGE, "Global idmsCheckUserExist() failed to perform");
+				response.put(UserConstants.MESSAGE_L, "Global idmsCheckUserExist() failed to perform");
 				LOGGER.error("Error in idmsCheckUserExists is :: Global checkUserExist() failed to perform");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 				return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(response).build();
 			} else {
-				response.put(UserConstants.STATUS, errorStatus);
-				response.put(UserConstants.MESSAGE, UserConstants.FALSE);
+				response.put(UserConstants.MESSAGE_L, UserConstants.FALSE);
 				LOGGER.error("User not found");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 				return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 			}
 		} catch (BadRequestException e) {
-			response.put(UserConstants.STATUS, errorStatus);
-			response.put(UserConstants.MESSAGE, UserConstants.BAD_REQUEST);
+			response.put(UserConstants.MESSAGE_L, UserConstants.BAD_REQUEST);
 			LOGGER.error("BadRequestException in idmsCheckUserExists :: -> " + e.getMessage(),e);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (NotAuthorizedException e) {
-			response.put(UserConstants.STATUS, errorStatus);
-			response.put(UserConstants.MESSAGE, "Authorization Failed");
+			response.put(UserConstants.MESSAGE_L, "Authorization Failed");
 			LOGGER.error("NotAuthorizedException in idmsCheckUserExists :: -> " + e.getMessage(),e);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 			return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
 		} catch (NotFoundException e) {
-			response.put(UserConstants.STATUS, errorStatus);
-			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
+			response.put(UserConstants.MESSAGE_L, UserConstants.USER_NOT_FOUND);
 			LOGGER.error("NotFoundException in idmsCheckUserExists :: -> " + e.getMessage(),e);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 		} catch (Exception e) {
-			response.put(UserConstants.STATUS, errorStatus);
-			response.put(UserConstants.MESSAGE, e.getMessage());
+			response.put(UserConstants.MESSAGE_L, e.getMessage());
 			LOGGER.error("Exception in idmsCheckUserExists :: -> " + e.getMessage(),e);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
