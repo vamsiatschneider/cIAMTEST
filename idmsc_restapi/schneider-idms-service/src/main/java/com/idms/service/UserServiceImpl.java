@@ -87,6 +87,7 @@ import com.idms.model.ActivateUserRequest;
 import com.idms.model.AddEmailRequest;
 import com.idms.model.AddMobileRequest;
 import com.idms.model.CheckUserExistsRequest;
+import com.idms.model.CheckUserExistsRequestDemo;
 import com.idms.model.CheckUserIdentityRequest;
 import com.idms.model.ConfirmPinErrorResponse;
 import com.idms.model.ConfirmPinRequest;
@@ -1109,7 +1110,6 @@ public class UserServiceImpl implements UserService {
 			try {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
-				// TODO Auto-generated catch block
 				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 				iPlanetDirectoryKey = "";
 			}
@@ -9911,6 +9911,256 @@ public class UserServiceImpl implements UserService {
 
 	public void setSendOTPOverEmail(String sendOTPOverEmail) {
 		this.sendOTPOverEmail = sendOTPOverEmail;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Response idmsCheckUserExistsDemo(CheckUserExistsRequestDemo request) {
+		LOGGER.info("Entered idmsCheckUserExists() -> Start");
+		DocumentContext productDocCtx = null;
+		String iPlanetDirectoryKey = null;
+		String ifwAccessToken = null, userExists = null;
+		JSONObject response = new JSONObject();
+		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
+		long elapsedTime;
+		Response ifwResponse = null;
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		String loginId = null, mobileNum = null, fieldType = null;
+		ObjectMapper objMapper = new ObjectMapper();
+		Integer resultCount = 0;
+		ArrayList<String> varList = new ArrayList<String>();
+
+		try {
+			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(request));
+						
+			if(null != request.getEmail() && !request.getEmail().isEmpty()){
+				varList.add("true");
+			}
+			if(null != request.getMobile() && !request.getMobile().isEmpty()){
+				varList.add("true");
+			}
+			if(null != request.getLoginID() && !request.getLoginID().isEmpty()){
+				varList.add("true");
+			}
+			if(null != request.getIdmsFederatedId() && !request.getIdmsFederatedId().isEmpty()){
+				varList.add("true");
+			}
+			LOGGER.info("Parameters size(email,mobile,loginid,idmsFedid): " + varList.size());
+			if(varList.size()>1){
+				response.put(UserConstants.MESSAGE_L, "Only one identifier is allowed");
+				LOGGER.error("Mandatory check: Only one identifier is allowed");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+			}
+			
+			if ((null == request.getEmail() || request.getEmail().isEmpty())
+					&& (null == request.getMobile() || request.getMobile().isEmpty())
+					&& (null == request.getLoginID() || request.getLoginID().isEmpty())
+					&& (null == request.getIdmsFederatedId() || request.getIdmsFederatedId().isEmpty())) {
+				response.put(UserConstants.MESSAGE_L, "Either one Email/Mobile/LoginID/FederatedId should have value");
+				LOGGER.error("Mandatory check: Either one Email/Mobile/LoginID/FederatedId should have value");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+			}
+			if ((null != request.getWithGlobalUsers() && !request.getWithGlobalUsers().isEmpty())
+					&& (!UserConstants.TRUE.equalsIgnoreCase(request.getWithGlobalUsers())
+							&& !UserConstants.FALSE.equalsIgnoreCase(request.getWithGlobalUsers()))) {
+				response.put(UserConstants.MESSAGE_L, UserConstants.GLOBAL_USER_BOOLEAN);
+				LOGGER.error("Error in idmsCheckUserExists is " + UserConstants.GLOBAL_USER_BOOLEAN);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+			}
+			if (null != request.getEmail() && !request.getEmail().isEmpty()) {
+				if (!emailValidator.validate(request.getEmail())) {
+					response.put(UserConstants.MESSAGE_L, "Email validation failed.");
+					LOGGER.error("Error in idmsCheckUserExists is :: Email validation failed.");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+				}
+			}
+			if (null != request.getMobile() && !request.getMobile().isEmpty()) {
+				mobileNum = ChinaIdmsUtil.mobileTransformation(request.getMobile());
+				if (!ChinaIdmsUtil.mobileValidator(mobileNum)) {
+					response.put(UserConstants.MESSAGE_L, "Mobile validation failed.");
+					LOGGER.error("Error in idmsCheckUserExists is :: Mobile validation failed.");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+				}
+			}
+			if (null != request.getLoginID() && !request.getLoginID().isEmpty()) {
+				String loginString = request.getLoginID().trim();
+				if (loginString.contains("@")) {
+					if (!emailValidator.validate(loginString)) {
+						response.put(UserConstants.MESSAGE_L, "LoginID validation failed.");
+						LOGGER.error("Error in idmsCheckUserExists is :: LoginID validation failed.");
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+						return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+					}
+				} else if (!ChinaIdmsUtil.mobileValidator(loginString)) {
+					response.put(UserConstants.MESSAGE_L, "LoginID validation failed.");
+					LOGGER.error("Error in idmsCheckUserExists is :: LoginID validation failed.");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+				}
+			}
+			
+			if (null != request.getEmail() && !request.getEmail().isEmpty()) {
+				loginId = request.getEmail().trim();
+				fieldType = "email";
+			} else if (null != request.getMobile() && !request.getMobile().isEmpty()) {
+				loginId = mobileNum;
+				fieldType = "mobile";
+			} else if (null != request.getLoginID() && !request.getLoginID().isEmpty()) {
+				loginId = request.getLoginID().trim();
+				fieldType = "loginID";
+			} else if (null != request.getIdmsFederatedId() && !request.getIdmsFederatedId().isEmpty()) {
+				loginId = request.getIdmsFederatedId().trim();
+				fieldType = "idmsFederatedId";
+			}
+			// Adding try catch block for getSSoToken method,this is to address
+			// log zio alerts
+			try {
+				iPlanetDirectoryKey = getSSOToken();
+			} //// No Exception handling
+			catch (IOException ioExp) {
+				LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
+			}
+			LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
+					+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + loginId + AUDIT_LOG_CLOSURE);
+			
+			if(fieldType.equalsIgnoreCase("email") || fieldType.equalsIgnoreCase("mobile") || fieldType.equalsIgnoreCase("loginID")){
+				LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for loginId=" + loginId);
+				userExists = productService.checkUserExistsWithEmailMobile(
+						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+						"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginId, "UTF-8"), "UTF-8")
+								+ "\" or mobile_reg eq " + "\""
+								+ URLEncoder.encode(URLDecoder.decode(loginId, "UTF-8"), "UTF-8") + "\"");
+				LOGGER.info("End: checkUserExistsWithEmailMobile() of openam finished for loginId=" + loginId);
+			}
+			
+			if(fieldType.equalsIgnoreCase("idmsFederatedId")){
+				LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for federationId=" + loginId);
+				userExists = productService.checkUserExistsWithEmailMobile(
+						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+						"federationID  eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginId, "UTF-8"), "UTF-8")
+								+ "\"");
+				LOGGER.info("End: checkUserExistsWithEmailMobile() of openam finished for federationId=" + loginId);
+			}
+
+			productDocCtx = JsonPath.using(conf).parse(userExists);
+			resultCount = productDocCtx.read("$.resultCount");
+			LOGGER.info("resultCount=" + resultCount);
+			if (resultCount.intValue() == 1) {
+				response.put(UserConstants.MESSAGE_L, UserConstants.TRUE);
+				response.put("idmsFederatedId", productDocCtx.read("$.result[0].federationID[0]"));
+				response.put("userStatus", "Registered + "+(Boolean.valueOf(productDocCtx.read("$.result[0].isActivated[0]"))?"Active":"InActive"));
+				response.put("countryCode", UserConstants.CHINA_CODE);
+				LOGGER.info("User found in IDMS China");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+				return Response.status(Response.Status.OK).entity(response).build();
+			}
+			if (resultCount.intValue() > 1) {
+				response.put(UserConstants.MESSAGE_L, "Multiple users found based on the identifier");
+				LOGGER.error("Error in idmsCheckUserExists is :: Multiple users found based on the identifier");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+				return Response.status(Response.Status.CONFLICT).entity(response).build();
+			}			
+			if (resultCount.intValue() == 0 && UserConstants.TRUE.equalsIgnoreCase(request.getWithGlobalUsers())
+					&& (loginId.contains("@") || fieldType.equalsIgnoreCase("idmsFederatedId"))) {
+				LOGGER.info("Start: getIFWToken() of IFWService");
+				ifwAccessToken = ifwService.getIFWToken(UserConstants.CONTENT_TYPE_URL_FROM,
+						UserConstants.IFW_GRANT_TYPE, ifwClientId, ifwClientSecret);
+				LOGGER.info("End: getIFWToken() of IFWService finished");
+
+				productDocCtx = JsonPath.using(conf).parse(ifwAccessToken);
+				String accessToken = productDocCtx.read("$.access_token");
+				String bfoAuthorizationToken = sfSyncServiceImpl.getSFToken();
+				String authorization = "Bearer " + accessToken;
+
+				// if (loginId.contains("@")) {
+				LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for loginId:" + loginId);
+				ifwResponse = ifwService.checkUserExistsWithEmail(bfoAuthorizationToken, UserConstants.APPLICATION_NAME,
+						UserConstants.COUNTRY_CODE, UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID,
+						authorization, loginId, false);
+				LOGGER.info("End: checkUserExistsWithEmail() of IFWService finished for loginId:" + loginId);
+	
+				LOGGER.info("ifwResponse response status code for checkUserExist -> " + ifwResponse.getStatus());
+				if (null != ifwResponse && 200 == ifwResponse.getStatus()) {
+					response.put(UserConstants.MESSAGE_L, UserConstants.TRUE);
+					LOGGER.info("User found in IDMS Global");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+					return Response.status(ifwResponse.getStatus()).entity(response).build();
+				} else if (null != ifwResponse && 404 == ifwResponse.getStatus()) {
+					response.put(UserConstants.MESSAGE_L, UserConstants.FALSE);
+					LOGGER.info("User NOT found in IDMS Global");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+					return Response.status(ifwResponse.getStatus()).entity(response).build();
+				} else if (null != ifwResponse && 400 == ifwResponse.getStatus()) {
+					response.put(UserConstants.MESSAGE_L, UserConstants.BAD_REQUEST);
+					LOGGER.error("Error in idmsCheckUserExists is :: " + UserConstants.BAD_REQUEST);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+					return Response.status(ifwResponse.getStatus()).entity(response).build();
+				} else if (null != ifwResponse && 500 == ifwResponse.getStatus()) {
+					response.put(UserConstants.MESSAGE_L, UserConstants.SERVER_ERROR_IFW);
+					LOGGER.error("Error in idmsCheckUserExists is :: " + UserConstants.SERVER_ERROR_IFW);
+					return Response.status(ifwResponse.getStatus()).entity(response).build();
+				} else if (null != ifwResponse && 401 == ifwResponse.getStatus()) {
+					response.put(UserConstants.MESSAGE_L, UserConstants.AUTHENTICATION_ERROR_IFW);
+					LOGGER.error("Error in idmsCheckUserExists is :: " + UserConstants.AUTHENTICATION_ERROR_IFW);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+					return Response.status(ifwResponse.getStatus()).entity(response).build();
+				}
+
+				response.put(UserConstants.MESSAGE_L, "Global idmsCheckUserExist() failed to perform");
+				LOGGER.error("Error in idmsCheckUserExists is :: Global checkUserExist() failed to perform");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+				return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(response).build();
+			} else {
+				response.put(UserConstants.MESSAGE_L, UserConstants.FALSE);
+				LOGGER.error("User not found");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+				return Response.status(Response.Status.NOT_FOUND).entity(response).build();
+			}
+		} catch (BadRequestException e) {
+			response.put(UserConstants.MESSAGE_L, UserConstants.BAD_REQUEST);
+			LOGGER.error("BadRequestException in idmsCheckUserExists :: -> " + e.getMessage(),e);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+		} catch (NotAuthorizedException e) {
+			response.put(UserConstants.MESSAGE_L, "Authorization Failed");
+			LOGGER.error("NotAuthorizedException in idmsCheckUserExists :: -> " + e.getMessage(),e);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+			return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
+		} catch (NotFoundException e) {
+			response.put(UserConstants.MESSAGE_L, UserConstants.USER_NOT_FOUND);
+			LOGGER.error("NotFoundException in idmsCheckUserExists :: -> " + e.getMessage(),e);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
+		} catch (Exception e) {
+			response.put(UserConstants.MESSAGE_L, e.getMessage());
+			LOGGER.error("Exception in idmsCheckUserExists :: -> " + e.getMessage(),e);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+		}
 	}
 	
 }
