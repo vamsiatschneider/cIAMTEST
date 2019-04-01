@@ -569,5 +569,10 @@ public class UserConstants {
 	public static final String SESSION_TIME_OUT= "900";
 	public static final String ADMIN_TOKEN_MANDATORY= "Admin token is mandatory";
 	
+	//CheckUserExist message
+	public static final String USER_ACTIVE = "User is active in IDMS";
+	public static final String USER_INACTIVE = "User is inactive in IDMS";
+	public static final String USER_NOT_EXIST = "User does not exist in IDMS";
+	public static final String USER_MULTIPLE_EXIST = "Multiple users found based on the identifier";
 	
 }
