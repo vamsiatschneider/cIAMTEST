@@ -10061,7 +10061,11 @@ public class UserServiceImpl implements UserService {
 			if (resultCount.intValue() == 1) {
 				response.put(UserConstants.MESSAGE_L, UserConstants.TRUE);
 				response.put("idmsFederatedId", productDocCtx.read("$.result[0].federationID[0]"));
-				response.put("userStatus", "Registered + "+(Boolean.valueOf(productDocCtx.read("$.result[0].isActivated[0]"))?"Active":"InActive"));
+				if(Boolean.valueOf(productDocCtx.read("$.result[0].isActivated[0]"))){
+					response.put("userStatus", UserConstants.USER_ACTIVE);
+				} else {
+					response.put("userStatus", UserConstants.USER_INACTIVE);
+				}
 				response.put("countryCode", UserConstants.CHINA_CODE);
 				LOGGER.info("User found in IDMS China");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -10069,12 +10073,12 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.OK).entity(response).build();
 			}
 			if (resultCount.intValue() > 1) {
-				response.put(UserConstants.MESSAGE_L, "Multiple users found based on the identifier");
-				LOGGER.error("Error in idmsCheckUserExists is :: Multiple users found based on the identifier");
+				response.put(UserConstants.MESSAGE_L, UserConstants.USER_MULTIPLE_EXIST);
+				LOGGER.error("Error in idmsCheckUserExists is :: "+UserConstants.USER_MULTIPLE_EXIST);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 				return Response.status(Response.Status.CONFLICT).entity(response).build();
-			}			
+			}
 			if (resultCount.intValue() == 0 && UserConstants.TRUE.equalsIgnoreCase(request.getWithGlobalUsers())
 					&& (loginId.contains("@") || fieldType.equalsIgnoreCase("idmsFederatedId"))) {
 				LOGGER.info("Start: getIFWToken() of IFWService");
