@@ -92,7 +92,7 @@ public class GetUserServiceImpl extends IdmsCommonServiceImpl implements GetUser
 			errorResponse.setMessage("Session expired or Invalid token");
 			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(errorResponse).build();
 		}catch (Exception e) {
-			LOGGER.error("Error in Direct API getUser() OpenDjService ->" + e.getMessage());
+			LOGGER.error("Error in Direct API getUser() OpenDjService ->" + e.getMessage(),e);
 			errorResponse.setStatus(ErrorCodeConstants.ERROR);
 			errorResponse.setMessage("Error in Calling GetUser API, Please try again");
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();

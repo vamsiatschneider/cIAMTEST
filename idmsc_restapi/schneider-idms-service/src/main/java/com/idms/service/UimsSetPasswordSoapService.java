@@ -99,10 +99,10 @@ public class UimsSetPasswordSoapService {
 			LOGGER.info("End: getPort() of UIMS");
 
 		}catch (MalformedURLException e) {
-			LOGGER.error("MalformedURLException in getUserManager()::" + e.getMessage());
+			LOGGER.error("MalformedURLException in getUserManager()::" + e.getMessage(),e);
 		}
 		catch (Exception e) {
-			LOGGER.error("Exception in getUserManager()::" + e.getMessage());
+			LOGGER.error("Exception in getUserManager()::" + e.getMessage(),e);
 		}
 		return userManagerUIMSV22;
 	}
@@ -176,12 +176,12 @@ public class UimsSetPasswordSoapService {
 				LOGGER.info("sending mail notification finished for userid::"+userId);
 			}
 		} catch (RetryException e) {
-			LOGGER.error("RetryException in activateIdentity()::" + e.getMessage());
+			LOGGER.error("RetryException in activateIdentity()::" + e.getMessage(),e);
 			UIMSSYNCLOGGER.error("activateIdentity failed in UIMS for emailOrMobile = "+emailOrMobile);
 		} catch (ExecutionException e) {
-			LOGGER.error("ExecutionException in activateIdentity()::" + e.getMessage());
+			LOGGER.error("ExecutionException in activateIdentity()::" + e.getMessage(),e);
 		} catch (Exception e) {
-			LOGGER.error("Exception in activateIdentity()::" + e.getMessage());
+			LOGGER.error("Exception in activateIdentity()::" + e.getMessage(),e);
 		}
 		LOGGER.info("activateIdentity() finished!");
 	}
@@ -263,12 +263,12 @@ public class UimsSetPasswordSoapService {
 				LOGGER.info("sending mail notification finished for userid::" + userId);
 			}
 		} catch (RetryException e) {
-			LOGGER.error("RetryException in setUIMSPassword()::" + e.getMessage());
+			LOGGER.error("RetryException in setUIMSPassword()::" + e.getMessage(),e);
 			UIMSSYNCLOGGER.error("setUIMSPassword failed in UIMS for emailOrMobile = "+emailOrMobile);
 		} catch (ExecutionException e) {
-			LOGGER.error("ExecutionException in setUIMSPassword()::" + e.getMessage());
+			LOGGER.error("ExecutionException in setUIMSPassword()::" + e.getMessage(),e);
 		} catch (Exception e) {
-			LOGGER.error("Exception in setUIMSPassword()::" + e.getMessage());
+			LOGGER.error("Exception in setUIMSPassword()::" + e.getMessage(),e);
 		}
 		LOGGER.info("UIMS setUIMSPassword() finished!");
 		return setPasswordStatus;
@@ -300,7 +300,7 @@ public class UimsSetPasswordSoapService {
 						openamVnew, iPlanetDirectoryKey,loginIdentifierType,emailOrMobile);
 			}
 		} catch (Exception e) {			
-			LOGGER.error("Exception in activateUIMSUserConfirmPIN():: -> "+ e.getMessage());
+			LOGGER.error("Exception in activateUIMSUserConfirmPIN():: -> "+ e.getMessage(),e);
 		}
 	}
 	/**
@@ -372,9 +372,9 @@ public class UimsSetPasswordSoapService {
 			LOGGER.error("RetryException in activateIdentityNoPassword()::" + e.getMessage());
 			UIMSSYNCLOGGER.error("activateIdentityNoPassword failed in UIMS for emailOrMobile = "+emailOrMobile);
 		} catch (ExecutionException e) {
-			LOGGER.error("ExecutionException in activateIdentityNoPassword()::" + e.getMessage());
+			LOGGER.error("ExecutionException in activateIdentityNoPassword()::" + e.getMessage(),e);
 		} catch (Exception e) {
-			LOGGER.error("Exception in activateIdentityNoPassword()::" + e.getMessage());
+			LOGGER.error("Exception in activateIdentityNoPassword()::" + e.getMessage(),e);
 		}
 		LOGGER.info("Completed UIMS activateIdentityNoPassword() Sync method!");
 	}
@@ -431,12 +431,12 @@ public class UimsSetPasswordSoapService {
 			}
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in UIMS updatepassword() for userId::"+ userId);
-			LOGGER.error(e.getMessage());
+			LOGGER.error(e.getMessage(),e);
 			UIMSSYNCLOGGER.error("updateUIMSPassword failed in UIMS for userId = "+userId);
 		} catch (ExecutionException e) {
-			LOGGER.error("ExecutionException in UIMS updatepassword() for userId::" +userId+" is ->" + e.getMessage());
+			LOGGER.error("ExecutionException in UIMS updatepassword() for userId::" +userId+" is ->" + e.getMessage(),e);
 		} catch (Exception e) {
-			LOGGER.error("Exception in updateUIMSPassword() for userId::" +userId +" is ->" + e.getMessage());
+			LOGGER.error("Exception in updateUIMSPassword() for userId::" +userId +" is ->" + e.getMessage(),e);
 		}
 		return ispasswordupdated;
 	}

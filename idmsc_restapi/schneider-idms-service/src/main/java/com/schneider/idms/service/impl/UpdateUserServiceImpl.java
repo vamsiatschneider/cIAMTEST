@@ -185,7 +185,7 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				LOGGER.error("Error while processing is " + errorResponse.getMessage());
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			} catch (Exception e) {
-				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage());
+				LOGGER.error("UserServiceImpl:userRegistration ->" + e.getMessage(),e);
 				errorResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -382,8 +382,8 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 						sendEmail.emailReadyToSendEmail(updatingUser, fromUserName,
 								UserConstants.UPDATE_EMAIL_NOTIFICATION, contentBuilder.toString());
 					} catch (Exception e) {
-						e.getStackTrace();
-						LOGGER.error("Exception while sending email to old User :: -> " + e.getMessage());
+
+						LOGGER.error("Exception while sending email to old User :: -> " + e.getMessage(),e);
 					}
 
 				}

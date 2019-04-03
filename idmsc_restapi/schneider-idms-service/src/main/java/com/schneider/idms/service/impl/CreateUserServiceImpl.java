@@ -199,7 +199,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			}
 			catch (Exception e) {
 				
-				LOGGER.error("DirectAPI:userRegistration ->" + e.getMessage());
+				LOGGER.error("DirectAPI:userRegistration ->" + e.getMessage(),e);
 				errorResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -554,7 +554,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			errorResponse.setStatus(ErrorCodeConstants.ERROR);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-			LOGGER.error("Executing while user Registration :: -> " + e.getMessage());
+			LOGGER.error("Executing while user Registration :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		}
 

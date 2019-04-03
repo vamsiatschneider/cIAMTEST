@@ -376,7 +376,7 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.updateAIL() : " + elapsedTime);
 			LOGGER.error("Executing while updateAIL() :: -> " + responseCode.getMessage());
-			LOGGER.error("Executing while updateAIL() :: -> " + e.getMessage());
+			LOGGER.error("Executing while updateAIL() :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(responseCode).build();
 		}
 

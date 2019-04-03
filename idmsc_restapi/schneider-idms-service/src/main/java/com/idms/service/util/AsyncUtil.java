@@ -43,6 +43,7 @@ public class AsyncUtil {
 			writer.close();
 		} catch (IOException e) {
 			LOGGER.error("AsyncUtil.generateCSV: "+ e.getMessage());
+			LOGGER.error("Exception >"+e);
 		}
 	        
 		return csvAppended;

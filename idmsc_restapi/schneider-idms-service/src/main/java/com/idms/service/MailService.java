@@ -39,6 +39,7 @@ public class MailService {
 
     }catch (MessagingException mex) {
     	LOGGER.error("Error in sending mail"+mex.getMessage());
+    	LOGGER.error("Exception >"+mex);
     	}
 	}
 

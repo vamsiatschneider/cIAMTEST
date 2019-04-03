@@ -87,7 +87,7 @@ public class SaleforceServiceImpl {
 						}
 					} catch (IOException e) {
 						LOGGER.error("Failed to populate the activate date on PRM :: populateActivationDate -> "
-								+ e.getMessage());
+								+ e.getMessage(),e);
 					}
 					return true;
 				}
@@ -107,7 +107,7 @@ public class SaleforceServiceImpl {
 			}
 
 		} catch (Exception e) {
-			LOGGER.error("Exception in populatePrmActivationDate()::" + e.getMessage());
+			LOGGER.error("Exception in populatePrmActivationDate()::" + e.getMessage(),e);
 		}
 
 	}

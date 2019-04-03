@@ -27,7 +27,7 @@ public class AsyncComponent {
 			return new AsyncResult<>("hello world !!!!");
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
-			LOGGER.error("An error occured."+e.getMessage());
+			LOGGER.error("An error occured."+e.getMessage(),e);
 		}
 		return null;
 	}

@@ -188,7 +188,7 @@ public class ResendPinServiceImpl extends IdmsCommonServiceImpl implements IRese
 			response.put(UserConstants.MESSAGE, UserConstants.ERROR_RESEND_PIN);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.resendPIN() : " + elapsedTime);
-			LOGGER.error("Executing while Resending User PIN :: -> " + e.getMessage());
+			LOGGER.error("Executing while Resending User PIN :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 		response.put(UserConstants.STATUS, successStatus);

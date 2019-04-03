@@ -77,7 +77,8 @@ public class ActivateUsers {
 					jsonString = executeRequestApi(hostname + "/services/apexrest/GetIDMSUser/" + user, "GET", null);
 				} catch (Exception exp) {
 					// TODO Auto-generated catch block
-					LOGGER.error("An error occured."+exp.getMessage());				}
+					LOGGER.error("An error occured."+exp.getMessage());		
+					LOGGER.error("Exception >"+exp);}
 
 				if (!"{}".equals(jsonString.toString())) {
 					inputRequesr = buildUserRequest(productDocCtx, conf, jsonString);
@@ -87,6 +88,7 @@ public class ActivateUsers {
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						LOGGER.error("An error occured."+e.getMessage());
+						LOGGER.error("Exception >"+e);
 					}
 				} else {
 					dataNotFount.append(user);
@@ -101,14 +103,17 @@ public class ActivateUsers {
 
 		} catch (FileNotFoundException e) {
 			LOGGER.error("An error occured."+e.getMessage());
+			LOGGER.error("Exception >"+e);
 		} catch (IOException e) {
 			LOGGER.error("An error occured."+e.getMessage());
+			LOGGER.error("Exception >"+e);
 		} finally {
 			if (br != null) {
 				try {
 					br.close();
 				} catch (IOException e) {
 					LOGGER.error("An error occured."+e.getMessage());
+					LOGGER.error("Exception >"+e);
 				}
 			}
 		}
@@ -197,8 +202,10 @@ public class ActivateUsers {
 
 		} catch (MalformedURLException e) {
 			LOGGER.error("An error occured."+e.getMessage());
+			LOGGER.error("Exception >"+e);
 		} catch (IOException e) {
 			LOGGER.error("An error occured."+e.getMessage());
+			LOGGER.error("Exception >"+e);
 		}
 		return jsonString;
 	}
