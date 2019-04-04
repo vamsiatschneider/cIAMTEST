@@ -49,7 +49,7 @@ public class PickListValidatorImpl implements IValidator {
 		Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
 		}*/
 		String pickListProperty = cacheProperties.getProperty(key);
-		LOGGER.info("pickListProperty::"+pickListProperty);
+		//LOGGER.info("pickListProperty::"+pickListProperty);
 		List<String> pickListCache = Arrays.asList(pickListProperty.split(","));
 		String pickListValue = (String) value;
 		for(String str:pickListCache){
