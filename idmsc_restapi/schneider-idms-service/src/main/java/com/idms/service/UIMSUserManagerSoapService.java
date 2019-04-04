@@ -178,9 +178,9 @@ public class UIMSUserManagerSoapService {
 			LOGGER.info("End: getPort()");
 
 		}catch (MalformedURLException e) {
-			LOGGER.error("MalformedURLException in getUserManager()::" + e.getMessage());
+			LOGGER.error("MalformedURLException in getUserManager()::" + e.getMessage(),e);
 		} catch (Exception e) {
-			LOGGER.error("Exception in getUserManager()::" + e.getMessage());
+			LOGGER.error("Exception in getUserManager()::" + e.getMessage(),e);
 		}
 		return userManagerUIMSV22;
 	}
@@ -342,12 +342,12 @@ public class UIMSUserManagerSoapService {
 				LOGGER.info("End: emailReadyToSendEmail() finished for userId:" + userId);
 			}
 		}catch (RetryException e) {
-			LOGGER.error("RetryException in setUIMSPassword() of UIMS::" + e.getMessage());
+			LOGGER.error("RetryException in setUIMSPassword() of UIMS::" + e.getMessage(),e);
 
 		} catch (ExecutionException e) {
-			LOGGER.error("ExecutionException in setUIMSPassword() of UIMS::" + e.getMessage());
+			LOGGER.error("ExecutionException in setUIMSPassword() of UIMS::" + e.getMessage(),e);
 		} catch (Exception e) {
-			LOGGER.error("Exception while setUIMSPassword::" + e.getMessage());
+			LOGGER.error("Exception while setUIMSPassword::" + e.getMessage(),e);
 		}
 		LOGGER.info("setUIMSPassword() Async Method -> End");
 	}
@@ -393,12 +393,12 @@ public class UIMSUserManagerSoapService {
 				LOGGER.info("End: updateUser() call of openamservice to update version finished for userId:" + userId);
 			}
 		} catch (RetryException e) {
-			LOGGER.error("RetryException in UIMS updateUIMSPassword()::" + e.getMessage());
+			LOGGER.error("RetryException in UIMS updateUIMSPassword()::" + e.getMessage(),e);
 
 		} catch (ExecutionException e) {
-			LOGGER.error("ExecutionException in UIMS updateUIMSPassword()::" + e.getMessage());
+			LOGGER.error("ExecutionException in UIMS updateUIMSPassword()::" + e.getMessage(),e);
 		} catch (Exception e) {
-			LOGGER.error("Exception in updateUIMSPassword()::" + e.getMessage());
+			LOGGER.error("Exception in updateUIMSPassword()::" + e.getMessage(),e);
 		}
 	}
 
@@ -440,15 +440,15 @@ public class UIMSUserManagerSoapService {
 			try {
 				UIMSSYNCLOGGER.error("updateUIMSUser failed in UIMS, user info = "+objMapper.writeValueAsString(user));
 			} catch (JsonProcessingException e1) {
-				LOGGER.error("JsonProcessingException1 in updateUIMSUser()::" + e1.getMessage());
+				LOGGER.error("JsonProcessingException1 in updateUIMSUser()::" + e1.getMessage(),e1);
 			}			
 		} catch (Exception e) {
-			LOGGER.error("Exception executing while getting samlAssertion::" + e.getMessage());
+			LOGGER.error("Exception executing while getting samlAssertion::" + e.getMessage(),e);
 			UIMSSYNCLOGGER.error("updateUIMSUser failed in UIMS, fedId = "+fedId);
 			try {
 				UIMSSYNCLOGGER.error("updateUIMSUser failed in UIMS, user info = "+objMapper.writeValueAsString(user));
 			} catch (JsonProcessingException e1) {
-				LOGGER.error("JsonProcessingException2 in updateUIMSUser()::" + e1.getMessage());
+				LOGGER.error("JsonProcessingException2 in updateUIMSUser()::" + e1.getMessage(),e);
 			}
 		}
 		return status;
@@ -477,9 +477,9 @@ public class UIMSUserManagerSoapService {
 				| RequestedEntryNotExistsException_Exception | RequestedInternalUserException_Exception
 				| SecuredImsException_Exception | UnexpectedLdapResponseException_Exception
 				| UnexpectedRuntimeImsException_Exception e) {
-			LOGGER.error("Error in activateUIMSIdentity()::" + e.getMessage());
+			LOGGER.error("Error in activateUIMSIdentity()::" + e.getMessage(),e);
 		} catch (Exception e) {
-			LOGGER.error("Exception in activateUIMSIdentity()::" + e.getMessage());
+			LOGGER.error("Exception in activateUIMSIdentity()::" + e.getMessage(),e);
 		}
 	}
 
@@ -547,11 +547,11 @@ public class UIMSUserManagerSoapService {
 						"UIMS UserpinConfirmation activateIdentityNoPassword failed.", userId);
 			}
 		} catch (RetryException e) {
-			LOGGER.error("RetryException in activateIdentityNoPassword()::" + e.getMessage());
+			LOGGER.error("RetryException in activateIdentityNoPassword()::" + e.getMessage(),e);
 		} catch (ExecutionException e) {
-			LOGGER.error("ExecutionException in activateIdentityNoPassword()::" + e.getMessage());
+			LOGGER.error("ExecutionException in activateIdentityNoPassword()::" + e.getMessage(),e);
 		} catch (Exception e) {
-			LOGGER.error("Exception in activateIdentityNoPassword()::" + e.getMessage());
+			LOGGER.error("Exception in activateIdentityNoPassword()::" + e.getMessage(),e);
 		}
 		LOGGER.info("Completed UIMS activateIdentityNoPassword() Async method!");
 
@@ -584,7 +584,7 @@ public class UIMSUserManagerSoapService {
 			userRequestjsonString = objMapper.writeValueAsString(userRequest);
 			userRequestjsonString = userRequestjsonString.replace("\"\"", "[]");
 		} catch (JsonProcessingException e) {
-			LOGGER.error("Error while converting the userRequest to Json" + e.getMessage());
+			LOGGER.error("Error while converting the userRequest to Json" + e.getMessage(),e);
 		} finally {
 			if (null != objMapper) {
 				objMapper = null;
@@ -740,11 +740,11 @@ public class UIMSUserManagerSoapService {
 						userRequestjsonString);
 			}
 		}catch (RetryException e) {
-			LOGGER.error("RetryException in createUIMSUserAndCompany()::" + e.getMessage());
+			LOGGER.error("RetryException in createUIMSUserAndCompany()::" + e.getMessage(),e);
 		} catch (ExecutionException e) {
-			LOGGER.error("ExecutionException in createUIMSUserAndCompany()::" + e.getMessage());
+			LOGGER.error("ExecutionException in createUIMSUserAndCompany()::" + e.getMessage(),e);
 		} catch (Exception e) {
-			LOGGER.error("Exception in createUIMSUserAndCompany()::" + e.getMessage());
+			LOGGER.error("Exception in createUIMSUserAndCompany()::" + e.getMessage(),e);
 		}
 		createdFedId = null;
 		LOGGER.info("Completed the createUIMSUserAndCompany() Async method!!");
@@ -895,12 +895,12 @@ public class UIMSUserManagerSoapService {
 			//}
 
 		} catch (RetryException e) {
-			LOGGER.error("RetryException in updateUIMSUserAndCompany()::" + e.getMessage());
+			LOGGER.error("RetryException in updateUIMSUserAndCompany()::" + e.getMessage(),e);
 
 		} catch (ExecutionException e) {
-			LOGGER.error("ExecutionException in updateUIMSUserAndCompany()::" + e.getMessage());
+			LOGGER.error("ExecutionException in updateUIMSUserAndCompany()::" + e.getMessage(),e);
 		} catch (Exception e) {
-			LOGGER.error("Exception in updateUIMSUserAndCompany()::" + e.getMessage());
+			LOGGER.error("Exception in updateUIMSUserAndCompany()::" + e.getMessage(),e);
 		}
 
 		LOGGER.info("UIMS updateUIMSUserAndCompany Async method completed!!");
@@ -933,7 +933,7 @@ public class UIMSUserManagerSoapService {
 						iPlanetDirectoryKey, loginIdentifierType, emailOrMobile);
 			}
 		} catch (Exception e) {
-			LOGGER.error("Exception in activateUIMSUserConfirmPIN():: -> " + e.getMessage());
+			LOGGER.error("Exception in activateUIMSUserConfirmPIN():: -> " + e.getMessage(),e);
 		}
 	}
 
@@ -1014,11 +1014,11 @@ public class UIMSUserManagerSoapService {
 				LOGGER.info("End: emailReadyToSendEmail() finished for userId:" + userId);
 			}
 		} catch (RetryException e) {
-			LOGGER.error("RetryException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage());
+			LOGGER.error("RetryException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage(),e);
 		} catch (ExecutionException e) {
-			LOGGER.error("ExecutionException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage());
+			LOGGER.error("ExecutionException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage(),e);
 		} catch (Exception e) {
-			LOGGER.error("Exception in updateChangeEmailOrMobile()::" + e.getMessage());
+			LOGGER.error("Exception in updateChangeEmailOrMobile()::" + e.getMessage(),e);
 		}
 		LOGGER.info("updateChangeEmailOrMobile() Async Method -> End");
 	}
@@ -1056,7 +1056,7 @@ public class UIMSUserManagerSoapService {
 			jsonString = objMapper.writeValueAsString(userRegistrationInfoRequest);
 			jsonString = jsonString.replace("\"\"", "[]");
 		} catch (JsonProcessingException e) {
-			LOGGER.error("JsonProcessingException while converting the digitalRequest to Json" + e.getMessage());
+			LOGGER.error("JsonProcessingException while converting the digitalRequest to Json" + e.getMessage(),e);
 		}
 		objMapper = null;
 		return jsonString;

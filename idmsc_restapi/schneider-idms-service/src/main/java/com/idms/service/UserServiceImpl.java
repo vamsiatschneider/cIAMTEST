@@ -49,6 +49,7 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
@@ -653,7 +654,6 @@ public class UserServiceImpl implements UserService {
 		try {
 			token = getSSOToken();
 		} catch (IOException ioExp) {
-			// TODO Auto-generated catch block
 			LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
 			token = "";
 		}
@@ -2675,7 +2675,6 @@ public class UserServiceImpl implements UserService {
 			try {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
-				// TODO Auto-generated catch block
 				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage());
 				iPlanetDirectoryKey = "";
 			}
@@ -2801,7 +2800,6 @@ public class UserServiceImpl implements UserService {
 		try {
 			iPlanetDirectoryKey = getSSOToken();
 		} catch (IOException ioExp) {
-			// TODO Auto-generated catch block
 			LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
 			iPlanetDirectoryKey = "";
 		}
@@ -3099,7 +3097,6 @@ public class UserServiceImpl implements UserService {
 			try {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
-				// TODO Auto-generated catch block
 				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 				iPlanetDirectoryKey = "";
 			}
@@ -3296,7 +3293,7 @@ public class UserServiceImpl implements UserService {
 				// executeHotpCall: Requset : -> ");
 				LOGGER.info("hotpService ->" + hotpService);
 				LOGGER.info("productDocCtx.jsonString() - >" + productDocCtx.jsonString());
-				LOGGER.info("userService" + userService);
+				LOGGER.info("userService ->" + userService);
 				if (UserConstants.USER_REGISTRATION.equalsIgnoreCase(confirmRequest.getOperation())) {
 					LOGGER.info("Start: validatePin() for User-Registration for uniqueIdentifier=" + uniqueIdentifier);
 					validPinStatus = sendEmail.validatePin(confirmRequest.getPinCode(), uniqueIdentifier);
@@ -3930,7 +3927,6 @@ public class UserServiceImpl implements UserService {
 			try {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
-				// TODO Auto-generated catch block
 				LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
 				iPlanetDirectoryKey = "";
 			}
@@ -4324,7 +4320,6 @@ public class UserServiceImpl implements UserService {
 			try {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
-				// TODO Auto-generated catch block
 				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 				iPlanetDirectoryKey = "";
 			}
@@ -4500,7 +4495,6 @@ public class UserServiceImpl implements UserService {
 				try {
 					iPlanetDirectoryKey = getSSOToken();
 				} catch (IOException ioExp) {
-					// TODO Auto-generated catch block
 					LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 					iPlanetDirectoryKey = "";
 				}
@@ -5838,7 +5832,6 @@ public class UserServiceImpl implements UserService {
 			try {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
-				// TODO Auto-generated catch block
 				LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
 				iPlanetDirectoryKey = "";
 			}
@@ -6207,7 +6200,6 @@ public class UserServiceImpl implements UserService {
 			try {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
-				// TODO Auto-generated catch block
 				LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
 				iPlanetDirectoryKey = "";
 			}
@@ -6441,7 +6433,6 @@ public class UserServiceImpl implements UserService {
 					// "logout");
 				}
 			} catch (Exception e) {
-
 				LOGGER.error("Exception in setUIMSPassword UIMS API:: ->" + e.getMessage(),e);
 			}
 
@@ -6458,8 +6449,21 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info(setPasswordResponse.getMessage());
 			LOGGER.info("Time taken by UserServiceImpl.setPassword() : " + elapsedTime);
 			return Response.status(Response.Status.OK).entity(setPasswordResponse).build();
+		} catch (WebApplicationException wae) {
+			String errorString=null;
+			try {
+				errorString = IOUtils.toString((InputStream) wae.getResponse().getEntity());
+			} catch (IOException e) {
+				LOGGER.error("IOException is " + e.getMessage(),e);
+			}
+			response.setStatus(errorStatus);
+			response.setMessage(errorString);
+			response.setId(userId);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.error("Exception is :: " + errorString);
+			LOGGER.info("Time taken by UserServiceImpl.setPassword() : " + elapsedTime);
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (Exception e) {
-
 			response.setStatus(errorStatus);
 			response.setMessage("Error in Setting User Password");
 			response.setId(userId);
@@ -6561,7 +6565,6 @@ public class UserServiceImpl implements UserService {
 			try {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
-				// TODO Auto-generated catch block
 				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 				iPlanetDirectoryKey = "";
 			}
@@ -8940,7 +8943,6 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	public Response buildQueryParam(String relayState, String samlRequest, int length) {
-		// TODO Auto-generated method stub
 		LOGGER.info("Entered buildQueryParam() -> Start");
 		LOGGER.info("Parameter relayState -> " + relayState + " ,SAMLRequest  -> " + samlRequest
 				+ " ,content length  -> " + length);

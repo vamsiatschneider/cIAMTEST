@@ -47,7 +47,8 @@ public class CacheManagerProviderImpl implements CacheTypes, CacheManagerProvide
 		} catch (Exception e) {
 		//catch (CacheException e) {
 			logger.error("Cache-central was not initialized correctly : " + e.getMessage() 
-							+ "\n\t The origin of the problem was: " + e.getCause());			
+							+ "\n\t The origin of the problem was: " + e.getCause());	
+			logger.error("Exception >"+e);
 		}		
 		return manager;
 	}

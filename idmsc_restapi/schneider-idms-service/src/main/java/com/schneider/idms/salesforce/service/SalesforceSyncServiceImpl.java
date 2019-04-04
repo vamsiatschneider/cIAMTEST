@@ -103,7 +103,7 @@ public class SalesforceSyncServiceImpl {
 						}
 					} catch (IOException e) {
 						LOGGER.error("Failed to populate the activate date on PRM :: populateActivationDate -> "
-								+ e.getMessage());
+								+ e.getMessage(),e);
 					}
 					return true;
 				}
@@ -115,15 +115,15 @@ public class SalesforceSyncServiceImpl {
 			try {
 				retryer.call(datePopulated);
 			} catch (RetryException e) {
-				LOGGER.error("RetryException in populatePrmActivationDate() of Salesforce::" + e.getMessage());
+				LOGGER.error("RetryException in populatePrmActivationDate() of Salesforce::" + e.getMessage(),e);
 
 			} catch (ExecutionException e) {
 				LOGGER.error("ExecutionException in populatePrmActivationDate() of Salesforce::"
-						+ e.getMessage());
+						+ e.getMessage(),e);
 			}
 
 		} catch (Exception e) {
-			LOGGER.error("Exception in populatePrmActivationDate()::" + e.getMessage());
+			LOGGER.error("Exception in populatePrmActivationDate()::" + e.getMessage(),e);
 		}
 
 	}
@@ -214,7 +214,7 @@ public class SalesforceSyncServiceImpl {
 				LOGGER.info("SalesForceToken added to HashMap");
 			}
 		} catch (ExecutionException | RetryException e) {
-			LOGGER.error("Error in getGeneratedSFToken() ->"+e.getMessage());
+			LOGGER.error("Error in getGeneratedSFToken() ->"+e.getMessage(),e);
 		}
 		return generatedSFToken;
 	}

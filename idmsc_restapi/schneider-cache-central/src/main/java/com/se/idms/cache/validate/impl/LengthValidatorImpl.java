@@ -61,6 +61,7 @@ public class LengthValidatorImpl implements IValidator {
 			}
 		} catch (Exception e) {
 			LOGGER.error("Length Validation of key:"+key+" ,value:"+value+"is having error:"+e.getMessage());
+			LOGGER.error("Exception "+e);
 		}
 		LOGGER.error("Length Validation of key:"+key+" ,value:"+value+" is NOT OK! and validate() is Ending");
 		return false;

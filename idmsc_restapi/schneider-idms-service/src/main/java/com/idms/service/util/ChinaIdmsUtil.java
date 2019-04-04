@@ -40,6 +40,7 @@ public class ChinaIdmsUtil {
 			
 		} catch (NoSuchAlgorithmException e) {
 			LOGGER.error("An error occured."+e.getMessage());
+			LOGGER.error("Exception >"+e);
 		}
 
 		return hexString;

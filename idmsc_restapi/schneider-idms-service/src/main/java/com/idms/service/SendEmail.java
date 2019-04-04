@@ -316,7 +316,7 @@ public class SendEmail {
 					LOGGER.info("sendOpenAmEmail : " + "HOTP sent to : " + to + ".");
 				}
 			} catch (Exception e) {
-				LOGGER.info("Exception in sendOpenAmEmail() => "+e.getMessage());
+				LOGGER.info("Exception in sendOpenAmEmail() => "+e.getMessage(),e);
 			}
 	}
 	

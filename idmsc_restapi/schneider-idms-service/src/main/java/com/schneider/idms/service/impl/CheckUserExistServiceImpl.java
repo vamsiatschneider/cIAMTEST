@@ -232,14 +232,14 @@ public class CheckUserExistServiceImpl extends IdmsCommonServiceImpl implements 
 			responseCode.setMessage(UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by DirectAPI.ActivateUser() : " + elapsedTime);
-			LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage());
+			LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.NOT_FOUND).entity(responseCode).build();
 		} catch (Exception e) {
 			responseCode.setStatus(ErrorCodeConstants.ERROR);
 			responseCode.setMessage("Some other error in CheckUserExist");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by DirectAPI.checkUserExists() : " + elapsedTime);
-			LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage());
+			LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(responseCode).build();
 		}
 

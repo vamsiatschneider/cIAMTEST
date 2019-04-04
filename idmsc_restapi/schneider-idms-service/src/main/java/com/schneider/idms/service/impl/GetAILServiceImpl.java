@@ -153,7 +153,7 @@ public class GetAILServiceImpl extends IdmsCommonServiceImpl implements GetAILSe
 			responseCode.setMessage("Internal Server Error");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by getUserAIL() : " + elapsedTime);
-			LOGGER.error("Exception in getUserAIL() :: -> " + e.getMessage());
+			LOGGER.error("Exception in getUserAIL() :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(responseCode).build();
 		}
 	}
@@ -233,7 +233,7 @@ public Response getUserResponse (String userId,String iPlanetDirectoryToken ){
 	}
 	catch (Exception e) {
 		
-		LOGGER.error("Error in getUser() openam service->"+e.getMessage());
+		LOGGER.error("Error in getUser() openam service->"+e.getMessage(),e);
 		LOGGER.error(e.toString());
 		if (userData == null) {
 			JSONObject jsonObject = new JSONObject();

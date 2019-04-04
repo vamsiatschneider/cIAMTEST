@@ -78,10 +78,10 @@ public class UIMSCompanyManagerSoapService {
 			userManagerUIMSV2 = service.getPort(CompanyManagerUIMSV2.class);
 
 		}catch (MalformedURLException e) {
-			LOGGER.error("Exception while UIMSCompanyManagerSoapService :: getAuthenticatedUserManager()::" + e.getMessage());
+			LOGGER.error("Exception while UIMSCompanyManagerSoapService :: getAuthenticatedUserManager()::" + e.getMessage(),e);
 		}
 		catch (Exception e) {
-			LOGGER.error("Exception while UIMSCompanyManagerSoapService :: getAuthenticatedUserManager()::" + e.getMessage());
+			LOGGER.error("Exception while UIMSCompanyManagerSoapService :: getAuthenticatedUserManager()::" + e.getMessage(),e);
 		}
 		return userManagerUIMSV2;
 	}
@@ -102,10 +102,10 @@ public class UIMSCompanyManagerSoapService {
 
 			userManagerUIMSV2 = service.getPort(AuthenticatedCompanyManagerUIMSV2.class);
 		}catch (MalformedURLException e) {
-				LOGGER.error("Exception while getAuthenticatedUserManager()::" + e.getMessage());
+				LOGGER.error("Exception while getAuthenticatedUserManager()::" + e.getMessage(),e);
 			}
 			catch (Exception e) {
-				LOGGER.error("Exception while getAuthenticatedUserManager()::" + e.getMessage());
+				LOGGER.error("Exception while getAuthenticatedUserManager()::" + e.getMessage(),e);
 			}
 			return userManagerUIMSV2;
 		}
@@ -191,7 +191,7 @@ public class UIMSCompanyManagerSoapService {
 			try {
 				UIMSSYNCLOGGER.error("updateUIMSCompany failed in UIMS, company info = "+objMapper.writeValueAsString(company));
 			} catch (JsonProcessingException e1) {
-				LOGGER.error("JsonProcessingException1 in updateUIMSCompany()::" + e1.getMessage());
+				LOGGER.error("JsonProcessingException1 in updateUIMSCompany()::" + e1.getMessage(),e1);
 			}
 		}
 		return uimsUserResponse;
@@ -206,7 +206,7 @@ public class UIMSCompanyManagerSoapService {
 		} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
 				| LdapTemplateNotReadyException | RequestedEntryNotExistsException | UnexpectedLdapResponseException
 				| UnexpectedRuntimeImsException e) {
-			LOGGER.error("An error occured."+e.getMessage());
+			LOGGER.error("An error occured."+e.getMessage(),e);
 		}
 		return uimsUserResponse;
 	}

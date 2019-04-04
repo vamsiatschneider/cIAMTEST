@@ -29,13 +29,13 @@ public class PropertiesLoader {
 			return prop.getProperty(key);
 
 		} catch (IOException ex) {
-			LOGGER.error("An error occured."+ex.getMessage());
+			LOGGER.error("An error occured."+ex.getMessage(),ex);
 		} finally {
 			if (input != null) {
 				try {
 					input.close();
 				} catch (IOException e) {
-					LOGGER.error("An error occured."+e.getMessage());
+					LOGGER.error("An error occured."+e.getMessage(),e);
 				}
 			}
 		}

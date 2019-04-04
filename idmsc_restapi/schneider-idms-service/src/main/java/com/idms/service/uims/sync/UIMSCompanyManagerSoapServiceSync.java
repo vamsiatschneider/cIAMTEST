@@ -69,9 +69,11 @@ public class UIMSCompanyManagerSoapServiceSync {
 
 		}catch (MalformedURLException e) {
 			LOGGER.error("MalformedURLException in getCompanyManager()::" + e.getMessage());
+			LOGGER.error("Exception >"+e);
 		}
 		catch (Exception e) {
 			LOGGER.error("Exception in getCompanyManager()::" + e.getMessage());
+			LOGGER.error("Exception >"+e);
 		}
 		return userManagerUIMSV2;
 	}
@@ -97,9 +99,11 @@ public class UIMSCompanyManagerSoapServiceSync {
 		
 		} catch (MalformedURLException e) {
 			LOGGER.error("Exception in getAuthenitcatedCompanyManager()::" + e.getMessage());
+			LOGGER.error("Exception >"+e);
 		}
 		catch (Exception e) {
 			LOGGER.error("Exception in getAuthenitcatedCompanyManager()::" + e.getMessage());
+			LOGGER.error("Exception >"+e);
 		}
 		return userManagerUIMSV2;
 	}
@@ -129,8 +133,10 @@ public class UIMSCompanyManagerSoapServiceSync {
 					| LdapTemplateNotReadyException | RequestedEntryNotExistsException | RequestedInternalUserException
 					| UnexpectedLdapResponseException | UnexpectedRuntimeImsException e) {
 				LOGGER.error("Error executing while createUIMSCompany()::" + e.getMessage());
+				LOGGER.error("Exception >"+e);
 			}catch (Exception e) {
 				LOGGER.error("Error executing while createUIMSCompany::" + e.getMessage());
+				LOGGER.error("Exception >"+e);
 			}
 		
 		return uimsUserResponse;
@@ -174,6 +180,7 @@ public class UIMSCompanyManagerSoapServiceSync {
 				UIMSSYNCLOGGER.error("Company creation failed in UIMS, company info = "+objMapper.writeValueAsString(company));
 			} catch (JsonProcessingException e1) {
 				LOGGER.error("JsonProcessingException1 in createUIMSCompanyWithCompanyForceIdmsId()::" + e1.getMessage());
+				LOGGER.error("Exception >"+e1);
 			}
 		}catch (Exception e) {
 			UIMSSYNCLOGGER.error("Exception in createUIMSCompanyWithCompanyForceIdmsId()::" + e.getMessage());
@@ -183,6 +190,7 @@ public class UIMSCompanyManagerSoapServiceSync {
 				UIMSSYNCLOGGER.error("Company creation failed in UIMS, company info = "+objMapper.writeValueAsString(company));
 			} catch (JsonProcessingException e1) {
 				LOGGER.error("JsonProcessingException2 in createUIMSCompanyWithCompanyForceIdmsId()::" + e1.getMessage());
+				LOGGER.error("Exception >"+e1);
 			}
 		}
 		return uimsUserResponse;
@@ -203,7 +211,7 @@ public class UIMSCompanyManagerSoapServiceSync {
 		} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
 				| LdapTemplateNotReadyException | RequestedEntryNotExistsException | UnexpectedLdapResponseException
 				| UnexpectedRuntimeImsException e) {
-			LOGGER.error("Error in getUIMSCompany()::" + e.getMessage());
+			LOGGER.error("Error in getUIMSCompany()::" + e.getMessage(),e);
 		}
 		return uimsCompanyResponse;
 	}

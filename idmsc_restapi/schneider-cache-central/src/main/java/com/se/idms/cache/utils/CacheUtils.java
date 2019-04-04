@@ -38,7 +38,8 @@ public class CacheUtils {
 					try {
 						inputStream.close();
 					} catch (IOException e) {
-						System.out.println(e.getMessage() + "\n The Cause: " + e.getCause());
+						logger.error(e.getMessage() + "\n The Cause: " + e.getCause());
+						
 					}
 				}
 			}

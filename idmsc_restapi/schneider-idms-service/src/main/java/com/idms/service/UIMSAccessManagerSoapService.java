@@ -93,10 +93,10 @@ public class UIMSAccessManagerSoapService {
 			LOGGER.info("End: getPort() of UIMS");
 
 		} catch (MalformedURLException e) {
-			LOGGER.error("MalformedURLException in getAccessManager()::" + e.getMessage());
+			LOGGER.error("MalformedURLException in getAccessManager()::" + e.getMessage(),e);
 		}
 		catch (Exception e) {
-			LOGGER.error("Exception in getAccessManager()::" + e.getMessage());
+			LOGGER.error("Exception in getAccessManager()::" + e.getMessage(),e);
 		}
 		return accessManagerUIMSV2;
 	}
@@ -167,7 +167,7 @@ public class UIMSAccessManagerSoapService {
 			} catch (RetryException e) {
 				uimsLog.error("Retry failed while calling the revokeAccessControlToUser::" + e.getMessage());
 			} catch (ExecutionException e) {
-				LOGGER.error("An error occured."+e.getMessage());
+				LOGGER.error("An error occured."+e.getMessage(),e);
 			}
 			if(!isrevokeresult) {
 				LOGGER.info("UIMS UpdateAIL revoke access got failed -----> ::sending mail notification::");
