@@ -1445,7 +1445,7 @@ public class UserServiceImpl implements UserService {
 							LOGGER.info("End: sendOpenAmMobileEmail() finsihed for  mobile userName:" + userName);
 							}
 						else{
-							LOGGER.info("Start: sendOpenAmMobileEmail() for mobile userName:" + userName +" disallowed");
+							LOGGER.info("Send Mobile OTP over Email() for mobile userName:" + userName +" disallowed");
 							/**LOGGER.info("Start: sendOpenAmMobileEmail() for mobile userName:" + userName);
 							sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
 									userRequest.getUserRecord().getIDMS_Profile_update_source__c());
@@ -9336,7 +9336,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("End: sendMobileEmail() finished for  mobile user:" + mobile);
 			}
 			else{
-				LOGGER.info("Start: sendMobileEmail() for mobile userName:" + mobile+" disallowed");
+				LOGGER.info("Send Mobile OTP over Email() for mobile userName:" + mobile+" disallowed");
 				/**LOGGER.info("Start: sendMobileEmail() for mobile userName:" + mobile);
 				sendEmail.sendMobileEmail(otpMobile, mobile);
 				LOGGER.info("End: sendMobileEmail() finished for  mobile user:" + mobile);*/
