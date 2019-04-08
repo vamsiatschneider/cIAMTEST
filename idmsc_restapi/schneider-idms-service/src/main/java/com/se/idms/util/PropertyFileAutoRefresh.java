@@ -118,26 +118,26 @@ public class PropertyFileAutoRefresh {
 			((UserServiceImpl) userService).setSalesForcePassword(configuration.getProperty("salesForcePassword"));
 			((UserServiceImpl) userService).setHa_mode(configuration.getProperty("ha_mode"));
 			((UserServiceImpl) userService).setFromUserName(configuration.getProperty("fromUserName"));
-			((UserServiceImpl) userService).setGoDitalToken(configuration.getProperty("salesgoDitalToken"));
+			((UserServiceImpl) userService).setGoDitalToken(configuration.getProperty("goDitalToken"));
 			((UserServiceImpl) userService).setGoDigitalValue(configuration.getProperty("goDigitalValue"));
 			((UserServiceImpl) userService).setUimsClientId(configuration.getProperty("uimsClientId"));
 			((UserServiceImpl) userService).setUimsClientSecret(configuration.getProperty("uimsClientSecret"));
-			((UserServiceImpl) userService).setRedirectUri(configuration.getProperty("redirectUri"));
-			((UserServiceImpl) userService).setPrefixStartUrl(configuration.getProperty("prefixStartUrl"));
-			((UserServiceImpl) userService).setPrefixIdentityUrl(configuration.getProperty("prefixIdentityUrl"));
-			((UserServiceImpl) userService).setRegisterPRMUserIdp(configuration.getProperty("registerPRMUserIdp"));
+			((UserServiceImpl) userService).setRedirectUri(configuration.getProperty("redirect.uri"));
+			((UserServiceImpl) userService).setPrefixStartUrl(configuration.getProperty("openAMService.url"));
+			((UserServiceImpl) userService).setPrefixIdentityUrl(configuration.getProperty("identityService.url"));
+			((UserServiceImpl) userService).setRegisterPRMUserIdp(configuration.getProperty("register.prmUser.idp"));
 			((UserServiceImpl) userService)
 					.setOtpvalidationtimeinminute(configuration.getProperty("otpvalidationtimeinminute"));
-			((UserServiceImpl) userService).setDjUserName(configuration.getProperty("djUserName"));
-			((UserServiceImpl) userService).setDjUserPwd(configuration.getProperty("djUserPwd"));
+			((UserServiceImpl) userService).setDjUserName(configuration.getProperty("openDJUserName"));
+			((UserServiceImpl) userService).setDjUserPwd(configuration.getProperty("openDJUserPassword"));
 			((UserServiceImpl) userService).setSendOTPOverEmail(configuration.getProperty("enable.sendOtpOverEmail"));
 
 			goDigitalUserService.setFromUserName(configuration.getProperty("fromUserName"));
 			goDigitalUserService.setSupportUser(configuration.getProperty("supportUser"));
 
 			emailService.setFrom(configuration.getProperty("fromUserName"));
-			emailService.setDjUserName(configuration.getProperty("setDjUserName"));
-			emailService.setDjUserPwd(configuration.getProperty("setDjUserPwd"));
+			emailService.setDjUserName(configuration.getProperty("openDJUserName"));
+			emailService.setDjUserPwd(configuration.getProperty("openDJUserPassword"));
 			emailService.setHotpEmailVerificationURL(configuration.getProperty("hotpEmailVerificationURL"));
 			emailService.setIDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN(
 					configuration.getProperty("user.reset.password.email.template.cn"));
@@ -196,7 +196,7 @@ public class PropertyFileAutoRefresh {
 			commonService.setAuthCsvPath(configuration.getProperty("authCsvPath"));
 			commonService.setRegistrationCsvPath(configuration.getProperty("registrationCsvPath"));
 			commonService.setDirectApiSecretToken(configuration.getProperty("directApiSecretToken"));
-			commonService.setEMAIL_TEMPLATE_DIR(configuration.getProperty("EMAIL_TEMPLATE_DIR"));
+			commonService.setEMAIL_TEMPLATE_DIR(configuration.getProperty("email.template.dir"));
 			commonService.setFromUserName(configuration.getProperty("fromUserName"));
 
 			commonService.setGoDigitalValue(configuration.getProperty("goDigitalValue"));
