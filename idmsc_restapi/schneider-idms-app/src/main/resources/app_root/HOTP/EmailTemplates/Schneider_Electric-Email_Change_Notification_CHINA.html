@@ -84,12 +84,12 @@
                 mso-table-rspace:0pt; 
 
             }
-           /* a {
-                color: #e95353;
+            a {
+                /*color: #e95353;*/
                 text-underline:none!important;
                 text-decoration: none;
                 text-decoration:none!important;
-            }*/
+            }
 
             /*STYLES*/
             table[class=full] {
@@ -170,11 +170,13 @@
                         <table width="618" cellpadding="0" cellspacing="0" border="0" align="center" class="devicewidth" bgcolor="#EDEDED">
                             <tbody>
                                 <!-- Spacing -->
-                                <!--<tr>
+                                <tr>
                                     <td width="100%"  align="right" height="25">
-                                        <a href="#" style="font-size:12px; color:#219BFD;text-decoration:underline;">View Online</a>
+<!--
+									<a href="#" style="font-size:12px; color:#219BFD;text-decoration:underline;">View Online</a>
+-->
                                     </td>
-                                </tr>-->
+                                </tr>
                             </tbody>
                         </table>
                     </td>
@@ -207,7 +209,7 @@
                                                                     <div class="img_edit" style="visibility: visible;">
                                                                     </div>
                                                                 </div>
-                                                            </div><a href="http://www.schneider-electric.com/"><img src="https://se--c.na72.content.force.com/servlet/servlet.ImageServer?id=0151H000006TxEo&oid=00DA0000000abSm" width="215" height="47" alt="logo" border="0" style="display:block; border:none; outline:none; text-decoration:none;" class="logo" /></a>
+                                                            </div> <a href="http://www.schneider-electric.cn/"><img src="https://se.my.salesforce.com/servlet/servlet.ImageServer?id=015J0000000v1Ss&oid=00DA0000000abSm" width="215" height="47" alt="logo" border="0" style="display:block; border:none; outline:none; text-decoration:none;" class="logo" /></a>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -233,7 +235,7 @@
                             <tbody>
                                 <!-- Spacing -->
                                 <tr>
-                                    <td height="28" style="background: #3dcd58;" width="618">
+                                    <td width="100%" height="28">
                                     </td>
                                 </tr>
                             </tbody>
@@ -250,7 +252,10 @@
                         </div>
                         <table bgcolor="#ffffff" width="618" cellpadding="0" cellspacing="0" border="0" align="center" class="devicewidth">
                             <tbody>
-                                
+                                <tr>
+                                    <td width="100%" height="20">
+                                    </td>
+                                </tr>
                                 <tr>
                                     <td>
                                         <table width="550" cellpadding="0" cellspacing="0" border="0" align="center" class="devicewidth">
@@ -261,7 +266,7 @@
                                                 <tr>
                                                     <td style="text-align:left;">
                                                         <p style="font-family:Arial; font-size:18px; line-height:16.88px; letter-spacing:0.17px; color:#626469;">
-                                                            <b>更新电子邮箱。</b>
+                                                            <b>您的电子邮箱已更新</b>
                                                         </p>
 <br/>
                                                     </td>
@@ -269,7 +274,7 @@
                                                  <tr>
                                                     <td style="text-align:left;">
                                                         <p style="font-family:Arial; font-style:italic; font-size:14px; line-height:16.88px; letter-spacing:0.17px; color:#009933;">
-                                                           本Email邮箱将不再被使用。
+                                                           本电子邮箱将不再被使用。
                                                         </p>
                                                     </td>
                                                 </tr>
@@ -277,6 +282,7 @@
                                                     <td height="20"></td>
                                                 </tr>
                                                 <tr>
+<br/>
                                                     <td>
                                                         <p style="font-family:Arial; font-size:14px; line-height:16.88px; letter-spacing:0.17px; color:#626469;">
                                                             您好 {!User.FirstName},
@@ -287,18 +293,19 @@
                                                     <td>
 <br/>
                                                         <p style="font-family:Arial; font-size:14px; line-height:16.88px; letter-spacing:0.17px; color:#626469;">
-                                                            您已经要求变更Email地址， 本Email地址将在您确认变更后不再被用于施耐德电气的应用系统。 
-                                                        </p><br/>
-<p style="font-family:Arial; font-size:14px; line-height:16.88px; letter-spacing:0.17px; color:#626469;">如果您没有要求变更Email地址或者有任何问题，请立即联络支持人员 @ <a href="mailto:Secure_Identity-L2@schneider-electric.com" target="_other" rel="nofollow">Secure Identity Support</a>
- </p>
+                                                            您已经要求变更电子邮箱，在施耐德电气应用系统中确认后本邮箱将不再被使用。 
+                                                        </p>
+<p style="font-family:Arial; font-size:14px; line-height:16.88px; letter-spacing:0.17px; color:#626469;">如有疑问，请联络系统管理员或施耐德电气客户服务中心。</p>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td>
 <br/>
                                                         <p style="font-family:Arial; font-size:14px; line-height:16.88px; letter-spacing:0.17px; color:#626469;">
-                                                           此致，
+<!--                                                            Sincerely,
+-->
                                                         </p>
+                                                        <br/>
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -307,7 +314,7 @@
                                                 <tr>
                                                     <td>
                                                         <p style="font-family:Arial; font-size:14px; line-height:16.88px; letter-spacing:0.17px; color:#626469;">
-                                                            施耐德电气团队
+                                                            施耐德电气中国 | 全球能效管理专家
                                                         </p>
                                                         <br/>
                                                     </td>
@@ -344,11 +351,12 @@
                                         <table width="618" cellpadding="0" cellspacing="0" border="0" align="left" class="devicewidth">
                                             <tbody>
                                                 <tr>
-                                                    <td height="40" width="44"><a href="http://weibo.com/schneidercn" title="official Weibo" target="_blank"><img height="31" src="https://se.my.salesforce.com/servlet/servlet.ImageServer?id=01512000005JoNO&amp;oid=00DA0000000abSm" alt=""></a></td>
-                                                    <td height="40" width="44"><a href="http://www.schneider-electric.cn/zh/work/support/wechat/" title="Official WeChat" target="_blank"><img height="31" src="https://se.my.salesforce.com/servlet/servlet.ImageServer?id=01512000005JoNJ&amp;oid=00DA0000000abSm" alt=""></a></td>
-                                                    <td height="40" width="44"><a href="http://i.youku.com/i/UMzU3MDAyMjA0" title="Official Youku" target="_blank"><img height="31" src="https://se.my.salesforce.com/servlet/servlet.ImageServer?id=01512000005JoNT&amp;oid=00DA0000000abSm" alt=""></a></td>
-                                                    <td height="40" width="44"><a href="https://schneiderelectric.tmall.com/?ali_trackid=42_01186a8b291d832f01e9bffaea7fc605" title="Schneider Electric Tmall Flagship Store" target="_blank"><img height="31" src="https://se.my.salesforce.com/servlet/servlet.ImageServer?id=01512000005JoNY&amp;oid=00DA0000000abSm" alt=""></a></td>
-                                                    <td height="40" width="44"><a href="https://mall.jd.com/index-216830.html" title="Schneider Electric Jingdong flagship store" target="_blank"><img height="31" src="https://se.my.salesforce.com/servlet/servlet.ImageServer?id=01512000005JoNd&amp;oid=00DA0000000abSm" alt=""></a></td>
+                                                    <td height="40" width="44"><a href="http://tv.schneider-electric.com/site/schneidertv/cn/ch/" title="官方TV" target="_blank"><img height="31" src="https://se.my.salesforce.com/servlet/servlet.ImageServer?id=01512000005UC4R&oid=00DA0000000abSm" alt=""></a></td>
+                                                    <td height="40" width="44"><a href="http://weibo.com/schneidercn" title="官方微博" target="_blank"><img height="31" src="https://se.my.salesforce.com/servlet/servlet.ImageServer?id=01512000005JoNO&oid=00DA0000000abSm" alt=""></a></td>
+                                                    <td height="40" width="44"><a href="http://www.schneider-electric.cn/zh/work/support/wechat/" title="官方微信" target="_blank"><img height="31" src="https://se.my.salesforce.com/servlet/servlet.ImageServer?id=01512000005JoNJ&oid=00DA0000000abSm" alt=""></a></td>
+                                                    <td height="40" width="44"><a href="http://i.youku.com/i/UMzU3MDAyMjA0" title="官方优酷" target="_blank"><img height="31" src="https://se.my.salesforce.com/servlet/servlet.ImageServer?id=01512000005JoNT&oid=00DA0000000abSm" alt=""></a></td>
+                                                    <td height="40" width="44"><a href="https://schneiderelectric.tmall.com/?ali_trackid=42_01186a8b291d832f01e9bffaea7fc605" title= "施耐德电气天猫旗舰店" target="_blank"><img height="31" src="https://se.my.salesforce.com/servlet/servlet.ImageServer?id=01512000005JoNY&oid=00DA0000000abSm" alt=""></a></td>
+                                                    <td height="40" width="44"><a href="https://mall.jd.com/index-216830.html" title= "施耐德电气京东旗舰店" target="_blank"><img height="31" src="https://se.my.salesforce.com/servlet/servlet.ImageServer?id=01512000005JoNd&oid=00DA0000000abSm" alt=""></a></td>
                                                     <td>&nbsp;</td>
                                                 </tr>
                                             </tbody>
@@ -356,7 +364,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td width="100%" height="14">
+                                    <td width="100%" height="30">
                                     </td>
                                 </tr>
                             </tbody>
@@ -374,20 +382,27 @@
                         </div>
                         <table bgcolor="#EDEDED" width="618" cellpadding="0" cellspacing="0" border="0" align="center" class="devicewidth">
                             <tbody>
-                                 <tr>
+                                <tr>
+                                    <td width="100%" height="14">
+                                    </td>
+                                </tr>
+                                <tr>
                                     <td>
                                         <table width="618" cellpadding="0" cellspacing="0" border="0" align="left" class="devicewidth">
                                             <tbody>
                                                 <tr>
                                                     <td>
-                                                        <p style="font-family:Arial; font-size:10px; line-height:16.88px; letter-spacing:0.17px; color:#626469;">@2018 版权所有，施耐德电气(中国)有限公司
-                                                        </p></td>
+                                                        <p style="font-family:Arial; font-size:10px; line-height:16.88px; letter-spacing:0.17px; color:#626469;"> 客户关爱热线: 4008101315, 售前支持热线: 4008108889</p></td>
                                                 </tr>
-                                                <tr> <td height="14" width="100%">
+                                                <tr>
+                                                    <td>
+                                                        <p style="font-family:Arial; font-size:10px; line-height:16.88px; letter-spacing:0.17px; color:#626469;">版权所有©2017施耐德电气（中国）有限公司</p></td>
+                                                </tr>
+                                                <tr> <td width="100%" height="14">
                                                     </td></tr>
                                                 <tr>
                                                     <td>
-                                                        <p style="font-family:Arial; font-size:10px; line-height:16.88px; letter-spacing:0.17px; color:#626469;">这是自动生成的邮件，请勿回复。</p></td>
+                             <!--                           <p style="font-family:Arial; font-size:10px; line-height:16.88px; letter-spacing:0.17px; color:#626469;">这是一封事务性邮件。</p></td> -->
                                                 </tr>
                                             </tbody>
                                         </table>
