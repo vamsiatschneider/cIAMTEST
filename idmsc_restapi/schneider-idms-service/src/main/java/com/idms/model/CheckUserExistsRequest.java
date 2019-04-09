@@ -11,6 +11,9 @@ public class CheckUserExistsRequest {
 
 	@JsonProperty
 	private String mobile;
+	
+	@JsonProperty
+	private String idmsFederatedId;
 
 	@JsonProperty
 	private String loginID;
@@ -48,6 +51,14 @@ public class CheckUserExistsRequest {
 
 	public void setWithGlobalUsers(String withGlobalUsers) {
 		this.withGlobalUsers = withGlobalUsers;
+	}
+
+	public String getIdmsFederatedId() {
+		return idmsFederatedId;
+	}
+
+	public void setIdmsFederatedId(String idmsFederatedId) {
+		this.idmsFederatedId = idmsFederatedId;
 	}
 
 	@Override

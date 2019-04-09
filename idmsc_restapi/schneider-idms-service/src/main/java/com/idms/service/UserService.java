@@ -21,7 +21,6 @@ import com.idms.model.ActivateUserRequest;
 import com.idms.model.AddEmailRequest;
 import com.idms.model.AddMobileRequest;
 import com.idms.model.CheckUserExistsRequest;
-import com.idms.model.CheckUserExistsRequestDemo;
 import com.idms.model.CheckUserIdentityRequest;
 import com.idms.model.ConfirmPinRequest;
 import com.idms.model.CreateUserRequest;
@@ -85,10 +84,6 @@ public interface UserService {
 	@POST
 	@Path("/apexrest/IDMSCheckUser")
 	Response idmsCheckUserExists(@Valid CheckUserExistsRequest request);
-	
-	@POST
-	@Path("/apexrest/IDMSCheckUserDemo")
-	Response idmsCheckUserExistsDemo(@Valid CheckUserExistsRequestDemo request);
 	
 	@POST
 	@Path("/apexrest/IDMSCheckIdentity")
