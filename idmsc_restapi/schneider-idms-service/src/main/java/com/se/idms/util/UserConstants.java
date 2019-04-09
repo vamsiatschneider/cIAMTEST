@@ -577,4 +577,7 @@ public class UserConstants {
 	public static final String USER_NOT_EXIST = "User does not exist in IDMS";
 	public static final String USER_MULTIPLE_EXIST = "Multiple users found based on the identifier";
 	
+	public static final String APP_ROOT_PLACE_HOLDER ="${idmsc.app_root.location}";
+	
+	
 }

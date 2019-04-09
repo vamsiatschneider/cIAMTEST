@@ -53,7 +53,7 @@ public class ApplicationPropertiesWatcher implements Runnable {
 	}
 
 	public ApplicationPropertiesWatcher(final String filePath) throws IOException {
-		LOGGER.info("ApplicationPropertiesWatcher constr called!");
+		LOGGER.info("ApplicationPropertiesWatcher constr called!!"+ filePath);
 		Path dir = Paths.get(filePath);// full absolute file path
 		this.watcher = FileSystems.getDefault().newWatchService();
 		this.keys = new HashMap<WatchKey, Path>();

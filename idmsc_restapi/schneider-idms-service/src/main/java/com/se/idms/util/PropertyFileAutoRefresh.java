@@ -32,6 +32,7 @@ import com.se.idms.cache.validate.impl.LengthValidatorImpl;
 import com.se.idms.cache.validate.impl.MandatoryValidatorImpl;
 import com.se.idms.cache.validate.impl.MultiPickListValidatorImpl;
 import com.se.idms.cache.validate.impl.PickListValidatorImpl;
+import static com.se.idms.util.UserConstants.APP_ROOT_PLACE_HOLDER;;
 
 @Service("propertyFileAutoRefresh")
 public class PropertyFileAutoRefresh {
@@ -47,6 +48,9 @@ public class PropertyFileAutoRefresh {
 
 	@Value("${app.properties.file}")
 	private String PROPERTY_FILE;
+
+	@Value("${idms.env}")
+	private String IDMS_DEPLOY_ENV;
 
 	@Inject
 	private UserService userService;
@@ -99,8 +103,27 @@ public class PropertyFileAutoRefresh {
 			LOGGER.info("initilize(final String file) start");
 			in = new FileInputStream(new File(file));
 			configuration.load(in);
+			LOGGER.info("PROPERTY_FILE"+PROPERTY_FILE);
+			//configuration.forEach((key, value) -> LOGGER.info(key + " : " + value));
+			//String DEFAULT_APP_ROOT_LOCATION="${idmsc.app_root.location}";
+			String appRootLocation=System.getProperty("idmsc.app_root.location");
+			LOGGER.info("System app root property:"+appRootLocation);
+			configuration.forEach((type, value) -> {
+			String strValue=(String)value;
+			   if(strValue.contains(APP_ROOT_PLACE_HOLDER)){
+				   //configuration.setProperty((String)type, strValue.replace(DEFAULT_APP_ROOT_LOCATION, appRootLocation));
+				   strValue=strValue.replace(APP_ROOT_PLACE_HOLDER, appRootLocation);
+				   if(IDMS_DEPLOY_ENV.equalsIgnoreCase("DEV")){
+				   //configuration.setProperty((String)type, strValue.replaceAll("/", "\\\\"));
+				    strValue=strValue.replaceAll("/", "\\\\");
+				   }
+				   configuration.setProperty((String)type, strValue);
+			   }
+			  });
+			configuration.setProperty("app.properties.file",configuration.getProperty("app.properties.file").replace("${idms.env}", IDMS_DEPLOY_ENV));
+			LOGGER.info("After conversion:");
+			configuration.forEach((key, value) -> LOGGER.info(key + " : " + value));
 			//System.out.println("Refreshed value:" + configuration.getProperty("IDMS_BFO_profile"));
-			// System.out.println("PROPERTY_FILE:"+PROPERTY_FILE);
 			// Update all properties file entries
 			((UserServiceImpl) userService).setCALLER_FID(configuration.getProperty("caller.fid"));
 			((UserServiceImpl) userService).setLOGIN_ERROR(configuration.getProperty("caller.fid"));
@@ -259,6 +282,24 @@ public class PropertyFileAutoRefresh {
 			LOGGER.info("PropertyFileAutoRefresh::initilize() called");
 			in = new FileInputStream(new File(PROPERTY_FILE));
 			configuration.load(in);
+			//String DEFAULT_APP_ROOT_LOCATION="${idmsc.app_root.location}";
+			String appRootLocation=System.getProperty("idmsc.app_root.location");
+			LOGGER.info("system property:"+appRootLocation);
+			configuration.forEach((type, value) -> {
+			   String strValue=(String)value;
+			   if(strValue.contains(APP_ROOT_PLACE_HOLDER)){
+				   //configuration.setProperty((String)type, strValue.replace(DEFAULT_APP_ROOT_LOCATION, appRootLocation));
+				   strValue=strValue.replace(APP_ROOT_PLACE_HOLDER, appRootLocation);
+				   if(IDMS_DEPLOY_ENV.equalsIgnoreCase("DEV")){
+				   //configuration.setProperty((String)type, strValue.replaceAll("/", "\\\\"));
+				    strValue=strValue.replaceAll("/", "\\\\");
+				   }
+				   configuration.setProperty((String)type, strValue);
+			   }
+			  });
+			configuration.setProperty("app.properties.file",configuration.getProperty("app.properties.file").replace("${idms.env}", IDMS_DEPLOY_ENV));
+			LOGGER.info("After conversion:");
+			configuration.forEach((key, value) -> LOGGER.info(key + " : " + value));
 			LOGGER.info("Initial value:" + configuration.getProperty("caller.fid"));
 			LOGGER.info("userserviceimpl:###" + userService);
 			LOGGER.info("PROPERTY_FILE:" + PROPERTY_FILE);
