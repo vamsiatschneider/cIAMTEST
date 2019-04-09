@@ -508,6 +508,8 @@ public class UserConstants {
 
 	public static final String IDMS_BFO_profile = "IDMS_BFO_profile";
 	
+	public static final String TestMailDomain = "TestMailDomain";
+	
 	public static final String TOKEN_TYPE = "contact activation";
 	
 	public static final String PRMPORTAL = "PRMPortal";

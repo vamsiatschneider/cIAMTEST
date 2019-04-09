@@ -131,6 +131,7 @@ public class PropertyFileAutoRefresh {
 			((UserServiceImpl) userService).setDjUserName(configuration.getProperty("openDJUserName"));
 			((UserServiceImpl) userService).setDjUserPwd(configuration.getProperty("openDJUserPassword"));
 			((UserServiceImpl) userService).setSendOTPOverEmail(configuration.getProperty("enable.sendOtpOverEmail"));
+			((UserServiceImpl) userService).setDisableTestMailDomain(configuration.getProperty("disableTestMailDomain"));
 
 			goDigitalUserService.setFromUserName(configuration.getProperty("fromUserName"));
 			goDigitalUserService.setSupportUser(configuration.getProperty("supportUser"));
