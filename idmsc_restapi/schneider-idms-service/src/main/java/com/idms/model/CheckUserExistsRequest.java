@@ -19,6 +19,9 @@ public class CheckUserExistsRequest {
 	private String loginID;
 
 	@JsonProperty
+	private String applicationName;
+
+	@JsonProperty
 	private String withGlobalUsers;
 
 	public String getEmail() {
@@ -59,6 +62,14 @@ public class CheckUserExistsRequest {
 
 	public void setIdmsFederatedId(String idmsFederatedId) {
 		this.idmsFederatedId = idmsFederatedId;
+	}
+
+	public String getApplicationName() {
+		return applicationName;
+	}
+
+	public void setApplicationName(String applicationName) {
+		this.applicationName = applicationName;
 	}
 
 	@Override

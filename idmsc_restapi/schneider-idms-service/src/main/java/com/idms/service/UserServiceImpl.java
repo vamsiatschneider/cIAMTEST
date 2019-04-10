@@ -339,8 +339,8 @@ public class UserServiceImpl implements UserService {
 	@Value("${enable.sendOtpOverEmail}")
 	private String sendOTPOverEmail;
 	
-	@Value("${disableTestMailDomain}")
-	private String disableTestMailDomain;
+	@Value("${enableTestMailDomain}")
+	private String enableTestMailDomain;
 	
 	private static String userAction = "submitRequirements";
 
@@ -816,23 +816,7 @@ public class UserServiceImpl implements UserService {
 					userRequest.getUserRecord().setMobilePhone(
 							ChinaIdmsUtil.mobileTransformation(userRequest.getUserRecord().getMobilePhone()));
 				}
-
-				if (null != userRequest.getUserRecord().getEmail()
-						&& !userRequest.getUserRecord().getEmail().isEmpty()) {
-					userRequest.getUserRecord().setEmail(userRequest.getUserRecord().getEmail().trim());
-					String mailDomain = userRequest.getUserRecord().getEmail().substring(userRequest.getUserRecord().getEmail().indexOf("@")+1);
-					LOGGER.info("mailDomain = "+mailDomain);
-					if(Boolean.valueOf(disableTestMailDomain)){
-						if (pickListValidator.validate(UserConstants.TestMailDomain,mailDomain)) {
-							errorResponse.setStatus(errorStatus);
-							errorResponse.setMessage("TestEmailDomain("+mailDomain+") is  not allowed. Registration terminated.");
-							elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-							LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-							LOGGER.error("TestEmailDomain("+mailDomain+") is  not allowed. Registration terminated.");
-							return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-						}
-					}
-				}
+				
 				mobileRegFlag = Boolean.parseBoolean(userRequest.getMobileRegFlag());
 
 				if (mobileRegFlag) {
@@ -4744,19 +4728,15 @@ public class UserServiceImpl implements UserService {
 					String messageUser = checkUserJson.get(UserConstants.MESSAGE_L).toString();
 					if (!messageUser.equalsIgnoreCase(UserConstants.FALSE)) {
 						if (200 != checkUserExist.getStatus()) {
-							responseCheck.put(UserConstants.STATUS, errorStatus);
-							responseCheck.put(UserConstants.MESSAGE,
-									"Mail identifier cannot be modified :: " + messageUser);
-							LOGGER.error("Error while email updation, idmsCheckUserExists in updateUser() ->  "
-									+ messageUser);
+							responseCheck.put(UserConstants.STATUS,errorStatus);
+							responseCheck.put(UserConstants.MESSAGE,"Mail identifier cannot be modified :: "+messageUser);
+							LOGGER.error("Error while email updation, idmsCheckUserExists in updateUser() ->  " + messageUser);
 							return Response.status(checkUserExist.getStatus()).entity(responseCheck).build();
 						}
 						if (200 == checkUserExist.getStatus()) {
-							responseCheck.put(UserConstants.STATUS, errorStatus);
-							responseCheck.put(UserConstants.MESSAGE,
-									"Mail identifier cannot be modified :: " + UserConstants.USER_EXISTS);
-							LOGGER.error("Error while email updation, idmsCheckUserExists in updateUser() -> "
-									+ UserConstants.USER_EXISTS);
+							responseCheck.put(UserConstants.STATUS,errorStatus);
+							responseCheck.put(UserConstants.MESSAGE,"Mail identifier cannot be modified :: "+UserConstants.USER_EXISTS);
+							LOGGER.error("Error while email updation, idmsCheckUserExists in updateUser() -> "+UserConstants.USER_EXISTS);
 							return Response.status(Response.Status.CONFLICT).entity(responseCheck).build();
 						}
 					}
@@ -7761,18 +7741,19 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Response idmsCheckUserExists(CheckUserExistsRequest request) {
 		LOGGER.info("Entered idmsCheckUserExists() -> Start");
-		DocumentContext productDocCtx = null;
+		DocumentContext productDocCtx = null, productDocApp = null;
 		String iPlanetDirectoryKey = null;
 		String ifwAccessToken = null, userExists = null;
 		JSONObject response = new JSONObject();
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
-		Response ifwResponse = null;
+		Response ifwResponse = null, appDetails = null;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		String loginId = null, mobileNum = null, fieldType = null;
 		ObjectMapper objMapper = new ObjectMapper();
 		Integer resultCount = 0;
 		ArrayList<String> varList = new ArrayList<String>();
+		String appname = null, enableTestMailStatus = null;
 
 		try {
 			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(request));
@@ -7867,6 +7848,40 @@ public class UserServiceImpl implements UserService {
 				loginId = request.getIdmsFederatedId().trim();
 				fieldType = "idmsFederatedId";
 			}
+			
+			//check appname to allow testMailDomain			
+			if (null != request.getApplicationName() && !request.getApplicationName().isEmpty()) {
+				appname = request.getApplicationName().trim();
+				appDetails = openDJService.getUser(djUserName, djUserPwd, appname);
+			}
+			
+			if (null != appDetails && 200 == appDetails.getStatus()) {
+				productDocApp = JsonPath.using(conf)
+						.parse(IOUtils.toString((InputStream) appDetails.getEntity()));
+				String testMailStatusOpenAM = productDocApp.read("_enableTestMailDomain");
+				if(null != testMailStatusOpenAM && !testMailStatusOpenAM.isEmpty()){
+					enableTestMailStatus = testMailStatusOpenAM;
+				} else{
+					enableTestMailStatus = enableTestMailDomain;
+				}
+			}
+			
+			if (null != appDetails && 200 != appDetails.getStatus()) {
+				enableTestMailStatus = enableTestMailDomain;
+			}
+			
+			if (null != enableTestMailStatus && !Boolean.parseBoolean(enableTestMailStatus) && loginId.contains("@")) {
+				String mailDomain = loginId.substring(loginId.indexOf("@") + 1);
+				LOGGER.info("mailDomain = " + mailDomain);
+				if (pickListValidator.validate(UserConstants.TestMailDomain, mailDomain)) {
+					response.put(UserConstants.MESSAGE_L, "This Email Domain is not allowed - "+mailDomain);
+					LOGGER.error("Error in idmsCheckUserExists is :: "+"This Email Domain is not allowed - "+mailDomain);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+				}
+			}
+			
 			// Adding try catch block for getSSoToken method,this is to address
 			// log zio alerts
 			try {
@@ -7934,12 +7949,20 @@ public class UserServiceImpl implements UserService {
 				String bfoAuthorizationToken = sfSyncServiceImpl.getSFToken();
 				String authorization = "Bearer " + accessToken;
 
-				// if (loginId.contains("@")) {
-				LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for loginId:" + loginId);
-				ifwResponse = ifwService.checkUserExistsWithEmail(bfoAuthorizationToken, UserConstants.APPLICATION_NAME,
-						UserConstants.COUNTRY_CODE, UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID,
-						authorization, loginId, false);
-				LOGGER.info("End: checkUserExistsWithEmail() of IFWService finished for loginId:" + loginId);
+				if (loginId.contains("@")) {
+					LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for email:" + loginId);
+					ifwResponse = ifwService.checkUserExistsWithEmail(bfoAuthorizationToken, UserConstants.APPLICATION_NAME,
+							UserConstants.COUNTRY_CODE, UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID,
+							authorization, loginId, false);
+					LOGGER.info("End: checkUserExistsWithEmail() of IFWService finished for email:" + loginId);
+				}
+				if (fieldType.equalsIgnoreCase("idmsFederatedId")) {
+					LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for fedID:" + loginId);
+					ifwResponse = ifwService.checkUserExistsWithFedId(bfoAuthorizationToken, UserConstants.APPLICATION_NAME,
+							UserConstants.COUNTRY_CODE, UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID,
+							authorization, loginId, false);
+					LOGGER.info("End: checkUserExistsWithEmail() of IFWService finished for fedID:" + loginId);
+				}
 	
 				LOGGER.info("ifwResponse response status code for checkUserExist -> " + ifwResponse.getStatus());
 				if (null != ifwResponse && 200 == ifwResponse.getStatus()) {
@@ -7960,6 +7983,12 @@ public class UserServiceImpl implements UserService {
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 					return Response.status(ifwResponse.getStatus()).entity(response).build();
+				} else if (null != ifwResponse && 409 == ifwResponse.getStatus()) {
+					response.put(UserConstants.MESSAGE_L, UserConstants.USER_MULTIPLE_EXIST);
+					LOGGER.error("Error in idmsCheckUserExists is :: " + UserConstants.USER_MULTIPLE_EXIST);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+					return Response.status(ifwResponse.getStatus()).entity(response).build();
 				} else if (null != ifwResponse && 500 == ifwResponse.getStatus()) {
 					response.put(UserConstants.MESSAGE_L, UserConstants.SERVER_ERROR_IFW);
 					LOGGER.error("Error in idmsCheckUserExists is :: " + UserConstants.SERVER_ERROR_IFW);
@@ -7972,8 +8001,8 @@ public class UserServiceImpl implements UserService {
 					return Response.status(ifwResponse.getStatus()).entity(response).build();
 				}
 
-				response.put(UserConstants.MESSAGE_L, "Global idmsCheckUserExist() failed to perform");
-				LOGGER.error("Error in idmsCheckUserExists is :: Global checkUserExist() failed to perform");
+				response.put(UserConstants.MESSAGE_L, "Global idmsCheckUserExist failed to perform");
+				LOGGER.error("Error in idmsCheckUserExists is :: Global checkUserExist failed to perform");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 				return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(response).build();
@@ -9971,8 +10000,8 @@ public class UserServiceImpl implements UserService {
 		this.sendOTPOverEmail = sendOTPOverEmail;
 	}
 
-	public void setDisableTestMailDomain(String disableTestMailDomain) {
-		this.disableTestMailDomain = disableTestMailDomain;
+	public void setEnableTestMailDomain(String enableTestMailDomain) {
+		this.enableTestMailDomain = enableTestMailDomain;
 	}
 	
 }
