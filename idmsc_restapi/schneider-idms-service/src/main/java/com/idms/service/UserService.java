@@ -272,5 +272,9 @@ public interface UserService {
 	@DELETE
 	@Path("/apexrest/deleteMobile")
 	Response deleteMobile(SendOTPRequest deleteRequest);
+	
+	/*@GET
+	@Path("/apexrest/userDetailByApplication")
+	Response getUserDetailByApplication(@HeaderParam("Authorization") String authorizationToken,@PathParam("userId") String userId);*/
 
 }
