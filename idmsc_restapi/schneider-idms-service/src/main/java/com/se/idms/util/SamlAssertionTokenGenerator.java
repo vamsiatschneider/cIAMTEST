@@ -134,4 +134,24 @@ public class SamlAssertionTokenGenerator {
 	public void setSamlAssertionSigningAlgo(String samlAssertionSigningAlgo) {
 		this.samlAssertionSigningAlgo = samlAssertionSigningAlgo;
 	}
+
+	public String getSamlAssertionSigningKeystore() {
+		return samlAssertionSigningKeystore;
+	}
+
+	public String getSamlAssertionKeystorePassword() {
+		return samlAssertionKeystorePassword;
+	}
+
+	public String getSamlAssertionKeyPassword() {
+		return samlAssertionKeyPassword;
+	}
+
+	public String getSamlAssertionSigningCert() {
+		return samlAssertionSigningCert;
+	}
+
+	public String getSamlAssertionSigningAlgo() {
+		return samlAssertionSigningAlgo;
+	}
 }

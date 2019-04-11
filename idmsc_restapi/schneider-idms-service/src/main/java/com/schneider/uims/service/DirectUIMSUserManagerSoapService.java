@@ -1160,4 +1160,29 @@ public class DirectUIMSUserManagerSoapService {
 		this.goDigitalValue = goDigitalValue;
 	}
 
+
+	public String getCALLER_FID() {
+		return CALLER_FID;
+	}
+
+
+	public String getFromUserName() {
+		return fromUserName;
+	}
+
+
+	public String getGoDitalToken() {
+		return goDitalToken;
+	}
+
+
+	public String getGoDigitalValue() {
+		return goDigitalValue;
+	}
+
+
+	public String getSupportUser() {
+		return supportUser;
+	}
+
 }

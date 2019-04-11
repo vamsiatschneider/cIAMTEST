@@ -75,4 +75,12 @@ public class MultiPickListValidatorImpl implements IValidator {
 		IDMS_DEPLOY_ENV = iDMS_DEPLOY_ENV;
 	}
 
+	public String getIDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH() {
+		return IDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH;
+	}
+
+	public String getIDMS_DEPLOY_ENV() {
+		return IDMS_DEPLOY_ENV;
+	}
+
 }

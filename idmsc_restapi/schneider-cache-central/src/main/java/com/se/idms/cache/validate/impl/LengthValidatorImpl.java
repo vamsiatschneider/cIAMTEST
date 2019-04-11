@@ -75,5 +75,13 @@ public class LengthValidatorImpl implements IValidator {
 		IDMS_DEPLOY_ENV = iDMS_DEPLOY_ENV;
 	}
 
+	public String getIDMS_FIELDSLENGTH_PROPERTIES_PATH() {
+		return IDMS_FIELDSLENGTH_PROPERTIES_PATH;
+	}
+
+	public String getIDMS_DEPLOY_ENV() {
+		return IDMS_DEPLOY_ENV;
+	}
+
 	
 }

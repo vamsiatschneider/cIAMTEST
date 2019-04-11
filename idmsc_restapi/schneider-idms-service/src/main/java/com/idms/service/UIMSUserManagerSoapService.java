@@ -1086,4 +1086,20 @@ public class UIMSUserManagerSoapService {
 		this.goDigitalValue = goDigitalValue;
 	}
 
+	public String getFromUserName() {
+		return fromUserName;
+	}
+
+	public String getSupportUser() {
+		return supportUser;
+	}
+
+	public String getGoDitalToken() {
+		return goDitalToken;
+	}
+
+	public String getGoDigitalValue() {
+		return goDigitalValue;
+	}
+
 }

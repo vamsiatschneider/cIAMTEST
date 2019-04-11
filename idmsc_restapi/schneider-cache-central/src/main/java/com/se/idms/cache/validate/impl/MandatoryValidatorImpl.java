@@ -67,4 +67,12 @@ public class MandatoryValidatorImpl  implements IValidator{
 		IDMS_DEPLOY_ENV = iDMS_DEPLOY_ENV;
 	}
 
+	public String getIDMS_FIELDSMANDATORY_PROPERTIES_PATH() {
+		return IDMS_FIELDSMANDATORY_PROPERTIES_PATH;
+	}
+
+	public String getIDMS_DEPLOY_ENV() {
+		return IDMS_DEPLOY_ENV;
+	}
+
 }

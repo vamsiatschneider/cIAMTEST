@@ -10005,6 +10005,114 @@ public class UserServiceImpl implements UserService {
 
 	public void setEnableTestMailDomain(String enableTestMailDomain) {
 		this.enableTestMailDomain = enableTestMailDomain;
+    }
+    
+    public String getLOGIN_ERROR() {
+		return LOGIN_ERROR;
+	}
+
+	public String getEMAIL_TEMPLATE_DIR() {
+		return EMAIL_TEMPLATE_DIR;
+	}
+
+	public String getAuthCsvPath() {
+		return authCsvPath;
+	}
+
+	public String getRegistrationCsvPath() {
+		return registrationCsvPath;
+	}
+
+	public String getAdminUserName() {
+		return adminUserName;
+	}
+
+	public String getAdminPassword() {
+		return adminPassword;
+	}
+
+	public String getIfwClientId() {
+		return ifwClientId;
+	}
+
+	public String getIfwClientSecret() {
+		return ifwClientSecret;
+	}
+
+	public String getSalesForceClientId() {
+		return salesForceClientId;
+	}
+
+	public String getSalesForceClientSecret() {
+		return salesForceClientSecret;
+	}
+
+	public String getSalesForceUserName() {
+		return salesForceUserName;
+	}
+
+	public String getSalesForcePassword() {
+		return salesForcePassword;
+	}
+
+	public String getHa_mode() {
+		return ha_mode;
+	}
+
+	public String getFromUserName() {
+		return fromUserName;
+	}
+
+	public String getGoDitalToken() {
+		return goDitalToken;
+	}
+
+	public String getGoDigitalValue() {
+		return goDigitalValue;
+	}
+
+	public String getUimsClientId() {
+		return uimsClientId;
+	}
+
+	public String getUimsClientSecret() {
+		return uimsClientSecret;
+	}
+
+	public String getRedirectUri() {
+		return redirectUri;
+	}
+
+	public String getPrefixStartUrl() {
+		return prefixStartUrl;
+	}
+
+	public String getDjUserName() {
+		return djUserName;
+	}
+
+	public String getDjUserPwd() {
+		return djUserPwd;
+	}
+
+	public String getEnableTestMailDomain() {
+		return enableTestMailDomain;
+	}
+
+	public String getPrefixIdentityUrl() {
+		return prefixIdentityUrl;
+	}
+
+	public String getRegisterPRMUserIdp() {
+		return registerPRMUserIdp;
+	}
+
+	public String getOtpvalidationtimeinminute() {
+		return otpvalidationtimeinminute;
+	}
+
+	public String getSendOTPOverEmail() {
+		return sendOTPOverEmail;
 	}
 	
 }

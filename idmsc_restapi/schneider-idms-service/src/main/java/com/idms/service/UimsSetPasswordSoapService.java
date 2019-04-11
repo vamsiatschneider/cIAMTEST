@@ -457,4 +457,14 @@ public class UimsSetPasswordSoapService {
 		CALLER_FID = cALLER_FID;
 	}
 
+
+	public String getFromUserName() {
+		return fromUserName;
+	}
+
+
+	public String getSupportUser() {
+		return supportUser;
+	}
+
 }
