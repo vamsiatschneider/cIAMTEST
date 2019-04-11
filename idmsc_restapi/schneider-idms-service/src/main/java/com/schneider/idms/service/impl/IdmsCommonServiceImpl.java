@@ -1201,4 +1201,92 @@ public class IdmsCommonServiceImpl {
 	public void setPrefixStartUrl(String prefixStartUrl) {
 		this.prefixStartUrl = prefixStartUrl;
 	}
+
+	public String getAuthCsvPath() {
+		return authCsvPath;
+	}
+
+	public String getRegistrationCsvPath() {
+		return registrationCsvPath;
+	}
+
+	public String getAdminUserName() {
+		return adminUserName;
+	}
+
+	public String getAdminPassword() {
+		return adminPassword;
+	}
+
+	public String getSalesForceClientId() {
+		return salesForceClientId;
+	}
+
+	public String getSalesForceClientSecret() {
+		return salesForceClientSecret;
+	}
+
+	public String getSalesForceUserName() {
+		return salesForceUserName;
+	}
+
+	public String getSalesForcePassword() {
+		return salesForcePassword;
+	}
+
+	public String getDirectApiSecretToken() {
+		return directApiSecretToken;
+	}
+
+	public String getEMAIL_TEMPLATE_DIR() {
+		return EMAIL_TEMPLATE_DIR;
+	}
+
+	public String getFromUserName() {
+		return fromUserName;
+	}
+
+	public String getIfwClientId() {
+		return ifwClientId;
+	}
+
+	public String getIfwClientSecret() {
+		return ifwClientSecret;
+	}
+
+	public String getHa_mode() {
+		return ha_mode;
+	}
+
+	public String getGoDitalToken() {
+		return goDitalToken;
+	}
+
+	public String getGoDigitalValue() {
+		return goDigitalValue;
+	}
+
+	public String getOpenDJUserName() {
+		return openDJUserName;
+	}
+
+	public String getOpenDJUserPassword() {
+		return openDJUserPassword;
+	}
+
+	public String getRedirectUri() {
+		return redirectUri;
+	}
+
+	public String getUimsClientId() {
+		return uimsClientId;
+	}
+
+	public String getUimsClientSecret() {
+		return uimsClientSecret;
+	}
+
+	public String getPrefixStartUrl() {
+		return prefixStartUrl;
+	}
 }

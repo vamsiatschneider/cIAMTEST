@@ -249,4 +249,24 @@ public class SalesforceSyncServiceImpl {
 		this.sftokentimeinminute = sftokentimeinminute;
 	}
 
+	public String getSalesForceClientId() {
+		return salesForceClientId;
+	}
+
+	public String getSalesForceClientSecret() {
+		return salesForceClientSecret;
+	}
+
+	public String getSalesForceUserName() {
+		return salesForceUserName;
+	}
+
+	public String getSalesForcePassword() {
+		return salesForcePassword;
+	}
+
+	public String getSftokentimeinminute() {
+		return sftokentimeinminute;
+	}
+
 }

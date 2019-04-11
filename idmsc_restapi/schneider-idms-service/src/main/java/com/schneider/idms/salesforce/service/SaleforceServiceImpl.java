@@ -143,4 +143,20 @@ public class SaleforceServiceImpl {
 	public void setSalesForcePassword(String salesForcePassword) {
 		this.salesForcePassword = salesForcePassword;
 	}
+
+	public String getSalesForceClientId() {
+		return salesForceClientId;
+	}
+
+	public String getSalesForceClientSecret() {
+		return salesForceClientSecret;
+	}
+
+	public String getSalesForceUserName() {
+		return salesForceUserName;
+	}
+
+	public String getSalesForcePassword() {
+		return salesForcePassword;
+	}
 }

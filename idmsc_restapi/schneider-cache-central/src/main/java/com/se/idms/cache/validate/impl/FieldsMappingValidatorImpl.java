@@ -64,5 +64,13 @@ public class FieldsMappingValidatorImpl  implements IValidator{
 	public void setIDMS_DEPLOY_ENV(String iDMS_DEPLOY_ENV) {
 		IDMS_DEPLOY_ENV = iDMS_DEPLOY_ENV;
 	}
+
+	public String getIDMS_FIELDSMAPPING_PROPERTIES_PATH() {
+		return IDMS_FIELDSMAPPING_PROPERTIES_PATH;
+	}
+
+	public String getIDMS_DEPLOY_ENV() {
+		return IDMS_DEPLOY_ENV;
+	}
 	
 }

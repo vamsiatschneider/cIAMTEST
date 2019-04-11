@@ -1065,4 +1065,84 @@ public class SendEmail {
 	public void setIDMS_USER_ADD_EMAILTEMPLATE_EN(String iDMS_USER_ADD_EMAILTEMPLATE_EN) {
 		IDMS_USER_ADD_EMAILTEMPLATE_EN = iDMS_USER_ADD_EMAILTEMPLATE_EN;
 	}
+
+
+	public String getFrom() {
+		return from;
+	}
+
+
+	public String getDjUserName() {
+		return djUserName;
+	}
+
+
+	public String getDjUserPwd() {
+		return djUserPwd;
+	}
+
+
+	public String getIDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN() {
+		return IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN;
+	}
+
+
+	public String getIDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN() {
+		return IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN;
+	}
+
+
+	public String getIDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN() {
+		return IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN;
+	}
+
+
+	public String getIDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN() {
+		return IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN;
+	}
+
+
+	public String getIDMS_USER_UPDATE_EMAILTEMPLATE_CN() {
+		return IDMS_USER_UPDATE_EMAILTEMPLATE_CN;
+	}
+
+
+	public String getIDMS_USER_UPDATE_EMAILTEMPLATE_EN() {
+		return IDMS_USER_UPDATE_EMAILTEMPLATE_EN;
+	}
+
+
+	public String getIDMS_USER_DEFAULT_EMAILTEMPLATE_CN() {
+		return IDMS_USER_DEFAULT_EMAILTEMPLATE_CN;
+	}
+
+
+	public String getIDMS_USER_DEFAULT_EMAILTEMPLATE_EN() {
+		return IDMS_USER_DEFAULT_EMAILTEMPLATE_EN;
+	}
+
+
+	public String getIDMS_SEND_INVITATION_EMAILTEMPLATE_EN() {
+		return IDMS_SEND_INVITATION_EMAILTEMPLATE_EN;
+	}
+
+
+	public String getIDMS_SEND_INVITATION_EMAILTEMPLATE_CN() {
+		return IDMS_SEND_INVITATION_EMAILTEMPLATE_CN;
+	}
+
+
+	public String getIDMS_USER_ADD_EMAILTEMPLATE_CN() {
+		return IDMS_USER_ADD_EMAILTEMPLATE_CN;
+	}
+
+
+	public String getIDMS_USER_ADD_EMAILTEMPLATE_EN() {
+		return IDMS_USER_ADD_EMAILTEMPLATE_EN;
+	}
+
+
+	public String getHotpEmailVerificationURL() {
+		return hotpEmailVerificationURL;
+	}
 }

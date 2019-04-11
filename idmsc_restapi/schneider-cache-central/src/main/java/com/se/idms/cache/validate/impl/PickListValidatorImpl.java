@@ -77,4 +77,8 @@ public class PickListValidatorImpl implements IValidator {
 	public String getIDMS_DEPLOY_ENV() {
 		return IDMS_DEPLOY_ENV;
 	}
+
+	public String getIDMS_FIELDSPICKLIST_PROPERTIES_PATH() {
+		return IDMS_FIELDSPICKLIST_PROPERTIES_PATH;
+	}
 }

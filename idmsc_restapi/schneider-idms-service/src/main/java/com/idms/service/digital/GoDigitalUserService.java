@@ -7,4 +7,8 @@ public interface GoDigitalUserService {
 	void setFromUserName(String property);
 
 	void setSupportUser(String property);
+	
+    String getFromUserName();
+
+	String getSupportUser();
 }
