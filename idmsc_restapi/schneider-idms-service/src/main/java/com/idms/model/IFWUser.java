@@ -1,5 +1,7 @@
 package com.idms.model;
 
+import java.util.List;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -233,6 +235,9 @@ public class IFWUser extends BaseEntity {
 	
 	@JsonProperty
 	private String IDMSWorkPhone__c;
+	
+	@JsonProperty
+	private List IDMSMarketServed__c;
 	
 	@JsonProperty("RegistrationAttributes__c")
 	public String getRegistrationAttributes__c() {
@@ -917,6 +922,15 @@ public class IFWUser extends BaseEntity {
 	@JsonProperty("IDMSWorkPhone__c")
 	public void setIDMSWorkPhone__c(String iDMSWorkPhone__c) {
 		IDMSWorkPhone__c = iDMSWorkPhone__c;
+	}
+	
+	@JsonProperty("IDMSMarketServed__c")
+	public List getIDMSMarketServed__c() {
+		return IDMSMarketServed__c;
+	}
+	@JsonProperty("IDMSMarketServed__c")
+	public void setIDMSMarketServed__c(List iDMSMarketServed__c) {
+		IDMSMarketServed__c = iDMSMarketServed__c;
 	}
 	
 }
