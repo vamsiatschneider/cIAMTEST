@@ -875,8 +875,13 @@ public class UserServiceImpl implements UserService {
 				if (!mobileRegFlag) {
 					// checkUserExist
 					CheckUserExistsRequest checkRequest = new CheckUserExistsRequest();
-					checkRequest.setEmail(userRequest.getUserRecord().getEmail());
-					checkRequest.setMobile(userRequest.getUserRecord().getMobilePhone());
+					if(null != userRequest.getUserRecord().getEmail() && !userRequest.getUserRecord().getEmail().isEmpty()){
+						checkRequest.setEmail(userRequest.getUserRecord().getEmail().trim());
+					}
+					if((null == userRequest.getUserRecord().getEmail() || userRequest.getUserRecord().getEmail().isEmpty())
+							&& (null != userRequest.getUserRecord().getMobilePhone() && !userRequest.getUserRecord().getMobilePhone().isEmpty())){
+						checkRequest.setMobile(userRequest.getUserRecord().getMobilePhone().trim());
+					}
 
 					LOGGER.info("checking bfo reg source");
 					if (pickListValidator.validate(UserConstants.IDMS_BFO_profile,
@@ -4683,10 +4688,7 @@ public class UserServiceImpl implements UserService {
 					CheckUserExistsRequest checkRequest = new CheckUserExistsRequest();
 					checkRequest.setMobile(modifiedMobileInRequest);
 					checkRequest.setWithGlobalUsers("false");
-					if (null != userRequest.getUserRecord().getIDMS_Profile_update_source__c()
-							&& !userRequest.getUserRecord().getIDMS_Profile_update_source__c().isEmpty()) {
-						checkRequest.setApplicationName(userRequest.getUserRecord().getIDMS_Profile_update_source__c().trim());
-					}					
+									
 					Response checkUserExist = idmsCheckUserExists(checkRequest);
 					LOGGER.info("idmsCheckUserExists reponse in updateUser() for mobile check::"
 							+ objMapper.writeValueAsString(checkUserExist));
