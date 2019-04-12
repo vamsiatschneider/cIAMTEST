@@ -260,15 +260,19 @@ public class UimsSetPasswordSoapService {
 				
 				sendEmail.emailReadyToSendEmail(supportUser, fromUserName,"UIMS UserpinConfirmation setPassword failed.", userId);
 				
+				UIMSSYNCLOGGER.error("UIMS UserpinConfirmation setPassword got failed --> ::sending mail notification for userid::"+ userId);
+				
 				LOGGER.info("sending mail notification finished for userid::" + userId);
 			}
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in setUIMSPassword()::" + e.getMessage(),e);
-			UIMSSYNCLOGGER.error("setUIMSPassword failed in UIMS for emailOrMobile = "+emailOrMobile);
+			UIMSSYNCLOGGER.error("setUIMSPassword failed in UIMS for emailOrMobile = "+emailOrMobile,e);
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in setUIMSPassword()::" + e.getMessage(),e);
+			UIMSSYNCLOGGER.error("setUIMSPassword failed in UIMS for emailOrMobile = "+emailOrMobile,e);
 		} catch (Exception e) {
 			LOGGER.error("Exception in setUIMSPassword()::" + e.getMessage(),e);
+			UIMSSYNCLOGGER.error("setUIMSPassword failed in UIMS for emailOrMobile = "+emailOrMobile,e);
 		}
 		LOGGER.info("UIMS setUIMSPassword() finished!");
 		return setPasswordStatus;
@@ -301,6 +305,7 @@ public class UimsSetPasswordSoapService {
 			}
 		} catch (Exception e) {			
 			LOGGER.error("Exception in activateUIMSUserConfirmPIN():: -> "+ e.getMessage(),e);
+			UIMSSYNCLOGGER.error("Exception in UIMS activateUIMSUserConfirmPIN()::" + e.getMessage(),e);
 		}
 	}
 	/**
@@ -432,11 +437,14 @@ public class UimsSetPasswordSoapService {
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in UIMS updatepassword() for userId::"+ userId);
 			LOGGER.error(e.getMessage(),e);
-			UIMSSYNCLOGGER.error("updateUIMSPassword failed in UIMS for userId = "+userId);
+			UIMSSYNCLOGGER.error("updateUIMSPassword failed in UIMS for userId = "+userId,e); 
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in UIMS updatepassword() for userId::" +userId+" is ->" + e.getMessage(),e);
+			UIMSSYNCLOGGER.error("updateUIMSPassword failed in UIMS for userId = "+userId,e);
 		} catch (Exception e) {
 			LOGGER.error("Exception in updateUIMSPassword() for userId::" +userId +" is ->" + e.getMessage(),e);
+			UIMSSYNCLOGGER.error("updateUIMSPassword failed in UIMS for userId = "+userId,e);
+			
 		}
 		return ispasswordupdated;
 	}
