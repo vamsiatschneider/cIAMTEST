@@ -19,6 +19,11 @@ public interface OpenDjService {
 	Response getUser(@HeaderParam("X-OpenIDM-Username") String userName,@HeaderParam("X-OpenIDM-Password") String password,@PathParam("applicationName") String applicationName);
 	
 	/*@GET
+	@Path("/applicationHash/{hashName}")
+	Response getApp(@HeaderParam("X-OpenIDM-Username") String userName,@HeaderParam("X-OpenIDM-Password") String password,@PathParam("hashName") String hashName);
+	*/
+	
+	/*@GET
 	@Path("accessmanager/oauth2/se/userinfo")
 	String getUserDetails(@HeaderParam("Authorization") String authorization);*/
 	
