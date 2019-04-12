@@ -343,11 +343,13 @@ public class UIMSUserManagerSoapService {
 			}
 		}catch (RetryException e) {
 			LOGGER.error("RetryException in setUIMSPassword() of UIMS::" + e.getMessage(),e);
-
+			UIMSSYNCLOGGER.error("setUIMSPassword failed in UIMS for userId = "+userId,e);
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in setUIMSPassword() of UIMS::" + e.getMessage(),e);
+			UIMSSYNCLOGGER.error("setUIMSPassword failed in UIMS for userId = "+userId,e);
 		} catch (Exception e) {
 			LOGGER.error("Exception while setUIMSPassword::" + e.getMessage(),e);
+			UIMSSYNCLOGGER.error("setUIMSPassword failed in UIMS for userId = "+userId,e);
 		}
 		LOGGER.info("setUIMSPassword() Async Method -> End");
 	}
@@ -394,11 +396,13 @@ public class UIMSUserManagerSoapService {
 			}
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in UIMS updateUIMSPassword()::" + e.getMessage(),e);
-
+			UIMSSYNCLOGGER.error("RetryException in  UIMS updateUIMSPassword()::" + e.getMessage(),e);
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in UIMS updateUIMSPassword()::" + e.getMessage(),e);
+			UIMSSYNCLOGGER.error("ExecutionException in UIMS updateUIMSPassword()::" + e.getMessage(),e);
 		} catch (Exception e) {
 			LOGGER.error("Exception in updateUIMSPassword()::" + e.getMessage(),e);
+			UIMSSYNCLOGGER.error("Exception in UIMS updateUIMSPassword()::" + e.getMessage(),e);
 		}
 	}
 
@@ -934,6 +938,7 @@ public class UIMSUserManagerSoapService {
 			}
 		} catch (Exception e) {
 			LOGGER.error("Exception in activateUIMSUserConfirmPIN():: -> " + e.getMessage(),e);
+			UIMSSYNCLOGGER.error("Exception in UIMS activateUIMSUserConfirmPIN()::" + e.getMessage(),e);
 		}
 	}
 
@@ -1009,16 +1014,21 @@ public class UIMSUserManagerSoapService {
 						"UIMS requestEmailChange got failed -----> ::sending mail notification for userid::"
 								+ userId);
 				LOGGER.info("Start: emailReadyToSendEmail() for userId:" + userId);
+				UIMSSYNCLOGGER.error("UIMS requestEmailChange got failed -----> ::sending mail notification for userid::"
+						+ userId);
 				sendEmail.emailReadyToSendEmail(supportUser, fromUserName, "UIMS updateChangeEmailOrMobile failed.",
 						userId);
 				LOGGER.info("End: emailReadyToSendEmail() finished for userId:" + userId);
 			}
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage(),e);
+			UIMSSYNCLOGGER.error("RetryException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage(),e);
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage(),e);
+			UIMSSYNCLOGGER.error("ExecutionException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage(),e);
 		} catch (Exception e) {
 			LOGGER.error("Exception in updateChangeEmailOrMobile()::" + e.getMessage(),e);
+			UIMSSYNCLOGGER.error("Exception in updateChangeEmailOrMobile()::" + e.getMessage(),e);
 		}
 		LOGGER.info("updateChangeEmailOrMobile() Async Method -> End");
 	}
