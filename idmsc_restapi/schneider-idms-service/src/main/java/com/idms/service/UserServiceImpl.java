@@ -112,6 +112,7 @@ import com.idms.model.TransliteratorResponse;
 import com.idms.model.UpdatePasswordRequest;
 import com.idms.model.UpdateUserRequest;
 import com.idms.model.UpdateUserResponse;
+import com.idms.model.UserDetailByApplicationRequest;
 import com.idms.model.VerifyPinRequest;
 import com.idms.product.client.IFWService;
 import com.idms.product.client.IdentityService;
@@ -885,6 +886,9 @@ public class UserServiceImpl implements UserService {
 					} else {
 						LOGGER.info("Reg source belongs to non-BFO profile, setting WithGlobalUsers to true");
 						checkRequest.setWithGlobalUsers("true");
+					}
+					if(null != userRequest.getUserRecord().getIDMS_Registration_Source__c() && !userRequest.getUserRecord().getIDMS_Registration_Source__c().isEmpty()){
+						checkRequest.setApplicationName(userRequest.getUserRecord().getIDMS_Registration_Source__c().trim());
 					}
 
 					checkUserExist = idmsCheckUserExists(checkRequest);
@@ -3515,7 +3519,7 @@ public class UserServiceImpl implements UserService {
 					.concat(",\"authId\":\"" + "[]" + "\"}");
 
 			// After creating an user and while calling confirm pin api, if
-			// ‘password’ comes in the request then call setPassword UIMS
+			// ï¿½passwordï¿½ comes in the request then call setPassword UIMS
 			// api
 			// Otherwise if there is no password then call Activate User UIMS
 			// api.
@@ -4677,6 +4681,10 @@ public class UserServiceImpl implements UserService {
 					CheckUserExistsRequest checkRequest = new CheckUserExistsRequest();
 					checkRequest.setMobile(modifiedMobileInRequest);
 					checkRequest.setWithGlobalUsers("false");
+					if (null != userRequest.getUserRecord().getIDMS_Profile_update_source__c()
+							&& !userRequest.getUserRecord().getIDMS_Profile_update_source__c().isEmpty()) {
+						checkRequest.setApplicationName(userRequest.getUserRecord().getIDMS_Profile_update_source__c().trim());
+					}					
 					Response checkUserExist = idmsCheckUserExists(checkRequest);
 					LOGGER.info("idmsCheckUserExists reponse in updateUser() for mobile check::"
 							+ objMapper.writeValueAsString(checkUserExist));
@@ -4721,6 +4729,10 @@ public class UserServiceImpl implements UserService {
 					CheckUserExistsRequest checkRequest = new CheckUserExistsRequest();
 					checkRequest.setEmail(modifiedMailInRequest);
 					checkRequest.setWithGlobalUsers("true");
+					if (null != userRequest.getUserRecord().getIDMS_Profile_update_source__c()
+							&& !userRequest.getUserRecord().getIDMS_Profile_update_source__c().isEmpty()) {
+						checkRequest.setApplicationName(userRequest.getUserRecord().getIDMS_Profile_update_source__c().trim());
+					}
 					Response checkUserExist = idmsCheckUserExists(checkRequest);
 					LOGGER.info("idmsCheckUserExists reponse ::" + objMapper.writeValueAsString(checkUserExist));
 
@@ -9407,7 +9419,7 @@ public class UserServiceImpl implements UserService {
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
 		ObjectMapper objMapper = new ObjectMapper();
-		String mobile = null, fedid = null, otpStoredStatus = null;
+		String mobile = null, fedid = null, otpStoredStatus = null, regSource = null;
 		JSONObject response = new JSONObject();
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 
@@ -9441,10 +9453,23 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Time taken by addMobile() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 			}
+			if (null == addMobileRequest.getProfileUpdateSource()
+					|| addMobileRequest.getProfileUpdateSource().isEmpty()) {
+				response.put(UserConstants.STATUS_L, errorStatus);
+				response.put(UserConstants.MESSAGE_L, UserConstants.PROFILE_UPDATE_SOURCE);
+				LOGGER.error("Error in addMobile() is ::" + UserConstants.PROFILE_UPDATE_SOURCE);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by addMobile() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+			}
+			if(null != addMobileRequest.getProfileUpdateSource() && !addMobileRequest.getProfileUpdateSource().isEmpty()){
+				regSource = addMobileRequest.getProfileUpdateSource().trim();
+			}
 
 			CheckUserExistsRequest checkRequest = new CheckUserExistsRequest();
 			checkRequest.setMobile(mobile);
 			checkRequest.setWithGlobalUsers("false");
+			checkRequest.setApplicationName(regSource);
 			Response checkUserExist = idmsCheckUserExists(checkRequest);
 			LOGGER.info("idmsCheckUserExists reponse in addmobile()::" + objMapper.writeValueAsString(checkUserExist));
 
@@ -9618,6 +9643,7 @@ public class UserServiceImpl implements UserService {
 			CheckUserExistsRequest checkRequest = new CheckUserExistsRequest();
 			checkRequest.setEmail(email);
 			checkRequest.setWithGlobalUsers("true");
+			checkRequest.setApplicationName(source);
 			Response checkUserExist = idmsCheckUserExists(checkRequest);
 			LOGGER.info("idmsCheckUserExists reponse in addEmail()::" + objMapper.writeValueAsString(checkUserExist));
 
@@ -9680,7 +9706,7 @@ public class UserServiceImpl implements UserService {
 				response.put(UserConstants.MESSAGE_L, UserConstants.USER_MULTIPLE_EXIST + " federationID");
 				LOGGER.error("Error in addEmail() is :: "+UserConstants.USER_MULTIPLE_EXIST + " federationID");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+				LOGGER.info("Time taken by addEmail() : " + elapsedTime);
 				return Response.status(Response.Status.CONFLICT).entity(response).build();
 			}			
 			if (resultCount.intValue() == 0)  {
@@ -9794,7 +9820,7 @@ public class UserServiceImpl implements UserService {
 				response.put(UserConstants.MESSAGE_L, UserConstants.USER_MULTIPLE_EXIST+" federationID");
 				LOGGER.error("Error in addEmailToUser is :: "+UserConstants.USER_MULTIPLE_EXIST+" federationID");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+				LOGGER.info("Time taken by addEmailToUser() : " + elapsedTime);
 				return Response.status(Response.Status.CONFLICT).entity(response).build();
 			}
 			if (resultCount.intValue() == 0) {
@@ -9999,12 +10025,12 @@ public class UserServiceImpl implements UserService {
 	public void setSendOTPOverEmail(String sendOTPOverEmail) {
 		this.sendOTPOverEmail = sendOTPOverEmail;
 	}
-
-	public void setEnableTestMailDomain(String enableTestMailDomain) {
-		this.enableTestMailDomain = enableTestMailDomain;
-    }
     
-    public String getLOGIN_ERROR() {
+    public void setEnableTestMailDomain(String enableTestMailDomain) {
+		this.enableTestMailDomain = enableTestMailDomain;
+	}
+
+	public String getLOGIN_ERROR() {
 		return LOGIN_ERROR;
 	}
 
