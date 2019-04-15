@@ -7874,8 +7874,8 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Start: getUser() of openDJ for appname=" + appname);
 				appDetails = openDJService.getUser(djUserName, djUserPwd, appname);
 				LOGGER.info("End: finished getUser() of openDJ for appname=" + appname);
+				LOGGER.info("Response code from OpenDJ for appDetails: " + appDetails.getStatus());
 			}
-			LOGGER.info("Response code from OpenDJ for appDetails: " + appDetails.getStatus());
 			
 			if (null != appDetails && 200 == appDetails.getStatus()) {
 				productDocApp = JsonPath.using(conf)
