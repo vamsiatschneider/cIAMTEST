@@ -110,6 +110,18 @@ public class SendEmail {
 	@Value("${user.add.email.template.en}")
 	private String IDMS_USER_ADD_EMAILTEMPLATE_EN;
 	
+	@Value("${idmsc.emailUserNameFormat}")
+	private String defaultUserNameFormat;
+	
+	public String getDefaultUserNameFormat() {
+		return defaultUserNameFormat;
+	}
+
+
+	public void setDefaultUserNameFormat(String defaultUserNameFormat) {
+		this.defaultUserNameFormat = defaultUserNameFormat;
+	}
+
 	private UserServiceImpl userService;
 	
 	@Autowired
@@ -202,6 +214,7 @@ public class SendEmail {
 		String firstName = "";
 		String aLink="";
 		String linkParam="";
+		String emailUserNameFormat = null;
 
 			try {
 				encodedHOTPcode = code;
@@ -220,7 +233,20 @@ public class SendEmail {
 				productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
 				String bfoSupportUrl = productDJData.read(JsonConstants.BFO_SUPPORT_URL);
 				LOGGER.info("bfoSupportUrl = "+bfoSupportUrl);
-				
+				// For email name configuration 
+				if (null != applicationDetails && 200 == applicationDetails.getStatus()) {
+					String userNameFormatOpenDJ = productDJData.read("userNameFormat");
+					LOGGER.info("userNameFormatOpenDJ:"+userNameFormatOpenDJ);
+					LOGGER.info("defaultUserNameFormat:"+defaultUserNameFormat);
+					if(null != userNameFormatOpenDJ && !userNameFormatOpenDJ.isEmpty()){
+						emailUserNameFormat = userNameFormatOpenDJ;
+					} else{
+						emailUserNameFormat = defaultUserNameFormat;
+					}
+				}
+				if (null != applicationDetails && 200 != applicationDetails.getStatus()) {
+					emailUserNameFormat = defaultUserNameFormat;
+				}
 				if(hotpOperationType.equalsIgnoreCase(EmailConstants.UPDATEUSERRECORD_OPT_TYPE)){
 					/*userData = provisionalService.getUser(userService.getSSOToken(), userId);
 					productDocCtxUser = JsonPath.using(conf).parse(userData);*/
@@ -233,9 +259,15 @@ public class SendEmail {
 					subject=productDocCtxUser.read("$.registerationSource[0]");
 					to = productDocCtxUser.read("$.mail[0]");
 				}
-
 				lang=productDocCtxUser.read("$.preferredlanguage[0]");
+
+				if(emailUserNameFormat.equalsIgnoreCase(UserConstants.FIRST_NAME))
 				firstName=productDocCtxUser.read("$.givenName[0]");
+				else if(emailUserNameFormat.equalsIgnoreCase(UserConstants.LAST_NAME))
+					firstName=productDocCtxUser.read("$.sn[0]");
+				else
+					firstName=productDocCtxUser.read("$.cn[0]");
+				LOGGER.info("Email format Name:"+firstName);
 				aLink = productDocCtxUser.read("$.alink[0]");
 				LOGGER.info("sendOpenAmEmail** alink:"+aLink);
 				//Setting aLink in case of User Registration
