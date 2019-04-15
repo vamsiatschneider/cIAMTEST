@@ -270,9 +270,9 @@ public interface UserService {
 	@Path("/apexrest/deleteMobile")
 	Response deleteMobile(SendOTPRequest deleteRequest);
 
-	/*@POST
+	@POST
 	@Path("/apexrest/GetUserDetailByApplication")
 	Response getUserDetailByApplication(@HeaderParam("Authorization") String authorizationToken,
-			@HeaderParam("Content-Type") String type, UserDetailByApplicationRequest userDetailByApplicationRequest);*/
+			@HeaderParam("Content-Type") String type, UserDetailByApplicationRequest userDetailByApplicationRequest);
 
 }

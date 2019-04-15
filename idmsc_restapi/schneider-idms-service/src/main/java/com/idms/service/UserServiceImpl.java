@@ -94,6 +94,8 @@ import com.idms.model.ConfirmPinRequest;
 import com.idms.model.ConfirmPinResponse;
 import com.idms.model.CreateUserRequest;
 import com.idms.model.CreateUserResponse;
+import com.idms.model.GetUserByApplicationResponse;
+import com.idms.model.GetUserRecordResponse;
 import com.idms.model.IDMSUserResponse;
 import com.idms.model.IFWUser;
 import com.idms.model.PasswordRecoveryRequest;
@@ -7862,12 +7864,15 @@ public class UserServiceImpl implements UserService {
 				loginId = request.getIdmsFederatedId().trim();
 				fieldType = "idmsFederatedId";
 			}
-			
+			LOGGER.info("loginId : " + loginId +" ,fieldType = "+fieldType);
 			//check appname to allow testMailDomain			
 			if (null != request.getApplicationName() && !request.getApplicationName().isEmpty()) {
 				appname = request.getApplicationName().trim();
+				LOGGER.info("Start: getUser() of openDJ for appname=" + appname);
 				appDetails = openDJService.getUser(djUserName, djUserPwd, appname);
+				LOGGER.info("End: finished getUser() of openDJ for appname=" + appname);
 			}
+			LOGGER.info("Response code from OpenDJ for appDetails: " + appDetails.getStatus());
 			
 			if (null != appDetails && 200 == appDetails.getStatus()) {
 				productDocApp = JsonPath.using(conf)
@@ -7880,10 +7885,11 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 			
-			if (null != appDetails && 200 != appDetails.getStatus()) {
+			/*if (null != appDetails && 404 != appDetails.getStatus()) {
 				enableTestMailStatus = enableTestMailDomain;
-			}
+			}*/
 			
+			LOGGER.info("enableTestMailStatus value = " + enableTestMailStatus);
 			if (null != enableTestMailStatus && !Boolean.parseBoolean(enableTestMailStatus) && loginId.contains("@")) {
 				String mailDomain = loginId.substring(loginId.indexOf("@") + 1);
 				LOGGER.info("mailDomain = " + mailDomain);
@@ -9914,6 +9920,297 @@ public class UserServiceImpl implements UserService {
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info("Time taken by deleteMobile() : " + elapsedTime);
 		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+	}
+	
+	@Override
+	public Response getUserDetailByApplication(String authorizationToken, String type,
+			UserDetailByApplicationRequest userDetailByApplicationRequest) {
+
+		LOGGER.info("Entered getUserDetailByApplication() -> Start");
+		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
+		long elapsedTime;
+		ObjectMapper objMapper = new ObjectMapper();
+		String mobileNum = null, appNameInOpenDJ = null;
+		String loginId = null, fieldType = null, userExists = null, iPlanetDirectoryKey = null;
+		Integer resultCount = 0;
+		ArrayList<String> varList = new ArrayList<String>();
+		Response applicationDetails = null;
+		Configuration confg = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		
+		GetUserByApplicationResponse userResponse = new GetUserByApplicationResponse();
+		//GetUserRecordResponse idmsUserResponse = null;
+		DocumentContext productDocCtx = null;
+		try {
+			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(userDetailByApplicationRequest));
+
+			if (null == authorizationToken || authorizationToken.isEmpty()) {
+				userResponse.setStatus(errorStatus);
+				userResponse.setMessage(UserConstants.ADMIN_TOKEN_MANDATORY);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Error is " + userResponse.getMessage());
+				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+			}
+			if (null == userDetailByApplicationRequest.getAppHash()
+					|| userDetailByApplicationRequest.getAppHash().isEmpty()) {
+				userResponse.setStatus(errorStatus);
+				userResponse.setMessage("Please provide Hashcode");
+				//userResponse.setIDMSUserRecord(idmsUserResponse);
+				LOGGER.error("Mandatory check: Please provide Hashcode");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+			}
+			if ((null == userDetailByApplicationRequest.getEmail()
+					|| userDetailByApplicationRequest.getEmail().isEmpty())
+					&& (null == userDetailByApplicationRequest.getMobile()
+							|| userDetailByApplicationRequest.getMobile().isEmpty())
+					&& (null == userDetailByApplicationRequest.getIdmsFederatedId()
+							|| userDetailByApplicationRequest.getIdmsFederatedId().isEmpty())) {
+				userResponse.setStatus(errorStatus);
+				userResponse.setMessage("Either one Email/ Mobile/ FederatedId should have value");
+				//userResponse.setIDMSUserRecord(idmsUserResponse);
+				LOGGER.error("Mandatory check: Either one Email/ Mobile/ FederatedId should have value");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+			}
+
+			if (null != userDetailByApplicationRequest.getEmail()
+					&& !userDetailByApplicationRequest.getEmail().isEmpty()) {
+				varList.add("true");
+			}
+			if (null != userDetailByApplicationRequest.getMobile()
+					&& !userDetailByApplicationRequest.getMobile().isEmpty()) {
+				varList.add("true");
+			}
+			if (null != userDetailByApplicationRequest.getIdmsFederatedId()
+					&& !userDetailByApplicationRequest.getIdmsFederatedId().isEmpty()) {
+				varList.add("true");
+			}
+			LOGGER.info("Parameters size(email,mobile,idmsFedid): " + varList.size());
+
+			if (varList.size() > 1) {
+				userResponse.setStatus(errorStatus);
+				userResponse.setMessage("Only one identifier is allowed");
+				//userResponse.setIDMSUserRecord(idmsUserResponse);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+			}
+			if (null != userDetailByApplicationRequest.getEmail()
+					&& !userDetailByApplicationRequest.getEmail().isEmpty()) {
+				if (!emailValidator.validate(userDetailByApplicationRequest.getEmail())) {
+					userResponse.setStatus(errorStatus);
+					userResponse.setMessage("Email validation failed");
+					//userResponse.setIDMSUserRecord(idmsUserResponse);
+					LOGGER.error("Error in getUserDetailByApplication() is :: Email validation failed.");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+				}
+			}
+			if (null != userDetailByApplicationRequest.getMobile()
+					&& !userDetailByApplicationRequest.getMobile().isEmpty()) {
+				mobileNum = ChinaIdmsUtil.mobileTransformation(userDetailByApplicationRequest.getMobile());
+				if (!ChinaIdmsUtil.mobileValidator(mobileNum)) {
+					userResponse.setStatus(errorStatus);
+					userResponse.setMessage("Mobile validation failed");
+					//userResponse.setIDMSUserRecord(idmsUserResponse);
+					LOGGER.error("Error in getUserDetailByApplication is :: Mobile validation failed.");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+				}
+			}
+
+			if (!getTechnicalUserDetails(authorizationToken)) {
+				userResponse.setStatus(errorStatus);
+				userResponse.setMessage("Unauthorized or session expired");
+				//userResponse.setIDMSUserRecord(idmsUserResponse);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Error is " + userResponse.getMessage());
+				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
+				return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
+			}
+			if (null != userDetailByApplicationRequest.getAppHash()
+					&& !userDetailByApplicationRequest.getAppHash().isEmpty()) {
+				String appHash = userDetailByApplicationRequest.getAppHash().trim();
+				LOGGER.info("Start: getAppInfo() of OpenDjService for appHash="
+						+ userDetailByApplicationRequest.getAppHash().trim());
+				applicationDetails = openDJService.getAppInfo(djUserName, djUserPwd,
+						"_Application_Hash eq " + "\"" + appHash + "\"");
+				LOGGER.info("End: getAppInfo() of OpenDjService finished for appHash="
+						+ userDetailByApplicationRequest.getAppHash().trim());
+				LOGGER.info("Response code from OpenDJ for get call: " + applicationDetails.getStatus());
+			}
+
+			if (null != applicationDetails && 200 == applicationDetails.getStatus()) {
+				productDocCtx = JsonPath.using(confg)
+						.parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
+				resultCount = productDocCtx.read("$.resultCount");
+				LOGGER.info("resultCount=" + resultCount);
+			}
+			if (resultCount.intValue() == 1) {
+				appNameInOpenDJ = productDocCtx.read(JsonConstants.APP_ID);
+				LOGGER.info("App name/id = " + appNameInOpenDJ);
+			}
+			if (resultCount.intValue() == 0) {
+				userResponse.setStatus(errorStatus);
+				userResponse.setMessage("Invalid Application Hash Code");
+				//userResponse.setIDMSUserRecord(idmsUserResponse);
+				LOGGER.error("Error is :: Invalid Application Hash Code.");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+			}
+
+			if (null != userDetailByApplicationRequest.getEmail()
+					&& !userDetailByApplicationRequest.getEmail().isEmpty()) {
+				loginId = userDetailByApplicationRequest.getEmail().trim();
+				fieldType = "email";
+			} else if (null != userDetailByApplicationRequest.getMobile()
+					&& !userDetailByApplicationRequest.getMobile().isEmpty()) {
+				loginId = mobileNum;
+				fieldType = "mobile";
+			} else if (null != userDetailByApplicationRequest.getIdmsFederatedId()
+					&& !userDetailByApplicationRequest.getIdmsFederatedId().isEmpty()) {
+				loginId = userDetailByApplicationRequest.getIdmsFederatedId().trim();
+				fieldType = "idmsFederatedId";
+			}
+			LOGGER.info("loginId : " + loginId + " ,fieldType = " + fieldType);
+			// checking user and getting info
+			try {
+				iPlanetDirectoryKey = getSSOToken();
+			} //// No Exception handling
+			catch (IOException ioExp) {
+				LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(), ioExp);
+			}
+
+			if (fieldType.equalsIgnoreCase("email") || fieldType.equalsIgnoreCase("mobile")) {
+				LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for loginId=" + loginId);
+				userExists = productService.checkUserExistsWithEmailMobile(
+						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+						"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginId, "UTF-8"), "UTF-8")
+								+ "\" or mobile_reg eq " + "\""
+								+ URLEncoder.encode(URLDecoder.decode(loginId, "UTF-8"), "UTF-8") + "\"");
+				LOGGER.info("End: checkUserExistsWithEmailMobile() of openam finished for loginId=" + loginId);
+			}
+			if (fieldType.equalsIgnoreCase("idmsFederatedId")) {
+				LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for federationId=" + loginId);
+				userExists = productService.checkUserExistsWithEmailMobile(
+						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "federationID  eq " + "\""
+								+ URLEncoder.encode(URLDecoder.decode(loginId, "UTF-8"), "UTF-8") + "\"");
+				LOGGER.info("End: checkUserExistsWithEmailMobile() of openam finished for federationId=" + loginId);
+			}
+			productDocCtx = null; resultCount =0;
+			productDocCtx = JsonPath.using(confg).parse(userExists);
+			resultCount = productDocCtx.read("$.resultCount");
+			LOGGER.info("User resultCount=" + resultCount);
+
+			if (resultCount.intValue() > 1) {
+				userResponse.setStatus(errorStatus);
+				userResponse.setMessage("Critical Error: Multiple user record exists");
+				//userResponse.setIDMSUserRecord(idmsUserResponse);
+				LOGGER.error("Error is :: " + UserConstants.USER_MULTIPLE_EXIST);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
+				return Response.status(Response.Status.CONFLICT).entity(userResponse).build();
+			}
+			if (resultCount.intValue() == 0) {
+				userResponse.setStatus(errorStatus);
+				userResponse.setMessage("User not found based on "+fieldType);
+				//userResponse.setIDMSUserRecord(idmsUserResponse);
+				LOGGER.error("Error is :: " + "User not found based on "+fieldType);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
+				return Response.status(Response.Status.NOT_FOUND).entity(userResponse).build();
+			}
+			if (resultCount.intValue() == 1) {
+				boolean appFound = false;
+				String appAIL = productDocCtx.read("$.result[0].IDMSAIL_Applications_c[0]");
+				if(null != appAIL && !appAIL.isEmpty()){
+					List<String> appAILList = Arrays.asList(appAIL.split(","));
+					for(String appName:appAILList){
+						if(appName.toLowerCase().equalsIgnoreCase(appNameInOpenDJ.toLowerCase())){
+							LOGGER.info("application is found in User AIL");
+							appFound = true;
+							break;
+						}
+					}
+				}
+							
+				LOGGER.info("app is associated with user = "+appFound);
+				
+				if(!appFound){
+					userResponse.setStatus(errorStatus);
+					userResponse.setMessage("User not found based on AIL");
+					//userResponse.setIDMSUserRecord(idmsUserResponse);
+					LOGGER.error("Error is :: User not found based on AIL");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+				}
+				
+				String userStatusInChina = null;
+				if (Boolean.valueOf(productDocCtx.read("$.result[0].isActivated[0]"))) {
+					userStatusInChina = UserConstants.USER_ACTIVE;
+				} else {
+					userStatusInChina = UserConstants.USER_INACTIVE;
+				}
+				LOGGER.info("userStatusInChina = "+userStatusInChina);
+				GetUserRecordResponse userRecordResponse = new GetUserRecordResponse();
+				//idmsUserResponse = new GetUserRecordResponse();
+				ParseValuesByOauthHomeWorkContextDto userInfoMapper = new ParseValuesByOauthHomeWorkContextDto();
+				userInfoMapper.parseValuesForGetUserByApplication(userRecordResponse, productDocCtx);
+				
+				userResponse.setStatus(successStatus);
+				userResponse.setMessage(userStatusInChina);
+				userResponse.setIDMSUserRecord(userRecordResponse);
+				LOGGER.info("Response given");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
+				return Response.status(Response.Status.OK).entity(userResponse).build();
+				
+				/*userResponse.setStatus(errorStatus);
+				userResponse.setMessage("Invalid Application Hash Code");
+				userResponse.put(UserConstants.MESSAGE_L, UserConstants.TRUE);
+				userResponse.put("idmsFederatedId", productDocCtx.read("$.result[0].federationID[0]"));
+				if (Boolean.valueOf(productDocCtx.read("$.result[0].isActivated[0]"))) {
+					response.put("userStatus", UserConstants.USER_ACTIVE);
+				} else {
+					response.put("userStatus", UserConstants.USER_INACTIVE);
+				}
+				response.put("countryCode", UserConstants.CHINA_CODE);
+				LOGGER.info("User found in IDMS China");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+				return Response.status(Response.Status.OK).entity(response).build();*/
+			}
+
+			LOGGER.info("-----in development----");
+			
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			LOGGER.error("Error in getUserDetailByApplication is ::" + e.getMessage());
+			userResponse.setStatus(errorStatus);
+			userResponse.setMessage("Internal Server Error");
+			//userResponse.setIDMSUserRecord(idmsUserResponse);
+			LOGGER.error("Error in getUserDetailByApplication is :: Internal Server Error.");
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(userResponse).build();
+		}
+
+		userResponse.setStatus(errorStatus);
+		userResponse.setMessage("User Not Found");
+		//userResponse.setIDMSUserRecord(idmsUserResponse);
+		LOGGER.error("Error in getUserDetailByApplication is :: User Not Found.");
+		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+		LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
+		return Response.status(Response.Status.NOT_FOUND).entity(userResponse).build();
+		// return null;
 	}
 
 	public void setEMAIL_TEMPLATE_DIR(String eMAIL_TEMPLATE_DIR) {
