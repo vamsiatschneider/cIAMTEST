@@ -195,6 +195,8 @@ public class PropertyFileAutoRefresh {
 
 	private String IDMS_FIELDSMAPPING_PROPERTIES_PATH;
 	
+	private String emailUserNameFormat ;
+	
 	public static PropertyFileAutoRefresh getInstance() {
 		return INSTANCE;
 	}
@@ -291,280 +293,283 @@ public class PropertyFileAutoRefresh {
 			((UserServiceImpl) userService).setGoDigitalValue(goDigitalValue);
 			
 			if(!((UserServiceImpl) userService).getUimsClientId().equals(uimsClientId) && uimsClientId!=null && !uimsClientId.isEmpty())
-			((UserServiceImpl) userService).setUimsClientId(configuration.getProperty("uimsClientId"));
+			((UserServiceImpl) userService).setUimsClientId(uimsClientId);
 			
 			if(!((UserServiceImpl) userService).getUimsClientSecret().equals(uimsClientSecret) && uimsClientSecret!=null && !uimsClientSecret.isEmpty())
-			((UserServiceImpl) userService).setUimsClientSecret(configuration.getProperty("uimsClientSecret"));
+			((UserServiceImpl) userService).setUimsClientSecret(uimsClientSecret);
 			
 			if(!((UserServiceImpl) userService).getRedirectUri().equals(redirectUri) && redirectUri!=null && !redirectUri.isEmpty())
-			((UserServiceImpl) userService).setRedirectUri(configuration.getProperty("redirect.uri"));
+			((UserServiceImpl) userService).setRedirectUri(redirectUri);
 			
 			if(!((UserServiceImpl) userService).getPrefixStartUrl().equals(prefixStartUrl) && prefixStartUrl!=null && !prefixStartUrl.isEmpty())
-			((UserServiceImpl) userService).setPrefixStartUrl(configuration.getProperty("openAMService.url"));
+			((UserServiceImpl) userService).setPrefixStartUrl(prefixStartUrl);
 			
 			if(!((UserServiceImpl) userService).getPrefixIdentityUrl().equals(prefixIdentityUrl) && prefixIdentityUrl!=null && !prefixIdentityUrl.isEmpty())
-			((UserServiceImpl) userService).setPrefixIdentityUrl(configuration.getProperty("identityService.url"));
+			((UserServiceImpl) userService).setPrefixIdentityUrl(prefixIdentityUrl);
 			
 			if(!((UserServiceImpl) userService).getRegisterPRMUserIdp().equals(registerPRMUserIdp) && registerPRMUserIdp!=null && !registerPRMUserIdp.isEmpty())
-			((UserServiceImpl) userService).setRegisterPRMUserIdp(configuration.getProperty("register.prmUser.idp"));
+			((UserServiceImpl) userService).setRegisterPRMUserIdp(registerPRMUserIdp);
 			
 			if(!((UserServiceImpl) userService).getOtpvalidationtimeinminute().equals(otpvalidationtimeinminute) && otpvalidationtimeinminute!=null && !otpvalidationtimeinminute.isEmpty())
 			((UserServiceImpl) userService)
-					.setOtpvalidationtimeinminute(configuration.getProperty("otpvalidationtimeinminute"));
+					.setOtpvalidationtimeinminute(otpvalidationtimeinminute);
 			
 			if(!((UserServiceImpl) userService).getDjUserName().equals(djUserName) && djUserName!=null && !djUserName.isEmpty())
-			((UserServiceImpl) userService).setDjUserName(configuration.getProperty("openDJUserName"));
+			((UserServiceImpl) userService).setDjUserName(djUserName);
 			
 			if(!((UserServiceImpl) userService).getDjUserPwd().equals(djUserPwd) && djUserPwd!=null && !djUserPwd.isEmpty())
-			((UserServiceImpl) userService).setDjUserPwd(configuration.getProperty("openDJUserPassword"));
+			((UserServiceImpl) userService).setDjUserPwd(djUserPwd);
 			
 			if(!((UserServiceImpl) userService).getSendOTPOverEmail().equals(sendOTPOverEmail) && sendOTPOverEmail!=null && !sendOTPOverEmail.isEmpty())
-			((UserServiceImpl) userService).setSendOTPOverEmail(configuration.getProperty("enable.sendOtpOverEmail"));
+			((UserServiceImpl) userService).setSendOTPOverEmail(sendOTPOverEmail);
 			
 			if(!((UserServiceImpl) userService).getEnableTestMailDomain().equals(enableTestMailDomain) && enableTestMailDomain!=null && !enableTestMailDomain.isEmpty())
-			((UserServiceImpl) userService).setEnableTestMailDomain(configuration.getProperty("enableTestMailDomain"));
+			((UserServiceImpl) userService).setEnableTestMailDomain(enableTestMailDomain);
 			
 			if(!(goDigitalUserService.getFromUserName().equals(fromUserName)) && fromUserName!=null && !fromUserName.isEmpty())
-			goDigitalUserService.setFromUserName(configuration.getProperty("fromUserName"));
+			goDigitalUserService.setFromUserName(fromUserName);
 			
 			if(!(goDigitalUserService.getSupportUser().equals(supportUser)) && supportUser!=null && !supportUser.isEmpty())
-			goDigitalUserService.setSupportUser(configuration.getProperty("supportUser"));
+			goDigitalUserService.setSupportUser(supportUser);
 			
 			if(!(emailService.getFrom().equals(fromUserName)) && fromUserName!=null && !fromUserName.isEmpty())
-			emailService.setFrom(configuration.getProperty("fromUserName"));
+			emailService.setFrom(fromUserName);
 			
 			if(!(emailService.getDjUserName().equals(djUserName)) && djUserName!=null && !djUserName.isEmpty())
-			emailService.setDjUserName(configuration.getProperty("openDJUserName"));
+			emailService.setDjUserName(djUserName);
 			
 			if(!(emailService.getDjUserPwd().equals(djUserPwd)) && djUserPwd!=null && !djUserPwd.isEmpty())
-			emailService.setDjUserPwd(configuration.getProperty("openDJUserPassword"));
+			emailService.setDjUserPwd(djUserPwd);
 			
 			if(!(emailService.getHotpEmailVerificationURL().equals(hotpEmailVerificationURL)) && hotpEmailVerificationURL!=null && !hotpEmailVerificationURL.isEmpty())
-			emailService.setHotpEmailVerificationURL(configuration.getProperty("hotpEmailVerificationURL"));
+			emailService.setHotpEmailVerificationURL(hotpEmailVerificationURL);
 			
 			if(!(emailService.getIDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN().equals(IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN)) && IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN!=null && !IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN.isEmpty())
 			emailService.setIDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN(
-					configuration.getProperty("user.reset.password.email.template.cn"));
+					IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN);
 			
 			if(!(emailService.getIDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN().equals(IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN)) && IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN!=null && !IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN.isEmpty())
 			emailService.setIDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN(
-					configuration.getProperty("user.reset.password.email.template.en"));
+					IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN);
 			
 			if(!(emailService.getIDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN().equals(IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN)) && IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN!=null && !IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN.isEmpty())
 			emailService.setIDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN(
-					configuration.getProperty("user.registration.withpwd.email.template.cn"));
+					IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN);
 			
 			if(!(emailService.getIDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN().equals(IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN)) && IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN!=null && !IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN.isEmpty())
 			emailService.setIDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN(
-					configuration.getProperty("user.registration.withpwd.email.template.en"));
+					IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN);
 			
 			if(!(emailService.getIDMS_USER_UPDATE_EMAILTEMPLATE_CN().equals(IDMS_USER_UPDATE_EMAILTEMPLATE_CN)) && IDMS_USER_UPDATE_EMAILTEMPLATE_CN!=null && !IDMS_USER_UPDATE_EMAILTEMPLATE_CN.isEmpty())
 			emailService
-					.setIDMS_USER_UPDATE_EMAILTEMPLATE_CN(configuration.getProperty("user.update.email.template.cn"));
+					.setIDMS_USER_UPDATE_EMAILTEMPLATE_CN(IDMS_USER_UPDATE_EMAILTEMPLATE_CN);
 			
 			if(!(emailService.getIDMS_USER_UPDATE_EMAILTEMPLATE_EN().equals(IDMS_USER_UPDATE_EMAILTEMPLATE_EN)) && IDMS_USER_UPDATE_EMAILTEMPLATE_EN!=null && !IDMS_USER_UPDATE_EMAILTEMPLATE_EN.isEmpty())
 			emailService
-					.setIDMS_USER_UPDATE_EMAILTEMPLATE_EN(configuration.getProperty("user.update.email.template.en"));
+					.setIDMS_USER_UPDATE_EMAILTEMPLATE_EN(IDMS_USER_UPDATE_EMAILTEMPLATE_EN);
 			
 			if(!(emailService.getIDMS_USER_DEFAULT_EMAILTEMPLATE_CN().equals(IDMS_USER_DEFAULT_EMAILTEMPLATE_CN)) && IDMS_USER_DEFAULT_EMAILTEMPLATE_CN!=null && !IDMS_USER_DEFAULT_EMAILTEMPLATE_CN.isEmpty())
 			emailService
-					.setIDMS_USER_DEFAULT_EMAILTEMPLATE_CN(configuration.getProperty("user.default.email.template.cn"));
+					.setIDMS_USER_DEFAULT_EMAILTEMPLATE_CN(IDMS_USER_DEFAULT_EMAILTEMPLATE_CN);
 			
 			if(!(emailService.getIDMS_USER_DEFAULT_EMAILTEMPLATE_EN().equals(IDMS_USER_DEFAULT_EMAILTEMPLATE_EN)) && IDMS_USER_DEFAULT_EMAILTEMPLATE_EN!=null && !IDMS_USER_DEFAULT_EMAILTEMPLATE_EN.isEmpty())
 			emailService
-					.setIDMS_USER_DEFAULT_EMAILTEMPLATE_EN(configuration.getProperty("user.default.email.template.en"));
+					.setIDMS_USER_DEFAULT_EMAILTEMPLATE_EN(IDMS_USER_DEFAULT_EMAILTEMPLATE_EN);
 			
 			if(!(emailService.getIDMS_SEND_INVITATION_EMAILTEMPLATE_EN().equals(IDMS_SEND_INVITATION_EMAILTEMPLATE_EN)) && IDMS_SEND_INVITATION_EMAILTEMPLATE_EN!=null && !IDMS_SEND_INVITATION_EMAILTEMPLATE_EN.isEmpty())
 			emailService.setIDMS_SEND_INVITATION_EMAILTEMPLATE_EN(
-					configuration.getProperty("send.invitation.email.template.en"));
+					IDMS_SEND_INVITATION_EMAILTEMPLATE_EN);
 			
 			if(!(emailService.getIDMS_SEND_INVITATION_EMAILTEMPLATE_CN().equals(IDMS_SEND_INVITATION_EMAILTEMPLATE_CN)) && IDMS_SEND_INVITATION_EMAILTEMPLATE_CN!=null && !IDMS_SEND_INVITATION_EMAILTEMPLATE_CN.isEmpty())
 			emailService.setIDMS_SEND_INVITATION_EMAILTEMPLATE_CN(
-					configuration.getProperty("send.invitation.email.template.cn"));
+					IDMS_SEND_INVITATION_EMAILTEMPLATE_CN);
 			
 			if(!(emailService.getIDMS_USER_ADD_EMAILTEMPLATE_CN().equals(IDMS_USER_ADD_EMAILTEMPLATE_CN)) && IDMS_USER_ADD_EMAILTEMPLATE_CN!=null && !IDMS_USER_ADD_EMAILTEMPLATE_CN.isEmpty())
-			emailService.setIDMS_USER_ADD_EMAILTEMPLATE_CN(configuration.getProperty("user.add.email.template.cn"));
+			emailService.setIDMS_USER_ADD_EMAILTEMPLATE_CN(IDMS_USER_ADD_EMAILTEMPLATE_CN);
 			
 			if(!(emailService.getIDMS_USER_ADD_EMAILTEMPLATE_EN().equals(IDMS_USER_ADD_EMAILTEMPLATE_EN)) && IDMS_USER_ADD_EMAILTEMPLATE_EN!=null && !IDMS_USER_ADD_EMAILTEMPLATE_EN.isEmpty())
-			emailService.setIDMS_USER_ADD_EMAILTEMPLATE_EN(configuration.getProperty("user.add.email.template.en"));
+			emailService.setIDMS_USER_ADD_EMAILTEMPLATE_EN(IDMS_USER_ADD_EMAILTEMPLATE_EN);
+			
+			if(!(emailService.getDefaultUserNameFormat().equals(emailUserNameFormat)) && emailUserNameFormat!=null && !emailUserNameFormat.isEmpty())
+				emailService.setDefaultUserNameFormat(emailUserNameFormat);
 			
 			if(!(uimsCompManagSoapService.getCALLER_FID().equals(CALLER_FID)) && CALLER_FID!=null && !CALLER_FID.isEmpty())
-			uimsCompManagSoapService.setCALLER_FID(configuration.getProperty("caller.fid"));
+			uimsCompManagSoapService.setCALLER_FID(CALLER_FID);
 			
 			if(!(uimsSetPasswordSoapService.getCALLER_FID().equals(CALLER_FID)) && CALLER_FID!=null && !CALLER_FID.isEmpty())
-			uimsSetPasswordSoapService.setCALLER_FID(configuration.getProperty("caller.fid"));
+			uimsSetPasswordSoapService.setCALLER_FID(CALLER_FID);
 			
 			if(!(uimsSetPasswordSoapService.getFromUserName().equals(fromUserName)) && fromUserName!=null && !fromUserName.isEmpty())
-			uimsSetPasswordSoapService.setFromUserName(configuration.getProperty("fromUserName"));
+			uimsSetPasswordSoapService.setFromUserName(fromUserName);
 			
 			if(!(uimsSetPasswordSoapService.getSupportUser().equals(supportUser)) && supportUser!=null && !supportUser.isEmpty())
-			uimsSetPasswordSoapService.setSupportUser(configuration.getProperty("supportUser"));
+			uimsSetPasswordSoapService.setSupportUser(supportUser);
 			
 			if(!(uimsUserManagSoapService.getCALLER_FID().equals(CALLER_FID)) && CALLER_FID!=null && !CALLER_FID.isEmpty())
-			uimsUserManagSoapService.setCALLER_FID(configuration.getProperty("caller.fid"));
+			uimsUserManagSoapService.setCALLER_FID(CALLER_FID);
 			
 			if(!(uimsUserManagSoapService.getFromUserName().equals(fromUserName)) && fromUserName!=null && !fromUserName.isEmpty())
-			uimsUserManagSoapService.setFromUserName(configuration.getProperty("fromUserName"));
+			uimsUserManagSoapService.setFromUserName(fromUserName);
 			
 			if(!(uimsUserManagSoapService.getSupportUser().equals(supportUser)) && supportUser!=null && !supportUser.isEmpty())
-			uimsUserManagSoapService.setSupportUser(configuration.getProperty("supportUser"));
+			uimsUserManagSoapService.setSupportUser(supportUser);
 			
 			if(!(uimsUserManagSoapService.getGoDigitalValue().equals(goDigitalValue)) && goDigitalValue!=null && !goDigitalValue.isEmpty())
-			uimsUserManagSoapService.setGoDigitalValue(configuration.getProperty("goDigitalValue"));
+			uimsUserManagSoapService.setGoDigitalValue(goDigitalValue);
 			
 			if(!(uimsUserManagSoapService.getGoDitalToken().equals(goDitalToken)) && goDitalToken!=null && !goDitalToken.isEmpty())
-			uimsUserManagSoapService.setGoDitalToken(configuration.getProperty("goDitalToken"));
+			uimsUserManagSoapService.setGoDitalToken(goDitalToken);
 			
 			if(!(saleforceService.getSalesForceClientId().equals(salesForceClientId)) && salesForceClientId!=null && !salesForceClientId.isEmpty())
-			saleforceService.setSalesForceClientId(configuration.getProperty("salesForceClientId"));
+			saleforceService.setSalesForceClientId(salesForceClientId);
 			
 			if(!(saleforceService.getSalesForceClientSecret().equals(salesForceClientSecret)) && salesForceClientSecret!=null && !salesForceClientSecret.isEmpty())
-			saleforceService.setSalesForceClientSecret(configuration.getProperty("salesForceClientSecret"));
+			saleforceService.setSalesForceClientSecret(salesForceClientSecret);
 			
 			if(!(saleforceService.getSalesForcePassword().equals(salesForcePassword)) && salesForcePassword!=null && !salesForcePassword.isEmpty())
-			saleforceService.setSalesForcePassword(configuration.getProperty("salesForcePassword"));
+			saleforceService.setSalesForcePassword(salesForcePassword);
 			
 			if(!(saleforceService.getSalesForceUserName().equals(salesForceUserName)) && salesForceUserName!=null && !salesForceUserName.isEmpty())
-			saleforceService.setSalesForceUserName(configuration.getProperty("salesForceUserName"));
+			saleforceService.setSalesForceUserName(salesForceUserName);
 			
 			if(!(saleforceSynService.getSalesForceClientId().equals(salesForceClientId)) && salesForceClientId!=null && !salesForceClientId.isEmpty())
-			saleforceSynService.setSalesForceClientId(configuration.getProperty("salesForceClientId"));
+			saleforceSynService.setSalesForceClientId(salesForceClientId);
 			
 			if(!(saleforceSynService.getSalesForceClientSecret().equals(salesForceClientSecret)) && salesForceClientSecret!=null && !salesForceClientSecret.isEmpty())
-			saleforceSynService.setSalesForceClientSecret(configuration.getProperty("salesForceClientSecret"));
+			saleforceSynService.setSalesForceClientSecret(salesForceClientSecret);
 			
 			if(!(saleforceSynService.getSalesForcePassword().equals(salesForcePassword)) && salesForcePassword!=null && !salesForcePassword.isEmpty())
-			saleforceSynService.setSalesForcePassword(configuration.getProperty("salesForcePassword"));
+			saleforceSynService.setSalesForcePassword(salesForcePassword);
 			
 			if(!(saleforceSynService.getSalesForceUserName().equals(salesForceUserName)) && salesForceUserName!=null && !salesForceUserName.isEmpty())
-			saleforceSynService.setSalesForceUserName(configuration.getProperty("salesForceUserName"));
+			saleforceSynService.setSalesForceUserName(salesForceUserName);
 			
 			if(!(saleforceSynService.getSftokentimeinminute().equals(sftokentimeinminute)) && sftokentimeinminute!=null && !sftokentimeinminute.isEmpty())
-			saleforceSynService.setSftokentimeinminute(configuration.getProperty("sftokentimeinminute"));
+			saleforceSynService.setSftokentimeinminute(sftokentimeinminute);
 			
 			if(!(createUserService.getCALLER_FID().equals(CALLER_FID)) && CALLER_FID!=null && !CALLER_FID.isEmpty())
-			createUserService.setCALLER_FID(configuration.getProperty("caller.fid"));
+			createUserService.setCALLER_FID(CALLER_FID);
 			
 			if(!(commonService.getSalesForceClientId().equals(salesForceClientId)) && salesForceClientId!=null && !salesForceClientId.isEmpty())
-			commonService.setSalesForceClientId(configuration.getProperty("salesForceClientId"));
+			commonService.setSalesForceClientId(salesForceClientId);
 			
 			if(!(commonService.getSalesForceClientSecret().equals(salesForceClientSecret)) && salesForceClientSecret!=null && !salesForceClientSecret.isEmpty())
-			commonService.setSalesForceClientSecret(configuration.getProperty("salesForceClientSecret"));
+			commonService.setSalesForceClientSecret(salesForceClientSecret);
 			
 			if(!(commonService.getSalesForcePassword().equals(salesForcePassword)) && salesForcePassword!=null && !salesForcePassword.isEmpty())
-			commonService.setSalesForcePassword(configuration.getProperty("salesForcePassword"));
+			commonService.setSalesForcePassword(salesForcePassword);
 			
 			if(!(commonService.getSalesForceUserName().equals(salesForceUserName)) && salesForceUserName!=null && !salesForceUserName.isEmpty())
-			commonService.setSalesForceUserName(configuration.getProperty("salesForceUserName"));
+			commonService.setSalesForceUserName(salesForceUserName);
 			
 			if(!(commonService.getAdminUserName().equals(adminUserName)) && adminUserName!=null && !adminUserName.isEmpty())
-			commonService.setAdminUserName(configuration.getProperty("adminUserName"));
+			commonService.setAdminUserName(adminUserName);
 			
 			if(!(commonService.getAdminPassword().equals(adminPassword)) && adminPassword!=null && !adminPassword.isEmpty())
-			commonService.setAdminPassword(configuration.getProperty("adminPassword"));
+			commonService.setAdminPassword(adminPassword);
 			
 			if(!(commonService.getAuthCsvPath().equals(authCsvPath)) && authCsvPath!=null && !authCsvPath.isEmpty())
-			commonService.setAuthCsvPath(configuration.getProperty("authCsvPath"));
+			commonService.setAuthCsvPath(authCsvPath);
 			
 			if(!(commonService.getRegistrationCsvPath().equals(registrationCsvPath)) && registrationCsvPath!=null && !registrationCsvPath.isEmpty())
-			commonService.setRegistrationCsvPath(configuration.getProperty("registrationCsvPath"));
+			commonService.setRegistrationCsvPath(registrationCsvPath);
 			
 			if(!(commonService.getDirectApiSecretToken().equals(directApiSecretToken)) && directApiSecretToken!=null && !directApiSecretToken.isEmpty())
-			commonService.setDirectApiSecretToken(configuration.getProperty("directApiSecretToken"));
+			commonService.setDirectApiSecretToken(directApiSecretToken);
 			
 			if(!(commonService.getEMAIL_TEMPLATE_DIR().equals(EMAIL_TEMPLATE_DIR)) && EMAIL_TEMPLATE_DIR!=null && !EMAIL_TEMPLATE_DIR.isEmpty())
-			commonService.setEMAIL_TEMPLATE_DIR(configuration.getProperty("email.template.dir"));
+			commonService.setEMAIL_TEMPLATE_DIR(EMAIL_TEMPLATE_DIR);
 			
 			if(!commonService.getFromUserName().equals(fromUserName) && fromUserName!=null && !fromUserName.isEmpty())
-			commonService.setFromUserName(configuration.getProperty("fromUserName"));
+			commonService.setFromUserName(fromUserName);
 			
 			if(!commonService.getGoDigitalValue().equals(goDigitalValue) && goDigitalValue!=null && !goDigitalValue.isEmpty())
-			commonService.setGoDigitalValue(configuration.getProperty("goDigitalValue"));
+			commonService.setGoDigitalValue(goDigitalValue);
 			
 			if(!commonService.getGoDitalToken().equals(goDitalToken) && goDitalToken!=null && !goDitalToken.isEmpty())
-			commonService.setGoDitalToken(configuration.getProperty("goDitalToken"));
+			commonService.setGoDitalToken(goDitalToken);
 			
 			if(!commonService.getHa_mode().equals(ha_mode) && ha_mode!=null && !ha_mode.isEmpty())
-			commonService.setHa_mode(configuration.getProperty("ha_mode"));
+			commonService.setHa_mode(ha_mode);
 			
 			if(!commonService.getIfwClientId().equals(ifwClientId) && ifwClientId!=null && !ifwClientId.isEmpty())
-			commonService.setIfwClientId(configuration.getProperty("ifwClientId"));
+			commonService.setIfwClientId(ifwClientId);
 			
 			if(!commonService.getIfwClientSecret().equals(ifwClientSecret) && ifwClientSecret!=null && !ifwClientSecret.isEmpty())
-			commonService.setIfwClientSecret(configuration.getProperty("ifwClientSecret"));
+			commonService.setIfwClientSecret(ifwClientSecret);
 			
 			if(!(commonService.getOpenDJUserName().equals(djUserName)) && djUserName!=null && !djUserName.isEmpty())
-			commonService.setOpenDJUserName(configuration.getProperty("openDJUserName"));
+			commonService.setOpenDJUserName(djUserName);
 			
 			if(!(commonService.getOpenDJUserPassword().equals(djUserPwd)) && djUserPwd!=null && !djUserPwd.isEmpty())
-			commonService.setOpenDJUserPassword(configuration.getProperty("openDJUserPassword"));
+			commonService.setOpenDJUserPassword(djUserPwd);
 			
 			if(!commonService.getRedirectUri().equals(redirectUri) && redirectUri!=null && !redirectUri.isEmpty())
-			commonService.setRedirectUri(configuration.getProperty("redirect.uri"));
+			commonService.setRedirectUri(redirectUri);
 			
 			if(!commonService.getUimsClientId().equals(uimsClientId) && uimsClientId!=null && !uimsClientId.isEmpty())
-			commonService.setUimsClientId(configuration.getProperty("uimsClientId"));
+			commonService.setUimsClientId(uimsClientId);
 			
 			if(!commonService.getUimsClientSecret().equals(uimsClientSecret) && uimsClientSecret!=null && !uimsClientSecret.isEmpty())
-			commonService.setUimsClientSecret(configuration.getProperty("uimsClientSecret"));
+			commonService.setUimsClientSecret(uimsClientSecret);
 			
 			if(!commonService.getPrefixStartUrl().equals(prefixStartUrl) && prefixStartUrl!=null && !prefixStartUrl.isEmpty())
-			commonService.setPrefixStartUrl(configuration.getProperty("openAMService.url"));
+			commonService.setPrefixStartUrl(prefixStartUrl);
 			
 			if(!(directUIMSUserManagerSoapService.getCALLER_FID().equals(CALLER_FID)) && CALLER_FID!=null && !CALLER_FID.isEmpty())
-			directUIMSUserManagerSoapService.setCALLER_FID(configuration.getProperty("caller.fid"));
+			directUIMSUserManagerSoapService.setCALLER_FID(CALLER_FID);
 			
 			if(!directUIMSUserManagerSoapService.getFromUserName().equals(fromUserName) && fromUserName!=null && !fromUserName.isEmpty())
-			directUIMSUserManagerSoapService.setFromUserName(configuration.getProperty("fromUserName"));
+			directUIMSUserManagerSoapService.setFromUserName(fromUserName);
 			
 			if(!directUIMSUserManagerSoapService.getGoDigitalValue().equals(goDigitalValue) && goDigitalValue!=null && !goDigitalValue.isEmpty())
-			directUIMSUserManagerSoapService.setGoDigitalValue(configuration.getProperty("goDigitalValue"));
+			directUIMSUserManagerSoapService.setGoDigitalValue(goDigitalValue);
 			
 			if(!directUIMSUserManagerSoapService.getGoDitalToken().equals(goDitalToken) && goDitalToken!=null && !goDitalToken.isEmpty())
-			directUIMSUserManagerSoapService.setGoDitalToken(configuration.getProperty("goDitalToken"));
+			directUIMSUserManagerSoapService.setGoDitalToken(goDitalToken);
 			
 			if(!(directUIMSUserManagerSoapService.getSupportUser().equals(supportUser)) && supportUser!=null && !supportUser.isEmpty())
-			directUIMSUserManagerSoapService.setSupportUser(configuration.getProperty("supportUser"));
+			directUIMSUserManagerSoapService.setSupportUser(supportUser);
 			
 			if(!samlAssertionTokenService.getSamlAssertionKeyPassword().equals(samlAssertionKeyPassword) && samlAssertionKeyPassword!=null && !samlAssertionKeyPassword.isEmpty())
 			samlAssertionTokenService.setSamlAssertionKeyPassword(
-					configuration.getProperty("keystore.samlAssertionSigning.keystore.privateKey.password"));
+					samlAssertionKeyPassword);
 			
 			if(!samlAssertionTokenService.getSamlAssertionKeystorePassword().equals(samlAssertionKeystorePassword)&& samlAssertionKeystorePassword!=null && !samlAssertionKeystorePassword.isEmpty() )
 			samlAssertionTokenService.setSamlAssertionKeystorePassword(
-					configuration.getProperty("keystore.samlAssertionSigning.keystore.password"));
+					samlAssertionKeystorePassword);
 			
 			if(!samlAssertionTokenService.getSamlAssertionSigningAlgo().equals(samlAssertionSigningAlgo) && samlAssertionSigningAlgo!=null && !samlAssertionSigningAlgo.isEmpty())
 			samlAssertionTokenService
-					.setSamlAssertionSigningAlgo(configuration.getProperty("crypto.algo.samlAssertionSigning"));
+					.setSamlAssertionSigningAlgo(samlAssertionSigningAlgo);
 			
 			if(!samlAssertionTokenService.getSamlAssertionSigningCert().equals(samlAssertionSigningCert) && samlAssertionSigningCert!=null && !samlAssertionSigningCert.isEmpty())
 			samlAssertionTokenService.setSamlAssertionSigningCert(
-					configuration.getProperty("keystore.samlAssertionSigning.keystore.certAlias"));
+					samlAssertionSigningCert);
 			
 			if(!samlAssertionTokenService.getSamlAssertionSigningKeystore().equals(samlAssertionSigningKeystore) && samlAssertionSigningKeystore!=null && !samlAssertionSigningKeystore.isEmpty())
 			samlAssertionTokenService
-					.setSamlAssertionSigningKeystore(configuration.getProperty("keystore.samlAssertionSigning.path"));
+					.setSamlAssertionSigningKeystore(samlAssertionSigningKeystore);
 			
 			//pickListValidator.setIDMS_DEPLOY_ENV(configuration.getProperty("idms.env"));
 			if(!pickListValidator.getIDMS_FIELDSPICKLIST_PROPERTIES_PATH().equals(IDMS_FIELDSPICKLIST_PROPERTIES_PATH) && IDMS_FIELDSPICKLIST_PROPERTIES_PATH!=null && !IDMS_FIELDSPICKLIST_PROPERTIES_PATH.isEmpty())
-				pickListValidator.setIDMS_FIELDSPICKLIST_PROPERTIES_PATH(configuration.getProperty("fields.picklist.props.path"));
+				pickListValidator.setIDMS_FIELDSPICKLIST_PROPERTIES_PATH(IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
 			
 			//multiPickListValidator.setIDMS_DEPLOY_ENV(configuration.getProperty("idms.env"));
 			if(!multiPickListValidator.getIDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH().equals(IDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH) && IDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH!=null && !IDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH.isEmpty())
-				multiPickListValidator.setIDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH(configuration.getProperty("fields.multi.picklist.props.path"));
+				multiPickListValidator.setIDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH(IDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH);
 			
 			//mandatoryValidator.setIDMS_DEPLOY_ENV(configuration.getProperty("idms.env"));
 			if(!mandatoryValidator.getIDMS_FIELDSMANDATORY_PROPERTIES_PATH().equals(IDMS_FIELDSMANDATORY_PROPERTIES_PATH) && IDMS_FIELDSMANDATORY_PROPERTIES_PATH!=null && !IDMS_FIELDSMANDATORY_PROPERTIES_PATH.isEmpty())
-				mandatoryValidator.setIDMS_FIELDSMANDATORY_PROPERTIES_PATH(configuration.getProperty("fields.mandatory.props.path"));
+				mandatoryValidator.setIDMS_FIELDSMANDATORY_PROPERTIES_PATH(IDMS_FIELDSMANDATORY_PROPERTIES_PATH);
 			
 			//legthValidator.setIDMS_DEPLOY_ENV(configuration.getProperty("idms.env"));
 			if(!legthValidator.getIDMS_FIELDSLENGTH_PROPERTIES_PATH().equals(IDMS_FIELDSLENGTH_PROPERTIES_PATH) && IDMS_FIELDSLENGTH_PROPERTIES_PATH!=null && !IDMS_FIELDSLENGTH_PROPERTIES_PATH.isEmpty())
-				legthValidator.setIDMS_FIELDSLENGTH_PROPERTIES_PATH(configuration.getProperty("fields.length.props.path"));
+				legthValidator.setIDMS_FIELDSLENGTH_PROPERTIES_PATH(IDMS_FIELDSLENGTH_PROPERTIES_PATH);
 			
 			//fieldsMappingValidator.setIDMS_DEPLOY_ENV(configuration.getProperty("idms.env"));
 			if(!fieldsMappingValidator.getIDMS_FIELDSMAPPING_PROPERTIES_PATH().equals(IDMS_FIELDSMAPPING_PROPERTIES_PATH) && IDMS_FIELDSMAPPING_PROPERTIES_PATH!=null && !IDMS_FIELDSMAPPING_PROPERTIES_PATH.isEmpty())
-				fieldsMappingValidator.setIDMS_FIELDSMAPPING_PROPERTIES_PATH(configuration.getProperty("fields.mapping.props.path"));
+				fieldsMappingValidator.setIDMS_FIELDSMAPPING_PROPERTIES_PATH(IDMS_FIELDSMAPPING_PROPERTIES_PATH);
 			
 			LOGGER.info("initilize(final String file) end");
 		} catch (IOException e) {
@@ -683,6 +688,8 @@ public class PropertyFileAutoRefresh {
 		IDMS_FIELDSLENGTH_PROPERTIES_PATH=configuration.getProperty("fields.length.props.path");
 
 		IDMS_FIELDSMAPPING_PROPERTIES_PATH=configuration.getProperty("fields.mapping.props.path");
+		
+		emailUserNameFormat =configuration.getProperty("idmsc.emailUserNameFormat");
 	}
 
 	public void initilize() throws Exception {

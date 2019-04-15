@@ -109,6 +109,8 @@ public class UserConstants {
 	
 	public static final String LAST_NAME ="LastName";
 	
+	public static final String FULL_NAME ="FullName";
+	
 	public static final String MOBILE_PHONE = "MobilePhone";
 	
 	
