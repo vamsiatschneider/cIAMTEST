@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.idms.model.GetUserRecordResponse;
 import com.idms.product.model.OpenAMGetUserHomeResponse;
 import com.idms.product.model.OpenAMGetUserWorkResponse;
 import com.jayway.jsonpath.DocumentContext;
@@ -730,6 +731,34 @@ public class ParseValuesByOauthHomeWorkContextDto {
 				? getValue(userProductDocCtx.read("$.mobile_reg").toString()) : getDelimeter());
 
 	}
+	
+	public void parseValuesForGetUserByApplication(GetUserRecordResponse userResponse, DocumentContext userProductDocCtx) {
+		
+		userResponse.setId(null != userProductDocCtx.read("$.result[0].federationID[0]")
+				? getValue(userProductDocCtx.read("$.result[0].federationID[0]").toString()) : getDelimeter());
+		userResponse.setFirstName(null != userProductDocCtx.read("$.result[0].givenName[0]")
+				? getValue(userProductDocCtx.read("$.result[0].givenName[0]").toString()) : getDelimeter());
+		userResponse.setLastName(null != userProductDocCtx.read("$.result[0].sn[0]")
+				? getValue(userProductDocCtx.read("$.result[0].sn[0]").toString()) : getDelimeter());
+		userResponse.setEmail(null != userProductDocCtx.read("$.result[0].mail[0]")
+				? getValue(userProductDocCtx.read("$.result[0].mail[0]").toString()) : getDelimeter());
+		userResponse.setMobilePhone(null != userProductDocCtx.read("$.result[0].mobile[0]")
+				? getValue(userProductDocCtx.read("$.result[0].mobile[0]").toString()) : getDelimeter());
+		
+		
+		userResponse.setIDMSAil__c(null != userProductDocCtx.read("$.result[0].IDMSAil_c[0]")
+				? getValue(userProductDocCtx.read("$.result[0].IDMSAil_c[0]").toString()) : getDelimeter());
+
+		userResponse.setIDMSAIL_Applications__c(null != userProductDocCtx.read("$.result[0].IDMSAIL_Applications_c[0]")
+				? getValue(userProductDocCtx.read("$.result[0].IDMSAIL_Applications_c[0]").toString()) : getDelimeter());
+
+		userResponse.setIDMSAIL_Features__c(null != userProductDocCtx.read("$.IDMSAIL_Features_c[0]")
+				? getValue(userProductDocCtx.read("$.result[0].IDMSAIL_Features_c[0]").toString()) : getDelimeter());
+
+		userResponse.setIDMSAIL_Programs__c(null != userProductDocCtx.read("$.IDMSAIL_Programs_c[0]")
+				? getValue(userProductDocCtx.read("$.result[0].IDMSAIL_Programs_c[0]").toString()) : getDelimeter());
+	}
+	
 
 	private String getDelimeter() {
 		return UserConstants.USER_DELIMETER;

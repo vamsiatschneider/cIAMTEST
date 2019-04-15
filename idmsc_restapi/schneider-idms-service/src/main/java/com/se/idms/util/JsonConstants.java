@@ -29,7 +29,7 @@ public class JsonConstants {
 	
 	public static final String USER_LEVEL = "_registrationLevel";
 	public static final String BFO_SUPPORT_URL = "_bfoSupportUrl";
-	public static final String APP_NAME_HASH = "_Application_Name";
+	public static final String APP_ID = "$.result[0]._id";
 	public static final String MAIL_0 = "$.mail[0]";
 	public static final String MOBILE_0 = "$.mobile[0]";
 	public static final String MOBILEREG_0 = "$.mobile_reg[0]";
