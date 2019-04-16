@@ -814,6 +814,15 @@ public class UserServiceImpl implements UserService {
 			 */
 
 			try {
+				if(null == userRequest){
+					errorResponse.setStatus(errorStatus);
+					errorResponse.setMessage("Request body is null or empty");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
+					LOGGER.error("Error is :: Request body is null or empty");
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+				}
+				
 				if (null != userRequest.getUserRecord().getMobilePhone()
 						&& !userRequest.getUserRecord().getMobilePhone().isEmpty()) {
 					userRequest.getUserRecord().setMobilePhone(
@@ -7776,6 +7785,13 @@ public class UserServiceImpl implements UserService {
 
 		try {
 			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(request));
+			if(null == request){
+				response.put(UserConstants.MESSAGE_L, "Request body is empty or null");
+				LOGGER.error("Mandatory check: Request body is empty or null");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+			}
 						
 			if(null != request.getEmail() && !request.getEmail().isEmpty()){
 				varList.add("true");
@@ -7966,7 +7982,7 @@ public class UserServiceImpl implements UserService {
 				ifwAccessToken = ifwService.getIFWToken(UserConstants.CONTENT_TYPE_URL_FROM,
 						UserConstants.IFW_GRANT_TYPE, ifwClientId, ifwClientSecret);
 				LOGGER.info("End: getIFWToken() of IFWService finished");
-
+				productDocCtx = null;
 				productDocCtx = JsonPath.using(conf).parse(ifwAccessToken);
 				String accessToken = productDocCtx.read("$.access_token");
 				String bfoAuthorizationToken = sfSyncServiceImpl.getSFToken();
@@ -7988,7 +8004,16 @@ public class UserServiceImpl implements UserService {
 				}
 	
 				LOGGER.info("ifwResponse response status code for checkUserExist -> " + ifwResponse.getStatus());
+				
 				if (null != ifwResponse && 200 == ifwResponse.getStatus()) {
+					productDocCtx = null;
+					productDocCtx = JsonPath.using(conf)
+							.parse(IOUtils.toString((InputStream) ifwResponse.getEntity()));
+					LOGGER.info("ifwResponse == "+productDocCtx.jsonString());
+					
+					response.put("userStatus", productDocCtx.read("$.userStatus"));
+					response.put("idmsFederatedId", productDocCtx.read("$.idmsFederatedId"));
+					response.put("countryCode", productDocCtx.read("$.countryCode"));
 					response.put(UserConstants.MESSAGE_L, UserConstants.TRUE);
 					LOGGER.info("User found in IDMS Global");
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -9946,6 +9971,14 @@ public class UserServiceImpl implements UserService {
 		try {
 			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(userDetailByApplicationRequest));
 
+			if(null == userDetailByApplicationRequest){
+				userResponse.setStatus(errorStatus);
+				userResponse.setMessage("Request body is null or empty");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Error is -> Request body is null or empty");
+				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+			}
 			if (null == authorizationToken || authorizationToken.isEmpty()) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage(UserConstants.ADMIN_TOKEN_MANDATORY);
