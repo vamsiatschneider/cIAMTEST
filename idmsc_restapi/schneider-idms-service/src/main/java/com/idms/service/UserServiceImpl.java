@@ -363,7 +363,10 @@ public class UserServiceImpl implements UserService {
 	private static EhCacheCache cache = null;
 
 	String userIdExistInUIMS = null;
-
+	
+	@Value("${idmsc.emailUserNameFormat}")
+	private String defaultUserNameFormat;
+	
 	/*
 	 * @Resource(name="cacheManager") private CacheManager cacheManager;
 	 */
@@ -4494,6 +4497,8 @@ public class UserServiceImpl implements UserService {
 			boolean isUserFromSocialLogin = false;
 			String attributeText = null;
 			JSONObject responseCheck = new JSONObject();
+			DocumentContext  productDJData = null;
+			String emailUserNameFormat = null;
 			// Step 1:
 
 			// LOGGER.info(" UserServiceImpl :: updateUser
@@ -5061,13 +5066,36 @@ public class UserServiceImpl implements UserService {
 						}
 
 						// cal send email
-						firstName = null != productDocCtxUser.read("$.givenName")
+						Response applicationDetails   = openDJService.getUser(djUserName, djUserPwd, userRequest.getUserRecord().getIDMS_Profile_update_source__c());
+						productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
+						if (null != applicationDetails && 200 == applicationDetails.getStatus()) {
+							String userNameFormatOpenDJ = productDJData.read("userNameFormat");
+							LOGGER.info("update user userNameFormatOpenDJ:"+userNameFormatOpenDJ);
+							LOGGER.info("update user defaultUserNameFormat:"+defaultUserNameFormat);
+							if(null != userNameFormatOpenDJ && !userNameFormatOpenDJ.isEmpty()){
+								emailUserNameFormat = userNameFormatOpenDJ;
+							} else{
+								emailUserNameFormat = defaultUserNameFormat;
+							}
+						}
+						if (null != applicationDetails && 200 != applicationDetails.getStatus()) {
+							emailUserNameFormat = defaultUserNameFormat;
+						}
+						if(emailUserNameFormat.equalsIgnoreCase(UserConstants.FIRST_NAME))
+							firstName=productDocCtxUser.read("$.givenName[0]");
+						else if(emailUserNameFormat.equalsIgnoreCase(UserConstants.LAST_NAME))
+							firstName=productDocCtxUser.read("$.sn[0]");
+						else
+							firstName=productDocCtxUser.read("$.cn[0]");
+						LOGGER.info("Update user Email format Name:"+firstName);
+						
+						/*firstName = null != productDocCtxUser.read("$.givenName")
 								? getValue(productDocCtxUser.read("$.givenName").toString()) : getDelimeter();
 						if (null == firstName) { // added for socialLogin issue
 							firstName = null != productDocCtxUser.read("$.cn")
 									? getValue(productDocCtxUser.read("$.cn").toString()) : getDelimeter();
-						}
-
+						}*/
+						
 						contentBuilder = getContentFromTemplate(UserConstants.UPDATE_EMAIL_NOTIFICATION,
 								prefferedLanguage);
 						int startName = contentBuilder.indexOf("{!User.FirstName},");
@@ -10472,5 +10500,15 @@ public class UserServiceImpl implements UserService {
 	public String getSendOTPOverEmail() {
 		return sendOTPOverEmail;
 	}
+	
+	public String getDefaultUserNameFormat() {
+		return defaultUserNameFormat;
+	}
+
+
+	public void setDefaultUserNameFormat(String defaultUserNameFormat) {
+		this.defaultUserNameFormat = defaultUserNameFormat;
+	}
+
 	
 }

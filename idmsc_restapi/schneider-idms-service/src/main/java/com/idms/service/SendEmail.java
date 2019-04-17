@@ -168,7 +168,7 @@ public class SendEmail {
 	public void emailReadyToSendEmail(String to, String from, String subject, String msgBody) {
 		LOGGER.info("Entered emailReadyToSendEmail() -> Start");
 		LOGGER.info("Parameter to -> " + to+" ,from -> "+from+" ,subject -> "+subject);
-		
+		//LOGGER.info("msg body:"+msgBody);
 		MimeMessage mailMessage = mailSender.createMimeMessage();
 		InternetAddress fromAddress = null;
 		InternetAddress toAddress = null;
@@ -308,7 +308,7 @@ public class SendEmail {
 
 				contentBuilder = new StringBuilder();
 				contentBuilder.setLength(0);
-
+				LOGGER.info("Before emailContentTemplate call first name:"+firstName);
 				// if section for chinese user
 				if ((lang != null
 					&& (lang.equalsIgnoreCase("zh") || lang.equalsIgnoreCase("zh_cn") || lang.equalsIgnoreCase("zh_tw")))
@@ -457,6 +457,7 @@ public class SendEmail {
 		LOGGER.info("Entered emailContentTemplate() -> Start");
 		LOGGER.info("Parameter to -> " + to+" ,subject -> "+subject);
 		LOGGER.info("Parameter lang -> " + lang+" ,hotpOperationType -> "+hotpOperationType);
+		LOGGER.info("firstName emailContentTemplate -> " + firstName);
 		String filePath;
 		boolean chineseLangCheck = ((lang != null && lang.equalsIgnoreCase(EmailConstants.HOTP_LAN_CN)) || (hotpLanguage != null && hotpLanguage.equalsIgnoreCase(EmailConstants.HOTP_LAN_CN)));
 		int startIndex=0;
