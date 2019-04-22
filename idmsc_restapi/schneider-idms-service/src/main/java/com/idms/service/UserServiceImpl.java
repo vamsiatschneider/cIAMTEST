@@ -5082,8 +5082,10 @@ public class UserServiceImpl implements UserService {
 							firstName=productDocCtxUser.read("$.givenName[0]");
 						else if(emailUserNameFormat.equalsIgnoreCase(UserConstants.LAST_NAME))
 							firstName=productDocCtxUser.read("$.sn[0]");
-						else
+						else if(emailUserNameFormat.equalsIgnoreCase(UserConstants.FULL_NAME))
 							firstName=productDocCtxUser.read("$.cn[0]");
+						else
+							firstName=productDocCtxUser.read("$.givenName[0]");
 						LOGGER.info("Update user Email format Name:"+firstName);
 						
 						/*firstName = null != productDocCtxUser.read("$.givenName")
