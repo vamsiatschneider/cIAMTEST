@@ -40,6 +40,7 @@ import com.uims.authenticatedUsermanager.Type;
 @org.springframework.stereotype.Service("uimsUserManagerSoapServiceSync")
 public class UIMSUserManagerSoapServiceSync {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UIMSUserManagerSoapServiceSync.class);
+	private static final Logger UIMSSYNCLOGGER = LoggerFactory.getLogger("uimsSyncErrorLogger");
 	
 	@Autowired
 	private UIMSAuthenticatedUserManagerSoapServiceSync authenticatedUserManagerSoapServiceSync;
@@ -107,11 +108,11 @@ public class UIMSUserManagerSoapServiceSync {
 		} catch (JsonProcessingException e) {
 			LOGGER.error("Error while converting the userRequest to Json" + e.getMessage());
 			LOGGER.error("Exception >"+e);
-		}finally{
+		}/*finally{
 			if(null != objMapper){
 				objMapper = null;
 			}
-		}
+		}*/
 		try {
 			Callable<Boolean> callableUser = new Callable<Boolean>() {
 				public Boolean call() throws Exception {
@@ -125,9 +126,11 @@ public class UIMSUserManagerSoapServiceSync {
 					
 					
 					if (null != password && !password.isEmpty()) {
+						LOGGER.info("calling createUIMSUserWithPassword() of UIMS");
 						createdFedId = authenticatedUserManagerSoapServiceSync.createUIMSUserWithPassword(
 								CALLER_FID, identity, password, forcedFederatedId);
 					} else {
+						LOGGER.info("calling createUIMSUser() of UIMS");
 						createdFedId = authenticatedUserManagerSoapServiceSync.createUIMSUser(CALLER_FID,
 								identity, forcedFederatedId);
 					}
@@ -160,7 +163,8 @@ public class UIMSUserManagerSoapServiceSync {
 				LOGGER.error("Exception from UIMS while create user::" + originalException.getMessage());*/
 				LOGGER.error("RetryException while UIMS create user::" + e.getMessage());
 				LOGGER.error("Exception >"+e);
-				
+				UIMSSYNCLOGGER.error("User creation failed in UIMS, UserForceFederationId = "+forcedFederatedId);
+				UIMSSYNCLOGGER.error("User info = "+objMapper.writeValueAsString(identity));
 			} catch (ExecutionException e) {
 				LOGGER.error("ExecutionException while UIMS create user::" + e.getMessage());
 				LOGGER.error("Exception >"+e);
@@ -198,6 +202,7 @@ public class UIMSUserManagerSoapServiceSync {
 					if (null != userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c()
 							&& !userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c().isEmpty()) {
 						if (companyCreatedCount == 1) {
+							LOGGER.info("calling createUIMSCompanyWithCompanyForceIdmsId() of UIMS");
 							createdCompanyFedId = companyManagerSoapServiceSync.createUIMSCompanyWithCompanyForceIdmsId(createdFedId,
 									userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c(), UimsConstants.VNEW, company);
 						} 
@@ -258,6 +263,8 @@ public class UIMSUserManagerSoapServiceSync {
 				// productService.sessionLogout(iPlanetDirectoryKey, "logout");
 				LOGGER.error("RetryException while UIMS create company::" + e.getMessage());
 				LOGGER.error("Exception >"+e);
+				UIMSSYNCLOGGER.error("Company creation failed in UIMS, companyForceFederationId = "+userRequest.getUserRecord().getIDMSCompanyFederationIdentifier__c());
+				UIMSSYNCLOGGER.error("Company creation failed in UIMS, company info = "+objMapper.writeValueAsString(company));
 			} catch (ExecutionException e) {
 				// productService.sessionLogout(iPlanetDirectoryKey, "logout");
 				LOGGER.error("ExecutionException while UIMS create company::" + e.getMessage());

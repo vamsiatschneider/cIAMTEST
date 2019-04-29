@@ -8017,6 +8017,7 @@ public class UserServiceImpl implements UserService {
 				String accessToken = productDocCtx.read("$.access_token");
 				String bfoAuthorizationToken = sfSyncServiceImpl.getSFToken();
 				String authorization = "Bearer " + accessToken;
+				LOGGER.info("IFW dynamic Token = "+authorization);
 
 				if (loginId.contains("@")) {
 					LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for email:" + loginId);
