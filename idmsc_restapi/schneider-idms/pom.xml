@@ -122,7 +122,12 @@
 			<version>${version.slf4j}</version>
 			<scope>runtime</scope>
 		</dependency>
-		
+		<dependency>
+    	<groupId>log4j</groupId>
+   	 	<artifactId>apache-log4j-extras</artifactId>
+   	 	<version>1.2.17</version>
+   	 	<scope>compile</scope>
+		</dependency>
 		<!-- SLF 4j -->
         <dependency>
               <groupId>ch.qos.logback</groupId>
