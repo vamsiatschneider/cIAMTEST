@@ -120,6 +120,29 @@ public class ChinaIdmsUtil {
     }
 	
 	/**
+	 * Print openam request without Password
+	 * @param rawData
+	 * @return
+	 */
+	public static String printOpenAMInfo(String rawData){
+		String newrawdata = rawData;
+        if (rawData.toLowerCase().contains("userPassword".toLowerCase())){
+        	int i = rawData.indexOf(",\"userPassword");
+        	int y = rawData.indexOf(",", i+1);
+        	String chars = rawData.substring(i, y);
+        	newrawdata = rawData.replace(chars, "");
+        }
+        if (newrawdata.toLowerCase().contains("tmp_password".toLowerCase())){
+        	int i = newrawdata.indexOf(",\"tmp_password");
+        	int y = newrawdata.indexOf(",", i+1);
+        	String chars = newrawdata.substring(i, y);
+        	newrawdata = newrawdata.replace(chars, "");
+        }
+        
+        return newrawdata;
+    }
+	
+	/**
 	 * Get cookies values from response
 	 * @param response
 	 * @return

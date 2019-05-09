@@ -639,8 +639,95 @@ public class UserServiceImpl implements UserService {
 		}
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info(GET_USER_TIME_LOG + elapsedTime);
-		// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+token,
-		// "logout");
+		//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+token, "logout");
+		return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).build();
+	}
+	
+	/**
+	 * 
+	 * @param applicationContext
+	 * @param userId
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public Response getUserWhenContextIsNull(String applicationContext, String userId) {
+		LOGGER.info("Entered getUserWhenContextIsNull() -> Start");
+		LOGGER.info("Parameter applicationContext -> " + applicationContext);
+		LOGGER.info("userId = "+userId);
+
+		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
+		long elapsedTime;
+		String userData = null;
+		String token = null;
+
+		try {
+			token = getSSOToken();
+		} catch (IOException ioExp) {
+			LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
+		}
+
+		try {
+			if (null == userId || userId.isEmpty()) {
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("errorCode", "NOT_FOUND");
+				jsonObject.put("message", "Provided external ID field does not exist or is  not accessible: " + userId);
+
+				JSONArray jsonArray = new JSONArray();
+				jsonArray.add(jsonObject);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info(GET_USER_TIME_LOG + elapsedTime);
+				LOGGER.error("userId is null or empty");
+				return Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(jsonArray).build();
+
+			} else if (null != userId) {
+				LOGGER.info(AUDIT_REQUESTING_USER.concat(AUDIT_TECHNICAL_USER).concat(AUDIT_IMPERSONATING_USER)
+						.concat(AUDIT_API_ADMIN).concat(AUDIT_OPENAM_API).concat(AUDIT_OPENAM_GET_CALL).concat(userId)
+						.concat(AUDIT_LOG_CLOSURE));
+				LOGGER.info("Going to call getUser() of OpenAMService for userId=" + userId);
+				userData = productService.getUser(token, userId);
+				LOGGER.info("getUser() call of OpenAMService finished with userdata: " + userData);
+			}
+		} catch (Exception e) {
+			LOGGER.error("Error in getUser() openam service->" + e.getMessage(),e);
+			LOGGER.error(e.toString());
+			if (userData == null) {
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("errorCode", "NOT_FOUND");
+				jsonObject.put("message", "Provided external ID field does not exist or is  not accessible: " + userId);
+
+				JSONArray jsonArray = new JSONArray();
+				jsonArray.add(jsonObject);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info(GET_USER_TIME_LOG + elapsedTime);
+				return Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(jsonArray).build();
+			}
+		}
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		// getting the context
+		DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
+		String context = null != productDocCtx.read(JsonConstants.EMPLOYEE_TYPE)
+				? getValue(productDocCtx.read(JsonConstants.EMPLOYEE_TYPE).toString()) : null;
+		LOGGER.info("user context=" + context);
+
+		OpenAMGetUserHomeResponse userHomeResponse = new OpenAMGetUserHomeResponse();
+		OpenAMGetUserWorkResponse userWorkResponse = new OpenAMGetUserWorkResponse();
+		DocumentContext userProductDocCtx = JsonPath.using(conf).parse(userData);
+		Attributes attributes = new Attributes();
+		userHomeResponse.setAttributes(attributes);
+		userWorkResponse.setAttributes(attributes);
+		
+		if ("@home".equalsIgnoreCase(applicationContext) || "home".equalsIgnoreCase(applicationContext)) {
+			return returnGetUserHomeContext(startTime, userHomeResponse, userProductDocCtx);
+		} else if ("@work".equalsIgnoreCase(applicationContext) || "work".equalsIgnoreCase(applicationContext)) {
+			valuesByOauthHomeWorkContext.parseValuesWorkContext(userWorkResponse, userProductDocCtx);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info(GET_USER_TIME_LOG + elapsedTime);
+			return Response.status(Response.Status.OK.getStatusCode()).entity(userWorkResponse).build();
+		} else if (null == applicationContext || "".equals(applicationContext)) {
+			return returnGetUserHomeContext(startTime, userHomeResponse, userProductDocCtx);
+		}
+		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+		LOGGER.info(GET_USER_TIME_LOG + elapsedTime);
 		return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).build();
 	}
 
@@ -702,9 +789,9 @@ public class UserServiceImpl implements UserService {
 		GetUserHomeByOauthResponse userHomeResponse = new GetUserHomeByOauthResponse();
 		GetUserWorkByOauthResponse userWorkResponse = new GetUserWorkByOauthResponse();
 		DocumentContext userProductDocCtx = JsonPath.using(conf).parse(userData);
-		if ("@home".equalsIgnoreCase(context)) {
+		if ("@home".equalsIgnoreCase(context) || "home".equalsIgnoreCase(context)) {
 			return returnGetUserByOauthHomeContext(startTime, userHomeResponse, userProductDocCtx);
-		} else if ("@work".equalsIgnoreCase(context)) {
+		} else if ("@work".equalsIgnoreCase(context) || "work".equalsIgnoreCase(context)) {
 			valuesByOauthHomeWorkContext.parseValuesByOauthWorkContext(userWorkResponse, userProductDocCtx);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info(GET_USER_TIME_LOG + elapsedTime);
@@ -714,8 +801,7 @@ public class UserServiceImpl implements UserService {
 		}
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info(GET_USER_TIME_LOG + elapsedTime);
-		// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+token,
-		// "logout");
+		//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+token, "logout");
 		return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).build();
 	}
 
@@ -1327,7 +1413,7 @@ public class UserServiceImpl implements UserService {
 
 			String json = objMapper.writeValueAsString(openAmReq);
 			json = json.replace("\"\"", "[]");
-			LOGGER.info("Open AM  user  Request ------------->" + json);
+			LOGGER.info("Open AM  user  Request ------------->" + ChinaIdmsUtil.printOpenAMInfo(json));
 			LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 					+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_REGISTRATION_CALL + userAction + AUDIT_LOG_CLOSURE);
 
@@ -1348,13 +1434,13 @@ public class UserServiceImpl implements UserService {
 				// openAmReq.getInput().getUser().setUsername(null);
 				json = objMapper.writeValueAsString(openAmReq.getInput().getUser());
 				json = json.replace("\"\"", "[]");
-				LOGGER.info("productService.userRegistration :  Request -> " + json);
+				LOGGER.info("productService.userRegistration :  Request -> " + ChinaIdmsUtil.printOpenAMInfo(json));
 				LOGGER.info("Start: calling updateUser() of OpenAMService...userName=" + userName);
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userName, json);
 				LOGGER.info("End: updateUser() of OpenAMService finished for userName: " + userName);
 
 			} else {
-				LOGGER.info("productService.userRegistration :  Request -> " + json);
+				LOGGER.info("productService.userRegistration :  Request -> " + ChinaIdmsUtil.printOpenAMInfo(json));
 				LOGGER.info("Start: calling userRegistration() of OpenAMService...userAction=" + userAction);
 				userCreation = productService.userRegistration(iPlanetDirectoryKey, userAction, json);
 				LOGGER.info("End: userRegistration() of OpenAMService finished with status code: "
@@ -1562,13 +1648,15 @@ public class UserServiceImpl implements UserService {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public Response getUserbyTokenUI(String token) {
+	public Response getUserbyTokenUI(String token, String appName) {
 		LOGGER.info("Entered getUserbyTokenUI() -> Start");
 		LOGGER.info("Parameter token -> " + token);
+		LOGGER.info("Parameter appName -> " + appName);
 
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
-		Response userResponse = null;
+		Response userResponse = null, applicationDetails = null;
+		String applicationContext = null;
 		try {
 			if (null != token) {
 
@@ -1582,7 +1670,29 @@ public class UserServiceImpl implements UserService {
 				Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 				DocumentContext productDocCtx = JsonPath.using(conf).parse(userInfoByAccessToken);
 				String userId = productDocCtx.read("$.sub");
-				userResponse = getUser(userId);
+				String employeeType = productDocCtx.read("$.employeeType");
+				LOGGER.info("User employeeType = "+employeeType);
+				
+				if(null == employeeType || employeeType.isEmpty() 
+						|| !(employeeType.equalsIgnoreCase(UserConstants.USER_CONTEXT_HOME)
+						|| employeeType.equalsIgnoreCase(UserConstants.USER_CONTEXT_HOME_1) 
+						|| employeeType.equalsIgnoreCase(UserConstants.USER_CONTEXT_WORK)
+						|| employeeType.equalsIgnoreCase(UserConstants.USER_CONTEXT_WORK_1))){
+					LOGGER.info("Start: getAppInfo() of OpenDjService for appName="+appName);
+					applicationDetails = openDJService.getAppInfo(djUserName, djUserPwd,"_id eq " + "\"" + appName + "\"");
+					LOGGER.info("End: getAppInfo() of OpenDjService for appName="+appName);
+					LOGGER.info("Response code from OpenDJ for getAppInfo() call: " + applicationDetails.getStatus());
+					
+					if (null != applicationDetails && 200 == applicationDetails.getStatus()) {
+						productDocCtx = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
+						applicationContext = productDocCtx.read(JsonConstants.APP_CONTEXT);
+						LOGGER.info("applicationContext=" + applicationContext);
+					}
+					userResponse = getUserWhenContextIsNull(applicationContext,userId);					
+				} else {
+					userResponse = getUser(userId);
+				}
+				
 				LOGGER.info("User details derived from access token: " + userId);
 			}
 		} catch (NotAuthorizedException e) {
@@ -1595,8 +1705,19 @@ public class UserServiceImpl implements UserService {
 			jsonArray.add(jsonObject);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info(GET_USER_BY_TOKEN_TIME_LOG + elapsedTime);
-			LOGGER.error("Error in getUserInfoByAccessToken() of OpenAMTokenService:"+e.getMessage(),e);
+			LOGGER.error("NotAuthorizedException in getUserbyTokenUI() -> "+e.getMessage(),e);
 			return Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(jsonArray).build();
+		} catch (IOException e) {
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("errorCode", "Parsing Error");
+			jsonObject.put("message", "System is unable to parse user details.");
+
+			JSONArray jsonArray = new JSONArray();
+			jsonArray.add(jsonObject);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info(GET_USER_BY_TOKEN_TIME_LOG + elapsedTime);
+			LOGGER.error("IOException in getUserbyTokenUI() -> "+e.getMessage(),e);
+			return Response.status(Response.Status.SERVICE_UNAVAILABLE.getStatusCode()).entity(jsonArray).build();
 		}
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info(GET_USER_BY_TOKEN_TIME_LOG + elapsedTime);
@@ -6868,8 +6989,8 @@ public class UserServiceImpl implements UserService {
 	 * com.idms.service.UserServiceImpl#getUserByOauthFromUI(java.lang.String)
 	 */
 	@Override
-	public Response getUserByOauthFromUI(String token) {
-		return getUserbyTokenUI(token);
+	public Response getUserByOauthFromUI(String token, String appName) {
+		return getUserbyTokenUI(token, appName);
 	}
 
 	/*
