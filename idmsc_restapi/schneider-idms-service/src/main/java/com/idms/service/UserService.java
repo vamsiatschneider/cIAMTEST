@@ -150,7 +150,7 @@ public interface UserService {
 
 	@GET
 	@Path("/oauth2/userinfo/ui")
-	Response getUserByOauthFromUI(@HeaderParam("Authorization") String token);
+	Response getUserByOauthFromUI(@HeaderParam("Authorization") String token, @HeaderParam("Appname") String appName);
 
 	@GET
 	@Path("/apexrest/ActivateBulkUser")
