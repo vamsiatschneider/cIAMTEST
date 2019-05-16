@@ -5287,8 +5287,14 @@ public class UserServiceImpl implements UserService {
 					 */
 
 			}
-
 			// convert Ifw to open am
+			//Senthil if IDMSMarketserved field is not null set in OpenAMUser Object
+			 if (null != userRequest.getUserRecord().getIDMSCompanyMarketServed__c()
+						&& !userRequest.getUserRecord().getIDMSCompanyMarketServed__c().isEmpty()){
+				LOGGER.info("inside IDMSCompanyMarketServed__c block");
+				openAmReq.getInput().getUser().setIndustries(userRequest.getUserRecord().getIDMSCompanyMarketServed__c());
+
+			}
 			jsonRequset = objMapper.writeValueAsString(openAmReq.getInput().getUser());
 			jsonRequset = jsonRequset.replace("\"\"", "[]");
 
