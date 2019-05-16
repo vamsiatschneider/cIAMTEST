@@ -8980,7 +8980,7 @@ public class UserServiceImpl implements UserService {
 	public void updateOpenamDetails(String iPlanetDirectoryKey, String federationId, String jsonData) {
 		LOGGER.info("Entered updateOpenamDetails() -> Start");
 		LOGGER.info("Parameter federationId -> " + federationId);
-		LOGGER.info("Parameter jsonData -> " + jsonData);
+		//LOGGER.info("Parameter jsonData -> " + jsonData);
 
 		try {
 			LOGGER.info("Start: updateUserForPassword() of openam for federatioId=" + federationId);
