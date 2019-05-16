@@ -236,8 +236,8 @@ public class IFWUser extends BaseEntity {
 	@JsonProperty
 	private String IDMSWorkPhone__c;
 	
-	@JsonProperty
-	private List IDMSMarketServed__c;
+	//@JsonProperty
+	//private String IDMSMarketServed__c;
 	
 	@JsonProperty("RegistrationAttributes__c")
 	public String getRegistrationAttributes__c() {
@@ -923,7 +923,7 @@ public class IFWUser extends BaseEntity {
 	public void setIDMSWorkPhone__c(String iDMSWorkPhone__c) {
 		IDMSWorkPhone__c = iDMSWorkPhone__c;
 	}
-	
+	/*
 	@JsonProperty("IDMSMarketServed__c")
 	public List getIDMSMarketServed__c() {
 		return IDMSMarketServed__c;
@@ -931,6 +931,6 @@ public class IFWUser extends BaseEntity {
 	@JsonProperty("IDMSMarketServed__c")
 	public void setIDMSMarketServed__c(List iDMSMarketServed__c) {
 		IDMSMarketServed__c = iDMSMarketServed__c;
-	}
+	}*/
 	
 }
