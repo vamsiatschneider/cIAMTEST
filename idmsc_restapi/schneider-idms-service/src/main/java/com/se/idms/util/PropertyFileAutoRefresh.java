@@ -232,7 +232,7 @@ public class PropertyFileAutoRefresh {
 			  });
 			configuration.setProperty("app.properties.file",configuration.getProperty("app.properties.file").replace("${idms.env}", IDMS_DEPLOY_ENV));
 			LOGGER.info("\nAfter conversion:");
-			configuration.forEach((key, value) -> LOGGER.info(key + " : " + value));
+			//configuration.forEach((key, value) -> LOGGER.info(key + " : " + value));
 			
 			initializeProperties();
 			
