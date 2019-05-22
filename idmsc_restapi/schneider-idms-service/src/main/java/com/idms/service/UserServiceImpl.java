@@ -1737,8 +1737,8 @@ public class UserServiceImpl implements UserService {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Response getUserbyToken(String token) {
-		// LOGGER.info("Entered getUserbyToken() -> Start");
-		// LOGGER.info("Parameter token -> "+token);
+		LOGGER.info("Entered getUserbyToken() -> Start");
+		LOGGER.info("Parameter token -> "+token);
 
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
