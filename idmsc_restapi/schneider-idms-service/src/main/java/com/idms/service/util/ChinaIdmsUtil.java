@@ -18,9 +18,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 
-import com.se.idms.cache.api.CacheManagerProviderImpl;
 import com.se.idms.util.UserConstants;
 
 public class ChinaIdmsUtil {
@@ -124,23 +122,22 @@ public class ChinaIdmsUtil {
 	 * @param rawData
 	 * @return
 	 */
-	public static String printOpenAMInfo(String rawData){
+	public static String printOpenAMInfo(String rawData) {
 		String newrawdata = rawData;
-        if (rawData.toLowerCase().contains("userPassword".toLowerCase())){
-        	int i = rawData.indexOf(",\"userPassword");
-        	int y = rawData.indexOf(",", i+1);
-        	String chars = rawData.substring(i, y);
-        	newrawdata = rawData.replace(chars, "");
-        }
-        if (newrawdata.toLowerCase().contains("tmp_password".toLowerCase())){
-        	int i = newrawdata.indexOf(",\"tmp_password");
-        	int y = newrawdata.indexOf(",", i+1);
-        	String chars = newrawdata.substring(i, y);
-        	newrawdata = newrawdata.replace(chars, "");
-        }
-        
-        return newrawdata;
-    }
+		if (rawData.toLowerCase().contains("userPassword".toLowerCase())) {
+			int i = rawData.indexOf(",\"userPassword");
+			int y = rawData.indexOf(",", i + 1);
+			String chars = rawData.substring(i, y);
+			newrawdata = rawData.replace(chars, "");
+		}
+		if (newrawdata.toLowerCase().contains("tmp_password".toLowerCase())) {
+			int i = newrawdata.indexOf(",\"tmp_password");
+			int y = newrawdata.indexOf(",", i + 1);
+			String chars = newrawdata.substring(i, y);
+			newrawdata = newrawdata.replace(chars, "");
+		}
+		return newrawdata;
+	}
 	
 	/**
 	 * Get cookies values from response
@@ -186,8 +183,8 @@ public class ChinaIdmsUtil {
 		return amlbcookie; 
 	}
 
-	public static boolean mobileValidator(String mobile){
-		boolean checkMobile = true;		
+	public static boolean mobileValidator(String mobile) {
+		boolean checkMobile = true;
 		mobile = mobileTransformation(mobile);
 
 		if ((!StringUtils.isNumeric(mobile)) || (mobile.length() != 11)) {
@@ -201,22 +198,77 @@ public class ChinaIdmsUtil {
 	 * @param str
 	 * @return
 	 */
-	public static String mobileTransformation(String str) 
-	{ 
+	public static String mobileTransformation(String str) {
 		String mobileNumber = str.trim();
 		str = mobileNumber.replaceAll("[\\(\\)\\-\\+\\s]", "");
-		int i = 0; 
-		while (str.charAt(i) == '0') 
-			i++; 
+		int i = 0;
+		while (str.charAt(i) == '0')
+			i++;
 
 		str = str.substring(i);
-		
-		if(str.startsWith(UserConstants.MOBILE_CHINA_CODE)) {
+
+		if (str.startsWith(UserConstants.MOBILE_CHINA_CODE)) {
 			str = str.substring(UserConstants.MOBILE_CHINA_CODE.length());
 		}
 
-		return str;  // return in String 
-	} 
+		return str; // return in String
+	}
+	
+	public static boolean passwordCheck(String strPass, String strEmail, String strMobile) {
+		boolean checkEmailInPassword = false;
+		boolean checkMobileInPassword = false;
+		boolean checkPassword = false;
+
+		if (null != strEmail && !strEmail.isEmpty()) {
+			strEmail = strEmail.trim();
+			for (int i = 0; i <= strEmail.length() - 4; i++) {
+				String subStrEmail = strEmail.substring(i, i + 4);
+				if (strPass.contains(subStrEmail)) {
+					checkEmailInPassword = true;
+					break;
+				}
+			}
+		}
+
+		if (null != strMobile && !strMobile.isEmpty()) {
+			strMobile = strMobile.trim();
+			if (strPass.contains(strMobile)) {
+				checkMobileInPassword = true;
+			}
+		}
+
+		checkPassword = checkEmailInPassword || checkMobileInPassword;
+		return checkPassword;
+	}
+	
+	public static String maskText(String strToken) {
+		int strLength = 0, startPoint = 5, maskLength = 0;
+		StringBuilder sbMaskString = new StringBuilder(maskLength);
+
+		if (null != strToken && !strToken.isEmpty()) {
+			if(strToken.trim().toLowerCase().contains("bearer")){
+				startPoint = 12;
+			}
+			strLength = strToken.trim().length();
+			maskLength = strLength - startPoint;
+
+			for (int i = 0; i < maskLength; i++) {
+				sbMaskString.append('X');
+			}
+			return strToken.trim().substring(0, startPoint) + sbMaskString.toString();
+		}
+		return null;
+	}
+	
+	/*public static void main(String[] args) {
+		String str = "88ee604-735c-4b95-a0d8-41439bfbbd14";
+		try {
+			String modString  = maskText(str);
+			System.out.println("modString = "+modString);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}*/
 	
 	/*public static void main(String[] args) {
 		//String longvalue = generateHashValue("tY4MomqIwjg34932ZhTx651K38WJcZ");
