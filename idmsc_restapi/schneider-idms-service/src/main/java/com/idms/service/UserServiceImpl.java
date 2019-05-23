@@ -630,7 +630,7 @@ public class UserServiceImpl implements UserService {
 		if ("@home".equalsIgnoreCase(context) || "home".equalsIgnoreCase(context)) {
 			return returnGetUserHomeContext(startTime, userHomeResponse, userProductDocCtx);
 		} else if ("@work".equalsIgnoreCase(context) || "work".equalsIgnoreCase(context)
-				|| "Both".equalsIgnoreCase(context)) {
+				|| "Both".equalsIgnoreCase(context) || "@Both".equalsIgnoreCase(context)) {
 			valuesByOauthHomeWorkContext.parseValuesWorkContext(userWorkResponse, userProductDocCtx);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info(GET_USER_TIME_LOG + elapsedTime);
@@ -794,7 +794,7 @@ public class UserServiceImpl implements UserService {
 		if ("@home".equalsIgnoreCase(context) || "home".equalsIgnoreCase(context)) {
 			return returnGetUserByOauthHomeContext(startTime, userHomeResponse, userProductDocCtx);
 		} else if ("@work".equalsIgnoreCase(context) || "work".equalsIgnoreCase(context)
-				|| "Both".equalsIgnoreCase(context)) {
+				|| "Both".equalsIgnoreCase(context) || "@Both".equalsIgnoreCase(context)) {
 			valuesByOauthHomeWorkContext.parseValuesByOauthWorkContext(userWorkResponse, userProductDocCtx);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info(GET_USER_TIME_LOG + elapsedTime);
@@ -4113,7 +4113,7 @@ public class UserServiceImpl implements UserService {
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
 			// LOGGER.info("SSOTOKEN--------------------------->" +
 			// iPlanetDirectoryKey);
-			LOGGER.info("productDocCtx in updateAil=" + productDocCtx);
+			LOGGER.info("productDocCtx in updateAil=" + ChinaIdmsUtil.printOpenAMInfo(productDocCtx.jsonString()));
 			IDMSAil__c = productDocCtx.read("$.IDMSAil_c[0]");
 
 			// IDMSAil__c = IDMSAil__c.replace("\"", "");
@@ -4540,7 +4540,7 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 			userData = productService.getUser(iPlanetDirectoryKey, userName);
-			LOGGER.info("getPasswordRecoveryResponse -> " + userData);
+			LOGGER.info("getPasswordRecoveryResponse -> " + ChinaIdmsUtil.printOpenAMInfo(userData));
 		} catch (BadRequestException e) {
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
@@ -4801,7 +4801,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Start: getUser() of OpenAMService for userId:" + userId);
 				userData = productService.getUser(iPlanetDirectoryKey, userId);
 
-				LOGGER.info("userData -> " + userData);
+				LOGGER.info("userData -> " + ChinaIdmsUtil.printOpenAMInfo(userData));
 
 				productDocCtxUser = JsonPath.using(conf).parse(userData);
 				updatingUser = productDocCtxUser.read(JsonConstants.LOGIN_ID_LOWER_0);
@@ -5745,7 +5745,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Start: getUser() of OpenAMService in resendPIN for resendId:" + resendId);
 				userData = productService.getUser(iPlanetDirectoryKey, resendId);
 				LOGGER.info("End: getUser() of OpenAMService in resendPIN finished for resendId:" + resendId);
-				LOGGER.info("user data from Openam: " + userData);
+				LOGGER.info("user data from Openam: " + ChinaIdmsUtil.printOpenAMInfo(userData));
 
 				productDocCtx = JsonPath.using(conf).parse(userData);
 
@@ -6792,7 +6792,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Start: getUser() of openam for userid=" + userId);
 				userData = productService.getUser(iPlanetDirectoryKey, userId);
 				LOGGER.info("End: getUser() of openam finished for userid=" + userId);
-				LOGGER.info(" productService.getUser :: " + userData);
+				LOGGER.info(" productService.getUser :: " + ChinaIdmsUtil.printOpenAMInfo(userData));
 				productDocCtx = JsonPath.using(conf).parse(userData);
 
 				usermail = productDocCtx.read("$.mail[0]");
@@ -8293,7 +8293,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Start: getUser() of openam for federationId:" + federationId);
 				userData = productService.getUser(iPlanetDirectoryKey, federationId);
 				LOGGER.info("End: getUser() of openam finished for federationId:" + federationId);
-				LOGGER.info("user data from Openam: " + userData);
+				LOGGER.info("user data from Openam: " + ChinaIdmsUtil.printOpenAMInfo(userData));
 
 				productDocCtx = JsonPath.using(conf).parse(userData);
 
