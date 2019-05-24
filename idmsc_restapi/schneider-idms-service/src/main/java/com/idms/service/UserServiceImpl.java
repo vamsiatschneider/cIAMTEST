@@ -720,7 +720,7 @@ public class UserServiceImpl implements UserService {
 		if ("@home".equalsIgnoreCase(applicationContext) || "home".equalsIgnoreCase(applicationContext)) {
 			return returnGetUserHomeContext(startTime, userHomeResponse, userProductDocCtx);
 		} else if ("@work".equalsIgnoreCase(applicationContext) || "work".equalsIgnoreCase(applicationContext) 
-				|| "Both".equalsIgnoreCase(applicationContext)) {
+				|| "Both".equalsIgnoreCase(applicationContext) || "@Both".equalsIgnoreCase(applicationContext)) {
 			valuesByOauthHomeWorkContext.parseValuesWorkContext(userWorkResponse, userProductDocCtx);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info(GET_USER_TIME_LOG + elapsedTime);
