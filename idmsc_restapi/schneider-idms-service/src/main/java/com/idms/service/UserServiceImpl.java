@@ -1616,7 +1616,11 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("!uimsAlreadyCreatedFlag Value is -> " + !uimsAlreadyCreatedFlag);
 		if (!uimsAlreadyCreatedFlag && null != userRequest.getUserRecord().getIDMS_Registration_Source__c()
 				&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())) {
-			LOGGER.info("Now ready to create UIMS users, userRequest=" + userRequest);
+			try {
+				LOGGER.info("Now ready to create UIMS users, userRequest=" + ChinaIdmsUtil.printData(objMapper.writeValueAsString(userRequest)));
+			} catch (JsonProcessingException e) {
+				LOGGER.error("JsonProcessingException = "+e.getMessage(),e);
+			}
 
 			Thread thread = new Thread(new Runnable() {
 				public void run() {
