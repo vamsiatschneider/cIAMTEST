@@ -197,6 +197,8 @@ public class PropertyFileAutoRefresh {
 	
 	private String emailUserNameFormat ;
 	
+	private String maintenanceModeGlobal;
+	
 	public static PropertyFileAutoRefresh getInstance() {
 		return INSTANCE;
 	}
@@ -325,6 +327,9 @@ public class PropertyFileAutoRefresh {
 			
 			if(!((UserServiceImpl) userService).getEnableTestMailDomain().equals(enableTestMailDomain) && enableTestMailDomain!=null && !enableTestMailDomain.isEmpty())
 			((UserServiceImpl) userService).setEnableTestMailDomain(enableTestMailDomain);
+			
+			if(!((UserServiceImpl) userService).getMaintenanceModeGlobal().equals(maintenanceModeGlobal) && maintenanceModeGlobal!=null && !maintenanceModeGlobal.isEmpty())
+				((UserServiceImpl) userService).setMaintenanceModeGlobal(maintenanceModeGlobal);
 			
 			if(!(goDigitalUserService.getFromUserName().equals(fromUserName)) && fromUserName!=null && !fromUserName.isEmpty())
 			goDigitalUserService.setFromUserName(fromUserName);
@@ -691,6 +696,8 @@ public class PropertyFileAutoRefresh {
 		IDMS_FIELDSMAPPING_PROPERTIES_PATH=configuration.getProperty("fields.mapping.props.path");
 		
 		emailUserNameFormat =configuration.getProperty("idmsc.emailUserNameFormat");
+		
+		maintenanceModeGlobal=configuration.getProperty("idmsc.maintenance_mode_global");
 	}
 
 	public void initilize() throws Exception {

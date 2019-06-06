@@ -345,6 +345,9 @@ public class UserServiceImpl implements UserService {
 	@Value("${enableTestMailDomain}")
 	private String enableTestMailDomain;
 	
+	@Value("${idmsc.maintenance_mode_global}")
+	private String maintenanceModeGlobal;
+	
 	private static String userAction = "submitRequirements";
 
 	private static String errorStatus = "Error";
@@ -892,6 +895,10 @@ public class UserServiceImpl implements UserService {
 		boolean uimsAlreadyCreatedFlag = false, mobileRegFlag = false;
 		Response userCreation = null, checkUserExist = null;
 		String otpinOpendj = null, hexPinMobile = null, otpStatus = null;
+		LOGGER.info("Access Control List:"+maintenanceModeGlobal);
+		//List<String> accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
+		List<String> accssControlList=null;
+		boolean maintenanceMode=false;
 		try {
 
 			objMapper = new ObjectMapper();
@@ -914,7 +921,27 @@ public class UserServiceImpl implements UserService {
 					LOGGER.error("Error is :: Request body is null or empty");
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
-				
+				if(maintenanceModeGlobal!=null)
+					accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
+				if(accssControlList!=null && accssControlList.size()>0 && !(accssControlList.contains("False"))){
+				//if(accssControlList!=null &&accssControlList.size()>0){//Through error if maintenance mode is enabled
+				if(accssControlList.contains(UserConstants.MAINTENANCE_MODE_COMPLETE) || accssControlList.contains(UserConstants.MAINTENANCE_MODE_REGISTRATION) ){
+					errorResponse.setStatus(errorStatus);
+					errorResponse.setMessage(UserConstants.MAINTENANCE_MODE_MESSAGE);
+					LOGGER.error("Error :: Maintenance mode in progress");
+					maintenanceMode=true;
+					//return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
+				 }
+				//}
+				//Consider  exclusions for maintenance mode as below
+				if(maintenanceMode){
+					maintenanceMode = excludeMaintenanceMode(userRequest.getUserRecord().getIDMS_Registration_Source__c(), UserConstants.MAINTENANCE_MODE_REGISTRATION);
+				}
+				if(maintenanceMode){
+					return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
+				}
+				}
+				//Here if maintenanceMode==true then return 503
 				if (null != userRequest.getUserRecord().getMobilePhone()
 						&& !userRequest.getUserRecord().getMobilePhone().isEmpty()) {
 					userRequest.getUserRecord().setMobilePhone(
@@ -1644,6 +1671,69 @@ public class UserServiceImpl implements UserService {
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 		return Response.status(Response.Status.OK).entity(sucessRespone).build();
+	}
+
+	private boolean excludeMaintenanceMode(String sourceApp, String action)
+			throws Exception {
+		DocumentContext productDJData;
+		String exclusionList;
+		boolean maintenanceMode=false;
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		try{
+		Response applicationDetails = openDJService.getUser(djUserName, djUserPwd, sourceApp);
+		productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
+		if (null != applicationDetails && 200 == applicationDetails.getStatus()) {
+			String maintenanceModeOpenDJ = productDJData.read("_maintenance_mode_exclusion");
+			LOGGER.info("userRegistration maintenance_mode:"+maintenanceModeOpenDJ);
+			if(null != maintenanceModeOpenDJ && !maintenanceModeOpenDJ.isEmpty()){
+				exclusionList = maintenanceModeOpenDJ;
+				List<String> exclusionAppList = Arrays.asList(exclusionList.split(","));
+				if(action.equalsIgnoreCase(UserConstants.MAINTENANCE_MODE_REGISTRATION)){
+					if(exclusionAppList.contains(UserConstants.MAINTENANCE_MODE_REGISTRATION)){
+						maintenanceMode=false;
+					}
+					else{
+						maintenanceMode=true;	
+					}
+				}
+				else if(action.equalsIgnoreCase(UserConstants.MAINTENANCE_MODE_PROFILE_UPDATE)){
+					if(exclusionAppList.contains(UserConstants.MAINTENANCE_MODE_PROFILE_UPDATE)){
+						maintenanceMode=false;
+					}
+					else{
+						maintenanceMode=true;	
+					}
+				}
+				else if(action.equalsIgnoreCase(UserConstants.MAINTENANCE_MODE_AIL_UPDATE)){
+					if(exclusionAppList.contains(UserConstants.MAINTENANCE_MODE_AIL_UPDATE)){
+						maintenanceMode=false;
+					}
+					else{
+						maintenanceMode=true;	
+					}
+				}
+				else if(action.equalsIgnoreCase(UserConstants.MAINTENANCE_MODE_LOGIN)){
+					if(exclusionAppList.contains(UserConstants.MAINTENANCE_MODE_LOGIN)){
+						maintenanceMode=false;
+					}
+					else{
+						maintenanceMode=true;	
+					}
+				}
+			}
+			else{
+				maintenanceMode=true;
+			}
+			//maintenanceMode=false;
+		}
+		if (null != applicationDetails && 200 != applicationDetails.getStatus()) {//revisit here
+			maintenanceMode=true;
+		}
+	}
+	catch(Exception exception){
+		LOGGER.error("Error in maintenance mode exclusion"+exception);
+	}
+		return maintenanceMode;
 	}
 
 	/**
@@ -3903,7 +3993,6 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Entered updateAIL() -> Start");
 		// LOGGER.info("Parameter clientId -> "+clientId+" ,clientSecret ->
 		// "+clientSecret);
-
 		String IDMSAil__c = "";
 		String userData = "";
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
@@ -3918,11 +4007,35 @@ public class UserServiceImpl implements UserService {
 		String PRODUCT_JSON_STRING = "";
 		String usermail = "";
 		// Validate Input Paramenters
-
+		ErrorResponse errorResponse = new ErrorResponse();
 		ObjectMapper objMapper = new ObjectMapper();
+		//List<String> accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
+		List<String> accssControlList =null;
+		boolean maintenanceMode=false;
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		try {
 			LOGGER.info("UserServiceImpl:updateAIL -> : Requset :  -> " + objMapper.writeValueAsString(ailRequest));
-
+			LOGGER.info("Access Control List:"+maintenanceModeGlobal);
+			if(maintenanceModeGlobal!=null)
+				accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
+			if(accssControlList!=null && accssControlList.size()>0 && !(accssControlList.contains("False"))){
+			//if(accssControlList!=null && accssControlList.size()>0){//Through error if maintenance mode is enabled
+				if(accssControlList.contains(UserConstants.MAINTENANCE_MODE_COMPLETE) || accssControlList.contains(UserConstants.MAINTENANCE_MODE_AIL_UPDATE) ){
+					errorResponse.setStatus(errorStatus);
+					errorResponse.setMessage(UserConstants.MAINTENANCE_MODE_MESSAGE);
+					LOGGER.error("Error :: Maintenance mode in progress");
+					maintenanceMode=true;
+					//return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
+				 }
+			//}
+			//Consider  exclusions for maintenance mode as below
+			if(maintenanceMode){
+				maintenanceMode = excludeMaintenanceMode(ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c(),  UserConstants.MAINTENANCE_MODE_AIL_UPDATE);
+			}
+			if(maintenanceMode){
+				return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
+			}
+		  }
 			// Profile Update Source
 			if (null == ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c()
 					|| ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c().isEmpty()) {
@@ -4109,7 +4222,7 @@ public class UserServiceImpl implements UserService {
 				// LOGGER.info("productService.getUser : Response ->
 				// "+userData);
 			}
-			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+			//Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();//Senthil
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
 			// LOGGER.info("SSOTOKEN--------------------------->" +
 			// iPlanetDirectoryKey);
@@ -4625,6 +4738,10 @@ public class UserServiceImpl implements UserService {
 			JSONObject responseCheck = new JSONObject();
 			DocumentContext  productDJData = null;
 			String emailUserNameFormat = null;
+			boolean maintenanceMode=false;
+			ErrorResponse errorResponse = new ErrorResponse();
+			//List<String> accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
+			List<String> accssControlList =null;
 			// Step 1:
 
 			// LOGGER.info(" UserServiceImpl :: updateUser
@@ -4635,7 +4752,27 @@ public class UserServiceImpl implements UserService {
 			 */
 
 			try {
-
+				LOGGER.info("Access Control List:"+maintenanceModeGlobal);
+				if(maintenanceModeGlobal!=null)
+					accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
+				if(accssControlList!=null && accssControlList.size()>0 && !(accssControlList.contains("False"))){
+				//if(accssControlList!=null &&accssControlList.size()>0){//Through error if maintenance mode is enabled
+					if(accssControlList.contains(UserConstants.MAINTENANCE_MODE_COMPLETE) || accssControlList.contains(UserConstants.MAINTENANCE_MODE_PROFILE_UPDATE) ){
+						errorResponse.setStatus(errorStatus);
+						errorResponse.setMessage(UserConstants.MAINTENANCE_MODE_MESSAGE);
+						LOGGER.error("Error :: Maintenance mode in progress");
+						maintenanceMode=true;
+						//return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
+					 }
+				//}
+				//Consider  exclusions for maintenance mode as below
+				if(maintenanceMode){
+					maintenanceMode = excludeMaintenanceMode(userRequest.getUserRecord().getIDMS_Profile_update_source__c(),  UserConstants.MAINTENANCE_MODE_PROFILE_UPDATE);
+				}
+				if(maintenanceMode){
+					return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
+				}
+			}
 				/**
 				 * Get iPlanetDirectory Pro Admin token for admin
 				 */
@@ -8905,6 +9042,11 @@ public class UserServiceImpl implements UserService {
 		long elapsedTime;
 		String successResponse = null;
 		String regSource = app;
+		//List<String> accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
+		List<String> accssControlList =null;
+		ErrorResponse errorResponse = new ErrorResponse();
+		boolean maintenanceMode=false;
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		if ((app == null || app.equalsIgnoreCase("undefined"))) {
 			regSource = UserConstants.LOGZ_IO_DEFAULT_APP;
 		} else if ((app != null && app.contains("partner"))) {
@@ -8925,6 +9067,27 @@ public class UserServiceImpl implements UserService {
 		try {
 			// The below snippet for authentication logs.
 			// String PlanetDirectoryKey = getSSOToken();
+			LOGGER.info("Access Control List:"+maintenanceModeGlobal);
+			if(maintenanceModeGlobal!=null)
+				accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
+			if(accssControlList!=null && accssControlList.size()>0 && !(accssControlList.contains("False"))){
+			//if(accssControlList!=null &&accssControlList.size()>0){//Through error if maintenance mode is enabled
+				if(accssControlList.contains(UserConstants.MAINTENANCE_MODE_COMPLETE) || accssControlList.contains(UserConstants.MAINTENANCE_MODE_LOGIN) ){
+					errorResponse.setStatus(errorStatus);
+					errorResponse.setMessage(UserConstants.MAINTENANCE_MODE_MESSAGE);
+					LOGGER.error("Error :: Maintenance mode in progress");
+					maintenanceMode=true;
+					//return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
+				 }
+			//}
+			//Consider  exclusions for maintenance mode as below
+			if(maintenanceMode){
+				maintenanceMode = excludeMaintenanceMode(app,  UserConstants.MAINTENANCE_MODE_LOGIN);
+			}
+			if(maintenanceMode){
+				return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
+			}
+			}
 			LOGGER.info("Start: aunthenticate User of OPENAMService for username=" + userName);
 			Response authenticateResponse = ChinaIdmsUtil.executeHttpClient(prefixStartUrl, realm, userName, password);
 			LOGGER.info("End: aunthenticate User of OPENAMService for username=" + userName);
@@ -10656,5 +10819,13 @@ public class UserServiceImpl implements UserService {
 		this.defaultUserNameFormat = defaultUserNameFormat;
 	}
 
+	public String getMaintenanceModeGlobal() {
+		return maintenanceModeGlobal;
+	}
+
+	public void setMaintenanceModeGlobal(String maintenanceModeGlobal) {
+		this.maintenanceModeGlobal = maintenanceModeGlobal;
+	}
+	
 	
 }

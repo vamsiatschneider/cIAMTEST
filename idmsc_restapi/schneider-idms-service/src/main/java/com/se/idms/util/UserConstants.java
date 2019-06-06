@@ -582,5 +582,14 @@ public class UserConstants {
 	
 	public static final String APP_ROOT_PLACE_HOLDER ="${idmsc.app_root.location}";
 	
+	//Maintenance mode access control list
+	
+	public static final String MAINTENANCE_MODE_COMPLETE = "Complete";
+	public static final String MAINTENANCE_MODE_REGISTRATION = "Registration";
+	public static final String MAINTENANCE_MODE_PROFILE_UPDATE = "Profile_Update";
+	public static final String MAINTENANCE_MODE_AIL_UPDATE = "AIL_Update";
+	public static final String MAINTENANCE_MODE_LOGIN = "Login";
+	public static final String MAINTENANCE_MODE_MESSAGE = "Maintenance mode in progress";
+	
 	
 }
