@@ -1643,7 +1643,11 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("!uimsAlreadyCreatedFlag Value is -> " + !uimsAlreadyCreatedFlag);
 		if (!uimsAlreadyCreatedFlag && null != userRequest.getUserRecord().getIDMS_Registration_Source__c()
 				&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())) {
-			LOGGER.info("Now ready to create UIMS users, userRequest=" + userRequest);
+			try {
+				LOGGER.info("Now ready to create UIMS users, userRequest=" + ChinaIdmsUtil.printData(objMapper.writeValueAsString(userRequest)));
+			} catch (JsonProcessingException e) {
+				LOGGER.error("JsonProcessingException = "+e.getMessage(),e);
+			}
 
 			Thread thread = new Thread(new Runnable() {
 				public void run() {
@@ -7531,7 +7535,7 @@ public class UserServiceImpl implements UserService {
 	public Response idmsIdpChaning(String idToken1, String idToken2, String idButton, String gotoUrl, String gotoOnFail,
 			String sunQueryParamsString, String encoded, String errorMessage, String gxCharset) {
 		LOGGER.info("Entered idmsIdpChaning() -> Start");
-		LOGGER.info("Parameter idToken1 -> " + idToken1 + " ,idToken2 - > " + idToken2);
+		LOGGER.info("Parameter idToken1 -> " + idToken1);
 		LOGGER.info("Parameter idButton -> " + idButton + " ,gotoUrl -> " + gotoUrl);
 		LOGGER.info("Parameter gotoOnFail -> " + gotoOnFail + " ,sunQueryParamsString -> " + sunQueryParamsString);
 		LOGGER.info("Parameter encoded -> " + encoded + " ,errorMessage -> " + errorMessage);
@@ -7544,14 +7548,14 @@ public class UserServiceImpl implements UserService {
 		try {
 			if ((null == gotoUrl || gotoUrl.isEmpty())) {
 				userResponse.setStatus(errorStatus);
-				userResponse.setMessage("goto value is mandatory::");
+				userResponse.setMessage("goto value is mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error is -> " + userResponse.getMessage());
 				LOGGER.info("Time taken by idmsIdpChaning() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 			} else if ((null == sunQueryParamsString || sunQueryParamsString.isEmpty())) {
 				userResponse.setStatus(errorStatus);
-				userResponse.setMessage("sunQueryParamsString value is mandatory::");
+				userResponse.setMessage("sunQueryParamsString value is mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error is -> " + userResponse.getMessage());
 				LOGGER.info("Time taken by idmsIdpChaning() : " + elapsedTime);
@@ -7941,7 +7945,7 @@ public class UserServiceImpl implements UserService {
 			String loginbutton) {
 		LOGGER.info("Entered idmsDirectLogin() -> Start");
 		LOGGER.info("Parameter startUrl -> " + startUrl + " ,idToken1 -> " + idToken1);
-		LOGGER.info("Parameter idToken2 -> " + idToken2 + " ,submitted -> " + submitted);
+		LOGGER.info("Parameter submitted -> " + submitted);
 		LOGGER.info("Parameter loginbutton -> " + loginbutton);
 		long elapsedTime;
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
@@ -7956,35 +7960,35 @@ public class UserServiceImpl implements UserService {
 
 			if ((null == startUrl || startUrl.isEmpty())) {
 				userResponse.setStatus(errorStatus);
-				userResponse.setMessage("StartUrl value is mandatory::");
+				userResponse.setMessage("StartUrl value is mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by idmsDirectLogin() : " + elapsedTime);
 				LOGGER.error("Error in idmsDirectLogin is " + userResponse.getMessage());
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 			} else if ((null == idToken1 || idToken1.isEmpty())) {
 				userResponse.setStatus(errorStatus);
-				userResponse.setMessage("idToken1 value is mandatory::");
+				userResponse.setMessage("idToken1 value is mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error in idmsDirectLogin is " + userResponse.getMessage());
 				LOGGER.info("Time taken by idmsDirectLogin() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 			} else if ((null == idToken2 || idToken2.isEmpty())) {
 				userResponse.setStatus(errorStatus);
-				userResponse.setMessage("idToken2 value is mandatory::");
+				userResponse.setMessage("idToken2 value is mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error in idmsDirectLogin is " + userResponse.getMessage());
 				LOGGER.info("Time taken by idmsDirectLogin() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 			} else if ((null == submitted || submitted.isEmpty())) {
 				userResponse.setStatus(errorStatus);
-				userResponse.setMessage("Submitted value is mandatory::");
+				userResponse.setMessage("Submitted value is mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error in idmsDirectLogin is " + userResponse.getMessage());
 				LOGGER.info("Time taken by idmsDirectLogin() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 			} else if ((null == loginbutton || loginbutton.isEmpty())) {
 				userResponse.setStatus(errorStatus);
-				userResponse.setMessage("Loginbutton value is mandatory::");
+				userResponse.setMessage("Loginbutton value is mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error in idmsDirectLogin is " + userResponse.getMessage());
 				LOGGER.info("Time taken by idmsDirectLogin() : " + elapsedTime);
