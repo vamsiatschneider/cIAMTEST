@@ -9050,7 +9050,7 @@ public class UserServiceImpl implements UserService {
 		List<String> accssControlList =null;
 		ErrorResponse errorResponse = new ErrorResponse();
 		boolean maintenanceMode=false;
-		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		//Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		if ((app == null || app.equalsIgnoreCase("undefined"))) {
 			regSource = UserConstants.LOGZ_IO_DEFAULT_APP;
 		} else if ((app != null && app.contains("partner"))) {
