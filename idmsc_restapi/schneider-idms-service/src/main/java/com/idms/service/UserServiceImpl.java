@@ -36,6 +36,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -344,6 +345,9 @@ public class UserServiceImpl implements UserService {
 	
 	@Value("${enableTestMailDomain}")
 	private String enableTestMailDomain;
+	
+	@Value("${idmsc.maintenance_mode_global}")
+	private String maintenanceModeGlobal;
 	
 	private static String userAction = "submitRequirements";
 
@@ -887,6 +891,10 @@ public class UserServiceImpl implements UserService {
 		boolean uimsAlreadyCreatedFlag = false, mobileRegFlag = false;
 		Response userCreation = null, checkUserExist = null;
 		String otpinOpendj = null, hexPinMobile = null, otpStatus = null;
+		LOGGER.info("Access Control List:"+maintenanceModeGlobal);
+		//List<String> accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
+		List<String> accssControlList=null;
+		boolean maintenanceMode=false;
 		try {
 
 			objMapper = new ObjectMapper();
@@ -909,7 +917,27 @@ public class UserServiceImpl implements UserService {
 					LOGGER.error("Error is :: Request body is null or empty");
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
-				
+				if(maintenanceModeGlobal!=null)
+					accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
+				if(accssControlList!=null && accssControlList.size()>0 && !(accssControlList.contains("False"))){
+				//if(accssControlList!=null &&accssControlList.size()>0){//Through error if maintenance mode is enabled
+				if(accssControlList.contains(UserConstants.MAINTENANCE_MODE_COMPLETE) || accssControlList.contains(UserConstants.MAINTENANCE_MODE_REGISTRATION) ){
+					errorResponse.setStatus(errorStatus);
+					errorResponse.setMessage(UserConstants.MAINTENANCE_MODE_MESSAGE);
+					LOGGER.error("Error :: Maintenance mode in progress");
+					maintenanceMode=true;
+					//return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
+				 }
+				//}
+				//Consider  exclusions for maintenance mode as below
+				if(maintenanceMode){
+					maintenanceMode = excludeMaintenanceMode(userRequest.getUserRecord().getIDMS_Registration_Source__c(), UserConstants.MAINTENANCE_MODE_REGISTRATION);
+				}
+				if(maintenanceMode){
+					return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
+				}
+				}
+				//Here if maintenanceMode==true then return 503
 				if (null != userRequest.getUserRecord().getMobilePhone()
 						&& !userRequest.getUserRecord().getMobilePhone().isEmpty()) {
 					userRequest.getUserRecord().setMobilePhone(
@@ -1643,6 +1671,69 @@ public class UserServiceImpl implements UserService {
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 		return Response.status(Response.Status.OK).entity(sucessRespone).build();
+	}
+
+	private boolean excludeMaintenanceMode(String sourceApp, String action)
+			throws Exception {
+		DocumentContext productDJData;
+		String exclusionList;
+		boolean maintenanceMode=false;
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		try{
+		Response applicationDetails = openDJService.getUser(djUserName, djUserPwd, sourceApp);
+		productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
+		if (null != applicationDetails && 200 == applicationDetails.getStatus()) {
+			String maintenanceModeOpenDJ = productDJData.read("_maintenance_mode_exclusion");
+			LOGGER.info("userRegistration maintenance_mode:"+maintenanceModeOpenDJ);
+			if(null != maintenanceModeOpenDJ && !maintenanceModeOpenDJ.isEmpty()){
+				exclusionList = maintenanceModeOpenDJ;
+				List<String> exclusionAppList = Arrays.asList(exclusionList.split(","));
+				if(action.equalsIgnoreCase(UserConstants.MAINTENANCE_MODE_REGISTRATION)){
+					if(exclusionAppList.contains(UserConstants.MAINTENANCE_MODE_REGISTRATION)){
+						maintenanceMode=false;
+					}
+					else{
+						maintenanceMode=true;	
+					}
+				}
+				else if(action.equalsIgnoreCase(UserConstants.MAINTENANCE_MODE_PROFILE_UPDATE)){
+					if(exclusionAppList.contains(UserConstants.MAINTENANCE_MODE_PROFILE_UPDATE)){
+						maintenanceMode=false;
+					}
+					else{
+						maintenanceMode=true;	
+					}
+				}
+				else if(action.equalsIgnoreCase(UserConstants.MAINTENANCE_MODE_AIL_UPDATE)){
+					if(exclusionAppList.contains(UserConstants.MAINTENANCE_MODE_AIL_UPDATE)){
+						maintenanceMode=false;
+					}
+					else{
+						maintenanceMode=true;	
+					}
+				}
+				else if(action.equalsIgnoreCase(UserConstants.MAINTENANCE_MODE_LOGIN)){
+					if(exclusionAppList.contains(UserConstants.MAINTENANCE_MODE_LOGIN)){
+						maintenanceMode=false;
+					}
+					else{
+						maintenanceMode=true;	
+					}
+				}
+			}
+			else{
+				maintenanceMode=true;
+			}
+			//maintenanceMode=false;
+		}
+		if (null != applicationDetails && 200 != applicationDetails.getStatus()) {//revisit here
+			maintenanceMode=true;
+		}
+	}
+	catch(Exception exception){
+		LOGGER.error("Error in maintenance mode exclusion"+exception);
+	}
+		return maintenanceMode;
 	}
 
 	/**
@@ -3903,7 +3994,6 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Entered updateAIL() -> Start");
 		// LOGGER.info("Parameter clientId -> "+clientId+" ,clientSecret ->
 		// "+clientSecret);
-
 		String IDMSAil__c = "";
 		String userData = "";
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
@@ -3918,11 +4008,35 @@ public class UserServiceImpl implements UserService {
 		String PRODUCT_JSON_STRING = "";
 		String usermail = "";
 		// Validate Input Paramenters
-
+		ErrorResponse errorResponse = new ErrorResponse();
 		ObjectMapper objMapper = new ObjectMapper();
+		//List<String> accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
+		List<String> accssControlList =null;
+		boolean maintenanceMode=false;
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		try {
 			LOGGER.info("UserServiceImpl:updateAIL -> : Requset :  -> " + objMapper.writeValueAsString(ailRequest));
-
+			LOGGER.info("Access Control List:"+maintenanceModeGlobal);
+			if(maintenanceModeGlobal!=null)
+				accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
+			if(accssControlList!=null && accssControlList.size()>0 && !(accssControlList.contains("False"))){
+			//if(accssControlList!=null && accssControlList.size()>0){//Through error if maintenance mode is enabled
+				if(accssControlList.contains(UserConstants.MAINTENANCE_MODE_COMPLETE) || accssControlList.contains(UserConstants.MAINTENANCE_MODE_AIL_UPDATE) ){
+					errorResponse.setStatus(errorStatus);
+					errorResponse.setMessage(UserConstants.MAINTENANCE_MODE_MESSAGE);
+					LOGGER.error("Error :: Maintenance mode in progress");
+					maintenanceMode=true;
+					//return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
+				 }
+			//}
+			//Consider  exclusions for maintenance mode as below
+			if(maintenanceMode){
+				maintenanceMode = excludeMaintenanceMode(ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c(),  UserConstants.MAINTENANCE_MODE_AIL_UPDATE);
+			}
+			if(maintenanceMode){
+				return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
+			}
+		  }
 			// Profile Update Source
 			if (null == ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c()
 					|| ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c().isEmpty()) {
@@ -4109,7 +4223,7 @@ public class UserServiceImpl implements UserService {
 				// LOGGER.info("productService.getUser : Response ->
 				// "+userData);
 			}
-			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+			//Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();//Senthil
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
 			// LOGGER.info("SSOTOKEN--------------------------->" +
 			// iPlanetDirectoryKey);
@@ -4625,6 +4739,10 @@ public class UserServiceImpl implements UserService {
 			JSONObject responseCheck = new JSONObject();
 			DocumentContext  productDJData = null;
 			String emailUserNameFormat = null;
+			boolean maintenanceMode=false;
+			ErrorResponse errorResponse = new ErrorResponse();
+			//List<String> accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
+			List<String> accssControlList =null;
 			// Step 1:
 
 			// LOGGER.info(" UserServiceImpl :: updateUser
@@ -4635,7 +4753,27 @@ public class UserServiceImpl implements UserService {
 			 */
 
 			try {
-
+				LOGGER.info("Access Control List:"+maintenanceModeGlobal);
+				if(maintenanceModeGlobal!=null)
+					accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
+				if(accssControlList!=null && accssControlList.size()>0 && !(accssControlList.contains("False"))){
+				//if(accssControlList!=null &&accssControlList.size()>0){//Through error if maintenance mode is enabled
+					if(accssControlList.contains(UserConstants.MAINTENANCE_MODE_COMPLETE) || accssControlList.contains(UserConstants.MAINTENANCE_MODE_PROFILE_UPDATE) ){
+						errorResponse.setStatus(errorStatus);
+						errorResponse.setMessage(UserConstants.MAINTENANCE_MODE_MESSAGE);
+						LOGGER.error("Error :: Maintenance mode in progress");
+						maintenanceMode=true;
+						//return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
+					 }
+				//}
+				//Consider  exclusions for maintenance mode as below
+				if(maintenanceMode){
+					maintenanceMode = excludeMaintenanceMode(userRequest.getUserRecord().getIDMS_Profile_update_source__c(),  UserConstants.MAINTENANCE_MODE_PROFILE_UPDATE);
+				}
+				if(maintenanceMode){
+					return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
+				}
+			}
 				/**
 				 * Get iPlanetDirectory Pro Admin token for admin
 				 */
@@ -7396,7 +7534,7 @@ public class UserServiceImpl implements UserService {
 	public Response idmsIdpChaning(String idToken1, String idToken2, String idButton, String gotoUrl, String gotoOnFail,
 			String sunQueryParamsString, String encoded, String errorMessage, String gxCharset) {
 		LOGGER.info("Entered idmsIdpChaning() -> Start");
-		LOGGER.info("Parameter idToken1 -> " + idToken1 + " ,idToken2 - > " + idToken2);
+		LOGGER.info("Parameter idToken1 -> " + idToken1);
 		LOGGER.info("Parameter idButton -> " + idButton + " ,gotoUrl -> " + gotoUrl);
 		LOGGER.info("Parameter gotoOnFail -> " + gotoOnFail + " ,sunQueryParamsString -> " + sunQueryParamsString);
 		LOGGER.info("Parameter encoded -> " + encoded + " ,errorMessage -> " + errorMessage);
@@ -7409,14 +7547,14 @@ public class UserServiceImpl implements UserService {
 		try {
 			if ((null == gotoUrl || gotoUrl.isEmpty())) {
 				userResponse.setStatus(errorStatus);
-				userResponse.setMessage("goto value is mandatory::");
+				userResponse.setMessage("goto value is mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error is -> " + userResponse.getMessage());
 				LOGGER.info("Time taken by idmsIdpChaning() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 			} else if ((null == sunQueryParamsString || sunQueryParamsString.isEmpty())) {
 				userResponse.setStatus(errorStatus);
-				userResponse.setMessage("sunQueryParamsString value is mandatory::");
+				userResponse.setMessage("sunQueryParamsString value is mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error is -> " + userResponse.getMessage());
 				LOGGER.info("Time taken by idmsIdpChaning() : " + elapsedTime);
@@ -7806,7 +7944,7 @@ public class UserServiceImpl implements UserService {
 			String loginbutton) {
 		LOGGER.info("Entered idmsDirectLogin() -> Start");
 		LOGGER.info("Parameter startUrl -> " + startUrl + " ,idToken1 -> " + idToken1);
-		LOGGER.info("Parameter idToken2 -> " + idToken2 + " ,submitted -> " + submitted);
+		LOGGER.info("Parameter submitted -> " + submitted);
 		LOGGER.info("Parameter loginbutton -> " + loginbutton);
 		long elapsedTime;
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
@@ -7821,35 +7959,35 @@ public class UserServiceImpl implements UserService {
 
 			if ((null == startUrl || startUrl.isEmpty())) {
 				userResponse.setStatus(errorStatus);
-				userResponse.setMessage("StartUrl value is mandatory::");
+				userResponse.setMessage("StartUrl value is mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by idmsDirectLogin() : " + elapsedTime);
 				LOGGER.error("Error in idmsDirectLogin is " + userResponse.getMessage());
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 			} else if ((null == idToken1 || idToken1.isEmpty())) {
 				userResponse.setStatus(errorStatus);
-				userResponse.setMessage("idToken1 value is mandatory::");
+				userResponse.setMessage("idToken1 value is mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error in idmsDirectLogin is " + userResponse.getMessage());
 				LOGGER.info("Time taken by idmsDirectLogin() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 			} else if ((null == idToken2 || idToken2.isEmpty())) {
 				userResponse.setStatus(errorStatus);
-				userResponse.setMessage("idToken2 value is mandatory::");
+				userResponse.setMessage("idToken2 value is mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error in idmsDirectLogin is " + userResponse.getMessage());
 				LOGGER.info("Time taken by idmsDirectLogin() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 			} else if ((null == submitted || submitted.isEmpty())) {
 				userResponse.setStatus(errorStatus);
-				userResponse.setMessage("Submitted value is mandatory::");
+				userResponse.setMessage("Submitted value is mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error in idmsDirectLogin is " + userResponse.getMessage());
 				LOGGER.info("Time taken by idmsDirectLogin() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 			} else if ((null == loginbutton || loginbutton.isEmpty())) {
 				userResponse.setStatus(errorStatus);
-				userResponse.setMessage("Loginbutton value is mandatory::");
+				userResponse.setMessage("Loginbutton value is mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error in idmsDirectLogin is " + userResponse.getMessage());
 				LOGGER.info("Time taken by idmsDirectLogin() : " + elapsedTime);
@@ -8907,6 +9045,11 @@ public class UserServiceImpl implements UserService {
 		long elapsedTime;
 		String successResponse = null;
 		String regSource = app;
+		//List<String> accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
+		List<String> accssControlList =null;
+		ErrorResponse errorResponse = new ErrorResponse();
+		boolean maintenanceMode=false;
+		//Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		if ((app == null || app.equalsIgnoreCase("undefined"))) {
 			regSource = UserConstants.LOGZ_IO_DEFAULT_APP;
 		} else if ((app != null && app.contains("partner"))) {
@@ -8927,6 +9070,27 @@ public class UserServiceImpl implements UserService {
 		try {
 			// The below snippet for authentication logs.
 			// String PlanetDirectoryKey = getSSOToken();
+			LOGGER.info("Access Control List:"+maintenanceModeGlobal);
+			if(maintenanceModeGlobal!=null)
+				accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
+			if(accssControlList!=null && accssControlList.size()>0 && !(accssControlList.contains("False"))){
+			//if(accssControlList!=null &&accssControlList.size()>0){//Through error if maintenance mode is enabled
+				if(accssControlList.contains(UserConstants.MAINTENANCE_MODE_COMPLETE) || accssControlList.contains(UserConstants.MAINTENANCE_MODE_LOGIN) ){
+					errorResponse.setStatus(errorStatus);
+					errorResponse.setMessage(UserConstants.MAINTENANCE_MODE_MESSAGE);
+					LOGGER.error("Error :: Maintenance mode in progress");
+					maintenanceMode=true;
+					//return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
+				 }
+			//}
+			//Consider  exclusions for maintenance mode as below
+			if(maintenanceMode){
+				maintenanceMode = excludeMaintenanceMode(app,  UserConstants.MAINTENANCE_MODE_LOGIN);
+			}
+			if(maintenanceMode){
+				return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
+			}
+			}
 			LOGGER.info("Start: aunthenticate User of OPENAMService for username=" + userName);
 			Response authenticateResponse = ChinaIdmsUtil.executeHttpClient(prefixStartUrl, realm, userName, password);
 			LOGGER.info("End: aunthenticate User of OPENAMService for username=" + userName);
@@ -9069,7 +9233,6 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Entered getUser() -> Start");
 		LOGGER.info("Parameter userId -> " + userId);
 		JSONObject errorResponse = new JSONObject();
-		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		Response response = null;
 
 		if (!getTechnicalUserDetails(authorizationToken)) {
@@ -9081,7 +9244,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	/**
-	 * Added For MySE, Dual Identifier Requirement given by Prasenjit
+	 * Dual Identifier Requirement given by Prasenjit
 	 */
 	@Override
 	public Response verifyPIN(VerifyPinRequest verifyPinInfo) {
@@ -10129,7 +10292,6 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Response getUserDetailByApplication(String authorizationToken, String type,
 			UserDetailByApplicationRequest userDetailByApplicationRequest) {
-
 		LOGGER.info("Entered getUserDetailByApplication() -> Start");
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
@@ -10142,7 +10304,6 @@ public class UserServiceImpl implements UserService {
 		Configuration confg = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		
 		GetUserByApplicationResponse userResponse = new GetUserByApplicationResponse();
-		//GetUserRecordResponse idmsUserResponse = null;
 		DocumentContext productDocCtx = null;
 		try {
 			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(userDetailByApplicationRequest));
@@ -10167,7 +10328,6 @@ public class UserServiceImpl implements UserService {
 					|| userDetailByApplicationRequest.getAppHash().isEmpty()) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage("Please provide Hashcode");
-				//userResponse.setIDMSUserRecord(idmsUserResponse);
 				LOGGER.error("Mandatory check: Please provide Hashcode");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
@@ -10181,7 +10341,6 @@ public class UserServiceImpl implements UserService {
 							|| userDetailByApplicationRequest.getIdmsFederatedId().isEmpty())) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage("Either one Email/ Mobile/ FederatedId should have value");
-				//userResponse.setIDMSUserRecord(idmsUserResponse);
 				LOGGER.error("Mandatory check: Either one Email/ Mobile/ FederatedId should have value");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
@@ -10205,7 +10364,6 @@ public class UserServiceImpl implements UserService {
 			if (varList.size() > 1) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage("Only one identifier is allowed");
-				//userResponse.setIDMSUserRecord(idmsUserResponse);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
@@ -10215,7 +10373,6 @@ public class UserServiceImpl implements UserService {
 				if (!emailValidator.validate(userDetailByApplicationRequest.getEmail())) {
 					userResponse.setStatus(errorStatus);
 					userResponse.setMessage("Email validation failed");
-					//userResponse.setIDMSUserRecord(idmsUserResponse);
 					LOGGER.error("Error in getUserDetailByApplication() is :: Email validation failed.");
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
@@ -10228,7 +10385,6 @@ public class UserServiceImpl implements UserService {
 				if (!ChinaIdmsUtil.mobileValidator(mobileNum)) {
 					userResponse.setStatus(errorStatus);
 					userResponse.setMessage("Mobile validation failed");
-					//userResponse.setIDMSUserRecord(idmsUserResponse);
 					LOGGER.error("Error in getUserDetailByApplication is :: Mobile validation failed.");
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
@@ -10239,7 +10395,6 @@ public class UserServiceImpl implements UserService {
 			if (!getTechnicalUserDetails(authorizationToken)) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage("Unauthorized or session expired");
-				//userResponse.setIDMSUserRecord(idmsUserResponse);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error is " + userResponse.getMessage());
 				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
@@ -10270,7 +10425,6 @@ public class UserServiceImpl implements UserService {
 			if (resultCount.intValue() == 0) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage("Invalid Application Hash Code");
-				//userResponse.setIDMSUserRecord(idmsUserResponse);
 				LOGGER.error("Error is :: Invalid Application Hash Code.");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
@@ -10323,7 +10477,6 @@ public class UserServiceImpl implements UserService {
 			if (resultCount.intValue() > 1) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage("Critical Error: Multiple user record exists");
-				//userResponse.setIDMSUserRecord(idmsUserResponse);
 				LOGGER.error("Error is :: " + UserConstants.USER_MULTIPLE_EXIST);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
@@ -10332,7 +10485,6 @@ public class UserServiceImpl implements UserService {
 			if (resultCount.intValue() == 0) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage("User not found based on "+fieldType);
-				//userResponse.setIDMSUserRecord(idmsUserResponse);
 				LOGGER.error("Error is :: " + "User not found based on "+fieldType);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
@@ -10352,12 +10504,11 @@ public class UserServiceImpl implements UserService {
 					}
 				}
 							
-				LOGGER.info("app is associated with user = "+appFound);
+				LOGGER.info("is app associated with user = "+appFound);
 				
 				if(!appFound){
 					userResponse.setStatus(errorStatus);
 					userResponse.setMessage("User not found based on AIL");
-					//userResponse.setIDMSUserRecord(idmsUserResponse);
 					LOGGER.error("Error is :: User not found based on AIL");
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
@@ -10372,7 +10523,6 @@ public class UserServiceImpl implements UserService {
 				}
 				LOGGER.info("userStatusInChina = "+userStatusInChina);
 				GetUserRecordResponse userRecordResponse = new GetUserRecordResponse();
-				//idmsUserResponse = new GetUserRecordResponse();
 				ParseValuesByOauthHomeWorkContextDto userInfoMapper = new ParseValuesByOauthHomeWorkContextDto();
 				userInfoMapper.parseValuesForGetUserByApplication(userRecordResponse, productDocCtx);
 				
@@ -10383,32 +10533,11 @@ public class UserServiceImpl implements UserService {
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
 				return Response.status(Response.Status.OK).entity(userResponse).build();
-				
-				/*userResponse.setStatus(errorStatus);
-				userResponse.setMessage("Invalid Application Hash Code");
-				userResponse.put(UserConstants.MESSAGE_L, UserConstants.TRUE);
-				userResponse.put("idmsFederatedId", productDocCtx.read("$.result[0].federationID[0]"));
-				if (Boolean.valueOf(productDocCtx.read("$.result[0].isActivated[0]"))) {
-					response.put("userStatus", UserConstants.USER_ACTIVE);
-				} else {
-					response.put("userStatus", UserConstants.USER_INACTIVE);
-				}
-				response.put("countryCode", UserConstants.CHINA_CODE);
-				LOGGER.info("User found in IDMS China");
-				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
-				return Response.status(Response.Status.OK).entity(response).build();*/
 			}
-
-			LOGGER.info("-----in development----");
-			
-
 		} catch (Exception e) {
-			e.printStackTrace();
-			LOGGER.error("Error in getUserDetailByApplication is ::" + e.getMessage());
+			LOGGER.error("Error in getUserDetailByApplication is ::" + e.getMessage(),e);
 			userResponse.setStatus(errorStatus);
 			userResponse.setMessage("Internal Server Error");
-			//userResponse.setIDMSUserRecord(idmsUserResponse);
 			LOGGER.error("Error in getUserDetailByApplication is :: Internal Server Error.");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
@@ -10417,12 +10546,67 @@ public class UserServiceImpl implements UserService {
 
 		userResponse.setStatus(errorStatus);
 		userResponse.setMessage("User Not Found");
-		//userResponse.setIDMSUserRecord(idmsUserResponse);
 		LOGGER.error("Error in getUserDetailByApplication is :: User Not Found.");
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
 		return Response.status(Response.Status.NOT_FOUND).entity(userResponse).build();
-		// return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Response sendDemoMail(CheckUserIdentityRequest emailRequest) {
+		LOGGER.info("Entered sendDemoMail() -> Start");
+		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
+		long elapsedTime;
+		JSONObject response = new JSONObject();
+		LinkedHashMap<String, String> lhm = new LinkedHashMap<String, String>();
+		ObjectMapper objMapper = new ObjectMapper();
+		boolean status = false;
+
+		try {
+			LOGGER.info("emailIds = " + objMapper.writeValueAsString(emailRequest));
+
+			if (null == emailRequest.getEmailOrMobile() || emailRequest.getEmailOrMobile().isEmpty()
+					|| emailRequest.getEmailOrMobile().split(";").length < 1) {
+				response.put(UserConstants.STATUS_L, errorStatus);
+				response.put(UserConstants.MESSAGE_L, UserConstants.EMAIL_EMPTY);
+				LOGGER.error("Error in addMobile() is ::" + UserConstants.EMAIL_EMPTY);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by sendDemoMail() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+			}
+			String[] listEmailIds = emailRequest.getEmailOrMobile().split(";");
+			LOGGER.info("number of email ids = " + listEmailIds.length);
+			// changing user mailid to testmail
+			for (int i = 0; i < listEmailIds.length; i++) {
+				if (null != listEmailIds[i] && !listEmailIds[i].isEmpty()) {
+					String orgMail = listEmailIds[i].trim();
+					if(orgMail.contains("@")){
+						orgMail = "testmail"+orgMail.substring(orgMail.indexOf('@'));
+					}
+					if (emailValidator.validate(orgMail)) {
+						lhm.put(orgMail, "Email validation passed. Sending email...");
+						try {
+							status = sendEmail.sendDemoEmail(orgMail);
+						} catch (Exception e) {
+							LOGGER.error("Exception as == " + e.getMessage());
+							lhm.put(orgMail,lhm.get(orgMail) + "Sending email failed. " + e.getMessage());
+						}
+						if (status)
+							lhm.put(orgMail,lhm.get(orgMail) + "Sending email finished.");
+					} else
+						lhm.put(orgMail, "Email validation failed.");
+				}
+			}
+			return Response.status(Response.Status.ACCEPTED).entity(lhm).build();
+		} catch (JsonProcessingException e) {
+			response.put(UserConstants.STATUS_L, errorStatus);
+			response.put(UserConstants.MESSAGE_L, e.getMessage());
+			LOGGER.error("JsonProcessingException in sendDemoMail() ::" + e.getMessage(), e);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by sendDemoMail() : " + elapsedTime);
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+		}
 	}
 
 	public void setEMAIL_TEMPLATE_DIR(String eMAIL_TEMPLATE_DIR) {
@@ -10658,5 +10842,13 @@ public class UserServiceImpl implements UserService {
 		this.defaultUserNameFormat = defaultUserNameFormat;
 	}
 
+	public String getMaintenanceModeGlobal() {
+		return maintenanceModeGlobal;
+	}
+
+	public void setMaintenanceModeGlobal(String maintenanceModeGlobal) {
+		this.maintenanceModeGlobal = maintenanceModeGlobal;
+	}
+	
 	
 }

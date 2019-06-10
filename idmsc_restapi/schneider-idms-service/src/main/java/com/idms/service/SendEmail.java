@@ -15,6 +15,7 @@ import java.time.ZoneId;
 import javax.inject.Inject;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.ws.rs.core.Response;
@@ -920,6 +921,55 @@ public class SendEmail {
 		subject = "Complete Registration - OTP";
 		
 		emailReadyToSendEmail(to, from, subject, emailContent);
+	}
+	
+	/**
+	 * Sending demo email
+	 * @param email
+	 * @throws MessagingException 
+	 */
+	public boolean sendDemoEmail(String email ) throws MessagingException{
+		LOGGER.info("Entered sendDemoEmail() -> Start");
+		LOGGER.info("Parameter email -> "+email);
+		boolean status = false;
+
+		String to = email ;
+		String subject = null;
+
+		String emailContent = "This is a test email. Please do not reply.";
+		emailContent = emailContent+"<BR><BR><BR><BR> Current Timestamp: "+System.currentTimeMillis();
+		subject = "Test Email Verification";
+		
+		MimeMessage mailMessage = mailSender.createMimeMessage();
+		InternetAddress fromAddress = null;
+		InternetAddress toAddress = null;
+		try {
+			fromAddress = new InternetAddress(from);
+			toAddress = new InternetAddress(to);
+
+			mailMessage.setSubject(subject, "utf-8");
+			mailMessage.setText(emailContent, "utf-8", "html");
+			mailMessage.setFrom(fromAddress);
+			mailMessage.setRecipient(RecipientType.TO, toAddress);
+
+			LOGGER.info("Start: sending email to:"+to);
+			mailSender.send(mailMessage);
+			LOGGER.info("End: sending email finished to:"+to);
+			status = true;
+		}
+		catch (SMTPSendFailedException e) {
+			LOGGER.error("SMTPSendFailedException while sending email to "+to+" :: -> " + e.getMessage(),e);
+			throw e;
+		}
+		catch (AddressException e) {
+			LOGGER.error("Exception while sending email to "+to+" :: -> " + e.getMessage(),e);
+			throw e;
+		}
+		catch (MessagingException e) {
+			LOGGER.error("MessagingException while sending email to "+to+" :: -> " + e.getMessage(),e);
+			throw e;
+		}
+		return status;
 	}
 	
 	/**
