@@ -274,5 +274,9 @@ public interface UserService {
 	@Path("/apexrest/GetUserDetailByApplication")
 	Response getUserDetailByApplication(@HeaderParam("Authorization") String authorizationToken,
 			@HeaderParam("Content-Type") String type, UserDetailByApplicationRequest userDetailByApplicationRequest);
+	
+	@POST
+	@Path("/apexrest/sendDemoMail")
+	Response sendDemoMail(CheckUserIdentityRequest mailIds);
 
 }
