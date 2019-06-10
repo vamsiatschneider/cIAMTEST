@@ -39,6 +39,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -891,7 +892,6 @@ public class UserServiceImpl implements UserService {
 		boolean uimsAlreadyCreatedFlag = false, mobileRegFlag = false;
 		Response userCreation = null, checkUserExist = null;
 		String otpinOpendj = null, hexPinMobile = null, otpStatus = null;
-		LOGGER.info("Access Control List:"+maintenanceModeGlobal);
 		//List<String> accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
 		List<String> accssControlList=null;
 		boolean maintenanceMode=false;
@@ -900,6 +900,7 @@ public class UserServiceImpl implements UserService {
 			objMapper = new ObjectMapper();
 
 			LOGGER.info("Entered userRegistration() -> Start");
+			LOGGER.info("Access Control List:"+maintenanceModeGlobal);
 			LOGGER.info(
 					"Parameter userRequest -> " + ChinaIdmsUtil.printData(objMapper.writeValueAsString(userRequest)));
 
