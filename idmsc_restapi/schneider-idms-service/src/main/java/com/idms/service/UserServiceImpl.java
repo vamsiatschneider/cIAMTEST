@@ -36,6 +36,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -602,20 +603,15 @@ public class UserServiceImpl implements UserService {
 			}
 		} catch (Exception e) {
 			LOGGER.error("Error in getUser() openam service->" + e.getMessage(),e);
-			LOGGER.error(e.toString());
-			if (userData == null) {
-				JSONObject jsonObject = new JSONObject();
-				jsonObject.put("errorCode", "NOT_FOUND");
-				jsonObject.put("message", "Provided external ID field does not exist or is  not accessible: " + userId);
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("errorCode", "Unauthorized");
+			jsonObject.put("message", "OpenAM issue of Authorization for " + userId);
 
-				JSONArray jsonArray = new JSONArray();
-				jsonArray.add(jsonObject);
-				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.info(GET_USER_TIME_LOG + elapsedTime);
-				// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+token,
-				// "logout");
-				return Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(jsonArray).build();
-			}
+			JSONArray jsonArray = new JSONArray();
+			jsonArray.add(jsonObject);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info(GET_USER_TIME_LOG + elapsedTime);
+			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonArray).build();
 		}
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		// getting the context
@@ -9234,7 +9230,6 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Entered getUser() -> Start");
 		LOGGER.info("Parameter userId -> " + userId);
 		JSONObject errorResponse = new JSONObject();
-		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		Response response = null;
 
 		if (!getTechnicalUserDetails(authorizationToken)) {
@@ -9246,7 +9241,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	/**
-	 * Added For MySE, Dual Identifier Requirement given by Prasenjit
+	 * Dual Identifier Requirement given by Prasenjit
 	 */
 	@Override
 	public Response verifyPIN(VerifyPinRequest verifyPinInfo) {
@@ -10294,7 +10289,6 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Response getUserDetailByApplication(String authorizationToken, String type,
 			UserDetailByApplicationRequest userDetailByApplicationRequest) {
-
 		LOGGER.info("Entered getUserDetailByApplication() -> Start");
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
@@ -10307,7 +10301,6 @@ public class UserServiceImpl implements UserService {
 		Configuration confg = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		
 		GetUserByApplicationResponse userResponse = new GetUserByApplicationResponse();
-		//GetUserRecordResponse idmsUserResponse = null;
 		DocumentContext productDocCtx = null;
 		try {
 			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(userDetailByApplicationRequest));
@@ -10332,7 +10325,6 @@ public class UserServiceImpl implements UserService {
 					|| userDetailByApplicationRequest.getAppHash().isEmpty()) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage("Please provide Hashcode");
-				//userResponse.setIDMSUserRecord(idmsUserResponse);
 				LOGGER.error("Mandatory check: Please provide Hashcode");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
@@ -10346,7 +10338,6 @@ public class UserServiceImpl implements UserService {
 							|| userDetailByApplicationRequest.getIdmsFederatedId().isEmpty())) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage("Either one Email/ Mobile/ FederatedId should have value");
-				//userResponse.setIDMSUserRecord(idmsUserResponse);
 				LOGGER.error("Mandatory check: Either one Email/ Mobile/ FederatedId should have value");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
@@ -10370,7 +10361,6 @@ public class UserServiceImpl implements UserService {
 			if (varList.size() > 1) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage("Only one identifier is allowed");
-				//userResponse.setIDMSUserRecord(idmsUserResponse);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
@@ -10380,7 +10370,6 @@ public class UserServiceImpl implements UserService {
 				if (!emailValidator.validate(userDetailByApplicationRequest.getEmail())) {
 					userResponse.setStatus(errorStatus);
 					userResponse.setMessage("Email validation failed");
-					//userResponse.setIDMSUserRecord(idmsUserResponse);
 					LOGGER.error("Error in getUserDetailByApplication() is :: Email validation failed.");
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
@@ -10393,7 +10382,6 @@ public class UserServiceImpl implements UserService {
 				if (!ChinaIdmsUtil.mobileValidator(mobileNum)) {
 					userResponse.setStatus(errorStatus);
 					userResponse.setMessage("Mobile validation failed");
-					//userResponse.setIDMSUserRecord(idmsUserResponse);
 					LOGGER.error("Error in getUserDetailByApplication is :: Mobile validation failed.");
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
@@ -10404,7 +10392,6 @@ public class UserServiceImpl implements UserService {
 			if (!getTechnicalUserDetails(authorizationToken)) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage("Unauthorized or session expired");
-				//userResponse.setIDMSUserRecord(idmsUserResponse);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error is " + userResponse.getMessage());
 				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
@@ -10435,7 +10422,6 @@ public class UserServiceImpl implements UserService {
 			if (resultCount.intValue() == 0) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage("Invalid Application Hash Code");
-				//userResponse.setIDMSUserRecord(idmsUserResponse);
 				LOGGER.error("Error is :: Invalid Application Hash Code.");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
@@ -10488,7 +10474,6 @@ public class UserServiceImpl implements UserService {
 			if (resultCount.intValue() > 1) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage("Critical Error: Multiple user record exists");
-				//userResponse.setIDMSUserRecord(idmsUserResponse);
 				LOGGER.error("Error is :: " + UserConstants.USER_MULTIPLE_EXIST);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
@@ -10497,7 +10482,6 @@ public class UserServiceImpl implements UserService {
 			if (resultCount.intValue() == 0) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage("User not found based on "+fieldType);
-				//userResponse.setIDMSUserRecord(idmsUserResponse);
 				LOGGER.error("Error is :: " + "User not found based on "+fieldType);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
@@ -10517,12 +10501,11 @@ public class UserServiceImpl implements UserService {
 					}
 				}
 							
-				LOGGER.info("app is associated with user = "+appFound);
+				LOGGER.info("is app associated with user = "+appFound);
 				
 				if(!appFound){
 					userResponse.setStatus(errorStatus);
 					userResponse.setMessage("User not found based on AIL");
-					//userResponse.setIDMSUserRecord(idmsUserResponse);
 					LOGGER.error("Error is :: User not found based on AIL");
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
@@ -10537,7 +10520,6 @@ public class UserServiceImpl implements UserService {
 				}
 				LOGGER.info("userStatusInChina = "+userStatusInChina);
 				GetUserRecordResponse userRecordResponse = new GetUserRecordResponse();
-				//idmsUserResponse = new GetUserRecordResponse();
 				ParseValuesByOauthHomeWorkContextDto userInfoMapper = new ParseValuesByOauthHomeWorkContextDto();
 				userInfoMapper.parseValuesForGetUserByApplication(userRecordResponse, productDocCtx);
 				
@@ -10548,32 +10530,11 @@ public class UserServiceImpl implements UserService {
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
 				return Response.status(Response.Status.OK).entity(userResponse).build();
-				
-				/*userResponse.setStatus(errorStatus);
-				userResponse.setMessage("Invalid Application Hash Code");
-				userResponse.put(UserConstants.MESSAGE_L, UserConstants.TRUE);
-				userResponse.put("idmsFederatedId", productDocCtx.read("$.result[0].federationID[0]"));
-				if (Boolean.valueOf(productDocCtx.read("$.result[0].isActivated[0]"))) {
-					response.put("userStatus", UserConstants.USER_ACTIVE);
-				} else {
-					response.put("userStatus", UserConstants.USER_INACTIVE);
-				}
-				response.put("countryCode", UserConstants.CHINA_CODE);
-				LOGGER.info("User found in IDMS China");
-				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
-				return Response.status(Response.Status.OK).entity(response).build();*/
 			}
-
-			LOGGER.info("-----in development----");
-			
-
 		} catch (Exception e) {
-			e.printStackTrace();
-			LOGGER.error("Error in getUserDetailByApplication is ::" + e.getMessage());
+			LOGGER.error("Error in getUserDetailByApplication is ::" + e.getMessage(),e);
 			userResponse.setStatus(errorStatus);
 			userResponse.setMessage("Internal Server Error");
-			//userResponse.setIDMSUserRecord(idmsUserResponse);
 			LOGGER.error("Error in getUserDetailByApplication is :: Internal Server Error.");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
@@ -10582,12 +10543,67 @@ public class UserServiceImpl implements UserService {
 
 		userResponse.setStatus(errorStatus);
 		userResponse.setMessage("User Not Found");
-		//userResponse.setIDMSUserRecord(idmsUserResponse);
 		LOGGER.error("Error in getUserDetailByApplication is :: User Not Found.");
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
 		return Response.status(Response.Status.NOT_FOUND).entity(userResponse).build();
-		// return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Response sendDemoMail(CheckUserIdentityRequest emailRequest) {
+		LOGGER.info("Entered sendDemoMail() -> Start");
+		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
+		long elapsedTime;
+		JSONObject response = new JSONObject();
+		LinkedHashMap<String, String> lhm = new LinkedHashMap<String, String>();
+		ObjectMapper objMapper = new ObjectMapper();
+		boolean status = false;
+
+		try {
+			LOGGER.info("emailIds = " + objMapper.writeValueAsString(emailRequest));
+
+			if (null == emailRequest.getEmailOrMobile() || emailRequest.getEmailOrMobile().isEmpty()
+					|| emailRequest.getEmailOrMobile().split(";").length < 1) {
+				response.put(UserConstants.STATUS_L, errorStatus);
+				response.put(UserConstants.MESSAGE_L, UserConstants.EMAIL_EMPTY);
+				LOGGER.error("Error in addMobile() is ::" + UserConstants.EMAIL_EMPTY);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by sendDemoMail() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+			}
+			String[] listEmailIds = emailRequest.getEmailOrMobile().split(";");
+			LOGGER.info("number of email ids = " + listEmailIds.length);
+			// changing user mailid to testmail
+			for (int i = 0; i < listEmailIds.length; i++) {
+				if (null != listEmailIds[i] && !listEmailIds[i].isEmpty()) {
+					String orgMail = listEmailIds[i].trim();
+					if(orgMail.contains("@")){
+						orgMail = "testmail"+orgMail.substring(orgMail.indexOf('@'));
+					}
+					if (emailValidator.validate(orgMail)) {
+						lhm.put(orgMail, "Email validation passed. Sending email...");
+						try {
+							status = sendEmail.sendDemoEmail(orgMail);
+						} catch (Exception e) {
+							LOGGER.error("Exception as == " + e.getMessage());
+							lhm.put(orgMail,lhm.get(orgMail) + "Sending email failed. " + e.getMessage());
+						}
+						if (status)
+							lhm.put(orgMail,lhm.get(orgMail) + "Sending email finished.");
+					} else
+						lhm.put(orgMail, "Email validation failed.");
+				}
+			}
+			return Response.status(Response.Status.ACCEPTED).entity(lhm).build();
+		} catch (JsonProcessingException e) {
+			response.put(UserConstants.STATUS_L, errorStatus);
+			response.put(UserConstants.MESSAGE_L, e.getMessage());
+			LOGGER.error("JsonProcessingException in sendDemoMail() ::" + e.getMessage(), e);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by sendDemoMail() : " + elapsedTime);
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+		}
 	}
 
 	public void setEMAIL_TEMPLATE_DIR(String eMAIL_TEMPLATE_DIR) {
