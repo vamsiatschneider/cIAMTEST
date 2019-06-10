@@ -602,20 +602,15 @@ public class UserServiceImpl implements UserService {
 			}
 		} catch (Exception e) {
 			LOGGER.error("Error in getUser() openam service->" + e.getMessage(),e);
-			LOGGER.error(e.toString());
-			if (userData == null) {
-				JSONObject jsonObject = new JSONObject();
-				jsonObject.put("errorCode", "NOT_FOUND");
-				jsonObject.put("message", "Provided external ID field does not exist or is  not accessible: " + userId);
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("errorCode", "Unauthorized");
+			jsonObject.put("message", "OpenAM issue of Authorization for " + userId);
 
-				JSONArray jsonArray = new JSONArray();
-				jsonArray.add(jsonObject);
-				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.info(GET_USER_TIME_LOG + elapsedTime);
-				// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+token,
-				// "logout");
-				return Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(jsonArray).build();
-			}
+			JSONArray jsonArray = new JSONArray();
+			jsonArray.add(jsonObject);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info(GET_USER_TIME_LOG + elapsedTime);
+			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonArray).build();
 		}
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		// getting the context
