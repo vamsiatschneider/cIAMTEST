@@ -39,7 +39,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -3799,7 +3798,7 @@ public class UserServiceImpl implements UserService {
 				// check UIMSPasswordSync to call sync or Async method
 				if (pickListValidator.validate(UserConstants.UIMSPasswordSync, UserConstants.TRUE)) {
 					// Calling Sync method of setUIMSPassword
-					LOGGER.info("Start: Calling SYNC setUIMSPassword() of UimsSetPasswordSoapService for federationID="
+					LOGGER.info("Start: SYNC setUIMSPassword() of UimsSetPasswordSoapService for federationID="
 							+ federationID);
 					isPasswordUpdatedInUIMS = uimsSetPasswordSoapService.setUIMSPassword(
 							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, uniqueIdentifier, federationID,
@@ -3810,7 +3809,7 @@ public class UserServiceImpl implements UserService {
 							+ federationID);
 				} else {
 					// Calling Async method of setUIMSPassword
-					LOGGER.info("Start: Calling ASYNC setUIMSPassword() of uimsUserManagerSoapService for federationID="
+					LOGGER.info("Start: ASYNC setUIMSPassword() of uimsUserManagerSoapService for federationID="
 							+ federationID);
 					uimsUserManagerSoapService.setUIMSPassword(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 							uniqueIdentifier, federationID, confirmRequest.getPassword(), vNewCntValue.toString(),
@@ -3824,12 +3823,12 @@ public class UserServiceImpl implements UserService {
 					&& !UserConstants.UIMS.equalsIgnoreCase(confirmRequest.getIDMS_Profile_update_source())
 					&& (null != confirmRequest.getOperation()
 							&& UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(confirmRequest.getOperation()))) {
-				LOGGER.info("Start: Calling ASYNC setUIMSPassword() of uimsUserManagerSoapService for federationID="
+				LOGGER.info("Start: ASYNC updateChangeEmailOrMobile() of uimsUserManagerSoapService for federationID="
 						+ federationID);
 				uimsUserManagerSoapService.updateChangeEmailOrMobile(iPlanetDirectoryKey, uniqueIdentifier,
 						federationID, openamVnew, loginIdentifierType, emailOrMobile);
 				updateOpenamDetails(iPlanetDirectoryKey, uniqueIdentifier, PRODUCT_JSON_STRING);
-				LOGGER.info("End: ASYNC setUIMSPassword() of uimsUserManagerSoapService finished for federationID="
+				LOGGER.info("End: ASYNC updateChangeEmailOrMobile() of uimsUserManagerSoapService finished for federationID="
 						+ federationID);
 			}
 			LOGGER.info("activateUIMSUserConfirmPIN is completed successfully");
@@ -9653,13 +9652,11 @@ public class UserServiceImpl implements UserService {
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
 
-		LOGGER.info("caller ID before:"+ CALLER_FID);
 		ObjectMapper objMapper = new ObjectMapper();
 		String otpMobile = null, otpStatus = null, otpValidityTime = null;
 		//Thread.sleep(5000);
 		String mobile = null;
 		JSONObject response = new JSONObject();
-		LOGGER.info("caller ID after :"+ CALLER_FID);
 
 		try {
 			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(otpRequest));
@@ -9795,6 +9792,8 @@ public class UserServiceImpl implements UserService {
 		String mobile = null, fedid = null, otpStoredStatus = null, regSource = null;
 		JSONObject response = new JSONObject();
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		String openamVnew = null;
+		Integer vNewCntValue = 0;
 
 		try {
 			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(addMobileRequest));
@@ -9908,9 +9907,16 @@ public class UserServiceImpl implements UserService {
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userExistsInOpenam);
 			Integer resultCount = productDocCtx.read(JsonConstants.RESULT_COUNT);
 			LOGGER.info("resultCount = " + resultCount);
+			
+			openamVnew = null != productDocCtx.read("$.result[0].V_New[0]") ? getValue(productDocCtx.read("$.result[0].V_New[0]"))
+					: getDelimeter();
+			if (null != vNewCntValue && null != openamVnew) {
+				vNewCntValue = Integer.parseInt(openamVnew) + 1;
+			}
+			
 			if (resultCount.intValue() == 1) {
 				String addMobileString = "{" + "\"mobile\": \"" + mobile + "\",\"mobile_reg\": \"" + mobile
-						+ "\",\"login_mobile\": \"" + mobile + "\"" + "}";
+						+ "\",\"login_mobile\": \"" + mobile + "\",\"V_New\": \"" + vNewCntValue + "\"" + "}";
 				LOGGER.info(
 						"Start: updateUser() of openamservice to add mobile as dual indentifier for userId:" + fedid);
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + ssoToken, fedid, addMobileString);
@@ -9921,6 +9927,11 @@ public class UserServiceImpl implements UserService {
 				sendOTPRequest.setMobile(mobile);
 				deleteMobile(sendOTPRequest);
 
+				if (null != regSource && !UserConstants.UIMS.equalsIgnoreCase(regSource)) {
+					LOGGER.info("Start: ASYNC updateChangeEmailOrMobile() of UIMSService for federationID=" + fedid);
+					uimsUserManagerSoapService.updateChangeEmailOrMobile(ssoToken, fedid, fedid, openamVnew, "mobile", mobile);
+					LOGGER.info("End: ASYNC updateChangeEmailOrMobile() of UIMSService finished for federationID=" + fedid);
+				}
 				response.put(UserConstants.STATUS_L, successStatus);
 				response.put(UserConstants.MESSAGE_L, UserConstants.ADD_MOBILE_IDENTIFIER);
 				return Response.status(Response.Status.OK).entity(response).build();
