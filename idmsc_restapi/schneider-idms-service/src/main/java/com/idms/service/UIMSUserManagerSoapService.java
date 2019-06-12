@@ -976,19 +976,27 @@ public class UIMSUserManagerSoapService {
 								samlAssertion, application, newEmailOrMobile);
 
 						LOGGER.info("End: requestEmailChange() of UIMS finished for EMAIL.. userId:" + userId);
+						LOGGER.info("requestEmailChange status from UIMS = "+changeEmailUpdated);
 					} else {
-						LOGGER.info("Start: requestPhoneIdChange() of UIMS for non-EMAIL.. userId:" + userId);
+						LOGGER.info("Start: requestPhoneIdChange() of UIMS for mobile.. userId:" + userId);
 
 						changeEmailUpdated = userManagerUIMSV22.requestPhoneIdChange(CALLER_FID,
 								samlAssertion, application, newEmailOrMobile);
 
-						LOGGER.info("End: requestPhoneIdChange() of UIMS finished for non-EMAIL.. userId:" + userId);
+						LOGGER.info("End: requestPhoneIdChange() of UIMS finished for mobile.. userId:" + userId);
+						LOGGER.info("requestPhoneIdChange status from UIMS = "+changeEmailUpdated);
 					}
 					LOGGER.info("request Email/PhoneId Change status: " + changeEmailUpdated);
 
-					if (changeEmailUpdated) {
-						changeEmailUpdated = userManagerUIMSV22.updateEmail(CALLER_FID, samlAssertion);
-					}
+					/*if (changeEmailUpdated) {
+						if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
+							changeEmailUpdated = userManagerUIMSV22.updateEmail(CALLER_FID, samlAssertion);
+							LOGGER.info("updateEmail status from UIMS = "+changeEmailUpdated);
+						} else {
+							changeEmailUpdated = userManagerUIMSV22.updatePhoneId(CALLER_FID, newEmailOrMobile, samlAssertion);
+							LOGGER.info("updatePhoneId status from UIMS = "+changeEmailUpdated);
+						}
+					}*/
 
 					return true;
 				}
@@ -1002,12 +1010,11 @@ public class UIMSUserManagerSoapService {
 			// after successful setUIMSPassword , we need to update the
 			// v_old
 			if (changeEmailUpdated) {
-
-				String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
+				LOGGER.info("User Email/Mobile change successful in UIMS..."+newEmailOrMobile);
+				/*String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
 				LOGGER.info("Start: updateUser() of openamservice to update version for userId:" + userId);
-				// productService.updateUser(iPlanetDirectoryKey, userId,
-				// version);
-				LOGGER.info("End: updateUser() call of openamservice to update version finished for userId:" + userId);
+				 productService.updateUser(iPlanetDirectoryKey, userId, version);
+				LOGGER.info("End: updateUser() call of openamservice to update version finished for userId:" + userId);*/
 			}
 			if (!changeEmailUpdated) {
 				LOGGER.info(
