@@ -964,40 +964,40 @@ public class UIMSUserManagerSoapService {
 			} else {
 				samlAssertion = samlTokenService.getSamlAssertionToken(callerFid, openamVnew);
 			}
-			LOGGER.info("samlAssertion="+samlAssertion);
+			LOGGER.info("samlAssertion=" + samlAssertion);
+			UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
 
-			Callable<Boolean> callableUIMSPassword = new Callable<Boolean>() {
+			Callable<Boolean> callableRequestEmailMobileChangeUIMS = new Callable<Boolean>() {
 				public Boolean call() throws Exception {
-					UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
-					if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {						
+					if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
 						LOGGER.info("Start: requestEmailChange() of UIMS for EMAIL.. userId:" + userId);
-
-						changeEmailUpdated = userManagerUIMSV22.requestEmailChange(CALLER_FID,
-								samlAssertion, application, newEmailOrMobile);
-
+						changeEmailUpdated = userManagerUIMSV22.requestEmailChange(CALLER_FID, samlAssertion,
+								application, newEmailOrMobile);
 						LOGGER.info("End: requestEmailChange() of UIMS finished for EMAIL.. userId:" + userId);
-						LOGGER.info("requestEmailChange status from UIMS = "+changeEmailUpdated);
+						LOGGER.info("requestEmailChange status from UIMS = " + changeEmailUpdated);
 					} else {
 						LOGGER.info("Start: requestPhoneIdChange() of UIMS for mobile.. userId:" + userId);
-
-						changeEmailUpdated = userManagerUIMSV22.requestPhoneIdChange(CALLER_FID,
-								samlAssertion, application, newEmailOrMobile);
-
+						changeEmailUpdated = userManagerUIMSV22.requestPhoneIdChange(CALLER_FID, samlAssertion,
+								application, newEmailOrMobile);
 						LOGGER.info("End: requestPhoneIdChange() of UIMS finished for mobile.. userId:" + userId);
-						LOGGER.info("requestPhoneIdChange status from UIMS = "+changeEmailUpdated);
+						LOGGER.info("requestPhoneIdChange status from UIMS = " + changeEmailUpdated);
 					}
-					LOGGER.info("request Email/PhoneId Change status: " + changeEmailUpdated);
+					return true;
+				}
+			};
 
-					/*if (changeEmailUpdated) {
+			Callable<Boolean> callableUpdateEmailMobileUIMS = new Callable<Boolean>() {
+				public Boolean call() throws Exception {
+					if (changeEmailUpdated) {
 						if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
 							changeEmailUpdated = userManagerUIMSV22.updateEmail(CALLER_FID, samlAssertion);
-							LOGGER.info("updateEmail status from UIMS = "+changeEmailUpdated);
+							LOGGER.info("updateEmail status from UIMS = " + changeEmailUpdated);
 						} else {
-							changeEmailUpdated = userManagerUIMSV22.updatePhoneId(CALLER_FID, newEmailOrMobile, samlAssertion);
-							LOGGER.info("updatePhoneId status from UIMS = "+changeEmailUpdated);
+							changeEmailUpdated = userManagerUIMSV22.updatePhoneId(CALLER_FID, newEmailOrMobile,
+									samlAssertion);
+							LOGGER.info("updatePhoneId status from UIMS = " + changeEmailUpdated);
 						}
-					}*/
-
+					}
 					return true;
 				}
 			};
@@ -1006,36 +1006,33 @@ public class UIMSUserManagerSoapService {
 					.retryIfResult(Predicates.<Boolean> isNull()).retryIfExceptionOfType(Exception.class)
 					.retryIfRuntimeException().withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
 
-			retryer.call(callableUIMSPassword);
-			// after successful setUIMSPassword , we need to update the
-			// v_old
+			retryer.call(callableRequestEmailMobileChangeUIMS);
 			if (changeEmailUpdated) {
-				LOGGER.info("User Email/Mobile change successful in UIMS..."+newEmailOrMobile);
-				/*String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
-				LOGGER.info("Start: updateUser() of openamservice to update version for userId:" + userId);
-				 productService.updateUser(iPlanetDirectoryKey, userId, version);
-				LOGGER.info("End: updateUser() call of openamservice to update version finished for userId:" + userId);*/
+				retryer.call(callableUpdateEmailMobileUIMS);
+			}
+
+			if (changeEmailUpdated) {
+				LOGGER.info("User Email/Mobile change successful in UIMS..." + newEmailOrMobile);
 			}
 			if (!changeEmailUpdated) {
 				LOGGER.info(
-						"UIMS requestEmailChange got failed -----> ::sending mail notification for userid::"
-								+ userId);
+						"User Email/Mobile change failed in UIMS-----> ::sending mail notification for user::" + newEmailOrMobile);
 				LOGGER.info("Start: emailReadyToSendEmail() for userId:" + userId);
-				UIMSSYNCLOGGER.error("UIMS requestEmailChange got failed -----> ::sending mail notification for userid::"
-						+ userId);
+				UIMSSYNCLOGGER.error(
+						"UIMS Email/Mobile change failed -----> ::sending mail notification for user::" + newEmailOrMobile);
 				sendEmail.emailReadyToSendEmail(supportUser, fromUserName, "UIMS updateChangeEmailOrMobile failed.",
 						userId);
 				LOGGER.info("End: emailReadyToSendEmail() finished for userId:" + userId);
 			}
 		} catch (RetryException e) {
-			LOGGER.error("RetryException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage(),e);
-			UIMSSYNCLOGGER.error("RetryException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage(),e);
+			LOGGER.error("RetryException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage(), e);
+			UIMSSYNCLOGGER.error("RetryException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage(), e);
 		} catch (ExecutionException e) {
-			LOGGER.error("ExecutionException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage(),e);
-			UIMSSYNCLOGGER.error("ExecutionException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage(),e);
+			LOGGER.error("ExecutionException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage(), e);
+			UIMSSYNCLOGGER.error("ExecutionException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage(), e);
 		} catch (Exception e) {
-			LOGGER.error("Exception in updateChangeEmailOrMobile()::" + e.getMessage(),e);
-			UIMSSYNCLOGGER.error("Exception in updateChangeEmailOrMobile()::" + e.getMessage(),e);
+			LOGGER.error("Exception in updateChangeEmailOrMobile()::" + e.getMessage(), e);
+			UIMSSYNCLOGGER.error("Exception in updateChangeEmailOrMobile()::" + e.getMessage(), e);
 		}
 		LOGGER.info("updateChangeEmailOrMobile() Async Method -> End");
 	}
