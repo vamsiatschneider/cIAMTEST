@@ -8212,19 +8212,6 @@ public class UserServiceImpl implements UserService {
 				enableTestMailStatus = enableTestMailDomain;
 			}*/
 			
-			LOGGER.info("enableTestMailStatus value = " + enableTestMailStatus);
-			if (null != enableTestMailStatus && !Boolean.parseBoolean(enableTestMailStatus) && loginId.contains("@")) {
-				String mailDomain = loginId.substring(loginId.indexOf("@") + 1);
-				LOGGER.info("mailDomain = " + mailDomain);
-				if (pickListValidator.validate(UserConstants.TestMailDomain, mailDomain)) {
-					response.put(UserConstants.MESSAGE_L, "This Email Domain is not allowed - "+mailDomain);
-					LOGGER.error("Error in idmsCheckUserExists is :: "+"This Email Domain is not allowed - "+mailDomain);
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
-					return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
-				}
-			}
-			
 			// Adding try catch block for getSSoToken method,this is to address
 			// log zio alerts
 			try {
@@ -8280,6 +8267,22 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 				return Response.status(Response.Status.CONFLICT).entity(response).build();
 			}
+			
+			LOGGER.info("enableTestMailStatus value = " + enableTestMailStatus);
+			if(resultCount.intValue() == 0){
+				if (null != enableTestMailStatus && !Boolean.parseBoolean(enableTestMailStatus) && loginId.contains("@")) {
+					String mailDomain = loginId.substring(loginId.indexOf("@") + 1);
+					LOGGER.info("mailDomain = " + mailDomain);
+					if (pickListValidator.validate(UserConstants.TestMailDomain, mailDomain)) {
+						response.put(UserConstants.MESSAGE_L, "This Email Domain is not allowed - "+mailDomain);
+						LOGGER.error("Error in idmsCheckUserExists is :: "+"This Email Domain is not allowed - "+mailDomain);
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+						return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+					}
+				}
+			}
+			
 			if (resultCount.intValue() == 0 && UserConstants.TRUE.equalsIgnoreCase(request.getWithGlobalUsers())
 					&& (loginId.contains("@") || fieldType.equalsIgnoreCase("idmsFederatedId"))) {
 				LOGGER.info("Start: getIFWToken() of IFWService");
