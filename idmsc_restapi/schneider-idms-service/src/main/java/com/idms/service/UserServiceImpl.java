@@ -468,11 +468,9 @@ public class UserServiceImpl implements UserService {
 
 			} else if (401 == authenticateResponse.getStatus()) {
 				checkUserExistsResponse = checkUserExists(userName, UserConstants.FALSE);
-
 				checkUserExistsFlag = (UserExistsResponse) checkUserExistsResponse.getEntity();
 
 				if (UserConstants.TRUE.equalsIgnoreCase(checkUserExistsFlag.getMessage())) {
-
 					jsonObject.put("user_store", "CN");
 					AsyncUtil.generateCSV(authCsvPath,
 							new Date() + "," + userName + "," + errorStatus + "," + regSource);
@@ -891,11 +889,9 @@ public class UserServiceImpl implements UserService {
 		boolean uimsAlreadyCreatedFlag = false, mobileRegFlag = false;
 		Response userCreation = null, checkUserExist = null;
 		String otpinOpendj = null, hexPinMobile = null, otpStatus = null;
-		//List<String> accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
 		List<String> accssControlList=null;
 		boolean maintenanceMode=false;
 		try {
-
 			objMapper = new ObjectMapper();
 
 			LOGGER.info("Entered userRegistration() -> Start");
@@ -920,22 +916,19 @@ public class UserServiceImpl implements UserService {
 				if(maintenanceModeGlobal!=null)
 					accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
 				if(accssControlList!=null && accssControlList.size()>0 && !(accssControlList.contains("False"))){
-				//if(accssControlList!=null &&accssControlList.size()>0){//Through error if maintenance mode is enabled
-				if(accssControlList.contains(UserConstants.MAINTENANCE_MODE_COMPLETE) || accssControlList.contains(UserConstants.MAINTENANCE_MODE_REGISTRATION) ){
-					errorResponse.setStatus(errorStatus);
-					errorResponse.setMessage(UserConstants.MAINTENANCE_MODE_MESSAGE);
-					LOGGER.error("Error :: Maintenance mode in progress");
-					maintenanceMode=true;
-					//return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
-				 }
-				//}
-				//Consider  exclusions for maintenance mode as below
-				if(maintenanceMode){
-					maintenanceMode = excludeMaintenanceMode(userRequest.getUserRecord().getIDMS_Registration_Source__c(), UserConstants.MAINTENANCE_MODE_REGISTRATION);
-				}
-				if(maintenanceMode){
-					return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
-				}
+					if(accssControlList.contains(UserConstants.MAINTENANCE_MODE_COMPLETE) || accssControlList.contains(UserConstants.MAINTENANCE_MODE_REGISTRATION) ){
+						errorResponse.setStatus(errorStatus);
+						errorResponse.setMessage(UserConstants.MAINTENANCE_MODE_MESSAGE);
+						LOGGER.error("Error :: Maintenance mode in progress");
+						maintenanceMode=true;
+					}
+					//Consider  exclusions for maintenance mode as below
+					if(maintenanceMode){
+						maintenanceMode = excludeMaintenanceMode(userRequest.getUserRecord().getIDMS_Registration_Source__c(), UserConstants.MAINTENANCE_MODE_REGISTRATION);
+					}
+					if(maintenanceMode){
+						return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
+					}
 				}
 				//Here if maintenanceMode==true then return 503
 				if (null != userRequest.getUserRecord().getMobilePhone()
@@ -2849,25 +2842,23 @@ public class UserServiceImpl implements UserService {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Response checkUserExists(String loginIdentifier, String withGlobalUsers) {
-
 		LOGGER.info("Entered checkUserExists() -> Start");
 		LOGGER.info("Parameter loginIdentifier -> " + loginIdentifier + " ,withGlobalUsers -> " + withGlobalUsers);
 
 		UserExistsResponse userResponse = new UserExistsResponse();
 		DocumentContext productDocCtx = null;
 		String iPlanetDirectoryKey = null;
-		String ifwAccessToken = null;
+		String ifwAccessToken = null, userExists = null;
 		JSONObject response = new JSONObject();
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
 		Response ifwResponse = null;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		Integer resultCount = 0;
 
 		try {
-
 			if ((null != withGlobalUsers) && (!UserConstants.TRUE.equalsIgnoreCase(withGlobalUsers)
 					&& !UserConstants.FALSE.equalsIgnoreCase(withGlobalUsers))) {
-
 				response.put(UserConstants.STATUS, errorStatus);
 				response.put(UserConstants.MESSAGE, UserConstants.GLOBAL_USER_BOOLEAN);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -2915,46 +2906,73 @@ public class UserServiceImpl implements UserService {
 			}
 
 			if (null != loginIdentifier && !loginIdentifier.isEmpty()) {
-				LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
-						+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + loginIdentifier + AUDIT_LOG_CLOSURE);
-				LOGGER.info("Start: checkUserExistsWithEmailMobile() of openamservice with loginIdentifier="
-						+ loginIdentifier);
-				String userExists = productService.checkUserExistsWithEmailMobile(
-						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-						"loginid eq " + "\""
-								+ URLEncoder.encode(URLDecoder.decode(loginIdentifier.trim(), "UTF-8"), "UTF-8")
-								+ "\" or login_mobile eq " + "\""
-								+ URLEncoder.encode(URLDecoder.decode(loginIdentifier.trim(), "UTF-8"), "UTF-8")
-								+ "\"");
-				LOGGER.info("End: checkUserExistsWithEmailMobile() of openamservice finished with loginIdentifier="
-						+ loginIdentifier);
-				productDocCtx = JsonPath.using(conf).parse(userExists);
-				Integer resultCount = productDocCtx.read("$.resultCount");
-				LOGGER.info("resultCount=" + resultCount);
-				if (resultCount.intValue() > 0) {
-					userResponse.setMessage(UserConstants.TRUE);
-					return Response.status(Response.Status.OK).entity(userResponse).build();
-
+				if(!UserConstants.TRUE.equalsIgnoreCase(withGlobalUsers)){
+					LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
+							+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + loginIdentifier + AUDIT_LOG_CLOSURE);
+					LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for login/login_mobile="
+							+ loginIdentifier);
+					userExists = productService.checkUserExistsWithEmailMobile(
+							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+							"loginid eq " + "\""
+									+ URLEncoder.encode(URLDecoder.decode(loginIdentifier.trim(), "UTF-8"), "UTF-8")
+									+ "\" or login_mobile eq " + "\""
+									+ URLEncoder.encode(URLDecoder.decode(loginIdentifier.trim(), "UTF-8"), "UTF-8")
+									+ "\"");
+					LOGGER.info("End: checkUserExistsWithEmailMobile() of openam finished for login/login_mobile="
+							+ loginIdentifier);
+					productDocCtx = JsonPath.using(conf).parse(userExists);
+					resultCount = productDocCtx.read("$.resultCount");
+					LOGGER.info("resultCount of loginIdentifier = " + resultCount);
+					if(resultCount == 1){
+						//loginIdentifier found but password is incorrect
+						userResponse.setUserInfo(UserConstants.CN_USER_ACTIVE);
+						userResponse.setMessage(UserConstants.TRUE);
+						return Response.status(Response.Status.OK).entity(userResponse).build();
+					}
+					//loginIdentifier not found, checking if user is registered but not activated
+					if(resultCount == 0){
+						LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for mail/mobile="
+								+ loginIdentifier);
+						userExists = productService.checkUserExistsWithEmailMobile(
+								UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+								"mail eq " + "\""
+										+ URLEncoder.encode(URLDecoder.decode(loginIdentifier.trim(), "UTF-8"), "UTF-8")
+										+ "\" or mobile_reg eq " + "\""
+										+ URLEncoder.encode(URLDecoder.decode(loginIdentifier.trim(), "UTF-8"), "UTF-8")
+										+ "\"");
+						LOGGER.info("End: checkUserExistsWithEmailMobile() of openam finished for mail/mobile="
+								+ loginIdentifier);
+						productDocCtx = JsonPath.using(conf).parse(userExists);
+						resultCount = productDocCtx.read("$.resultCount");
+						LOGGER.info("resultCount of mail or mobile = " + resultCount);
+						if(resultCount == 1){
+							userResponse.setUserInfo(UserConstants.CN_USER_INACTIVE);
+							userResponse.setMessage(UserConstants.TRUE);
+							return Response.status(Response.Status.OK).entity(userResponse).build();
+						}
+						if(resultCount > 1){
+							userResponse.setUserInfo(UserConstants.CN_USER_MULTIPLE_EXIST);
+							userResponse.setMessage(UserConstants.TRUE);
+							return Response.status(Response.Status.OK).entity(userResponse).build();
+						}
+					}
 				} else {
 					if (UserConstants.TRUE.equalsIgnoreCase(withGlobalUsers)) {
-
 						LOGGER.info("Start: getIFWToken() of IFWService");
 						ifwAccessToken = ifwService.getIFWToken(UserConstants.CONTENT_TYPE_URL_FROM,
 								UserConstants.IFW_GRANT_TYPE, ifwClientId, ifwClientSecret);
-
 						LOGGER.info("End: getIFWToken() of IFWService finished");
+						
 						productDocCtx = JsonPath.using(conf).parse(ifwAccessToken);
 						String accessToken = productDocCtx.read("$.access_token");
-
 						String bfoAuthorizationToken = sfSyncServiceImpl.getSFToken();
-
 						String authorization = "Bearer " + accessToken;
 
 						if (loginIdentifier.contains("@")) {
 							LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for loginIdentifier="
 									+ loginIdentifier);
 							ifwResponse = ifwService.checkUserExistsWithEmail(bfoAuthorizationToken,
-									UserConstants.APPLICATION_NAME, UserConstants.CHINA_CODE,
+									UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE,
 									UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID, authorization,
 									loginIdentifier.trim(), false);
 							LOGGER.info("End: checkUserExistsWithEmail() of IFWService finished for loginIdentifier="
@@ -2964,7 +2982,7 @@ public class UserServiceImpl implements UserService {
 							LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for loginIdentifier="
 									+ loginIdentifier);
 							ifwResponse = ifwService.checkUserExistsWithMobile(bfoAuthorizationToken,
-									UserConstants.APPLICATION_NAME, UserConstants.CHINA_CODE,
+									UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE,
 									UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID, authorization,
 									loginIdentifier.trim(), false);
 							LOGGER.info("End: checkUserExistsWithEmail() of IFWService finished for loginIdentifier="
@@ -2981,31 +2999,31 @@ public class UserServiceImpl implements UserService {
 			}
 		} catch (BadRequestException e) {
 			response.put(UserConstants.STATUS, errorStatus);
-			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
+			response.put(UserConstants.MESSAGE, UserConstants.BAD_REQUEST);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.checkUserExists() : " + elapsedTime);
-			LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage(),e);
+			LOGGER.error("BadRequestException while checkUserExists :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (NotAuthorizedException e) {
 			response.put(UserConstants.STATUS, errorStatus);
-			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
+			response.put(UserConstants.MESSAGE, "Authorization Failed");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.checkUserExists() : " + elapsedTime);
-			LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage(),e);
+			LOGGER.error("NotAuthorizedException while checkUserExists :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
 		} catch (NotFoundException e) {
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.ActivateUser() : " + elapsedTime);
-			LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage(),e);
+			LOGGER.error("NotFoundException while checkUserExists :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 		} catch (Exception e) {
 			response.put(UserConstants.STATUS, errorStatus);
-			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
+			response.put(UserConstants.MESSAGE, e.getMessage());
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.checkUserExists() : " + elapsedTime);
-			LOGGER.error("Executing while checkUserExists :: -> " + e.getMessage(),e);
+			LOGGER.error("Exception while checkUserExists :: -> " + e.getMessage(),e);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 		LOGGER.error("USER not found while executing checkUserExists()");
@@ -9045,11 +9063,9 @@ public class UserServiceImpl implements UserService {
 		long elapsedTime;
 		String successResponse = null;
 		String regSource = app;
-		//List<String> accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
 		List<String> accssControlList =null;
 		ErrorResponse errorResponse = new ErrorResponse();
 		boolean maintenanceMode=false;
-		//Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		if ((app == null || app.equalsIgnoreCase("undefined"))) {
 			regSource = UserConstants.LOGZ_IO_DEFAULT_APP;
 		} else if ((app != null && app.contains("partner"))) {
@@ -9063,33 +9079,26 @@ public class UserServiceImpl implements UserService {
 		cache = (EhCacheCache) cacheManager.getCache("iPlanetToken");
 		if (null != cache) {
 			LOGGER.info("cacahe NotNull");
-			// cache.evictExpiredElements();
 		}
-		// Response authenticateResponse =
-		// productService.authenticateIdmsChinaUser(userName, password, realm);
+
 		try {
-			// The below snippet for authentication logs.
-			// String PlanetDirectoryKey = getSSOToken();
 			LOGGER.info("Access Control List:"+maintenanceModeGlobal);
 			if(maintenanceModeGlobal!=null)
 				accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
 			if(accssControlList!=null && accssControlList.size()>0 && !(accssControlList.contains("False"))){
-			//if(accssControlList!=null &&accssControlList.size()>0){//Through error if maintenance mode is enabled
 				if(accssControlList.contains(UserConstants.MAINTENANCE_MODE_COMPLETE) || accssControlList.contains(UserConstants.MAINTENANCE_MODE_LOGIN) ){
 					errorResponse.setStatus(errorStatus);
 					errorResponse.setMessage(UserConstants.MAINTENANCE_MODE_MESSAGE);
 					LOGGER.error("Error :: Maintenance mode in progress");
 					maintenanceMode=true;
-					//return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
-				 }
-			//}
-			//Consider  exclusions for maintenance mode as below
-			if(maintenanceMode){
-				maintenanceMode = excludeMaintenanceMode(app,  UserConstants.MAINTENANCE_MODE_LOGIN);
-			}
-			if(maintenanceMode){
-				return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
-			}
+				}
+				//Consider  exclusions for maintenance mode as below
+				if(maintenanceMode){
+					maintenanceMode = excludeMaintenanceMode(app,  UserConstants.MAINTENANCE_MODE_LOGIN);
+				}
+				if(maintenanceMode){
+					return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
+				}
 			}
 			LOGGER.info("Start: aunthenticate User of OPENAMService for username=" + userName);
 			Response authenticateResponse = ChinaIdmsUtil.executeHttpClient(prefixStartUrl, realm, userName, password);
@@ -9109,12 +9118,33 @@ public class UserServiceImpl implements UserService {
 				checkUserExistsFlag = (UserExistsResponse) checkUserExistsResponse.getEntity();
 
 				if (UserConstants.TRUE.equalsIgnoreCase(checkUserExistsFlag.getMessage())) {
-					jsonObject.put("user_store", "CN");
-					elapsedTime = (System.currentTimeMillis() - startTime);
-					AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource
-							+ "," + elapsedTime + "ms" + "," + UserConstants.INCORRECT_PASSWORD);
-					LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
-					return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
+					if(UserConstants.CN_USER_ACTIVE.equalsIgnoreCase(checkUserExistsFlag.getUserInfo())){
+						jsonObject.put("user_store", "CN");
+						jsonObject.put("user_status", "Registered-Active");
+						elapsedTime = (System.currentTimeMillis() - startTime);
+						AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource
+								+ "," + elapsedTime + "ms" + "," + UserConstants.INCORRECT_PASSWORD);
+						LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
+						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
+					}
+					if(UserConstants.CN_USER_INACTIVE.equalsIgnoreCase(checkUserExistsFlag.getUserInfo())){
+						jsonObject.put("user_store", "CN");
+						jsonObject.put("user_status", "Registered-Not-Active");
+						elapsedTime = (System.currentTimeMillis() - startTime);
+						AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource
+								+ "," + elapsedTime + "ms" + "," + UserConstants.USER_INACTIVE);
+						LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
+						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
+					}
+					if(UserConstants.CN_USER_MULTIPLE_EXIST.equalsIgnoreCase(checkUserExistsFlag.getUserInfo())){
+						jsonObject.put("user_store", "CN");
+						jsonObject.put("user_status", "Multiple Registered Users");
+						elapsedTime = (System.currentTimeMillis() - startTime);
+						AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource
+								+ "," + elapsedTime + "ms" + "," + UserConstants.CN_USER_MULTIPLE_EXIST);
+						LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
+						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
+					}					
 				} else {
 					checkUserExistsResponse = checkUserExists(userName, UserConstants.TRUE);
 					checkUserExistsFlag = (UserExistsResponse) checkUserExistsResponse.getEntity();
@@ -9558,13 +9588,13 @@ public class UserServiceImpl implements UserService {
 				if (loginId.contains("@")) {
 					LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for loginId:" + loginId);
 					ifwResponse = ifwService.checkUserExistsWithEmail(bfoAuthorizationToken,
-							UserConstants.APPLICATION_NAME, UserConstants.CHINA_CODE, UserConstants.LANGUAGE_CODE,
+							UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE, UserConstants.LANGUAGE_CODE,
 							UserConstants.REQUEST_ID, authorization, loginId, false);
 					LOGGER.info("End: checkUserExistsWithEmail() of IFWService finished for loginId:" + loginId);
 				} else {
 					LOGGER.info("Start: checkUserExistsWithMobile() of IFWService for loginId:" + loginId);
 					ifwResponse = ifwService.checkUserExistsWithMobile(bfoAuthorizationToken,
-							UserConstants.APPLICATION_NAME, UserConstants.CHINA_CODE, UserConstants.LANGUAGE_CODE,
+							UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE, UserConstants.LANGUAGE_CODE,
 							UserConstants.REQUEST_ID, authorization, loginId, false);
 					LOGGER.info("End: checkUserExistsWithMobile() of IFWService finished for loginId:" + loginId);
 				}
