@@ -405,6 +405,7 @@ public class UserConstants {
 	public static final String MESSAGE_L = "message";
 	public static final String STATUS_FAILD = "Failed";
 	public static final String STATUS_ERROR = "Error";
+	public static final String USER_INFO = "userInfo";
 	public static final String RESPONSE_MESSAGE = "User ID and Federated Id doesn’t match";
 	public static final String RESEND_ONLYMOBILE_ERROR_MESSAGE = "Resend pin only for mobile users";
 	public static final String RESEND_UPDATEOPTTYPE_ERROR = "Operation is not permitted";
