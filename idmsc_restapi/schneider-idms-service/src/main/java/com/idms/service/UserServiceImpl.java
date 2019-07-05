@@ -54,6 +54,8 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.xml.ws.soap.AddressingFeature.Responses;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -158,6 +160,8 @@ import com.se.idms.dto.SetPasswordErrorResponse;
 import com.se.idms.dto.SetPasswordRequest;
 import com.se.idms.dto.SetPasswordResponse;
 import com.se.idms.dto.SocialLoginResponse;
+import com.se.idms.dto.UIMSResponse;
+import com.se.idms.dto.UIMSStatusInfo;
 import com.se.idms.dto.UserExistsResponse;
 import com.se.idms.dto.UserServiceResponse;
 import com.se.idms.util.EmailValidator;
@@ -977,7 +981,8 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 					LOGGER.error(
 							"Registration from UIMS, federationID should not contain cn00. May be duplicate entry.");
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+					//return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+					return handleUIMSError(Response.Status.BAD_REQUEST, "Registration from UIMS, federationID should not contain cn00. May be duplicate entry.");
 				}
 				if (null != userRequest.getUserRecord().getIDMS_Federated_ID__c()
 						&& !userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty()
@@ -989,6 +994,7 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 					LOGGER.error("Registration from non-UIMS, federationID must contain cn00.");
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+					
 				}
 
 				if (!mobileRegFlag) {
@@ -1026,6 +1032,10 @@ public class UserServiceImpl implements UserService {
 							elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 							LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 							LOGGER.error("Error while idmsCheckUserExists is " + errorResponse.getMessage());
+							if(UserConstants.UIMS
+									.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())){
+								return handleUIMSError(Response.Status.fromStatusCode(checkUserExist.getStatus()),messageUser);
+							}
 							return Response.status(checkUserExist.getStatus()).entity(errorResponse).build();
 						}
 						if (200 == checkUserExist.getStatus()) {
@@ -1034,6 +1044,10 @@ public class UserServiceImpl implements UserService {
 							elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 							LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 							LOGGER.error("User exists/registered in OpenAM");
+							if(UserConstants.UIMS
+									.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())){
+								return handleUIMSError(Response.Status.CONFLICT,UserConstants.USER_EXISTS);
+							}
 							return Response.status(Response.Status.CONFLICT).entity(errorResponse).build();
 						}
 					}
@@ -1045,6 +1059,10 @@ public class UserServiceImpl implements UserService {
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 					LOGGER.error("Error while processing checkMandatoryFields is " + errorResponse.getMessage());
+					if(UserConstants.UIMS
+							.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())){
+						return handleUIMSError(Response.Status.BAD_REQUEST,userResponse.getMessage());
+					}
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 
@@ -1064,6 +1082,10 @@ public class UserServiceImpl implements UserService {
 						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 						LOGGER.info("Time taken by UserServiceImpl.userRegistration() : " + elapsedTime);
 						LOGGER.error("Error while processing is " + errorResponse.getMessage());
+						if(UserConstants.UIMS
+								.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())){
+							return handleUIMSError(Response.Status.BAD_REQUEST,UserConstants.PR_POLICY);
+						}
 						return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 					}
 				} else if (((null == userRequest.getUIFlag()
@@ -1085,6 +1107,10 @@ public class UserServiceImpl implements UserService {
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Error while processing is "+errorResponse.getMessage(),e);
+				if(UserConstants.UIMS
+						.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())){
+					return handleUIMSError(Response.Status.BAD_REQUEST,UserConstants.ATTRIBUTE_NOT_AVAILABELE);
+				}
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 
@@ -1099,7 +1125,8 @@ public class UserServiceImpl implements UserService {
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
 					LOGGER.error("Error while processing is " + userResponse.getMessage());
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+					//return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+					return handleUIMSError(Response.Status.BAD_REQUEST,UserConstants.UIMS_CLIENTID_SECRET);
 				}
 
 				if ((null != clientId && !clientId.equalsIgnoreCase(uimsClientId))
@@ -1109,7 +1136,8 @@ public class UserServiceImpl implements UserService {
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
 					LOGGER.error("Error while processing is " + userResponse.getMessage());
-					return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+					//return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+					return handleUIMSError(Response.Status.UNAUTHORIZED,UserConstants.INVALID_UIMS_CREDENTIALS);
 				}
 			}
 			/**
@@ -1273,6 +1301,10 @@ public class UserServiceImpl implements UserService {
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("User exists/registered in OpenAM");
+				if(UserConstants.UIMS
+						.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())){
+					handleUIMSError(Response.Status.CONFLICT, UserConstants.USER_EXISTS);
+				}
 				return Response.status(Response.Status.CONFLICT).entity(errorResponse).build();
 			}
 
@@ -1610,6 +1642,10 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 			LOGGER.error("BadRequestException while user Registration :: -> " + e.getMessage(),e);
 			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
+			if(UserConstants.UIMS
+					.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())){
+				handleUIMSError(Response.Status.BAD_REQUEST,UserConstants.ERROR_CREATE_USER);
+			}
 			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 		} catch (NotFoundException e) {
 			errorResponse.setStatus(errorStatus);
@@ -1618,6 +1654,10 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 			LOGGER.error("NotFoundException while user Registration :: -> " + e.getMessage(),e);
 			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
+			if(UserConstants.UIMS
+					.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())){
+				handleUIMSError(Response.Status.NOT_FOUND,UserConstants.ERROR_CREATE_USER);
+			}
 			return Response.status(Response.Status.NOT_FOUND).entity(errorResponse).build();
 		} catch (Exception e) {
 			errorResponse.setStatus(errorStatus);
@@ -1626,6 +1666,10 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 			LOGGER.error("Exception while user Registration :: -> " + e.getMessage(),e);
 			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
+			if(UserConstants.UIMS
+					.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())){
+				handleUIMSError(Response.Status.INTERNAL_SERVER_ERROR,UserConstants.ERROR_CREATE_USER);
+			}
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		}
 		userRequest.getUserRecord().setIDMS_Federated_ID__c(userName);
@@ -1649,7 +1693,6 @@ public class UserServiceImpl implements UserService {
 			thread.start();
 
 		}
-
 		sucessRespone = new CreateUserResponse();
 		sucessRespone.setStatus(successStatus);
 		sucessRespone.setMessage(UserConstants.CREATE_USER_SUCCESS_MESSAGE);
@@ -1663,6 +1706,16 @@ public class UserServiceImpl implements UserService {
 		sucessRespone.setIDMSUserRecord(idmsResponse);
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
+		if(UserConstants.UIMS
+				.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())){
+			UIMSResponse response= new UIMSResponse();
+			response.setHasErrors("false");
+			UIMSStatusInfo userResponse=new UIMSStatusInfo();
+			userResponse.setStatusCode(String.valueOf(Response.Status.OK.getStatusCode()));
+			userResponse.setMessage(UserConstants.CREATE_USER_SUCCESS_MESSAGE);
+			response.setResults(userResponse);
+			return Response.status(Response.Status.OK).entity(response).build();
+		}
 		return Response.status(Response.Status.OK).entity(sucessRespone).build();
 	}
 
@@ -4808,12 +4861,20 @@ public class UserServiceImpl implements UserService {
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.error("Error is " + userResponse.getMessage());
 					LOGGER.info("Time taken by updateUser() : " + elapsedTime);
+					if(UserConstants.UIMS
+							.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Profile_update_source__c())){
+						return handleUIMSError(Response.Status.BAD_REQUEST, UserConstants.INCORRECT_REVENUE);
+					}
 					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 				}
 
 				if (checkMandatoryFieldsFromRequest(userRequest.getUserRecord(), userResponse, false)) {
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by updateUser() : " + elapsedTime);
+					if(UserConstants.UIMS
+							.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Profile_update_source__c())){
+						return handleUIMSError(Response.Status.BAD_REQUEST, userResponse.getMessage());
+					}
 					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 				}
 			} catch (Exception e) {
@@ -4821,6 +4882,12 @@ public class UserServiceImpl implements UserService {
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by updateUser() : " + elapsedTime);
 				LOGGER.error("Exception in updateUser()->" + userResponse.getMessage());
+				// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
+				// "logout");
+				if(UserConstants.UIMS
+						.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Profile_update_source__c())){
+					return handleUIMSError(Response.Status.BAD_REQUEST, UserConstants.ATTRIBUTE_NOT_AVAILABELE);
+				}
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 			}
 
@@ -4838,7 +4905,8 @@ public class UserServiceImpl implements UserService {
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.error("Error in updateUser()-> " + userResponse.getMessage());
 					LOGGER.info("Time taken by updateUser() : " + elapsedTime);
-					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+					//return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+					return handleUIMSError(Response.Status.BAD_REQUEST,UserConstants.UIMS_CLIENTID_SECRET);
 				}
 
 				if ((null != clientId && !clientId.equalsIgnoreCase(uimsClientId))
@@ -4848,7 +4916,8 @@ public class UserServiceImpl implements UserService {
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.error("Error in updateUser()-> " + userResponse.getMessage());
 					LOGGER.info("Time taken by updateUser() : " + elapsedTime);
-					return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
+					//return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
+					return handleUIMSError(Response.Status.UNAUTHORIZED,UserConstants.INVALID_UIMS_CREDENTIALS);
 				}
 
 				Response fedResponse = checkUserExistsWithFederationID(iPlanetDirectoryKey,
@@ -5568,30 +5637,59 @@ public class UserServiceImpl implements UserService {
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by updateUser() : " + elapsedTime);
 			LOGGER.error("BadRequestException in Updating the User :: -> " + e.getMessage(),e);
+			// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
+			// "logout");
+			if(UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Profile_update_source__c())){
+				return handleUIMSError(Response.Status.BAD_REQUEST, UserConstants.ERROR_UPDATE_USER);
+			}
 			return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 		} catch (NotAuthorizedException e) {
 			userResponse.setMessage("Session expired or invalid");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by updateUser() : " + elapsedTime);
 			LOGGER.error("NotAuthorizedException in Updating the User :: -> " + e.getMessage(),e);
+			// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
+			// "logout");
+			if(UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Profile_update_source__c())){
+				return handleUIMSError(Response.Status.UNAUTHORIZED, "Session expired or invalid");
+			}
 			return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
 		} catch (ClientErrorException e) {
 			userResponse.setMessage(UserConstants.NEW_USER_EXISTS);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
 			LOGGER.error("ClientErrorException in updating the User :: -> " + userResponse.getMessage(),e);
+			// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
+			// "logout");
+			if(UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Profile_update_source__c())){
+				return handleUIMSError(Response.Status.CONFLICT, UserConstants.NEW_USER_EXISTS);
+			}
 			return Response.status(Response.Status.CONFLICT).entity(userResponse).build();
 		} catch (Exception e) {
 			userResponse.setMessage(UserConstants.ERROR_UPDATE_USER);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by updateUser() : " + elapsedTime);
 			LOGGER.error("Exception in Updating the User :: -> " + e.getMessage(),e);
+			// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
+			// "logout");
+			if(UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Profile_update_source__c())){
+				return handleUIMSError(Response.Status.INTERNAL_SERVER_ERROR, UserConstants.ERROR_UPDATE_USER);
+			}
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(userResponse).build();
 		}
-
 		LOGGER.info(" UserServiceImpl :: updateUser End");
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info("Time taken by updateUser() : " + elapsedTime);
+		if(UserConstants.UIMS
+				.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Profile_update_source__c())){
+			UIMSResponse response= new UIMSResponse();
+			response.setHasErrors("false");
+			UIMSStatusInfo userResponse=new UIMSStatusInfo();
+			userResponse.setStatusCode(String.valueOf(Response.Status.OK.getStatusCode()));
+			userResponse.setMessage(UserConstants.UPDATE_USER_SUCCESS_MESSAGE);
+			response.setResults(userResponse);
+			return Response.status(Response.Status.OK).entity(response).build();
+		}
 		return Response.status(Response.Status.OK).entity(sucessRespone).build();
 	}
 
@@ -10653,7 +10751,16 @@ public class UserServiceImpl implements UserService {
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		}
 	}
-
+    
+	private Response handleUIMSError(Status statusCode, String message){
+		UIMSResponse response= new UIMSResponse();
+		response.setHasErrors("true");
+		UIMSStatusInfo userResponse=new UIMSStatusInfo();
+		userResponse.setStatusCode(String.valueOf(statusCode.getStatusCode()));
+		userResponse.setMessage(message);
+		response.setResults(userResponse);
+		return Response.status(statusCode).entity(response).build();
+	}
 	public void setEMAIL_TEMPLATE_DIR(String eMAIL_TEMPLATE_DIR) {
 		EMAIL_TEMPLATE_DIR = eMAIL_TEMPLATE_DIR;
 	}
