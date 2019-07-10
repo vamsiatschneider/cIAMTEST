@@ -3623,14 +3623,14 @@ public class UserServiceImpl implements UserService {
 				response.setMessage(e.getMessage());
 				response.setId(uniqueIdentifier);
 				response.setFederation_Id(uniqueIdentifier);
-
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
 				LOGGER.error("Exception while userPinConfirmation :: -> " + e.getMessage(),e);
 				return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
 			} catch (Exception e) {
 				errorResponse.setStatus(errorStatus);
-				errorResponse.setMessage(UserConstants.INVALID_PINCODE);
+				//errorResponse.setMessage(UserConstants.INVALID_PINCODE);
+				errorResponse.setMessage(UserConstants.PIN_CONFIRMATION_ERROR);
 				errorResponse.setId(uniqueIdentifier);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
@@ -3910,7 +3910,6 @@ public class UserServiceImpl implements UserService {
 			response.setMessage(e.getMessage());
 			response.setId(uniqueIdentifier);
 			response.setFederation_Id(uniqueIdentifier);
-
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
 			LOGGER.error("Error while userPinConfirmation :: -> " + e.getMessage(),e);
@@ -4020,7 +4019,6 @@ public class UserServiceImpl implements UserService {
 			response.setMessage("404 Not Found");
 			response.setId(uniqueIdentifier);
 			response.setFederation_Id(uniqueIdentifier);
-
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by userPinConfirmation() : " + elapsedTime);
 			LOGGER.error("Error in userPinConfirmation -> " + e.getMessage(),e);
@@ -4030,14 +4028,18 @@ public class UserServiceImpl implements UserService {
 
 		catch (Exception e) {
 			LOGGER.error("Error is " + e.getMessage(),e);
-			response.setStatus(errorStatus);
-			response.setMessage(UserConstants.SERVER_ERROR);
-			response.setId(uniqueIdentifier);
-			response.setFederation_Id(uniqueIdentifier);
-
+			LOGGER.info("userPinConfirmation() User ID:"+uniqueIdentifier+"Federation_Id:"+uniqueIdentifier);
+			errorResponse.setId(uniqueIdentifier);
+			errorResponse.setStatus(errorStatus);
+			errorResponse.setMessage(UserConstants.PIN_CONFIRMATION_ERROR);
+			//response.setStatus(errorStatus);
+			//response.setMessage(UserConstants.SERVER_ERROR);
+			//response.setId(uniqueIdentifier);
+			//response.setFederation_Id(uniqueIdentifier);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by userPinConfirmation() : " + elapsedTime);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+			//return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		}
 
 		Attributes attributes = new Attributes();
