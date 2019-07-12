@@ -596,6 +596,7 @@ public class UserConstants {
 	public static final String MAINTENANCE_MODE_LOGIN = "Login";
 	public static final String MAINTENANCE_MODE_MESSAGE = "Maintenance mode in progress";
 	public static final String PIN_CONFIRMATION_ERROR= "Connection to backend failed. Please contact the administrator";
+	public static final String PIN_CONFIRMATION_ERROR_CODE = "HTTP 502 Bad Gateway";
 		
 	
 }
