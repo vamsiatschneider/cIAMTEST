@@ -3630,7 +3630,10 @@ public class UserServiceImpl implements UserService {
 			} catch (Exception e) {
 				errorResponse.setStatus(errorStatus);
 				//errorResponse.setMessage(UserConstants.INVALID_PINCODE);
-				errorResponse.setMessage(UserConstants.PIN_CONFIRMATION_ERROR);
+				if(e.getMessage().contains(UserConstants.PIN_CONFIRMATION_ERROR_CODE))
+					errorResponse.setMessage(UserConstants.PIN_CONFIRMATION_ERROR);
+				else
+					errorResponse.setMessage(e.getMessage());
 				errorResponse.setId(uniqueIdentifier);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
@@ -4029,17 +4032,26 @@ public class UserServiceImpl implements UserService {
 		catch (Exception e) {
 			LOGGER.error("Error is " + e.getMessage(),e);
 			LOGGER.info("userPinConfirmation() User ID:"+uniqueIdentifier+"Federation_Id:"+uniqueIdentifier);
-			errorResponse.setId(uniqueIdentifier);
-			errorResponse.setStatus(errorStatus);
-			errorResponse.setMessage(UserConstants.PIN_CONFIRMATION_ERROR);
-			//response.setStatus(errorStatus);
-			//response.setMessage(UserConstants.SERVER_ERROR);
-			//response.setId(uniqueIdentifier);
-			//response.setFederation_Id(uniqueIdentifier);
+			boolean connectionError=false;
+			if(e.getMessage().contains(UserConstants.PIN_CONFIRMATION_ERROR_CODE)){
+				errorResponse.setId(uniqueIdentifier);
+				errorResponse.setStatus(errorStatus);
+				errorResponse.setMessage(UserConstants.PIN_CONFIRMATION_ERROR);
+				connectionError=true;
+			}
+			else{
+				response.setStatus(errorStatus);
+				response.setMessage(UserConstants.SERVER_ERROR);
+				response.setId(uniqueIdentifier);
+				response.setFederation_Id(uniqueIdentifier);
+			}
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by userPinConfirmation() : " + elapsedTime);
 			//return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
+			if(connectionError)
+				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
+			else
+				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 
 		Attributes attributes = new Attributes();
