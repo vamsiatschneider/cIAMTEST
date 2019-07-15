@@ -9878,6 +9878,7 @@ public class UserServiceImpl implements UserService {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Response addMobile(AddMobileRequest addMobileRequest) {
+		LOGGER.info("Starting addMobile()");
 		LOGGER.info("Entered addMobile() -> Start");
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
