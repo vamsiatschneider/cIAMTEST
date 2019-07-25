@@ -29,4 +29,9 @@ public class UIMSStatusInfo {
 		this.message = message;
 	}
 
+	@Override
+	public String toString() {
+		return "UIMSStatusInfo [statusCode=" + statusCode + ", message=" + message + "]";
+	}
+
 }

@@ -1710,10 +1710,12 @@ public class UserServiceImpl implements UserService {
 				.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())){
 			UIMSResponse response= new UIMSResponse();
 			response.setHasErrors("false");
+			response.setStatus("Success");
 			UIMSStatusInfo userResponse=new UIMSStatusInfo();
 			userResponse.setStatusCode(String.valueOf(Response.Status.OK.getStatusCode()));
 			userResponse.setMessage(UserConstants.CREATE_USER_SUCCESS_MESSAGE);
 			response.setResults(userResponse);
+			LOGGER.info("User Registration -> : UIMS Response -> " + response);
 			return Response.status(Response.Status.OK).entity(response).build();
 		}
 		return Response.status(Response.Status.OK).entity(sucessRespone).build();
@@ -5695,10 +5697,12 @@ public class UserServiceImpl implements UserService {
 				.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Profile_update_source__c())){
 			UIMSResponse response= new UIMSResponse();
 			response.setHasErrors("false");
+			response.setStatus("Success");
 			UIMSStatusInfo userResponse=new UIMSStatusInfo();
 			userResponse.setStatusCode(String.valueOf(Response.Status.OK.getStatusCode()));
 			userResponse.setMessage(UserConstants.UPDATE_USER_SUCCESS_MESSAGE);
 			response.setResults(userResponse);
+			LOGGER.info("updateUser -> : UIMS Response -> " + response);
 			return Response.status(Response.Status.OK).entity(response).build();
 		}
 		return Response.status(Response.Status.OK).entity(sucessRespone).build();
@@ -10766,6 +10770,7 @@ public class UserServiceImpl implements UserService {
 	private Response handleUIMSError(Status statusCode, String message){
 		UIMSResponse response= new UIMSResponse();
 		response.setHasErrors("true");
+		response.setStatus("Error");
 		UIMSStatusInfo userResponse=new UIMSStatusInfo();
 		userResponse.setStatusCode(String.valueOf(statusCode.getStatusCode()));
 		userResponse.setMessage(message);
