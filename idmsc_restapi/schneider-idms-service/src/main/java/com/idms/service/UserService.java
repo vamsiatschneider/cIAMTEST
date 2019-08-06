@@ -33,6 +33,7 @@ import com.idms.model.SendOTPRequest;
 import com.idms.model.UpdatePasswordRequest;
 import com.idms.model.UpdateUserRequest;
 import com.idms.model.UserDetailByApplicationRequest;
+import com.idms.model.UserMFADataRequest;
 import com.idms.model.VerifyPinRequest;
 import com.se.idms.dto.SetPasswordRequest;
 
@@ -278,5 +279,8 @@ public interface UserService {
 	@POST
 	@Path("/apexrest/sendDemoMail")
 	Response sendDemoMail(CheckUserIdentityRequest mailIds);
-
+	
+	@POST
+	@Path("/apexrest/securedLoginNext")
+	Response securedLoginNext(UserMFADataRequest userMFADataRequest);
 }

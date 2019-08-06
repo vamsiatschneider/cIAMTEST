@@ -116,6 +116,6 @@ public class OpenUserReponse {
 
 	@Override
     public String toString() {
-        return  null;//ToStringBuilder.reflectionToString(this);
+        return  "";//ToStringBuilder.reflectionToString(this);
     }
 }

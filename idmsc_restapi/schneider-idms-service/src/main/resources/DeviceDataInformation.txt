@@ -1,0 +1,33 @@
+{
+    "authId": "<AuthenticateIdentification>",
+    "template": "",
+    "stage": "DeviceIdMatch2",
+    "header": "Sign in to OpenAM",
+    "callbacks": [
+        {
+            "type": "HiddenValueCallback",
+            "output": [
+                {
+                    "name": "value",
+                    "value": ""
+                }
+            ],
+            "input": [
+                {
+                    "name": "IDToken1",
+                    "value": "<SystemDeviceInfo>"
+                }
+            ]
+        },
+        {
+            "type": "TextOutputCallback",
+            "output": [
+                
+                {
+                    "name": "messageType",
+                    "value": "4"
+                }
+            ]
+        }
+    ]
+}

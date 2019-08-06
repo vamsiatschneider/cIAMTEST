@@ -597,6 +597,16 @@ public class UserConstants {
 	public static final String MAINTENANCE_MODE_MESSAGE = "Maintenance mode in progress";
 	public static final String PIN_CONFIRMATION_ERROR= "Connection to backend failed. Please contact the administrator";
 	public static final String PIN_CONFIRMATION_ERROR_CODE = "HTTP 502 Bad Gateway";
+	
+	//MFA
+	public static final String STAGE_DEVICEIDMATCH2 = "DeviceIdMatch2";
+	public static final String STAGE_HOTP2 = "HOTP2";
+	public static final String AUTHID_EMPTY = "AuthId is empty or missing";
+	public static final String DEVICEDATA_EMPTY = "Stage data(device or OTP) is empty or missing";
+	public static final String STAGENAME_EMPTY = "Login stage name is empty or missing";
+	public static final String STAGENAME_INCORRECT = "Login stage name should be either deviceStage or OTPStage";
+	public static final String USER_EMPTY = "Login is empty or missing";
+	public static final String APPNAME_EMPTY = "Application Name is empty or missing";
 		
 	
 }
