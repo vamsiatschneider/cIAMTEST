@@ -10418,6 +10418,8 @@ public class UserServiceImpl implements UserService {
 		String optType = null;
 		JSONObject response = new JSONObject();
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		String openamVnew = null;
+		Integer vNewCntValue = 0;
 		try {
 			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(addEmailRequest));
 
@@ -10467,6 +10469,13 @@ public class UserServiceImpl implements UserService {
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userExistsInOpenam);
 			Integer resultCount = productDocCtx.read(JsonConstants.RESULT_COUNT);
 			LOGGER.info("resultCount = " + resultCount);
+			
+			openamVnew = null != productDocCtx.read("$.result[0].V_New[0]") ? getValue(productDocCtx.read("$.result[0].V_New[0]"))
+					: getDelimeter();
+			if (null != vNewCntValue && null != openamVnew) {
+				vNewCntValue = Integer.parseInt(openamVnew) + 1;
+			}
+			
 			if (optType.equalsIgnoreCase(UserConstants.ADD_EMAIL_USER_RECORD))
 				email = productDocCtx.read("$.result[0].mail[0]");
 			LOGGER.info("email in openam = " + email);
@@ -10478,6 +10487,12 @@ public class UserServiceImpl implements UserService {
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + ssoToken, fedid, addEmailString);
 				LOGGER.info("End: updateUser() of openamservice to add email as dual indentifier finished for userId:"
 						+ fedid);
+				
+				if (null != source && !UserConstants.UIMS.equalsIgnoreCase(source)) {
+					LOGGER.info("Start: ASYNC updateChangeEmailOrMobile() of UIMSService for federationID=" + fedid);
+					uimsUserManagerSoapService.updateChangeEmailOrMobile(ssoToken, fedid, fedid, openamVnew, "email", email);
+					LOGGER.info("End: ASYNC updateChangeEmailOrMobile() of UIMSService finished for federationID=" + fedid);
+				}
 
 				response.put(UserConstants.STATUS_L, successStatus);
 				response.put(UserConstants.MESSAGE_L, UserConstants.ADD_EMAIL_PROFILE_SUCCESS);
