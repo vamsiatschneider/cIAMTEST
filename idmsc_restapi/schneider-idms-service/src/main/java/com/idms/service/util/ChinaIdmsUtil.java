@@ -54,7 +54,7 @@ public class ChinaIdmsUtil {
 			throws ClientProtocolException, IOException {
 
 		HttpClient client = new DefaultHttpClient();
-		HttpPost request = new HttpPost(uri + "/accessmanager/json/authenticate?realm=" + realm+"&authIndexType=service&authIndexValue=MFA");
+		HttpPost request = new HttpPost(uri + "/accessmanager/json/authenticate?realm=" + realm);
 		request.setHeader("X-OpenAM-Username", userName);
 		request.setHeader("X-OpenAM-Password", password);
 		HttpResponse response = client.execute(request);
@@ -281,7 +281,7 @@ public class ChinaIdmsUtil {
 		
 		if(null != jsonString && !jsonString.isEmpty()){
 			HttpClient client = new DefaultHttpClient();
-			HttpPost request = new HttpPost(uri + "/accessmanager/json/authenticate?realm=" + realm + "&authIndexType=service&authIndexValue=MFA");
+			HttpPost request = new HttpPost(uri + "/accessmanager/json/authenticate?realm=" + realm);
 			StringEntity entity = new StringEntity(jsonString);
 			request.setEntity(entity);
 			request.setHeader("Accept", "application/json");
