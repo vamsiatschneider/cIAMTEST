@@ -416,7 +416,7 @@ public class IdmsMapper extends ConfigurableMapper{
         //adding new mappings
         .field("userRecord.IDMSCompanyPoBox__c", "postOfficeBoxCode")
         .field("userRecord.IDMSClassLevel1__c", "businessType")
-        .field("userRecord.IDMSCompanyMarketServed__c", "marketSegment")
+        .field("userRecord.IDMSCompanyMarketServed__c", "marketServed")
         .field("userRecord.IDMSAnnualRevenue__c", "annualSales")
         .field("userRecord.BFO_ACCOUNT_ID__c", "bfoId")
         .field("userRecord.IDMSWorkPhone__c", "telephoneNumber")
@@ -454,7 +454,7 @@ public class IdmsMapper extends ConfigurableMapper{
         //adding new mappings
         .field("userRecord.IDMSCompanyPoBox__c", "postOfficeBoxCode")
         .field("userRecord.IDMSClassLevel1__c", "businessType")
-        .field("userRecord.IDMSCompanyMarketServed__c", "marketSegment")
+        .field("userRecord.IDMSCompanyMarketServed__c", "marketServed")
         .field("userRecord.IDMSAnnualRevenue__c", "annualSales")
         .field("userRecord.BFO_ACCOUNT_ID__c", "bfoId")
         .field("userRecord.IDMSWorkPhone__c", "telephoneNumber")
