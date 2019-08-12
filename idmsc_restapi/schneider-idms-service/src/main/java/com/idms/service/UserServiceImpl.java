@@ -9163,13 +9163,11 @@ public class UserServiceImpl implements UserService {
 			Response authenticateResponse = ChinaIdmsUtil.executeHttpClient(prefixStartUrl, realm, userName, password);
 			LOGGER.info("End: aunthenticate User of OPENAMService for username=" + userName);
 			successResponse = (String) authenticateResponse.getEntity();
-			//LOGGER.info("Response from OPENAMService:" + successResponse);
+			LOGGER.info("Response code from OPENAMService: " + authenticateResponse.getStatus());
 			
 			productDocCtx = JsonPath.using(conf).parse(successResponse);
 			String authIdSecuredLogin = productDocCtx.read("$.authId");
 			String stage = productDocCtx.read("$.stage");
-			LOGGER.info("authIdSecuredLogin :" + authIdSecuredLogin);
-			LOGGER.info("stage :" + stage);
 			
 			if (401 == authenticateResponse.getStatus() && successResponse.contains(UserConstants.ACCOUNT_BLOCKED)) {
 				jsonObjectResponse.put("message", UserConstants.ACCOUNT_BLOCKED);
@@ -9243,6 +9241,8 @@ public class UserServiceImpl implements UserService {
 				}
 			} else if (200 == authenticateResponse.getStatus() && (null != stage && !stage.isEmpty()) 
 					&& stage.equalsIgnoreCase(UserConstants.STAGE_DEVICEIDMATCH2)) {
+				LOGGER.info("authIdSecuredLogin : " + authIdSecuredLogin);
+				LOGGER.info("stage : " + stage);
 				JSONObject response = new JSONObject();
 				response.put("authID", authIdSecuredLogin);
 				response.put("stage", stage);
@@ -9276,15 +9276,15 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Entered securedLoginNext() -> Start");
 		LOGGER.info("Parameter loginUser -> " + userMFADataRequest.getLoginUser());
 		LOGGER.info("Parameter appName -> " + userMFADataRequest.getAppName());
+		LOGGER.info("Parameter stageName -> " + userMFADataRequest.getStageName());
 		
 		ErrorResponse errorResponse = new ErrorResponse();
-		JSONObject jsonObjectResponse = new JSONObject();
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
-		String successResponse = null;
+		String successResponse = null, stage = null;
 		DocumentContext productDocCtx = null;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
-		String authIdSecuredLogin = null, stage = null, stageNameFromUI = null, fileName = null;
+		String authIdSecuredLogin = null, header = null, stageNameFromUI = null, fileName = null;
 		String fileNameDevice = "DeviceDataInformation.txt";
 		String fileNameOTP = "DeviceOTPInformation.txt";
 
@@ -9352,15 +9352,15 @@ public class UserServiceImpl implements UserService {
 					userMFADataRequest.getStageData(), fileName);
 			LOGGER.info("End: checkDeviceInfo of OPENAMService for username="+userMFADataRequest.getLoginUser());
 			successResponse = (String) authenticateResponse.getEntity();
-			LOGGER.info("Response from OPENAMService:" + successResponse);
+			LOGGER.info("Response code from OPENAMService: " + authenticateResponse.getStatus());
 			productDocCtx = JsonPath.using(conf).parse(successResponse);
 			authIdSecuredLogin = productDocCtx.read("$.authId");
 			stage = productDocCtx.read("$.stage");
-			LOGGER.info("authIdSecuredLogin :" + authIdSecuredLogin);
-			LOGGER.info("stage :" + stage);
+			header = productDocCtx.read("$.header");
 
 			if (200 != authenticateResponse.getStatus()) {
 				LOGGER.error("Problem in securedLoginDevice():" + successResponse);
+				JSONObject jsonObjectResponse = new JSONObject();
 				jsonObjectResponse.put("message", productDocCtx.read("$.message"));
 				elapsedTime = (System.currentTimeMillis() - startTime);
 				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
@@ -9368,14 +9368,19 @@ public class UserServiceImpl implements UserService {
 			}
 			if (200 == authenticateResponse.getStatus() && (null != stage && !stage.isEmpty())
 					&& stage.equalsIgnoreCase(UserConstants.STAGE_HOTP2)) {
+				LOGGER.info("authIdSecuredLogin : " + authIdSecuredLogin);
+				LOGGER.info("stage : " + stage);
+				LOGGER.info("header : " + header);
 				JSONObject response = new JSONObject();
 				response.put("authID", authIdSecuredLogin);
 				response.put("stage", stage);
+				response.put("header", header);
 				LOGGER.info("securedLoginNext() -> Ending");
 				return Response.status(Response.Status.OK.getStatusCode()).entity(response).build();
 			}
 		} catch (Exception e) {
 			LOGGER.error("Problem in securedLoginDevice():" + e.getMessage(), e);
+			JSONObject jsonObjectResponse = new JSONObject();
 			jsonObjectResponse.put("message", UserConstants.LOGIN_ERROR);
 			elapsedTime = (System.currentTimeMillis() - startTime);
 			AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userMFADataRequest.getLoginUser() + "," + errorStatus
