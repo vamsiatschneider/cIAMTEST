@@ -206,7 +206,8 @@ public class ChinaIdmsUtil {
 	 */
 	public static String mobileTransformation(String str) {
 		String mobileNumber = str.trim();
-		str = mobileNumber.replaceAll("[\\(\\)\\-\\+\\s]", "");
+		//str = mobileNumber.replaceAll("[\\(\\)\\-\\+\\.\\s]", "");
+		str = mobileNumber.replaceAll("[^0-9]", "");
 		int i = 0;
 		while (str.charAt(i) == '0')
 			i++;
@@ -398,10 +399,11 @@ public class ChinaIdmsUtil {
 	
 	/*public static void main(String[] args) {
 		//String longvalue = generateHashValue("tY4MomqIwjg34932ZhTx651K38WJcZ");
-		//boolean mobileStr = mobileValidator("5987559777");
+		String mobileStr = mobileTransformation("+086-(508) 75*&^%$59.777");
 		//String abc = "\"Hello \"world\" estr\"";
 		//formatEscapeCharacter(abc);
-		printFileContent();
+		//printFileContent();
+		System.out.println(mobileStr);
 	}*/
 	
 }
