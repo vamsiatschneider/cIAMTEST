@@ -55,7 +55,6 @@ import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.xml.ws.soap.AddressingFeature.Responses;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -118,6 +117,7 @@ import com.idms.model.UpdatePasswordRequest;
 import com.idms.model.UpdateUserRequest;
 import com.idms.model.UpdateUserResponse;
 import com.idms.model.UserDetailByApplicationRequest;
+import com.idms.model.UserMFADataRequest;
 import com.idms.model.VerifyPinRequest;
 import com.idms.product.client.IFWService;
 import com.idms.product.client.IdentityService;
@@ -393,11 +393,6 @@ public class UserServiceImpl implements UserService {
 		emailValidator = EmailValidator.getInstance();
 		formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 		userResponse = new UserServiceResponse();
-		// userPinMap = new HashMap<String,String>();
-		/*
-		 * appList = new ArrayList<String>(); appList.add("PACE");
-		 * appList.add("PRM"); appList.add("PRMPORTAL");
-		 */
 	}
 
 	/*
@@ -4138,14 +4133,14 @@ public class UserServiceImpl implements UserService {
 			}
 
 			// Admin token check
-			/*if (null == authorizedToken || authorizedToken.isEmpty()) {
+			if (null == authorizedToken || authorizedToken.isEmpty()) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage(UserConstants.ADMIN_TOKEN_MANDATORY);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error is " + userResponse.getMessage());
 				LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
-			}*/
+			}
 
 			// UID
 			if (null != ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c() && !UserConstants.UIMS
@@ -4260,14 +4255,14 @@ public class UserServiceImpl implements UserService {
 			 * } }
 			 */
 
-			/*if (!getTechnicalUserDetails(authorizedToken)) {
+			if (!getTechnicalUserDetails(authorizedToken)) {
 				userResponse.setStatus(errorStatus);
 				userResponse.setMessage("Unauthorized or session expired");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error is " + userResponse.getMessage());
 				LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
 				return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
-			}*/
+			}
 
 			idmsAclType_c = getIDMSAclType(ailRequest.getUserAILRecord().getIDMSAclType__c());
 			LOGGER.info("AIL type = " + idmsAclType_c);
@@ -9114,12 +9109,10 @@ public class UserServiceImpl implements UserService {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.idms.service.UserServiceImpl#securedLogin(java.lang.String,
-	 * java.lang.String, java.lang.String, java.lang.String)
+	 * Stage 1 Login
+	 * User credential Validation
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked" })
 	@Override
 	public Response securedLogin(String userName, String password, String realm, String app) {
 		LOGGER.info("Entered securedLogin() -> Start");
@@ -9132,13 +9125,15 @@ public class UserServiceImpl implements UserService {
 		List<String> accssControlList =null;
 		ErrorResponse errorResponse = new ErrorResponse();
 		boolean maintenanceMode=false;
+		DocumentContext productDocCtx = null;
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		
 		if ((app == null || app.equalsIgnoreCase("undefined"))) {
 			regSource = UserConstants.LOGZ_IO_DEFAULT_APP;
 		} else if ((app != null && app.contains("partner"))) {
 			regSource = UserConstants.PRM_DEFAULT_SP_LOGIN;
 		}
 		Response checkUserExistsResponse = null;
-		//UserExistsResponse checkUserExistsFlag = null;
 		JSONObject jsonObject = new JSONObject();
 		JSONObject jsonObjectResponse = new JSONObject();
 		LOGGER.info(AUDIT_REQUESTING_USER.concat(userName).concat(AUDIT_IMPERSONATING_USER).concat(AUDIT_API_ADMIN)
@@ -9171,7 +9166,12 @@ public class UserServiceImpl implements UserService {
 			Response authenticateResponse = ChinaIdmsUtil.executeHttpClient(prefixStartUrl, realm, userName, password);
 			LOGGER.info("End: aunthenticate User of OPENAMService for username=" + userName);
 			successResponse = (String) authenticateResponse.getEntity();
-			LOGGER.info("Response from OPENAMService:" + successResponse);
+			LOGGER.info("Response code from OPENAMService: " + authenticateResponse.getStatus());
+			
+			productDocCtx = JsonPath.using(conf).parse(successResponse);
+			String authIdSecuredLogin = productDocCtx.read("$.authId");
+			String stage = productDocCtx.read("$.stage");
+			
 			if (401 == authenticateResponse.getStatus() && successResponse.contains(UserConstants.ACCOUNT_BLOCKED)) {
 				jsonObjectResponse.put("message", UserConstants.ACCOUNT_BLOCKED);
 				elapsedTime = (System.currentTimeMillis() - startTime);
@@ -9242,6 +9242,15 @@ public class UserServiceImpl implements UserService {
 						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObjectResponse).build();
 					}
 				}
+			} else if (200 == authenticateResponse.getStatus() && (null != stage && !stage.isEmpty()) 
+					&& stage.equalsIgnoreCase(UserConstants.STAGE_DEVICEIDMATCH2)) {
+				LOGGER.info("authIdSecuredLogin : " + authIdSecuredLogin);
+				LOGGER.info("stage : " + stage);
+				JSONObject response = new JSONObject();
+				response.put("authID", authIdSecuredLogin);
+				response.put("stage", stage);
+				LOGGER.info("securedLogin() -> Ending");
+				return Response.status(Response.Status.OK.getStatusCode()).entity(response).build();
 			}
 		} catch (Exception e) {
 			LOGGER.error("Problem in securedLogin():" + e.getMessage(),e);
@@ -9257,6 +9266,137 @@ public class UserServiceImpl implements UserService {
 		AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + successStatus + "," + regSource + ","
 				+ elapsedTime + "ms" + "," + UserConstants.LOGIN_SUCCESS);
 		LOGGER.info("securedLogin() -> Ending");
+		return Response.status(Response.Status.OK.getStatusCode()).entity(successResponse).build();
+	}
+	
+	/**
+	 * Stage 2 & Stage 3 Login
+	 * DeviceInfo or OTPInfo validation
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public Response securedLoginNext(UserMFADataRequest userMFADataRequest) {
+		LOGGER.info("Entered securedLoginNext() -> Start");
+		LOGGER.info("Parameter loginUser -> " + userMFADataRequest.getLoginUser());
+		LOGGER.info("Parameter appName -> " + userMFADataRequest.getAppName());
+		LOGGER.info("Parameter stageName -> " + userMFADataRequest.getStageName());
+		
+		ErrorResponse errorResponse = new ErrorResponse();
+		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
+		long elapsedTime;
+		String successResponse = null, stage = null;
+		DocumentContext productDocCtx = null;
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		String authIdSecuredLogin = null, header = null, stageNameFromUI = null, fileName = null;
+		String fileNameDevice = "DeviceDataInformation.txt";
+		String fileNameOTP = "DeviceOTPInformation.txt";
+
+		try {
+			if (null == userMFADataRequest.getAuthId() || userMFADataRequest.getAuthId().isEmpty()) {
+				errorResponse.setStatus(ErrorCodeConstants.ERROR);
+				errorResponse.setMessage(UserConstants.AUTHID_EMPTY);
+				LOGGER.error(UserConstants.AUTHID_EMPTY);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+			}
+			if (null == userMFADataRequest.getStageData() || userMFADataRequest.getStageData().isEmpty()) {
+				errorResponse.setStatus(ErrorCodeConstants.ERROR);
+				errorResponse.setMessage(UserConstants.DEVICEDATA_EMPTY);
+				LOGGER.error(UserConstants.DEVICEDATA_EMPTY);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+			}
+			if (null == userMFADataRequest.getLoginUser() || userMFADataRequest.getLoginUser().isEmpty()) {
+				errorResponse.setStatus(ErrorCodeConstants.ERROR);
+				errorResponse.setMessage(UserConstants.USER_EMPTY);
+				LOGGER.error(UserConstants.USER_EMPTY);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+			}
+			if (null == userMFADataRequest.getAppName() || userMFADataRequest.getAppName().isEmpty()) {
+				errorResponse.setStatus(ErrorCodeConstants.ERROR);
+				errorResponse.setMessage(UserConstants.APPNAME_EMPTY);
+				LOGGER.error(UserConstants.APPNAME_EMPTY);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+			}
+			if (null == userMFADataRequest.getStageName() || userMFADataRequest.getStageName().isEmpty()) {
+				errorResponse.setStatus(ErrorCodeConstants.ERROR);
+				errorResponse.setMessage(UserConstants.STAGENAME_EMPTY);
+				LOGGER.error(UserConstants.STAGENAME_EMPTY);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+			}
+			
+			stageNameFromUI = userMFADataRequest.getStageName();
+			if(!(stageNameFromUI.equals("deviceStage") || stageNameFromUI.equals("OTPStage"))){
+				errorResponse.setStatus(ErrorCodeConstants.ERROR);
+				errorResponse.setMessage(UserConstants.STAGENAME_INCORRECT);
+				LOGGER.error(UserConstants.STAGENAME_INCORRECT);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+			}
+			
+			if(stageNameFromUI.equalsIgnoreCase("deviceStage")){
+				fileName = fileNameDevice;
+			}
+			if(stageNameFromUI.equalsIgnoreCase("OTPStage")){
+				fileName = fileNameOTP;
+			}
+			
+			LOGGER.info("Start: checkDeviceInfo of OPENAMService for username="+userMFADataRequest.getLoginUser());
+			Response authenticateResponse = ChinaIdmsUtil.executeHttpDeviceClient(prefixStartUrl, "se", userMFADataRequest.getAuthId(), 
+					userMFADataRequest.getStageData(), fileName);
+			LOGGER.info("End: checkDeviceInfo of OPENAMService for username="+userMFADataRequest.getLoginUser());
+			successResponse = (String) authenticateResponse.getEntity();
+			LOGGER.info("Response code from OPENAMService: " + authenticateResponse.getStatus());
+			productDocCtx = JsonPath.using(conf).parse(successResponse);
+			authIdSecuredLogin = productDocCtx.read("$.authId");
+			stage = productDocCtx.read("$.stage");
+			header = productDocCtx.read("$.header");
+
+			if (200 != authenticateResponse.getStatus()) {
+				LOGGER.error("Problem in securedLoginDevice():" + successResponse);
+				JSONObject jsonObjectResponse = new JSONObject();
+				jsonObjectResponse.put("message", productDocCtx.read("$.message"));
+				elapsedTime = (System.currentTimeMillis() - startTime);
+				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
+				return Response.status(authenticateResponse.getStatus()).entity(jsonObjectResponse).build();
+			}
+			if (200 == authenticateResponse.getStatus() && (null != stage && !stage.isEmpty())
+					&& stage.equalsIgnoreCase(UserConstants.STAGE_HOTP2)) {
+				LOGGER.info("authIdSecuredLogin : " + authIdSecuredLogin);
+				LOGGER.info("stage : " + stage);
+				LOGGER.info("header : " + header);
+				JSONObject response = new JSONObject();
+				response.put("authID", authIdSecuredLogin);
+				response.put("stage", stage);
+				response.put("header", header);
+				LOGGER.info("securedLoginNext() -> Ending");
+				return Response.status(Response.Status.OK.getStatusCode()).entity(response).build();
+			}
+		} catch (Exception e) {
+			LOGGER.error("Problem in securedLoginDevice():" + e.getMessage(), e);
+			JSONObject jsonObjectResponse = new JSONObject();
+			jsonObjectResponse.put("message", UserConstants.LOGIN_ERROR);
+			elapsedTime = (System.currentTimeMillis() - startTime);
+			AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userMFADataRequest.getLoginUser() + "," + errorStatus
+					+ "," + userMFADataRequest.getAppName() + "," + elapsedTime + "ms" + "," + e.getMessage());
+			LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).entity(jsonObjectResponse)
+					.build();
+		}
+
+		elapsedTime = (System.currentTimeMillis() - startTime);
+		AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userMFADataRequest.getLoginUser() + "," + successStatus + ","
+				+ userMFADataRequest.getAppName() + "," + elapsedTime + "ms" + "," + UserConstants.LOGIN_SUCCESS);
+		LOGGER.info("securedLoginNext() -> Ending");
 		return Response.status(Response.Status.OK.getStatusCode()).entity(successResponse).build();
 	}
 
@@ -9885,7 +10025,6 @@ public class UserServiceImpl implements UserService {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Response addMobile(AddMobileRequest addMobileRequest) {
-		//LOGGER.info("Starting addMobile()");
 		LOGGER.info("Entered addMobile() -> Start");
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
@@ -10056,7 +10195,7 @@ public class UserServiceImpl implements UserService {
 
 				if (null != regSource && !UserConstants.UIMS.equalsIgnoreCase(regSource)) {
 					LOGGER.info("Start: ASYNC updateChangeEmailOrMobile() of UIMSService for federationID=" + fedid);
-					uimsUserManagerSoapService.updateChangeEmailOrMobile(ssoToken, fedid, fedid, openamVnew, "mobile", mobile);
+					uimsUserManagerSoapService.updateChangeEmailOrMobile(ssoToken, fedid, fedid, String.valueOf(vNewCntValue), "mobile", mobile);
 					LOGGER.info("End: ASYNC updateChangeEmailOrMobile() of UIMSService finished for federationID=" + fedid);
 				}
 				response.put(UserConstants.STATUS_L, successStatus);
@@ -10286,6 +10425,7 @@ public class UserServiceImpl implements UserService {
 		String optType = null;
 		JSONObject response = new JSONObject();
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+
 		try {
 			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(addEmailRequest));
 
@@ -10335,6 +10475,7 @@ public class UserServiceImpl implements UserService {
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userExistsInOpenam);
 			Integer resultCount = productDocCtx.read(JsonConstants.RESULT_COUNT);
 			LOGGER.info("resultCount = " + resultCount);
+			
 			if (optType.equalsIgnoreCase(UserConstants.ADD_EMAIL_USER_RECORD))
 				email = productDocCtx.read("$.result[0].mail[0]");
 			LOGGER.info("email in openam = " + email);

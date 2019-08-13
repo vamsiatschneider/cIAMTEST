@@ -63,8 +63,8 @@ public class ActivateUsers {
 		String user = "";
 		String jsonString = "";
 		String inputRequesr = "";
-		DocumentContext productDocCtx = null;
-		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		//DocumentContext productDocCtx = null;
+		//Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		StringBuffer dataNotFount = new StringBuffer();
 
 		try {
@@ -81,7 +81,7 @@ public class ActivateUsers {
 					LOGGER.error("Exception >"+exp);}
 
 				if (!"{}".equals(jsonString.toString())) {
-					inputRequesr = buildUserRequest(productDocCtx, conf, jsonString);
+					inputRequesr = buildUserRequest(jsonString);
 
 					try {
 						jsonString = executeRequestApi(hostname + "/services/apexrest/ActivateUser", "PUT", inputRequesr);
@@ -120,7 +120,9 @@ public class ActivateUsers {
 
 	}
 
-	public String buildUserRequest(DocumentContext productDocCtx, Configuration conf, String jsonString) {
+	public String buildUserRequest(String jsonString) {
+		DocumentContext productDocCtx = null;
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 
 		productDocCtx = JsonPath.using(conf).parse(jsonString);
 		String regSource = productDocCtx.read("$.regSource");
