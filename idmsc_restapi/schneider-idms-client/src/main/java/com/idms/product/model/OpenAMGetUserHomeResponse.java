@@ -138,6 +138,8 @@ public class OpenAMGetUserHomeResponse {
 	private String trustedAdmin;
 	
 	private String isActivated;
+	
+	private String Loginid;
 
 	// mobile_reg and login_mobile field is added for dual identifier feature
 	@JsonProperty
@@ -648,5 +650,14 @@ public class OpenAMGetUserHomeResponse {
 	public void setLogin_mobile(String login_mobile) {
 		this.login_mobile = login_mobile;
 	}
+	
+	@JsonProperty("Loginid")
+	public String getLoginid() {
+		return Loginid;
+	}
 
+	@JsonProperty("Loginid")
+	public void setLoginid(String loginid) {
+		Loginid = loginid;
+	}
 }

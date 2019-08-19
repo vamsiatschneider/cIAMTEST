@@ -194,6 +194,8 @@ public class OpenAMGetUserWorkResponse {
 	private String SubChannel__c;
 	
 	private String IDMSWorkPhone__c;
+	
+	private String Loginid;
 
 	// mobile_reg and login_mobile field is added for dual identifier feature
 	@JsonProperty
@@ -1053,6 +1055,16 @@ public class OpenAMGetUserWorkResponse {
 	@JsonProperty("IDMSWorkPhone__c")
 	public void setIDMSWorkPhone__c(String iDMSWorkPhone__c) {
 		IDMSWorkPhone__c = iDMSWorkPhone__c;
+	}
+
+	@JsonProperty("Loginid")
+	public String getLoginid() {
+		return Loginid;
+	}
+
+	@JsonProperty("Loginid")
+	public void setLoginid(String loginid) {
+		Loginid = loginid;
 	}
 	
 }
