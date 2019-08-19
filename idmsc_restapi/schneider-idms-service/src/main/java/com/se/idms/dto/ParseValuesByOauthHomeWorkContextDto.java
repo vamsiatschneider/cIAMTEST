@@ -324,6 +324,8 @@ public class ParseValuesByOauthHomeWorkContextDto {
 
 		userResponse.setUsername(null != userProductDocCtx.read("$.Loginid")
 				? getValue(userProductDocCtx.read("$.Loginid").toString()) : getDelimeter());
+		userResponse.setLoginid(null != userProductDocCtx.read("$.Loginid")
+				? getValue(userProductDocCtx.read("$.Loginid").toString()) : getDelimeter());
 
 		String emailValue = null != userProductDocCtx.read("$.mail")
 				? getValue(userProductDocCtx.read("$.mail").toString()) : getDelimeter();
@@ -484,6 +486,8 @@ public class ParseValuesByOauthHomeWorkContextDto {
 				? getValue(userProductDocCtx.read("$.companyFederatedID").toString()) : getDelimeter());
 		userResponse.setUsername(null != userProductDocCtx.read("$.loginid")
 				? getValue(userProductDocCtx.read("$.loginid").toString()) : getDelimeter());
+		userResponse.setLoginid(null != userProductDocCtx.read("$.Loginid")
+				? getValue(userProductDocCtx.read("$.Loginid").toString()) : getDelimeter());
 
 		String emailValue = null != userProductDocCtx.read("$.mail")
 				? getValue(userProductDocCtx.read("$.mail").toString()) : getDelimeter();
