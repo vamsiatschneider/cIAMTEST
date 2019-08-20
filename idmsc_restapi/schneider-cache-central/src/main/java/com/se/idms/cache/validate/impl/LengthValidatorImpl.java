@@ -1,19 +1,15 @@
 package com.se.idms.cache.validate.impl;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
 
 import com.se.idms.cache.api.CacheBuilder;
 import com.se.idms.cache.api.CacheManagerProvider;
 import com.se.idms.cache.api.CacheManagerProviderImpl;
-import com.se.idms.cache.utils.IdmsConstants;
 import com.se.idms.cache.validate.IValidator;
 
 @Component("legthValidator")
@@ -56,14 +52,14 @@ public class LengthValidatorImpl implements IValidator {
 			Integer len1 = Integer.valueOf(strVal.length());
 			Integer len2 = Integer.valueOf(lengthProperty);
 			if (len1 <= len2) {
-				LOGGER.info("Length Validation of key:"+key+" ,value:"+value+" is OK! and validate() is Ending");
+				LOGGER.info("Length Validation of "+key+":"+value+" is OK! and validate() is Ending");
 				return true;
 			}
 		} catch (Exception e) {
-			LOGGER.error("Length Validation of key:"+key+" ,value:"+value+"is having error:"+e.getMessage());
+			LOGGER.error("Length Validation of "+key+":"+value+" is having error:"+e.getMessage());
 			LOGGER.error("Exception "+e);
 		}
-		LOGGER.error("Length Validation of key:"+key+" ,value:"+value+" is NOT OK! and validate() is Ending");
+		LOGGER.error("Length Validation of "+key+":"+value+" is NOT OK! and validate() is Ending");
 		return false;
 	}
 

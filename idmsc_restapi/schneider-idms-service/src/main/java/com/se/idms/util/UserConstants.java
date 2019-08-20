@@ -94,9 +94,9 @@ public class UserConstants {
 	
 	public static final String MOBILE_VALIDATION = "Mobile should be 11 Numberic Digits - ";
 	
-	public static final String EMAIL_VALIDATION = "Email error - ";
+	public static final String EMAIL_VALIDATION = "Email validation error - ";
 	
-	public static final String EMAIL_VALIDATION_INTERNALUSER = "Employees are restricted from User registration";
+	public static final String EMAIL_VALIDATION_INTERNALUSER = "Employees are restricted from User registration ";
 	
 	public static final String MOBILE_CHINA_CODE = "86";
 	

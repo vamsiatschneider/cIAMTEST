@@ -405,6 +405,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Response authenticateUser(String userName, String password, String realm) {
 		LOGGER.info("Entered authenticateUser() -> Start");
+		LOGGER.info("Testing****!!!!");
 		LOGGER.info("Parameter userName -> " + userName + " ,realm -> " + realm);
 
 		String successResponse = null;
@@ -910,6 +911,15 @@ public class UserServiceImpl implements UserService {
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 					LOGGER.error("Error is :: Request body is null or empty");
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+				}
+				if(null == userRequest.getUserRecord().getIDMS_Registration_Source__c() || 
+						userRequest.getUserRecord().getIDMS_Registration_Source__c().isEmpty()){
+					errorResponse.setStatus(errorStatus);
+					errorResponse.setMessage("Registration source is null or empty");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
+					LOGGER.error("Error is :: Registration source is null or empty");
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 				if(maintenanceModeGlobal!=null)
@@ -1935,8 +1945,6 @@ public class UserServiceImpl implements UserService {
 	private boolean checkMandatoryFieldsFromRequest(IFWUser userRequest, UserServiceResponse userResponse,
 			boolean checkMandatoryFields) {
 		LOGGER.info("Entered checkMandatoryFieldsFromRequest() -> Start");
-		//LOGGER.info("Parameter userRequest -> " + userRequest);
-		// LOGGER.info("Parameter userResponse -> "+userResponse);
 		LOGGER.info("Parameter checkMandatoryFields -> " + checkMandatoryFields);
 
 		userResponse.setStatus(errorStatus);
@@ -1956,33 +1964,33 @@ public class UserServiceImpl implements UserService {
 						|| (pickListValidator.validate(UserConstants.UPDATE_SOURCE, regOrUpdateSource)))) {
 			LOGGER.info("Registration/update source is OK and continues..");
 		} else {
-			userResponse.setStatus(errorStatus);
 			userResponse.setMessage(UserConstants.INVALID_REG_SOURCE);
+			LOGGER.error(UserConstants.INVALID_REG_SOURCE);
 			return true;
 		}
 
 		if (null != userRequest.getIDMS_Registration_Source__c() && ((pickListValidator
 				.validate(UserConstants.APPLICATIONS, userRequest.getIDMS_Registration_Source__c().toUpperCase()))
 				|| UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c()))) {
-
 			if ((checkMandatoryFields) && (null == userRequest.getIDMS_Federated_ID__c()
 					|| userRequest.getIDMS_Federated_ID__c().isEmpty())) {
 				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.FEDERATION_IDENTIFIER);
+				LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.FEDERATION_IDENTIFIER);
 				return true;
 			}
 		}
 
 		if ((null != userRequest.getEmail() && !userRequest.getEmail().isEmpty())
 				&& (userRequest.getEmail().length() > 65)) {
-			userResponse.setStatus(errorStatus);
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.EMAIL);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.EMAIL);
 			return true;
 		}
 
 		if ((null != userRequest.getEmail()) && (!userRequest.getEmail().isEmpty())) {
 			if (!emailValidator.validate(userRequest.getEmail())) {
-				userResponse.setStatus(errorStatus);
 				userResponse.setMessage(UserConstants.EMAIL_VALIDATION + userRequest.getEmail());
+				LOGGER.error(UserConstants.EMAIL_VALIDATION + userRequest.getEmail());
 				return true;
 			}
 
@@ -1990,20 +1998,17 @@ public class UserServiceImpl implements UserService {
 					|| userRequest.getEmail().contains(UserConstants.NON_SE_MAIL)
 					|| userRequest.getEmail().contains(UserConstants.SCHNEIDER_MAIL)
 					|| userRequest.getEmail().contains(UserConstants.NON_SCHNEIDER_MAIL)) {
-
-				userResponse.setStatus(errorStatus);
 				userResponse.setMessage(UserConstants.EMAIL_VALIDATION_INTERNALUSER + userRequest.getEmail());
+				LOGGER.error(UserConstants.EMAIL_VALIDATION_INTERNALUSER + userRequest.getEmail());
 				return true;
 			}
 		}
 		if (null != userRequest.getIDMS_Registration_Source__c()
 				&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c())) {
-
 			if ((null != userRequest.getMobilePhone()) && (!userRequest.getMobilePhone().isEmpty())) {
 				if (!legthValidator.validate(UserConstants.MOBILE_PHONE, userRequest.getMobilePhone())) {
-
-					userResponse.setStatus(errorStatus);
-					userResponse.setMessage("Field(s) not in correct format -" + UserConstants.MOBILE_PHONE);
+					userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.MOBILE_PHONE);
+					LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.MOBILE_PHONE);
 					return true;
 				}
 			}
@@ -2013,9 +2018,9 @@ public class UserServiceImpl implements UserService {
 		 */
 		if ((checkMandatoryFields) && (null == userRequest.getEmail() || userRequest.getEmail().isEmpty())
 				&& (null == userRequest.getMobilePhone() || userRequest.getMobilePhone().isEmpty())) {
-			userResponse.setStatus(errorStatus);
 			userResponse.setMessage(
 					UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.EMAIL + " OR " + UserConstants.MOBILE);
+			LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.EMAIL + " OR " + UserConstants.MOBILE);
 			return true;
 		}
 
@@ -2024,10 +2029,12 @@ public class UserServiceImpl implements UserService {
 		 */
 		if ((checkMandatoryFields) && (null == userRequest.getFirstName() || userRequest.getFirstName().isEmpty())) {
 			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.FIRST_NAME);
+			LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.FIRST_NAME);
 			return true;
 		} else if ((null != userRequest.getFirstName() && !userRequest.getFirstName().isEmpty())
 				&& (!legthValidator.validate(UserConstants.FIRST_NAME, userRequest.getFirstName()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.FIRST_NAME);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.FIRST_NAME);
 			return true;
 		}
 
@@ -2036,10 +2043,12 @@ public class UserServiceImpl implements UserService {
 		 */
 		if ((checkMandatoryFields) && (null == userRequest.getLastName() || userRequest.getLastName().isEmpty())) {
 			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.LAST_NAME);
+			LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.LAST_NAME);
 			return true;
 		} else if ((null != userRequest.getLastName() && !userRequest.getLastName().isEmpty())
 				&& (!legthValidator.validate(UserConstants.LAST_NAME, userRequest.getLastName()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.LAST_NAME);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.LAST_NAME);
 			return true;
 		}
 
@@ -2048,15 +2057,16 @@ public class UserServiceImpl implements UserService {
 		 */
 
 		if (null != userRequest.getIDMS_Email_opt_in__c() && !userRequest.getIDMS_Email_opt_in__c().isEmpty()) {
-
 			if (!legthValidator.validate(UserConstants.IDMS_Email_opt_in__c, userRequest.getIDMS_Email_opt_in__c())) {
 				userResponse
 						.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.EMLAIL_OPT_IN_DOC.toString());
+				LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.EMLAIL_OPT_IN_DOC.toString());
 				return true;
 
 			} else if (!pickListValidator.validate(UserConstants.EMLAIL_OPT_IN,
 					userRequest.getIDMS_Email_opt_in__c())) {
 				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.EMLAIL_OPT_IN_DOC.toString());
+				LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.EMLAIL_OPT_IN_DOC.toString());
 				return true;
 			}
 		}
@@ -2069,17 +2079,19 @@ public class UserServiceImpl implements UserService {
 				&& (null == userRequest.getIDMS_User_Context__c() || userRequest.getIDMS_User_Context__c().isEmpty())) {
 			userResponse
 					.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.IDMS_USER_CONTEXT_C.toString());
+			LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.IDMS_USER_CONTEXT_C.toString());
 			return true;
 		} else if (null != userRequest.getIDMS_User_Context__c() && !userRequest.getIDMS_User_Context__c().isEmpty()) {
-
 			if (!legthValidator.validate(UserConstants.IDMS_USER_CONTEXT_C, userRequest.getIDMS_User_Context__c())) {
 				userResponse.setMessage(
 						UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_USER_CONTEXT_C.toString());
+				LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_USER_CONTEXT_C.toString());
 				return true;
 
 			} else if (!pickListValidator.validate(UserConstants.IDMS_USER_CONTEXT_C,
 					userRequest.getIDMS_User_Context__c())) {
 				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_USER_CONTEXT_C.toString());
+				LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.IDMS_USER_CONTEXT_C.toString());
 				return true;
 			}
 		}
@@ -2090,15 +2102,17 @@ public class UserServiceImpl implements UserService {
 
 		if ((checkMandatoryFields) && (null == userRequest.getCountry() || userRequest.getCountry().isEmpty())) {
 			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COUNTRY);
+			LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COUNTRY);
 			return true;
 		} else if ((null != userRequest.getCountry() && !userRequest.getCountry().isEmpty())) {
-
 			if (!legthValidator.validate(UserConstants.COUNTRY, userRequest.getCountry())) {
 				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COUNTRY);
+				LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COUNTRY);
 				return true;
 
 			} else if (!pickListValidator.validate(UserConstants.COUNTRY, userRequest.getCountry())) {
 				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.COUNTRY);
+				LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.COUNTRY);
 				return true;
 			}
 
@@ -2111,6 +2125,7 @@ public class UserServiceImpl implements UserService {
 		if ((checkMandatoryFields) && (null == userRequest.getIDMS_Registration_Source__c()
 				|| userRequest.getIDMS_Registration_Source__c().isEmpty())) {
 			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.IDMS_REGISTRATION_SOURCE_C);
+			LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.IDMS_REGISTRATION_SOURCE_C);
 			return true;
 		} else if ((checkMandatoryFields)
 				&& (null != userRequest.getIDMS_Registration_Source__c()
@@ -2118,6 +2133,7 @@ public class UserServiceImpl implements UserService {
 				&& (!legthValidator.validate(UserConstants.IDMS_REGISTRATION_SOURCE_C,
 						userRequest.getIDMS_Registration_Source__c()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_REGISTRATION_SOURCE_C);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_REGISTRATION_SOURCE_C);
 			return true;
 		}
 
@@ -2130,12 +2146,14 @@ public class UserServiceImpl implements UserService {
 				&& (null == userRequest.getIDMS_PreferredLanguage__c()
 						|| userRequest.getIDMS_PreferredLanguage__c().isEmpty())) {
 			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.PREFERRED_LANGUAGE);
+			LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.PREFERRED_LANGUAGE);
 			return true;
 		} else if ((null != userRequest.getIDMS_PreferredLanguage__c()
 				&& !userRequest.getIDMS_PreferredLanguage__c().isEmpty())
 				&& !pickListValidator.validate(UserConstants.PREFERRED_LANGUAGE,
 						userRequest.getIDMS_PreferredLanguage__c().toLowerCase())) {
 			userResponse.setMessage(UserConstants.INVALID_VALUE_IDMS + UserConstants.PREFERRED_LANGUAGE);
+			LOGGER.error(UserConstants.INVALID_VALUE_IDMS + UserConstants.PREFERRED_LANGUAGE);
 			return true;
 		}
 
@@ -2145,12 +2163,14 @@ public class UserServiceImpl implements UserService {
 			if (!legthValidator.validate(UserConstants.PREFERRED_LANGUAGE,
 					userRequest.getIDMS_PreferredLanguage__c())) {
 				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.PREFERRED_LANGUAGE);
+				LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.PREFERRED_LANGUAGE);
 				return true;
 
 			}
 			if (!pickListValidator.validate(UserConstants.PREFERRED_LANGUAGE,
 					userRequest.getIDMS_PreferredLanguage__c())) {
 				userResponse.setMessage(UserConstants.INVALID_VALUE_IDMS + UserConstants.PREFERRED_LANGUAGE);
+				LOGGER.error(UserConstants.INVALID_VALUE_IDMS + UserConstants.PREFERRED_LANGUAGE);
 				return true;
 			}
 		}
@@ -2159,13 +2179,14 @@ public class UserServiceImpl implements UserService {
 		 * DefaultCurrencyIsoCode validation and length check Mandatory
 		 */
 		if ((null != userRequest.getDefaultCurrencyIsoCode() && !userRequest.getDefaultCurrencyIsoCode().isEmpty())) {
-
 			if (!legthValidator.validate(UserConstants.CURRENCY, userRequest.getDefaultCurrencyIsoCode())) {
 				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.CURRENCY);
+				LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.CURRENCY);
 				return true;
 
 			} else if (!pickListValidator.validate(UserConstants.CURRENCY, userRequest.getDefaultCurrencyIsoCode())) {
 				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.CURRENCY);
+				LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.CURRENCY);
 				return true;
 			}
 		}
@@ -2177,6 +2198,7 @@ public class UserServiceImpl implements UserService {
 		if ((null != userRequest.getStreet() && !userRequest.getStreet().isEmpty())
 				&& (!legthValidator.validate(UserConstants.STREET, userRequest.getStreet()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.STREET);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.STREET);
 			return true;
 		}
 
@@ -2186,6 +2208,7 @@ public class UserServiceImpl implements UserService {
 		if ((null != userRequest.getCity() && !userRequest.getCity().isEmpty())
 				&& (!legthValidator.validate(UserConstants.CITY, userRequest.getCity()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.CITY);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.CITY);
 			return true;
 		}
 
@@ -2196,6 +2219,7 @@ public class UserServiceImpl implements UserService {
 		if ((null != userRequest.getPostalCode() && !userRequest.getPostalCode().isEmpty())
 				&& (!legthValidator.validate(UserConstants.POSTAL_CODE, userRequest.getPostalCode()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.POSTAL_CODE);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.POSTAL_CODE);
 			return true;
 		}
 
@@ -2208,13 +2232,13 @@ public class UserServiceImpl implements UserService {
 				|| (null != userRequest.getIDMS_Profile_update_source__c()
 						&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Profile_update_source__c()))) {
 			if ((null != userRequest.getState() && !userRequest.getState().isEmpty())) {
-
 				if (!legthValidator.validate(UserConstants.STATE, userRequest.getState())) {
 					userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.STATE);
+					LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.STATE);
 					return true;
-
 				} else if (!pickListValidator.validate(UserConstants.STATE, userRequest.getState())) {
 					userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.STATE);
+					LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.STATE);
 					return true;
 				}
 			}
@@ -2226,6 +2250,7 @@ public class UserServiceImpl implements UserService {
 		if ((null != userRequest.getIDMS_County__c() && !userRequest.getIDMS_County__c().isEmpty())
 				&& (!legthValidator.validate(UserConstants.IDMS_COUNTY_C, userRequest.getIDMS_County__c()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_COUNTY_C);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_COUNTY_C);
 			return true;
 		}
 
@@ -2235,6 +2260,7 @@ public class UserServiceImpl implements UserService {
 		if ((null != userRequest.getIDMS_POBox__c() && !userRequest.getIDMS_POBox__c().isEmpty())
 				&& (!legthValidator.validate(UserConstants.IDMS_PO_BOX_C, userRequest.getIDMS_POBox__c()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_PO_BOX_C);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_PO_BOX_C);
 			return true;
 		}
 
@@ -2247,11 +2273,13 @@ public class UserServiceImpl implements UserService {
 				&& (null == userRequest.getIDMS_Federated_ID__c() || userRequest.getIDMS_Federated_ID__c().isEmpty())) {
 			userResponse
 					.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.FEDERATION_IDENTIFIER.toString());
+			LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.FEDERATION_IDENTIFIER.toString());
 			return true;
 		} else if ((null != userRequest.getIDMS_Federated_ID__c() && !userRequest.getIDMS_Federated_ID__c().isEmpty())
 				&& (!legthValidator.validate(UserConstants.FEDERATION_IDENTIFIER,
 						userRequest.getIDMS_Federated_ID__c()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.FEDERATION_IDENTIFIER);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.FEDERATION_IDENTIFIER);
 			return true;
 		}
 
@@ -2261,12 +2289,14 @@ public class UserServiceImpl implements UserService {
 		if ((!checkMandatoryFields) && (null == userRequest.getIDMS_Profile_update_source__c()
 				|| userRequest.getIDMS_Profile_update_source__c().isEmpty())) {
 			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.UPDATE_SOURCE);
+			LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.UPDATE_SOURCE);
 			return true;
 		} else if ((null != userRequest.getIDMS_Profile_update_source__c()
 				&& !userRequest.getIDMS_Profile_update_source__c().isEmpty())
 				&& (!pickListValidator.validate(UserConstants.UPDATE_SOURCE,
 						userRequest.getIDMS_Profile_update_source__c()))) {
 			userResponse.setMessage(UserConstants.INVALID_VALUE_IDMS + UserConstants.UPDATE_SOURCE);
+			LOGGER.error(UserConstants.INVALID_VALUE_IDMS + UserConstants.UPDATE_SOURCE);
 			return true;
 		}
 
@@ -2277,6 +2307,7 @@ public class UserServiceImpl implements UserService {
 				&& UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Profile_update_source__c())
 				&& null == userRequest.getIDMS_Federated_ID__c())) {
 			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.FEDERATION_IDENTIFIER);
+			LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.FEDERATION_IDENTIFIER);
 			return true;
 		}
 
@@ -2289,6 +2320,7 @@ public class UserServiceImpl implements UserService {
 				&& (!legthValidator.validate(UserConstants.IDMS_ADDITIONAL_ADDRESS_C,
 						userRequest.getIDMS_AdditionalAddress__c()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_ADDITIONAL_ADDRESS_C);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_ADDITIONAL_ADDRESS_C);
 			return true;
 		}
 
@@ -2299,6 +2331,7 @@ public class UserServiceImpl implements UserService {
 		if ((null != userRequest.getCompanyName() && !userRequest.getCompanyName().isEmpty())
 				&& (!legthValidator.validate(UserConstants.COMPANY_NAME, userRequest.getCompanyName()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_NAME);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_NAME);
 			return true;
 		}
 
@@ -2309,6 +2342,7 @@ public class UserServiceImpl implements UserService {
 		if ((null != userRequest.getCompany_Address1__c() && !userRequest.getCompany_Address1__c().isEmpty())
 				&& (!legthValidator.validate(UserConstants.COMPANY_ADDRESS1_C, userRequest.getCompany_Address1__c()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_ADDRESS1_C);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_ADDRESS1_C);
 			return true;
 		}
 
@@ -2319,6 +2353,7 @@ public class UserServiceImpl implements UserService {
 		if ((null != userRequest.getCompany_City__c() && !userRequest.getCompany_City__c().isEmpty())
 				&& (!legthValidator.validate(UserConstants.COMPANY_CITY_C, userRequest.getCompany_City__c()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_CITY_C);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_CITY_C);
 			return true;
 		}
 
@@ -2330,6 +2365,7 @@ public class UserServiceImpl implements UserService {
 				&& (!legthValidator.validate(UserConstants.COMPANY_POSTAL_CODE_C,
 						userRequest.getCompany_Postal_Code__c()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_POSTAL_CODE_C);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_POSTAL_CODE_C);
 			return true;
 		}
 
@@ -2341,11 +2377,10 @@ public class UserServiceImpl implements UserService {
 				&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c()))
 				|| (null != userRequest.getIDMS_Profile_update_source__c()
 						&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Profile_update_source__c()))) {
-
 			if ((null != userRequest.getCompany_State__c() && !userRequest.getCompany_State__c().isEmpty())) {
-
 				if (!pickListValidator.validate(UserConstants.COMPANY_STATE_C, userRequest.getCompany_State__c())) {
 					userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.COMPANY_STATE_C);
+					LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.COMPANY_STATE_C);
 					return true;
 				}
 			}
@@ -2358,6 +2393,7 @@ public class UserServiceImpl implements UserService {
 				&& (!legthValidator.validate(UserConstants.IDMS_COMPANY_PO_BOX_C,
 						userRequest.getIDMSCompanyPoBox__c()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_COMPANY_PO_BOX_C);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_COMPANY_PO_BOX_C);
 			return true;
 		}
 
@@ -2368,10 +2404,11 @@ public class UserServiceImpl implements UserService {
 		if ((null != userRequest.getCompany_Country__c() && !userRequest.getCompany_Country__c().isEmpty())) {
 			if (!legthValidator.validate(UserConstants.COUNTRY, userRequest.getCompany_Country__c())) {
 				userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_COUNTRY_C);
+				LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_COUNTRY_C);
 				return true;
-
 			} else if (!pickListValidator.validate(UserConstants.COUNTRY, userRequest.getCompany_Country__c())) {
 				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.COMPANY_COUNTRY_C);
+				LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.COMPANY_COUNTRY_C);
 				return true;
 			}
 		}
@@ -2383,6 +2420,7 @@ public class UserServiceImpl implements UserService {
 		if ((null != userRequest.getCompany_Address2__c() && !userRequest.getCompany_Address2__c().isEmpty())
 				&& (!legthValidator.validate(UserConstants.COMPANY_ADDRESS2_C, userRequest.getCompany_Address2__c()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_ADDRESS2_C);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_ADDRESS2_C);
 			return true;
 		}
 
@@ -2400,6 +2438,7 @@ public class UserServiceImpl implements UserService {
 			 * } else
 			 */ if (!pickListValidator.validate(UserConstants.IAM_A1, userRequest.getIDMSClassLevel1__c())) {
 				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_CLASS_LEVEL_C);
+				LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.IDMS_CLASS_LEVEL_C);
 				return true;
 			}
 		}
@@ -2419,6 +2458,7 @@ public class UserServiceImpl implements UserService {
 			 * } else
 			 */ if (!pickListValidator.validate(UserConstants.IAM_A2.toString(), userRequest.getIDMSClassLevel2__c())) {
 				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_CLASS_LEVEL2_C);
+				LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.IDMS_CLASS_LEVEL2_C);
 				return true;
 			}
 		}
@@ -2439,6 +2479,7 @@ public class UserServiceImpl implements UserService {
 			 */ if (!pickListValidator.validate(UserConstants.MY_INDUSTRY_SEGMENT,
 					userRequest.getIDMSMarketSegment__c())) {
 				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_MARKET_SEGMENT_C);
+				LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.IDMS_MARKET_SEGMENT_C);
 				return true;
 			}
 		}
@@ -2460,6 +2501,7 @@ public class UserServiceImpl implements UserService {
 			 */ if (!pickListValidator.validate(UserConstants.MY_INDUSTRY_SUB_SEGMENT,
 					userRequest.getIDMSMarketSubSegment__c())) {
 				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_MARKET_SUB_SEGMENT_C);
+				LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.IDMS_MARKET_SUB_SEGMENT_C);
 				return true;
 			}
 		}
@@ -2470,6 +2512,7 @@ public class UserServiceImpl implements UserService {
 		if ((null != userRequest.getPhone() && !userRequest.getPhone().isEmpty())
 				&& (!legthValidator.validate(UserConstants.MOBILE_PHONE, userRequest.getPhone()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.PHONE);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.PHONE);
 			return true;
 		}
 
@@ -2478,10 +2521,10 @@ public class UserServiceImpl implements UserService {
 		 */
 		if (null != userRequest.getIDMS_Registration_Source__c()
 				&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c())) {
-
 			if ((null != userRequest.getPhone() && !userRequest.getPhone().isEmpty())
 					&& (!legthValidator.validate(UserConstants.MOBILE_PHONE, userRequest.getPhone()))) {
 				userResponse.setMessage(UserConstants.COUNTRY_FIELDS_MISSING + UserConstants.PHONE);
+				LOGGER.error(UserConstants.COUNTRY_FIELDS_MISSING + UserConstants.PHONE);
 				return true;
 			}
 		}
@@ -2489,7 +2532,6 @@ public class UserServiceImpl implements UserService {
 		 * Job_Title__c Length Validation check
 		 */
 		if ((null != userRequest.getJob_Title__c() && !userRequest.getJob_Title__c().isEmpty())) {
-
 			/*
 			 * if (!legthValidator.validate(UserConstants.JOB_TITLE.toString(),
 			 * userRequest.getJob_Title__c())) {
@@ -2499,6 +2541,7 @@ public class UserServiceImpl implements UserService {
 			 * } else
 			 */ if (!pickListValidator.validate(UserConstants.JOB_TITLE.toString(), userRequest.getJob_Title__c())) {
 				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.JOB_TITLE_C);
+				LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.JOB_TITLE_C);
 				return true;
 			}
 		}
@@ -2507,7 +2550,6 @@ public class UserServiceImpl implements UserService {
 		 * Job_Function__c Length Validation check
 		 */
 		if ((null != userRequest.getJob_Function__c() && !userRequest.getJob_Function__c().isEmpty())) {
-
 			/*
 			 * if (!legthValidator.validate(UserConstants.JOB_FUNCTION,
 			 * userRequest.getJob_Function__c())) {
@@ -2517,6 +2559,7 @@ public class UserServiceImpl implements UserService {
 			 * } else
 			 */ if (!pickListValidator.validate(UserConstants.JOB_FUNCTION, userRequest.getJob_Function__c())) {
 				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.JOB_FUNCTION_C);
+				LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.JOB_FUNCTION_C);
 				return true;
 			}
 		}
@@ -2529,6 +2572,7 @@ public class UserServiceImpl implements UserService {
 				&& (!legthValidator.validate(UserConstants.IDMS_JOB_DESCRIPTION_C,
 						userRequest.getIDMSJobDescription__c()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_JOB_DESCRIPTION_C);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_JOB_DESCRIPTION_C);
 			return true;
 		}
 
@@ -2541,6 +2585,7 @@ public class UserServiceImpl implements UserService {
 				&& (!multiPickListValidator.validate(UserConstants.IDMS_COMPANY_MARKET_SERVED_C,
 						userRequest.getIDMSCompanyMarketServed__c()))) {
 			userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_COMPANY_MARKET_SERVED_C);
+			LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.IDMS_COMPANY_MARKET_SERVED_C);
 			return true;
 		}
 
@@ -2549,7 +2594,6 @@ public class UserServiceImpl implements UserService {
 		 */
 		if ((null != userRequest.getIDMSCompanyNbrEmployees__c()
 				&& !userRequest.getIDMSCompanyNbrEmployees__c().isEmpty())) {
-
 			/*
 			 * if (!legthValidator.validate(UserConstants.
 			 * IDMS_COMPANY_NBR_EMPLOYEES_C,
@@ -2561,6 +2605,7 @@ public class UserServiceImpl implements UserService {
 			 */if (!pickListValidator.validate(UserConstants.IDMS_COMPANY_NBR_EMPLOYEES_C,
 					userRequest.getIDMSCompanyNbrEmployees__c())) {
 				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_COMPANY_NBR_EMPLOYEES_C);
+				LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.IDMS_COMPANY_NBR_EMPLOYEES_C);
 				return true;
 			}
 		}
@@ -2575,6 +2620,7 @@ public class UserServiceImpl implements UserService {
 						|| UserConstants.FALSE.equalsIgnoreCase(userRequest.getIDMSCompanyHeadquarters__c()))) {
 			userResponse
 					.setMessage(UserConstants.INVALID_VALUE_HEADQUARTER + UserConstants.IDMS_COMPANY_HEAD_QUARTERS_C);
+			LOGGER.error(UserConstants.INVALID_VALUE_HEADQUARTER + UserConstants.IDMS_COMPANY_HEAD_QUARTERS_C);
 			return true;
 		}
 
@@ -2583,7 +2629,6 @@ public class UserServiceImpl implements UserService {
 		 */
 
 		if ((null != userRequest.getIDMSAnnualRevenue__c()) && !userRequest.getIDMSAnnualRevenue__c().isEmpty()) {
-
 			try {
 				new BigDecimal(userRequest.getIDMSAnnualRevenue__c()).toPlainString();
 			} catch (Exception e) {
@@ -2593,6 +2638,7 @@ public class UserServiceImpl implements UserService {
 				} else {
 					userResponse
 							.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_ANNUAL_REVENUE_C);
+					LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_ANNUAL_REVENUE_C);
 					return true;
 				}
 			}
@@ -2608,6 +2654,7 @@ public class UserServiceImpl implements UserService {
 						userRequest.getIDMSTaxIdentificationNumber__c()))) {
 			userResponse
 					.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_TAX_IDENTIFICATION_NUMBER_C);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_TAX_IDENTIFICATION_NUMBER_C);
 			return true;
 		}
 
@@ -2617,6 +2664,7 @@ public class UserServiceImpl implements UserService {
 		if ((null != userRequest.getIDMSMiddleName__c() && !userRequest.getIDMSMiddleName__c().isEmpty())
 				&& (!legthValidator.validate(UserConstants.IDMS_MIDDLE_NAME_C, userRequest.getIDMSMiddleName__c()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_MIDDLE_NAME_C);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_MIDDLE_NAME_C);
 			return true;
 		}
 
@@ -2627,6 +2675,7 @@ public class UserServiceImpl implements UserService {
 		if ((null != userRequest.getCompany_Website__c() && !userRequest.getCompany_Website__c().isEmpty())
 				&& (!legthValidator.validate(UserConstants.COMPANY_WEBSITE_C, userRequest.getCompany_Website__c()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_WEBSITE_C);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_WEBSITE_C);
 			return true;
 		}
 
@@ -2637,6 +2686,7 @@ public class UserServiceImpl implements UserService {
 				&& (!pickListValidator.validate(UserConstants.SALUTATION.toString(),
 						userRequest.getIDMSSalutation__c()))) {
 			userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.SALUTATION);
+			LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.SALUTATION);
 			return true;
 		}
 
@@ -2646,6 +2696,7 @@ public class UserServiceImpl implements UserService {
 		if ((null != userRequest.getDepartment() && !userRequest.getDepartment().isEmpty())
 				&& (!legthValidator.validate(UserConstants.DEPARTMENT, userRequest.getDepartment()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.DEPARTMENT);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.DEPARTMENT);
 			return true;
 		}
 		/**
@@ -2654,6 +2705,7 @@ public class UserServiceImpl implements UserService {
 		if ((null != userRequest.getIDMSSuffix__c() && !userRequest.getIDMSSuffix__c().isEmpty())
 				&& (!legthValidator.validate(UserConstants.IDMS_SUFFIX_C, userRequest.getIDMSSuffix__c()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_SUFFIX_C);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_SUFFIX_C);
 			return true;
 		}
 
@@ -2663,6 +2715,7 @@ public class UserServiceImpl implements UserService {
 		if ((null != userRequest.getFax() && !userRequest.getFax().isEmpty())
 				&& (!legthValidator.validate(UserConstants.FAX, userRequest.getFax()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.FAX);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.FAX);
 			return true;
 		}
 
@@ -2676,6 +2729,7 @@ public class UserServiceImpl implements UserService {
 						userRequest.getIDMSCompanyFederationIdentifier__c()))) {
 			userResponse
 					.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_COMAPNY_FED_IDENTIFIER_C);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_COMAPNY_FED_IDENTIFIER_C);
 			return true;
 		}
 
@@ -2687,6 +2741,7 @@ public class UserServiceImpl implements UserService {
 				&& (!pickListValidator.validate(UserConstants.DELEGATED_IDP.toString(),
 						userRequest.getIDMSDelegatedIdp__c()))) {
 			userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_DELEGATED_IDP_C);
+			LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.IDMS_DELEGATED_IDP_C);
 			return true;
 		}
 
@@ -2698,6 +2753,7 @@ public class UserServiceImpl implements UserService {
 				&& (!pickListValidator.validate(UserConstants.IDENTITY_TYPE.toString(),
 						userRequest.getIDMSIdentityType__c()))) {
 			userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_IDENTITY_TYPE_C);
+			LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.IDMS_IDENTITY_TYPE_C);
 			return true;
 		}
 
@@ -2708,6 +2764,7 @@ public class UserServiceImpl implements UserService {
 		if ((null != userRequest.getMobilePhone() && !userRequest.getMobilePhone().isEmpty())
 				&& (!legthValidator.validate(UserConstants.MOBILE_PHONE, userRequest.getMobilePhone()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.MOBILE_PHONE);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.MOBILE_PHONE);
 			return true;
 		}
 
@@ -2719,19 +2776,20 @@ public class UserServiceImpl implements UserService {
 				&& (!(UserConstants.TRUE.equalsIgnoreCase(userRequest.getIDMSPrimaryContact__c())
 						|| (UserConstants.FALSE.equalsIgnoreCase(userRequest.getIDMSPrimaryContact__c()))))) {
 			userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_PRIMARY_CONTACT_C);
+			LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.IDMS_PRIMARY_CONTACT_C);
 			return true;
 		}
 
 		// Need to check mandatory field for GoDigiatal
 
 		if (null != goDigitalValue && goDigitalValue.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c())) {
-
 			/**
 			 * FirstName Mandatory validation and length check
 			 */
 			if ((checkMandatoryFields)
 					&& (null == userRequest.getFirstName() || userRequest.getFirstName().isEmpty())) {
 				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.FIRST_NAME);
+				LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.FIRST_NAME);
 				return true;
 			}
 
@@ -2740,6 +2798,7 @@ public class UserServiceImpl implements UserService {
 			 */
 			if ((checkMandatoryFields) && (null == userRequest.getLastName() || userRequest.getLastName().isEmpty())) {
 				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.LAST_NAME);
+				LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.LAST_NAME);
 				return true;
 			}
 
@@ -2759,6 +2818,7 @@ public class UserServiceImpl implements UserService {
 			if ((checkMandatoryFields) && (null == userRequest.getIDMS_PreferredLanguage__c()
 					|| userRequest.getIDMS_PreferredLanguage__c().isEmpty())) {
 				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.PREFERRED_LANGUAGE);
+				LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.PREFERRED_LANGUAGE);
 				return true;
 			}
 
@@ -2767,6 +2827,7 @@ public class UserServiceImpl implements UserService {
 			 */
 			if ((checkMandatoryFields) && (null == userRequest.getCountry() || userRequest.getCountry().isEmpty())) {
 				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COUNTRY);
+				LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COUNTRY);
 				return true;
 			}
 
@@ -2776,6 +2837,7 @@ public class UserServiceImpl implements UserService {
 			if ((checkMandatoryFields)
 					&& (null == userRequest.getCompanyName() || userRequest.getCompanyName().isEmpty())) {
 				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_NAME);
+				LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_NAME);
 				return true;
 			}
 
@@ -2785,6 +2847,7 @@ public class UserServiceImpl implements UserService {
 			if ((checkMandatoryFields) && (null == userRequest.getCompany_Address1__c()
 					|| userRequest.getCompany_Address1__c().isEmpty())) {
 				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_ADDRESS1_C);
+				LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_ADDRESS1_C);
 				return true;
 			}
 
@@ -2794,6 +2857,7 @@ public class UserServiceImpl implements UserService {
 			if ((checkMandatoryFields)
 					&& (null == userRequest.getCompany_City__c() || userRequest.getCompany_City__c().isEmpty())) {
 				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_CITY_C);
+				LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_CITY_C);
 				return true;
 			}
 
@@ -2803,6 +2867,7 @@ public class UserServiceImpl implements UserService {
 			if ((checkMandatoryFields) && (null == userRequest.getCompany_Postal_Code__c()
 					|| userRequest.getCompany_Postal_Code__c().isEmpty())) {
 				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_POSTAL_CODE_C);
+				LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_POSTAL_CODE_C);
 				return true;
 			}
 
@@ -2812,6 +2877,7 @@ public class UserServiceImpl implements UserService {
 			if ((checkMandatoryFields)
 					&& (null == userRequest.getCompany_Country__c() || userRequest.getCompany_Country__c().isEmpty())) {
 				userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_COUNTRY_C);
+				LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_COUNTRY_C);
 				return true;
 			}
 
@@ -2820,23 +2886,25 @@ public class UserServiceImpl implements UserService {
 		if ((null != userRequest.getAboutMe() && !userRequest.getAboutMe().isEmpty())
 				&& (!legthValidator.validate(UserConstants.ABOUT_ME, userRequest.getFirstName()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.ABOUT_ME);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.ABOUT_ME);
 			return true;
 		}
 
 		if ((null != userRequest.getBFO_ACCOUNT_ID__c() && !userRequest.getBFO_ACCOUNT_ID__c().isEmpty())
 				&& (!legthValidator.validate(UserConstants.BFO_ACCOUNT_ID, userRequest.getBFO_ACCOUNT_ID__c()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.BFO_ACCOUNT_ID);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.BFO_ACCOUNT_ID);
 			return true;
 		}
 
 		if ((null != userRequest.getAccountId() && !userRequest.getAccountId().isEmpty())
 				&& (!legthValidator.validate(UserConstants.ACCOUNT_ID, userRequest.getAccountId()))) {
 			userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.ACCOUNT_ID);
+			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.ACCOUNT_ID);
 			return true;
 		}
 
 		if ((null != userRequest.getTrustedAdmin() && !userRequest.getTrustedAdmin().isEmpty())) {
-
 			if (UserConstants.TRUE.equalsIgnoreCase(userRequest.getTrustedAdmin())) {
 				userRequest.setTrustedAdmin(UserConstants.SE_TRUSTED_ADMIN);
 			}
@@ -2858,6 +2926,7 @@ public class UserServiceImpl implements UserService {
 				&& (null == userRequest.getEmail() || userRequest.getEmail().isEmpty()) && 
 				(null == userRequest.getMobilePhone() || userRequest.getMobilePhone().isEmpty())) {
 			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.EMAIL+" OR " + UserConstants.MOBILE);
+			LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.EMAIL+" OR " + UserConstants.MOBILE);
 			return true;
 		}
 
@@ -2868,6 +2937,7 @@ public class UserServiceImpl implements UserService {
 		if ((null != userRequest.getChannel__c() && !userRequest.getChannel__c().isEmpty())
 				&& (!pickListValidator.validate(UserConstants.IAM_A1, userRequest.getChannel__c()))) {
 			userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.CHANNEL);
+			LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.CHANNEL);
 			return true;
 		}
 
@@ -2877,6 +2947,7 @@ public class UserServiceImpl implements UserService {
 		if ((null != userRequest.getSubChannel__c() && !userRequest.getSubChannel__c().isEmpty())
 				&& (!pickListValidator.validate(UserConstants.IAM_A2, userRequest.getSubChannel__c()))) {
 			userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.SUBCHANNEL);
+			LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.SUBCHANNEL);
 			return true;
 		}
 
