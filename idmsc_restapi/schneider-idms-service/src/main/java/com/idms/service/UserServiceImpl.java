@@ -405,7 +405,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Response authenticateUser(String userName, String password, String realm) {
 		LOGGER.info("Entered authenticateUser() -> Start");
-		LOGGER.info("Testing****!!!!");
+		LOGGER.info("Testing****");
 		LOGGER.info("Parameter userName -> " + userName + " ,realm -> " + realm);
 
 		String successResponse = null;
