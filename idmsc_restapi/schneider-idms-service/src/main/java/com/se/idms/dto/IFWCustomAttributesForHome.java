@@ -88,6 +88,8 @@ public class IFWCustomAttributesForHome {
 	private String mobile_reg;
 	
 	private String login_mobile;
+	
+	private String login;
 
 	public String getUserId() {
 		return userId;
@@ -431,5 +433,13 @@ public class IFWCustomAttributesForHome {
 
 	public void setLogin_mobile(String login_mobile) {
 		this.login_mobile = login_mobile;
+	}
+
+	public String getLogin() {
+		return login;
+	}
+
+	public void setLogin(String login) {
+		this.login = login;
 	}
 }

@@ -217,6 +217,8 @@ public class ParseValuesByOauthHomeWorkContextDto {
 				? getValue(userProductDocCtx.read("$.login_mobile").toString()) : getDelimeter());
 		userResponse.getCustomAttributes().setMobile_reg(null != userProductDocCtx.read("$.mobile_reg")
 				? getValue(userProductDocCtx.read("$.mobile_reg").toString()) : getDelimeter());
+		userResponse.getCustomAttributes().setLogin(null != userProductDocCtx.read("$.Loginid")
+				? getValue(userProductDocCtx.read("$.Loginid").toString()) : getDelimeter());
 	}
 
 	public void parseValuesByOauthHomeContext(GetUserHomeByOauthResponse userResponse,
@@ -318,6 +320,8 @@ public class ParseValuesByOauthHomeWorkContextDto {
 				? getValue(userProductDocCtx.read("$.login_mobile").toString()) : getDelimeter());
 		userResponse.getCustomAttributes().setMobile_reg(null != userProductDocCtx.read("$.mobile_reg")
 				? getValue(userProductDocCtx.read("$.mobile_reg").toString()) : getDelimeter());
+		userResponse.getCustomAttributes().setLogin(null != userProductDocCtx.read("$.Loginid")
+				? getValue(userProductDocCtx.read("$.Loginid").toString()) : getDelimeter());
 	}
 
 	public void parseValuesHomeContext(OpenAMGetUserHomeResponse userResponse, DocumentContext userProductDocCtx) {

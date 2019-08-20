@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import com.se.idms.cache.api.CacheBuilder;
 import com.se.idms.cache.api.CacheManagerProvider;
 import com.se.idms.cache.api.CacheManagerProviderImpl;
-import com.se.idms.cache.utils.IdmsConstants;
 import com.se.idms.cache.validate.IValidator;
 
 @Component("multiPickListValidator")
@@ -51,19 +50,17 @@ public class MultiPickListValidatorImpl implements IValidator {
 		// IDMSCompanyMarketServed__c=BA4,BA5,BDZ,BD1,BD3,BD4,BD6,BD9
 		LOGGER.info("multiPickList properties from cache:" + pickListProperty);
 		List<String> companyMarketServedList = Arrays.asList(pickListProperty.split(","));
-
-		//LOGGER.info("companyMarketServedList size" + "-->" + companyMarketServedList.size());
 		String multiPickList = (String) value;
 
 		List<String> companyMarketServedListValue = new ArrayList<String>(Arrays.asList(multiPickList.split(";")));
 		companyMarketServedListValue.removeAll(companyMarketServedList);
 
 		if (companyMarketServedListValue.size() > 0) {
-			LOGGER.error("Validation of key:"+key+" ,value:"+value+" is NOT OK! and validate() is Ending");
+			LOGGER.error("Validation of "+key+":"+value+" is NOT OK! and validate() is Ending");
 			return false;
 		}
 
-		LOGGER.info("Validation of key:"+key+" ,value:"+value+" is OK! and validate() is Ending");
+		LOGGER.info("Validation of "+key+":"+value+" is OK! and validate() is Ending");
 		return true;
 	}
 

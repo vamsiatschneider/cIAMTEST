@@ -2,7 +2,6 @@ package com.se.idms.cache.validate.impl;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Component;
 import com.se.idms.cache.api.CacheBuilder;
 import com.se.idms.cache.api.CacheManagerProvider;
 import com.se.idms.cache.api.CacheManagerProviderImpl;
-import com.se.idms.cache.utils.IdmsConstants;
 import com.se.idms.cache.validate.IValidator;
 
 @Component("pickListValidator")
@@ -34,7 +32,7 @@ public class PickListValidatorImpl implements IValidator {
 		CacheManagerProvider cacheManagerProvider = new CacheManagerProviderImpl();
 		//Properties cacheProperties=null;
 		CacheBuilder cacheBuilder = new CacheBuilder(cacheManagerProvider);
-		LOGGER.info("picklist path first:"+IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
+		//LOGGER.info("picklist path first:"+IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
 		if(IDMS_DEPLOY_ENV.equalsIgnoreCase("DEV"))
 			IDMS_FIELDSPICKLIST_PROPERTIES_PATH=IDMS_FIELDSPICKLIST_PROPERTIES_PATH.replaceAll("/", "\\\\");
 		LOGGER.info("picklist path after conversion:"+IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
@@ -54,7 +52,7 @@ public class PickListValidatorImpl implements IValidator {
 		String pickListValue = (String) value;
 		for(String str:pickListCache){
 			if(str.toLowerCase().equalsIgnoreCase(pickListValue.toLowerCase())){
-				LOGGER.info("Validation of key:"+key+" ,value:"+value+" is OK! and validate() is Ending");
+				LOGGER.info("Validation of "+key+":"+value+" is OK! and validate() is Ending");
 				return true;
 			}
 		}
@@ -62,7 +60,7 @@ public class PickListValidatorImpl implements IValidator {
 			LOGGER.info("Validation of key:"+key+" ,value:"+value+" is OK! and validate() is Ending");
 			return true;
 		}*/
-		LOGGER.error("Validation of key:"+key+" ,value:"+value+" is NOT OK! and validate() is Ending");
+		LOGGER.error("Validation of "+key+":"+value+" is NOT OK! and validate() is Ending");
 		return false;
 	}
 
