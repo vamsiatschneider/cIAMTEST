@@ -217,8 +217,12 @@ public class ParseValuesByOauthHomeWorkContextDto {
 				? getValue(userProductDocCtx.read("$.login_mobile").toString()) : getDelimeter());
 		userResponse.getCustomAttributes().setMobile_reg(null != userProductDocCtx.read("$.mobile_reg")
 				? getValue(userProductDocCtx.read("$.mobile_reg").toString()) : getDelimeter());
-		userResponse.getCustomAttributes().setLogin(null != userProductDocCtx.read("$.Loginid")
+		userResponse.getCustomAttributes().setLoginid(null != userProductDocCtx.read("$.Loginid")
 				? getValue(userProductDocCtx.read("$.Loginid").toString()) : getDelimeter());
+		if(null == userResponse.getCustomAttributes().getLoginid() || userResponse.getCustomAttributes().getLoginid().isEmpty()){
+			userResponse.getCustomAttributes().setLoginid(null != userProductDocCtx.read("$.loginid")
+					? getValue(userProductDocCtx.read("$.loginid").toString()) : getDelimeter());
+		}
 	}
 
 	public void parseValuesByOauthHomeContext(GetUserHomeByOauthResponse userResponse,
@@ -320,8 +324,12 @@ public class ParseValuesByOauthHomeWorkContextDto {
 				? getValue(userProductDocCtx.read("$.login_mobile").toString()) : getDelimeter());
 		userResponse.getCustomAttributes().setMobile_reg(null != userProductDocCtx.read("$.mobile_reg")
 				? getValue(userProductDocCtx.read("$.mobile_reg").toString()) : getDelimeter());
-		userResponse.getCustomAttributes().setLogin(null != userProductDocCtx.read("$.Loginid")
+		userResponse.getCustomAttributes().setLoginid(null != userProductDocCtx.read("$.Loginid")
 				? getValue(userProductDocCtx.read("$.Loginid").toString()) : getDelimeter());
+		if(null == userResponse.getCustomAttributes().getLoginid() || userResponse.getCustomAttributes().getLoginid().isEmpty()){
+			userResponse.getCustomAttributes().setLoginid(null != userProductDocCtx.read("$.loginid")
+					? getValue(userProductDocCtx.read("$.loginid").toString()) : getDelimeter());
+		}
 	}
 
 	public void parseValuesHomeContext(OpenAMGetUserHomeResponse userResponse, DocumentContext userProductDocCtx) {
@@ -330,6 +338,10 @@ public class ParseValuesByOauthHomeWorkContextDto {
 				? getValue(userProductDocCtx.read("$.Loginid").toString()) : getDelimeter());
 		userResponse.setLoginid(null != userProductDocCtx.read("$.Loginid")
 				? getValue(userProductDocCtx.read("$.Loginid").toString()) : getDelimeter());
+		if(null == userResponse.getLoginid() || userResponse.getLoginid().isEmpty()){
+			userResponse.setLoginid(null != userProductDocCtx.read("$.loginid")
+					? getValue(userProductDocCtx.read("$.loginid").toString()) : getDelimeter());
+		}
 
 		String emailValue = null != userProductDocCtx.read("$.mail")
 				? getValue(userProductDocCtx.read("$.mail").toString()) : getDelimeter();
@@ -492,6 +504,10 @@ public class ParseValuesByOauthHomeWorkContextDto {
 				? getValue(userProductDocCtx.read("$.loginid").toString()) : getDelimeter());
 		userResponse.setLoginid(null != userProductDocCtx.read("$.Loginid")
 				? getValue(userProductDocCtx.read("$.Loginid").toString()) : getDelimeter());
+		if(null == userResponse.getLoginid() || userResponse.getLoginid().isEmpty()){
+			userResponse.setLoginid(null != userProductDocCtx.read("$.loginid")
+					? getValue(userProductDocCtx.read("$.loginid").toString()) : getDelimeter());
+		}
 
 		String emailValue = null != userProductDocCtx.read("$.mail")
 				? getValue(userProductDocCtx.read("$.mail").toString()) : getDelimeter();
