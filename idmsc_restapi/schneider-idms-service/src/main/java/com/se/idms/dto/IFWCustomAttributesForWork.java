@@ -233,7 +233,7 @@ public class IFWCustomAttributesForWork {
 	private String login_mobile;
 	
 	@JsonProperty
-	private String Login;
+	private String Loginid;
 	
 	public String getCompanyFederatedId() {
 		return companyFederatedId;
@@ -844,12 +844,12 @@ public class IFWCustomAttributesForWork {
 		this.login_mobile = login_mobile;
 	}
 
-	public String getLogin() {
-		return Login;
+	public String getLoginid() {
+		return Loginid;
 	}
 
-	public void setLogin(String login) {
-		Login = login;
+	public void setLoginid(String loginid) {
+		Loginid = loginid;
 	}
 	
 }

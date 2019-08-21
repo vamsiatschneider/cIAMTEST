@@ -89,7 +89,7 @@ public class IFWCustomAttributesForHome {
 	
 	private String login_mobile;
 	
-	private String login;
+	private String Loginid;
 
 	public String getUserId() {
 		return userId;
@@ -435,11 +435,11 @@ public class IFWCustomAttributesForHome {
 		this.login_mobile = login_mobile;
 	}
 
-	public String getLogin() {
-		return login;
+	public String getLoginid() {
+		return Loginid;
 	}
 
-	public void setLogin(String login) {
-		this.login = login;
+	public void setLoginid(String loginid) {
+		Loginid = loginid;
 	}
 }
