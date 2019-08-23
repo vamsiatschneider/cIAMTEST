@@ -5165,8 +5165,8 @@ public class UserServiceImpl implements UserService {
 				String mailIdentityInOpenam = productDocCtxUser.read(JsonConstants.LOGIN_ID_UPPER_0);
 				if (null == mailIdentityInOpenam || mailIdentityInOpenam.isEmpty()) {
 					mailIdentityInOpenam = productDocCtxUser.read(JsonConstants.LOGIN_ID_LOWER_0);
-				} else if (null == mailIdentityInOpenam || mailIdentityInOpenam.isEmpty()) {
-					mailIdentityInOpenam = productDocCtxUser.read(JsonConstants.MAIL);
+				} if (null == mailIdentityInOpenam || mailIdentityInOpenam.isEmpty()) {
+					mailIdentityInOpenam = productDocCtxUser.read(JsonConstants.MAIL_0);
 				}
 				LOGGER.info("mailIdentityInOpenam = " + mailIdentityInOpenam);
 				String modifiedMailInRequest = userRequest.getUserRecord().getEmail();
