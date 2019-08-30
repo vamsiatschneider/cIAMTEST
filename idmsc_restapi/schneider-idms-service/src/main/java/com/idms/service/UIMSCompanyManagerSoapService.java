@@ -121,7 +121,9 @@ public class UIMSCompanyManagerSoapService {
 			uimsLog.error("Error executing while createUIMSCompany::" + e.getMessage());
 		}
 			try {
-				uimsUserResponse = companyManagerUIMSV2.createCompany(CALLER_FID, fedId, company);
+				if(companyManagerUIMSV2 != null) {
+					uimsUserResponse = companyManagerUIMSV2.createCompany(CALLER_FID, fedId, company);
+				}
 			} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
 					| LdapTemplateNotReadyException | RequestedEntryNotExistsException | RequestedInternalUserException
 					| UnexpectedLdapResponseException | UnexpectedRuntimeImsException e) {
@@ -145,7 +147,9 @@ public class UIMSCompanyManagerSoapService {
 			uimsLog.error("Error executing while createUIMSCompany::" + e.getMessage());
 		}
 		try {
-			uimsUserResponse = authenticatedCompanyManagerUIMSV2.createCompanyForceIdmsId(CALLER_FID, idmsFederationId, company, companyForceFederationId);
+			if(authenticatedCompanyManagerUIMSV2 != null) {
+				uimsUserResponse = authenticatedCompanyManagerUIMSV2.createCompanyForceIdmsId(CALLER_FID, idmsFederationId, company, companyForceFederationId);
+			}
 		} catch (ForcedFidAlreadyExistException | IMSServiceSecurityCallNotAllowedException
 				| InvalidImsServiceMethodArgumentException | LdapTemplateNotReadyException
 				| RequestedEntryNotExistsException | RequestedInternalUserException | SecuredImsException
