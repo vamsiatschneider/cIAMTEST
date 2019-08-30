@@ -4195,22 +4195,23 @@ public class UserServiceImpl implements UserService {
 			// Profile Update Source
 			if (null == ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c()
 					|| ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c().isEmpty()) {
-				userResponse.setStatus(errorStatus);
-				userResponse.setMessage(UserConstants.MANDATORY_PROFILE_UPDATE_SOURCE);
+				errorResponse.setStatus(errorStatus);
+				errorResponse.setMessage(UserConstants.MANDATORY_PROFILE_UPDATE_SOURCE);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.error("Error is " + userResponse.getMessage());
+				LOGGER.error("Error is " + errorResponse.getMessage());
 				LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
-				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 
 			// Admin token check
-			if (null == authorizedToken || authorizedToken.isEmpty()) {
-				userResponse.setStatus(errorStatus);
-				userResponse.setMessage(UserConstants.ADMIN_TOKEN_MANDATORY);
+			if (!ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c().equalsIgnoreCase(UserConstants.UIMS) && 
+					(null == authorizedToken || authorizedToken.isEmpty())) {
+				errorResponse.setStatus(errorStatus);
+				errorResponse.setMessage(UserConstants.ADMIN_TOKEN_MANDATORY);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.error("Error is " + userResponse.getMessage());
+				LOGGER.error("Error is " + errorResponse.getMessage());
 				LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
-				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 
 			// UID
@@ -4220,12 +4221,12 @@ public class UserServiceImpl implements UserService {
 						|| ailRequest.getUserAILRecord().getIDMS_Federated_ID__c().isEmpty())
 						&& (null == ailRequest.getUserAILRecord().getIDMSUser__c()
 								|| ailRequest.getUserAILRecord().getIDMSUser__c().isEmpty())) {
-					userResponse.setStatus(errorStatus);
-					userResponse.setMessage(UserConstants.MANDATORY_ID);
+					errorResponse.setStatus(errorStatus);
+					errorResponse.setMessage(UserConstants.MANDATORY_ID);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.error("Error is " + userResponse.getMessage());
+					LOGGER.error("Error is " + errorResponse.getMessage());
 					LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
-					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 			}
 
@@ -4234,31 +4235,31 @@ public class UserServiceImpl implements UserService {
 					.equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c())) {
 				if (null == ailRequest.getUserAILRecord().getIDMS_Federated_ID__c()
 						|| ailRequest.getUserAILRecord().getIDMS_Federated_ID__c().isEmpty()) {
-					userResponse.setStatus(errorStatus);
-					userResponse.setMessage(UserConstants.MANDATORY_FEDERATION_ID);
+					errorResponse.setStatus(errorStatus);
+					errorResponse.setMessage(UserConstants.MANDATORY_FEDERATION_ID);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.error("Error is " + userResponse.getMessage());
+					LOGGER.error("Error is " + errorResponse.getMessage());
 					LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
-					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 
 				if (null == clientId || null == clientSecret) {
-					userResponse.setStatus(errorStatus);
-					userResponse.setMessage(UserConstants.UIMS_CLIENTID_SECRET);
+					errorResponse.setStatus(errorStatus);
+					errorResponse.setMessage(UserConstants.UIMS_CLIENTID_SECRET);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.error("Error is " + userResponse.getMessage());
+					LOGGER.error("Error is " + errorResponse.getMessage());
 					LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
-					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 
 				if ((null != clientId && !clientId.equalsIgnoreCase(uimsClientId))
 						|| (null != clientSecret && !clientSecret.equalsIgnoreCase(uimsClientSecret))) {
-					userResponse.setStatus(errorStatus);
-					userResponse.setMessage(UserConstants.INVALID_UIMS_CREDENTIALS);
+					errorResponse.setStatus(errorStatus);
+					errorResponse.setMessage(UserConstants.INVALID_UIMS_CREDENTIALS);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.error("Error is " + userResponse.getMessage());
+					LOGGER.error("Error is " + errorResponse.getMessage());
 					LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
-					return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
+					return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 				}
 			}
 
@@ -4267,23 +4268,23 @@ public class UserServiceImpl implements UserService {
 					|| ailRequest.getUserAILRecord().getIDMSAclType__c().isEmpty()
 					|| (!pickListValidator.validate(UserConstants.IDMS_ACL_TYPE_C,
 							ailRequest.getUserAILRecord().getIDMSAclType__c()))) {
-				userResponse.setStatus(errorStatus);
-				userResponse.setMessage(UserConstants.INVALID_ACL_TYPE);
+				errorResponse.setStatus(errorStatus);
+				errorResponse.setMessage(UserConstants.INVALID_ACL_TYPE);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.error("Error is " + userResponse.getMessage());
+				LOGGER.error("Error is " + errorResponse.getMessage());
 				LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
-				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 
 			// IDMSAcl__c
 			if (null == ailRequest.getUserAILRecord().getIDMSAcl__c()
 					|| ailRequest.getUserAILRecord().getIDMSAcl__c().isEmpty()) {
-				userResponse.setStatus(errorStatus);
-				userResponse.setMessage(UserConstants.MANDATORY_ACL);
+				errorResponse.setStatus(errorStatus);
+				errorResponse.setMessage(UserConstants.MANDATORY_ACL);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.error("Error is " + userResponse.getMessage());
+				LOGGER.error("Error is " + errorResponse.getMessage());
 				LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
-				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 
 			// Operation
@@ -4291,12 +4292,12 @@ public class UserServiceImpl implements UserService {
 					|| ailRequest.getUserAILRecord().getIDMSOperation__c().isEmpty()
 					|| (!pickListValidator.validate(UserConstants.IDMS_OPERATION_C,
 							ailRequest.getUserAILRecord().getIDMSOperation__c()))) {
-				userResponse.setStatus(errorStatus);
-				userResponse.setMessage(UserConstants.INVALID_OPERATION);
+				errorResponse.setStatus(errorStatus);
+				errorResponse.setMessage(UserConstants.INVALID_OPERATION);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.error("Error is " + userResponse.getMessage());
+				LOGGER.error("Error is " + errorResponse.getMessage());
 				LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
-				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 
 			/**
@@ -4326,13 +4327,13 @@ public class UserServiceImpl implements UserService {
 			 * } }
 			 */
 
-			if (!getTechnicalUserDetails(authorizedToken)) {
-				userResponse.setStatus(errorStatus);
-				userResponse.setMessage("Unauthorized or session expired");
+			if (null != authorizedToken && !authorizedToken.isEmpty() && !getTechnicalUserDetails(authorizedToken)) {
+				errorResponse.setStatus(errorStatus);
+				errorResponse.setMessage("Unauthorized or session expired");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.error("Error is " + userResponse.getMessage());
+				LOGGER.error("Error is " + errorResponse.getMessage());
 				LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
-				return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
+				return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 			}
 
 			idmsAclType_c = getIDMSAclType(ailRequest.getUserAILRecord().getIDMSAclType__c());
@@ -4581,21 +4582,21 @@ public class UserServiceImpl implements UserService {
 			}
 			return updateAILSuccessResponse(idmsUserAIL);
 		} catch (NotFoundException e) {
-			userResponse.setStatus(errorStatus);
-			userResponse.setMessage("User not found based on user Id");
+			errorResponse.setStatus(errorStatus);
+			errorResponse.setMessage("User not found based on user Id");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.updateAIL() : " + elapsedTime);
-			LOGGER.error("Executing while updateAIL() :: -> " + userResponse.getMessage());
+			LOGGER.error("Executing while updateAIL() :: -> " + errorResponse.getMessage());
 			LOGGER.error("Executing while updateAIL() :: -> " + e.getMessage(),e);
-			return Response.status(Response.Status.NOT_FOUND).entity(userResponse).build();
+			return Response.status(Response.Status.NOT_FOUND).entity(errorResponse).build();
 		} catch (Exception e) {
-			userResponse.setStatus(errorStatus);
-			userResponse.setMessage("Error in Updating the AIL Object");
+			errorResponse.setStatus(errorStatus);
+			errorResponse.setMessage("Error in Updating the AIL Object");
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.updateAIL() : " + elapsedTime);
-			LOGGER.error("Executing while updateAIL() :: -> " + userResponse.getMessage());
+			LOGGER.error("Executing while updateAIL() :: -> " + errorResponse.getMessage());
 			LOGGER.error("Executing while updateAIL() :: -> " + e.getMessage(),e);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(userResponse).build();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		}
 	}
 

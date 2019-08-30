@@ -2,6 +2,7 @@ package com.idms.service;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -466,98 +467,70 @@ public class SendEmail {
 		int startIndex=0;
 		int endIndex=0;
 		
-		try {
-			// For Windows//BufferedReader in = new BufferedReader(new
-			// FileReader("C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_registration_with_password.html"));
-			// For Unix//
-			BufferedReader in = null;
-			FileReader file = null;
+		//Get the appropriate path variable
+		String filePathone = new File("").getAbsolutePath();
+		LOGGER.info("Current File Path : " + filePathone);
 
-			String filePathone = new File("").getAbsolutePath();
-			LOGGER.info("Current File Path : " + filePathone);
-
-			if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.SETUSERPWD_OPT_TYPE)) {
-				LOGGER.info("Inside SetUserPwd OperationType  :  " + hotpOperationType);
-				// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_Reset_password.html";
-				if (chineseLangCheck) {
-					filePath = IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN;
-				} else {
-					filePath = IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN;
-				}
-				file = new FileReader(filePath);
-				LOGGER.info("filePath is"+filePath);
-				in = new BufferedReader(file);
-			} else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.USERREGISTRATION_OPT_TYPE)) {
-				LOGGER.info("Inside userRegistration OperationType Create " + hotpOperationType);
-				// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_registration_with_password.html";
-				if (chineseLangCheck) {
-					filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN;
-				} else {
-					filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN;
-				}
-				file = new FileReader(filePath);
-				LOGGER.info("filePath is"+filePath);
-				in = new BufferedReader(file);
-			} else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.UPDATEUSERRECORD_OPT_TYPE)) {
-				LOGGER.info("Inside OperationType UpdateUserRecord " + hotpOperationType);
-				// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_registration_with_password.html";
-				if (chineseLangCheck) {
-					filePath = IDMS_USER_UPDATE_EMAILTEMPLATE_CN;
-				} else {
-					filePath = IDMS_USER_UPDATE_EMAILTEMPLATE_EN;
-				}
-				file = new FileReader(filePath);
-				LOGGER.info("filePath is"+filePath);
-				in = new BufferedReader(file);
-			} else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE)) {
-				LOGGER.info("Inside OperationType AddEmailUserRecord " + hotpOperationType);
-				// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_registration_with_password.html";
-				if (chineseLangCheck) {
-					filePath = IDMS_USER_ADD_EMAILTEMPLATE_CN;
-				} else {
-					filePath = IDMS_USER_ADD_EMAILTEMPLATE_EN;
-				}
-				file = new FileReader(filePath);
-				LOGGER.info("filePath is"+filePath);
-				in = new BufferedReader(file);
-			}else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.SENDINVITATION_OPT_TYPE)) {
-				LOGGER.info("Inside OperationType sendInvitation " + hotpOperationType);
-				// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_registration_with_password.html";
-				if (chineseLangCheck) {
-					filePath = IDMS_SEND_INVITATION_EMAILTEMPLATE_CN;
-				} else {
-					filePath = IDMS_SEND_INVITATION_EMAILTEMPLATE_EN;
-				}
-				file = new FileReader(filePath);
-				LOGGER.info("filePath is"+filePath);
-				in = new BufferedReader(file);
+		if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.SETUSERPWD_OPT_TYPE)) {
+			LOGGER.info("Inside SetUserPwd OperationType  :  " + hotpOperationType);
+			if (chineseLangCheck) {
+				filePath = IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN;
 			} else {
-				LOGGER.info("Inside Common OperationType " + hotpOperationType);
-				if (chineseLangCheck) {
-					filePath = IDMS_USER_DEFAULT_EMAILTEMPLATE_CN;
-				} else {
-					filePath = IDMS_USER_DEFAULT_EMAILTEMPLATE_EN;
-				}
-				file = new FileReader(filePath);
-				LOGGER.info("filePath is"+filePath);
-				in = new BufferedReader(file);
+				filePath = IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN;
 			}
+			LOGGER.info("filePath is"+filePath);
+		} else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.USERREGISTRATION_OPT_TYPE)) {
+			LOGGER.info("Inside userRegistration OperationType Create " + hotpOperationType);
+			if (chineseLangCheck) {
+				filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN;
+			} else {
+				filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN;
+			}
+			LOGGER.info("filePath is"+filePath);
+		} else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.UPDATEUSERRECORD_OPT_TYPE)) {
+			LOGGER.info("Inside OperationType UpdateUserRecord " + hotpOperationType);
+			// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_registration_with_password.html";
+			if (chineseLangCheck) {
+				filePath = IDMS_USER_UPDATE_EMAILTEMPLATE_CN;
+			} else {
+				filePath = IDMS_USER_UPDATE_EMAILTEMPLATE_EN;
+			}
+			LOGGER.info("filePath is"+filePath);
+		} else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE)) {
+			LOGGER.info("Inside OperationType AddEmailUserRecord " + hotpOperationType);
+			if (chineseLangCheck) {
+				filePath = IDMS_USER_ADD_EMAILTEMPLATE_CN;
+			} else {
+				filePath = IDMS_USER_ADD_EMAILTEMPLATE_EN;
+			}
+			LOGGER.info("filePath is"+filePath);
+		}else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.SENDINVITATION_OPT_TYPE)) {
+			LOGGER.info("Inside OperationType sendInvitation " + hotpOperationType);
+			if (chineseLangCheck) {
+				filePath = IDMS_SEND_INVITATION_EMAILTEMPLATE_CN;
+			} else {
+				filePath = IDMS_SEND_INVITATION_EMAILTEMPLATE_EN;
+			}
+			LOGGER.info("filePath is"+filePath);
+		} else {
+			LOGGER.info("Inside Common OperationType " + hotpOperationType);
+			if (chineseLangCheck) {
+				filePath = IDMS_USER_DEFAULT_EMAILTEMPLATE_CN;
+			} else {
+				filePath = IDMS_USER_DEFAULT_EMAILTEMPLATE_EN;
+			}
+			LOGGER.info("filePath is"+filePath);
+		}
+		
+		try(FileReader file = new FileReader(filePath); BufferedReader in = new BufferedReader(file)) {
 			String str;
+			
 			while ((str = in.readLine()) != null) {
 				contentBuilder.append(str);
 			}
-			in.close();
-			file.close();
 		} catch (IOException e) {
-			//throw new FileNotFoundException("Caught Exception!!!!!!!!!!!! " + e);
 			LOGGER.error("Executing while emailContentTemplate :: -> " + e.getMessage(),e);
 		}
-		/*LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : Content Builder Length after reading the file :"
-				+ contentBuilder.length());*/
-		// int start=13165;
-		// int end=13175;
-
-		
 		
 		if(null != invID &&  EmailConstants.SENDINVITATION_OPT_TYPE.equalsIgnoreCase(hotpOperationType)){
 			 startIndex = contentBuilder.indexOf("{!invtID}");

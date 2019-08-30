@@ -111,8 +111,14 @@ public class UIMSAuthenticatedUserManagerSoapService {
 				| UnexpectedRuntimeImsException_Exception e) {
 			LOGGER.error("Exception while createUIMSUser() of UIMS::" + e.getMessage(),e);
 		}
-		LOGGER.info("createUIMSUser() Async method -> End..FederatedID="+uimsUserResponse.getFederatedID());
-		return uimsUserResponse.getFederatedID();
+		
+		String fedId = "";
+		if(uimsUserResponse != null) {
+			LOGGER.info("createUIMSUser() Async method -> End..FederatedID="+uimsUserResponse.getFederatedID());
+			fedId = uimsUserResponse.getFederatedID();
+		}
+		
+		return fedId;
 	}
 	
 	public String createUIMSUserWithPassword(String callerFid,UserV6 identity,String password,String forcedFederatedId)
@@ -148,8 +154,15 @@ public class UIMSAuthenticatedUserManagerSoapService {
 				| UnexpectedRuntimeImsException_Exception e) {
 			LOGGER.error("Exception in createUIMSUserWithPassword()::" + e.getMessage(),e);
 		}
-		LOGGER.info("createUIMSUserWithPassword() UIMS Async method -> End.. with FederatedID:"+uimsUserResponse.getFederatedID());
-		return uimsUserResponse.getFederatedID();
+		
+		String fedID = "";
+		
+		if(uimsUserResponse != null) {
+			LOGGER.info("createUIMSUserWithPassword() UIMS Async method -> End.. with FederatedID:"+uimsUserResponse.getFederatedID());
+			fedID = uimsUserResponse.getFederatedID();
+		}
+		
+		return fedID;
 	}
 
 	@Async
