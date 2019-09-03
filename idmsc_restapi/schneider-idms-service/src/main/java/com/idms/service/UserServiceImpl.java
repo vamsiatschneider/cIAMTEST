@@ -9352,6 +9352,7 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Parameter loginUser -> " + userMFADataRequest.getLoginUser());
 		LOGGER.info("Parameter appName -> " + userMFADataRequest.getAppName());
 		LOGGER.info("Parameter stageName -> " + userMFADataRequest.getStageName());
+		LOGGER.info("Parameter stageData -> " + userMFADataRequest.getStageData());
 		
 		ErrorResponse errorResponse = new ErrorResponse();
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
