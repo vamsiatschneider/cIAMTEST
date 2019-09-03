@@ -607,6 +607,6 @@ public class UserConstants {
 	public static final String STAGENAME_INCORRECT = "Login stage name should be either deviceStage or OTPStage";
 	public static final String USER_EMPTY = "Login is empty or missing";
 	public static final String APPNAME_EMPTY = "Application Name is empty or missing";
-		
+	public static final String YOP_MAIL="yopmail.com";	
 	
 }
