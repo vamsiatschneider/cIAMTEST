@@ -290,7 +290,8 @@ public class SendEmail {
 				//userId ==con
 				//appid = regsource or updateresource pass from emthod
 				
-				String mailDomain = to.substring(userId.indexOf("@") + 1);
+				String mailDomain = to.substring(to.indexOf("@") + 1);
+				
 				LOGGER.info("mailDomain in sendOpenAmEmail= " + mailDomain);
 				if(mailDomain.equalsIgnoreCase(UserConstants.YOP_MAIL)){
 					url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + encodedHOTPcode + "&operationType="
