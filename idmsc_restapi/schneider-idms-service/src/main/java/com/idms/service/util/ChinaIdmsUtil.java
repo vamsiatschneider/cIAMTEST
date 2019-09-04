@@ -359,7 +359,7 @@ public class ChinaIdmsUtil {
 	}
 	
 	public static String removeEscapeCharacter(String deviceData){
-		String temp = null;
+		String temp = deviceData;
 		if(deviceData.contains("\\")){
 			temp = deviceData.replaceAll("\\\\", "");
 		}
