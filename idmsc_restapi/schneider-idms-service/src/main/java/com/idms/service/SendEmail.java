@@ -175,6 +175,7 @@ public class SendEmail {
 		InternetAddress fromAddress = null;
 		InternetAddress toAddress = null;
 		try {
+			
 			fromAddress = new InternetAddress(from);
 			toAddress = new InternetAddress(to);
 
@@ -293,7 +294,7 @@ public class SendEmail {
 				String mailDomain = to.substring(to.indexOf("@") + 1);
 				
 				LOGGER.info("mailDomain in sendOpenAmEmail= " + mailDomain);
-				if(mailDomain.equalsIgnoreCase(UserConstants.YOP_MAIL)){
+				if(mailDomain.contains(UserConstants.YOP_MAIL)){
 					url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + encodedHOTPcode + "&operationType="
 							+ hotpOperationType + "&amp;lang=" + lang + "&app=" + appid + "&uid=" + userId+linkParam;
 				}
@@ -706,10 +707,16 @@ public class SendEmail {
 		invID = invitationId;
 		
 			if(null != invitationId && !invitationId.isEmpty()){
-				
-				url = redirectUrl + "&InvitationId="+ invitationId + "&email=" + email ;
+				String mailDomain = email.substring(email.indexOf("@") + 1);
+				LOGGER.info("mailDomain in sendInvitationEmail= " + mailDomain);
+				if(mailDomain.contains(UserConstants.YOP_MAIL)){
+					url = redirectUrl + "&amp;InvitationId="+ invitationId + "&amp;email=" + email ;
+				}
+				else{
+					url = redirectUrl + "&InvitationId="+ invitationId + "&email=" + email ;
+				}
 			}
-			
+		
 			LOGGER.info("sendInvitationEmail URL compiled to : " + url);
 
 			contentBuilder = new StringBuilder();
