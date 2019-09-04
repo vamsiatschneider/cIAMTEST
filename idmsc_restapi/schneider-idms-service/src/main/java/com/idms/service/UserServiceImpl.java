@@ -9359,6 +9359,7 @@ public class UserServiceImpl implements UserService {
 		String authIdSecuredLogin = null, header = null, stageNameFromUI = null, fileName = null;
 		String fileNameDevice = "DeviceDataInformation.txt";
 		String fileNameOTP = "DeviceOTPInformation.txt";
+		String stageData = null;
 
 		try {
 			if (null == userMFADataRequest.getAuthId() || userMFADataRequest.getAuthId().isEmpty()) {
@@ -9418,10 +9419,15 @@ public class UserServiceImpl implements UserService {
 			if(stageNameFromUI.equalsIgnoreCase("OTPStage")){
 				fileName = fileNameOTP;
 			}
+			//userMFADataRequest.getStageData();
+			if(userMFADataRequest.getStageData().contains("\\")){
+				stageData = ChinaIdmsUtil.removeEscapeCharacter(userMFADataRequest.getStageData());
+				LOGGER.info("without escaped stageData = "+ stageData);
+			}
 			
 			LOGGER.info("Start: checkDeviceInfo of OPENAMService for username="+userMFADataRequest.getLoginUser());
 			Response authenticateResponse = ChinaIdmsUtil.executeHttpDeviceClient(prefixStartUrl, "se", userMFADataRequest.getAuthId(), 
-					userMFADataRequest.getStageData(), fileName);
+					ChinaIdmsUtil.removeEscapeCharacter(userMFADataRequest.getStageData()), fileName);
 			LOGGER.info("End: checkDeviceInfo of OPENAMService for username="+userMFADataRequest.getLoginUser());
 			successResponse = (String) authenticateResponse.getEntity();
 			LOGGER.info("Response code from OPENAMService: " + authenticateResponse.getStatus());

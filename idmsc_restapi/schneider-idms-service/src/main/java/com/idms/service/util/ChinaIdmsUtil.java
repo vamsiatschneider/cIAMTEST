@@ -358,6 +358,14 @@ public class ChinaIdmsUtil {
 		return temp;
 	}
 	
+	public static String removeEscapeCharacter(String deviceData){
+		String temp = null;
+		if(deviceData.contains("\\")){
+			temp = deviceData.replaceAll("\\\\", "");
+		}
+		return temp;
+	}
+	
 	/*public static String printFileContent(){
 		String content = null;
 		StringBuilder contentBuilder = null;
@@ -388,6 +396,10 @@ public class ChinaIdmsUtil {
 	
 	
 	/*public static void main(String[] args) {
+		String abc = "{\\\"screen\\\":";
+		System.out.println("abc= "+abc);
+		String xyz = removeEscapeCharacter(abc);
+		System.out.println("xyz= "+xyz);
 		String str = "88ee604-735c-4b95-a0d8-41439bfbbd14";
 		try {
 			String modString  = maskText(str);
