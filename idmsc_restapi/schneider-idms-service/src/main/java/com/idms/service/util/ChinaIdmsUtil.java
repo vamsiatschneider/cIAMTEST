@@ -116,10 +116,14 @@ public class ChinaIdmsUtil {
         	int i = rawData.indexOf(",\"PinCode");
         	int y = rawData.indexOf(",", i+1);
         	String chars = rawData.substring(i, y);
-        	newrawdata = rawData.replace(chars, "");
-        	
-        }else{
+        	newrawdata = rawData.replace(chars, "");        	
         }
+        if (newrawdata.toLowerCase().contains("pin")) {
+			int i = newrawdata.indexOf(",\"pin");
+			int y = newrawdata.lastIndexOf("\"");
+			String chars = newrawdata.substring(i, y+1);
+			newrawdata = newrawdata.replace(chars, "");
+		}
         return newrawdata;
     }
 	

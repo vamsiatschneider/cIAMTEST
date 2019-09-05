@@ -10,6 +10,8 @@ public class JsonConstants {
 
 	public static final String AUTH_ID = "$.authId";
 	public static final String TOKEN_ID = "$.tokenId";
+	public static final String RESULT_AUTH_ID = "$.result[0].AuthID[0]";
+	public static final String RESULT_AUTH_ID_L = "$.result[0].authId[0]";
 	public static final String USER_NAME = "$.username";
 	public static final String LOGIN_ID_UPPER_0 = "$.Loginid[0]";
 	public static final String LOGIN_ID_LOWER_0 = "$.loginid[0]";
@@ -25,6 +27,7 @@ public class JsonConstants {
 	public static final String RESULT = "$.result[0].username";
 	public static final String FEDERATION_ID = "$.federationID";
 	public static final String RESULT_Loginid = "$.result[0].Loginid[0]";
+	public static final String RESULT_Loginid_L = "$.result[0].loginid[0]";
 	public static final String RESULT_LOGIN_MOBILE = "$.result[0].login_mobile[0]";
 	
 	public static final String USER_LEVEL = "_registrationLevel";
