@@ -295,8 +295,8 @@ public class SendEmail {
 				
 				LOGGER.info("mailDomain in sendOpenAmEmail= " + mailDomain);
 				if(mailDomain.contains(UserConstants.YOP_MAIL)){
-					url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + encodedHOTPcode + "&operationType="
-							+ hotpOperationType + "&amp;lang=" + lang + "&app=" + appid + "&uid=" + userId+linkParam;
+					url = hotpEmailVerificationURL + "?userid=" + userId + "&amp;pin=" + encodedHOTPcode + "&amp;operationType="
+							+ hotpOperationType + "&amp;lang=" + lang + "&amp;app=" + appid + "&amp;uid=" + userId+linkParam;
 				}
 				else{
 					url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + encodedHOTPcode + "&operationType="
