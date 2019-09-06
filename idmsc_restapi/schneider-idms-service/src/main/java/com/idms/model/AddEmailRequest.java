@@ -26,6 +26,9 @@ public class AddEmailRequest {
 	
 	@JsonInclude(Include.NON_NULL)
 	private String  accesstoken;
+	
+	@JsonInclude(Include.NON_NULL)
+	private String  pin;
 
 	public String getEmail() {
 		return email;
@@ -65,6 +68,14 @@ public class AddEmailRequest {
 
 	public void setAccesstoken(String accesstoken) {
 		this.accesstoken = accesstoken;
+	}
+
+	public String getPin() {
+		return pin;
+	}
+
+	public void setPin(String pin) {
+		this.pin = pin;
 	}
 
 }

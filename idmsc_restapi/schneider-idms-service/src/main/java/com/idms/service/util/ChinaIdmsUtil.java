@@ -116,10 +116,14 @@ public class ChinaIdmsUtil {
         	int i = rawData.indexOf(",\"PinCode");
         	int y = rawData.indexOf(",", i+1);
         	String chars = rawData.substring(i, y);
-        	newrawdata = rawData.replace(chars, "");
-        	
-        }else{
+        	newrawdata = rawData.replace(chars, "");        	
         }
+        if (newrawdata.toLowerCase().contains("pin")) {
+			int i = newrawdata.indexOf(",\"pin");
+			int y = newrawdata.lastIndexOf("\"");
+			String chars = newrawdata.substring(i, y+1);
+			newrawdata = newrawdata.replace(chars, "");
+		}
         return newrawdata;
     }
 	
@@ -358,6 +362,14 @@ public class ChinaIdmsUtil {
 		return temp;
 	}
 	
+	public static String removeEscapeCharacter(String deviceData){
+		String temp = deviceData;
+		if(deviceData.contains("\\")){
+			temp = deviceData.replaceAll("\\\\", "");
+		}
+		return temp;
+	}
+	
 	/*public static String printFileContent(){
 		String content = null;
 		StringBuilder contentBuilder = null;
@@ -388,6 +400,10 @@ public class ChinaIdmsUtil {
 	
 	
 	/*public static void main(String[] args) {
+		String abc = "{\\\"screen\\\":";
+		System.out.println("abc= "+abc);
+		String xyz = removeEscapeCharacter(abc);
+		System.out.println("xyz= "+xyz);
 		String str = "88ee604-735c-4b95-a0d8-41439bfbbd14";
 		try {
 			String modString  = maskText(str);

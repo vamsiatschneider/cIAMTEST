@@ -175,6 +175,7 @@ public class SendEmail {
 		InternetAddress fromAddress = null;
 		InternetAddress toAddress = null;
 		try {
+			
 			fromAddress = new InternetAddress(from);
 			toAddress = new InternetAddress(to);
 
@@ -290,14 +291,21 @@ public class SendEmail {
 				//userId ==con
 				//appid = regsource or updateresource pass from emthod
 				
-				url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + encodedHOTPcode + "&operationType="
-						+ hotpOperationType + "&lang=" + lang + "&app=" + appid + "&uid=" + userId+linkParam;
+				String mailDomain = to.substring(to.indexOf("@") + 1);
 				
+				LOGGER.info("mailDomain in sendOpenAmEmail= " + mailDomain);
+				if(mailDomain.contains(UserConstants.YOP_MAIL)){
+					url = hotpEmailVerificationURL + "?userid=" + userId + "&amp;pin=" + encodedHOTPcode + "&amp;operationType="
+							+ hotpOperationType + "&amp;lang=" + lang + "&amp;app=" + appid + "&amp;uid=" + userId+linkParam;
+				}
+				else{
+					url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + encodedHOTPcode + "&operationType="
+							+ hotpOperationType + "&lang=" + lang + "&app=" + appid + "&uid=" + userId+linkParam;
+				}
+				//url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + encodedHOTPcode + "&operationType="
+				//		+ hotpOperationType + "&lang=" + lang + "&app=" + appid + "&uid=" + userId+linkParam;
 				//url = URLEncoder.encode( structurl, "UTF-8");  
-				
-						
 				//subject = appid;
-
 				// String url =
 				// hotpEmailVerificationURL+"?userid="+to+"&pin="+code+"&operationType="+hotpOperationType+"&pwdReq="+hotpPasswordRequired+"&lang="+hotpLanguage;
 				// String url =
@@ -699,10 +707,16 @@ public class SendEmail {
 		invID = invitationId;
 		
 			if(null != invitationId && !invitationId.isEmpty()){
-				
-				url = redirectUrl + "&InvitationId="+ invitationId + "&email=" + email ;
+				String mailDomain = email.substring(email.indexOf("@") + 1);
+				LOGGER.info("mailDomain in sendInvitationEmail= " + mailDomain);
+				if(mailDomain.contains(UserConstants.YOP_MAIL)){
+					url = redirectUrl + "&amp;InvitationId="+ invitationId + "&amp;email=" + email ;
+				}
+				else{
+					url = redirectUrl + "&InvitationId="+ invitationId + "&email=" + email ;
+				}
 			}
-			
+		
 			LOGGER.info("sendInvitationEmail URL compiled to : " + url);
 
 			contentBuilder = new StringBuilder();

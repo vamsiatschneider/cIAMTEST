@@ -8242,6 +8242,7 @@ public class UserServiceImpl implements UserService {
 		String iPlanetDirectoryKey = null;
 		String ifwAccessToken = null, userExists = null;
 		JSONObject response = new JSONObject();
+		JSONObject responseMultiLine = new JSONObject();
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
 		Response ifwResponse = null, appDetails = null;
@@ -8410,18 +8411,18 @@ public class UserServiceImpl implements UserService {
 			resultCount = productDocCtx.read("$.resultCount");
 			LOGGER.info("resultCount=" + resultCount);
 			if (resultCount.intValue() == 1) {
-				response.put(UserConstants.MESSAGE_L, UserConstants.TRUE);
-				response.put("idmsFederatedId", productDocCtx.read("$.result[0].federationID[0]"));
+				responseMultiLine.put(UserConstants.MESSAGE_L, UserConstants.TRUE);
+				responseMultiLine.put("idmsFederatedId", productDocCtx.read("$.result[0].federationID[0]"));
 				if(Boolean.valueOf(productDocCtx.read("$.result[0].isActivated[0]"))){
-					response.put("userStatus", UserConstants.USER_ACTIVE);
+					responseMultiLine.put("userStatus", UserConstants.USER_ACTIVE);
 				} else {
-					response.put("userStatus", UserConstants.USER_INACTIVE);
+					responseMultiLine.put("userStatus", UserConstants.USER_INACTIVE);
 				}
-				response.put("countryCode", UserConstants.CHINA_CODE);
+				responseMultiLine.put("countryCode", UserConstants.CHINA_CODE);
 				LOGGER.info("User found in IDMS China");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
-				return Response.status(Response.Status.OK).entity(response).build();
+				return Response.status(Response.Status.OK).entity(responseMultiLine).build();
 			}
 			if (resultCount.intValue() > 1) {
 				response.put(UserConstants.MESSAGE_L, UserConstants.USER_MULTIPLE_EXIST);
@@ -8482,14 +8483,14 @@ public class UserServiceImpl implements UserService {
 							.parse(IOUtils.toString((InputStream) ifwResponse.getEntity()));
 					LOGGER.info("ifwResponse == "+productDocCtx.jsonString());
 					
-					response.put("userStatus", productDocCtx.read("$.userStatus"));
-					response.put("idmsFederatedId", productDocCtx.read("$.idmsFederatedId"));
-					response.put("countryCode", productDocCtx.read("$.countryCode"));
-					response.put(UserConstants.MESSAGE_L, UserConstants.TRUE);
+					responseMultiLine.put("userStatus", productDocCtx.read("$.userStatus"));
+					responseMultiLine.put("idmsFederatedId", productDocCtx.read("$.idmsFederatedId"));
+					responseMultiLine.put("countryCode", productDocCtx.read("$.countryCode"));
+					responseMultiLine.put(UserConstants.MESSAGE_L, UserConstants.TRUE);
 					LOGGER.info("User found in IDMS Global");
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
-					return Response.status(ifwResponse.getStatus()).entity(response).build();
+					return Response.status(ifwResponse.getStatus()).entity(responseMultiLine).build();
 				} else if (null != ifwResponse && 404 == ifwResponse.getStatus()) {
 					response.put(UserConstants.MESSAGE_L, UserConstants.FALSE);
 					LOGGER.info("User NOT found in IDMS Global");
@@ -9353,7 +9354,7 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Parameter appName -> " + userMFADataRequest.getAppName());
 		LOGGER.info("Parameter stageName -> " + userMFADataRequest.getStageName());
 		LOGGER.info("Parameter stageData -> " + userMFADataRequest.getStageData());
-		
+
 		ErrorResponse errorResponse = new ErrorResponse();
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
@@ -9363,6 +9364,7 @@ public class UserServiceImpl implements UserService {
 		String authIdSecuredLogin = null, header = null, stageNameFromUI = null, fileName = null;
 		String fileNameDevice = "DeviceDataInformation.txt";
 		String fileNameOTP = "DeviceOTPInformation.txt";
+		String stageData = null;
 
 		try {
 			if (null == userMFADataRequest.getAuthId() || userMFADataRequest.getAuthId().isEmpty()) {
@@ -9422,10 +9424,15 @@ public class UserServiceImpl implements UserService {
 			if(stageNameFromUI.equalsIgnoreCase("OTPStage")){
 				fileName = fileNameOTP;
 			}
+			//userMFADataRequest.getStageData();
+			if(userMFADataRequest.getStageData().contains("\\")){
+				stageData = ChinaIdmsUtil.removeEscapeCharacter(userMFADataRequest.getStageData());
+				LOGGER.info("without escaped stageData = "+ stageData);
+			}
 			
 			LOGGER.info("Start: checkDeviceInfo of OPENAMService for username="+userMFADataRequest.getLoginUser());
 			Response authenticateResponse = ChinaIdmsUtil.executeHttpDeviceClient(prefixStartUrl, "se", userMFADataRequest.getAuthId(), 
-					userMFADataRequest.getStageData(), fileName);
+					ChinaIdmsUtil.removeEscapeCharacter(userMFADataRequest.getStageData()), fileName);
 			LOGGER.info("End: checkDeviceInfo of OPENAMService for username="+userMFADataRequest.getLoginUser());
 			successResponse = (String) authenticateResponse.getEntity();
 			LOGGER.info("Response code from OPENAMService: " + authenticateResponse.getStatus());
@@ -10400,6 +10407,7 @@ public class UserServiceImpl implements UserService {
 
 			org.json.simple.JSONObject checkUserJson = (org.json.simple.JSONObject) checkUserExist.getEntity();
 			String messageUser = checkUserJson.get(UserConstants.MESSAGE_L).toString();
+			
 			if (!messageUser.equalsIgnoreCase(UserConstants.FALSE)) {
 				if (200 != checkUserExist.getStatus()) {
 					response.put(UserConstants.STATUS_L, errorStatus);
@@ -10410,12 +10418,15 @@ public class UserServiceImpl implements UserService {
 					return Response.status(checkUserExist.getStatus()).entity(response).build();
 				}
 				if (200 == checkUserExist.getStatus()) {
-					response.put(UserConstants.STATUS_L, errorStatus);
-					response.put(UserConstants.MESSAGE_L, UserConstants.USER_EXISTS);
-					LOGGER.error("User exists/registered in OpenAM");
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.info("Time taken by addEmail() : " + elapsedTime);
-					return Response.status(Response.Status.CONFLICT).entity(response).build();
+					String fedIdInOpenAM = checkUserJson.get("idmsFederatedId").toString();
+					if(null != fedIdInOpenAM && !fedIdInOpenAM.isEmpty() && !fedIdInOpenAM.equalsIgnoreCase(fedid)){
+						response.put(UserConstants.STATUS_L, errorStatus);
+						response.put(UserConstants.MESSAGE_L, UserConstants.USER_EXISTS);
+						LOGGER.error("User exists/registered in OpenAM");
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.info("Time taken by addEmail() : " + elapsedTime);
+						return Response.status(Response.Status.CONFLICT).entity(response).build();
+					}
 				}
 			}
 
@@ -10494,13 +10505,14 @@ public class UserServiceImpl implements UserService {
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
 		ObjectMapper objMapper = new ObjectMapper();
-		String email = null, fedid = null, source = null;
-		String optType = null;
+		String email = null, fedid = null, source = null, pin = null;
+		String optType = null, mailLoginIdCheck = null;
 		JSONObject response = new JSONObject();
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		boolean validPinStatus = false;
 
 		try {
-			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(addEmailRequest));
+			LOGGER.info("Parameter request -> " + ChinaIdmsUtil.printInfo(objMapper.writeValueAsString(addEmailRequest)));
 
 			if (null == addEmailRequest.getFedId() || addEmailRequest.getFedId().isEmpty()) {
 				response.put(UserConstants.STATUS_L, errorStatus);
@@ -10527,10 +10539,27 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Time taken by addEmailToUser() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 			}
+			optType = addEmailRequest.getOperationType().trim();
+			if (null != optType && !optType.isEmpty() && !optType.equalsIgnoreCase(UserConstants.ADD_EMAIL_USER_RECORD)) {
+				response.put(UserConstants.STATUS_L, errorStatus);
+				response.put(UserConstants.MESSAGE_L, UserConstants.OPERATION_MISMATCH);
+				LOGGER.error("Error in addEmailToUser() is ::" + UserConstants.OPERATION_MISMATCH);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by addEmailToUser() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+			}
+			if (null == addEmailRequest.getPin() || addEmailRequest.getPin().isEmpty()) {
+				response.put(UserConstants.STATUS_L, errorStatus);
+				response.put(UserConstants.MESSAGE_L, UserConstants.MANDATORY_PINCODE);
+				LOGGER.error("Error in addEmailToUser() is ::" + UserConstants.MANDATORY_PINCODE);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by addEmailToUser() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+			}
 
 			fedid = addEmailRequest.getFedId().trim();
 			source = addEmailRequest.getProfileUpdateSource().trim();
-			optType = addEmailRequest.getOperationType().trim();
+			pin = addEmailRequest.getPin().trim();
 
 			String ssoToken = null;
 			try {
@@ -10549,11 +10578,36 @@ public class UserServiceImpl implements UserService {
 			Integer resultCount = productDocCtx.read(JsonConstants.RESULT_COUNT);
 			LOGGER.info("resultCount = " + resultCount);
 			
-			if (optType.equalsIgnoreCase(UserConstants.ADD_EMAIL_USER_RECORD))
-				email = productDocCtx.read("$.result[0].mail[0]");
+			//if (optType.equalsIgnoreCase(UserConstants.ADD_EMAIL_USER_RECORD))
+			email = productDocCtx.read("$.result[0].mail[0]");
 			LOGGER.info("email in openam = " + email);
 
 			if (resultCount.intValue() == 1) {
+				mailLoginIdCheck = productDocCtx.read(JsonConstants.RESULT_Loginid);
+				if (null == mailLoginIdCheck)
+					mailLoginIdCheck = productDocCtx.read(JsonConstants.RESULT_Loginid_L);
+				LOGGER.info("Loginid in openam = "+mailLoginIdCheck);
+				
+				if(null != mailLoginIdCheck && !mailLoginIdCheck.isEmpty()){
+					response.put(UserConstants.STATUS_L, errorStatus);
+					response.put(UserConstants.MESSAGE_L, "The user email is already activated");
+					LOGGER.error("Error in addEmailToUser() is :: The user email is already activated");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by addEmailToUser() : " + elapsedTime);
+					return Response.status(Response.Status.CONFLICT).entity(response).build();
+				}
+				if ("[]".equalsIgnoreCase(productDocCtx.read(JsonConstants.RESULT_AUTH_ID))
+						|| "[]".equalsIgnoreCase(productDocCtx.read(JsonConstants.RESULT_AUTH_ID_L))) {
+					throw new Exception("Pin got expired or invalid!!");
+				}
+				
+				LOGGER.info("Start: validatePin() for addEmailToUser for uniqueIdentifier= " + fedid);
+				validPinStatus = sendEmail.validatePin(pin, fedid);
+				LOGGER.info("End: validatePin() for addEmailToUser finished for uniqueIdentifier= "	+ fedid);
+				if (!validPinStatus) {
+					throw new Exception("Pin got expired or invalid!!");
+				}
+				
 				String addEmailString = "{" + "\"mail\": \"" + email + "\",\"loginid\": \"" + email + "\"" + "}";
 				LOGGER.info(
 						"Start: updateUser() of openamservice to add email as dual indentifier for userId:" + fedid);
