@@ -234,8 +234,8 @@ public class IFWUser extends BaseEntity {
 	@JsonProperty
 	private String IDMSWorkPhone__c;
 	
-	@JsonProperty
-	private String login_mobile;
+	//@JsonProperty
+	//private String login_mobile;
 	
 	//@JsonProperty
 	//private String IDMSMarketServed__c;
@@ -925,7 +925,7 @@ public class IFWUser extends BaseEntity {
 		IDMSWorkPhone__c = iDMSWorkPhone__c;
 	}
 
-	@JsonProperty("login_mobile")
+	/**@JsonProperty("login_mobile")
 	public String getLogin_mobile() {
 		return login_mobile;
 	}
@@ -934,7 +934,7 @@ public class IFWUser extends BaseEntity {
 	public void setLogin_mobile(String login_mobile) {
 		this.login_mobile = login_mobile;
 	}
-	
+	*/
 	/*
 	@JsonProperty("IDMSMarketServed__c")
 	public List getIDMSMarketServed__c() {
