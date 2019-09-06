@@ -9765,6 +9765,19 @@ public class UserServiceImpl implements UserService {
 					 */
 					// jsonResponse=rb.build();
 				}
+				if(relayState != null & index == -1){
+					strQueryParam = relayState;
+					LOGGER.info("Relay state :" + strQueryParam);
+					Cookie cookie = new Cookie("spRelayState", strQueryParam, "/", domainName);
+					NewCookie newCookie = new NewCookie(cookie);
+					String amlbcookieArray[] = jsonResponse.getHeaderString("Set-Cookie").split(",");
+					for (String responseCookie : amlbcookieArray) {
+						LOGGER.info("cookie* " + responseCookie);
+						rb = rb.header("Set-Cookie", responseCookie);
+					}
+					rb = rb.cookie(newCookie);// Adding new cookie to the
+												// response
+				}
 				jsonResponse = rb.build();
 			}
 		} catch (Exception e) {
