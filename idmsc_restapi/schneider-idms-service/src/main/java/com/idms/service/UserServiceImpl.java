@@ -9733,9 +9733,12 @@ public class UserServiceImpl implements UserService {
 					index = relayState.indexOf("?");
 				}
 				LOGGER.info("index:" + index);
+				boolean hasQueryParam =false;
 				if (relayState != null & index > -1) {
 					strQueryParam = relayState.substring(index + 1);
 					LOGGER.info("Relay state Query Params:" + strQueryParam);
+					LOGGER.info("hasQueryParam:" + hasQueryParam);
+					hasQueryParam=true;
 					// if(queryParam.length> 1 && queryParam[1]!=null){
 					// rb =
 					// Response.status(Response.Status.FOUND).entity(jsonResponse.getEntity()).header("Location",jsonResponse.getLocation().toString());
@@ -9748,8 +9751,8 @@ public class UserServiceImpl implements UserService {
 						LOGGER.info("cookie* " + responseCookie);
 						rb = rb.header("Set-Cookie", responseCookie);
 					}
-					rb = rb.cookie(newCookie);// Adding new cookie to the
-												// response
+					rb = rb.cookie(newCookie);// Adding new cookie to the response
+												
 					/*
 					 * jsonResponse.getCookies().put("regQueryParams",newCookie)
 					 * ; jsonResponse=Response.status(Response.Status.FOUND).
@@ -9761,18 +9764,19 @@ public class UserServiceImpl implements UserService {
 					 */
 					// jsonResponse=rb.build();
 				}
-				if(relayState != null & index == -1){
+				if(relayState != null ){
 					strQueryParam = relayState;
-					LOGGER.info("Relay state :" + strQueryParam);
+					LOGGER.info("Relay state in spRelayState :" + strQueryParam);
 					Cookie cookie = new Cookie("spRelayState", strQueryParam, "/", domainName);
 					NewCookie newCookie = new NewCookie(cookie);
-					String amlbcookieArray[] = jsonResponse.getHeaderString("Set-Cookie").split(",");
-					for (String responseCookie : amlbcookieArray) {
-						LOGGER.info("cookie* " + responseCookie);
-						rb = rb.header("Set-Cookie", responseCookie);
+					if(!hasQueryParam){
+						String amlbcookieArray[] = jsonResponse.getHeaderString("Set-Cookie").split(",");
+						for (String responseCookie : amlbcookieArray) {
+							LOGGER.info("cookie* " + responseCookie);
+							rb = rb.header("Set-Cookie", responseCookie);
+						}
 					}
-					rb = rb.cookie(newCookie);// Adding new cookie to the
-												// response
+					rb = rb.cookie(newCookie);// Adding new cookie to the response
 				}
 				jsonResponse = rb.build();
 			}
