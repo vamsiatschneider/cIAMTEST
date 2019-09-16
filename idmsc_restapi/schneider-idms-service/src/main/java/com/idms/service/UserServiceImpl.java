@@ -405,7 +405,6 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Response authenticateUser(String userName, String password, String realm) {
 		LOGGER.info("Entered authenticateUser() -> Start");
-		LOGGER.info("Testing****");
 		LOGGER.info("Parameter userName -> " + userName + " ,realm -> " + realm);
 
 		String successResponse = null;
@@ -10530,6 +10529,8 @@ public class UserServiceImpl implements UserService {
 		JSONObject response = new JSONObject();
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		boolean validPinStatus = false;
+		String openamVnew = null;
+		Integer vNewCntValue = 0;
 
 		try {
 			LOGGER.info("Parameter request -> " + ChinaIdmsUtil.printInfo(objMapper.writeValueAsString(addEmailRequest)));
@@ -10598,7 +10599,12 @@ public class UserServiceImpl implements UserService {
 			Integer resultCount = productDocCtx.read(JsonConstants.RESULT_COUNT);
 			LOGGER.info("resultCount = " + resultCount);
 			
-			//if (optType.equalsIgnoreCase(UserConstants.ADD_EMAIL_USER_RECORD))
+			openamVnew = null != productDocCtx.read("$.result[0].V_New[0]") ? getValue(productDocCtx.read("$.result[0].V_New[0]"))
+					: getDelimeter();
+			if (null != vNewCntValue && null != openamVnew) {
+				vNewCntValue = Integer.parseInt(openamVnew) + 1;
+			}
+			
 			email = productDocCtx.read("$.result[0].mail[0]");
 			LOGGER.info("email in openam = " + email);
 
@@ -10628,12 +10634,19 @@ public class UserServiceImpl implements UserService {
 					throw new Exception("Pin got expired or invalid!!");
 				}
 				
-				String addEmailString = "{" + "\"mail\": \"" + email + "\",\"loginid\": \"" + email + "\"" + "}";
+				//String addEmailString = "{" + "\"mail\": \"" + email + "\",\"loginid\": \"" + email + "\"" + "}";
+				String addEmailString = "{" + "\"mail\": \"" + email + "\",\"loginid\": \"" + email + "\",\"authId\":\"" + "[]" + "\"" + "}";
 				LOGGER.info(
 						"Start: updateUser() of openamservice to add email as dual indentifier for userId:" + fedid);
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + ssoToken, fedid, addEmailString);
 				LOGGER.info("End: updateUser() of openamservice to add email as dual indentifier finished for userId:"
 						+ fedid);
+				
+				if (null != source && !UserConstants.UIMS.equalsIgnoreCase(source)) {
+					LOGGER.info("Start: ASYNC updateChangeEmailOrMobile() of UIMSService for federationID=" + fedid);
+					uimsUserManagerSoapService.updateChangeEmailOrMobile(ssoToken, fedid, fedid, String.valueOf(vNewCntValue), "email", email);
+					LOGGER.info("End: ASYNC updateChangeEmailOrMobile() of UIMSService finished for federationID=" + fedid);
+				}
 
 				response.put(UserConstants.STATUS_L, successStatus);
 				response.put(UserConstants.MESSAGE_L, UserConstants.ADD_EMAIL_PROFILE_SUCCESS);
