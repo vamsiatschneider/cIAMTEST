@@ -14,8 +14,8 @@ public class UserMFADataRequest {
 	private String stageData;
 	
 	/**
-	 * stageName can be any of two
-	 * deviceStage or OTPStage
+	 * stageName can be any of three
+	 * deviceStage or OTPStage or ResendOTPStage
 	 */
 	private String stageName;
 	private String loginUser;

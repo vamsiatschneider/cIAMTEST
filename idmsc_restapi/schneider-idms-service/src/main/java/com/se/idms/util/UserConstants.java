@@ -604,7 +604,7 @@ public class UserConstants {
 	public static final String AUTHID_EMPTY = "AuthId is empty or missing";
 	public static final String DEVICEDATA_EMPTY = "Stage data(device or OTP) is empty or missing";
 	public static final String STAGENAME_EMPTY = "Login stage name is empty or missing";
-	public static final String STAGENAME_INCORRECT = "Login stage name should be either deviceStage or OTPStage";
+	public static final String STAGENAME_INCORRECT = "Login stage name should be either deviceStage or OTPStage or ResendOTPStage";
 	public static final String USER_EMPTY = "Login is empty or missing";
 	public static final String APPNAME_EMPTY = "Application Name is empty or missing";
 	public static final String YOP_MAIL="yopmail";	
