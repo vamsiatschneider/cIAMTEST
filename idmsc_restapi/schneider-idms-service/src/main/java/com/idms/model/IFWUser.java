@@ -237,6 +237,9 @@ public class IFWUser extends BaseEntity {
 	@JsonProperty
 	private String login_mobile;
 	
+	@JsonProperty
+	private String mobile_reg;
+	
 	//@JsonProperty
 	//private String IDMSMarketServed__c;
 	
@@ -933,6 +936,16 @@ public class IFWUser extends BaseEntity {
 	@JsonProperty("login_mobile")
 	public void setLogin_mobile(String login_mobile) {
 		this.login_mobile = login_mobile;
+	}
+	
+	@JsonProperty("mobile_reg")
+	public String getMobile_reg() {
+		return mobile_reg;
+	}
+	
+	@JsonProperty("mobile_reg")
+	public void setMobile_reg(String mobile_reg) {
+		this.mobile_reg = mobile_reg;
 	}
 	
 	/*
