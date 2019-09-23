@@ -9343,7 +9343,7 @@ public class UserServiceImpl implements UserService {
 	
 	/**
 	 * Stage 2 & Stage 3 Login
-	 * DeviceInfo or OTPInfo validation
+	 * DeviceInfo or OTPInfo or ResendOTP validation
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -9363,6 +9363,7 @@ public class UserServiceImpl implements UserService {
 		String authIdSecuredLogin = null, header = null, stageNameFromUI = null, fileName = null;
 		String fileNameDevice = "DeviceDataInformation.txt";
 		String fileNameOTP = "DeviceOTPInformation.txt";
+		String fileNameResendOTP = "ResendOTPInformation.txt";
 		String stageData = null;
 
 		try {
@@ -9374,7 +9375,26 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
-			if (null == userMFADataRequest.getStageData() || userMFADataRequest.getStageData().isEmpty()) {
+			if (null == userMFADataRequest.getStageName() || userMFADataRequest.getStageName().isEmpty()) {
+				errorResponse.setStatus(ErrorCodeConstants.ERROR);
+				errorResponse.setMessage(UserConstants.STAGENAME_EMPTY);
+				LOGGER.error(UserConstants.STAGENAME_EMPTY);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+			}
+			stageNameFromUI = userMFADataRequest.getStageName();
+			if(!(stageNameFromUI.equals("deviceStage") || stageNameFromUI.equals("OTPStage") 
+					|| stageNameFromUI.equals("ResendOTPStage"))){
+				errorResponse.setStatus(ErrorCodeConstants.ERROR);
+				errorResponse.setMessage(UserConstants.STAGENAME_INCORRECT);
+				LOGGER.error(UserConstants.STAGENAME_INCORRECT);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+			}
+			if (!stageNameFromUI.equals("ResendOTPStage") && 
+					(null == userMFADataRequest.getStageData() || userMFADataRequest.getStageData().isEmpty())) {
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
 				errorResponse.setMessage(UserConstants.DEVICEDATA_EMPTY);
 				LOGGER.error(UserConstants.DEVICEDATA_EMPTY);
@@ -9398,30 +9418,15 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
-			if (null == userMFADataRequest.getStageName() || userMFADataRequest.getStageName().isEmpty()) {
-				errorResponse.setStatus(ErrorCodeConstants.ERROR);
-				errorResponse.setMessage(UserConstants.STAGENAME_EMPTY);
-				LOGGER.error(UserConstants.STAGENAME_EMPTY);
-				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
-				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-			}
-			
-			stageNameFromUI = userMFADataRequest.getStageName();
-			if(!(stageNameFromUI.equals("deviceStage") || stageNameFromUI.equals("OTPStage"))){
-				errorResponse.setStatus(ErrorCodeConstants.ERROR);
-				errorResponse.setMessage(UserConstants.STAGENAME_INCORRECT);
-				LOGGER.error(UserConstants.STAGENAME_INCORRECT);
-				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
-				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-			}
 			
 			if(stageNameFromUI.equalsIgnoreCase("deviceStage")){
 				fileName = fileNameDevice;
 			}
 			if(stageNameFromUI.equalsIgnoreCase("OTPStage")){
 				fileName = fileNameOTP;
+			}
+			if(stageNameFromUI.equalsIgnoreCase("ResendOTPStage")){
+				fileName = fileNameResendOTP;
 			}
 			//userMFADataRequest.getStageData();
 			if(userMFADataRequest.getStageData().contains("\\")){
