@@ -8321,15 +8321,15 @@ public class UserServiceImpl implements UserService {
 				String loginString = request.getLoginID().trim();
 				if (loginString.contains("@")) {
 					if (!emailValidator.validate(loginString)) {
-						response.put(UserConstants.MESSAGE_L, "LoginID validation failed");
-						LOGGER.error("Error in idmsCheckUserExists is :: LoginID validation failed.");
+						response.put(UserConstants.MESSAGE_L, "Email format validation failed");
+						LOGGER.error("Error in idmsCheckUserExists is :: Email format validation failed.");
 						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 						LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 						return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 					}
 				} else if (!ChinaIdmsUtil.mobileValidator(loginString)) {
-					response.put(UserConstants.MESSAGE_L, "LoginID validation failed");
-					LOGGER.error("Error in idmsCheckUserExists is :: LoginID validation failed.");
+					response.put(UserConstants.MESSAGE_L, "Mobile length/format validation failed");
+					LOGGER.error("Error in idmsCheckUserExists is :: Mobile length/format validation failed.");
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 					return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
