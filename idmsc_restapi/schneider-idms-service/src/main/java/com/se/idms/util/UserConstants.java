@@ -566,6 +566,8 @@ public class UserConstants {
 	
 	public static final String PRM_DEFAULT_SP_LOGIN = "mySchneiderPartnerPortal.SP";
 	
+	public static final String PRM_APP_NAME = "mySchneiderPartnerPortal";
+	
 	public static final String INCORRECT_PASSWORD ="Incorrect password";
 	
 	public static final String LOGIN_ERROR ="Problem in secure login";
@@ -607,6 +609,10 @@ public class UserConstants {
 	public static final String STAGENAME_INCORRECT = "Login stage name should be either deviceStage or OTPStage or ResendOTPStage";
 	public static final String USER_EMPTY = "Login is empty or missing";
 	public static final String APPNAME_EMPTY = "Application Name is empty or missing";
-	public static final String YOP_MAIL="yopmail";	
+	public static final String YOP_MAIL="yopmail";
+	//PRM Registration Email Type
+	public static final String PRM_SELF_REG_EMAIL="Self Registration";
+	public static final String PRM_INTERNAL_REG_EMAIL="Internal Registration";
+	public static final String PRM_ECLIPSE_REG_EMAIL="Eclipse Registration";
 	
 }

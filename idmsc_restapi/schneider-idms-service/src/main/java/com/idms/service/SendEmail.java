@@ -12,6 +12,8 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.mail.Message.RecipientType;
@@ -32,6 +34,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.idms.model.RegistrationAttributes;
 import com.idms.product.client.NewSmsService;
 import com.idms.product.client.OpenAMService;
 import com.idms.product.client.OpenDjService;
@@ -115,6 +119,24 @@ public class SendEmail {
 	@Value("${idmsc.emailUserNameFormat}")
 	private String defaultUserNameFormat;
 	
+	@Value("${prm.self.registration.email.template.cn}")
+	private String PRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_CN;
+	
+	@Value("${prm.self.registration.email.template.en}")
+	private String PRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_EN;
+
+	@Value("${prm.internal.registration.email.template.cn}")
+	private String PRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_CN;
+	
+	@Value("${prm.internal.registration.email.template.en}")
+	private String PRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_EN;
+	
+	@Value("${prm.eclipse.registration.email.template.cn}")
+	private String PRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_CN;
+	
+	@Value("${prm.eclipse.registration.email.template.en}")
+	private String PRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_EN;
+	
 	public String getDefaultUserNameFormat() {
 		return defaultUserNameFormat;
 	}
@@ -149,6 +171,7 @@ public class SendEmail {
 	String url = null;
 	String cn = null;
 	String invID = null;
+	//private String prmTemplate=null;
 	
 	boolean sslEnabled = true;
 	
@@ -205,7 +228,7 @@ public class SendEmail {
 	}
 	
 	
-	public void sendOpenAmEmail(String code, String hotpOperationType,String userId, String appid ){
+	public void  sendOpenAmEmail(String code, String hotpOperationType,String userId, String appid ){
 		LOGGER.info("Entered sendOpenAmEmail() -> Start");
 		LOGGER.info("Parameter hotpOperationType -> "+hotpOperationType+" ,userId -> "+userId);
 		LOGGER.info("Parameter appid -> " + appid);
@@ -218,7 +241,9 @@ public class SendEmail {
 		String aLink="";
 		String linkParam="";
 		String emailUserNameFormat = null;
-
+		String attribute="";
+		String appNameParam="";
+		String prmTemplate=null;
 			try {
 				encodedHOTPcode = code;
 				// get sso token.. iPlanetDirectoryKey
@@ -275,9 +300,41 @@ public class SendEmail {
 				LOGGER.info("Email format Name:"+firstName);
 				aLink = productDocCtxUser.read("$.alink[0]");
 				LOGGER.info("sendOpenAmEmail** alink:"+aLink);
+				//for PRM - mySchneiderPartnerPortal user
+				if(subject.equalsIgnoreCase(UserConstants.PRM_APP_NAME)){
+					attribute=productDocCtxUser.read("$.RegistrationAttributes__c[0]");
+					firstName=productDocCtxUser.read("$.cn[0]");//In case of mySchneiderPartnerPortal
+					if(attribute!=null && !attribute.isEmpty()){
+						ObjectMapper mapper = new ObjectMapper();
+						//Convert JSON array to List of RegistrationAttributes objects
+						List<RegistrationAttributes> attributeList = Arrays.asList(mapper.readValue(attribute, RegistrationAttributes[].class));
+						for (int i = 0; i < attributeList.size(); i++) {
+							String KeyName = attributeList.get(i).getKeyName();
+							String KeyValue = attributeList.get(i).getKeyValue();
+							LOGGER.info("KeyName = " + KeyName + " and KeyValue =" + KeyValue);
+							if (KeyName.equalsIgnoreCase("prmRegEmailType") && null != KeyValue && !KeyValue.isEmpty()) {
+								LOGGER.info("inside prmRegEmailType  block");
+								prmTemplate=KeyValue;
+							}
+							else if (KeyName.equalsIgnoreCase("prmAppName") && null != KeyValue && !KeyValue.isEmpty()) {
+								LOGGER.info("inside prmAppName  block");
+								appNameParam="&appName="+KeyValue;
+							}
+						}
+						if(prmTemplate==null){
+							prmTemplate=UserConstants.PRM_SELF_REG_EMAIL;
+						}
+					}
+					else{
+						//select default self registration template.Pass the template to emailContentTemplate method or have one global variable and assign it the value 
+						//of prmTemplate
+						prmTemplate=UserConstants.PRM_SELF_REG_EMAIL;
+					}
+				}
 				//Setting aLink in case of User Registration
 				if(hotpOperationType.equalsIgnoreCase(EmailConstants.USERREGISTRATION_OPT_TYPE)){
 					linkParam=(aLink==null | aLink =="") ? "" : ("&alink="+aLink);
+					linkParam=linkParam+appNameParam;//Appending appName parameter for mySchneiderPartnerPortal.
 				}
 				LOGGER.info("linkParam: "+linkParam);
 				/*				url = hotpEmailVerificationURL + "?userid=" + to + "&pin=" + encodedHOTPcode + "&operationType="
@@ -327,12 +384,12 @@ public class SendEmail {
 					|| (hotpLanguage != null && (hotpLanguage.equalsIgnoreCase("zh")
 							|| hotpLanguage.equalsIgnoreCase("zh_cn") || hotpLanguage.equalsIgnoreCase("zh_tw")))) {
 					LOGGER.info("sendOpenAmEmail :  Building Chinese email content..for.."+to);
-					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,firstName,bfoSupportUrl);
+					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,firstName,bfoSupportUrl,prmTemplate);
 				}
 				// Else section for English user
 				else {
 					LOGGER.info("sendOpenAmEmail :  Building English email content..for.."+to);
-					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,firstName,bfoSupportUrl);
+					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,firstName,bfoSupportUrl,prmTemplate);
 
 				}
 
@@ -349,7 +406,7 @@ public class SendEmail {
 				//sendMail.postMail(tos, subject, content, from, "text/html", "UTF-8", smtpHostName, smtpHostPort,
 				//smtpUserName, smtpUserPassword, sslEnabled);
 					
-					emailReadyToSendEmail(to, from, subject, content);
+				emailReadyToSendEmail(to, from, subject, content);
 					/*
 					 * sendMail.postMail(tos, subject, msg, from, "UTF-8",
 					 * smtpHostName, smtpHostPort, smtpUserName, smtpUserPassword,
@@ -465,16 +522,15 @@ public class SendEmail {
 		return validatePin;
 	}
 
-	private String emailContentTemplate(String to, String subject, String lang,String hotpOperationType,String firstName, String bfoSupportUrl)  {
+	private String emailContentTemplate(String to, String subject, String lang,String hotpOperationType,String firstName, String bfoSupportUrl,String prmTemplate)  {
 		LOGGER.info("Entered emailContentTemplate() -> Start");
-		LOGGER.info("Parameter to -> " + to+" ,subject -> "+subject);
+		LOGGER.info("Parameter to -> " + to+" ,subject -> "+subject);//Senthil consider this to handle PRM scenario
 		LOGGER.info("Parameter lang -> " + lang+" ,hotpOperationType -> "+hotpOperationType);
 		LOGGER.info("firstName emailContentTemplate -> " + firstName);
 		String filePath;
 		boolean chineseLangCheck = ((lang != null && lang.equalsIgnoreCase(EmailConstants.HOTP_LAN_CN)) || (hotpLanguage != null && hotpLanguage.equalsIgnoreCase(EmailConstants.HOTP_LAN_CN)));
 		int startIndex=0;
 		int endIndex=0;
-		
 		//Get the appropriate path variable
 		String filePathone = new File("").getAbsolutePath();
 		LOGGER.info("Current File Path : " + filePathone);
@@ -488,11 +544,48 @@ public class SendEmail {
 			}
 			LOGGER.info("filePath is"+filePath);
 		} else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.USERREGISTRATION_OPT_TYPE)) {
-			LOGGER.info("Inside userRegistration OperationType Create " + hotpOperationType);
+			LOGGER.info("Inside userRegistration OperationType Create " + hotpOperationType);//senthil have logic to set correct prm template
 			if (chineseLangCheck) {
-				filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN;
+				if(subject.equalsIgnoreCase(UserConstants.PRM_APP_NAME) && prmTemplate!=null){
+					switch(prmTemplate) 
+			        { 
+			            case UserConstants.PRM_SELF_REG_EMAIL: 
+			            	filePath=PRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_CN;
+			                break; 
+			            case UserConstants.PRM_INTERNAL_REG_EMAIL: 
+			            	filePath=PRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_CN; 
+			                break; 
+			            case UserConstants.PRM_ECLIPSE_REG_EMAIL: 
+			            	filePath=PRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_CN; 
+			                break; 
+			            default: 
+			            	filePath=PRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_CN; 
+			        } 
+				}
+				else{
+					filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN;
+				}
+				
 			} else {
-				filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN;
+				if(subject.equalsIgnoreCase(UserConstants.PRM_APP_NAME) && prmTemplate!=null){
+					switch(prmTemplate) 
+			        { 
+			            case UserConstants.PRM_SELF_REG_EMAIL: 
+			            	filePath=PRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_EN;
+			                break; 
+			            case UserConstants.PRM_INTERNAL_REG_EMAIL: 
+			            	filePath=PRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_EN; 
+			                break; 
+			            case UserConstants.PRM_ECLIPSE_REG_EMAIL: 
+			            	filePath=PRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_EN; 
+			                break; 
+			            default: 
+			            	filePath=PRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_EN; 
+			        } 
+				}
+				else{
+					filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN;
+				}
 			}
 			LOGGER.info("filePath is"+filePath);
 		} else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.UPDATEUSERRECORD_OPT_TYPE)) {
@@ -729,12 +822,12 @@ public class SendEmail {
 			// if section for chinese user
 			if ((lang != null && lang.equalsIgnoreCase("zh")) || (hotpLanguage != null && hotpLanguage.equalsIgnoreCase("zh"))) {
 				LOGGER.info("sendInvitationEmail :  Building Chinese email content..");
-				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,email,null);
+				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,email,null,null);
 			}
 			// Else section for English user
 			else {
 				LOGGER.info("sendInvitationEmail :  Building English email content..");
-				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,email,null);
+				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,email,null,null);
 				LOGGER.info("subject="+subject);
 			}
 
@@ -856,12 +949,12 @@ public class SendEmail {
 			// if section for chinese user
 			if ((lang != null && lang.equalsIgnoreCase("zh")) || (hotpLanguage != null && hotpLanguage.equalsIgnoreCase("zh"))) {
 				LOGGER.info("Building Chinese email content..");
-				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,to,null);
+				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,to,null,null);
 			}
 			// Else section for English user
 			else {
 				LOGGER.info("Building English email content..");
-				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,to,null);
+				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,to,null,null);
 
 			}
 
