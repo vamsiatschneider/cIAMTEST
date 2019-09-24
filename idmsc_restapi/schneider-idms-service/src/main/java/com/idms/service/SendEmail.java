@@ -228,7 +228,7 @@ public class SendEmail {
 	}
 	
 	
-	public synchronized void  sendOpenAmEmail(String code, String hotpOperationType,String userId, String appid ){
+	public void  sendOpenAmEmail(String code, String hotpOperationType,String userId, String appid ){
 		LOGGER.info("Entered sendOpenAmEmail() -> Start");
 		LOGGER.info("Parameter hotpOperationType -> "+hotpOperationType+" ,userId -> "+userId);
 		LOGGER.info("Parameter appid -> " + appid);
