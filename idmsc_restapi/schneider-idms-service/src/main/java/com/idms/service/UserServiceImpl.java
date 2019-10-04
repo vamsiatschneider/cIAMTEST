@@ -9389,14 +9389,16 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
-			if (!stageNameFromUI.equals("ResendOTPStage") && 
-					(null == userMFADataRequest.getStageData() || userMFADataRequest.getStageData().isEmpty())) {
-				errorResponse.setStatus(ErrorCodeConstants.ERROR);
-				errorResponse.setMessage(UserConstants.DEVICEDATA_EMPTY);
-				LOGGER.error(UserConstants.DEVICEDATA_EMPTY);
-				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
-				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+			if (null == userMFADataRequest.getStageData() || userMFADataRequest.getStageData().isEmpty()) {
+				if (stageNameFromUI.equalsIgnoreCase("ResendOTPStage")) {
+				} else {
+					errorResponse.setStatus(ErrorCodeConstants.ERROR);
+					errorResponse.setMessage(UserConstants.DEVICEDATA_EMPTY);
+					LOGGER.error(UserConstants.DEVICEDATA_EMPTY);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+				}
 			}
 			if (null == userMFADataRequest.getLoginUser() || userMFADataRequest.getLoginUser().isEmpty()) {
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
