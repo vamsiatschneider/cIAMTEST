@@ -49,6 +49,7 @@ public class IFWTokenServiceImpl {
 	 */
 	public String getIFWToken() {
 		String ifwAccessToken = getIFWAccessToken();
+		LOGGER.info("ifwAccessToken = Bearer "+ifwAccessToken);
 		return  "Bearer " + ifwAccessToken;
 	}
 

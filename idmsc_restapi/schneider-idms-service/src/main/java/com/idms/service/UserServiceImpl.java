@@ -132,6 +132,7 @@ import com.idms.product.model.OpenAmUser;
 import com.idms.product.model.OpenAmUserRequest;
 import com.idms.product.model.PasswordRecoveryUser;
 import com.idms.product.model.PostMobileRecord;
+import com.idms.service.impl.IFWTokenServiceImpl;
 import com.idms.service.uims.sync.UIMSUserManagerSoapServiceSync;
 import com.idms.service.util.AsyncUtil;
 import com.idms.service.util.ChinaIdmsUtil;
@@ -363,8 +364,12 @@ public class UserServiceImpl implements UserService {
 
 	// private static Map<String,String> userPinMap = null;
 	private static SimpleDateFormat formatter;
+	
 	@Inject
 	private SalesforceSyncServiceImpl sfSyncServiceImpl;
+	
+	@Inject
+	private IFWTokenServiceImpl ifwTokenServiceImpl;
 
 	// private static Ehcache cache = null;
 
@@ -3077,22 +3082,15 @@ public class UserServiceImpl implements UserService {
 					}
 				} else {
 					if (UserConstants.TRUE.equalsIgnoreCase(withGlobalUsers)) {
-						LOGGER.info("Start: getIFWToken() of IFWService");
-						ifwAccessToken = ifwService.getIFWToken(UserConstants.CONTENT_TYPE_URL_FROM,
-								UserConstants.IFW_GRANT_TYPE, ifwClientId, ifwClientSecret);
-						LOGGER.info("End: getIFWToken() of IFWService finished");
-						
-						productDocCtx = JsonPath.using(conf).parse(ifwAccessToken);
-						String accessToken = productDocCtx.read("$.access_token");
+						ifwAccessToken = ifwTokenServiceImpl.getIFWToken();
 						String bfoAuthorizationToken = sfSyncServiceImpl.getSFToken();
-						String authorization = "Bearer " + accessToken;
 
 						if (loginIdentifier.contains("@")) {
 							LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for loginIdentifier="
 									+ loginIdentifier);
 							ifwResponse = ifwService.checkUserExistsWithEmail(bfoAuthorizationToken,
 									UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE,
-									UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID, authorization,
+									UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID, ifwAccessToken,
 									loginIdentifier.trim(), false);
 							LOGGER.info("End: checkUserExistsWithEmail() of IFWService finished for loginIdentifier="
 									+ loginIdentifier);
@@ -3102,7 +3100,7 @@ public class UserServiceImpl implements UserService {
 									+ loginIdentifier);
 							ifwResponse = ifwService.checkUserExistsWithMobile(bfoAuthorizationToken,
 									UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE,
-									UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID, authorization,
+									UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID, ifwAccessToken,
 									loginIdentifier.trim(), false);
 							LOGGER.info("End: checkUserExistsWithEmail() of IFWService finished for loginIdentifier="
 									+ loginIdentifier);
@@ -3991,13 +3989,7 @@ public class UserServiceImpl implements UserService {
 			// and retrieve the user details and pass it to create user
 			if (null != confirmRequest.getIDMS_Profile_update_source() && (pickListValidator
 					.validate(UserConstants.IDMS_BFO_profile, confirmRequest.getIDMS_Profile_update_source()))) {
-				LOGGER.info("Going to call getIFWToken() of IFWService");
-				ifwAccessToken = ifwService.getIFWToken(UserConstants.CONTENT_TYPE_URL_FROM,
-						UserConstants.IFW_GRANT_TYPE, ifwClientId, ifwClientSecret);
-				LOGGER.info("getIFWToken() of IFWService finished");
-				productDocCtx = JsonPath.using(conf).parse(ifwAccessToken);
-				String accessToken = productDocCtx.read("$.access_token");
-
+				ifwAccessToken = ifwTokenServiceImpl.getIFWToken();
 				/*
 				 * LOGGER.info("getSalesForceToken : => " +
 				 * "PASSWORD_GRANT_TYPE : " + UserConstants.PR_GRANT_TYPE +
@@ -4018,11 +4010,8 @@ public class UserServiceImpl implements UserService {
 				 * JsonPath.using(conf).parse(bfoAuthorization); String
 				 * bfoAuthorizationToken = productDocCtx.read("$.access_token");
 				 */
-
-				String authorization = "Bearer " + accessToken;
-
 				LOGGER.info("Start: getUser() of IFWService");
-				Response globalGetUserResponse = ifwService.getUser(authorization, bfoAuthorizationToken,
+				Response globalGetUserResponse = ifwService.getUser(ifwAccessToken, bfoAuthorizationToken,
 						UserConstants.ACCEPT_TYPE_APP_JSON, "", "", "", "", confirmRequest.getIDMS_Federated_ID__c());
 				LOGGER.info("End: getUser() of IFWService finished");
 				productDocCtx = JsonPath.using(conf).parse(globalGetUserResponse);
@@ -4766,16 +4755,8 @@ public class UserServiceImpl implements UserService {
 				}
 			} else if (resultCount.intValue() < 1) {
 				if (UserConstants.TRUE.equalsIgnoreCase(withGlobalUsers)) {
-
-					LOGGER.info("Start: getIFWToken() of IFWService");
-					ifwAccessToken = ifwService.getIFWToken(UserConstants.CONTENT_TYPE_URL_FROM,
-							UserConstants.IFW_GRANT_TYPE, ifwClientId, ifwClientSecret);
-					LOGGER.info("End: getIFWToken() of IFWService finished");
-
-					productDocCtx = JsonPath.using(conf).parse(ifwAccessToken);
-					String accessToken = productDocCtx.read("$.access_token");
+					ifwAccessToken = ifwTokenServiceImpl.getIFWToken();
 					String bfoAuthorizationToken = sfSyncServiceImpl.getSFToken();
-					String authorization = "Bearer " + accessToken;
 					
 					PasswordRecoveryUser input = mapper.map(passwordRecoveryRequest,
 							PasswordRecoveryUser.class);
@@ -4785,7 +4766,7 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info("Start: initiatePasswordRecovery() of IFWService");
 					String ifwResponse = ifwService.initiatePasswordRecovery(UserConstants.ACCEPT_TYPE_APP_JSON, bfoAuthorizationToken,
 							UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE, UserConstants.LANGUAGE_CODE,
-							UserConstants.REQUEST_ID, authorization, UserConstants.ACCEPT_TYPE_APP_JSON,
+							UserConstants.REQUEST_ID, ifwAccessToken, UserConstants.ACCEPT_TYPE_APP_JSON,
 							UserConstants.FALSE, json);
 					LOGGER.info("End: initiatePasswordRecovery() of IFWService finished");
 
@@ -8444,30 +8425,22 @@ public class UserServiceImpl implements UserService {
 			}
 			
 			if (resultCount.intValue() == 0 && UserConstants.TRUE.equalsIgnoreCase(request.getWithGlobalUsers())
-					&& (loginId.contains("@") || fieldType.equalsIgnoreCase("idmsFederatedId"))) {
-				LOGGER.info("Start: getIFWToken() of IFWService");
-				ifwAccessToken = ifwService.getIFWToken(UserConstants.CONTENT_TYPE_URL_FROM,
-						UserConstants.IFW_GRANT_TYPE, ifwClientId, ifwClientSecret);
-				LOGGER.info("End: getIFWToken() of IFWService finished");
-				productDocCtx = null;
-				productDocCtx = JsonPath.using(conf).parse(ifwAccessToken);
-				String accessToken = productDocCtx.read("$.access_token");
+					&& (loginId.contains("@") || fieldType.equalsIgnoreCase("idmsFederatedId"))) {				
+				ifwAccessToken = ifwTokenServiceImpl.getIFWToken();
 				String bfoAuthorizationToken = sfSyncServiceImpl.getSFToken();
-				String authorization = "Bearer " + accessToken;
-				LOGGER.info("IFW dynamic Token = "+authorization);
 
 				if (loginId.contains("@")) {
 					LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for email:" + loginId);
 					ifwResponse = ifwService.checkUserExistsWithEmail(bfoAuthorizationToken, UserConstants.APPLICATION_NAME,
 							UserConstants.COUNTRY_CODE, UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID,
-							authorization, loginId, false);
+							ifwAccessToken, loginId, false);
 					LOGGER.info("End: checkUserExistsWithEmail() of IFWService finished for email:" + loginId);
 				}
 				if (fieldType.equalsIgnoreCase("idmsFederatedId")) {
 					LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for fedID:" + loginId);
 					ifwResponse = ifwService.checkUserExistsWithFedId(bfoAuthorizationToken, UserConstants.APPLICATION_NAME,
 							UserConstants.COUNTRY_CODE, UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID,
-							authorization, loginId, false);
+							ifwAccessToken, loginId, false);
 					LOGGER.info("End: checkUserExistsWithEmail() of IFWService finished for fedID:" + loginId);
 				}
 	
@@ -9888,28 +9861,20 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.OK).entity(response).build();
 
 			} else {
-				LOGGER.info("Start: getIFWToken() of IFWService");
-				ifwAccessToken = ifwService.getIFWToken(UserConstants.CONTENT_TYPE_URL_FROM,
-						UserConstants.IFW_GRANT_TYPE, ifwClientId, ifwClientSecret);
-				LOGGER.info("End: getIFWToken() of IFWService finished");
-
-				productDocCtx = JsonPath.using(conf).parse(ifwAccessToken);
-				String accessToken = productDocCtx.read("$.access_token");
-
+				ifwAccessToken = ifwTokenServiceImpl.getIFWToken();
 				String bfoAuthorizationToken = sfSyncServiceImpl.getSFToken();
-				String authorization = "Bearer " + accessToken;
 
 				if (loginId.contains("@")) {
 					LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for loginId:" + loginId);
 					ifwResponse = ifwService.checkUserExistsWithEmail(bfoAuthorizationToken,
 							UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE, UserConstants.LANGUAGE_CODE,
-							UserConstants.REQUEST_ID, authorization, loginId, false);
+							UserConstants.REQUEST_ID, ifwAccessToken, loginId, false);
 					LOGGER.info("End: checkUserExistsWithEmail() of IFWService finished for loginId:" + loginId);
 				} else {
 					LOGGER.info("Start: checkUserExistsWithMobile() of IFWService for loginId:" + loginId);
 					ifwResponse = ifwService.checkUserExistsWithMobile(bfoAuthorizationToken,
 							UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE, UserConstants.LANGUAGE_CODE,
-							UserConstants.REQUEST_ID, authorization, loginId, false);
+							UserConstants.REQUEST_ID, ifwAccessToken, loginId, false);
 					LOGGER.info("End: checkUserExistsWithMobile() of IFWService finished for loginId:" + loginId);
 				}
 
