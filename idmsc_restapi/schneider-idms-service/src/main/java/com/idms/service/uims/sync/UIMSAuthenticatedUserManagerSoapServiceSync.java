@@ -95,12 +95,12 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 				application.setType(Type.APPLICATION);
 
 				//CODE-RE-STRUCTURING - Comment differs across Integration, Staging and Preprod
-				LOGGER.info("Start: UIMS createIdentityWithMobileWithPassword() for phone:"+identity.getPhoneId());
+				LOGGER.info("Start: UIMS createIdentityWithMobileWithPasswordForceIdmsId() for phone:"+identity.getPhoneId());
 				/*uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithMobileWithPassword(callerFid,
 						identity,application,password);*/
 				uimsUserResponse = authenticatedUserManagerUIMSV22.createIdentityWithMobileWithPasswordForceIdmsId(callerFid, identity, password, forcedFederatedId);
 				//CODE-RE-STRUCTURING - Comment differs across Integration, Staging and Preprod
-				LOGGER.info("End: UIMS createIdentityWithMobileWithPassword() finished, response:"+objMapper.writeValueAsString(uimsUserResponse));
+				LOGGER.info("End: UIMS createIdentityWithMobileWithPasswordForceIdmsId() finished, response:"+objMapper.writeValueAsString(uimsUserResponse));
 			} else {
 				//CODE-RE-STRUCTURING - Comment differs across Integration, Staging and Preprod
 				LOGGER.info("Start: UIMS createIdentityWithPasswordForceIdmsId() for phone:"+identity.getPhoneId());
@@ -131,7 +131,6 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 	
 	public String createUIMSUser(String callerFid,UserV6 identity,String forcedFederatedId)
 			throws MalformedURLException, ForcedFidAlreadyExistException_Exception {
-		
 		LOGGER.info("Entered createUIMSUser() method - > Start");
 		LOGGER.info("Parameter callerFid -> " + callerFid);
 		LOGGER.info("Parameter forcedFederatedId -> " + forcedFederatedId);
@@ -148,11 +147,11 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 				application.setId("Uims");
 				application.setType(Type.APPLICATION);
 				//CODE-RE-STRUCTURING - Comment differs across Integration, Staging and Preprod
-				LOGGER.info("Start: UIMS createIdentityWithPhoneId() for phone:"+identity.getPhoneId());
+				LOGGER.info("Start: UIMS createIdentityWithPhoneIdForceIdmsId() for phone:"+identity.getPhoneId());
 				//uimsUserResponse = authenticatedUserManagerUIMSV2.createIdentityWithPhoneId(callerFid, identity, application);
 				uimsUserResponse = authenticatedUserManagerUIMSV22.createIdentityWithPhoneIdForceIdmsId(callerFid, identity, forcedFederatedId);
 				//CODE-RE-STRUCTURING - Comment differs across Integration, Staging and Preprod
-				LOGGER.info("End: UIMS createIdentityWithPhoneId() finished, response:"+objMapper.writeValueAsString(uimsUserResponse));
+				LOGGER.info("End: UIMS createIdentityWithPhoneIdForceIdmsId() finished, response:"+objMapper.writeValueAsString(uimsUserResponse));
 			}else{
 				//CODE-RE-STRUCTURING - Comment differs across Integration, Staging and Preprod
 				LOGGER.info("Start: UIMS createIdentityForceIdmsId() for phone:"+identity.getPhoneId());
@@ -178,5 +177,31 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 		}
 		LOGGER.info("createUIMSUser() Sync method -> End..FederatedID="+uimsUserResponse.getFederatedID());
 		return uimsUserResponse.getFederatedID();
+	}
+	
+	
+	public UserV6 getUIMSUser(String callerFid,String federatedId){
+		LOGGER.info("Entered getUIMSUser() sync method - > Start");
+		LOGGER.info("Parameter callerFid -> " + callerFid);
+		LOGGER.info("Parameter federatedId -> " + federatedId);
+		UserV6 userdetails = null;
+
+		try {
+			AuthenticatedUserManagerUIMSV22 authenticatedUserManagerUIMSV22 = getAuthenticatedUserManager();
+			LOGGER.info("Start: UIMS getUser() for fedid:" + federatedId);
+			userdetails = authenticatedUserManagerUIMSV22.getUser(callerFid, federatedId);
+			LOGGER.info("End: UIMS getUser() finished, fedid:" + federatedId);
+			
+			if (null != userdetails) {
+				LOGGER.info("user fedid from UIMS ==" + userdetails.getFederatedID());
+			}
+		} catch (IMSServiceSecurityCallNotAllowedException_Exception
+				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
+				| RequestedEntryNotExistsException_Exception | SecuredImsException_Exception
+				| UnexpectedLdapResponseException_Exception | UnexpectedRuntimeImsException_Exception e) {
+			LOGGER.error("Exception in getUIMSUser() of UIMS::" + e.getMessage(),e);
+		}
+		LOGGER.info("getUIMSUser() Sync method -> End..FederatedID=");
+		return userdetails;
 	}
 }

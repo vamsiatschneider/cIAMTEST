@@ -27,7 +27,7 @@ public class MandatoryValidatorImpl  implements IValidator{
 
 	@Override
 	public boolean validate(String key, Object value) {
-		LOGGER.info("Entered validate() -> Start");
+		//LOGGER.info("Entered validate() -> Start");
 		LOGGER.info("Parameter key -> " + key+" ,value -> "+value);
 		CacheManagerProvider cacheManagerProvider = new CacheManagerProviderImpl();
 		CacheBuilder cacheBuilder = new CacheBuilder(cacheManagerProvider );
@@ -46,15 +46,15 @@ public class MandatoryValidatorImpl  implements IValidator{
 		   cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSMANDATORY_PROPERTIES_PATH);
 		}*/
 		String mandatoryProperty = cacheProperties.getProperty(key);
-		LOGGER.info("mandatoryProperty::"+mandatoryProperty);
+		//LOGGER.info("mandatoryProperty::"+mandatoryProperty);
 		String[] mandatoryPropertySplitter = mandatoryProperty.split(",");
 		List<String> list = Arrays.asList(mandatoryPropertySplitter);
 		//LOGGER.info("properties from cache::mandatoryProperty="+mandatoryProperty);
 		if(list.contains(value)){
-			LOGGER.info("Mandatory Validation of "+key+":"+value+" is OK! and validate() is Ending");
+			//LOGGER.info("Mandatory Validation of "+key+":"+value+" is OK! and validate() is Ending");
 			return true;
 		}
-		LOGGER.error("Mandatory Validation of "+key+":"+value+" is NOT OK! and validate() is Ending");
+		//LOGGER.error("Mandatory Validation of "+key+":"+value+" is NOT OK! and validate() is Ending");
 		return false;
 	}
 

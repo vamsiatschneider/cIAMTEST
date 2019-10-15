@@ -27,7 +27,7 @@ public class MultiPickListValidatorImpl implements IValidator {
 	private String IDMS_DEPLOY_ENV;
 		
 	public boolean validate(String key, Object value) {
-		LOGGER.info("Entered validate() -> Start");
+		//LOGGER.info("Entered validate() -> Start");
 		LOGGER.info("Parameter key -> " + key+" ,value -> "+value);
 		CacheManagerProvider cacheManagerProvider = new CacheManagerProviderImpl();
 		CacheBuilder cacheBuilder = new CacheBuilder(cacheManagerProvider);
@@ -48,7 +48,7 @@ public class MultiPickListValidatorImpl implements IValidator {
 		// multiPickListProperty will be in the form of comma separated string.
 		// Eg.
 		// IDMSCompanyMarketServed__c=BA4,BA5,BDZ,BD1,BD3,BD4,BD6,BD9
-		LOGGER.info("multiPickList properties from cache:" + pickListProperty);
+		//LOGGER.info("multiPickList properties from cache:" + pickListProperty);
 		List<String> companyMarketServedList = Arrays.asList(pickListProperty.split(","));
 		String multiPickList = (String) value;
 
@@ -56,11 +56,11 @@ public class MultiPickListValidatorImpl implements IValidator {
 		companyMarketServedListValue.removeAll(companyMarketServedList);
 
 		if (companyMarketServedListValue.size() > 0) {
-			LOGGER.error("Validation of "+key+":"+value+" is NOT OK! and validate() is Ending");
+			//LOGGER.error("Validation of "+key+":"+value+" is NOT OK! and validate() is Ending");
 			return false;
 		}
 
-		LOGGER.info("Validation of "+key+":"+value+" is OK! and validate() is Ending");
+		//LOGGER.info("Validation of "+key+":"+value+" is OK! and validate() is Ending");
 		return true;
 	}
 

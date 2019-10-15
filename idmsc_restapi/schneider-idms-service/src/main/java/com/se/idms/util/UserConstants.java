@@ -614,5 +614,7 @@ public class UserConstants {
 	public static final String PRM_SELF_REG_EMAIL="Self Registration";
 	public static final String PRM_INTERNAL_REG_EMAIL="Internal Registration";
 	public static final String PRM_ECLIPSE_REG_EMAIL="Eclipse Registration";
+	//UIMS user creation in IDMS
+	public static final String UIMS_USER_CREATE_IN_IDMS="UIMS user created in IDMS";
 	
 }

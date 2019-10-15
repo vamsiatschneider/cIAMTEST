@@ -26,7 +26,7 @@ public class LengthValidatorImpl implements IValidator {
 
 	@Override
 	public boolean validate(String key, Object value) {
-		LOGGER.info("Entered validate() -> Start");
+		//LOGGER.info("Entered validate() -> Start");
 		LOGGER.info("Parameter key -> " + key+" ,value -> "+value);
 		try {
 			CacheManagerProvider cacheManagerProvider = new CacheManagerProviderImpl();
@@ -46,20 +46,20 @@ public class LengthValidatorImpl implements IValidator {
 			   cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSLENGTH_PROPERTIES_PATH);
 			}*/
 			String lengthProperty = cacheProperties.getProperty(key).trim();
-			LOGGER.info("lengthProperty::"+lengthProperty);
+			//LOGGER.info("lengthProperty::"+lengthProperty);
 			//LOGGER.debug("lengthProperty from the cache is:" + lengthProperty);
 			String strVal = value.toString();
 			Integer len1 = Integer.valueOf(strVal.length());
 			Integer len2 = Integer.valueOf(lengthProperty);
 			if (len1 <= len2) {
-				LOGGER.info("Length Validation of "+key+":"+value+" is OK! and validate() is Ending");
+				//LOGGER.info("Length Validation of "+key+":"+value+" is OK! and validate() is Ending");
 				return true;
 			}
 		} catch (Exception e) {
-			LOGGER.error("Length Validation of "+key+":"+value+" is having error:"+e.getMessage());
+			//LOGGER.error("Length Validation of "+key+":"+value+" is having error:"+e.getMessage());
 			LOGGER.error("Exception "+e);
 		}
-		LOGGER.error("Length Validation of "+key+":"+value+" is NOT OK! and validate() is Ending");
+		//LOGGER.error("Length Validation of "+key+":"+value+" is NOT OK! and validate() is Ending");
 		return false;
 	}
 

@@ -27,7 +27,7 @@ public class PickListValidatorImpl implements IValidator {
 		
 	@Override
 	public boolean validate(String key, Object value) {
-		LOGGER.info("Entered validate() -> Start");
+		//LOGGER.info("Entered validate() -> Start");
 		LOGGER.info("Parameter key -> " + key+" ,value -> "+value);
 		CacheManagerProvider cacheManagerProvider = new CacheManagerProviderImpl();
 		//Properties cacheProperties=null;
@@ -35,7 +35,7 @@ public class PickListValidatorImpl implements IValidator {
 		//LOGGER.info("picklist path first:"+IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
 		if(IDMS_DEPLOY_ENV.equalsIgnoreCase("DEV"))
 			IDMS_FIELDSPICKLIST_PROPERTIES_PATH=IDMS_FIELDSPICKLIST_PROPERTIES_PATH.replaceAll("/", "\\\\");
-		LOGGER.info("picklist path after conversion:"+IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
+		//LOGGER.info("picklist path after conversion:"+IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
 		Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
 		/*if(CacheBuilder.getPropertiesMap().size()>0){
 			CacheBuilder.getPropertiesMap().entrySet().forEach(entry -> {
@@ -52,7 +52,7 @@ public class PickListValidatorImpl implements IValidator {
 		String pickListValue = (String) value;
 		for(String str:pickListCache){
 			if(str.toLowerCase().equalsIgnoreCase(pickListValue.toLowerCase())){
-				LOGGER.info("Validation of "+key+":"+value+" is OK! and validate() is Ending");
+				//LOGGER.info("Validation of "+key+":"+value+" is OK! and validate() is Ending");
 				return true;
 			}
 		}
@@ -60,7 +60,7 @@ public class PickListValidatorImpl implements IValidator {
 			LOGGER.info("Validation of key:"+key+" ,value:"+value+" is OK! and validate() is Ending");
 			return true;
 		}*/
-		LOGGER.error("Validation of "+key+":"+value+" is NOT OK! and validate() is Ending");
+		//LOGGER.error("Validation of "+key+":"+value+" is NOT OK! and validate() is Ending");
 		return false;
 	}
 

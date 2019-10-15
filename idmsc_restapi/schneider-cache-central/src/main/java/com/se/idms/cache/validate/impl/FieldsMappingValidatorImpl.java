@@ -25,7 +25,7 @@ public class FieldsMappingValidatorImpl  implements IValidator{
 	
 	@Override
 	public boolean validate(String key, Object value) {
-		LOGGER.info("Entered validate() -> Start");
+		//LOGGER.info("Entered validate() -> Start");
 		LOGGER.info("Parameter key -> " + key+" ,value -> "+value);
 		CacheManagerProvider cacheManagerProvider = new CacheManagerProviderImpl();
 		CacheBuilder cacheBuilder = new CacheBuilder(cacheManagerProvider );
@@ -45,14 +45,14 @@ public class FieldsMappingValidatorImpl  implements IValidator{
 		}*/
 		String fieldMapProperty = cacheProperties.getProperty(key);
 		
-		LOGGER.info("properties from cache::fieldMapProperty="+fieldMapProperty);
+		//LOGGER.info("properties from cache::fieldMapProperty="+fieldMapProperty);
 		
 		if(value.equals(fieldMapProperty)){
-			LOGGER.info("Validation of "+key+":"+value+" is OK! and validate() is Ending");
+			//LOGGER.info("Validation of "+key+":"+value+" is OK! and validate() is Ending");
 			return true;
 		}
 
-		LOGGER.error("Validation of "+key+":"+value+" is NOT OK! and validate() is Ending");
+		//LOGGER.error("Validation of "+key+":"+value+" is NOT OK! and validate() is Ending");
 		return false;
 	}
 
