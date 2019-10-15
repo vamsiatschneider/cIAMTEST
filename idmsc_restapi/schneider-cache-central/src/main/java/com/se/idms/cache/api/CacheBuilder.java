@@ -1,16 +1,8 @@
 package com.se.idms.cache.api;
 
-import static com.se.idms.cache.utils.CacheUtils.readPropertiesFile;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Ehcache;
-import net.sf.ehcache.Element;
-import net.sf.ehcache.constructs.blocking.CacheEntryFactory;
-import net.sf.ehcache.constructs.blocking.SelfPopulatingCache;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -22,6 +14,12 @@ import com.se.idms.cache.CacheTypes;
 import com.se.idms.cache.exception.CacheException;
 import com.se.idms.cache.population.PropertiesEntryCreator;
 
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Ehcache;
+import net.sf.ehcache.Element;
+import net.sf.ehcache.constructs.blocking.CacheEntryFactory;
+import net.sf.ehcache.constructs.blocking.SelfPopulatingCache;
+
 @Component("cacheBuilder")
 public class CacheBuilder implements CacheTypes {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CacheBuilder.class);
@@ -31,8 +29,6 @@ public class CacheBuilder implements CacheTypes {
 	private CacheEntryFactory cacheEntryFactory;
 	
 	private SelfPopulatingCache selfPopulatingPropertiesCache;
-	
-	private SelfPopulatingCache selfPopulatingIdmsFieldsCache;
 	
 	private static  Map<String, Properties> propertiesMap = new HashMap<String, Properties>();
 
@@ -146,7 +142,7 @@ public class CacheBuilder implements CacheTypes {
 	 * @return
 	 */
 	public CacheAdapter getPropertiesCache(String propertiesFile) {
-		LOGGER.info("Entered getPropertiesCache() -> Start");
+		//LOGGER.info("Entered getPropertiesCache() -> Start");
 		
 		if (selfPopulatingPropertiesCache == null) {
 			LOGGER.info("propertiesFile="+propertiesFile);
@@ -171,7 +167,7 @@ public class CacheBuilder implements CacheTypes {
 			}
 			
 		}
-		LOGGER.info("getPropertiesCache() -> End");
+		//LOGGER.info("getPropertiesCache() -> End");
 		return new CacheAdapter(selfPopulatingPropertiesCache);
 	}
 	
