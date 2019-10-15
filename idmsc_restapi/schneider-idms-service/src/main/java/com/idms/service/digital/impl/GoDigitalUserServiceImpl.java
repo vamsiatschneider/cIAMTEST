@@ -95,11 +95,13 @@ public class GoDigitalUserServiceImpl implements GoDigitalUserService {
 				LOGGER.error("Retry failed while calling the GoDigitalServiceApi create user::" + e.getMessage());
 				LOGGER.error("Exception >"+e);
 				GoDigitalLog.error("Retry failed while calling the GoDigitalServiceApi create user::" + e.getMessage());
+				LOGGER.error("ECODE-GODIGIT-USER-REG-RETRY-ERR : Retry error");
 			} catch (ExecutionException e) {
 				isGodFail=true;
 				LOGGER.error("Retry failed while calling the GoDigitalServiceApi create user::ExecutionException " + e.getMessage());
 				LOGGER.error("Exception >"+e);
 				GoDigitalLog.error("Retry failed while calling the GoDigitalServiceApi create user::ExecutionException " + e.getMessage());
+				LOGGER.error("ECODE-GODIGIT-USER-REG-EXEC-ERR : Execution error");
 			}
 			
 			if (!serviceResponse.isEmpty()) {
@@ -123,6 +125,7 @@ public class GoDigitalUserServiceImpl implements GoDigitalUserService {
 			LOGGER.error("Executing while goDigitalUserRegistration :: -> " + e.getMessage());
 			LOGGER.error("Exception >"+e);
 			GoDigitalLog.error("Executing while goDigitalUserRegistration :: -> " + e.getMessage());
+			LOGGER.error("ECODE-GODIGIT-USER-REG-GEN-ERR : Generic error");
 		}
 		
 	}

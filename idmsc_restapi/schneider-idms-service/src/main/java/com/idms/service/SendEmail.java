@@ -217,12 +217,14 @@ public class SendEmail {
 			LOGGER.info("End: sending email finished to:"+to);
 		} 
 		catch (SMTPSendFailedException e) {
+			LOGGER.error("ECODE-MAIL-SMTP-ERROR : SMTP error while sending mail");
 			LOGGER.error("SMTPSendFailedException while sending email to "+to+" :: -> " + e.getMessage(),e);
 		}
 		catch (MessagingException e) {
 			LOGGER.error("MessagingException while sending email to "+to+" :: -> " + e.getMessage(),e);
 		}
 		catch (Exception e) {
+			LOGGER.error("ECODE-MAIL-GEN-ERROR : Generic error while sending mail");
 			LOGGER.error("Exception while sending email to "+to+" :: -> " + e.getMessage(),e);
 		}
 	}
@@ -417,6 +419,7 @@ public class SendEmail {
 					LOGGER.info("sendOpenAmEmail : " + "HOTP sent to : " + to + ".");
 				}
 			} catch (Exception e) {
+				LOGGER.error("ECODE-MAIL-DESPATCH-OAM-FAILED : Error sending OpenAM Email");
 				LOGGER.info("Exception in sendOpenAmEmail() => "+e.getMessage(),e);
 			}
 	}
@@ -517,6 +520,7 @@ public class SendEmail {
 				}
 			}else{
 				LOGGER.error("Some problem in validatePin() for userId="+userId);
+				LOGGER.error("ECODE-VALIDATE-PIN-PROC-ERROR : Error during validate PIN");
 				throw new Exception("inValid Pin Exception!!!");
 			}
 		return validatePin;
@@ -1104,6 +1108,7 @@ public class SendEmail {
 
 		} catch (Exception e) {
 			LOGGER.error("Exception in sendSMSNewGateway() while sending code to: "+to);
+			LOGGER.error("ECODE-SMS-SEND-FAILED : Error sending SMS");
 			LOGGER.error(e.getMessage(),e);
 		}
 

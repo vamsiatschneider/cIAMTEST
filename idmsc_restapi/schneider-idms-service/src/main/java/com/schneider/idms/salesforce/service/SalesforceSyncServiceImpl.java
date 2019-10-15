@@ -116,14 +116,16 @@ public class SalesforceSyncServiceImpl {
 				retryer.call(datePopulated);
 			} catch (RetryException e) {
 				LOGGER.error("RetryException in populatePrmActivationDate() of Salesforce::" + e.getMessage(),e);
-
+				LOGGER.error("ECODE-SFSYNC-PRM-ACTIVE-DT-RETRY-ERROR : Retry error while calling SF activation date service");
 			} catch (ExecutionException e) {
 				LOGGER.error("ExecutionException in populatePrmActivationDate() of Salesforce::"
 						+ e.getMessage(),e);
+				LOGGER.error("ECODE-SFSYNC-PRM-ACTIVE-DT-EXEC-ERROR : Execution error while calling SF activation date service");
 			}
 
 		} catch (Exception e) {
 			LOGGER.error("Exception in populatePrmActivationDate()::" + e.getMessage(),e);
+			LOGGER.error("ECODE-SFSYNC-PRM-ACTIVE-DT-GEN-ERROR : Generic error while calling SF activation date service");
 		}
 
 	}

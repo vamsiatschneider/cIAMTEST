@@ -272,11 +272,14 @@ public class UIMSUserManagerSoapService {
 			}
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in activateIdentity() of UIMS::" + e.getMessage());
+			LOGGER.error("ECODE-SOAP-USRMGR-ACTIVEID-RETRY-ERR : Retry error");
 
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in activateIdentity() of UIMS::" + e.getMessage());
+			LOGGER.error("ECODE-SOAP-USRMGR-ACTIVEID-EXEC-ERR : Execution error");
 		} catch (Exception e) {
 			LOGGER.error("Exception in activateIdentity() of UIMS::" + e.getMessage());
+			LOGGER.error("ECODE-SOAP-USRMGR-ACTIVEID-GEN-ERR : Generic error");
 		}
 		LOGGER.info("activateIdentity() Async Method -> End");
 	}
@@ -343,12 +346,15 @@ public class UIMSUserManagerSoapService {
 			}
 		}catch (RetryException e) {
 			LOGGER.error("RetryException in setUIMSPassword() of UIMS::" + e.getMessage(),e);
+			LOGGER.error("ECODE-SOAP-USERMGR-SETPWD-RETRY-ERR : Retry error");
 			UIMSSYNCLOGGER.error("setUIMSPassword failed in UIMS for userId = "+userId,e);
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in setUIMSPassword() of UIMS::" + e.getMessage(),e);
+			LOGGER.error("ECODE-SOAP-USERMGR-SETPWD-EXEC-ERR : Execution error");
 			UIMSSYNCLOGGER.error("setUIMSPassword failed in UIMS for userId = "+userId,e);
 		} catch (Exception e) {
 			LOGGER.error("Exception while setUIMSPassword::" + e.getMessage(),e);
+			LOGGER.error("ECODE-SOAP-USERMGR-SETPWD-GEN-ERR : Generic error");
 			UIMSSYNCLOGGER.error("setUIMSPassword failed in UIMS for userId = "+userId,e);
 		}
 		LOGGER.info("setUIMSPassword() Async Method -> End");
@@ -552,10 +558,13 @@ public class UIMSUserManagerSoapService {
 			}
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in activateIdentityNoPassword()::" + e.getMessage(),e);
+			LOGGER.error("ECODE-SOAP-USERMGR-ACTIVEID-NOPWD-RETRY-ERR : Error retrying");
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in activateIdentityNoPassword()::" + e.getMessage(),e);
+			LOGGER.error("ECODE-SOAP-USERMGR-ACTIVEID-NOPWD-EXEC-ERR : Error executing change");
 		} catch (Exception e) {
 			LOGGER.error("Exception in activateIdentityNoPassword()::" + e.getMessage(),e);
+			LOGGER.error("ECODE-SOAP-USERMGR-ACTIVEID-NOPWD-GEN-ERR : Generic exception");
 		}
 		LOGGER.info("Completed UIMS activateIdentityNoPassword() Async method!");
 
@@ -937,6 +946,7 @@ public class UIMSUserManagerSoapService {
 						iPlanetDirectoryKey, loginIdentifierType, emailOrMobile);
 			}
 		} catch (Exception e) {
+			LOGGER.error("ECODE-SOAP-USERMGR-ACTIVEID-CONFPIN-ERR : Error confirming user PIN with UIMS");
 			LOGGER.error("Exception in activateUIMSUserConfirmPIN():: -> " + e.getMessage(),e);
 			UIMSSYNCLOGGER.error("Exception in UIMS activateUIMSUserConfirmPIN()::" + e.getMessage(),e);
 		}
@@ -1026,12 +1036,15 @@ public class UIMSUserManagerSoapService {
 			}
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage(), e);
+			LOGGER.error("ECODE-SOAP-USERMGR-CHGMAILMOB-RETRY-ERR : Retry error");
 			UIMSSYNCLOGGER.error("RetryException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage(), e);
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage(), e);
+			LOGGER.error("ECODE-SOAP-USERMGR-CHGMAILMOB-EXEC-ERR : Execution error");
 			UIMSSYNCLOGGER.error("ExecutionException in updateChangeEmailOrMobile() of UIMS::" + e.getMessage(), e);
 		} catch (Exception e) {
 			LOGGER.error("Exception in updateChangeEmailOrMobile()::" + e.getMessage(), e);
+			LOGGER.error("ECODE-SOAP-USERMGR-CHGMAILMOB-GEN-ERR : Generic error");
 			UIMSSYNCLOGGER.error("Exception in updateChangeEmailOrMobile()::" + e.getMessage(), e);
 		}
 		LOGGER.info("updateChangeEmailOrMobile() Async Method -> End");

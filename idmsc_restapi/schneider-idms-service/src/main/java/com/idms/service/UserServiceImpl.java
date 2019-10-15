@@ -441,7 +441,7 @@ public class UserServiceImpl implements UserService {
 			try {
 				PlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExcep) {
-				LOGGER.error("Unable to get SSO Token" + ioExcep.getMessage(),ioExcep);
+				LOGGER.error("ECODE-AUTHUSER-NO-TOKEN : Unable to get SSO Token" + ioExcep.getMessage(),ioExcep);
 			}
 
 			LOGGER.info("Start: checkUserExistsWithEmailMobile() of OpenAMService for userName=" + userName);
@@ -472,6 +472,7 @@ public class UserServiceImpl implements UserService {
 			if (401 == authenticateResponse.getStatus() && successResponse.contains(UserConstants.ACCOUNT_BLOCKED)) {
 				jsonObject.put("message", UserConstants.ACCOUNT_BLOCKED);
 				AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource);
+				LOGGER.error("ECODE-AUTHUSER-ACCT-BLOCKED : Account blocked for user : " + userName);
 				return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
 
 			} else if (401 == authenticateResponse.getStatus()) {
@@ -482,6 +483,7 @@ public class UserServiceImpl implements UserService {
 					jsonObject.put("user_store", "CN");
 					AsyncUtil.generateCSV(authCsvPath,
 							new Date() + "," + userName + "," + errorStatus + "," + regSource);
+					LOGGER.error("ECODE-AUTHUSER-UNAUTH-LOCAL : User (china) unauthorized : " + userName);
 					return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
 				} else {
 					checkUserExistsResponse = checkUserExists(userName, UserConstants.TRUE);
@@ -491,11 +493,13 @@ public class UserServiceImpl implements UserService {
 						jsonObject.put("user_store", "GLOBAL");
 						AsyncUtil.generateCSV(authCsvPath,
 								new Date() + "," + userName + "," + errorStatus + "," + regSource);
+						LOGGER.error("ECODE-AUTHUSER-UNAUTH-GLOBAL : User (global) unauthorized : " + userName);
 						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
 					} else {
 						jsonObject.put("user_store", "None");
 						AsyncUtil.generateCSV(authCsvPath,
 								new Date() + "," + userName + "," + errorStatus + "," + regSource);
+						LOGGER.error("ECODE-AUTHUSER-UNAUTH-UNKNOWN : User (Unknown) unauthorized : " + userName);
 						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
 					}
 				}
@@ -507,6 +511,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("Exception in authenticateUser():" + e.getMessage(),e);
 			jsonObject.put("user_store", "None");
 			AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + successStatus + "," + regSource);
+			LOGGER.error("ECODE-AUTHUSER-PROC-ERROR : Error authenticating user : " + userName);
 			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
 		}
 
@@ -583,6 +588,7 @@ public class UserServiceImpl implements UserService {
 		try {
 			token = getSSOToken();
 		} catch (IOException ioExp) {
+			LOGGER.error("ECODE-GETUSER-NO-TOKEN : Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 			LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 		}
 
@@ -609,6 +615,7 @@ public class UserServiceImpl implements UserService {
 			}
 		} catch (Exception e) {
 			LOGGER.error("Error in getUser() openam service->" + e.getMessage(),e);
+			LOGGER.error("ECODE-GETUSER-OAM-PROC-ERROR : OpenAM issue of Authorization for " + userId);
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("errorCode", "Unauthorized");
 			jsonObject.put("message", "OpenAM issue of Authorization for " + userId);
@@ -646,6 +653,7 @@ public class UserServiceImpl implements UserService {
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info(GET_USER_TIME_LOG + elapsedTime);
 		//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+token, "logout");
+		LOGGER.error("ECODE-GETUSER-PROC-ERROR : Error processing get user for " + userId);
 		return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).build();
 	}
 	
@@ -757,6 +765,7 @@ public class UserServiceImpl implements UserService {
 			token = getSSOToken();
 		} catch (IOException ioExp) {
 			LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
+			LOGGER.error("ECODE-GETUSER-OAUTH-NO-TOKEN : Unable to get SSO Token "+ioExp.getMessage(),ioExp);
 			token = "";
 		}
 
@@ -772,6 +781,7 @@ public class UserServiceImpl implements UserService {
 		} catch (Exception e) {
 			//LOGGER.error(e.toString());
 			LOGGER.error("UserServiceImpl:getUserByOauthToken() ->" + e.getMessage(),e);
+			LOGGER.error("ECODE-GETUSER-OAUTH-PROC-ERROR : Error processing get user" + userId);
 			if (userData == null) {
 				JSONObject jsonObject = new JSONObject();
 				jsonObject.put("errorCode", "NOT_FOUND");
@@ -810,6 +820,7 @@ public class UserServiceImpl implements UserService {
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info(GET_USER_TIME_LOG + elapsedTime);
 		//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+token, "logout");
+		LOGGER.error("ECODE-GETUSER-OAUTH-1A-FAILED : Error getting user by OAuth token : " + userId);
 		return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).build();
 	}
 
@@ -979,6 +990,7 @@ public class UserServiceImpl implements UserService {
 						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 						LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 						LOGGER.error("Mobile not verified. Registration terminated.");
+						LOGGER.error("ECODE-REG-MOBILE-REG-PIN-NOT-VERIFIED : User registration: Mobile pin verification failed for mobile="+mobileStr);
 						return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 					}
 				}
@@ -995,6 +1007,9 @@ public class UserServiceImpl implements UserService {
 					LOGGER.error(
 							"Registration from UIMS, federationID should not contain cn00. May be duplicate entry.");
 					//return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+					LOGGER.error(
+							"ECODE-REG-WRONG-UIMS-REG-CN00 : User registration: FederationID from UIMS has cn00 for : "
+									+ userName);
 					return handleUIMSError(Response.Status.BAD_REQUEST, "Registration from UIMS, federationID should not contain cn00. May be duplicate entry.");
 				}
 				if (null != userRequest.getUserRecord().getIDMS_Federated_ID__c()
@@ -1006,6 +1021,9 @@ public class UserServiceImpl implements UserService {
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 					LOGGER.error("Registration from non-UIMS, federationID must contain cn00.");
+					LOGGER.error(
+							"ECODE-REG-WRONG-NON-UIMS-REG-CN00 : User registration: FederationID from non-UIMS does not have cn00 for : "
+									+ userName);
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 					
 				}
@@ -1045,6 +1063,7 @@ public class UserServiceImpl implements UserService {
 							elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 							LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 							LOGGER.error("Error while idmsCheckUserExists is " + errorResponse.getMessage());
+							LOGGER.error("ECODE-REG-CHKUSR-ERROR : Error checking user : " + userName);
 							if(UserConstants.UIMS
 									.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())){
 								return handleUIMSError(Response.Status.fromStatusCode(checkUserExist.getStatus()),messageUser);
@@ -1057,6 +1076,7 @@ public class UserServiceImpl implements UserService {
 							elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 							LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 							LOGGER.error("User exists/registered in OpenAM");
+							LOGGER.error("ECODE-REG-CHKUSR-EXISTS-OAM : User exists in OpenAM : " + userName);
 							if(UserConstants.UIMS
 									.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())){
 								return handleUIMSError(Response.Status.CONFLICT,UserConstants.USER_EXISTS);
@@ -1072,6 +1092,8 @@ public class UserServiceImpl implements UserService {
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 					LOGGER.error("Error while processing checkMandatoryFields is " + errorResponse.getMessage());
+					LOGGER.error(
+							"ECODE-REG-CHKUSR-FLDCHK-ERR : Error checking mandatory fields for user : " + userName);
 					if(UserConstants.UIMS
 							.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())){
 						return handleUIMSError(Response.Status.BAD_REQUEST,userResponse.getMessage());
@@ -1095,6 +1117,7 @@ public class UserServiceImpl implements UserService {
 						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 						LOGGER.info("Time taken by UserServiceImpl.userRegistration() : " + elapsedTime);
 						LOGGER.error("Error while processing is " + errorResponse.getMessage());
+						LOGGER.error("ECODE-REG-CHKUSR-PPLC-ERR : Password policy not satisfied for : " + userName);
 						if(UserConstants.UIMS
 								.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())){
 							return handleUIMSError(Response.Status.BAD_REQUEST,UserConstants.PR_POLICY);
@@ -1111,6 +1134,8 @@ public class UserServiceImpl implements UserService {
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by UserServiceImpl.userRegistration() : " + elapsedTime);
 					LOGGER.error("Error while processing is " + errorResponse.getMessage());
+					LOGGER.error("ECODE-REG-CHKUSR-NOREG-WITH-PWD : User registration with password not allowed for : "
+							+ userName);
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 			} catch (Exception e) {
@@ -1120,6 +1145,8 @@ public class UserServiceImpl implements UserService {
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("Error while processing is "+errorResponse.getMessage(),e);
+				LOGGER.error(
+						"ECODE-REG-CHKUSR-PROC-ERR : Error performing registration time validation for : " + userName);
 				if(UserConstants.UIMS
 						.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())){
 					return handleUIMSError(Response.Status.BAD_REQUEST,UserConstants.ATTRIBUTE_NOT_AVAILABELE);
@@ -1139,6 +1166,7 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
 					LOGGER.error("Error while processing is " + userResponse.getMessage());
 					//return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+					LOGGER.error("ECODE-REG-UIMS-NO-CLIENT-SECRET : " + UserConstants.UIMS_CLIENTID_SECRET);
 					return handleUIMSError(Response.Status.BAD_REQUEST,UserConstants.UIMS_CLIENTID_SECRET);
 				}
 
@@ -1150,6 +1178,7 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
 					LOGGER.error("Error while processing is " + userResponse.getMessage());
 					//return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+					LOGGER.error("ECODE-REG-UIMS-INVALID-CLIENT-SECRET : " + UserConstants.UIMS_CLIENTID_SECRET);
 					return handleUIMSError(Response.Status.UNAUTHORIZED,UserConstants.INVALID_UIMS_CREDENTIALS);
 				}
 			}
@@ -1314,6 +1343,8 @@ public class UserServiceImpl implements UserService {
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 				LOGGER.error("User exists/registered in OpenAM");
+				LOGGER.error(
+						"ECODE-REG-CHKLOGID-EXISTS-OAM : User exists in OpenAM with LoginID/Federation : " + userName);
 				if(UserConstants.UIMS
 						.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())){
 					handleUIMSError(Response.Status.CONFLICT, UserConstants.USER_EXISTS);
@@ -1517,6 +1548,7 @@ public class UserServiceImpl implements UserService {
 					// "logout");
 					LOGGER.error("Exception while Registering User in OpenAM "
 							+ IOUtils.toString((InputStream) userCreation.getEntity()));
+					LOGGER.error("ECODE-REG-FAILED : Error registering user : " + userName);
 					throw new Exception("Exception while Registering User in Open "
 							+ IOUtils.toString((InputStream) userCreation.getEntity()));
 				}
@@ -1655,6 +1687,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 			LOGGER.error("BadRequestException while user Registration :: -> " + e.getMessage(),e);
 			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
+			LOGGER.error("ECODE-REG-FAILED-BADREQ : Registration failed - bad request : " + userName);
 			if(UserConstants.UIMS
 					.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())){
 				handleUIMSError(Response.Status.BAD_REQUEST,UserConstants.ERROR_CREATE_USER);
@@ -1667,6 +1700,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 			LOGGER.error("NotFoundException while user Registration :: -> " + e.getMessage(),e);
 			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
+			LOGGER.error("ECODE-REG-FAILED-NOTFOUND : Registration failed - Not found error : " + userName);
 			if(UserConstants.UIMS
 					.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())){
 				handleUIMSError(Response.Status.NOT_FOUND,UserConstants.ERROR_CREATE_USER);
@@ -1679,6 +1713,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 			LOGGER.error("Exception while user Registration :: -> " + e.getMessage(),e);
 			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
+			LOGGER.error("ECODE-REG-FAILED-UNKNOWN-ERR : Registration failed - Unknown error : " + userName);
 			if(UserConstants.UIMS
 					.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())){
 				handleUIMSError(Response.Status.INTERNAL_SERVER_ERROR,UserConstants.ERROR_CREATE_USER);
@@ -1862,6 +1897,7 @@ public class UserServiceImpl implements UserService {
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info(GET_USER_BY_TOKEN_TIME_LOG + elapsedTime);
 			LOGGER.error("NotAuthorizedException in getUserbyTokenUI() -> "+e.getMessage(),e);
+			LOGGER.error("ECODE-GETUSER-BYTOKEN-ERR : User unauthorized for access using token");
 			return Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(jsonArray).build();
 		} catch (IOException e) {
 			JSONObject jsonObject = new JSONObject();
@@ -1873,6 +1909,7 @@ public class UserServiceImpl implements UserService {
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info(GET_USER_BY_TOKEN_TIME_LOG + elapsedTime);
 			LOGGER.error("IOException in getUserbyTokenUI() -> "+e.getMessage(),e);
+			LOGGER.error("ECODE-GETUSER-BYTOKEN-PROC-ERROR : Error processing getuser by Token request");
 			return Response.status(Response.Status.SERVICE_UNAVAILABLE.getStatusCode()).entity(jsonArray).build();
 		}
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -1929,6 +1966,7 @@ public class UserServiceImpl implements UserService {
 			// LOGGER.info(GET_USER_BY_TOKEN_TIME_LOG + elapsedTime);
 			// LOGGER.error("Error in getUserInfoByAccessToken() of
 			// OpenAMTokenService:"+e.getMessage());
+			LOGGER.error("ECODE-GETUSER-BYTOKEN-ERR : Token not acceptable - Session expired");
 			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonArray).build();
 		} catch (Exception e) {
 			// LOGGER.debug("Unauthorized!");
@@ -1942,6 +1980,7 @@ public class UserServiceImpl implements UserService {
 			// LOGGER.info(GET_USER_BY_TOKEN_TIME_LOG + elapsedTime);
 			// LOGGER.error("Exception in getUserInfoByAccessToken() of
 			// OpenAMTokenService->"+e.getMessage());
+			LOGGER.error("ECODE-GETUSER-BYTOKEN-UNAUTH : Token unauthorized");
 			return Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(jsonArray).build();
 
 		}
@@ -3127,6 +3166,8 @@ public class UserServiceImpl implements UserService {
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.checkUserExists() : " + elapsedTime);
 			LOGGER.error("BadRequestException while checkUserExists :: -> " + e.getMessage(),e);
+			LOGGER.error(
+					"ECODE-CHKUSREXIST-BAD-REQ : Bad request error encountered while processing ");
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (NotAuthorizedException e) {
 			response.put(UserConstants.STATUS_L, errorStatus);
@@ -3134,6 +3175,7 @@ public class UserServiceImpl implements UserService {
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.checkUserExists() : " + elapsedTime);
 			LOGGER.error("NotAuthorizedException while checkUserExists :: -> " + e.getMessage(),e);
+			LOGGER.error("ECODE-CHKUSREXIST-UNAUTH-REQ : Unauthorized request encountered while processing");
 			return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
 		} catch (NotFoundException e) {
 			response.put(UserConstants.STATUS_L, errorStatus);
@@ -3141,6 +3183,8 @@ public class UserServiceImpl implements UserService {
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.ActivateUser() : " + elapsedTime);
 			LOGGER.error("NotFoundException while checkUserExists :: -> " + e.getMessage(),e);
+			LOGGER.error(
+					"ECODE-CHKUSREXIST-NOTFOUND-ERR : Notfound error encountered while processing ");
 			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 		} catch (Exception e) {
 			response.put(UserConstants.STATUS_L, errorStatus);
@@ -3148,6 +3192,8 @@ public class UserServiceImpl implements UserService {
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.checkUserExists() : " + elapsedTime);
 			LOGGER.error("Exception while checkUserExists :: -> " + e.getMessage(),e);
+			LOGGER.error(
+					"ECODE-CHKUSREXIST-UNKNOWN-ERR : Generic error encountered while processing");
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 		LOGGER.error("USER not found while executing checkUserExists()");
@@ -3307,6 +3353,7 @@ public class UserServiceImpl implements UserService {
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.getOauthFromIPlanet() : " + elapsedTime);
 			LOGGER.error("Error in getting authorizationCode / AccessToken =" + e.getMessage());
+			LOGGER.error("ECODE-GETOAUTH-TOKEN-PROC-ERR : Error in gettin authorization access token");
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).entity(jsonArray).build();
 
 		}
@@ -3695,6 +3742,7 @@ public class UserServiceImpl implements UserService {
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
 				LOGGER.error("Exception while userPinConfirmation :: -> " + e.getMessage(),e);
+				LOGGER.error("ECODE-USER-PIN-CONF-UNAUTH : Not Authorized for PIN confirmation");
 				return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
 			} catch (Exception e) {
 				errorResponse.setStatus(errorStatus);
@@ -3707,6 +3755,7 @@ public class UserServiceImpl implements UserService {
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
 				LOGGER.error("Exception while confirming the User pin:: -> " + e.getMessage(),e);
+				LOGGER.error("ECODE-USER-PIN-PROC-ERR : Unknown error during PIN confirmation");
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 
@@ -3985,6 +4034,7 @@ public class UserServiceImpl implements UserService {
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
 			LOGGER.error("Error while userPinConfirmation :: -> " + e.getMessage(),e);
+			LOGGER.error("ECODE-USER-PIN-BAD-REQ : User pin confirmation bad request");
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (NotFoundException e) {
 			LOGGER.error("Error is " + e.getMessage(),e);
@@ -4060,6 +4110,7 @@ public class UserServiceImpl implements UserService {
 					}
 
 				} catch (IOException e1) {
+					LOGGER.error("ECODE-USER-PIN-IFW-GETUSR-IOERR : IO Error during response data extraction");
 					LOGGER.error("IOException in userPinConfirmation()-> " + e1.getMessage(),e1);
 				}
 
@@ -4085,6 +4136,7 @@ public class UserServiceImpl implements UserService {
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by userPinConfirmation() : " + elapsedTime);
 			LOGGER.error("Error in userPinConfirmation -> " + e.getMessage(),e);
+			LOGGER.error("ECODE-USER-PIN-NOTFOUND : 404 not found error during user pin confirmation");
 			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
 			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 		}
@@ -4107,6 +4159,7 @@ public class UserServiceImpl implements UserService {
 			}
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by userPinConfirmation() : " + elapsedTime);
+			LOGGER.error("ECODE-USER-PIN-PROC-ERR : Internal server error during user pin confirmation");
 			//return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 			if(connectionError)
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
@@ -4579,6 +4632,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Time taken by UserServiceImpl.updateAIL() : " + elapsedTime);
 			LOGGER.error("Executing while updateAIL() :: -> " + errorResponse.getMessage());
 			LOGGER.error("Executing while updateAIL() :: -> " + e.getMessage(),e);
+			LOGGER.error("ECODE-UPDT-AIL-NOTFOUND : User not found");
 			return Response.status(Response.Status.NOT_FOUND).entity(errorResponse).build();
 		} catch (Exception e) {
 			errorResponse.setStatus(errorStatus);
@@ -4587,6 +4641,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Time taken by UserServiceImpl.updateAIL() : " + elapsedTime);
 			LOGGER.error("Executing while updateAIL() :: -> " + errorResponse.getMessage());
 			LOGGER.error("Executing while updateAIL() :: -> " + e.getMessage(),e);
+			LOGGER.error("ECODE-UPDT-AIL-PROC-ERR : Internal server error while updating AIL");
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		}
 	}
@@ -4695,6 +4750,7 @@ public class UserServiceImpl implements UserService {
 				return passwordRecoveryErrorResponse();
 			}
 		} catch (Exception e) {
+			LOGGER.error("ECODE-PWD-RECOVERY-PROC-ERR : Generic exception during password recovery");
 			LOGGER.error("UserServiceImpl.passwordRecovery() : " + e.getMessage(),e);
 		}
 		return null;
@@ -4796,6 +4852,7 @@ public class UserServiceImpl implements UserService {
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.passwordRecovery() : " + elapsedTime);
 			LOGGER.error("BadRequestException in getPasswordRecoveryResponse() :: -> " + e.getMessage(),e);
+			LOGGER.error("ECODE-PWD-RECOVERY-BAD-REQ : Bad request error");
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (NotAuthorizedException e) {
 			response.put(UserConstants.STATUS, errorStatus);
@@ -4803,6 +4860,7 @@ public class UserServiceImpl implements UserService {
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.passwordRecovery() : " + elapsedTime);
 			LOGGER.error("NotAuthorizedException in getPasswordRecoveryResponse() :: -> " + e.getMessage(),e);
+			LOGGER.error("ECODE-PWD-RECOVERY-NOT-AUTH : Not authorized error");
 			return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
 		} catch (NotFoundException e) {
 			response.put(UserConstants.STATUS, errorStatus);
@@ -4810,6 +4868,7 @@ public class UserServiceImpl implements UserService {
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.passwordRecovery() : " + elapsedTime);
 			LOGGER.error("NotFoundException in getPasswordRecoveryResponse() :: -> " + e.getMessage(),e);
+			LOGGER.error("ECODE-PWD-RECOVERY-USR-NOT-FOUND : User not found error");
 			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 		} catch (Exception e) {
 			response.put(UserConstants.STATUS, errorStatus);
@@ -4817,6 +4876,7 @@ public class UserServiceImpl implements UserService {
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.passwordRecovery() : " + elapsedTime);
 			LOGGER.error("Exception in getPasswordRecoveryResponse() :: -> " + e.getMessage(),e);
+			LOGGER.error("ECODE-PWD-RECOVERY-PROC-ERR : Generic exception");
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 		return passwordRecoverySuccessResponse(userName, startTime, userData);
@@ -9319,6 +9379,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("End: updateUserForPassword() of openam finished for federatioId=" + federationId);
 			//LOGGER.info("Information from OPENAM=" + IOUtils.toString((InputStream) updateResponse.getEntity()));
 		} catch (Exception e) {
+			LOGGER.error("ECODE-UPDT-OAM-PROC-ERROR : Error updating details into OpenAM");
 			LOGGER.error("Error in updateOpenamDetails() -> " + e.getMessage(),e);
 		}
 		LOGGER.info("Ended updateOpenamDetails()");
@@ -9359,6 +9420,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("Exception in updatePasswordHistory()=" + e.getMessage(),e);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by updatePasswordHistory() : " + elapsedTime);
+			LOGGER.error("ECODE-UPDT-PWDHIST-PROC-ERROR : Error updating password history in OpenAM");
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		}
 		return jsonResponse;
