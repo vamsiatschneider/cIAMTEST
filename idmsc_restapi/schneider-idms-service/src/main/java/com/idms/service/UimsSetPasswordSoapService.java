@@ -100,9 +100,11 @@ public class UimsSetPasswordSoapService {
 
 		}catch (MalformedURLException e) {
 			LOGGER.error("MalformedURLException in getUserManager()::" + e.getMessage(),e);
+			LOGGER.error("ECODE-SOAP-GETUSRMGR-MFURL-ERR : Malformed URL exception when invoking SOAP service");
 		}
 		catch (Exception e) {
 			LOGGER.error("Exception in getUserManager()::" + e.getMessage(),e);
+			LOGGER.error("ECODE-SOAP-GETUSRMGR-PROC-ERR : Generic exception when invoking SOAP service");
 		}
 		return userManagerUIMSV22;
 	}
@@ -177,6 +179,7 @@ public class UimsSetPasswordSoapService {
 			}
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in activateIdentity()::" + e.getMessage(),e);
+			LOGGER.error("ECODE-SOAP-SETPWD-ACTIVEID-RETRY-ERR : Retry error during activate identity");
 			UIMSSYNCLOGGER.error("activateIdentity failed in UIMS for emailOrMobile = "+emailOrMobile);
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in activateIdentity()::" + e.getMessage(),e);
@@ -267,12 +270,15 @@ public class UimsSetPasswordSoapService {
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in setUIMSPassword()::" + e.getMessage(),e);
 			UIMSSYNCLOGGER.error("setUIMSPassword failed in UIMS for emailOrMobile = "+emailOrMobile,e);
+			LOGGER.error("ECODE-SOAP-SETPWD-SETPWD-RETRY-ERR : Retry error");
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in setUIMSPassword()::" + e.getMessage(),e);
 			UIMSSYNCLOGGER.error("setUIMSPassword failed in UIMS for emailOrMobile = "+emailOrMobile,e);
+			LOGGER.error("ECODE-SOAP-SETPWD-SETPWD-EXEC-ERR : Execution error");
 		} catch (Exception e) {
 			LOGGER.error("Exception in setUIMSPassword()::" + e.getMessage(),e);
 			UIMSSYNCLOGGER.error("setUIMSPassword failed in UIMS for emailOrMobile = "+emailOrMobile,e);
+			LOGGER.error("ECODE-SOAP-SETPWD-SETPWD-GEN-ERR : Generic error");
 		}
 		LOGGER.info("UIMS setUIMSPassword() finished!");
 		return setPasswordStatus;
@@ -305,6 +311,7 @@ public class UimsSetPasswordSoapService {
 			}
 		} catch (Exception e) {			
 			LOGGER.error("Exception in activateUIMSUserConfirmPIN():: -> "+ e.getMessage(),e);
+			LOGGER.error("ECODE-SOAP-SETPWD-USER-CONFIRM-PIN-ERR : Error confirming PIN with UIMS");
 			UIMSSYNCLOGGER.error("Exception in UIMS activateUIMSUserConfirmPIN()::" + e.getMessage(),e);
 		}
 	}
@@ -376,10 +383,13 @@ public class UimsSetPasswordSoapService {
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in activateIdentityNoPassword()::" + e.getMessage());
 			UIMSSYNCLOGGER.error("activateIdentityNoPassword failed in UIMS for emailOrMobile = "+emailOrMobile);
+			LOGGER.error("ECODE-SOAP-ACTIVEID-NOPWD-RETRY-ERR : Retry error during activate identity");
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in activateIdentityNoPassword()::" + e.getMessage(),e);
+			LOGGER.error("ECODE-SOAP-ACTIVEID-NOPWD-EXEC-ERR : Execution error during activate identity");
 		} catch (Exception e) {
 			LOGGER.error("Exception in activateIdentityNoPassword()::" + e.getMessage(),e);
+			LOGGER.error("ECODE-SOAP-ACTIVEID-NOPWD-GEN-ERR : Generic error during activate identity");
 		}
 		LOGGER.info("Completed UIMS activateIdentityNoPassword() Sync method!");
 	}
@@ -437,13 +447,16 @@ public class UimsSetPasswordSoapService {
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in UIMS updatepassword() for userId::"+ userId);
 			LOGGER.error(e.getMessage(),e);
-			UIMSSYNCLOGGER.error("updateUIMSPassword failed in UIMS for userId = "+userId,e); 
+			UIMSSYNCLOGGER.error("updateUIMSPassword failed in UIMS for userId = "+userId,e);
+			LOGGER.error("ECODE-SOAP-UPDATE-UIMSPASSWORD-RETRY-ERR : Retry error");
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in UIMS updatepassword() for userId::" +userId+" is ->" + e.getMessage(),e);
 			UIMSSYNCLOGGER.error("updateUIMSPassword failed in UIMS for userId = "+userId,e);
+			LOGGER.error("ECODE-SOAP-UPDATE-UIMSPASSWORD-EXEC-ERR : Execution error");
 		} catch (Exception e) {
 			LOGGER.error("Exception in updateUIMSPassword() for userId::" +userId +" is ->" + e.getMessage(),e);
 			UIMSSYNCLOGGER.error("updateUIMSPassword failed in UIMS for userId = "+userId,e);
+			LOGGER.error("ECODE-SOAP-UPDATE-UIMSPASSWORD-GEN-ERR : Generic error");
 			
 		}
 		return ispasswordupdated;
