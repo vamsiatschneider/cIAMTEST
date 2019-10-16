@@ -959,11 +959,30 @@ public class UserServiceImpl implements UserService {
 					}
 				}
 				//Here if maintenanceMode==true then return 503
-				if (null != userRequest.getUserRecord().getMobilePhone()
-						&& !userRequest.getUserRecord().getMobilePhone().isEmpty()) {
-					userRequest.getUserRecord().setMobilePhone(
-							ChinaIdmsUtil.mobileTransformation(userRequest.getUserRecord().getMobilePhone()));
+				
+				//Start - if UIMS and Mobile_reg have value then mobilephone is Mobile_reg, else MobilePhone
+				if (null != userRequest.getUserRecord().getIDMS_Registration_Source__c()
+						&& !userRequest.getUserRecord().getIDMS_Registration_Source__c().isEmpty()
+						&& userRequest.getUserRecord().getIDMS_Registration_Source__c().equalsIgnoreCase("UIMS")) {
+					if (null != userRequest.getUserRecord().getMobile_reg()
+							&& !userRequest.getUserRecord().getMobile_reg().isEmpty()) {
+						userRequest.getUserRecord().setMobilePhone(
+								ChinaIdmsUtil.mobileTransformation(userRequest.getUserRecord().getMobile_reg()));
+					} else {
+						if (null != userRequest.getUserRecord().getMobilePhone()
+								&& !userRequest.getUserRecord().getMobilePhone().isEmpty()) {
+							userRequest.getUserRecord().setMobilePhone(
+									ChinaIdmsUtil.mobileTransformation(userRequest.getUserRecord().getMobilePhone()));
+						}
+					}
+				} else {
+					if (null != userRequest.getUserRecord().getMobilePhone()
+							&& !userRequest.getUserRecord().getMobilePhone().isEmpty()) {
+						userRequest.getUserRecord().setMobilePhone(
+								ChinaIdmsUtil.mobileTransformation(userRequest.getUserRecord().getMobilePhone()));
+					}
 				}
+				//End - if UIMS and Mobile_reg have value then mobilephone is Mobile_reg, else MobilePhone
 				
 				mobileRegFlag = Boolean.parseBoolean(userRequest.getMobileRegFlag());
 
@@ -1163,7 +1182,7 @@ public class UserServiceImpl implements UserService {
 					errorResponse.setStatus(errorStatus);
 					errorResponse.setMessage(UserConstants.UIMS_CLIENTID_SECRET);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
+					LOGGER.info("Time taken by UserServiceImpl.userRegistration() : " + elapsedTime);
 					LOGGER.error("Error while processing is " + userResponse.getMessage());
 					//return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 					LOGGER.error("ECODE-REG-UIMS-NO-CLIENT-SECRET : " + UserConstants.UIMS_CLIENTID_SECRET);
@@ -1175,7 +1194,7 @@ public class UserServiceImpl implements UserService {
 					errorResponse.setStatus(errorStatus);
 					errorResponse.setMessage(UserConstants.INVALID_UIMS_CREDENTIALS);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.info("Time taken by UserServiceImpl.updateUser() : " + elapsedTime);
+					LOGGER.info("Time taken by UserServiceImpl.userRegistration() : " + elapsedTime);
 					LOGGER.error("Error while processing is " + userResponse.getMessage());
 					//return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 					LOGGER.error("ECODE-REG-UIMS-INVALID-CLIENT-SECRET : " + UserConstants.UIMS_CLIENTID_SECRET);
