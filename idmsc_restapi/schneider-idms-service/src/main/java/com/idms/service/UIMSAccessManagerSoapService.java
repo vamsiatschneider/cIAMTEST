@@ -127,7 +127,10 @@ public class UIMSAccessManagerSoapService {
 				}
 			} catch (RetryException e) {
 				uimsLog.error("Retry failed while calling the grantAccessControlToUser::" + e.getMessage());
+				LOGGER.error("ECODE-ACCESSMGR-GRANTACCESS-RETRY-ERR : Retry error while calling the grantAccessControlToUser");
 			} catch (ExecutionException e) {
+				uimsLog.error("ExecutionException while calling the grantAccessControlToUser::" + e.getMessage());
+				LOGGER.error("ECODE-ACCESSMGR-GRANTACCESS-EXEC-ERR : Execution error while calling the grantAccessControlToUser");
 			}
 			if(!isgrantresult) {
 				LOGGER.info("UIMS UpdateAIL Grant Access got failed -----> ::sending mail notification::");
@@ -136,6 +139,7 @@ public class UIMSAccessManagerSoapService {
 			}
 		} catch (Exception e) {
 			uimsLog.error("Remote Soap Exception while consuming grantAccessControlToUser :-->" + e.getMessage());
+			LOGGER.error("ECODE-ACCESSMGR-GRANTACCESS-GEN-ERR : Generic error while calling the grantAccessControlToUser");
 		}
 		uimsLog.info("Completed grantAccessControToUser Async method!");
 	}
@@ -166,8 +170,10 @@ public class UIMSAccessManagerSoapService {
 				}
 			} catch (RetryException e) {
 				uimsLog.error("Retry failed while calling the revokeAccessControlToUser::" + e.getMessage());
+				LOGGER.error("ECODE-ACCESSMGR-REVOKEACCESS-RETRY-ERR : Retry error while calling the revokeAccessControlToUser");
 			} catch (ExecutionException e) {
 				LOGGER.error("An error occured."+e.getMessage(),e);
+				LOGGER.error("ECODE-ACCESSMGR-REVOKEACCESS-EXEC-ERR : Execution error while calling the revokeAccessControlToUser");
 			}
 			if(!isrevokeresult) {
 				LOGGER.info("UIMS UpdateAIL revoke access got failed -----> ::sending mail notification::");
@@ -176,6 +182,7 @@ public class UIMSAccessManagerSoapService {
 			}
 		} catch (Exception e) {
 			uimsLog.error("Remote Soap Exception while consuming revokeAccessControlToUser:-->" + e.getMessage());
+			LOGGER.error("ECODE-ACCESSMGR-REVOKEACCESS-GEN-ERR : Generic error while calling the revokeAccessControlToUser");
 		}
 		uimsLog.info("inside revokeAccessControlToUser Async method!");
 	}
@@ -221,6 +228,7 @@ public class UIMSAccessManagerSoapService {
 		} catch (Exception e) {
 			//productService.sessionLogout(iPlanetDirectoryKey, "logout");
 			uimsLog.error("Exception in updateUIMSUserAIL():"+ e.getMessage());
+			LOGGER.error("ECODE-ACCESSMGR-UPDATE-UIMSUSER-AIL-GEN-ERR : Generic error while calling the updateUIMSUserAIL");
 		}
 		//productService.sessionLogout(iPlanetDirectoryKey, "logout");
 		uimsLog.info("UIMS updateAIL Async Method completed!");

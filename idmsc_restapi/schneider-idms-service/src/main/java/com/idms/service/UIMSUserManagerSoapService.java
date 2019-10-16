@@ -402,12 +402,15 @@ public class UIMSUserManagerSoapService {
 			}
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in UIMS updateUIMSPassword()::" + e.getMessage(),e);
+			LOGGER.error("ECODE-SOAP-USERMGR-UPDATEPWD-RETRY-ERR : Retry error");
 			UIMSSYNCLOGGER.error("RetryException in  UIMS updateUIMSPassword()::" + e.getMessage(),e);
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in UIMS updateUIMSPassword()::" + e.getMessage(),e);
+			LOGGER.error("ECODE-SOAP-USERMGR-UPDATEPWD-EXEC-ERR : Execution error");
 			UIMSSYNCLOGGER.error("ExecutionException in UIMS updateUIMSPassword()::" + e.getMessage(),e);
 		} catch (Exception e) {
 			LOGGER.error("Exception in updateUIMSPassword()::" + e.getMessage(),e);
+			LOGGER.error("ECODE-SOAP-USERMGR-UPDATEPWD-GEN-ERR : Generic error");
 			UIMSSYNCLOGGER.error("Exception in UIMS updateUIMSPassword()::" + e.getMessage(),e);
 		}
 	}
@@ -455,6 +458,7 @@ public class UIMSUserManagerSoapService {
 		} catch (Exception e) {
 			LOGGER.error("Exception executing while getting samlAssertion::" + e.getMessage(),e);
 			UIMSSYNCLOGGER.error("updateUIMSUser failed in UIMS, fedId = "+fedId);
+			LOGGER.error("ECODE-SOAP-USERMGR-UPDATE-UIMSUSER-GEN-ERR : updateUIMSUser failed in UIMS, fedId = "+fedId);
 			try {
 				UIMSSYNCLOGGER.error("updateUIMSUser failed in UIMS, user info = "+objMapper.writeValueAsString(user));
 			} catch (JsonProcessingException e1) {
@@ -754,10 +758,13 @@ public class UIMSUserManagerSoapService {
 			}
 		}catch (RetryException e) {
 			LOGGER.error("RetryException in createUIMSUserAndCompany()::" + e.getMessage(),e);
+			LOGGER.error("ECODE-SOAP-USERMGR-CREATEUSER-AND-COMPANY-RETRY-ERR : Retry error");
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in createUIMSUserAndCompany()::" + e.getMessage(),e);
+			LOGGER.error("ECODE-SOAP-USERMGR-CREATEUSER-AND-COMPANY-EXEC-ERR : Execution error");
 		} catch (Exception e) {
 			LOGGER.error("Exception in createUIMSUserAndCompany()::" + e.getMessage(),e);
+			LOGGER.error("ECODE-SOAP-USERMGR-CREATEUSER-AND-COMPANY-GEN-ERR : Generic error");
 		}
 		createdFedId = null;
 		LOGGER.info("Completed the createUIMSUserAndCompany() Async method!!");
@@ -909,11 +916,13 @@ public class UIMSUserManagerSoapService {
 
 		} catch (RetryException e) {
 			LOGGER.error("RetryException in updateUIMSUserAndCompany()::" + e.getMessage(),e);
-
+			LOGGER.error("ECODE-SOAP-USERMGR-UPDATEUSER-AND-COMPANY-RETRY-ERR : Retry error");
 		} catch (ExecutionException e) {
 			LOGGER.error("ExecutionException in updateUIMSUserAndCompany()::" + e.getMessage(),e);
+			LOGGER.error("ECODE-SOAP-USERMGR-UPDATEUSER-AND-COMPANY-EXEC-ERR : Execution error");
 		} catch (Exception e) {
 			LOGGER.error("Exception in updateUIMSUserAndCompany()::" + e.getMessage(),e);
+			LOGGER.error("ECODE-SOAP-USERMGR-UPDATEUSER-AND-COMPANY-GEN-ERR : Generic error");
 		}
 
 		LOGGER.info("UIMS updateUIMSUserAndCompany Async method completed!!");
