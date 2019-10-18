@@ -3037,7 +3037,7 @@ public class UserServiceImpl implements UserService {
 	public Response checkUserExists(String loginIdentifier, String withGlobalUsers) {
 		LOGGER.info("Entered checkUserExists() -> Start");
 		LOGGER.info("Parameter loginIdentifier -> " + loginIdentifier + " ,withGlobalUsers -> " + withGlobalUsers);
-
+		String PROCESSING_STATE = "UNKNOWN";
 		DocumentContext productDocCtx = null;
 		String iPlanetDirectoryKey = null;
 		String ifwAccessToken = null, userExists = null;
@@ -3103,6 +3103,7 @@ public class UserServiceImpl implements UserService {
 							+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + loginIdentifier + AUDIT_LOG_CLOSURE);
 					LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for login/login_mobile="
 							+ loginIdentifier);
+					PROCESSING_STATE = "IDMS-CHINA-CHK-USR";
 					userExists = productService.checkUserExistsWithEmailMobile(
 							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 							"loginid eq " + "\""
@@ -3150,12 +3151,14 @@ public class UserServiceImpl implements UserService {
 					}
 				} else {
 					if (UserConstants.TRUE.equalsIgnoreCase(withGlobalUsers)) {
+						PROCESSING_STATE = "IFW-GET-TOKEN";
 						ifwAccessToken = ifwTokenServiceImpl.getIFWToken();
 						String bfoAuthorizationToken = sfSyncServiceImpl.getSFToken();
 
 						if (loginIdentifier.contains("@")) {
 							LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for loginIdentifier="
 									+ loginIdentifier);
+							PROCESSING_STATE = "IFW-CHK-USER-WITH-MAIL";
 							ifwResponse = ifwService.checkUserExistsWithEmail(bfoAuthorizationToken,
 									UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE,
 									UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID, ifwAccessToken,
@@ -3166,6 +3169,7 @@ public class UserServiceImpl implements UserService {
 						} else {
 							LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for loginIdentifier="
 									+ loginIdentifier);
+							PROCESSING_STATE = "IFW-CHK-USER-WITH-MOBILE";
 							ifwResponse = ifwService.checkUserExistsWithMobile(bfoAuthorizationToken,
 									UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE,
 									UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID, ifwAccessToken,
@@ -3192,7 +3196,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Time taken by UserServiceImpl.checkUserExists() : " + elapsedTime);
 			LOGGER.error("BadRequestException while checkUserExists :: -> " + e.getMessage(),e);
 			LOGGER.error(
-					"ECODE-CHKUSREXIST-BAD-REQ : Bad request error encountered while processing ");
+					"ECODE-CHKUSREXIST-BAD-REQ : Bad request error encountered after processing "+ PROCESSING_STATE);
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (NotAuthorizedException e) {
 			response.put(UserConstants.STATUS_L, errorStatus);
@@ -3200,7 +3204,7 @@ public class UserServiceImpl implements UserService {
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.checkUserExists() : " + elapsedTime);
 			LOGGER.error("NotAuthorizedException while checkUserExists :: -> " + e.getMessage(),e);
-			LOGGER.error("ECODE-CHKUSREXIST-UNAUTH-REQ : Unauthorized request encountered while processing");
+			LOGGER.error("ECODE-CHKUSREXIST-UNAUTH-REQ : Unauthorized request encountered after processing" +PROCESSING_STATE);
 			return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
 		} catch (NotFoundException e) {
 			response.put(UserConstants.STATUS_L, errorStatus);
@@ -3209,7 +3213,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Time taken by UserServiceImpl.ActivateUser() : " + elapsedTime);
 			LOGGER.error("NotFoundException while checkUserExists :: -> " + e.getMessage(),e);
 			LOGGER.error(
-					"ECODE-CHKUSREXIST-NOTFOUND-ERR : Notfound error encountered while processing ");
+					"ECODE-CHKUSREXIST-NOTFOUND-ERR : Notfound error encountered after processing " + PROCESSING_STATE);
 			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 		} catch (Exception e) {
 			response.put(UserConstants.STATUS_L, errorStatus);
@@ -3218,7 +3222,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Time taken by UserServiceImpl.checkUserExists() : " + elapsedTime);
 			LOGGER.error("Exception while checkUserExists :: -> " + e.getMessage(),e);
 			LOGGER.error(
-					"ECODE-CHKUSREXIST-UNKNOWN-ERR : Generic error encountered while processing");
+					"ECODE-CHKUSREXIST-UNKNOWN-ERR : Generic error encountered after processing" + PROCESSING_STATE);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 		LOGGER.error("USER not found while executing checkUserExists()");
