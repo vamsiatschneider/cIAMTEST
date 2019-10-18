@@ -959,9 +959,15 @@ public class UserServiceImpl implements UserService {
 					}
 				}
 				//Here if maintenanceMode==true then return 503
-				
+
+				if (null != userRequest.getUserRecord().getMobilePhone()
+						&& !userRequest.getUserRecord().getMobilePhone().isEmpty()) {
+					userRequest.getUserRecord().setMobilePhone(
+							ChinaIdmsUtil.mobileTransformation(userRequest.getUserRecord().getMobilePhone()));
+				}
+
 				//Start - if UIMS and Mobile_reg have value then mobilephone is Mobile_reg, else MobilePhone
-				if (null != userRequest.getUserRecord().getIDMS_Registration_Source__c()
+				/*if (null != userRequest.getUserRecord().getIDMS_Registration_Source__c()
 						&& !userRequest.getUserRecord().getIDMS_Registration_Source__c().isEmpty()
 						&& userRequest.getUserRecord().getIDMS_Registration_Source__c().equalsIgnoreCase("UIMS")) {
 					if (null != userRequest.getUserRecord().getMobile_reg()
@@ -981,7 +987,7 @@ public class UserServiceImpl implements UserService {
 						userRequest.getUserRecord().setMobilePhone(
 								ChinaIdmsUtil.mobileTransformation(userRequest.getUserRecord().getMobilePhone()));
 					}
-				}
+				}*/
 				//End - if UIMS and Mobile_reg have value then mobilephone is Mobile_reg, else MobilePhone
 				
 				mobileRegFlag = Boolean.parseBoolean(userRequest.getMobileRegFlag());
