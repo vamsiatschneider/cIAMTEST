@@ -9154,6 +9154,7 @@ public class UserServiceImpl implements UserService {
 				AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource
 						+ "," + elapsedTime + "ms" + "," + UserConstants.ACCOUNT_BLOCKED);
 				LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
+				LOGGER.error("ECODE-SECLOGIN-ACCT-BLOCKED : Account blocked for user : " + userName);
 				return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObjectResponse).build();
 
 			} else if (401 == authenticateResponse.getStatus()) {
@@ -9165,6 +9166,7 @@ public class UserServiceImpl implements UserService {
 				if(400 == checkUserExistsResponse.getStatus()){
 					elapsedTime = (System.currentTimeMillis() - startTime);
 					LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
+					LOGGER.error("ECODE-SECLOGIN-BAD-REQUEST : Bad request in secured login for user : " + userName);
 					return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity(jsonObject).build();
 				}
 
@@ -9176,6 +9178,7 @@ public class UserServiceImpl implements UserService {
 						AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource
 								+ "," + elapsedTime + "ms" + "," + UserConstants.INCORRECT_PASSWORD);
 						LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
+						LOGGER.error("ECODE-SECLOGIN-UNAUTH-ACTIVE-LOCAL : Unauthorized China User : " + userName);
 						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObjectResponse).build();
 					}
 					if(UserConstants.CN_USER_INACTIVE.equalsIgnoreCase(jsonObject.get(UserConstants.USER_INFO).toString())){
@@ -9185,6 +9188,7 @@ public class UserServiceImpl implements UserService {
 						AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource
 								+ "," + elapsedTime + "ms" + "," + UserConstants.USER_INACTIVE);
 						LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
+						LOGGER.error("ECODE-SECLOGIN-UNAUTH-LOCAL-NOT-ACTIVE : Unauthorized Non active China User : " + userName);
 						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObjectResponse).build();
 					}
 					if(UserConstants.CN_USER_MULTIPLE_EXIST.equalsIgnoreCase(jsonObject.get(UserConstants.USER_INFO).toString())){
@@ -9194,6 +9198,7 @@ public class UserServiceImpl implements UserService {
 						AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource
 								+ "," + elapsedTime + "ms" + "," + UserConstants.CN_USER_MULTIPLE_EXIST);
 						LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
+						LOGGER.error("ECODE-SECLOGIN-UNAUTH-LOCAL-MULTIPLE-USER-EXISTS : Multiple Registered Users for user : " + userName);
 						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObjectResponse).build();
 					}					
 				} else {
@@ -9208,6 +9213,7 @@ public class UserServiceImpl implements UserService {
 						AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + ","
 								+ regSource + "," + elapsedTime + "ms" + "," + UserConstants.INCORRECT_PASSWORD);
 						LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
+						LOGGER.error("ECODE-SECLOGIN-UNAUTH-GLOBAL-USER : Unauthorized Global User : " + userName);
 						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObjectResponse).build();
 					} else {
 						jsonObjectResponse.put("user_store", "None");
@@ -9215,6 +9221,7 @@ public class UserServiceImpl implements UserService {
 						AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + ","
 								+ regSource + "," + elapsedTime + "ms" + "," + UserConstants.USER_NOT_EXISTS);
 						LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
+						LOGGER.error("ECODE-SECLOGIN-USER-NOT-EXISTS : User doesn't exists with user name : " + userName);
 						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObjectResponse).build();
 					}
 				}
@@ -9235,6 +9242,7 @@ public class UserServiceImpl implements UserService {
 			AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource + ","
 					+ elapsedTime + "ms" + "," + UserConstants.SERVER_ERROR);
 			LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
+			LOGGER.error("ECODE-SECLOGIN-PROC-ERROR : Error processing authentication request");
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).entity(jsonObjectResponse).build();
 		}
 
