@@ -79,7 +79,7 @@ public interface UserService {
 	@GET
 	@Path("/apexrest/IDMSUser/{loginIdentifier}")
 	Response checkUserExists(@PathParam("loginIdentifier") String loginIdentifier,
-			@QueryParam("WithGlobalUsers") String withGlobalUsers);
+			@QueryParam("WithGlobalUsers") String withGlobalUsers, @QueryParam("appName") String applicationName);
 
 	@POST
 	@Path("/apexrest/IDMSCheckUser")

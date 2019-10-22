@@ -616,5 +616,6 @@ public class UserConstants {
 	public static final String PRM_ECLIPSE_REG_EMAIL="Eclipse Registration";
 	//UIMS user creation in IDMS
 	public static final String UIMS_USER_CREATE_IN_IDMS="UIMS user created in IDMS";
+	public static final String PWD_NOT_SET_IN_IDMS="PasswordNotSetInIDMS : Email/SMS sent to reset password";
 	
 }

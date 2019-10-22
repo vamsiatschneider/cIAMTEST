@@ -118,7 +118,7 @@ public class UIMSCompanyManagerSoapService {
 			companyManagerUIMSV2 =  getAuthenitcatedCompanyManager();
 			//samlAssertion = samlTokenService.getSamlAssertionToken(fedId, vnew);
 		} catch (Exception e) {
-			uimsLog.error("Error executing while createUIMSCompany::" + e.getMessage());
+			uimsLog.error("Error executing while createUIMSCompany::" + e.getMessage(),e);
 		}
 			try {
 				if(companyManagerUIMSV2 != null) {
@@ -127,7 +127,7 @@ public class UIMSCompanyManagerSoapService {
 			} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
 					| LdapTemplateNotReadyException | RequestedEntryNotExistsException | RequestedInternalUserException
 					| UnexpectedLdapResponseException | UnexpectedRuntimeImsException e) {
-				uimsLog.error("Error executing while createUIMSCompany::" + e.getMessage());
+				uimsLog.error("Error executing while createUIMSCompany::" + e.getMessage(),e);
 			}
 		
 		return uimsUserResponse;
@@ -144,7 +144,7 @@ public class UIMSCompanyManagerSoapService {
 			authenticatedCompanyManagerUIMSV2 = getAuthenitcatedCompanyManager();
 			//samlAssertion = SamlAssertionTokenGenerator.getSamlAssertionToken(idmsFederationId, vnew);
 		} catch (Exception e) {
-			uimsLog.error("Error executing while createUIMSCompany::" + e.getMessage());
+			uimsLog.error("Error executing while createUIMSCompany::" + e.getMessage(),e);
 		}
 		try {
 			if(authenticatedCompanyManagerUIMSV2 != null) {
@@ -154,7 +154,7 @@ public class UIMSCompanyManagerSoapService {
 				| InvalidImsServiceMethodArgumentException | LdapTemplateNotReadyException
 				| RequestedEntryNotExistsException | RequestedInternalUserException | SecuredImsException
 				| UnexpectedLdapResponseException | UnexpectedRuntimeImsException e) {
-			uimsLog.error("Error executing while createUIMSCompany::" + e.getMessage());
+			uimsLog.error("Error executing while createUIMSCompany::" + e.getMessage(),e);
 		}
 		return uimsUserResponse;
 	}
@@ -190,7 +190,7 @@ public class UIMSCompanyManagerSoapService {
 		} catch (IMSServiceSecurityCallNotAllowedException | InvalidImsServiceMethodArgumentException
 				| LdapTemplateNotReadyException | RequestedEntryNotExistsException | SecuredImsException
 				| UnexpectedLdapResponseException | UnexpectedRuntimeImsException | JsonProcessingException e) {
-			UIMSSYNCLOGGER.error("Exception occured in updateUIMSCompany = "+e.getMessage());
+			UIMSSYNCLOGGER.error("Exception occured in updateUIMSCompany = "+e.getMessage(),e);
 			UIMSSYNCLOGGER.error("updateUIMSCompany failed in UIMS, fedId = "+fedId+" ,companyFedId = "+companyFedId);
 			try {
 				UIMSSYNCLOGGER.error("updateUIMSCompany failed in UIMS, company info = "+objMapper.writeValueAsString(company));

@@ -386,7 +386,7 @@ public class UimsSetPasswordSoapService {
 						"UIMS UserpinConfirmation activateIdentityNoPassword failed.", userId);
 			}
 		} catch (RetryException e) {
-			LOGGER.error("RetryException in activateIdentityNoPassword()::" + e.getMessage());
+			LOGGER.error("RetryException in activateIdentityNoPassword()::" + e.getMessage(),e);
 			UIMSSYNCLOGGER.error("activateIdentityNoPassword failed in UIMS for emailOrMobile = "+emailOrMobile);
 			LOGGER.error("ECODE-SOAP-ACTIVEID-NOPWD-RETRY-ERR : Retry error during activate identity");
 		} catch (ExecutionException e) {

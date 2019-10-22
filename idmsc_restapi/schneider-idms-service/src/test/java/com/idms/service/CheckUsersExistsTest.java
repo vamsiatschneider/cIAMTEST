@@ -106,7 +106,7 @@ public class CheckUsersExistsTest {
 		
 		when(salesForceService.getSalesForceToken(anyString(),anyString(), anyString(),anyString(), anyString(), anyString())).thenReturn(DomainMockData.SALESFORCE_USER);
 		
-		javax.ws.rs.core.Response response =   userService.checkUserExists("", "false");
+		javax.ws.rs.core.Response response =   userService.checkUserExists("", "false", null);
 		
 		UserExistsResponse  actualResponse = (UserExistsResponse)response.getEntity();
 		
@@ -129,7 +129,7 @@ public class CheckUsersExistsTest {
 		
 		when(salesForceService.getSalesForceToken(anyString(),anyString(), anyString(),anyString(), anyString(), anyString())).thenReturn(DomainMockData.SALESFORCE_USER);
 		
-		javax.ws.rs.core.Response response =   userService.checkUserExists("suresh.update.4@mailinator.com", "true");
+		javax.ws.rs.core.Response response =   userService.checkUserExists("suresh.update.4@mailinator.com", "true", null);
 		
 		UserExistsResponse  actualResponse = (UserExistsResponse)response.getEntity();
 		

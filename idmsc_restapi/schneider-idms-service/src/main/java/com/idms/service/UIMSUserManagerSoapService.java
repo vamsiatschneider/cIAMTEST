@@ -205,9 +205,9 @@ public class UIMSUserManagerSoapService {
 				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
 				| RequestedEntryNotExistsException_Exception | SecuredImsException_Exception
 				| UnexpectedLdapResponseException_Exception | UnexpectedRuntimeImsException_Exception e) {
-			LOGGER.error("Exception in UIMS getUser()::" + e.getMessage());
+			LOGGER.error("Exception in UIMS getUser()::" + e.getMessage(),e);
 		} catch (Exception e1) {
-			LOGGER.error("Exception in getUIMSUser()::" + e1.getMessage());
+			LOGGER.error("Exception in getUIMSUser()::" + e1.getMessage(),e1);
 		}
 	}
 
@@ -271,14 +271,14 @@ public class UIMSUserManagerSoapService {
 				LOGGER.info("End: emailReadyToSendEmail() finished for userId:" + userId);
 			}
 		} catch (RetryException e) {
-			LOGGER.error("RetryException in activateIdentity() of UIMS::" + e.getMessage());
+			LOGGER.error("RetryException in activateIdentity() of UIMS::" + e.getMessage(),e);
 			LOGGER.error("ECODE-SOAP-USRMGR-ACTIVEID-RETRY-ERR : Retry error");
 
 		} catch (ExecutionException e) {
-			LOGGER.error("ExecutionException in activateIdentity() of UIMS::" + e.getMessage());
+			LOGGER.error("ExecutionException in activateIdentity() of UIMS::" + e.getMessage(),e);
 			LOGGER.error("ECODE-SOAP-USRMGR-ACTIVEID-EXEC-ERR : Execution error");
 		} catch (Exception e) {
-			LOGGER.error("Exception in activateIdentity() of UIMS::" + e.getMessage());
+			LOGGER.error("Exception in activateIdentity() of UIMS::" + e.getMessage(),e);
 			LOGGER.error("ECODE-SOAP-USRMGR-ACTIVEID-GEN-ERR : Generic error");
 		}
 		LOGGER.info("activateIdentity() Async Method -> End");
@@ -448,7 +448,7 @@ public class UIMSUserManagerSoapService {
 				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
 				| RequestedEntryNotExistsException_Exception | SecuredImsException_Exception
 				| UnexpectedLdapResponseException_Exception | UnexpectedRuntimeImsException_Exception e) {
-			UIMSSYNCLOGGER.error("UIMS updateUIMSUser() failed, Exception ::" + e.getMessage());
+			UIMSSYNCLOGGER.error("UIMS updateUIMSUser() failed, Exception ::" + e.getMessage(),e);
 			UIMSSYNCLOGGER.error("updateUIMSUser failed in UIMS, fedId = "+fedId);
 			try {
 				UIMSSYNCLOGGER.error("updateUIMSUser failed in UIMS, user info = "+objMapper.writeValueAsString(user));

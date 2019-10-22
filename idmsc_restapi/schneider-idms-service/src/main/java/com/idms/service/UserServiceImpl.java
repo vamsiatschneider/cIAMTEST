@@ -476,7 +476,7 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
 
 			} else if (401 == authenticateResponse.getStatus()) {
-				checkUserExistsResponse = checkUserExists(userName, UserConstants.FALSE);
+				checkUserExistsResponse = checkUserExists(userName, UserConstants.FALSE, null);
 				checkUserExistsFlag = (UserExistsResponse) checkUserExistsResponse.getEntity();
 
 				if (UserConstants.TRUE.equalsIgnoreCase(checkUserExistsFlag.getMessage())) {
@@ -486,7 +486,7 @@ public class UserServiceImpl implements UserService {
 					LOGGER.error("ECODE-AUTHUSER-UNAUTH-LOCAL : User (china) unauthorized : " + userName);
 					return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
 				} else {
-					checkUserExistsResponse = checkUserExists(userName, UserConstants.TRUE);
+					checkUserExistsResponse = checkUserExists(userName, UserConstants.TRUE, null);
 					checkUserExistsFlag = (UserExistsResponse) checkUserExistsResponse.getEntity();
 
 					if (UserConstants.TRUE.equalsIgnoreCase(checkUserExistsFlag.getMessage())) {
@@ -3035,9 +3035,10 @@ public class UserServiceImpl implements UserService {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public Response checkUserExists(String loginIdentifier, String withGlobalUsers) {
+	public Response checkUserExists(String loginIdentifier, String withGlobalUsers, String applicationName) {
 		LOGGER.info("Entered checkUserExists() -> Start");
 		LOGGER.info("Parameter loginIdentifier -> " + loginIdentifier + " ,withGlobalUsers -> " + withGlobalUsers);
+		LOGGER.info("Parameter applicationName -> " + applicationName);
 		String PROCESSING_STATE = "UNKNOWN";
 		DocumentContext productDocCtx = null;
 		String iPlanetDirectoryKey = null;
@@ -3118,9 +3119,29 @@ public class UserServiceImpl implements UserService {
 					resultCount = productDocCtx.read("$.resultCount");
 					LOGGER.info("resultCount of loginIdentifier = " + resultCount);
 					if(resultCount == 1){
-						//loginIdentifier found but password is incorrect						
+						//if pwdSetFirstLogin is false then send email to reset password
+						String pwdSetFirstLoginString = productDocCtx.read("$.result[0].pwdSetFirstLogin[0]");
+						String userName = productDocCtx.read("$.result[0].username");
+						LOGGER.info("pwdSetFirstLoginString = "+pwdSetFirstLoginString);
+						LOGGER.info("userName = "+userName);
+						if(null != pwdSetFirstLoginString && !pwdSetFirstLoginString.isEmpty()){
+							String otp = sendEmail.generateOtp(userName);
+							if(pwdSetFirstLoginString.equalsIgnoreCase("false")){
+								if(loginIdentifier.contains("@")){
+									sendEmail.sendOpenAmEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName, applicationName);
+								} else {
+									sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName, applicationName);
+									sendEmail.sendSMSNewGateway(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,applicationName);
+								}
+								LOGGER.info("Email/SMS sent to "+loginIdentifier.trim()+" to reset password");
+								JSONObject responseUI = new JSONObject();
+								responseUI.put(UserConstants.MESSAGE_L, UserConstants.PWD_NOT_SET_IN_IDMS);
+								return Response.status(Response.Status.OK).entity(responseUI).build();
+							}
+						}
+						//loginIdentifier found but password is incorrect
 						response.put(UserConstants.USER_INFO, UserConstants.CN_USER_ACTIVE);
-						response.put(UserConstants.MESSAGE_L, UserConstants.TRUE);						
+						response.put(UserConstants.MESSAGE_L, UserConstants.TRUE);
 						return Response.status(Response.Status.OK).entity(response).build();
 					}
 					//loginIdentifier not found, checking if user is registered but not activated
@@ -3139,12 +3160,12 @@ public class UserServiceImpl implements UserService {
 						productDocCtx = JsonPath.using(conf).parse(userExists);
 						resultCount = productDocCtx.read("$.resultCount");
 						LOGGER.info("resultCount of mail or mobile = " + resultCount);
-						if(resultCount == 1){							
+						if(resultCount == 1){
 							response.put(UserConstants.USER_INFO, UserConstants.CN_USER_INACTIVE);
 							response.put(UserConstants.MESSAGE_L, UserConstants.TRUE);
 							return Response.status(Response.Status.OK).entity(response).build();
 						}
-						if(resultCount > 1){							
+						if(resultCount > 1){
 							response.put(UserConstants.USER_INFO, UserConstants.CN_USER_MULTIPLE_EXIST);
 							response.put(UserConstants.MESSAGE_L, UserConstants.TRUE);
 							return Response.status(Response.Status.OK).entity(response).build();
@@ -3180,8 +3201,6 @@ public class UserServiceImpl implements UserService {
 						}
 
 						if (null != ifwResponse && 200 == ifwResponse.getStatus()) {
-							
-							
 							response.put(UserConstants.MESSAGE_L, UserConstants.TRUE);
 							return Response.status(ifwResponse.getStatus()).entity(response).build();
 						}
@@ -9162,7 +9181,7 @@ public class UserServiceImpl implements UserService {
 
 			} else if (401 == authenticateResponse.getStatus()) {
 				LOGGER.info("Checking checkUserExists China");
-				checkUserExistsResponse = checkUserExists(userName, UserConstants.FALSE);
+				checkUserExistsResponse = checkUserExists(userName, UserConstants.FALSE, app);
 				jsonObject =  (JSONObject) checkUserExistsResponse.getEntity();
 				LOGGER.info("Response from checkUserExists China: " + jsonObject.toString());
 				
@@ -9171,6 +9190,17 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
 					LOGGER.error("ECODE-SECLOGIN-BAD-REQUEST : Bad request in secured login for user : " + userName);
 					return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity(jsonObject).build();
+				}
+				
+				if(jsonObject.get(UserConstants.MESSAGE_L).toString().contains(UserConstants.PWD_NOT_SET_IN_IDMS)){
+					jsonObjectResponse.put("user_store", "CN");
+					jsonObjectResponse.put("user_status", UserConstants.PWD_NOT_SET_IN_IDMS);
+					elapsedTime = (System.currentTimeMillis() - startTime);
+					AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource
+							+ "," + elapsedTime + "ms" + "," + "Password not set in OpenDJ");
+					LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
+					LOGGER.error("ECODE-SECLOGIN-UNAUTH-ACTIVE-FIRSTLOGIN-FAILED-LOCAL : Unauthorized China User : " + userName);
+					return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObjectResponse).build();
 				}
 
 				if (UserConstants.TRUE.equalsIgnoreCase(jsonObject.get(UserConstants.MESSAGE_L).toString())) {
@@ -9206,7 +9236,7 @@ public class UserServiceImpl implements UserService {
 					}					
 				} else {
 					LOGGER.info("Checking checkUserExists Global");
-					checkUserExistsResponse = checkUserExists(userName, UserConstants.TRUE);
+					checkUserExistsResponse = checkUserExists(userName, UserConstants.TRUE, null);
 					jsonObject =  (JSONObject) checkUserExistsResponse.getEntity();
 					LOGGER.info("Response from checkUserExists Global: " + jsonObject.toString());
 
