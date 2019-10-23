@@ -3446,7 +3446,6 @@ public class UserServiceImpl implements UserService {
 		Response passwordOpenAMResponse = null;
 		boolean isPasswordUpdatedInUIMS = false;
 		try {
-
 			LOGGER.info("Parameter confirmRequest -> "
 					+ ChinaIdmsUtil.printInfo(ChinaIdmsUtil.printData(objMapper.writeValueAsString(confirmRequest))));
 
@@ -3963,6 +3962,14 @@ public class UserServiceImpl implements UserService {
 
 						PRODUCT_JSON_STRING = "{" + "\"userPassword\": \"" + confirmRequest.getPassword().trim() + "\""
 								+ "}";
+						
+						String isPwdSetFirstLogin = productDocCtx.read("$.pwdSetFirstLogin[0]");
+						LOGGER.info("isPwdSetFirstLogin = "+isPwdSetFirstLogin);
+						
+						if(null != isPwdSetFirstLogin && !isPwdSetFirstLogin.isEmpty() && isPwdSetFirstLogin.equalsIgnoreCase("false")){
+							PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
+									.concat(",\"pwdSetFirstLogin\":\"true\"}");
+						}
 						/*
 						 * LOGGER.info(AUDIT_REQUESTING_USER + uniqueIdentifier
 						 * + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN +
@@ -11051,14 +11058,20 @@ public class UserServiceImpl implements UserService {
 			if (null != userInfo.getPhoneId() && !userInfo.getPhoneId().isEmpty() && null != userInfo.getEmail()
 					&& !userInfo.getEmail().isEmpty()) {
 				LOGGER.info("BOTH");
+				/*updateString = "{" + "\"loginid\": \"" + userInfo.getEmail() + "\",\"login_mobile\": \""
+						+ userInfo.getPhoneId() + "\"" + "}";*/				
 				updateString = "{" + "\"loginid\": \"" + userInfo.getEmail() + "\",\"login_mobile\": \""
-						+ userInfo.getPhoneId() + "\"" + "}";
+						+ userInfo.getPhoneId() + "\",\"pwdSetFirstLogin\": \"" + false + "\"" + "}";
+				
 			} else if (null != userInfo.getEmail() && !userInfo.getEmail().isEmpty()) {
 				LOGGER.info("EMAIL");
-				updateString = "{" + "\"loginid\": \"" + userInfo.getEmail() + "\"}";
+				//updateString = "{" + "\"loginid\": \"" + userInfo.getEmail() + "\"}";				
+				updateString = "{" + "\"loginid\": \"" + userInfo.getEmail() + "\",\"pwdSetFirstLogin\": \"" +false+ "\"" + "}";
+				
 			} else if (null != userInfo.getPhoneId() && !userInfo.getPhoneId().isEmpty()) {
 				LOGGER.info("PHONE");
-				updateString = "{" + "\"login_mobile\": \"" + userInfo.getPhoneId() + "\"}";
+				//updateString = "{" + "\"login_mobile\": \"" + userInfo.getPhoneId() + "\"}";				
+				updateString = "{" + "\"login_mobile\": \"" + userInfo.getPhoneId() + "\",\"pwdSetFirstLogin\": \"" +false+ "\"" + "}";
 			}
 
 			openAmReq.getInput().getUser().setUserPassword(generateRamdomPassWord());
