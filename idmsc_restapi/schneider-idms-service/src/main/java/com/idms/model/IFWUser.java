@@ -240,6 +240,9 @@ public class IFWUser extends BaseEntity {
 	@JsonProperty
 	private String mobile_reg;
 	
+	@JsonProperty
+	private String adminBFOAccoountID;
+	
 	//@JsonProperty
 	//private String IDMSMarketServed__c;
 	
@@ -946,6 +949,15 @@ public class IFWUser extends BaseEntity {
 	@JsonProperty("mobile_reg")
 	public void setMobile_reg(String mobile_reg) {
 		this.mobile_reg = mobile_reg;
+	}
+	@JsonProperty("AdminBFOAccoountID")
+	public String getAdminBFOAccoountID() {
+		return adminBFOAccoountID;
+	}
+	
+	@JsonProperty("AdminBFOAccoountID")
+	public void setAdminBFOAccoountID(String adminBFOAccoountID) {
+		this.adminBFOAccoountID = adminBFOAccoountID;
 	}
 	
 	/*
