@@ -247,6 +247,9 @@ public class OpenAmUser {
 	@JsonInclude(Include.NON_NULL)
 	private String login_mobile;
 	
+	@JsonInclude(Include.NON_NULL)
+	private String adminBFOAccoountID;
+	
 	@JsonProperty("IDMSWorkPhone__c")
 	@JsonInclude(Include.NON_NULL)
 	public String getIDMSWorkPhone__c() {
@@ -997,5 +1000,13 @@ public class OpenAmUser {
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);
+	}
+
+	public String getAdminBFOAccoountID() {
+		return adminBFOAccoountID;
+	}
+
+	public void setAdminBFOAccoountID(String adminBFOAccoountID) {
+		this.adminBFOAccoountID = adminBFOAccoountID;
 	}
 }
