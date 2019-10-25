@@ -1275,7 +1275,9 @@ public class UserServiceImpl implements UserService {
 					}
 				}
 			}
-
+			if((null != userRequest.getUserRecord().getAdminBFOAccoountID() && !userRequest.getUserRecord().getAdminBFOAccoountID().isEmpty())){
+				openAmReq.getInput().getUser().setAdminBFOAccoountID(userRequest.getUserRecord().getAdminBFOAccoountID());
+			}
 			/**
 			 * call /json/authenticate to iplanetDirectoryPro token for admin
 			 */
@@ -5585,6 +5587,11 @@ public class UserServiceImpl implements UserService {
 				openAmReq.getInput().getUser().setIndustries(userRequest.getUserRecord().getIDMSCompanyMarketServed__c());
 
 			}
+			 
+			 if((null != userRequest.getUserRecord().getAdminBFOAccoountID() && !userRequest.getUserRecord().getAdminBFOAccoountID().isEmpty())){
+					openAmReq.getInput().getUser().setAdminBFOAccoountID(userRequest.getUserRecord().getAdminBFOAccoountID());
+			 }
+  
 			jsonRequset = objMapper.writeValueAsString(openAmReq.getInput().getUser());
 			jsonRequset = jsonRequset.replace("\"\"", "[]");
 

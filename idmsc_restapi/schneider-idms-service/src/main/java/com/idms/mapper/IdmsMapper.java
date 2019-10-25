@@ -117,7 +117,7 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.contactId", "input.user.contactId")
         .field("userRecord.registrationAttributes__c", "input.user.registrationAttributes__c")
         .field("userRecord.IDMSWorkPhone__c", "input.user.IDMSWorkPhone__c")
-        .field("userRecord.adminBFOAccoountID", "input.user.AdminBFOAccoountID")
+       // .field("userRecord.adminBFOAccoountID", "input.user.AdminBFOAccoountID")
         .byDefault()
         .register();
     }
@@ -190,7 +190,7 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("userRecord.contactId", "input.user.contactId")
         .field("userRecord.IDMSWorkPhone__c", "input.user.IDMSWorkPhone__c")
         .field("userRecord.registrationAttributes__c", "input.user.registrationAttributes__c")
-        .field("userRecord.adminBFOAccoountID", "input.user.AdminBFOAccoountID")
+        //.field("userRecord.adminBFOAccoountID", "input.user.AdminBFOAccoountID")
         .byDefault()
         .register();
     }
