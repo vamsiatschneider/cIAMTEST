@@ -248,7 +248,7 @@ public class OpenAmUser {
 	private String login_mobile;
 	
 	@JsonInclude(Include.NON_NULL)
-	private String adminBFOAccoountID;
+	private String AdminBFOAccoountID;
 	
 	@JsonProperty("IDMSWorkPhone__c")
 	@JsonInclude(Include.NON_NULL)
@@ -1003,10 +1003,10 @@ public class OpenAmUser {
 	}
 
 	public String getAdminBFOAccoountID() {
-		return adminBFOAccoountID;
+		return AdminBFOAccoountID;
 	}
 
 	public void setAdminBFOAccoountID(String adminBFOAccoountID) {
-		this.adminBFOAccoountID = adminBFOAccoountID;
+		this.AdminBFOAccoountID = adminBFOAccoountID;
 	}
 }
