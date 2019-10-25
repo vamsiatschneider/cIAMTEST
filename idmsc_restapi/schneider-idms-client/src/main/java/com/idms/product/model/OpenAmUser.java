@@ -1001,11 +1001,13 @@ public class OpenAmUser {
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);
 	}
-
+	@JsonProperty("AdminBFOAccoountID")
+	@JsonInclude(Include.NON_NULL)
 	public String getAdminBFOAccoountID() {
 		return AdminBFOAccoountID;
 	}
-
+	@JsonProperty("AdminBFOAccoountID")
+	@JsonInclude(Include.NON_NULL)
 	public void setAdminBFOAccoountID(String adminBFOAccoountID) {
 		this.AdminBFOAccoountID = adminBFOAccoountID;
 	}
