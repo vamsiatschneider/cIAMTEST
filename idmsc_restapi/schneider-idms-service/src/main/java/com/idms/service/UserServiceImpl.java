@@ -1299,19 +1299,19 @@ public class UserServiceImpl implements UserService {
 					&& (null != userRequest.getUserRecord().getMobilePhone()
 							&& !userRequest.getUserRecord().getMobilePhone().isEmpty())) {
 
-				openAmReq.getInput().getUser().setIdmsuid(userRequest.getUserRecord().getEmail());
+				//openAmReq.getInput().getUser().setIdmsuid(userRequest.getUserRecord().getEmail());
 				loginIdentifier = userRequest.getUserRecord().getEmail();
 				identifierType = UserConstants.EMAIL;
 			} else if ((null != userRequest.getUserRecord().getEmail())
 					&& (!userRequest.getUserRecord().getEmail().isEmpty())) {
 
-				openAmReq.getInput().getUser().setIdmsuid(userRequest.getUserRecord().getEmail());
+				//openAmReq.getInput().getUser().setIdmsuid(userRequest.getUserRecord().getEmail());
 				loginIdentifier = userRequest.getUserRecord().getEmail();
 				identifierType = UserConstants.EMAIL;
 			} else if ((null != userRequest.getUserRecord().getMobilePhone())
 					&& (!userRequest.getUserRecord().getMobilePhone().isEmpty())) {
-				openAmReq.getInput().getUser()
-						.setIdmsuid(userRequest.getUserRecord().getMobilePhone() + "bridge-fo.com");
+				//openAmReq.getInput().getUser()
+				//		.setIdmsuid(userRequest.getUserRecord().getMobilePhone() + "bridge-fo.com");
 				openAmReq.getInput().getUser().setMobile_reg(userRequest.getUserRecord().getMobilePhone());
 				loginIdentifier = userRequest.getUserRecord().getMobilePhone();
 				identifierType = UserConstants.MOBILE;
@@ -1499,7 +1499,9 @@ public class UserServiceImpl implements UserService {
 			 * Adding below line for R4 Release
 			 */
 			openAmReq.getInput().getUser().setFederationID(userName);
-
+			
+			openAmReq.getInput().getUser().setIdmsuid(userName);
+			
 			/*
 			 * openAmReq.getInput().getUser().setIdmsail_c("[]");
 			 * openAmReq.getInput().getUser().setIdmsail_Applications_c("[]");
@@ -5386,7 +5388,8 @@ public class UserServiceImpl implements UserService {
 						&& (null != userRequest.getUserRecord().getMobilePhone()
 								&& !userRequest.getUserRecord().getMobilePhone().isEmpty())) {
 
-					openAmReq.getInput().getUser().setIdmsuid(userRequest.getUserRecord().getEmail());
+					//openAmReq.getInput().getUser().setIdmsuid(userRequest.getUserRecord().getEmail());
+					openAmReq.getInput().getUser().setIdmsuid(fedId);
 					hotpService = UserConstants.HOTP_EMAIL_UPDATE;
 					identifierType = UserConstants.EMAIL;
 					user.setMail(userRequest.getUserRecord().getEmail());
@@ -5400,7 +5403,8 @@ public class UserServiceImpl implements UserService {
 						&& (null != userRequest.getUserRecord().getEmail())
 						&& (!userRequest.getUserRecord().getEmail().isEmpty())) {
 					user.setMail(userRequest.getUserRecord().getEmail());
-					openAmReq.getInput().getUser().setIdmsuid(userRequest.getUserRecord().getEmail());
+					//openAmReq.getInput().getUser().setIdmsuid(userRequest.getUserRecord().getEmail());
+					openAmReq.getInput().getUser().setIdmsuid(fedId);
 					hotpService = UserConstants.HOTP_EMAIL_UPDATE;
 					identifierType = UserConstants.EMAIL;
 					loginIdentifier = userRequest.getUserRecord().getEmail();
@@ -5417,8 +5421,9 @@ public class UserServiceImpl implements UserService {
 						}
 					}
 					user.setMobile(userRequest.getUserRecord().getMobilePhone());
-					openAmReq.getInput().getUser()
-							.setIdmsuid(userRequest.getUserRecord().getMobilePhone() + "bridge-fo.com");
+					//openAmReq.getInput().getUser()
+					//		.setIdmsuid(userRequest.getUserRecord().getMobilePhone() + "bridge-fo.com");
+					openAmReq.getInput().getUser().setIdmsuid(fedId);
 					hotpService = UserConstants.HOTP_MOBILE_UPDATE;
 					identifierType = UserConstants.MOBILE;
 					loginIdentifier = userRequest.getUserRecord().getMobilePhone();
