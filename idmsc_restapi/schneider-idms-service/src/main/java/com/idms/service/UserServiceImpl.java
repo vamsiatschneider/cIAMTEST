@@ -8549,7 +8549,7 @@ public class UserServiceImpl implements UserService {
 					String lName = null != productDocCtx.read("$.emailcount[0]")
 							? getValue(productDocCtx.read("$.emailcount[0]").toString()) : getDelimeter();
 
-					if (null != lName && Integer.valueOf(lName).intValue() < 5) {
+					if (null != lName && Integer.valueOf(lName).intValue() < 4) {
 						mailCount = Integer.valueOf(lName).intValue();
 						uniqueIdentifier = productDocCtx.read("$.mail[0]");
 
@@ -8559,6 +8559,7 @@ public class UserServiceImpl implements UserService {
 
 						String regestrationSource = productDocCtx.read("$.registerationSource[0]");
 						String otp = sendEmail.generateOtp(federationId);
+						LOGGER.info("Email Reminder count  for " + federationId +" :"+mailCount);
 						LOGGER.info("Successfully OTP generated for " + federationId);
 
 						if (!emailValidator.validate(uniqueIdentifier)) {
