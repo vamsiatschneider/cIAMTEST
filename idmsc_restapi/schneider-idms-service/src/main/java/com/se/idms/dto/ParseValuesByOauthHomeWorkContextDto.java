@@ -776,10 +776,10 @@ public class ParseValuesByOauthHomeWorkContextDto {
 		userResponse.setIDMSAIL_Applications__c(null != userProductDocCtx.read("$.result[0].IDMSAIL_Applications_c[0]")
 				? getValue(userProductDocCtx.read("$.result[0].IDMSAIL_Applications_c[0]").toString()) : getDelimeter());
 
-		userResponse.setIDMSAIL_Features__c(null != userProductDocCtx.read("$.IDMSAIL_Features_c[0]")
+		userResponse.setIDMSAIL_Features__c(null != userProductDocCtx.read("$.result[0].IDMSAIL_Features_c[0]")
 				? getValue(userProductDocCtx.read("$.result[0].IDMSAIL_Features_c[0]").toString()) : getDelimeter());
 
-		userResponse.setIDMSAIL_Programs__c(null != userProductDocCtx.read("$.IDMSAIL_Programs_c[0]")
+		userResponse.setIDMSAIL_Programs__c(null != userProductDocCtx.read("$.result[0].IDMSAIL_Programs_c[0]")
 				? getValue(userProductDocCtx.read("$.result[0].IDMSAIL_Programs_c[0]").toString()) : getDelimeter());
 	}
 	
