@@ -6437,11 +6437,11 @@ public class UserServiceImpl implements UserService {
 	/**
 	 * From UIMS side when user want to activate
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public Response setPassword(String authorizedToken, String clientId, String clientSecret,
 			SetPasswordRequest setPasswordRequest) {
 		LOGGER.info("Entered setPassword() -> Start");
-		// LOGGER.info("Parameter authorizedToken -> " + authorizedToken);
 		LOGGER.info("id -> " + setPasswordRequest.getId() + " ,FederationIdentifier -> "
 				+ setPasswordRequest.getFederationIdentifier());
 		LOGGER.info("IDMS_Federated_ID__c -> " + setPasswordRequest.getIDMS_Federated_ID__c()
@@ -6471,13 +6471,9 @@ public class UserServiceImpl implements UserService {
 		String PRODUCT_JSON_STRING = null;
 
 		try {
-			// LOGGER.info("UserServiceImpl:updatePassword : setPassword :
-			// Request -> " + objMapper.writeValueAsString(setPasswordRequest));
-
 			if ((!UserConstants.UIMS.equalsIgnoreCase(setPasswordRequest.getIDMS_Profile_update_source()))
 					&& (null == setPasswordRequest.getUIFlag()
 							|| !UserConstants.TRUE.equalsIgnoreCase(setPasswordRequest.getUIFlag()))) {
-
 				response.setStatus(errorStatus);
 				response.setMessage(UserConstants.OPERATION_BLCOKED);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -6687,6 +6683,30 @@ public class UserServiceImpl implements UserService {
 							PRODUCT_JSON_STRING);
 					LOGGER.info("End: updateUser() of openam to update new password finished for userid=" + userId);
 				} else {
+					// if status code is 404 then create user
+					if (fedResponse.getStatus() == 404) {
+						JSONObject responseCreation = new JSONObject();
+						LOGGER.info("Start: SetPassword scenarion - this UIMS user not found in IDMS, now creating this user in IDMS-China"
+								+ setPasswordRequest.getIDMS_Federated_ID__c());
+						Response createUserInIDMSResponse = createAbhagaUIMSUserWithPasswordInIDMS(iPlanetDirectoryKey, setPasswordRequest);
+						LOGGER.info("End: SetPassword scenarion - this UIMS user not found in IDMS, finished creating this user in IDMS-China"
+								+ setPasswordRequest.getIDMS_Federated_ID__c());
+						if(200 == createUserInIDMSResponse.getStatus()){
+							responseCreation.put(UserConstants.STATUS_L, successStatus);
+							responseCreation.put(UserConstants.MESSAGE_L, "SetPassword scenarion - UIMS user created in IDMS");
+							elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+							LOGGER.info("SetPassword scenarion - UIMS user created in IDMS");
+							LOGGER.info("Time taken by setPassword() : " + elapsedTime);
+							return Response.status(Response.Status.OK).entity(responseCreation).build();
+						} else {
+							responseCreation.put(UserConstants.STATUS_L, errorStatus);
+							responseCreation.put(UserConstants.MESSAGE_L, "SetPassword scenarion - UIMS user creation failed in IDMS");
+							LOGGER.error("SetPassword scenarion - UIMS user creation failed in IDMS");
+							elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+							LOGGER.info("Time taken by setPassword() : " + elapsedTime);
+							return Response.status(Response.Status.BAD_REQUEST).entity(responseCreation).build();
+						}
+					}
 					return fedResponse;
 				}
 
@@ -11063,10 +11083,10 @@ public class UserServiceImpl implements UserService {
 
 		try {
 			openAmReq = mapper.map(userRequest, OpenAmUserRequest.class);
-			LOGGER.info("Start: SYNC updateUIMSUserAndCompany() for userId:" + userId);
+			LOGGER.info("Start: getUIMSUser() for userId:" + userId);
 			UserV6 userInfo = uimsAuthenticatedUserManagerSoapServiceSync.getUIMSUser(CALLER_FID,
 					userRequest.getUserRecord().getIDMS_Federated_ID__c());
-			LOGGER.info("End: ASYNC updateUIMSUserAndCompany() finished for userId:" + userId);
+			LOGGER.info("End: getUIMSUser() finished for userId:" + userId);
 
 			if (null != userInfo.getPhoneId() && !userInfo.getPhoneId().isEmpty() && null != userInfo.getEmail()
 					&& !userInfo.getEmail().isEmpty()) {
@@ -11091,14 +11111,14 @@ public class UserServiceImpl implements UserService {
 			openAmReq = prepareJsonForAbhagaUIMSUser(openAmReq);
 			String json = objMapper.writeValueAsString(openAmReq);
 			json = json.replace("\"\"", "[]");
-			LOGGER.info("Start: userRegistration() of OpenAMService...userAction=" + userAction);
+			LOGGER.info("Start: userRegistration() of OpenAMService for AbaghaUIMSuser: " + userInfo.getFederatedID());
 			userCreation = productService.userRegistration(iPlanetDirectoryKey, userAction, json);
-			LOGGER.info("End: userRegistration() of OpenAMService finished with status code: " + userCreation.getStatus());
+			LOGGER.info("End: userRegistration() of OpenAMService finished for AbaghaUIMSuser with status code: " + userCreation.getStatus());
 			if (userCreation.getStatus() == 200) {
-				LOGGER.info("Start: calling updateUser() of OpenAMService...userName=" + userInfo.getFederatedID());
+				LOGGER.info("Start: calling updateUser() of OpenAMService...userName = " + userInfo.getFederatedID());
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						userInfo.getFederatedID(), updateString);
-				LOGGER.info("End: updateUser() of OpenAMService finished for userName: " + userInfo.getFederatedID());
+				LOGGER.info("End: updateUser() of OpenAMService finished for userName : " + userInfo.getFederatedID());
 			}
 			if (userCreation.getStatus() != 200) {
 				str = IOUtils.toString((InputStream) userCreation.getEntity());
@@ -11108,7 +11128,7 @@ public class UserServiceImpl implements UserService {
 		} catch (Exception e) {
 			response.put(UserConstants.STATUS_L, errorStatus);
 			response.put(UserConstants.MESSAGE_L, e.getMessage());
-			LOGGER.error("JsonProcessingException in createAbhagaUIMSUserInIDMS() ::" + e.getMessage(), e);
+			LOGGER.error("Exception in createAbhagaUIMSUserInIDMS() ::" + e.getMessage(), e);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by createAbhagaUIMSUserInIDMS() : " + elapsedTime);
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
@@ -11117,6 +11137,77 @@ public class UserServiceImpl implements UserService {
 		response.put(UserConstants.MESSAGE_L, UserConstants.UIMS_USER_CREATE_IN_IDMS);
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info("Time taken by createAbhagaUIMSUserInIDMS() : " + elapsedTime);
+		return Response.status(Response.Status.OK).entity(response).build();
+	}
+	
+	@SuppressWarnings("unchecked")
+	private Response createAbhagaUIMSUserWithPasswordInIDMS(String iPlanetDirectoryKey,
+			SetPasswordRequest setPasswordRequest) {
+		LOGGER.info("Entered createAbhagaUIMSUserWithPasswordInIDMS() -> Start");
+		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
+		long elapsedTime;
+		JSONObject response = new JSONObject();
+		ObjectMapper objMapper = new ObjectMapper();
+		OpenAmUserRequest openAmReq = new OpenAmUserRequest();
+		String userId = null;
+		Response userCreation = null;
+		String str = null, updateString = null;
+
+		try {
+			LOGGER.info("Start: getUIMSUser() for userId:" + userId);
+			UserV6 userInfo = uimsAuthenticatedUserManagerSoapServiceSync.getUIMSUser(CALLER_FID,
+					setPasswordRequest.getIDMS_Federated_ID__c());
+			LOGGER.info("End: getUIMSUser() finished for userId:" + userId);
+
+			if (null != userInfo.getPhoneId() && !userInfo.getPhoneId().isEmpty() && null != userInfo.getEmail()
+					&& !userInfo.getEmail().isEmpty()) {
+				LOGGER.info("BOTH");
+				updateString = "{" + "\"loginid\": \"" + userInfo.getEmail() + "\",\"login_mobile\": \""
+						+ userInfo.getPhoneId() + "\"" + "}";
+			} else if (null != userInfo.getEmail() && !userInfo.getEmail().isEmpty()) {
+				LOGGER.info("EMAIL");
+				updateString = "{" + "\"loginid\": \"" + userInfo.getEmail() + "\"}";
+			} else if (null != userInfo.getPhoneId() && !userInfo.getPhoneId().isEmpty()) {
+				LOGGER.info("PHONE");
+				updateString = "{" + "\"login_mobile\": \"" + userInfo.getPhoneId() + "\"}";
+			}
+
+			openAmReq.getInput().getUser().setGivenName(userInfo.getFirstName());
+			openAmReq.getInput().getUser().setSn(userInfo.getLastName());
+			openAmReq.getInput().getUser().setUserPassword(setPasswordRequest.getNewPwd());
+			openAmReq.getInput().getUser().setUpdateSource(setPasswordRequest.getIDMS_Profile_update_source());
+			openAmReq.getInput().getUser().setFederationID(setPasswordRequest.getIDMS_Federated_ID__c());
+			openAmReq = prepareJsonForAbhagaUIMSUser(openAmReq);
+			String json = objMapper.writeValueAsString(openAmReq);
+			json = json.replace("\"\"", "[]");
+			LOGGER.info("Start: userRegistration() of OpenAMService for AbaghaUIMSuser: "
+					+ setPasswordRequest.getIDMS_Federated_ID__c());
+			userCreation = productService.userRegistration(iPlanetDirectoryKey, userAction, json);
+			LOGGER.info("End: userRegistration() of OpenAMService finished for AbaghaUIMSuser with status code: "
+					+ userCreation.getStatus());
+			if (userCreation.getStatus() == 200) {
+				LOGGER.info("Start: calling updateUser() of OpenAMService...userName = " + userInfo.getFederatedID());
+				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+						userInfo.getFederatedID(), updateString);
+				LOGGER.info("End: updateUser() of OpenAMService finished for userName : " + userInfo.getFederatedID());
+			}
+			if (userCreation.getStatus() != 200) {
+				str = IOUtils.toString((InputStream) userCreation.getEntity());
+				throw new Exception("Exception while Registering UIMS User in OpenAM " + str);
+			}
+
+		} catch (Exception e) {
+			response.put(UserConstants.STATUS_L, errorStatus);
+			response.put(UserConstants.MESSAGE_L, e.getMessage());
+			LOGGER.error("Exception in createAbhagaUIMSUserWithPasswordInIDMS() ::" + e.getMessage(), e);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by createAbhagaUIMSUserWithPasswordInIDMS() : " + elapsedTime);
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+		}
+		response.put(UserConstants.STATUS_L, successStatus);
+		response.put(UserConstants.MESSAGE_L, UserConstants.UIMS_USER_CREATE_IN_IDMS);
+		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+		LOGGER.info("Time taken by createAbhagaUIMSUserWithPasswordInIDMS() : " + elapsedTime);
 		return Response.status(Response.Status.OK).entity(response).build();
 	}
 	
@@ -11132,7 +11223,6 @@ public class UserServiceImpl implements UserService {
 		openAmReq.getInput().getUser().setIsActivated("true");
 		openAmReq.getInput().getUser().setEmailcount("0");
 		openAmReq.getInput().getUser().setIDMSisInternal__c("FALSE");
-		openAmReq.getInput().getUser().setAdmin_company_id(openAmReq.getInput().getUser().getAboutMe());
 		
 		return openAmReq;
 	}
