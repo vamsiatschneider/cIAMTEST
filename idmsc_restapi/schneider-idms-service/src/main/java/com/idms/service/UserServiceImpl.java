@@ -6648,7 +6648,7 @@ public class UserServiceImpl implements UserService {
 					userId = setPasswordRequest.getIDMS_Federated_ID__c();
 				}
 
-				Callable<String> callableGetUser = new Callable<String>() {
+				/*Callable<String> callableGetUser = new Callable<String>() {
 					public String call() throws Exception {
 						LOGGER.info("Start: getUser() of OpenAMService");
 						userIdExistInUIMS = productService.getUser(getSSOToken(),
@@ -6670,7 +6670,7 @@ public class UserServiceImpl implements UserService {
 				} catch (Exception e) {
 					LOGGER.error("Exception in getting user details= " + e.getMessage(),e);
 
-				}
+				}*/
 
 				Response fedResponse = checkUserExistsWithFederationID(iPlanetDirectoryKey, userId, startTime);
 				if (fedResponse.getStatus() == 200) {
