@@ -129,6 +129,7 @@ import com.idms.product.model.Attributes;
 import com.idms.product.model.OpenAMGetUserHomeResponse;
 import com.idms.product.model.OpenAMGetUserWorkResponse;
 import com.idms.product.model.OpenAmUser;
+import com.idms.product.model.OpenAmUserInput;
 import com.idms.product.model.OpenAmUserRequest;
 import com.idms.product.model.PasswordRecoveryUser;
 import com.idms.product.model.PostMobileRecord;
@@ -11083,10 +11084,10 @@ public class UserServiceImpl implements UserService {
 
 		try {
 			openAmReq = mapper.map(userRequest, OpenAmUserRequest.class);
-			LOGGER.info("Start: getUIMSUser() for userId:" + userId);
+			LOGGER.info("Start: getUIMSUser() for userId:" + userRequest.getUserRecord().getIDMS_Federated_ID__c());
 			UserV6 userInfo = uimsAuthenticatedUserManagerSoapServiceSync.getUIMSUser(CALLER_FID,
 					userRequest.getUserRecord().getIDMS_Federated_ID__c());
-			LOGGER.info("End: getUIMSUser() finished for userId:" + userId);
+			LOGGER.info("End: getUIMSUser() finished for userId:" + userRequest.getUserRecord().getIDMS_Federated_ID__c());
 
 			if (null != userInfo.getPhoneId() && !userInfo.getPhoneId().isEmpty() && null != userInfo.getEmail()
 					&& !userInfo.getEmail().isEmpty()) {
@@ -11172,6 +11173,10 @@ public class UserServiceImpl implements UserService {
 				updateString = "{" + "\"login_mobile\": \"" + userInfo.getPhoneId() + "\"}";
 			}
 
+			OpenAmUser openAmUser = new OpenAmUser();
+			OpenAmUserInput openAmUserInput = new OpenAmUserInput();
+			openAmUserInput.setUser(openAmUser);
+			openAmReq.setInput(openAmUserInput);
 			openAmReq.getInput().getUser().setGivenName(userInfo.getFirstName());
 			openAmReq.getInput().getUser().setSn(userInfo.getLastName());
 			openAmReq.getInput().getUser().setUserPassword(setPasswordRequest.getNewPwd());
