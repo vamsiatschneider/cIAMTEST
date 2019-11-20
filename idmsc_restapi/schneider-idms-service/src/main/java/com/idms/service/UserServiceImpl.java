@@ -6687,7 +6687,7 @@ public class UserServiceImpl implements UserService {
 						LOGGER.info("Start: SetPassword scenarion - this UIMS user not found in IDMS, now creating this user in IDMS-China: "
 								+ setPasswordRequest.getIDMS_Federated_ID__c());
 						Response createUserInIDMSResponse = createAbhagaUIMSUserWithPasswordInIDMS(iPlanetDirectoryKey, setPasswordRequest);
-						LOGGER.info("End: SetPassword scenarion - this UIMS user not found in IDMS, finished creating this user in IDMS-China: "
+						LOGGER.info("End: SetPassword scenarion - finished creating UIMS user in IDMS-China: "
 								+ setPasswordRequest.getIDMS_Federated_ID__c());
 						if(200 == createUserInIDMSResponse.getStatus()){
 							responseCreation.put(UserConstants.STATUS_L, successStatus);
