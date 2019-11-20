@@ -188,20 +188,20 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 
 		try {
 			AuthenticatedUserManagerUIMSV22 authenticatedUserManagerUIMSV22 = getAuthenticatedUserManager();
-			LOGGER.info("Start: UIMS getUser() for fedid:" + federatedId);
+			LOGGER.info("Start: UIMS getUser() for fedid: " + federatedId);
 			userdetails = authenticatedUserManagerUIMSV22.getUser(callerFid, federatedId);
-			LOGGER.info("End: UIMS getUser() finished, fedid:" + federatedId);
+			LOGGER.info("End: UIMS getUser() finished, fedid: " + federatedId);
 			
 			if (null != userdetails) {
-				LOGGER.info("user fedid from UIMS ==" + userdetails.getFederatedID());
+				LOGGER.info("user fedid from UIMS = " + userdetails.getFederatedID());
 			}
 		} catch (IMSServiceSecurityCallNotAllowedException_Exception
 				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
 				| RequestedEntryNotExistsException_Exception | SecuredImsException_Exception
 				| UnexpectedLdapResponseException_Exception | UnexpectedRuntimeImsException_Exception e) {
-			LOGGER.error("Exception in getUIMSUser() of UIMS::" + e.getMessage(),e);
+			LOGGER.error("Exception in getUIMSUser() of UIMS:: " + e.getMessage(),e);
 		}
-		LOGGER.info("getUIMSUser() Sync method -> End..FederatedID=");
+		LOGGER.info("getUIMSUser() Sync method -> End");
 		return userdetails;
 	}
 }
