@@ -6687,10 +6687,10 @@ public class UserServiceImpl implements UserService {
 					// if status code is 404 then create user
 					if (fedResponse.getStatus() == 404) {
 						JSONObject responseCreation = new JSONObject();
-						LOGGER.info("Start: SetPassword scenarion - this UIMS user not found in IDMS, now creating this user in IDMS-China"
+						LOGGER.info("Start: SetPassword scenarion - this UIMS user not found in IDMS, now creating this user in IDMS-China: "
 								+ setPasswordRequest.getIDMS_Federated_ID__c());
 						Response createUserInIDMSResponse = createAbhagaUIMSUserWithPasswordInIDMS(iPlanetDirectoryKey, setPasswordRequest);
-						LOGGER.info("End: SetPassword scenarion - this UIMS user not found in IDMS, finished creating this user in IDMS-China"
+						LOGGER.info("End: SetPassword scenarion - finished creating UIMS user in IDMS-China: "
 								+ setPasswordRequest.getIDMS_Federated_ID__c());
 						if(200 == createUserInIDMSResponse.getStatus()){
 							responseCreation.put(UserConstants.STATUS_L, successStatus);
@@ -11155,10 +11155,10 @@ public class UserServiceImpl implements UserService {
 		String str = null, updateString = null;
 
 		try {
-			LOGGER.info("Start: getUIMSUser() for userId:" + userId);
+			LOGGER.info("Start: getUIMSUser() for userId: " + setPasswordRequest.getIDMS_Federated_ID__c());
 			UserV6 userInfo = uimsAuthenticatedUserManagerSoapServiceSync.getUIMSUser(CALLER_FID,
 					setPasswordRequest.getIDMS_Federated_ID__c());
-			LOGGER.info("End: getUIMSUser() finished for userId:" + userId);
+			LOGGER.info("End: getUIMSUser() finished for userId: " + setPasswordRequest.getIDMS_Federated_ID__c());
 
 			if (null != userInfo.getPhoneId() && !userInfo.getPhoneId().isEmpty() && null != userInfo.getEmail()
 					&& !userInfo.getEmail().isEmpty()) {
