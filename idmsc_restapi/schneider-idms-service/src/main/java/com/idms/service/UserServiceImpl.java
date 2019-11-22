@@ -1288,6 +1288,15 @@ public class UserServiceImpl implements UserService {
 			}
 
 			}
+			
+			if (null == userRequest.getUserRecord().getDefaultCurrencyIsoCode()
+					|| userRequest.getUserRecord().getDefaultCurrencyIsoCode().isEmpty()) {
+
+			if (UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())) {
+				openAmReq.getInput().getUser().setCurrency("CNY");
+			}
+
+			}
 			/**
 			 * call /json/authenticate to iplanetDirectoryPro token for admin
 			 */
