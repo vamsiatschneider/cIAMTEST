@@ -2248,7 +2248,7 @@ public class UserServiceImpl implements UserService {
 						|| userRequest.getIDMS_PreferredLanguage__c().isEmpty())) {
 			return false;
 		}
-		else if ((UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_PreferredLanguage__c()))
+		else if ((UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c()))
 				&& (null != userRequest.getIDMS_PreferredLanguage__c()
 						&& !userRequest.getIDMS_PreferredLanguage__c().isEmpty())) {
 			if (!legthValidator.validate(UserConstants.PREFERRED_LANGUAGE,
