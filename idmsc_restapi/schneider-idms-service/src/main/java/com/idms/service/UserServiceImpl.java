@@ -1279,6 +1279,15 @@ public class UserServiceImpl implements UserService {
 			if((null != userRequest.getUserRecord().getAdminBFOAccoountID() && !userRequest.getUserRecord().getAdminBFOAccoountID().isEmpty())){
 				openAmReq.getInput().getUser().setAdminBFOAccoountID(userRequest.getUserRecord().getAdminBFOAccoountID());
 			}
+			// Set pref language if the call is from UIMS
+			if (null == userRequest.getUserRecord().getIDMS_PreferredLanguage__c()
+					|| userRequest.getUserRecord().getIDMS_PreferredLanguage__c().isEmpty()) {
+
+			if (UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c())) {
+				openAmReq.getInput().getUser().setPreferredlanguage("zh");
+			}
+
+			}
 			/**
 			 * call /json/authenticate to iplanetDirectoryPro token for admin
 			 */
@@ -2217,7 +2226,7 @@ public class UserServiceImpl implements UserService {
 		/**
 		 * IDMS_PreferredLanguage__c validation and length check Mandatory
 		 */
-
+		
 		if ((checkMandatoryFields)
 				&& (!UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c()))
 				&& (null == userRequest.getIDMS_PreferredLanguage__c()
@@ -2233,8 +2242,13 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error(UserConstants.INVALID_VALUE_IDMS + UserConstants.PREFERRED_LANGUAGE);
 			return true;
 		}
-
-		if ((UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_PreferredLanguage__c()))
+		
+		if ((UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c()))
+				&& (null == userRequest.getIDMS_PreferredLanguage__c()
+						|| userRequest.getIDMS_PreferredLanguage__c().isEmpty())) {
+			return false;
+		}
+		else if ((UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_PreferredLanguage__c()))
 				&& (null != userRequest.getIDMS_PreferredLanguage__c()
 						&& !userRequest.getIDMS_PreferredLanguage__c().isEmpty())) {
 			if (!legthValidator.validate(UserConstants.PREFERRED_LANGUAGE,
