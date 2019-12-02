@@ -39,8 +39,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -77,11 +75,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.rholder.retry.Retryer;
-import com.github.rholder.retry.RetryerBuilder;
-import com.github.rholder.retry.StopStrategies;
-import com.github.rholder.retry.WaitStrategies;
-import com.google.common.base.Predicates;
 import com.ibm.icu.text.Transliterator;
 import com.idms.mapper.IdmsMapper;
 import com.idms.model.AILRequest;
@@ -10984,12 +10977,26 @@ public class UserServiceImpl implements UserService {
 					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 				}
 				
-				String userStatusInChina = null;
-				if (Boolean.valueOf(productDocCtx.read("$.result[0].isActivated[0]"))) {
+				String userStatusInChina = null, identifierUser = null;
+				identifierUser = productDocCtx.read(JsonConstants.RESULT_Loginid_L);
+				if (null == identifierUser) {
+					identifierUser = productDocCtx.read(JsonConstants.RESULT_Loginid);
+				}
+				if (null == identifierUser) {
+					identifierUser = productDocCtx.read(JsonConstants.RESULT_LOGIN_MOBILE);
+				}
+				
+				if(null != identifierUser && !identifierUser.isEmpty()){
 					userStatusInChina = UserConstants.USER_ACTIVE;
 				} else {
 					userStatusInChina = UserConstants.USER_INACTIVE;
 				}
+				
+				/*if (Boolean.valueOf(productDocCtx.read("$.result[0].isActivated[0]"))) {
+					userStatusInChina = UserConstants.USER_ACTIVE;
+				} else {
+					userStatusInChina = UserConstants.USER_INACTIVE;
+				}*/
 				LOGGER.info("userStatusInChina = "+userStatusInChina);
 				GetUserRecordResponse userRecordResponse = new GetUserRecordResponse();
 				ParseValuesByOauthHomeWorkContextDto userInfoMapper = new ParseValuesByOauthHomeWorkContextDto();
