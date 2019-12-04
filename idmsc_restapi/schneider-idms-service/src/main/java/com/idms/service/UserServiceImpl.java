@@ -4481,7 +4481,40 @@ public class UserServiceImpl implements UserService {
 					JSONObject uimsResponse = (JSONObject) fedResponse.getEntity();
 					userId = (String) uimsResponse.get("userId");
 				} else {
-					return fedResponse;
+					// if status code is 404 then create user
+					if (fedResponse.getStatus() == 404) {
+						JSONObject response = new JSONObject();
+						String fedID=ailRequest.getUserAILRecord().getIDMS_Federated_ID__c();
+						String profileUpdateSource=ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c();
+						LOGGER.info("Start: This UIMS user is not existing in IDMS, now creating this user in IDMS-China"
+								+ fedID);
+						UpdateUserRequest request = new UpdateUserRequest();
+						request.getUserRecord().setIDMS_Federated_ID__c(fedID);
+						request.getUserRecord().setIDMS_Profile_update_source__c(profileUpdateSource);
+						Response createUserInIDMSResponse = createAbhagaUIMSUserInIDMS(iPlanetDirectoryKey, request);
+						LOGGER.info("End: This UIMS user is not existing in IDMS, finished creating this user in IDMS-China"
+								+ ailRequest.getUserAILRecord().getIDMS_Federated_ID__c());
+						if(200 == createUserInIDMSResponse.getStatus()){
+							//response.put(UserConstants.STATUS_L, successStatus);
+							//response.put(UserConstants.MESSAGE_L, "UIMS user created and updated in IDMS");
+							userId = ailRequest.getUserAILRecord().getIDMSUser__c();
+							if (null == userId) {
+								userId =fedID ;
+							}
+							elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+							LOGGER.info("UIMS user created and updated in IDMS");
+							LOGGER.info("Time taken by updateUser() : " + elapsedTime);
+							//return Response.status(Response.Status.OK).entity(response).build();
+						} else {
+							response.put(UserConstants.STATUS_L, errorStatus);
+							response.put(UserConstants.MESSAGE_L, "UIMS user creation and updatation failed in IDMS");
+							LOGGER.error("Error in updateUser() is ::" + "UIMS user creation and updatation failed in IDMS");
+							elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+							LOGGER.info("Time taken by updateUser() : " + elapsedTime);
+							return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+						}
+					}
+					//return fedResponse;
 				}
 			} else {
 				userId = ailRequest.getUserAILRecord().getIDMSUser__c();
@@ -11111,7 +11144,6 @@ public class UserServiceImpl implements UserService {
 		String userId = null;
 		Response userCreation = null;
 		String str = null, updateString = null;
-
 		try {
 			openAmReq = mapper.map(userRequest, OpenAmUserRequest.class);
 			LOGGER.info("Start: getUIMSUser() for userId:" + userRequest.getUserRecord().getIDMS_Federated_ID__c());
@@ -11137,7 +11169,10 @@ public class UserServiceImpl implements UserService {
 				//updateString = "{" + "\"login_mobile\": \"" + userInfo.getPhoneId() + "\"}";				
 				updateString = "{" + "\"login_mobile\": \"" + userInfo.getPhoneId() + "\",\"pwdSetFirstLogin\": \"" +false+ "\"" + "}";
 			}
-
+			if(userInfo.getGivenNameECS()!=null && !userInfo.getGivenNameECS().isEmpty())
+				openAmReq.getInput().getUser().setGivenName(userInfo.getGivenNameECS());
+			if(userInfo.getSnECS()!=null && !userInfo.getSnECS().isEmpty())
+				openAmReq.getInput().getUser().setSn(userInfo.getSnECS());
 			openAmReq.getInput().getUser().setUserPassword(generateRamdomPassWord());
 			openAmReq = prepareJsonForAbhagaUIMSUser(openAmReq);
 			String json = objMapper.writeValueAsString(openAmReq);
