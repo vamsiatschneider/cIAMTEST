@@ -4488,6 +4488,8 @@ public class UserServiceImpl implements UserService {
 						LOGGER.info("Start: This UIMS user is not existing in IDMS, now creating this user in IDMS-China"
 								+ fedID);
 						UpdateUserRequest request = new UpdateUserRequest();
+						IFWUser user = new IFWUser();
+						request.setUserRecord(user);
 						request.getUserRecord().setIDMS_Federated_ID__c(fedID);
 						request.getUserRecord().setIDMS_Profile_update_source__c(profileUpdateSource);
 						Response createUserInIDMSResponse = createAbhagaUIMSUserInIDMS(iPlanetDirectoryKey, request);
@@ -11145,6 +11147,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Start: getUIMSUser() for userId:" + userRequest.getUserRecord().getIDMS_Federated_ID__c());
 			UserV6 userInfo = uimsAuthenticatedUserManagerSoapServiceSync.getUIMSUser(CALLER_FID,
 					userRequest.getUserRecord().getIDMS_Federated_ID__c());
+			LOGGER.info("createAbhagaUIMSUserInIDMS userinfo from UIMS:"+userInfo);
 			LOGGER.info("End: getUIMSUser() finished for userId:" + userRequest.getUserRecord().getIDMS_Federated_ID__c());
 
 			if (null != userInfo.getPhoneId() && !userInfo.getPhoneId().isEmpty() && null != userInfo.getEmail()
