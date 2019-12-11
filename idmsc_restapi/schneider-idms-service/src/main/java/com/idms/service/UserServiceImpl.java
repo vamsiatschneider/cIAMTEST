@@ -4292,6 +4292,7 @@ public class UserServiceImpl implements UserService {
 		try {
 			LOGGER.info("UserServiceImpl:updateAIL -> : Requset :  -> " + objMapper.writeValueAsString(ailRequest));
 			LOGGER.info("Access Control List:"+maintenanceModeGlobal);
+			LOGGER.info("AuthorizedToken updateAIL()"+authorizedToken);
 			if(maintenanceModeGlobal!=null)
 				accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
 			if(accssControlList!=null && accssControlList.size()>0 && !(accssControlList.contains("False"))){
