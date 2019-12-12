@@ -11158,16 +11158,28 @@ public class UserServiceImpl implements UserService {
 						+ userInfo.getPhoneId() + "\"" + "}";*/				
 				updateString = "{" + "\"loginid\": \"" + userInfo.getEmail() + "\",\"login_mobile\": \""
 						+ userInfo.getPhoneId() + "\",\"pwdSetFirstLogin\": \"" + false + "\"" + "}";
+				if(null == openAmReq.getInput().getUser().getMail() || openAmReq.getInput().getUser().getMail().isEmpty()){
+					  openAmReq.getInput().getUser().setMail(userInfo.getEmail());
+				}
+				if(null == openAmReq.getInput().getUser().getMobile_reg() || openAmReq.getInput().getUser().getMobile_reg().isEmpty()){
+					  openAmReq.getInput().getUser().setMobile_reg(userInfo.getPhoneId());
+				} 
 				
 			} else if (null != userInfo.getEmail() && !userInfo.getEmail().isEmpty()) {
 				LOGGER.info("EMAIL");
 				//updateString = "{" + "\"loginid\": \"" + userInfo.getEmail() + "\"}";				
 				updateString = "{" + "\"loginid\": \"" + userInfo.getEmail() + "\",\"pwdSetFirstLogin\": \"" +false+ "\"" + "}";
-				
+				if(null == openAmReq.getInput().getUser().getMail() || openAmReq.getInput().getUser().getMail().isEmpty()){
+					  openAmReq.getInput().getUser().setMail(userInfo.getEmail());
+				} 
+		
 			} else if (null != userInfo.getPhoneId() && !userInfo.getPhoneId().isEmpty()) {
 				LOGGER.info("PHONE");
 				//updateString = "{" + "\"login_mobile\": \"" + userInfo.getPhoneId() + "\"}";				
 				updateString = "{" + "\"login_mobile\": \"" + userInfo.getPhoneId() + "\",\"pwdSetFirstLogin\": \"" +false+ "\"" + "}";
+				if(null == openAmReq.getInput().getUser().getMobile_reg() || openAmReq.getInput().getUser().getMobile_reg().isEmpty()){
+					  openAmReq.getInput().getUser().setMobile_reg(userInfo.getPhoneId());
+				} 
 			}
 			if(userInfo.getGivenNameECS()!=null && !userInfo.getGivenNameECS().isEmpty())
 				openAmReq.getInput().getUser().setGivenName(userInfo.getGivenNameECS());
