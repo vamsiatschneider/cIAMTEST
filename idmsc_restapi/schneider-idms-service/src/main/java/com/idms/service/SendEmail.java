@@ -506,9 +506,16 @@ public class SendEmail {
 				// long localDTInMilli =
 				// productDocCtx.read("$.timestamp").toString();
 				long localDTInMilli = Long.valueOf(authIdTime[1]).longValue();
-
+				// figure out login identifier type
+				String emailOrMobile = productDocCtx.read("$.mail[0]");
+				String loginIdentifierType = UserConstants.EMAIL;
+				if (null == emailOrMobile) {
+					emailOrMobile = productDocCtx.read("$.mobile_reg[0]");
+					loginIdentifierType = UserConstants.MOBILE;
+				}
+				LOGGER.info("loginIdentifierType: "+loginIdentifierType);
 				// compare Stored hashkey and generated hash key
-				if (newHashedValue.equals(storedHashedValue) && checkTimeStamp(localDTInMilli)) {
+				if (newHashedValue.equals(storedHashedValue) && checkTimeStamp(localDTInMilli, loginIdentifierType)) {
 					validatePin = true;
 					//product_json_string = "{" + "\"authId\": \"" + "[]" + "\"}";
 					// Need add the timestamp
@@ -767,23 +774,29 @@ public class SendEmail {
 		return tmpPr;
 	}
 	
-	private boolean checkTimeStamp(long localDTInMilli) {
+	private boolean checkTimeStamp(long localDTInMilli, String loginIdentifierType) {
 		LOGGER.info("Entered checkTimeStamp() -> Start");
 		LOGGER.info("Parameter localDTInMilli() ->"+ localDTInMilli);
 		
 		boolean validateTimeStamp = false;
 		LocalDateTime otpGeneratedDatenTime = Instant.ofEpochMilli(localDTInMilli).atZone(ZoneId.systemDefault())
 				.toLocalDateTime();
-		otpGeneratedDatenTime = otpGeneratedDatenTime.plusDays(7);
-				//plusMinutes(30);
-
-		long datePlusSevendaysInMillisecs = otpGeneratedDatenTime.atZone(ZoneId.systemDefault()).toInstant()
+		if(null != loginIdentifierType && UserConstants.MOBILE.equals(loginIdentifierType)) {
+			// mobile otp flow
+			otpGeneratedDatenTime = otpGeneratedDatenTime.plusMinutes(15);
+		}else {
+			// email otp flow
+			otpGeneratedDatenTime = otpGeneratedDatenTime.plusDays(7);
+		}
+		long expirationDateInMillisecs = otpGeneratedDatenTime.atZone(ZoneId.systemDefault()).toInstant()
 				.toEpochMilli();
 
 		LocalDateTime currentDatenTime = LocalDateTime.now();
-
 		long currentDatenTimeInMillisecs = currentDatenTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-		if(currentDatenTimeInMillisecs < datePlusSevendaysInMillisecs){
+		LOGGER.info("currentDatenTimeInMillisecs: "+currentDatenTimeInMillisecs);
+		LOGGER.info("expirationDateInMillisecs: "+expirationDateInMillisecs);
+
+		if(currentDatenTimeInMillisecs < expirationDateInMillisecs){
 			LOGGER.info("checkTimeStamp(): OTP timestamp validation OK! and checkTimeStamp() ended");
 			 validateTimeStamp = true;
 		}
