@@ -606,7 +606,7 @@ public class SendEmail {
 			        } 
 				}
 				else{
-					if(templateColor.equalsIgnoreCase("Blue")){
+					if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
 						filePath = IDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_EN;
 					}else
 					filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN;
