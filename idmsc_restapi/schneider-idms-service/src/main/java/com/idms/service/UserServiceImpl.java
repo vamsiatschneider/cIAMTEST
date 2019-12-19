@@ -2420,6 +2420,7 @@ public class UserServiceImpl implements UserService {
 		/**
 		 * CompanyName mandatory field check
 		 */
+
 		if((!checkMandatoryFields) && userRequest.getIDMS_User_Context__c()!=null && !userRequest.getIDMS_User_Context__c().isEmpty()){
 		 if(userRequest.getIDMS_User_Context__c().equalsIgnoreCase(UserConstants.USER_CONTEXT_WORK) || userRequest.getIDMS_User_Context__c().equalsIgnoreCase(UserConstants.USER_CONTEXT_WORK_1)){	
 			 if ((null == userRequest.getCompanyName() || userRequest.getCompanyName().isEmpty())) {
@@ -2430,7 +2431,7 @@ public class UserServiceImpl implements UserService {
 		 }
 		}
 		
-		
+
 		/**
 		 * CompanyName Length Validation check
 		 */
@@ -2534,6 +2535,7 @@ public class UserServiceImpl implements UserService {
 		/**
 		 * IDMSClassLevel1__c mandatory field check
 		 */
+
 		if((!checkMandatoryFields) && userRequest.getIDMS_User_Context__c()!=null && !userRequest.getIDMS_User_Context__c().isEmpty()){
 			
 			if(userRequest.getIDMS_User_Context__c().equalsIgnoreCase(UserConstants.USER_CONTEXT_WORK) || userRequest.getIDMS_User_Context__c().equalsIgnoreCase(UserConstants.USER_CONTEXT_WORK_1)){	
