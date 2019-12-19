@@ -552,8 +552,8 @@ public class SendEmail {
 		int startIndex=0;
 		int endIndex=0;
 		//Get the appropriate path variable
-		String filePathone = new File("").getAbsolutePath();
-		LOGGER.info("Current File Path : " + filePathone);
+		//String filePathone = new File("").getAbsolutePath();
+		//LOGGER.info("Current File Path : " + filePathone);
 
 		if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.SETUSERPWD_OPT_TYPE)) {
 			LOGGER.info("Inside SetUserPwd OperationType  :  " + hotpOperationType);
@@ -583,7 +583,7 @@ public class SendEmail {
 			        } 
 				}
 				else{					
-					if(templateColor.equalsIgnoreCase("Blue")){
+					if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
 						filePath = IDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_CN;
 					}else
 					filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN;
