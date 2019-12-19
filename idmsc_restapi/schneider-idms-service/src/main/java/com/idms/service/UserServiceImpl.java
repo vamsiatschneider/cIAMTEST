@@ -1036,10 +1036,10 @@ public class UserServiceImpl implements UserService {
 						&& !userRequest.getUserRecord().getIDMS_Federated_ID__c().startsWith("cn00")
 						&& !userRequest.getUserRecord().getIDMS_Registration_Source__c().equalsIgnoreCase("UIMS")) {
 					errorResponse.setStatus(errorStatus);
-					errorResponse.setMessage("Registration from non-UIMS, federationID must contain cn00.");
+					errorResponse.setMessage("Registration from non-UIMS, federationID must start with cn00.");
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
-					LOGGER.error("Registration from non-UIMS, federationID must contain cn00.");
+					LOGGER.error("Registration from non-UIMS, federationID must start with cn00.");
 					LOGGER.error(
 							"ECODE-REG-WRONG-NON-UIMS-REG-CN00 : User registration: FederationID from non-UIMS does not have cn00 for : "
 									+ userName);
@@ -2417,7 +2417,17 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.IDMS_ADDITIONAL_ADDRESS_C);
 			return true;
 		}
-
+        
+		/**
+		 * CompanyName mandatory field check
+		 */
+		
+		if ((null == userRequest.getCompanyName() || userRequest.getCompanyName().isEmpty())) {
+			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_NAME);
+			LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_NAME);
+			return true;
+		}
+		
 		/**
 		 * CompanyName Length Validation check
 		 */
@@ -2517,7 +2527,16 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error(UserConstants.INCORRECT_FIELDS_LENGTH + UserConstants.COMPANY_ADDRESS2_C);
 			return true;
 		}
+		
+		/**
+		 * IDMSClassLevel1__c mandatory field check
+		 */
+		if ((null == userRequest.getIDMSClassLevel1__c() || userRequest.getIDMSClassLevel1__c().isEmpty())) {
 
+			userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.IDMS_CLASS_LEVEL_C);
+			LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.IDMS_CLASS_LEVEL_C);
+			return true;
+		}
 		/**
 		 * IDMSClassLevel1__c validation and length check
 		 */
