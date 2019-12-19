@@ -90,6 +90,12 @@ public class SendEmail {
 	
 	@Value("${user.registration.withpwd.email.template.en}")
 	private String IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN;
+	
+	@Value("${user.registration.withpwd.email.template.blue.cn}")
+	private String IDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_CN;
+	
+	@Value("${user.registration.withpwd.email.template.blue.en}")
+	private String IDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_EN;
 
 	@Value("${user.update.email.template.cn}")
 	private String IDMS_USER_UPDATE_EMAILTEMPLATE_CN;
@@ -263,6 +269,9 @@ public class SendEmail {
 				productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
 				String bfoSupportUrl = productDJData.read(JsonConstants.BFO_SUPPORT_URL);
 				LOGGER.info("bfoSupportUrl = "+bfoSupportUrl);
+				
+				String templateColor = productDJData.read("_IDMS_Application_CSS");
+				LOGGER.info("templateColor = "+templateColor);
 				// For email name configuration 
 				if (null != applicationDetails && 200 == applicationDetails.getStatus()) {
 					String userNameFormatOpenDJ = productDJData.read("userNameFormat");
@@ -386,12 +395,12 @@ public class SendEmail {
 					|| (hotpLanguage != null && (hotpLanguage.equalsIgnoreCase("zh")
 							|| hotpLanguage.equalsIgnoreCase("zh_cn") || hotpLanguage.equalsIgnoreCase("zh_tw")))) {
 					LOGGER.info("sendOpenAmEmail :  Building Chinese email content..for.."+to);
-					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,firstName,bfoSupportUrl,prmTemplate);
+					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,firstName,bfoSupportUrl,prmTemplate,templateColor);
 				}
 				// Else section for English user
 				else {
 					LOGGER.info("sendOpenAmEmail :  Building English email content..for.."+to);
-					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,firstName,bfoSupportUrl,prmTemplate);
+					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,firstName,bfoSupportUrl,prmTemplate,templateColor);
 
 				}
 
@@ -533,7 +542,7 @@ public class SendEmail {
 		return validatePin;
 	}
 
-	private String emailContentTemplate(String to, String subject, String lang,String hotpOperationType,String firstName, String bfoSupportUrl,String prmTemplate)  {
+	private String emailContentTemplate(String to, String subject, String lang,String hotpOperationType,String firstName, String bfoSupportUrl,String prmTemplate, String templateColor)  {
 		LOGGER.info("Entered emailContentTemplate() -> Start");
 		LOGGER.info("Parameter to -> " + to+" ,subject -> "+subject);//Senthil consider this to handle PRM scenario
 		LOGGER.info("Parameter lang -> " + lang+" ,hotpOperationType -> "+hotpOperationType);
@@ -573,10 +582,12 @@ public class SendEmail {
 			            	filePath=PRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_CN; 
 			        } 
 				}
-				else{
+				else{					
+					if(templateColor.equalsIgnoreCase("Blue")){
+						filePath = IDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_CN;
+					}else
 					filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN;
 				}
-				
 			} else {
 				if(subject.equalsIgnoreCase(UserConstants.PRM_APP_NAME) && prmTemplate!=null){
 					switch(prmTemplate) 
@@ -595,6 +606,9 @@ public class SendEmail {
 			        } 
 				}
 				else{
+					if(templateColor.equalsIgnoreCase("Blue")){
+						filePath = IDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_EN;
+					}else
 					filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN;
 				}
 			}
@@ -839,12 +853,12 @@ public class SendEmail {
 			// if section for chinese user
 			if ((lang != null && lang.equalsIgnoreCase("zh")) || (hotpLanguage != null && hotpLanguage.equalsIgnoreCase("zh"))) {
 				LOGGER.info("sendInvitationEmail :  Building Chinese email content..");
-				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,email,null,null);
+				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,email,null,null,null);
 			}
 			// Else section for English user
 			else {
 				LOGGER.info("sendInvitationEmail :  Building English email content..");
-				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,email,null,null);
+				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,email,null,null,null);
 				LOGGER.info("subject="+subject);
 			}
 
@@ -966,12 +980,12 @@ public class SendEmail {
 			// if section for chinese user
 			if ((lang != null && lang.equalsIgnoreCase("zh")) || (hotpLanguage != null && hotpLanguage.equalsIgnoreCase("zh"))) {
 				LOGGER.info("Building Chinese email content..");
-				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,to,null,null);
+				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,to,null,null,null);
 			}
 			// Else section for English user
 			else {
 				LOGGER.info("Building English email content..");
-				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,to,null,null);
+				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,to,null,null,null);
 
 			}
 
