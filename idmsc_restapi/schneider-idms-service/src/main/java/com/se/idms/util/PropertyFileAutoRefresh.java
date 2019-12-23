@@ -93,6 +93,8 @@ public class PropertyFileAutoRefresh {
 	
 	private String EMAIL_TEMPLATE_DIR;
 	
+	private String BLUE_EMAIL_TEMPLATE_DIR;
+	
 	private String authCsvPath;
 	
 	private String registrationCsvPath;
@@ -245,11 +247,14 @@ public class PropertyFileAutoRefresh {
 			if(!((UserServiceImpl) userService).getLOGIN_ERROR().equals(LOGIN_ERROR) && LOGIN_ERROR!=null && !LOGIN_ERROR.isEmpty())
 			((UserServiceImpl) userService).setLOGIN_ERROR(LOGIN_ERROR);
 			
-			LOGGER.info("Userservice email template dir:##"+((UserServiceImpl) userService).getEMAIL_TEMPLATE_DIR());
-			LOGGER.info("Config  email template dir:##"+EMAIL_TEMPLATE_DIR);
+			//LOGGER.info("Userservice email template dir:##"+((UserServiceImpl) userService).getEMAIL_TEMPLATE_DIR());
+			//LOGGER.info("Config  email template dir:##"+EMAIL_TEMPLATE_DIR);
 			
 			if(!((UserServiceImpl) userService).getEMAIL_TEMPLATE_DIR().equals(EMAIL_TEMPLATE_DIR) && EMAIL_TEMPLATE_DIR!=null && !EMAIL_TEMPLATE_DIR.isEmpty())
 			((UserServiceImpl) userService).setEMAIL_TEMPLATE_DIR(EMAIL_TEMPLATE_DIR);
+			
+			if(!((UserServiceImpl) userService).getBLUE_EMAIL_TEMPLATE_DIR().equals(BLUE_EMAIL_TEMPLATE_DIR) && BLUE_EMAIL_TEMPLATE_DIR!=null && !BLUE_EMAIL_TEMPLATE_DIR.isEmpty())
+				((UserServiceImpl) userService).setBLUE_EMAIL_TEMPLATE_DIR(BLUE_EMAIL_TEMPLATE_DIR);
 			
 			if(!((UserServiceImpl) userService).getAuthCsvPath().equals(authCsvPath) && authCsvPath!=null && !authCsvPath.isEmpty())
 			((UserServiceImpl) userService).setAuthCsvPath(authCsvPath);
@@ -592,6 +597,8 @@ public class PropertyFileAutoRefresh {
 		LOGIN_ERROR=configuration.getProperty("caller.fid");
 		
 		EMAIL_TEMPLATE_DIR=configuration.getProperty("email.template.dir");
+		
+		BLUE_EMAIL_TEMPLATE_DIR=configuration.getProperty("blue.email.template.dir");
 		
 		authCsvPath=configuration.getProperty("authCsvPath");
 		

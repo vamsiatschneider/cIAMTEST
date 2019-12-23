@@ -183,6 +183,9 @@ public class UserServiceImpl implements UserService {
 	// CODE-RE-STRUCTURING
 	@Value("${email.template.dir}")
 	private String EMAIL_TEMPLATE_DIR;
+	
+	@Value("${blue.email.template.dir}")
+	private String BLUE_EMAIL_TEMPLATE_DIR;
 
 	// CODE-RE-STRUCTURING
 	@Value("${caller.fid}")
@@ -5494,9 +5497,9 @@ public class UserServiceImpl implements UserService {
 						else
 							firstName=productDocCtxUser.read("$.givenName[0]");
 						LOGGER.info("Update user Email format Name:"+firstName);
-						
+						String templateColor = productDJData.read("_IDMS_Application_CSS");
 						contentBuilder = getContentFromTemplate(UserConstants.UPDATE_EMAIL_NOTIFICATION,
-								prefferedLanguage);
+								prefferedLanguage, templateColor);
 						int startName = contentBuilder.indexOf("{!User.FirstName},");
 						int endName = startName + "{!User.FirstName}".length();
 						contentBuilder.replace(startName, endName, firstName);
@@ -7340,7 +7343,7 @@ public class UserServiceImpl implements UserService {
 	 * com.idms.service.UserServiceImpl#getContentFromTemplate(java.lang.String,
 	 * java.lang.String)
 	 */
-	public StringBuilder getContentFromTemplate(String scenarioName, String prefferedLanguage) throws IOException {
+	public StringBuilder getContentFromTemplate(String scenarioName, String prefferedLanguage, String templateColor) throws IOException {
 		LOGGER.info("Entered getContentFromTemplate() -> Start");
 		LOGGER.info("Parameter scenarioName -> " + scenarioName);
 		LOGGER.info("Parameter prefferedLanguage -> " + prefferedLanguage);
@@ -7352,8 +7355,14 @@ public class UserServiceImpl implements UserService {
 		// Need to check the scenario //UPDATE EMAIL NOTIFICATION
 		if (UserConstants.UPDATE_EMAIL_NOTIFICATION.equalsIgnoreCase(scenarioName)) {
 			if (UserConstants.LANGUAGE_CHINA.equalsIgnoreCase(prefferedLanguage)) {
+				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+					filePath = BLUE_EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_CHINA.html";
+				}else
 				filePath = EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_CHINA.html";
 			} else {
+				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+					filePath = BLUE_EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_ENGLISH.html";
+				}else
 				filePath = EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_ENGLISH.html";
 			}
 		} else if (UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(scenarioName)) {
@@ -11176,10 +11185,12 @@ public class UserServiceImpl implements UserService {
 		return openAmReq;
 	}
 	
-	
-	
 	public void setEMAIL_TEMPLATE_DIR(String eMAIL_TEMPLATE_DIR) {
 		EMAIL_TEMPLATE_DIR = eMAIL_TEMPLATE_DIR;
+	}
+	
+	public void setBLUE_EMAIL_TEMPLATE_DIR(String bLUE_EMAIL_TEMPLATE_DIR) {
+		BLUE_EMAIL_TEMPLATE_DIR = bLUE_EMAIL_TEMPLATE_DIR;
 	}
 
 	public void setLOGIN_ERROR(String lOGIN_ERROR) {
@@ -11300,6 +11311,10 @@ public class UserServiceImpl implements UserService {
 
 	public String getEMAIL_TEMPLATE_DIR() {
 		return EMAIL_TEMPLATE_DIR;
+	}
+
+	public String getBLUE_EMAIL_TEMPLATE_DIR() {
+		return BLUE_EMAIL_TEMPLATE_DIR;
 	}
 
 	public String getAuthCsvPath() {
