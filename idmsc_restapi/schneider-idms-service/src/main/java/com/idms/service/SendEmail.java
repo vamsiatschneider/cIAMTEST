@@ -1,8 +1,6 @@
 package com.idms.service;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -85,11 +83,23 @@ public class SendEmail {
 	@Value("${user.reset.password.email.template.en}")
 	private String IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN;
 	
+	@Value("${user.reset.password.email.template.blue.cn}")
+	private String IDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_CN;
+	
+	@Value("${user.reset.password.email.template.blue.en}")
+	private String IDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_EN;
+	
 	@Value("${user.registration.withpwd.email.template.cn}")
 	private String IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN;
 	
 	@Value("${user.registration.withpwd.email.template.en}")
 	private String IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN;
+	
+	@Value("${user.registration.withpwd.email.template.blue.cn}")
+	private String IDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_CN;
+	
+	@Value("${user.registration.withpwd.email.template.blue.en}")
+	private String IDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_EN;
 
 	@Value("${user.update.email.template.cn}")
 	private String IDMS_USER_UPDATE_EMAILTEMPLATE_CN;
@@ -97,11 +107,23 @@ public class SendEmail {
 	@Value("${user.update.email.template.en}")
 	private String IDMS_USER_UPDATE_EMAILTEMPLATE_EN;
 	
+	@Value("${user.update.email.template.blue.cn}")
+	private String IDMS_USER_UPDATE_BLUE_EMAILTEMPLATE_CN;
+	
+	@Value("${user.update.email.template.blue.en}")
+	private String IDMS_USER_UPDATE_BLUE_EMAILTEMPLATE_EN;
+	
 	@Value("${user.default.email.template.cn}")
 	private String IDMS_USER_DEFAULT_EMAILTEMPLATE_CN;
 	
 	@Value("${user.default.email.template.en}")
-	private String IDMS_USER_DEFAULT_EMAILTEMPLATE_EN;	
+	private String IDMS_USER_DEFAULT_EMAILTEMPLATE_EN;
+	
+	@Value("${user.default.email.template.blue.cn}")
+	private String IDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_CN;
+	
+	@Value("${user.default.email.template.blue.en}")
+	private String IDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_EN;
 	
 	@Value("${send.invitation.email.template.en}")
 	private String IDMS_SEND_INVITATION_EMAILTEMPLATE_EN;
@@ -109,12 +131,24 @@ public class SendEmail {
 	@Value("${send.invitation.email.template.cn}")
 	private String IDMS_SEND_INVITATION_EMAILTEMPLATE_CN;
 	
+	@Value("${send.invitation.email.template.blue.en}")
+	private String IDMS_SEND_INVITATION_BLUE_EMAILTEMPLATE_EN;
+	
+	@Value("${send.invitation.email.template.blue.cn}")
+	private String IDMS_SEND_INVITATION_BLUE_EMAILTEMPLATE_CN;
+	
 	//CODE-RE-STRUCTURING - 3-Feb-19 merge
 	@Value("${user.add.email.template.cn}")
 	private String IDMS_USER_ADD_EMAILTEMPLATE_CN;
 	
 	@Value("${user.add.email.template.en}")
 	private String IDMS_USER_ADD_EMAILTEMPLATE_EN;
+	
+	@Value("${user.add.email.template.blue.cn}")
+	private String IDMS_USER_ADD_BLUE_EMAILTEMPLATE_CN;
+	
+	@Value("${user.add.email.template.blue.en}")
+	private String IDMS_USER_ADD_BLUE_EMAILTEMPLATE_EN;
 	
 	@Value("${idmsc.emailUserNameFormat}")
 	private String defaultUserNameFormat;
@@ -171,7 +205,6 @@ public class SendEmail {
 	String url = null;
 	String cn = null;
 	String invID = null;
-	//private String prmTemplate=null;
 	
 	boolean sslEnabled = true;
 	
@@ -179,10 +212,7 @@ public class SendEmail {
 	
 	Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 	DocumentContext productDocCtxUser = null, productDJData = null;;
-	
-	/**
-	 * Logger instance.
-	 */
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(SendEmail.class);
 	
 
@@ -193,7 +223,6 @@ public class SendEmail {
 	public void emailReadyToSendEmail(String to, String from, String subject, String msgBody) {
 		LOGGER.info("Entered emailReadyToSendEmail() -> Start");
 		LOGGER.info("Parameter to -> " + to+" ,from -> "+from+" ,subject -> "+subject);
-		//LOGGER.info("msg body:"+msgBody);
 		MimeMessage mailMessage = mailSender.createMimeMessage();
 		InternetAddress fromAddress = null;
 		InternetAddress toAddress = null;
@@ -206,12 +235,7 @@ public class SendEmail {
 			mailMessage.setText(msgBody, "utf-8", "html");
 			mailMessage.setFrom(fromAddress);
 			mailMessage.setRecipient(RecipientType.TO, toAddress);
-			/*
-			 * MimeMessageHelper helper = new MimeMessageHelper(mailMessage,
-			 * true); helper.setFrom(fromAddress); helper.setTo(toAddress);
-			 */
-			// helper.setText(msgBody,true);
-
+			
 			LOGGER.info("Start: sending email to:"+to);
 			mailSender.send(mailMessage); 
 			LOGGER.info("End: sending email finished to:"+to);
@@ -248,7 +272,6 @@ public class SendEmail {
 		String prmTemplate=null;
 			try {
 				encodedHOTPcode = code;
-				// get sso token.. iPlanetDirectoryKey
 				LOGGER.info("Start: getUser() of openamService for userId="+userId);
 				userData = productService.getUser(userService.getSSOToken(), userId);
 				LOGGER.info("End: getUser() of openamService finished for userId="+userId);
@@ -263,6 +286,8 @@ public class SendEmail {
 				productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
 				String bfoSupportUrl = productDJData.read(JsonConstants.BFO_SUPPORT_URL);
 				LOGGER.info("bfoSupportUrl = "+bfoSupportUrl);
+				
+				String templateColor = productDJData.read("_IDMS_Application_CSS");
 				// For email name configuration 
 				if (null != applicationDetails && 200 == applicationDetails.getStatus()) {
 					String userNameFormatOpenDJ = productDJData.read("userNameFormat");
@@ -278,8 +303,6 @@ public class SendEmail {
 					emailUserNameFormat = defaultUserNameFormat;
 				}
 				if(hotpOperationType.equalsIgnoreCase(EmailConstants.UPDATEUSERRECORD_OPT_TYPE)){
-					/*userData = provisionalService.getUser(userService.getSSOToken(), userId);
-					productDocCtxUser = JsonPath.using(conf).parse(userData);*/
 					subject=appid;
 					to = productDocCtxUser.read("$.newmail[0]");
 				}else if(hotpOperationType.equalsIgnoreCase(EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE)){
@@ -339,16 +362,6 @@ public class SendEmail {
 					linkParam=linkParam+appNameParam;//Appending appName parameter for mySchneiderPartnerPortal.
 				}
 				LOGGER.info("linkParam: "+linkParam);
-				/*				url = hotpEmailVerificationURL + "?userid=" + to + "&pin=" + encodedHOTPcode + "&operationType="
-							+ hotpOperationType + "&lang=" + lang + "&app=" + appid + "&uid=" + uid;
-					subject = appid;
-				} else {
-					url = hotpEmailVerificationURL + "?userid=" + to + "&pin=" + encodedHOTPcode + "&operationType="
-							+ hotpOperationType + "&lang=" + hotpLanguage;
-					subject = "OpenAM";
-				}*/
-				//userId ==con
-				//appid = regsource or updateresource pass from emthod
 				
 				String mailDomain = to.substring(to.indexOf("@") + 1);
 				
@@ -361,22 +374,8 @@ public class SendEmail {
 					url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + encodedHOTPcode + "&operationType="
 							+ hotpOperationType + "&lang=" + lang + "&app=" + appid + "&uid=" + userId+linkParam;
 				}
-				//url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + encodedHOTPcode + "&operationType="
-				//		+ hotpOperationType + "&lang=" + lang + "&app=" + appid + "&uid=" + userId+linkParam;
-				//url = URLEncoder.encode( structurl, "UTF-8");  
-				//subject = appid;
-				// String url =
-				// hotpEmailVerificationURL+"?userid="+to+"&pin="+code+"&operationType="+hotpOperationType+"&pwdReq="+hotpPasswordRequired+"&lang="+hotpLanguage;
-				// String url =
-				// hotpEmailVerificationURL+"?userid="+email+"&pin="+code+"&operationType="+hotpOperationType+"&lang="+hotpLanguage;
-				// String url =
-				// hotpEmailVerificationURL+"?userid="+to+"&pin="+code+"&operationType="+hotpOperationType+"&lang="+lang+"&appid="+appid+"&uid="+uid;
+				
 				LOGGER.info("sendOpenAmEmail : URL compiled to : " + url);
-				// String msg = html1+url+html2;
-
-				// debug.error("SchneiderSMSGatewayImpl.sendEmail() : Message 1
-				// compiled to : "+msg);
-
 				contentBuilder = new StringBuilder();
 				contentBuilder.setLength(0);
 				LOGGER.info("Before emailContentTemplate call first name:"+firstName);
@@ -386,34 +385,24 @@ public class SendEmail {
 					|| (hotpLanguage != null && (hotpLanguage.equalsIgnoreCase("zh")
 							|| hotpLanguage.equalsIgnoreCase("zh_cn") || hotpLanguage.equalsIgnoreCase("zh_tw")))) {
 					LOGGER.info("sendOpenAmEmail :  Building Chinese email content..for.."+to);
-					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,firstName,bfoSupportUrl,prmTemplate);
+					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,firstName,bfoSupportUrl,prmTemplate,templateColor);
 				}
 				// Else section for English user
 				else {
 					LOGGER.info("sendOpenAmEmail :  Building English email content..for.."+to);
-					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,firstName,bfoSupportUrl,prmTemplate);
+					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,firstName,bfoSupportUrl,prmTemplate,templateColor);
 
 				}
 
 				String tos[] = new String[1];
-
 				tos[0] = to;
-				//AMSendMail sendMail = new AMSendMail();
 
 				LOGGER.info("sendOpenAmEmail : to : " + to);
 				LOGGER.info("sendOpenAmEmail : subject : " + subject);
 				LOGGER.info("sendOpenAmEmail : content.isEmpty : " + content.isEmpty());
 				LOGGER.info("sendOpenAmEmail : from : " + from);
 
-				//sendMail.postMail(tos, subject, content, from, "text/html", "UTF-8", smtpHostName, smtpHostPort,
-				//smtpUserName, smtpUserPassword, sslEnabled);
-					
 				emailReadyToSendEmail(to, from, subject, content);
-					/*
-					 * sendMail.postMail(tos, subject, msg, from, "UTF-8",
-					 * smtpHostName, smtpHostPort, smtpUserName, smtpUserPassword,
-					 * sslEnabled);
-					 */
 
 				if (LOGGER.isDebugEnabled()) {
 					LOGGER.info("sendOpenAmEmail : " + "HOTP sent to : " + to + ".");
@@ -428,13 +417,11 @@ public class SendEmail {
 		LOGGER.info("Entered generateOtp() -> Start");
 		LOGGER.info("Parameter userId -> " + userId);
 
-		// Proper Exception handling
 		String hexpin = "";
 		String product_json_string = "";
 		String pin = "";
 		pin = generateRamdomPin();
 		hexpin = ChinaIdmsUtil.generateHashValue(pin);
-		//LOGGER.info("hexa string is " + hexpin);
 		
 		LocalDateTime currentDatenTime = LocalDateTime.now();
 		long currentDatenTimeInMillisecs = currentDatenTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
@@ -454,9 +441,7 @@ public class SendEmail {
 	public void storePRMOtp(String userId, String hashedPin) throws Exception {
 		LOGGER.info("Entered storePRMOtp() -> Start");
 
-		// Proper Exception handling
 		String product_json_string = "";
-		//LOGGER.info("hexa string is " + hashedPin);
 		LOGGER.info("Parameter userId -> " + userId);
 		
 		LocalDateTime currentDatenTime = LocalDateTime.now();
@@ -484,7 +469,6 @@ public class SendEmail {
 			String newHashedValue = ChinaIdmsUtil.generateHashValue(otp);
 			LOGGER.info("hexa string is:" + newHashedValue);
 
-			// iplane getsson
 			// get user details to get stored hashkey.
 			LOGGER.info("Start: getUser() of openamservice to get stored hashkey");
 			String userData = productService.getUser(userService.getSSOToken(), userId);
@@ -502,9 +486,6 @@ public class SendEmail {
 
 				String storedHashedValue = authIdTime[0];
 
-				// pull time in milliseconds from openam
-				// long localDTInMilli =
-				// productDocCtx.read("$.timestamp").toString();
 				long localDTInMilli = Long.valueOf(authIdTime[1]).longValue();
 				// figure out login identifier type
 				String emailOrMobile = productDocCtx.read("$.mail[0]");
@@ -517,13 +498,6 @@ public class SendEmail {
 				// compare Stored hashkey and generated hash key
 				if (newHashedValue.equals(storedHashedValue) && checkTimeStamp(localDTInMilli, loginIdentifierType)) {
 					validatePin = true;
-					//product_json_string = "{" + "\"authId\": \"" + "[]" + "\"}";
-					// Need add the timestamp
-					// update hashkey in openAM.
-					//LOGGER.info("Start: updateUser() of openamservice to update hashkey for userid ="+userId);
-					/*productService.updateUser(UserConstants.CHINA_IDMS_TOKEN+userService.getSSOToken(), userId,
-							product_json_string);*/
-					//LOGGER.info("End: updateUser() of openamservice to update hashkey finished");
 				}
 			}else{
 				LOGGER.error("Some problem in validatePin() for userId="+userId);
@@ -533,7 +507,7 @@ public class SendEmail {
 		return validatePin;
 	}
 
-	private String emailContentTemplate(String to, String subject, String lang,String hotpOperationType,String firstName, String bfoSupportUrl,String prmTemplate)  {
+	private String emailContentTemplate(String to, String subject, String lang,String hotpOperationType,String firstName, String bfoSupportUrl,String prmTemplate, String templateColor)  {
 		LOGGER.info("Entered emailContentTemplate() -> Start");
 		LOGGER.info("Parameter to -> " + to+" ,subject -> "+subject);//Senthil consider this to handle PRM scenario
 		LOGGER.info("Parameter lang -> " + lang+" ,hotpOperationType -> "+hotpOperationType);
@@ -542,15 +516,18 @@ public class SendEmail {
 		boolean chineseLangCheck = ((lang != null && lang.equalsIgnoreCase(EmailConstants.HOTP_LAN_CN)) || (hotpLanguage != null && hotpLanguage.equalsIgnoreCase(EmailConstants.HOTP_LAN_CN)));
 		int startIndex=0;
 		int endIndex=0;
-		//Get the appropriate path variable
-		String filePathone = new File("").getAbsolutePath();
-		LOGGER.info("Current File Path : " + filePathone);
 
 		if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.SETUSERPWD_OPT_TYPE)) {
 			LOGGER.info("Inside SetUserPwd OperationType  :  " + hotpOperationType);
 			if (chineseLangCheck) {
+				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+					filePath = IDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_CN;
+				}else
 				filePath = IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN;
 			} else {
+				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+					filePath = IDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_EN;
+				}else
 				filePath = IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN;
 			}
 			LOGGER.info("filePath is"+filePath);
@@ -573,10 +550,12 @@ public class SendEmail {
 			            	filePath=PRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_CN; 
 			        } 
 				}
-				else{
+				else{					
+					if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+						filePath = IDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_CN;
+					}else
 					filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN;
 				}
-				
 			} else {
 				if(subject.equalsIgnoreCase(UserConstants.PRM_APP_NAME) && prmTemplate!=null){
 					switch(prmTemplate) 
@@ -595,40 +574,66 @@ public class SendEmail {
 			        } 
 				}
 				else{
+					if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+						filePath = IDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_EN;
+					}else
 					filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN;
 				}
 			}
 			LOGGER.info("filePath is"+filePath);
 		} else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.UPDATEUSERRECORD_OPT_TYPE)) {
 			LOGGER.info("Inside OperationType UpdateUserRecord " + hotpOperationType);
-			// filePath="C:\\Users\\neha.soni\\Desktop\\Schnieder\\POC's\\HOTP\\Template\\User_registration_with_password.html";
 			if (chineseLangCheck) {
+				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+					filePath = IDMS_USER_UPDATE_BLUE_EMAILTEMPLATE_CN;
+				}else
 				filePath = IDMS_USER_UPDATE_EMAILTEMPLATE_CN;
 			} else {
+				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+					filePath = IDMS_USER_UPDATE_BLUE_EMAILTEMPLATE_EN;
+				}else
 				filePath = IDMS_USER_UPDATE_EMAILTEMPLATE_EN;
 			}
 			LOGGER.info("filePath is"+filePath);
 		} else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE)) {
 			LOGGER.info("Inside OperationType AddEmailUserRecord " + hotpOperationType);
 			if (chineseLangCheck) {
+				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+					filePath = IDMS_USER_ADD_BLUE_EMAILTEMPLATE_CN;
+				}else
 				filePath = IDMS_USER_ADD_EMAILTEMPLATE_CN;
 			} else {
+				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+					filePath = IDMS_USER_ADD_BLUE_EMAILTEMPLATE_EN;
+				}else
 				filePath = IDMS_USER_ADD_EMAILTEMPLATE_EN;
 			}
 			LOGGER.info("filePath is"+filePath);
 		}else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.SENDINVITATION_OPT_TYPE)) {
 			LOGGER.info("Inside OperationType sendInvitation " + hotpOperationType);
 			if (chineseLangCheck) {
+				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+					filePath = IDMS_SEND_INVITATION_BLUE_EMAILTEMPLATE_CN;
+				}else
 				filePath = IDMS_SEND_INVITATION_EMAILTEMPLATE_CN;
 			} else {
+				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+					filePath = IDMS_SEND_INVITATION_BLUE_EMAILTEMPLATE_EN;
+				}else
 				filePath = IDMS_SEND_INVITATION_EMAILTEMPLATE_EN;
 			}
 			LOGGER.info("filePath is"+filePath);
 		} else {
 			LOGGER.info("Inside Common OperationType " + hotpOperationType);
 			if (chineseLangCheck) {
+				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+					filePath = IDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_CN;
+				}else
 				filePath = IDMS_USER_DEFAULT_EMAILTEMPLATE_CN;
 			} else {
+				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+					filePath = IDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_EN;
+				}else
 				filePath = IDMS_USER_DEFAULT_EMAILTEMPLATE_EN;
 			}
 			LOGGER.info("filePath is"+filePath);
@@ -647,12 +652,10 @@ public class SendEmail {
 		if(null != invID &&  EmailConstants.SENDINVITATION_OPT_TYPE.equalsIgnoreCase(hotpOperationType)){
 			 startIndex = contentBuilder.indexOf("{!invtID}");
 			 endIndex = startIndex + 9;
-			//LOGGER.info("Starting and Ending Index of invtID in Email : Start : " + startIndex + " : End : +" + endIndex);
 			contentBuilder.replace(startIndex, endIndex, invID);
 			
 			startIndex = contentBuilder.indexOf("{!firstname}");
 			endIndex = startIndex + 12;
-			//LOGGER.info("Starting and Ending Index of firstname in Email : Start : " + startIndex + " : End : +" + endIndex);
 			contentBuilder.replace(startIndex, endIndex, firstName);
 			
 			startIndex = contentBuilder.indexOf("{!invtURL}");
@@ -664,46 +667,29 @@ public class SendEmail {
 				if(0 < contentBuilder.indexOf("{!registrationSource}")){
 					startIndex = contentBuilder.indexOf("{!registrationSource}");
 					endIndex = startIndex + 21;
-					//LOGGER.info("Starting and Ending Index of registrationSource in Email : Start : " + startIndex + " : End : +" + endIndex);
 					contentBuilder.replace(startIndex, endIndex, subject);
 				}
 			}
 			startIndex = contentBuilder.indexOf("{!firstname}");
 			endIndex = startIndex + 12;
-			//LOGGER.info("Starting and Ending Index of firstname in Email : Start : " + startIndex + " : End : +" + endIndex);
 			contentBuilder.replace(startIndex, endIndex, firstName);
 			startIndex = contentBuilder.indexOf("{!url}");
 			endIndex = startIndex+6;
 		}
 		
-		/*int sendInvistartURL = contentBuilder.indexOf("{!invtURL}");
-		int sendInviendURL = sendInvistartURL+10;
-		
-		int startURL = contentBuilder.indexOf("{!url}");
-		int endURL = startURL+6;*/
-		
 		if (hotpOperationType != null && EmailConstants.SETUSERPWD_OPT_TYPE.equalsIgnoreCase(hotpOperationType)) {
-			/*LOGGER.info("emailContentTemplate : Inside OperationType " + hotpOperationType
-					+ " .. setting template starte and end value accordingly! ");*/
-			//endURL = startURL + 57;
 			if (chineseLangCheck) {
 				subject = subject + EmailConstants.HYPHEN + EmailConstants.SCHE_PWD_RESET_CN;
 			} else {
 				subject = subject + EmailConstants.HYPHEN + EmailConstants.SCHE_PWD_RESET_EN;
 			}
 		} else if (hotpOperationType != null && EmailConstants.USERREGISTRATION_OPT_TYPE.equalsIgnoreCase(hotpOperationType)) {
-			/*LOGGER.info("emailContentTemplate : Inside userRegistration OperationType " + hotpOperationType
-					+ " .. setting template starte and end value accordingly! ");*/
-			//endURL = startURL + 6;
 			if (chineseLangCheck) {
 				subject = subject + EmailConstants.HYPHEN + EmailConstants.COMPLETE_REG_CN;
 			} else {
 				subject = subject + EmailConstants.HYPHEN + EmailConstants.COMPLETE_REG_EN;
 			}
 		} else if (hotpOperationType != null && EmailConstants.UPDATEUSERRECORD_OPT_TYPE.equalsIgnoreCase(hotpOperationType)) {
-			/*LOGGER.info("emailContentTemplate : Inside UpdateUserRecord OperationType " + hotpOperationType
-					+ " .. setting template starte and end value accordingly! ");*/
-			//endURL = startURL + 70;
 			if (chineseLangCheck) {
 				subject = subject + EmailConstants.HYPHEN + EmailConstants.SCHE_LOGINID_CHANGE_NOTIFICATION_CN;
 			} else {
@@ -716,18 +702,12 @@ public class SendEmail {
 				subject = subject + EmailConstants.HYPHEN + EmailConstants.SCHE_ADD_EMAIL_NOTIFICATION_EN;
 			}
 		} else if (hotpOperationType != null && EmailConstants.SENDINVITATION_OPT_TYPE.equalsIgnoreCase(hotpOperationType)) {
-			/*LOGGER.info("emailContentTemplate : Inside sendInvitation OperationType " + hotpOperationType
-					+ " .. setting template starte and end value accordingly! ");*/
-			//endURL = startURL + 70;
 			if (chineseLangCheck) {
 				subject = subject + EmailConstants.HYPHEN + EmailConstants.SCHE_SEND_INVITATION_NOTIFICATION_CN;
 			} else {
 				subject = subject + EmailConstants.HYPHEN + EmailConstants.SCHE_SEND_INVITATION_NOTIFICATION_EN;
 			}
 		} else {
-			/*LOGGER.info(
-					"emailContentTemplate : OperationType doesn't match any of the above .. setting template starte and end value accordingly! ");*/
-			//endURL = startURL + 70;
 			if (chineseLangCheck) {
 				subject = subject + EmailConstants.HYPHEN + EmailConstants.OPENAM_OTP_CN;
 			} else {
@@ -735,7 +715,6 @@ public class SendEmail {
 			}
 		}
 		LOGGER.info("subject="+subject);
-		//LOGGER.info("Starting and Ending Index of URL in Email : Start : " + startIndex + " : End : +" + endIndex);
 		contentBuilder.replace(startIndex, endIndex, url);
 		
 		if(null != bfoSupportUrl && !bfoSupportUrl.isEmpty()){
@@ -746,18 +725,8 @@ public class SendEmail {
 				contentBuilder.replace(startIndex, endIndex, bfoSupportUrl);
 			}
 		}
-		
-		/*if (hotpOperationType != null && hotpOperationType.equals(EmailConstants.SENDINVITATION_OPT_TYPE)) {
-			LOGGER.info("Starting and Ending Index of URL in Email : Start : " + sendInvistartURL + " : End : +"
-					+ sendInviendURL);
-			contentBuilder.replace(sendInvistartURL, sendInviendURL, url);
-		} else {
-			LOGGER.info("Starting and Ending Index of URL in Email : Start : " + startURL + " : End : +" + endURL);
-			contentBuilder.replace(startURL, endURL, url);
-		}*/
 
 		content = contentBuilder.toString();
-		//LOGGER.info("emailContentTemplate : Message 2 compiled to : " );
 		return subject;
 	}
 	
@@ -800,7 +769,6 @@ public class SendEmail {
 			LOGGER.info("checkTimeStamp(): OTP timestamp validation OK! and checkTimeStamp() ended");
 			 validateTimeStamp = true;
 		}
-		//LOGGER.info("checkTimeStamp(): OTP timestamp validation NOT OK! and checkTimeStamp() ended");
 		LOGGER.info("validation status="+validateTimeStamp);
 		return validateTimeStamp;
 	}
@@ -830,21 +798,16 @@ public class SendEmail {
 			LOGGER.info("sendInvitationEmail URL compiled to : " + url);
 
 			contentBuilder = new StringBuilder();
-			/*LOGGER.info(
-					"sendInvitationEmail : Content Builder Length initial:" + contentBuilder.length());*/
 			contentBuilder.setLength(0);
-			/*LOGGER.info(
-					"sendInvitationEmail : Content Builder Length cleared:" + contentBuilder.length());*/
-
 			// if section for chinese user
 			if ((lang != null && lang.equalsIgnoreCase("zh")) || (hotpLanguage != null && hotpLanguage.equalsIgnoreCase("zh"))) {
 				LOGGER.info("sendInvitationEmail :  Building Chinese email content..");
-				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,email,null,null);
+				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,email,null,null,null);
 			}
 			// Else section for English user
 			else {
 				LOGGER.info("sendInvitationEmail :  Building English email content..");
-				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,email,null,null);
+				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,email,null,null,null);
 				LOGGER.info("subject="+subject);
 			}
 
@@ -926,16 +889,11 @@ public class SendEmail {
 		String subject = "";
 		String lang= "";
 		
-		//LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : Inside sendOpenAmEmail()");
-			//LOGGER.info("SchneiderSMSGatewayImpl.sendEmail() : User's Email : " + to);
-
 			encodedHOTPcode = code;
-			// get sso token.. iPlanetDirectoryKey
 			LOGGER.info("Start: getUser() of openamservice for sendOpenAmMobileEmail of userid:"+userId);
 			try {
 				userData = productService.getUser(userService.getSSOToken(), userId);
 			} catch (IOException ioExp) {
-				// TODO Auto-generated catch block
 				LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
 			}
 			LOGGER.info("End: getUser() of openamservice finished for sendOpenAmMobileEmail of userid:"+userId);
@@ -951,7 +909,6 @@ public class SendEmail {
 			
 			to = to.concat("@mailinator.com");
 			String emailContent = "Your OpenAM One Time Password is : " + code;
-			//LOGGER.info("productService.getUser : Response -> ", userData);
 
 			lang=productDocCtxUser.read("$.preferredlanguage[0]");
 			
@@ -966,35 +923,26 @@ public class SendEmail {
 			// if section for chinese user
 			if ((lang != null && lang.equalsIgnoreCase("zh")) || (hotpLanguage != null && hotpLanguage.equalsIgnoreCase("zh"))) {
 				LOGGER.info("Building Chinese email content..");
-				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,to,null,null);
+				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,to,null,null,null);
 			}
 			// Else section for English user
 			else {
 				LOGGER.info("Building English email content..");
-				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,to,null,null);
+				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,to,null,null,null);
 
 			}
 
 			String tos[] = new String[1];
 
 			tos[0] = to;
-			//AMSendMail sendMail = new AMSendMail();
 
 			LOGGER.info("sendOpenAmMobileEmail : to : " + to);
 			LOGGER.info("sendOpenAmMobileEmail : subject : " + subject);
 			LOGGER.info("sendOpenAmMobileEmail : content.isEmpty : " + content.isEmpty());
 			LOGGER.info("sendOpenAmMobileEmail : from : " + from);
 
-			//sendMail.postMail(tos, subject, content, from, "text/html", "UTF-8", smtpHostName, smtpHostPort,
-			//smtpUserName, smtpUserPassword, sslEnabled);
+			emailReadyToSendEmail(to, from, subject, emailContent);
 				
-				emailReadyToSendEmail(to, from, subject, emailContent);
-				/*
-				 * sendMail.postMail(tos, subject, msg, from, "UTF-8",
-				 * smtpHostName, smtpHostPort, smtpUserName, smtpUserPassword,
-				 * sslEnabled);
-				 */
-
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.info("sendOpenAmMobileEmail : " + "HOTP sent to : " + to + ".");
 			}
