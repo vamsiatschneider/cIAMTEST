@@ -1974,29 +1974,13 @@ public class UserServiceImpl implements UserService {
 		Response userResponse = null;
 		try {
 			if (null != token) {
-
-				/*
-				 * LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER +
-				 * AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN + AUDIT_OPENAM_API
-				 * + AUDIT_OPENAM_USER_INFO_CALL + "/se" + AUDIT_LOG_CLOSURE);
-				 */
-				// LOGGER.info("Start: getUserInfoByAccessToken() of
-				// OpenAMTokenService");
-				String userInfoByAccessToken = openAMTokenService.getUserInfoByAccessToken(token, "/se");
-				// LOGGER.info("End: getUserInfoByAccessToken() of
-				// OpenAMTokenService finished");
-				// LOGGER.info("Accesstoken from the API call: " +
-				// userInfoByAccessToken);
-
+				String userInfoByAccessToken = openAMTokenService.getUserInfoByAccessToken(token, "/se");				
 				Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 				DocumentContext productDocCtx = JsonPath.using(conf).parse(userInfoByAccessToken);
 				String userId = productDocCtx.read("$.sub");
 				userResponse = getUserByOauthToken(userId);
-				// LOGGER.info("User details derived from access token: " +
-				// userId);
 			}
 		} catch (NotAuthorizedException e) {
-			// LOGGER.debug("InvalidSessionId!");
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("errorCode", "INVALID_SESSION_ID");
 			jsonObject.put("message", "Session expired or invalid");
@@ -2004,13 +1988,10 @@ public class UserServiceImpl implements UserService {
 			JSONArray jsonArray = new JSONArray();
 			jsonArray.add(jsonObject);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-			// LOGGER.info(GET_USER_BY_TOKEN_TIME_LOG + elapsedTime);
-			// LOGGER.error("Error in getUserInfoByAccessToken() of
-			// OpenAMTokenService:"+e.getMessage());
+			
 			LOGGER.error("ECODE-GETUSER-BYTOKEN-ERR : Token not acceptable - Session expired");
 			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonArray).build();
 		} catch (Exception e) {
-			// LOGGER.debug("Unauthorized!");
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("errorCode", "Unauthorized");
 			jsonObject.put("message", "Provided external ID field does not exist or is  not accessible ");
@@ -2018,15 +1999,12 @@ public class UserServiceImpl implements UserService {
 			JSONArray jsonArray = new JSONArray();
 			jsonArray.add(jsonObject);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-			// LOGGER.info(GET_USER_BY_TOKEN_TIME_LOG + elapsedTime);
-			// LOGGER.error("Exception in getUserInfoByAccessToken() of
-			// OpenAMTokenService->"+e.getMessage());
+			
 			LOGGER.error("ECODE-GETUSER-BYTOKEN-UNAUTH : Token unauthorized");
 			return Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(jsonArray).build();
 
 		}
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-		// LOGGER.info(GET_USER_BY_TOKEN_TIME_LOG + elapsedTime);
 		return userResponse;
 	}
 
@@ -2552,15 +2530,7 @@ public class UserServiceImpl implements UserService {
 		 * IDMSClassLevel1__c validation and length check
 		 */
 		if ((null != userRequest.getIDMSClassLevel1__c() && !userRequest.getIDMSClassLevel1__c().isEmpty())) {
-
-			/*
-			 * if (!legthValidator.validate(UserConstants.IAM_A1,
-			 * userRequest.getIDMSClassLevel1__c())) {
-			 * userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH +
-			 * UserConstants.IDMS_CLASS_LEVEL_C);
-			 * 
-			 * } else
-			 */ if (!pickListValidator.validate(UserConstants.IAM_A1, userRequest.getIDMSClassLevel1__c())) {
+			if (!pickListValidator.validate(UserConstants.IAM_A1, userRequest.getIDMSClassLevel1__c())) {
 				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_CLASS_LEVEL_C);
 				LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.IDMS_CLASS_LEVEL_C);
 				return true;
@@ -2572,15 +2542,7 @@ public class UserServiceImpl implements UserService {
 		 */
 
 		if ((null != userRequest.getIDMSClassLevel2__c() && !userRequest.getIDMSClassLevel2__c().isEmpty())) {
-
-			/*
-			 * if (!legthValidator.validate(UserConstants.IAM_A2.toString(),
-			 * userRequest.getIDMSClassLevel2__c())) {
-			 * userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH +
-			 * UserConstants.IDMS_CLASS_LEVEL2_C);
-			 * 
-			 * } else
-			 */ if (!pickListValidator.validate(UserConstants.IAM_A2.toString(), userRequest.getIDMSClassLevel2__c())) {
+			if (!pickListValidator.validate(UserConstants.IAM_A2.toString(), userRequest.getIDMSClassLevel2__c())) {
 				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_CLASS_LEVEL2_C);
 				LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.IDMS_CLASS_LEVEL2_C);
 				return true;
@@ -2592,15 +2554,7 @@ public class UserServiceImpl implements UserService {
 		 */
 
 		if ((null != userRequest.getIDMSMarketSegment__c() && !userRequest.getIDMSMarketSegment__c().isEmpty())) {
-
-			/*
-			 * if (!legthValidator.validate(UserConstants.MY_INDUSTRY_SEGMENT,
-			 * userRequest.getIDMSMarketSegment__c())) {
-			 * userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH +
-			 * UserConstants.IDMS_MARKET_SEGMENT_C);
-			 * 
-			 * } else
-			 */ if (!pickListValidator.validate(UserConstants.MY_INDUSTRY_SEGMENT,
+			if (!pickListValidator.validate(UserConstants.MY_INDUSTRY_SEGMENT,
 					userRequest.getIDMSMarketSegment__c())) {
 				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_MARKET_SEGMENT_C);
 				LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.IDMS_MARKET_SEGMENT_C);
@@ -2613,16 +2567,7 @@ public class UserServiceImpl implements UserService {
 		 */
 
 		if ((null != userRequest.getIDMSMarketSubSegment__c() && !userRequest.getIDMSMarketSubSegment__c().isEmpty())) {
-
-			/*
-			 * if
-			 * (!legthValidator.validate(UserConstants.MY_INDUSTRY_SUB_SEGMENT,
-			 * userRequest.getIDMSMarketSubSegment__c())) {
-			 * userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH +
-			 * UserConstants.IDMS_MARKET_SUB_SEGMENT_C);
-			 * 
-			 * } else
-			 */ if (!pickListValidator.validate(UserConstants.MY_INDUSTRY_SUB_SEGMENT,
+			if (!pickListValidator.validate(UserConstants.MY_INDUSTRY_SUB_SEGMENT,
 					userRequest.getIDMSMarketSubSegment__c())) {
 				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_MARKET_SUB_SEGMENT_C);
 				LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.IDMS_MARKET_SUB_SEGMENT_C);
@@ -2656,14 +2601,7 @@ public class UserServiceImpl implements UserService {
 		 * Job_Title__c Length Validation check
 		 */
 		if ((null != userRequest.getJob_Title__c() && !userRequest.getJob_Title__c().isEmpty())) {
-			/*
-			 * if (!legthValidator.validate(UserConstants.JOB_TITLE.toString(),
-			 * userRequest.getJob_Title__c())) {
-			 * userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH +
-			 * UserConstants.JOB_TITLE_C);
-			 * 
-			 * } else
-			 */ if (!pickListValidator.validate(UserConstants.JOB_TITLE.toString(), userRequest.getJob_Title__c())) {
+			if (!pickListValidator.validate(UserConstants.JOB_TITLE.toString(), userRequest.getJob_Title__c())) {
 				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.JOB_TITLE_C);
 				LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.JOB_TITLE_C);
 				return true;
@@ -2674,14 +2612,7 @@ public class UserServiceImpl implements UserService {
 		 * Job_Function__c Length Validation check
 		 */
 		if ((null != userRequest.getJob_Function__c() && !userRequest.getJob_Function__c().isEmpty())) {
-			/*
-			 * if (!legthValidator.validate(UserConstants.JOB_FUNCTION,
-			 * userRequest.getJob_Function__c())) {
-			 * userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH +
-			 * UserConstants.JOB_FUNCTION_C);
-			 * 
-			 * } else
-			 */ if (!pickListValidator.validate(UserConstants.JOB_FUNCTION, userRequest.getJob_Function__c())) {
+			if (!pickListValidator.validate(UserConstants.JOB_FUNCTION, userRequest.getJob_Function__c())) {
 				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.JOB_FUNCTION_C);
 				LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.JOB_FUNCTION_C);
 				return true;
@@ -2718,15 +2649,7 @@ public class UserServiceImpl implements UserService {
 		 */
 		if ((null != userRequest.getIDMSCompanyNbrEmployees__c()
 				&& !userRequest.getIDMSCompanyNbrEmployees__c().isEmpty())) {
-			/*
-			 * if (!legthValidator.validate(UserConstants.
-			 * IDMS_COMPANY_NBR_EMPLOYEES_C,
-			 * userRequest.getIDMSCompanyNbrEmployees__c())) {
-			 * userResponse.setMessage(UserConstants.INCORRECT_FIELDS_LENGTH +
-			 * UserConstants.IDMS_COMPANY_NBR_EMPLOYEES_C);
-			 * 
-			 * } else
-			 */if (!pickListValidator.validate(UserConstants.IDMS_COMPANY_NBR_EMPLOYEES_C,
+			if (!pickListValidator.validate(UserConstants.IDMS_COMPANY_NBR_EMPLOYEES_C,
 					userRequest.getIDMSCompanyNbrEmployees__c())) {
 				userResponse.setMessage(UserConstants.INVALID_VALUE + UserConstants.IDMS_COMPANY_NBR_EMPLOYEES_C);
 				LOGGER.error(UserConstants.INVALID_VALUE + UserConstants.IDMS_COMPANY_NBR_EMPLOYEES_C);
@@ -2926,16 +2849,6 @@ public class UserServiceImpl implements UserService {
 				return true;
 			}
 
-			/**
-			 * validate e-mail or mobile attribute values should be present
-			 */
-		 /*	if ((checkMandatoryFields) && (null == userRequest.getEmail() || userRequest.getEmail().isEmpty())
-					&& (null == userRequest.getMobilePhone() || userRequest.getMobilePhone().isEmpty())) {
-				userResponse.setMessage(
-						UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.EMAIL + " OR " + UserConstants.MOBILE);
-				return true;
-			}
-		 */
 			/**
 			 * validate preferred Language attribute values should be present
 			 */
@@ -5101,9 +5014,7 @@ public class UserServiceImpl implements UserService {
 						errorResponse.setMessage(UserConstants.MAINTENANCE_MODE_MESSAGE);
 						LOGGER.error("Error :: Maintenance mode in progress");
 						maintenanceMode=true;
-						//return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
 					 }
-				//}
 				//Consider  exclusions for maintenance mode as below
 				if(maintenanceMode){
 					maintenanceMode = excludeMaintenanceMode(userRequest.getUserRecord().getIDMS_Profile_update_source__c(),  UserConstants.MAINTENANCE_MODE_PROFILE_UPDATE);
@@ -5112,10 +5023,7 @@ public class UserServiceImpl implements UserService {
 					return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
 				}
 			}
-				/**
-				 * Get iPlanetDirectory Pro Admin token for admin
-				 */
-				// LOGGER.info(" UserServiceImpl :: updateUser getSSOToken ");
+				
 				try {
 					iPlanetDirectoryKey = getSSOToken();
 				} catch (IOException ioExp) {
@@ -5151,19 +5059,12 @@ public class UserServiceImpl implements UserService {
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by updateUser() : " + elapsedTime);
 				LOGGER.error("Exception in updateUser()->" + userResponse.getMessage());
-				// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
-				// "logout");
 				if(UserConstants.UIMS
 						.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Profile_update_source__c())){
 					return handleUIMSError(Response.Status.BAD_REQUEST, UserConstants.ATTRIBUTE_NOT_AVAILABELE);
 				}
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 			}
-
-			// Need to check do we need pass the user FirstName
-			// sendEmail.emailReadyToSendEmail("Suresh.Bachu@non.schneider-electric.com",
-			// "bsuresh.infi@gmail.com", "EMAIL CHANGE NOTIFICATION",
-			// UserConstants.EMAIL_BODY);
 
 			if (null != userRequest.getUserRecord().getIDMS_Profile_update_source__c() && UserConstants.UIMS
 					.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Profile_update_source__c())) {
@@ -5174,7 +5075,6 @@ public class UserServiceImpl implements UserService {
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.error("Error in updateUser()-> " + userResponse.getMessage());
 					LOGGER.info("Time taken by updateUser() : " + elapsedTime);
-					//return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 					return handleUIMSError(Response.Status.BAD_REQUEST,UserConstants.UIMS_CLIENTID_SECRET);
 				}
 
@@ -5185,7 +5085,6 @@ public class UserServiceImpl implements UserService {
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.error("Error in updateUser()-> " + userResponse.getMessage());
 					LOGGER.info("Time taken by updateUser() : " + elapsedTime);
-					//return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
 					return handleUIMSError(Response.Status.UNAUTHORIZED,UserConstants.INVALID_UIMS_CREDENTIALS);
 				}
 
@@ -5546,11 +5445,7 @@ public class UserServiceImpl implements UserService {
 					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 							product_json_string);
 					LOGGER.info("End: updateUser() of OpenAMService to update new email finished for userid:" + userId);
-					/**
-					 * Adding the below condition for social Login
-					 */
 
-					// if(!isUserFromSocialLogin){
 					String otp = sendEmail.generateOtp(userId);
 					LOGGER.info("Successfully OTP generated for " + userId);
 					sendEmail.sendOpenAmEmail(otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userId,
@@ -5604,17 +5499,7 @@ public class UserServiceImpl implements UserService {
 								prefferedLanguage);
 						int startName = contentBuilder.indexOf("{!User.FirstName},");
 						int endName = startName + "{!User.FirstName}".length();
-						contentBuilder.replace(startName, endName, firstName);// Need
-																				// to
-																				// check
-																				// whether
-																				// we
-																				// need
-																				// to
-																				// pass
-																				// FirstName
-																				// of
-																				// loginId
+						contentBuilder.replace(startName, endName, firstName);
 						try {
 							// sending email to old user
 							sendEmail.emailReadyToSendEmail(updatingUser, fromUserName, subject,
@@ -7780,16 +7665,6 @@ public class UserServiceImpl implements UserService {
 				StringBuffer urlHeaderValue = new StringBuffer(
 						afterUrlDecoded.substring(afterUrlDecoded.indexOf(substr) + substr.length()));
 
-				// Checking Error Message
-
-				/*
-				 * if((null != errorMessage &&
-				 * !errorMessage.isEmpty())&&(UserConstants.AUTH_FAILED.
-				 * equalsIgnoreCase(errorMessage))) {
-				 * urlHeaderValue.append(UserConstants.ERROR_MESSAGE).append(
-				 * errorMessage); }
-				 */
-
 				if (null != errorMessage && !errorMessage.isEmpty()) {
 					urlHeaderValue.append(UserConstants.ERROR_MESSAGE).append(errorMessage);
 				}
@@ -8221,9 +8096,6 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Request builder:" + rb);
 				LOGGER.info("Token:" + token);
 
-				// startUrl = startUrl.substring(0,
-				// startUrl.indexOf(valueToFind)+valueToFind.length()).concat(URLEncoder.encode(valueToFind.substring(valueToFind.indexOf(valueToFind)+5,
-				// valueToFind.length()), "UTF-8" ));
 				if (startUrl.contains(valueToFind)) {
 					prefix.append(prefixIdentityUrl).append("/ui/#!")
 							.append(startUrl.substring(0, startUrl.indexOf(valueToFind) + valueToFind.length()))
@@ -8242,13 +8114,6 @@ public class UserServiceImpl implements UserService {
 
 			jsonObject.put("error_code", "L9101");
 			jsonObject.put("error_message", "Invalid username or password");
-			/*
-			 * prefix.append(UserConstants.redirectUrl_Option3)
-			 * .append("?startUrl=")
-			 */
-			/*
-			 * prefix.append("startUrl=") .append(startUrl)
-			 */
 
 			try {
 				prefix = new StringBuffer();
@@ -8263,14 +8128,8 @@ public class UserServiceImpl implements UserService {
 			} catch (UnsupportedEncodingException e1) {
 
 			}
-			/*
-			 * prefix.append(prefixStartUrl) .append("/ui/#!")
-			 */
-			// .append("/login?login_error=L9101");
 
 			response = rb.header("Location", prefix.toString()).build();
-			// return
-			// Response.status(Response.Status.UNAUTHORIZED).entity(jsonObject).build();
 		}
 		return response;
 	}
@@ -8420,10 +8279,6 @@ public class UserServiceImpl implements UserService {
 					enableTestMailStatus = enableTestMailDomain;
 				}
 			}
-			
-			/*if (null != appDetails && 404 != appDetails.getStatus()) {
-				enableTestMailStatus = enableTestMailDomain;
-			}*/
 			
 			try {
 				iPlanetDirectoryKey = getSSOToken();
@@ -8757,7 +8612,6 @@ public class UserServiceImpl implements UserService {
 						transErrorResponse = new TransliteratorErrorResponse();
 						transErrorResponse.setCode("MISSING_IDENTIFIER");
 						transErrorResponse.setMessage("Identifier is missing");
-						//LOGGER.error("Identifier is missing");
 						listResponse.add(transErrorResponse);
 					} else if (null == conversionList.get(index).getSourceLanguage()
 							|| conversionList.get(index).getSourceLanguage().isEmpty()) {
@@ -8765,7 +8619,6 @@ public class UserServiceImpl implements UserService {
 						transErrorResponse.setKey(conversionList.get(index).getIdentifier());
 						transErrorResponse.setCode("MISSING_SOURCE_LANGUAGE");
 						transErrorResponse.setMessage("SourceLanguage is missing");
-						//LOGGER.error("SourceLanguage is missing");
 						listResponse.add(transErrorResponse);
 					} else if (null == conversionList.get(index).getTargetLanguage()
 							|| conversionList.get(index).getTargetLanguage().isEmpty()) {
@@ -8773,7 +8626,6 @@ public class UserServiceImpl implements UserService {
 						transErrorResponse.setKey(conversionList.get(index).getIdentifier());
 						transErrorResponse.setCode("MISSING_TARGET_LANGUAGE");
 						transErrorResponse.setMessage("TargetLanguage is missing");
-						//LOGGER.error("TargetLanguage is missing");
 						listResponse.add(transErrorResponse);
 					} else if (null == conversionList.get(index).getAttributes()
 							|| conversionList.get(index).getAttributes().isEmpty()) {
@@ -8781,7 +8633,6 @@ public class UserServiceImpl implements UserService {
 						transErrorResponse.setKey(conversionList.get(index).getIdentifier());
 						transErrorResponse.setCode("MISSING_ATTRIBUTES");
 						transErrorResponse.setMessage("Attributes are missing");
-						//LOGGER.error("Attributes are missing");
 						listResponse.add(errorResponse);
 					} else if ((null != conversionList.get(index).getAttributes()
 							&& conversionList.get(index).getAttributes().size() > 0)
