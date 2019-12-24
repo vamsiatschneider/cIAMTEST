@@ -2403,7 +2403,7 @@ public class UserServiceImpl implements UserService {
 		 * CompanyName mandatory field check
 		 */
 
-		if((!checkMandatoryFields) && userRequest.getIDMS_User_Context__c()!=null && !userRequest.getIDMS_User_Context__c().isEmpty()){
+		/*if((!checkMandatoryFields) && userRequest.getIDMS_User_Context__c()!=null && !userRequest.getIDMS_User_Context__c().isEmpty()){
 		 if(userRequest.getIDMS_User_Context__c().equalsIgnoreCase(UserConstants.USER_CONTEXT_WORK) || userRequest.getIDMS_User_Context__c().equalsIgnoreCase(UserConstants.USER_CONTEXT_WORK_1)){	
 			 if ((null == userRequest.getCompanyName() || userRequest.getCompanyName().isEmpty())) {
 					userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_NAME);
@@ -2411,7 +2411,7 @@ public class UserServiceImpl implements UserService {
 					return true;
 			}
 		 }
-		}
+		}*/
 		
 
 		/**
@@ -2515,15 +2515,44 @@ public class UserServiceImpl implements UserService {
 		}
 		
 		/**
-		 * IDMSClassLevel1__c mandatory field check
+		 * IDMSClassLevel1__c and other  mandatory field check for @Work profile
 		 */
 
 		if((!checkMandatoryFields) && userRequest.getIDMS_User_Context__c()!=null && !userRequest.getIDMS_User_Context__c().isEmpty()){
-			
 			if(userRequest.getIDMS_User_Context__c().equalsIgnoreCase(UserConstants.USER_CONTEXT_WORK) || userRequest.getIDMS_User_Context__c().equalsIgnoreCase(UserConstants.USER_CONTEXT_WORK_1)){	
 				if ((null == userRequest.getIDMSClassLevel1__c() || userRequest.getIDMSClassLevel1__c().isEmpty())) {
 					userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.IDMS_CLASS_LEVEL_C);
 					LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.IDMS_CLASS_LEVEL_C);
+					return true;
+				}
+				else if ((null == userRequest.getCompanyName() || userRequest.getCompanyName().isEmpty())) {
+					userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_NAME);
+					LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_NAME);
+					return true;
+				}
+				else if((null == userRequest.getIDMSMarketSegment__c() || userRequest.getIDMSMarketSegment__c().isEmpty())){
+					userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.IDMS_MARKET_SEGMENT_C);
+					LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.IDMS_MARKET_SEGMENT_C);
+					return true;
+				}
+				else if((null == userRequest.getCompany_Address1__c() || userRequest.getCompany_Address1__c().isEmpty())){
+					userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_ADDRESS1_C);
+					LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_ADDRESS1_C);
+					return true;
+				}
+				else if((null == userRequest.getCompany_City__c() || userRequest.getCompany_City__c().isEmpty())){
+					userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_CITY_C);
+					LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_CITY_C);
+					return true;
+				}
+				else if((null == userRequest.getCompany_Postal_Code__c() || userRequest.getCompany_Postal_Code__c().isEmpty())){
+					userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_POSTAL_CODE_C);
+					LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_POSTAL_CODE_C);
+					return true;
+				}
+				else if((null == userRequest.getCompany_State__c() || userRequest.getCompany_State__c().isEmpty())){
+					userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_STATE_C);
+					LOGGER.error(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.COMPANY_STATE_C);
 					return true;
 				}
 			}
