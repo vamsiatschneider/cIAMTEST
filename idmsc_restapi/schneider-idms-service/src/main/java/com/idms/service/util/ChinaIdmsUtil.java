@@ -112,13 +112,13 @@ public class ChinaIdmsUtil {
 	 */
 	public static String printInfo(String rawData){
 		String newrawdata = rawData;
-        if (rawData.toLowerCase().contains("PinCode".toLowerCase())){
+        if (rawData.toLowerCase().contains(",\"PinCode".toLowerCase())){
         	int i = rawData.indexOf(",\"PinCode");
         	int y = rawData.indexOf(",", i+1);
         	String chars = rawData.substring(i, y);
-        	newrawdata = rawData.replace(chars, "");        	
+        	newrawdata = rawData.replace(chars, "");
         }
-        if (newrawdata.toLowerCase().contains("pin")) {
+        if (newrawdata.toLowerCase().contains(",\"pin")) {
 			int i = newrawdata.indexOf(",\"pin");
 			int y = newrawdata.lastIndexOf("\"");
 			String chars = newrawdata.substring(i, y+1);

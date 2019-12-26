@@ -9497,7 +9497,7 @@ public class UserServiceImpl implements UserService {
 		String mobileNum = null, pin = null, pinInOpenDJ = null;
 		String otpStatus = null, otpValidityTime = null;
 		try {
-			LOGGER.info("Parameter userRequest -> " + objMapper.writeValueAsString(verifyPinInfo));
+			LOGGER.info("Parameter userRequest -> " + ChinaIdmsUtil.printInfo(objMapper.writeValueAsString(verifyPinInfo)));
 			if (null == verifyPinInfo.getMobileRegNumber() || verifyPinInfo.getMobileRegNumber().isEmpty()) {
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
 				errorResponse.setMessage(UserConstants.MOBILE_EMPTY);
