@@ -33,6 +33,13 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.idms.mail.template.factory.EmailTemplateAbstractFactory;
+import com.idms.mail.template.factory.impl.EmailTemplateAbstractFactoryImpl;
+import com.idms.mail.template.util.EmailTemplateColor;
+import com.idms.mail.template.util.EmailTemplateInput;
+import com.idms.mail.template.util.Locale;
+import com.idms.mail.template.util.OperationType;
+import com.idms.mail.template.util.PRMTemplateType;
 import com.idms.model.RegistrationAttributes;
 import com.idms.product.client.NewSmsService;
 import com.idms.product.client.OpenAMService;
@@ -270,6 +277,7 @@ public class SendEmail {
 		String attribute="";
 		String appNameParam="";
 		String prmTemplate=null;
+		boolean isOTPEnabled = false;
 			try {
 				encodedHOTPcode = code;
 				LOGGER.info("Start: getUser() of openamService for userId="+userId);
@@ -290,13 +298,19 @@ public class SendEmail {
 				String templateColor = productDJData.read("_IDMS_Application_CSS");
 				// For email name configuration 
 				if (null != applicationDetails && 200 == applicationDetails.getStatus()) {
-					String userNameFormatOpenDJ = productDJData.read("userNameFormat");
+					String userNameFormatOpenDJ = productDJData.read("_userNameFormat");
 					LOGGER.info("userNameFormatOpenDJ:"+userNameFormatOpenDJ);
 					LOGGER.info("defaultUserNameFormat:"+defaultUserNameFormat);
 					if(null != userNameFormatOpenDJ && !userNameFormatOpenDJ.isEmpty()){
 						emailUserNameFormat = userNameFormatOpenDJ;
 					} else{
 						emailUserNameFormat = defaultUserNameFormat;
+					}
+					//check if otp option is enabled for app
+					String isOTPEnabledForApp = productDJData.read("_isOTPEnabled");
+					if(null!=isOTPEnabledForApp && !isOTPEnabledForApp.equals("")) {
+						isOTPEnabled = Boolean.valueOf(isOTPEnabledForApp);
+						LOGGER.info("isOTPEnabled: "+ isOTPEnabled);
 					}
 				}
 				if (null != applicationDetails && 200 != applicationDetails.getStatus()) {
@@ -385,12 +399,12 @@ public class SendEmail {
 					|| (hotpLanguage != null && (hotpLanguage.equalsIgnoreCase("zh")
 							|| hotpLanguage.equalsIgnoreCase("zh_cn") || hotpLanguage.equalsIgnoreCase("zh_tw")))) {
 					LOGGER.info("sendOpenAmEmail :  Building Chinese email content..for.."+to);
-					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,firstName,bfoSupportUrl,prmTemplate,templateColor);
+					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,firstName,bfoSupportUrl,prmTemplate,templateColor, isOTPEnabled);
 				}
 				// Else section for English user
 				else {
 					LOGGER.info("sendOpenAmEmail :  Building English email content..for.."+to);
-					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,firstName,bfoSupportUrl,prmTemplate,templateColor);
+					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,firstName,bfoSupportUrl,prmTemplate,templateColor, isOTPEnabled);
 
 				}
 
@@ -507,7 +521,7 @@ public class SendEmail {
 		return validatePin;
 	}
 
-	private String emailContentTemplate(String to, String subject, String lang,String hotpOperationType,String firstName, String bfoSupportUrl,String prmTemplate, String templateColor)  {
+	private String emailContentTemplate(String to, String subject, String lang,String hotpOperationType,String firstName, String bfoSupportUrl,String prmTemplate, String templateColor, boolean isOTPEnabled)  {
 		LOGGER.info("Entered emailContentTemplate() -> Start");
 		LOGGER.info("Parameter to -> " + to+" ,subject -> "+subject);//Senthil consider this to handle PRM scenario
 		LOGGER.info("Parameter lang -> " + lang+" ,hotpOperationType -> "+hotpOperationType);
@@ -517,127 +531,28 @@ public class SendEmail {
 		int startIndex=0;
 		int endIndex=0;
 
-		if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.SETUSERPWD_OPT_TYPE)) {
-			LOGGER.info("Inside SetUserPwd OperationType  :  " + hotpOperationType);
-			if (chineseLangCheck) {
-				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
-					filePath = IDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_CN;
-				}else
-				filePath = IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN;
-			} else {
-				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
-					filePath = IDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_EN;
-				}else
-				filePath = IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN;
-			}
-			LOGGER.info("filePath is"+filePath);
-		} else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.USERREGISTRATION_OPT_TYPE)) {
-			LOGGER.info("Inside userRegistration OperationType Create " + hotpOperationType);//senthil have logic to set correct prm template
-			if (chineseLangCheck) {
-				if(subject.equalsIgnoreCase(UserConstants.PRM_APP_NAME) && prmTemplate!=null){
-					switch(prmTemplate) 
-			        { 
-			            case UserConstants.PRM_SELF_REG_EMAIL: 
-			            	filePath=PRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_CN;
-			                break; 
-			            case UserConstants.PRM_INTERNAL_REG_EMAIL: 
-			            	filePath=PRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_CN; 
-			                break; 
-			            case UserConstants.PRM_ECLIPSE_REG_EMAIL: 
-			            	filePath=PRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_CN; 
-			                break; 
-			            default: 
-			            	filePath=PRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_CN; 
-			        } 
-				}
-				else{					
-					if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
-						filePath = IDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_CN;
-					}else
-					filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN;
-				}
-			} else {
-				if(subject.equalsIgnoreCase(UserConstants.PRM_APP_NAME) && prmTemplate!=null){
-					switch(prmTemplate) 
-			        { 
-			            case UserConstants.PRM_SELF_REG_EMAIL: 
-			            	filePath=PRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_EN;
-			                break; 
-			            case UserConstants.PRM_INTERNAL_REG_EMAIL: 
-			            	filePath=PRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_EN; 
-			                break; 
-			            case UserConstants.PRM_ECLIPSE_REG_EMAIL: 
-			            	filePath=PRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_EN; 
-			                break; 
-			            default: 
-			            	filePath=PRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_EN; 
-			        } 
-				}
-				else{
-					if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
-						filePath = IDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_EN;
-					}else
-					filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN;
-				}
-			}
-			LOGGER.info("filePath is"+filePath);
-		} else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.UPDATEUSERRECORD_OPT_TYPE)) {
-			LOGGER.info("Inside OperationType UpdateUserRecord " + hotpOperationType);
-			if (chineseLangCheck) {
-				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
-					filePath = IDMS_USER_UPDATE_BLUE_EMAILTEMPLATE_CN;
-				}else
-				filePath = IDMS_USER_UPDATE_EMAILTEMPLATE_CN;
-			} else {
-				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
-					filePath = IDMS_USER_UPDATE_BLUE_EMAILTEMPLATE_EN;
-				}else
-				filePath = IDMS_USER_UPDATE_EMAILTEMPLATE_EN;
-			}
-			LOGGER.info("filePath is"+filePath);
-		} else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE)) {
-			LOGGER.info("Inside OperationType AddEmailUserRecord " + hotpOperationType);
-			if (chineseLangCheck) {
-				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
-					filePath = IDMS_USER_ADD_BLUE_EMAILTEMPLATE_CN;
-				}else
-				filePath = IDMS_USER_ADD_EMAILTEMPLATE_CN;
-			} else {
-				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
-					filePath = IDMS_USER_ADD_BLUE_EMAILTEMPLATE_EN;
-				}else
-				filePath = IDMS_USER_ADD_EMAILTEMPLATE_EN;
-			}
-			LOGGER.info("filePath is"+filePath);
-		}else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.SENDINVITATION_OPT_TYPE)) {
-			LOGGER.info("Inside OperationType sendInvitation " + hotpOperationType);
-			if (chineseLangCheck) {
-				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
-					filePath = IDMS_SEND_INVITATION_BLUE_EMAILTEMPLATE_CN;
-				}else
-				filePath = IDMS_SEND_INVITATION_EMAILTEMPLATE_CN;
-			} else {
-				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
-					filePath = IDMS_SEND_INVITATION_BLUE_EMAILTEMPLATE_EN;
-				}else
-				filePath = IDMS_SEND_INVITATION_EMAILTEMPLATE_EN;
-			}
-			LOGGER.info("filePath is"+filePath);
-		} else {
-			LOGGER.info("Inside Common OperationType " + hotpOperationType);
-			if (chineseLangCheck) {
-				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
-					filePath = IDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_CN;
-				}else
-				filePath = IDMS_USER_DEFAULT_EMAILTEMPLATE_CN;
-			} else {
-				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
-					filePath = IDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_EN;
-				}else
-				filePath = IDMS_USER_DEFAULT_EMAILTEMPLATE_EN;
-			}
-			LOGGER.info("filePath is"+filePath);
-		}
+		// old code
+		//filePath = oldCode(subject, hotpOperationType, prmTemplate, templateColor, chineseLangCheck);
+		
+		/* new code starts*/
+		
+		EmailTemplateInput input = new EmailTemplateInput();
+		if(chineseLangCheck)
+			input.setLocale(Locale.CN);
+		else 
+			input.setLocale(Locale.EN);
+		
+		input.setOperationType(OperationType.getKey(hotpOperationType));
+		input.setOTPEnabled(isOTPEnabled);
+		input.setEtColor(EmailTemplateColor.getKey(templateColor));
+		if(subject.equalsIgnoreCase(UserConstants.PRM_APP_NAME) && prmTemplate!=null)
+			input.setPRMApp(true);
+		input.setPrmTemplateType(PRMTemplateType.getKey(prmTemplate));
+		input.setConfiguration(this);
+		EmailTemplateAbstractFactory factory = new EmailTemplateAbstractFactoryImpl(input );
+		filePath = factory.getEmailTemplateFactory().getEmailTemplatePath();
+		
+		/* new code ends*/
 		
 		try(FileReader file = new FileReader(filePath); BufferedReader in = new BufferedReader(file)) {
 			String str;
@@ -729,6 +644,134 @@ public class SendEmail {
 		content = contentBuilder.toString();
 		return subject;
 	}
+
+
+	private String oldCode(String subject, String hotpOperationType, String prmTemplate, String templateColor,
+			boolean chineseLangCheck) {
+		String filePath;
+		if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.SETUSERPWD_OPT_TYPE)) {
+			LOGGER.info("Inside SetUserPwd OperationType  :  " + hotpOperationType);
+			if (chineseLangCheck) {
+				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+					filePath = getIDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_CN();
+				}else
+				filePath = IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN;
+			} else {
+				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+					filePath = getIDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_EN();
+				}else
+				filePath = IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN;
+			}
+			LOGGER.info("filePath is"+filePath);
+		} else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.USERREGISTRATION_OPT_TYPE)) {
+			LOGGER.info("Inside userRegistration OperationType Create " + hotpOperationType);//senthil have logic to set correct prm template
+			if (chineseLangCheck) {
+				if(subject.equalsIgnoreCase(UserConstants.PRM_APP_NAME) && prmTemplate!=null){
+					switch(prmTemplate) 
+			        { 
+			            case UserConstants.PRM_SELF_REG_EMAIL: 
+			            	filePath=getPRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_CN();
+			                break; 
+			            case UserConstants.PRM_INTERNAL_REG_EMAIL: 
+			            	filePath=getPRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_CN(); 
+			                break; 
+			            case UserConstants.PRM_ECLIPSE_REG_EMAIL: 
+			            	filePath=getPRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_CN(); 
+			                break; 
+			            default: 
+			            	filePath=getPRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_CN(); 
+			        } 
+				}
+				else{					
+					if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+						filePath = getIDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_CN();
+					}else
+					filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN;
+				}
+			} else {
+				if(subject.equalsIgnoreCase(UserConstants.PRM_APP_NAME) && prmTemplate!=null){
+					switch(prmTemplate) 
+			        { 
+			            case UserConstants.PRM_SELF_REG_EMAIL: 
+			            	filePath=getPRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_EN();
+			                break; 
+			            case UserConstants.PRM_INTERNAL_REG_EMAIL: 
+			            	filePath=getPRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_EN(); 
+			                break; 
+			            case UserConstants.PRM_ECLIPSE_REG_EMAIL: 
+			            	filePath=getPRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_EN(); 
+			                break; 
+			            default: 
+			            	filePath=getPRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_EN(); 
+			        } 
+				}
+				else{
+					if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+						filePath = getIDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_EN();
+					}else
+					filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN;
+				}
+			}
+			LOGGER.info("filePath is"+filePath);
+		} else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.UPDATEUSERRECORD_OPT_TYPE)) {
+			LOGGER.info("Inside OperationType UpdateUserRecord " + hotpOperationType);
+			if (chineseLangCheck) {
+				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+					filePath = getIDMS_USER_UPDATE_BLUE_EMAILTEMPLATE_CN();
+				}else
+				filePath = IDMS_USER_UPDATE_EMAILTEMPLATE_CN;
+			} else {
+				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+					filePath = getIDMS_USER_UPDATE_BLUE_EMAILTEMPLATE_EN();
+				}else
+				filePath = IDMS_USER_UPDATE_EMAILTEMPLATE_EN;
+			}
+			LOGGER.info("filePath is"+filePath);
+		} else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE)) {
+			LOGGER.info("Inside OperationType AddEmailUserRecord " + hotpOperationType);
+			if (chineseLangCheck) {
+				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+					filePath = getIDMS_USER_ADD_BLUE_EMAILTEMPLATE_CN();
+				}else
+				filePath = IDMS_USER_ADD_EMAILTEMPLATE_CN;
+			} else {
+				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+					filePath = getIDMS_USER_ADD_BLUE_EMAILTEMPLATE_EN();
+				}else
+				filePath = IDMS_USER_ADD_EMAILTEMPLATE_EN;
+			}
+			LOGGER.info("filePath is"+filePath);
+		}else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.SENDINVITATION_OPT_TYPE)) {
+			LOGGER.info("Inside OperationType sendInvitation " + hotpOperationType);
+			if (chineseLangCheck) {
+				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+					filePath = getIDMS_SEND_INVITATION_BLUE_EMAILTEMPLATE_CN();
+				}else
+				filePath = IDMS_SEND_INVITATION_EMAILTEMPLATE_CN;
+			} else {
+				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+					filePath = getIDMS_SEND_INVITATION_BLUE_EMAILTEMPLATE_EN();
+				}else
+				filePath = IDMS_SEND_INVITATION_EMAILTEMPLATE_EN;
+			}
+			LOGGER.info("filePath is"+filePath);
+		} else {
+			LOGGER.info("Inside Common OperationType " + hotpOperationType);
+			if (chineseLangCheck) {
+				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+					filePath = getIDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_CN();
+				}else
+				filePath = IDMS_USER_DEFAULT_EMAILTEMPLATE_CN;
+			} else {
+				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
+					filePath = getIDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_EN();
+				}else
+				filePath = IDMS_USER_DEFAULT_EMAILTEMPLATE_EN;
+			}
+			LOGGER.info("filePath is"+filePath);
+		}
+		return filePath;
+	}
 	
 	
 	/**
@@ -802,12 +845,12 @@ public class SendEmail {
 			// if section for chinese user
 			if ((lang != null && lang.equalsIgnoreCase("zh")) || (hotpLanguage != null && hotpLanguage.equalsIgnoreCase("zh"))) {
 				LOGGER.info("sendInvitationEmail :  Building Chinese email content..");
-				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,email,null,null,null);
+				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,email,null,null,null, false);
 			}
 			// Else section for English user
 			else {
 				LOGGER.info("sendInvitationEmail :  Building English email content..");
-				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,email,null,null,null);
+				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,email,null,null,null, false);
 				LOGGER.info("subject="+subject);
 			}
 
@@ -923,12 +966,12 @@ public class SendEmail {
 			// if section for chinese user
 			if ((lang != null && lang.equalsIgnoreCase("zh")) || (hotpLanguage != null && hotpLanguage.equalsIgnoreCase("zh"))) {
 				LOGGER.info("Building Chinese email content..");
-				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,to,null,null,null);
+				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,to,null,null,null, false);
 			}
 			// Else section for English user
 			else {
 				LOGGER.info("Building English email content..");
-				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,to,null,null,null);
+				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,to,null,null,null, false);
 
 			}
 
@@ -1275,5 +1318,193 @@ public class SendEmail {
 
 	public String getHotpEmailVerificationURL() {
 		return hotpEmailVerificationURL;
+	}
+
+
+	public String getPRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_EN() {
+		return PRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_EN;
+	}
+
+
+	public void setPRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_EN(String pRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_EN) {
+		PRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_EN = pRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_EN;
+	}
+
+
+	public String getPRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_CN() {
+		return PRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_CN;
+	}
+
+
+	public void setPRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_CN(
+			String pRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_CN) {
+		PRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_CN = pRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_CN;
+	}
+
+
+	public String getPRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_EN() {
+		return PRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_EN;
+	}
+
+
+	public void setPRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_EN(
+			String pRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_EN) {
+		PRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_EN = pRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_EN;
+	}
+
+
+	public String getPRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_CN() {
+		return PRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_CN;
+	}
+
+
+	public void setPRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_CN(
+			String pRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_CN) {
+		PRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_CN = pRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_CN;
+	}
+
+
+	public String getPRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_EN() {
+		return PRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_EN;
+	}
+
+
+	public void setPRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_EN(
+			String pRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_EN) {
+		PRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_EN = pRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_EN;
+	}
+
+
+	public String getPRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_CN() {
+		return PRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_CN;
+	}
+
+
+	public void setPRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_CN(String pRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_CN) {
+		PRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_CN = pRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_CN;
+	}
+
+
+	public String getIDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_CN() {
+		return IDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_CN;
+	}
+
+
+	public void setIDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_CN(String iDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_CN) {
+		IDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_CN = iDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_CN;
+	}
+
+
+	public String getIDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_EN() {
+		return IDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_EN;
+	}
+
+
+	public void setIDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_EN(String iDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_EN) {
+		IDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_EN = iDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_EN;
+	}
+
+
+	public String getIDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_CN() {
+		return IDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_CN;
+	}
+
+
+	public void setIDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_CN(
+			String iDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_CN) {
+		IDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_CN = iDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_CN;
+	}
+
+
+	public String getIDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_EN() {
+		return IDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_EN;
+	}
+
+
+	public void setIDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_EN(
+			String iDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_EN) {
+		IDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_EN = iDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_EN;
+	}
+
+
+	public String getIDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_CN() {
+		return IDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_CN;
+	}
+
+
+	public void setIDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_CN(
+			String iDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_CN) {
+		IDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_CN = iDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_CN;
+	}
+
+
+	public String getIDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_EN() {
+		return IDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_EN;
+	}
+
+
+	public void setIDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_EN(
+			String iDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_EN) {
+		IDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_EN = iDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_EN;
+	}
+
+
+	public String getIDMS_USER_UPDATE_BLUE_EMAILTEMPLATE_CN() {
+		return IDMS_USER_UPDATE_BLUE_EMAILTEMPLATE_CN;
+	}
+
+
+	public void setIDMS_USER_UPDATE_BLUE_EMAILTEMPLATE_CN(String iDMS_USER_UPDATE_BLUE_EMAILTEMPLATE_CN) {
+		IDMS_USER_UPDATE_BLUE_EMAILTEMPLATE_CN = iDMS_USER_UPDATE_BLUE_EMAILTEMPLATE_CN;
+	}
+
+
+	public String getIDMS_USER_UPDATE_BLUE_EMAILTEMPLATE_EN() {
+		return IDMS_USER_UPDATE_BLUE_EMAILTEMPLATE_EN;
+	}
+
+
+	public void setIDMS_USER_UPDATE_BLUE_EMAILTEMPLATE_EN(String iDMS_USER_UPDATE_BLUE_EMAILTEMPLATE_EN) {
+		IDMS_USER_UPDATE_BLUE_EMAILTEMPLATE_EN = iDMS_USER_UPDATE_BLUE_EMAILTEMPLATE_EN;
+	}
+
+
+	public String getIDMS_SEND_INVITATION_BLUE_EMAILTEMPLATE_EN() {
+		return IDMS_SEND_INVITATION_BLUE_EMAILTEMPLATE_EN;
+	}
+
+
+	public void setIDMS_SEND_INVITATION_BLUE_EMAILTEMPLATE_EN(String iDMS_SEND_INVITATION_BLUE_EMAILTEMPLATE_EN) {
+		IDMS_SEND_INVITATION_BLUE_EMAILTEMPLATE_EN = iDMS_SEND_INVITATION_BLUE_EMAILTEMPLATE_EN;
+	}
+
+
+	public String getIDMS_SEND_INVITATION_BLUE_EMAILTEMPLATE_CN() {
+		return IDMS_SEND_INVITATION_BLUE_EMAILTEMPLATE_CN;
+	}
+
+
+	public void setIDMS_SEND_INVITATION_BLUE_EMAILTEMPLATE_CN(String iDMS_SEND_INVITATION_BLUE_EMAILTEMPLATE_CN) {
+		IDMS_SEND_INVITATION_BLUE_EMAILTEMPLATE_CN = iDMS_SEND_INVITATION_BLUE_EMAILTEMPLATE_CN;
+	}
+
+
+	public String getIDMS_USER_ADD_BLUE_EMAILTEMPLATE_CN() {
+		return IDMS_USER_ADD_BLUE_EMAILTEMPLATE_CN;
+	}
+
+
+	public void setIDMS_USER_ADD_BLUE_EMAILTEMPLATE_CN(String iDMS_USER_ADD_BLUE_EMAILTEMPLATE_CN) {
+		IDMS_USER_ADD_BLUE_EMAILTEMPLATE_CN = iDMS_USER_ADD_BLUE_EMAILTEMPLATE_CN;
+	}
+
+
+	public String getIDMS_USER_ADD_BLUE_EMAILTEMPLATE_EN() {
+		return IDMS_USER_ADD_BLUE_EMAILTEMPLATE_EN;
+	}
+
+
+	public void setIDMS_USER_ADD_BLUE_EMAILTEMPLATE_EN(String iDMS_USER_ADD_BLUE_EMAILTEMPLATE_EN) {
+		IDMS_USER_ADD_BLUE_EMAILTEMPLATE_EN = iDMS_USER_ADD_BLUE_EMAILTEMPLATE_EN;
 	}
 }
