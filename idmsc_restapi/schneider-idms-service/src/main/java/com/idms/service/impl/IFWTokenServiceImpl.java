@@ -99,7 +99,7 @@ public class IFWTokenServiceImpl {
 				conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 				productDocCtx = JsonPath.using(conf).parse(ifwTokenString);
 				generatedIFWToken = productDocCtx.read("$.access_token");
-				ifwTokenExpiryDuration = productDocCtx.read("$.expires_in");
+				ifwTokenExpiryDuration = Integer.valueOf(productDocCtx.read("$.expires_in"));
 			}
 
 			if (null != generatedIFWToken && !generatedIFWToken.isEmpty()) {
