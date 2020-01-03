@@ -87,12 +87,12 @@ public class IFWTokenServiceImpl {
 		String generatedIFWToken = null, ifwTokenString = null;
 		Integer ifwTokenExpiryDuration = null;
 		DocumentContext productDocCtx = null;
+		//IFWTokenAttribute ifwTokenAttribute = new IFWTokenAttribute();
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		ifwtokenMap.clear();
 		try {
 			LOGGER.info("Start: getIFWToken() of IFWService");
-			ifwTokenString = ifwService.getIFWToken(UserConstants.CONTENT_TYPE_URL_FROM, UserConstants.IFW_GRANT_TYPE,
-					ifwClientId, ifwClientSecret);
+			ifwTokenString = ifwService.getIFWToken(UserConstants.CONTENT_TYPE_URL_FROM, "client_credentials", ifwClientId, ifwClientSecret);
 			LOGGER.info("End: getIFWToken() of IFWService");
 
 			if (null != ifwTokenString && !ifwTokenString.isEmpty()) {
