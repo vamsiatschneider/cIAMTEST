@@ -27,7 +27,7 @@ public class ENEmailTemplateBlueThemeFactoryImpl implements EmailTemplateFactory
 				break;
 			case USER_REGISTRATION:
 				if (input.isPRMApp()) {
-					emailTemplate = new ENPrmEmailTemplateBlueThemeFactoryImpl(input).getTemplate();
+					emailTemplate = new ENPrmEmailTemplateGreenThemeFactoryImpl(input).getTemplate();
 				} else {
 					emailTemplate = new ENBlueUserRegistrationTemplate(input).getTemplate();
 				}
