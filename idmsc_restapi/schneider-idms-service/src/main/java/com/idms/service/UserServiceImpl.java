@@ -8333,8 +8333,8 @@ public class UserServiceImpl implements UserService {
 				userExists = productService.checkUserExistsWithEmailMobile(
 						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginId, "UTF-8"), "UTF-8")
--								+ "\" or mobile_reg eq " + "\""
--								+ URLEncoder.encode(URLDecoder.decode(loginId, "UTF-8"), "UTF-8") + "\"");
+								+ "\" or mobile_reg eq " + "\""
+								+ URLEncoder.encode(URLDecoder.decode(loginId, "UTF-8"), "UTF-8") + "\"");
 				LOGGER.info("End: checkUserExistsWithEmailMobile() of openam finished for loginId=" + loginId);
 			}
 			
@@ -8396,7 +8396,7 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for email:" + loginId);
 					ifwResponse = ifwService.checkUserExistsWithEmail(bfoAuthorizationToken, UserConstants.APPLICATION_NAME,
 							UserConstants.COUNTRY_CODE, UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID,
-							ifwAccessToken, "\"" + URLEncoder.encode(URLDecoder.decode(loginId, "UTF-8"), "UTF-8") + "\"", false);
+							ifwAccessToken, loginId, false);
 					LOGGER.info("End: checkUserExistsWithEmail() of IFWService finished for email:" + loginId);
 				}
 				if (fieldType.equalsIgnoreCase("idmsFederatedId")) {
