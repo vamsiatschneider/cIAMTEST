@@ -288,6 +288,7 @@ public class SendEmail {
 				LOGGER.info("bfoSupportUrl = "+bfoSupportUrl);
 				
 				String templateColor = productDJData.read("_IDMS_Application_CSS");
+				LOGGER.info("templateColor: "+templateColor);
 				// For email name configuration 
 				if (null != applicationDetails && 200 == applicationDetails.getStatus()) {
 					String userNameFormatOpenDJ = productDJData.read("userNameFormat");
@@ -488,10 +489,10 @@ public class SendEmail {
 
 				long localDTInMilli = Long.valueOf(authIdTime[1]).longValue();
 				// figure out login identifier type
-				String emailOrMobile = productDocCtx.read("$.mail[0]");
+				String emailOptIn = productDocCtx.read("$.emailOptIn[0]");
+				LOGGER.info("emailOptIn: " + emailOptIn);
 				String loginIdentifierType = UserConstants.EMAIL;
-				if (null == emailOrMobile) {
-					emailOrMobile = productDocCtx.read("$.mobile_reg[0]");
+				if ("N".equalsIgnoreCase(emailOptIn)) {
 					loginIdentifierType = UserConstants.MOBILE;
 				}
 				LOGGER.info("loginIdentifierType: "+loginIdentifierType);
@@ -512,6 +513,7 @@ public class SendEmail {
 		LOGGER.info("Parameter to -> " + to+" ,subject -> "+subject);//Senthil consider this to handle PRM scenario
 		LOGGER.info("Parameter lang -> " + lang+" ,hotpOperationType -> "+hotpOperationType);
 		LOGGER.info("firstName emailContentTemplate -> " + firstName);
+		LOGGER.info("templateColor -> " + templateColor);
 		String filePath;
 		boolean chineseLangCheck = ((lang != null && lang.equalsIgnoreCase(EmailConstants.HOTP_LAN_CN)) || (hotpLanguage != null && hotpLanguage.equalsIgnoreCase(EmailConstants.HOTP_LAN_CN)));
 		int startIndex=0;
