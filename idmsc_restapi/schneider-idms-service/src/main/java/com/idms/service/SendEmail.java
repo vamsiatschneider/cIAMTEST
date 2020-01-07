@@ -488,10 +488,10 @@ public class SendEmail {
 
 				long localDTInMilli = Long.valueOf(authIdTime[1]).longValue();
 				// figure out login identifier type
-				String emailOrMobile = productDocCtx.read("$.mail[0]");
+				String emailOptIn = productDocCtx.read("$.emailOptIn[0]");
+				LOGGER.info("emailOptIn: " + emailOptIn);
 				String loginIdentifierType = UserConstants.EMAIL;
-				if (null == emailOrMobile) {
-					emailOrMobile = productDocCtx.read("$.mobile_reg[0]");
+				if ("N".equalsIgnoreCase(emailOptIn)) {
 					loginIdentifierType = UserConstants.MOBILE;
 				}
 				LOGGER.info("loginIdentifierType: "+loginIdentifierType);
