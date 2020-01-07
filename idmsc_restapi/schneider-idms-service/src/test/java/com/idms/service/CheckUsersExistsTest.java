@@ -102,7 +102,7 @@ public class CheckUsersExistsTest {
 		
 		when(productService.checkUserExistsWithEmailMobile(anyString(), anyString())).thenReturn(DomainMockData.USER_EXISTS);
 		
-		when(ifwService.getIFWToken(anyString(),anyString(), anyString(), anyString())).thenReturn(DomainMockData.IFW_USER);
+		//when(ifwService.getIFWToken(anyString(),anyString(), anyString(), anyString())).thenReturn(DomainMockData.IFW_USER);
 		
 		when(salesForceService.getSalesForceToken(anyString(),anyString(), anyString(),anyString(), anyString(), anyString())).thenReturn(DomainMockData.SALESFORCE_USER);
 		
@@ -125,7 +125,7 @@ public class CheckUsersExistsTest {
 		
 		when(productService.checkUserExistsWithEmailMobile(anyString(), anyString())).thenReturn(DomainMockData.USER_EXISTS_TRUE);
 		
-		when(ifwService.getIFWToken(anyString(),anyString(), anyString(), anyString())).thenReturn(DomainMockData.IFW_USER);
+		//when(ifwService.getIFWToken(anyString(),anyString(), anyString(), anyString())).thenReturn(DomainMockData.IFW_USER);
 		
 		when(salesForceService.getSalesForceToken(anyString(),anyString(), anyString(),anyString(), anyString(), anyString())).thenReturn(DomainMockData.SALESFORCE_USER);
 		
