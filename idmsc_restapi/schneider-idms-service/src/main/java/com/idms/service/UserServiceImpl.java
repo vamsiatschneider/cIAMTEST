@@ -10315,13 +10315,11 @@ public class UserServiceImpl implements UserService {
 			
 			email = productDocCtx.read("$.result[0].mail[0]");
 			LOGGER.info("email in openam = " + email);
-
 			if (resultCount.intValue() == 1) {
 				mailLoginIdCheck = productDocCtx.read(JsonConstants.RESULT_Loginid);
 				if (null == mailLoginIdCheck)
 					mailLoginIdCheck = productDocCtx.read(JsonConstants.RESULT_Loginid_L);
 				LOGGER.info("Loginid in openam = "+mailLoginIdCheck);
-				
 				if(null != mailLoginIdCheck && !mailLoginIdCheck.isEmpty()){
 					response.put(UserConstants.STATUS_L, errorStatus);
 					response.put(UserConstants.MESSAGE_L, "The user email is already activated");
@@ -10816,6 +10814,8 @@ public class UserServiceImpl implements UserService {
 		String userId = null;
 		Response userCreation = null;
 		String str = null, updateString = null;
+		String  enableTestMailStatus = null;
+		String emailId=null;
 		try {
 			openAmReq = mapper.map(userRequest, OpenAmUserRequest.class);
 			LOGGER.info("Start: getUIMSUser() for userId:" + userRequest.getUserRecord().getIDMS_Federated_ID__c());
@@ -10840,7 +10840,20 @@ public class UserServiceImpl implements UserService {
 				
 			} else if (null != userInfo.getEmail() && !userInfo.getEmail().isEmpty()) {
 				LOGGER.info("EMAIL");
-				//updateString = "{" + "\"loginid\": \"" + userInfo.getEmail() + "\"}";				
+				//updateString = "{" + "\"loginid\": \"" + userInfo.getEmail() + "\"}";
+				enableTestMailStatus=enableTestMailDomain;
+				emailId=userInfo.getEmail();
+				String mailDomain = emailId.substring(emailId.indexOf("@") + 1);
+				LOGGER.info("mailDomain in createAbhagaUIMSUserInIDMS = " + mailDomain);
+				if (null != enableTestMailStatus && !Boolean.parseBoolean(enableTestMailStatus) && emailId.contains("@")) {
+					if (pickListValidator.validate(UserConstants.TestMailDomain, mailDomain)) {
+						response.put(UserConstants.MESSAGE_L, "This Email Domain is not allowed - "+mailDomain);
+						LOGGER.error("Error in createAbhagaUIMSUserInIDMS is :: "+"This Email Domain is not allowed in UIMS user creation in IDMS- "+mailDomain);
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.info("Time taken by createAbhagaUIMSUserInIDMS() : " + elapsedTime);
+						return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+					}
+				}
 				updateString = "{" + "\"loginid\": \"" + userInfo.getEmail() + "\",\"pwdSetFirstLogin\": \"" +false+ "\"" + "}";
 				if(null == openAmReq.getInput().getUser().getMail() || openAmReq.getInput().getUser().getMail().isEmpty()){
 					  openAmReq.getInput().getUser().setMail(userInfo.getEmail());
@@ -10903,6 +10916,7 @@ public class UserServiceImpl implements UserService {
 		String userId = null;
 		Response userCreation = null;
 		String str = null, updateString = null;
+		String enableTestMailStatus=null, emailId=null;
 
 		try {
 			LOGGER.info("Start: getUIMSUser() for userId: " + setPasswordRequest.getIDMS_Federated_ID__c());
@@ -10917,6 +10931,19 @@ public class UserServiceImpl implements UserService {
 						+ userInfo.getPhoneId() + "\"" + "}";
 			} else if (null != userInfo.getEmail() && !userInfo.getEmail().isEmpty()) {
 				LOGGER.info("EMAIL");
+				enableTestMailStatus=enableTestMailDomain;
+				emailId=userInfo.getEmail();
+				String mailDomain = emailId.substring(emailId.indexOf("@") + 1);
+				LOGGER.info("mailDomain in createAbhagaUIMSUserInIDMS = " + mailDomain);
+				if (null != enableTestMailStatus && !Boolean.parseBoolean(enableTestMailStatus) && emailId.contains("@")) {
+					if (pickListValidator.validate(UserConstants.TestMailDomain, mailDomain)) {
+						response.put(UserConstants.MESSAGE_L, "This Email Domain is not allowed - "+mailDomain);
+						LOGGER.error("Error in createAbhagaUIMSUserWithPasswordInIDMS :: "+"This Email Domain is not allowed in UIMS user creation in IDMS- "+mailDomain);
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.info("Time taken by createAbhagaUIMSUserWithPasswordInIDMS() : " + elapsedTime);
+						return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+					}
+				}
 				updateString = "{" + "\"loginid\": \"" + userInfo.getEmail() + "\"}";
 			} else if (null != userInfo.getPhoneId() && !userInfo.getPhoneId().isEmpty()) {
 				LOGGER.info("PHONE");
