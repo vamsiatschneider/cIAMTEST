@@ -20,8 +20,13 @@ public class CNEmailTemplateThemeFactoryImpl implements EmailTemplateThemeFactor
 				factory = new CNEmailTemplateBlueThemeFactoryImpl(input); 
 				break;
 			default:
-				factory = new CNEmailTemplateGreenThemeFactoryImpl(input); 
-				break;
+				if(input.isOTPEnabled()) {
+					factory = new CNOTPEmailTemplateGreenThemeFactoryImpl(input);
+					break;
+				}else {
+					factory = new CNEmailTemplateGreenThemeFactoryImpl(input); 
+					break;
+				}
 		}
 		return factory;
 	}

@@ -4,8 +4,6 @@ import com.idms.mail.template.util.EmailTemplate;
 import com.idms.mail.template.util.EmailTemplateInput;
 
 public class CNGreenAddEmailUserRecordOTPTemplate extends CNGreenDefaultTemplate {
-	//	@Value("${user.add.otp.email.template.cn}")
-	private String IDMS_USER_ADD_OTP_EMAILTEMPLATE_CN;
 
 	public CNGreenAddEmailUserRecordOTPTemplate(EmailTemplateInput input) {
 		super(input);
@@ -24,7 +22,7 @@ public class CNGreenAddEmailUserRecordOTPTemplate extends CNGreenDefaultTemplate
 //		template.setEmailTemplatePath(filePath);
 //		return template;
 		
-		String filePath = input.getConfiguration().getIDMS_SEND_INVITATION_EMAILTEMPLATE_CN();
+		String filePath = input.getConfiguration().getIDMS_USER_OTP_ADD_EMAILTEMPLATE_CN();
 		EmailTemplate template = new EmailTemplate();
 		template.setEmailTemplatePath(filePath);
 		return template;

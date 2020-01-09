@@ -2,7 +2,7 @@ package com.idms.mail.template.factory.impl;
 
 import com.idms.mail.template.factory.EmailTemplateFactory;
 import com.idms.mail.template.impl.cn.green.CNGreenAddEmailUserRecordOTPTemplate;
-import com.idms.mail.template.impl.cn.green.CNGreenDefaultTemplate;
+import com.idms.mail.template.impl.cn.green.CNGreenDefaultOTPTemplate;
 import com.idms.mail.template.impl.cn.green.CNGreenSendInvitationTemplate;
 import com.idms.mail.template.impl.cn.green.CNGreenSetUserPasswordOTPTemplate;
 import com.idms.mail.template.impl.cn.green.CNGreenUpdateUserRecordOTPTemplate;
@@ -43,7 +43,7 @@ public class CNOTPEmailTemplateGreenThemeFactoryImpl implements EmailTemplateFac
 				emailTemplate = new CNGreenSendInvitationTemplate(input).getTemplate();
 				break;
 			default:
-				emailTemplate = new CNGreenDefaultTemplate(input).getTemplate();
+				emailTemplate = new CNGreenDefaultOTPTemplate(input).getTemplate();
 				break;
 		}
 		return emailTemplate;

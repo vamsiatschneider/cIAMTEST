@@ -20,8 +20,13 @@ public class ENEmailTemplateThemeFactoryImpl implements EmailTemplateThemeFactor
 				factory = new ENEmailTemplateBlueThemeFactoryImpl(input); 
 				break;
 			default:
-				factory = new ENEmailTemplateGreenThemeFactoryImpl(input); 
-				break;
+				if(input.isOTPEnabled()) {
+					factory = new ENOTPEmailTemplateGreenThemeFactoryImpl(input);
+					break;
+				}else {
+					factory = new ENEmailTemplateGreenThemeFactoryImpl(input);
+					break;
+				}
 		}
 		return factory;
 	}

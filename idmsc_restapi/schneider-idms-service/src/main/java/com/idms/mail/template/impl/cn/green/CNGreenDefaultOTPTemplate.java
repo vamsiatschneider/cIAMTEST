@@ -1,15 +1,16 @@
-package com.idms.mail.template.impl.en.green;
+package com.idms.mail.template.impl.cn.green;
 
 import com.idms.mail.template.util.EmailTemplate;
 import com.idms.mail.template.util.EmailTemplateInput;
 
-public class ENGreenAddEmailUserRecordOTPTemplate extends ENGreenDefaultTemplate {
+public class CNGreenDefaultOTPTemplate  {
+
+	protected EmailTemplateInput input;
 	
-	public ENGreenAddEmailUserRecordOTPTemplate(EmailTemplateInput input) {
-		super(input);
+	public CNGreenDefaultOTPTemplate(EmailTemplateInput input) {
+		this.input = input;
 	}
-	
-	@Override
+
 	public EmailTemplate getTemplate() {
 /* 
  * TODO- Ideally the configuration class PropertyFileAutoRefresh should return the value of the 
@@ -17,14 +18,16 @@ public class ENGreenAddEmailUserRecordOTPTemplate extends ENGreenDefaultTemplate
  * Need to fix how configuration is loaded. The below commented code should work post that.
  */
 //		PropertyFileAutoRefresh _instance = PropertyFileAutoRefresh.getInstance();
-//		String filePath = _instance.getConfiguration("user.add.otp.email.template.cn");
+//		String filePath = _instance.getConfiguration("user.default.email.template.cn");
 //		EmailTemplate template = new EmailTemplate();
 //		template.setEmailTemplatePath(filePath);
 //		return template;
-		
-		String filePath = input.getConfiguration().getIDMS_USER_OTP_ADD_EMAILTEMPLATE_EN();
+				
+		String filePath = input.getConfiguration().getIDMS_USER_DEFAULT_OTP_EMAILTEMPLATE_CN();
 		EmailTemplate template = new EmailTemplate();
 		template.setEmailTemplatePath(filePath);
 		return template;
 	}
+
+
 }

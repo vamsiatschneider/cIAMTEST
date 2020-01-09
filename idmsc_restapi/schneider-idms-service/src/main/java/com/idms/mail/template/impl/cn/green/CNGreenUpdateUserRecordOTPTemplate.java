@@ -22,7 +22,7 @@ public class CNGreenUpdateUserRecordOTPTemplate extends CNGreenDefaultTemplate {
 //		template.setEmailTemplatePath(filePath);
 //		return template;
 		
-		String filePath = input.getConfiguration().getIDMS_SEND_INVITATION_EMAILTEMPLATE_CN();
+		String filePath = input.getConfiguration().getIDMS_USER_UPDATE_OTP_EMAILTEMPLATE_CN();
 		EmailTemplate template = new EmailTemplate();
 		template.setEmailTemplatePath(filePath);
 		return template;

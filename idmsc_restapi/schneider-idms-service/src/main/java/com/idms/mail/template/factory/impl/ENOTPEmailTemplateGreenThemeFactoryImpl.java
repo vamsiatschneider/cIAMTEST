@@ -2,7 +2,7 @@ package com.idms.mail.template.factory.impl;
 
 import com.idms.mail.template.factory.EmailTemplateFactory;
 import com.idms.mail.template.impl.en.green.ENGreenAddEmailUserRecordOTPTemplate;
-import com.idms.mail.template.impl.en.green.ENGreenDefaultTemplate;
+import com.idms.mail.template.impl.en.green.ENGreenDefaultOTPTemplate;
 import com.idms.mail.template.impl.en.green.ENGreenSendInvitationTemplate;
 import com.idms.mail.template.impl.en.green.ENGreenSetUserPasswordOTPTemplate;
 import com.idms.mail.template.impl.en.green.ENGreenUpdateUserRecordOTPTemplate;
@@ -43,7 +43,7 @@ public class ENOTPEmailTemplateGreenThemeFactoryImpl implements EmailTemplateFac
 				emailTemplate = new ENGreenSendInvitationTemplate(input).getTemplate();
 				break;
 			default:
-				emailTemplate = new ENGreenDefaultTemplate(input).getTemplate();
+				emailTemplate = new ENGreenDefaultOTPTemplate(input).getTemplate();
 				break;
 		}
 		return emailTemplate;

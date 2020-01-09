@@ -5,17 +5,26 @@ import com.idms.mail.template.util.EmailTemplateInput;
 
 public class ENGreenUserRegistrationOTPTemplate extends ENGreenDefaultTemplate {
 
-	// @Value("${user.registration.withpwd.otp.email.template.en}")
-	private String IDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE_EN;
-
 	public ENGreenUserRegistrationOTPTemplate(EmailTemplateInput input) {
 		super(input);
 	}
-
+	
 	@Override
 	public EmailTemplate getTemplate() {
+/* 
+ * TODO- Ideally the configuration class PropertyFileAutoRefresh should return the value of the 
+ * property key passed onto getConfiguration method but it returns null. 
+ * Need to fix how configuration is loaded. The below commented code should work post that.
+ */
+//		PropertyFileAutoRefresh _instance = PropertyFileAutoRefresh.getInstance();
+//		String filePath = _instance.getConfiguration("user.update.otp.email.template.cn");
+//		EmailTemplate template = new EmailTemplate();
+//		template.setEmailTemplatePath(filePath);
+//		return template;
+		
+		String filePath = input.getConfiguration().getIDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE_EN();
 		EmailTemplate template = new EmailTemplate();
-		template.setEmailTemplatePath(IDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE_EN);
+		template.setEmailTemplatePath(filePath);
 		return template;
 	}
 }

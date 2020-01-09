@@ -5,8 +5,6 @@ import com.idms.mail.template.util.EmailTemplateInput;
 
 public class CNGreenSetUserPasswordOTPTemplate extends CNGreenDefaultTemplate{
 
-	//	@Value("${user.reset.password.otp.email.template.cn}")
-	
 	public CNGreenSetUserPasswordOTPTemplate(EmailTemplateInput input) {
 		super(input);
 	}
@@ -24,7 +22,7 @@ public class CNGreenSetUserPasswordOTPTemplate extends CNGreenDefaultTemplate{
 //		template.setEmailTemplatePath(filePath);
 //		return template;
 		
-		String filePath = input.getConfiguration().getIDMS_SEND_INVITATION_EMAILTEMPLATE_CN();
+		String filePath = input.getConfiguration().getIDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE_CN();
 		EmailTemplate template = new EmailTemplate();
 		template.setEmailTemplatePath(filePath);
 		return template;
