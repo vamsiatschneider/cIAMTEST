@@ -210,7 +210,6 @@ public class ChinaIdmsUtil {
 	 */
 	public static String mobileTransformation(String str) {
 		String mobileNumber = str.trim();
-		//str = mobileNumber.replaceAll("[\\(\\)\\-\\+\\.\\s]", "");
 		str = mobileNumber.replaceAll("[^0-9]", "");
 		int i = 0;
 		while (str.charAt(i) == '0')
@@ -348,12 +347,10 @@ public class ChinaIdmsUtil {
 				content = contentBuilder.toString();
 			}
 		} catch (IOException e) {
-			// throw new FileNotFoundException("Caught Exception!!!!!!! " + e);
 			LOGGER.error("Executing while formDeviceJson :: -> " + e.getMessage(), e);
 		}
 		return content;
 	}
-	
 	
 	public static String formatEscapeCharacter(String deviceData){
 		String temp = deviceData.substring(1, deviceData.length()-1);
@@ -370,56 +367,17 @@ public class ChinaIdmsUtil {
 		return temp;
 	}
 	
-	/*public static String printFileContent(){
-		String content = null;
-		StringBuilder contentBuilder = null;
-		int startIndex;
-		try {
-			
-			String fileName = "DeviceDataInformation.txt";
-			
-			File file = ResourceUtils.getFile("classpath:"+fileName);
-			//File is found
-			System.out.println("File Foundrrrr : " + file.exists());
-			 
-			//Read File Content
-			if(file.exists()){
-				contentBuilder = new StringBuilder(new String(Files.readAllBytes(file.toPath())));
-			}
-			startIndex = contentBuilder.indexOf("<AuthenticateIdentification>");
-			System.out.println("startIndex = "+startIndex);
-			startIndex = contentBuilder.indexOf("<OTPIdentification>");
-			System.out.println(contentBuilder);
-			System.out.println("startIndex2 = "+startIndex);
-		} catch (IOException e) {
-			e.printStackTrace();
+	public static String getInvalidCount(String data){
+		int startIndex = 0, endIndex = 0;
+		String countValue = null;
+		startIndex = data.indexOf("<InvalidCount>");
+		endIndex = data.indexOf("</InvalidCount>");
+		
+		if(startIndex != -1 && startIndex > 0){
+			startIndex = startIndex + "<InvalidCount>".length();
+			countValue = data.substring(startIndex, endIndex);
 		}
-        return content;
-	}*/
-	
-	
-	
-	/*public static void main(String[] args) {
-		String abc = "{\\\"screen\\\":";
-		System.out.println("abc= "+abc);
-		String xyz = removeEscapeCharacter(abc);
-		System.out.println("xyz= "+xyz);
-		String str = "88ee604-735c-4b95-a0d8-41439bfbbd14";
-		try {
-			String modString  = maskText(str);
-			System.out.println("modString = "+modString);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}*/
-	
-	/*public static void main(String[] args) {
-		//String longvalue = generateHashValue("tY4MomqIwjg34932ZhTx651K38WJcZ");
-		String mobileStr = mobileTransformation("+086-(508) 75*&^%$59.777");
-		//String abc = "\"Hello \"world\" estr\"";
-		//formatEscapeCharacter(abc);
-		//printFileContent();
-		System.out.println(mobileStr);
-	}*/
-	
+		return countValue;
+	}
+		
 }
