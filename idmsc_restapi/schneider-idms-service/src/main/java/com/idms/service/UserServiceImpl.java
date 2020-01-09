@@ -3097,8 +3097,6 @@ public class UserServiceImpl implements UserService {
 
 			if (null != loginIdentifier && !loginIdentifier.isEmpty()) {
 				if(!UserConstants.TRUE.equalsIgnoreCase(withGlobalUsers)){
-					LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
-							+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + loginIdentifier + AUDIT_LOG_CLOSURE);
 					LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for login/login_mobile="
 							+ loginIdentifier);
 					PROCESSING_STATE = "IDMS-CHINA-CHK-USR";
@@ -3114,8 +3112,10 @@ public class UserServiceImpl implements UserService {
 					productDocCtx = JsonPath.using(conf).parse(userExists);
 					resultCount = productDocCtx.read("$.resultCount");
 					LOGGER.info("resultCount of loginIdentifier = " + resultCount);
+					String invalidAttempValue = ChinaIdmsUtil.getInvalidCount(productDocCtx.read("$.result[0].sunAMAuthInvalidAttemptsData[0]"));
+					LOGGER.info("invalidAttempValue = " + invalidAttempValue);
+					
 					if(resultCount == 1){
-						//if pwdSetFirstLogin is false then send email to reset password
 						String pwdSetFirstLoginString = productDocCtx.read("$.result[0].pwdSetFirstLogin[0]");
 						String userName = productDocCtx.read("$.result[0].username");
 						LOGGER.info("pwdSetFirstLoginString = "+pwdSetFirstLoginString);
@@ -3135,12 +3135,12 @@ public class UserServiceImpl implements UserService {
 								return Response.status(Response.Status.OK).entity(responseUI).build();
 							}
 						}
-						//loginIdentifier found but password is incorrect
 						response.put(UserConstants.USER_INFO, UserConstants.CN_USER_ACTIVE);
 						response.put(UserConstants.MESSAGE_L, UserConstants.TRUE);
+						response.put("invalidCount", invalidAttempValue);
+						
 						return Response.status(Response.Status.OK).entity(response).build();
 					}
-					//loginIdentifier not found, checking if user is registered but not activated
 					if(resultCount == 0){
 						LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for mail/mobile="
 								+ loginIdentifier);
@@ -3273,9 +3273,6 @@ public class UserServiceImpl implements UserService {
 		}
 
 		if (null != email && !email.isEmpty()) {
-			LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
-					+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + email + AUDIT_LOG_CLOSURE);
-
 			try {
 				LOGGER.info("Start: checkUserExistsWithEmailMobile() of OpenAMService for email=" + email);
 				userExists = productService.checkUserExistsWithEmailMobile(
@@ -3304,8 +3301,6 @@ public class UserServiceImpl implements UserService {
 		}
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info("Time taken by UserServiceImpl.userExists() : " + elapsedTime);
-		// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
-		// "logout");
 		LOGGER.error("User not found in userExists() with email=" + email);
 		return Response.status(Response.Status.NOT_FOUND).entity(userResponse).build();
 	}
@@ -3333,20 +3328,11 @@ public class UserServiceImpl implements UserService {
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		String accessToken = "";
 		try {
-
-			// To fetch the authorization code from the redirect URI
-			LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
-					+ AUDIT_OPENAM_API + AUDIT_OPENAM_AUTHORIZE_CALL + AUDIT_LOG_CLOSURE);
 			LOGGER.info("Start: getOauthFromIPlanet() of OpenAMTokenService");
 			oauthFromIPlanet = openAMTokenService.getOauthFromIPlanet(cookie, UserConstants.CACHE,
 					UserConstants.CONTENT_TYPE, UserConstants.RESPONSE_TYPE, redirectUri, UserConstants.SCOPE, "/se",
 					UserConstants.CLIENT_ID, csrf, "allow", "1");
 			LOGGER.info("End: getOauthFromIPlanet() of OpenAMTokenService finished");
-			/*
-			 * String[] parts =
-			 * oauthFromIPlanet.getHeaderString("Location").split("="); parts =
-			 * parts[1].trim().split("&"); authorizationCode = parts[0].trim();
-			 */
 
 			String locationValue = oauthFromIPlanet.getHeaderString("Location");
 			String codeString[] = locationValue
@@ -3575,20 +3561,11 @@ public class UserServiceImpl implements UserService {
 
 			String getUserReponseProv = null;
 			if (null != iPlanetDirectoryKey) {
-				LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
-						+ AUDIT_OPENAM_API + AUDIT_OPENAM_GET_CALL + uniqueIdentifier + AUDIT_LOG_CLOSURE);
 				LOGGER.info("Start: getUser() of OpenAMService for uniqueIdentifier=" + uniqueIdentifier);
 				getUserResponse = productService.getUser(iPlanetDirectoryKey, uniqueIdentifier);
 				LOGGER.info("End: getUser() of OpenAMService finished for uniqueIdentifier=" + uniqueIdentifier);
 				LOGGER.info("getUser(): Response :  -> " + ChinaIdmsUtil.printOpenAMInfo(getUserResponse));
 				productDocCtx = JsonPath.using(conf).parse(getUserResponse);
-
-				/*
-				 * String loginIdCheck = null !=
-				 * productDocCtx.read(JsonConstants.LOGIN_ID_UPPER_0) ?
-				 * getValue(productDocCtx.read(JsonConstants.LOGIN_ID_UPPER_0))
-				 * : getDelimeter();
-				 */
 
 				if (null != productDocCtx.read(JsonConstants.LOGIN_ID_UPPER_0))
 					loginIdCheck = getValue(productDocCtx.read(JsonConstants.LOGIN_ID_UPPER_0));
@@ -3713,18 +3690,6 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 			}
 
-			// LOGGER.info("User Reponse Document " +
-			// productDocCtx.jsonString());
-
-			/*
-			 * productDocCtx =
-			 * JsonPath.using(conf).parse(UserConstants.OPT_SUBMIT_REQUEST);
-			 * productDocCtx.set(JsonConstants.AUTH_ID, authId);
-			 * productDocCtx.set("$.callbacks[0].input[0].value",
-			 * confirmRequest.getPinCode());
-			 * productDocCtx.set("$.callbacks[1].input[0].value", 0);
-			 */
-
 			/**
 			 * HOTP Call 4 to Submit HOTP
 			 */
@@ -3757,9 +3722,6 @@ public class UserServiceImpl implements UserService {
 				userService = UserConstants.UPDATE_USER_SERVICE;
 			}
 			try {
-
-				// LOGGER.info("UserServiceImpl:userPinConfirmation -> :
-				// executeHotpCall: Requset : -> ");
 				LOGGER.info("hotpService ->" + hotpService);
 				LOGGER.info("productDocCtx.jsonString() - >" + ChinaIdmsUtil.printOpenAMInfo(productDocCtx.jsonString()));
 				LOGGER.info("userService ->" + userService);
@@ -3790,7 +3752,6 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
 			} catch (Exception e) {
 				errorResponse.setStatus(errorStatus);
-				//errorResponse.setMessage(UserConstants.INVALID_PINCODE);
 				if(e.getMessage().contains(UserConstants.PIN_CONFIRMATION_ERROR_CODE))
 					errorResponse.setMessage(UserConstants.PIN_CONFIRMATION_ERROR);
 				else
@@ -3847,27 +3808,6 @@ public class UserServiceImpl implements UserService {
 				PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
 						.concat(",\"isActivated\":\"true\"}");
 
-				/*
-				 * if (null != emailOrMobile && !emailOrMobile.isEmpty()) {
-				 * LOGGER.info(AUDIT_REQUESTING_USER + uniqueIdentifier +
-				 * AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN + AUDIT_OPENAM_API
-				 * + AUDIT_OPENAM_UPDATE_CALL + uniqueIdentifier +
-				 * AUDIT_LOG_CLOSURE); //LOGGER.info(
-				 * "Email/Mobile userPinConfirmation(): Request :  -> ");
-				 *//**
-					 * Commenting below line updateuser since we are updating
-					 * after uims sync
-					 *//*
-					 * LOGGER.info(
-					 * "going to call updateUser() of OpenAMService to update email/mobile for uniqueIdentifier="
-					 * +uniqueIdentifier);
-					 * productService.updateUser(UserConstants.CHINA_IDMS_TOKEN
-					 * + iPlanetDirectoryKey, uniqueIdentifier,
-					 * PRODUCT_JSON_STRING); LOGGER.info(
-					 * "updateUser() of OpenAMService finished to update email/mobile for uniqueIdentifier="
-					 * +uniqueIdentifier); }
-					 */
-
 				/**
 				 * The below code to activate the IDMSSetActivationDate
 				 * 
@@ -3878,42 +3818,16 @@ public class UserServiceImpl implements UserService {
 					datePopulationSerivce.populatePrmActivationDate(uniqueIdentifier,
 							confirmRequest.getIDMS_Profile_update_source());
 				}
-
 			}
 			if (UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(confirmRequest.getOperation())) {
-
 				if (UserConstants.MOBILE.equalsIgnoreCase(loginIdentifierType)) {
-
 					PRODUCT_JSON_STRING = "{" + "\"login_mobile\": \"" + emailOrMobile + "\",\"mobile_reg\": \""
 							+ emailOrMobile + "\",\"hotpMobileVerification\": \"" + hotpMobileVerification + "\"" + "}";
-
 				} else if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
 					PRODUCT_JSON_STRING = "{" + "\"loginid\": \"" + emailOrMobile + "\",\"mail\": \"" + emailOrMobile
 							+ "\",\"idmsuid\": \"" + emailOrMobile + "\",\"hotpEmailVerification\": \""
 							+ hotpEmailVerification + "\"" + "}";
 				}
-
-				/**
-				 * Commenting below line updateuser since we are updating after
-				 * uims sync
-				 */
-
-				/*
-				 * if (null != emailOrMobile && !emailOrMobile.isEmpty()) {
-				 * LOGGER.info(AUDIT_REQUESTING_USER + uniqueIdentifier +
-				 * AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN + AUDIT_OPENAM_API
-				 * + AUDIT_OPENAM_UPDATE_CALL + uniqueIdentifier +
-				 * AUDIT_LOG_CLOSURE); LOGGER.info(
-				 * "userPinConfirmation -> : productService.updateUser: Requset :  -> "
-				 * +PRODUCT_JSON_STRING); LOGGER.info(
-				 * "going to call updateUser() of OpenAMService for uniqueIdentifier ="
-				 * +uniqueIdentifier);
-				 * productService.updateUser(UserConstants.CHINA_IDMS_TOKEN +
-				 * iPlanetDirectoryKey, uniqueIdentifier, PRODUCT_JSON_STRING);
-				 * LOGGER.info(
-				 * "updateUser() of OpenAMService finished for uniqueIdentifier ="
-				 * +uniqueIdentifier); }
-				 */
 
 				EMAIL_CHANGE_LOGGER.info("{},{},{}", formatter.format(new Date()), uniqueIdentifier, emailOrMobile);
 
@@ -3966,33 +3880,8 @@ public class UserServiceImpl implements UserService {
 							PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
 									.concat(",\"pwdSetFirstLogin\":\"true\"}");
 						}
-						/*
-						 * LOGGER.info(AUDIT_REQUESTING_USER + uniqueIdentifier
-						 * + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN +
-						 * AUDIT_OPENAM_API + AUDIT_OPENAM_GET_CALL +
-						 * uniqueIdentifier + AUDIT_LOG_CLOSURE);
-						 */
-						// LOGGER.info("productService.updateUser: Requset : ->
-						// ");
-
-						/**
-						 * Commenting below line updateuser since we are
-						 * updating after uims sync
-						 */
-						/*
-						 * LOGGER.info(
-						 * "Going to call updateUser() of OpenAMService for uniqueIdentifier="
-						 * +uniqueIdentifier);
-						 * productService.updateUser(UserConstants.
-						 * CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-						 * uniqueIdentifier, PRODUCT_JSON_STRING); LOGGER.info(
-						 * "updateUser() of OpenAMService finished for uniqueIdentifier="
-						 * +uniqueIdentifier);
-						 */
 					}
-
 				}
-
 			}
 
 			LOGGER.info("authToken  " + authId);
@@ -4019,15 +3908,11 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info("Start: SYNC activateUIMSUserConfirmPIN() of UimsSetPasswordSoapService");
 					uimsSetPasswordSoapService.activateUIMSUserConfirmPIN(confirmRequest, vNewCntValue.toString(),
 							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, loginIdentifierType, emailOrMobile);
-					// updateOpenamDetails(iPlanetDirectoryKey,
-					// uniqueIdentifier, PRODUCT_JSON_STRING);
 					LOGGER.info("End: SYNC activateUIMSUserConfirmPIN() of UimsSetPasswordSoapService finished");
 				} else {
 					LOGGER.info("Start: ASYNC activateUIMSUserConfirmPIN() of UimsSetPasswordSoapService");
 					uimsUserManagerSoapService.activateUIMSUserConfirmPIN(confirmRequest, vNewCntValue.toString(),
 							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, loginIdentifierType, emailOrMobile);
-					// updateOpenamDetails(iPlanetDirectoryKey,
-					// uniqueIdentifier, PRODUCT_JSON_STRING);
 					LOGGER.info("End: ASYNC activateUIMSUserConfirmPIN() of UimsSetPasswordSoapService finished");
 				}
 			} else if (null != confirmRequest.getIDMS_Profile_update_source()
@@ -4043,25 +3928,19 @@ public class UserServiceImpl implements UserService {
 				}
 				// check UIMSPasswordSync to call sync or Async method
 				if (pickListValidator.validate(UserConstants.UIMSPasswordSync, UserConstants.TRUE)) {
-					// Calling Sync method of setUIMSPassword
 					LOGGER.info("Start: SYNC setUIMSPassword() of UimsSetPasswordSoapService for federationID="
 							+ federationID);
 					isPasswordUpdatedInUIMS = uimsSetPasswordSoapService.setUIMSPassword(
 							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, uniqueIdentifier, federationID,
 							confirmRequest.getPassword(), vNewCntValue.toString(), loginIdentifierType, emailOrMobile);
-					// updateOpenamDetails(iPlanetDirectoryKey,
-					// uniqueIdentifier, PRODUCT_JSON_STRING);
 					LOGGER.info("End: SYNC setUIMSPassword() of UimsSetPasswordSoapService finished for federationID="
 							+ federationID);
 				} else {
-					// Calling Async method of setUIMSPassword
 					LOGGER.info("Start: ASYNC setUIMSPassword() of uimsUserManagerSoapService for federationID="
 							+ federationID);
 					uimsUserManagerSoapService.setUIMSPassword(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 							uniqueIdentifier, federationID, confirmRequest.getPassword(), vNewCntValue.toString(),
 							loginIdentifierType, emailOrMobile);
-					// updateOpenamDetails(iPlanetDirectoryKey,
-					// uniqueIdentifier, PRODUCT_JSON_STRING);
 					LOGGER.info("End: ASYNC setUIMSPassword() of uimsUserManagerSoapService finished for federationID="
 							+ federationID);
 				}
@@ -4095,27 +3974,9 @@ public class UserServiceImpl implements UserService {
 			// and retrieve the user details and pass it to create user
 			if (null != confirmRequest.getIDMS_Profile_update_source() && (pickListValidator
 					.validate(UserConstants.IDMS_BFO_profile, confirmRequest.getIDMS_Profile_update_source()))) {
-				ifwAccessToken = ifwTokenServiceImpl.getIFWToken();
-				/*
-				 * LOGGER.info("getSalesForceToken : => " +
-				 * "PASSWORD_GRANT_TYPE : " + UserConstants.PR_GRANT_TYPE +
-				 * " salesForceClientId: " + salesForceClientId +
-				 * " salesForceClientSecret :" + salesForceClientSecret +
-				 * " salesForceUserName: " + salesForceUserName +
-				 * " salesForcePassword :" + salesForcePassword);
-				 */
-				// LOGGER.info("Start: getSalesForceToken() of
-				// SalesForceService");
+				ifwAccessToken = ifwTokenServiceImpl.getIFWToken();				
 				String bfoAuthorizationToken = sfSyncServiceImpl.getSFToken();
-				// LOGGER.info("End: getSalesForceToken() of SalesForceService
-				// finished");
-				/*
-				 * conf =
-				 * Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).
-				 * build(); productDocCtx =
-				 * JsonPath.using(conf).parse(bfoAuthorization); String
-				 * bfoAuthorizationToken = productDocCtx.read("$.access_token");
-				 */
+				
 				LOGGER.info("Start: getUser() of IFWService");
 				Response globalGetUserResponse = ifwService.getUser(ifwAccessToken, bfoAuthorizationToken,
 						UserConstants.ACCEPT_TYPE_APP_JSON, "", "", "", "", confirmRequest.getIDMS_Federated_ID__c());
@@ -4126,8 +3987,6 @@ public class UserServiceImpl implements UserService {
 				try {
 					IFWCustomAttributesForWork idmsUser = objMapper.readValue(responseAsString,
 							IFWCustomAttributesForWork.class);
-					// CreateUserRequest iDMSUser = mapper.map(idmsUser,
-					// CreateUserRequest.class);
 
 					/**
 					 * Added the below condition if user doesn't send the hashed
@@ -4138,7 +3997,6 @@ public class UserServiceImpl implements UserService {
 					}
 
 					IFWUser ifwUser = mapper.map(idmsUser, IFWUser.class);
-					// ifwUser.setIdmsHashedToken(ChinaIdmsUtil.generateHashValue(confirmRequest.getPinCode()));
 					LOGGER.info("IDMSUser : " + objMapper.writeValueAsString(ifwUser));
 					// creating the user
 					CreateUserRequest createUserRequest = new CreateUserRequest();
@@ -4189,7 +4047,6 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Time taken by userPinConfirmation() : " + elapsedTime);
 			LOGGER.error("Error in userPinConfirmation -> " + e.getMessage(),e);
 			LOGGER.error("ECODE-USER-PIN-NOTFOUND : 404 not found error during user pin confirmation");
-			//productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey, "logout");
 			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 		}
 
@@ -4212,7 +4069,6 @@ public class UserServiceImpl implements UserService {
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by userPinConfirmation() : " + elapsedTime);
 			LOGGER.error("ECODE-USER-PIN-PROC-ERR : Internal server error during user pin confirmation");
-			//return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 			if(connectionError)
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 			else
@@ -4243,8 +4099,6 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Response updateAIL(String authorizedToken, String clientId, String clientSecret, AILRequest ailRequest) {
 		LOGGER.info("Entered updateAIL() -> Start");
-		// LOGGER.info("Parameter clientId -> "+clientId+" ,clientSecret ->
-		// "+clientSecret);
 		String IDMSAil__c = "";
 		String userData = "";
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
@@ -4261,7 +4115,6 @@ public class UserServiceImpl implements UserService {
 		// Validate Input Paramenters
 		ErrorResponse errorResponse = new ErrorResponse();
 		ObjectMapper objMapper = new ObjectMapper();
-		//List<String> accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
 		List<String> accssControlList =null;
 		boolean maintenanceMode=false;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
@@ -4278,9 +4131,7 @@ public class UserServiceImpl implements UserService {
 					errorResponse.setMessage(UserConstants.MAINTENANCE_MODE_MESSAGE);
 					LOGGER.error("Error :: Maintenance mode in progress");
 					maintenanceMode=true;
-					//return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
 				 }
-			//}
 			//Consider  exclusions for maintenance mode as below
 			if(maintenanceMode){
 				maintenanceMode = excludeMaintenanceMode(ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c(),  UserConstants.MAINTENANCE_MODE_AIL_UPDATE);
@@ -4397,33 +4248,6 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 
-			/**
-			 * Disabling the below condition as part of R5 Release changes
-			 * 
-			 */
-			// Update source and ACL value have to be equal
-			/*
-			 * if (null !=
-			 * ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c()
-			 * && !UserConstants.UIMS
-			 * .equalsIgnoreCase(ailRequest.getUserAILRecord().
-			 * getIDMS_Profile_update_source__c())) { if
-			 * (!ailRequest.getUserAILRecord().getIDMSAcl__c()
-			 * .equals(ailRequest.getUserAILRecord().
-			 * getIDMS_Profile_update_source__c())) {
-			 * 
-			 * ErrorResponse errorResponse = new ErrorResponse();
-			 * errorResponse.setStatus(errorStatus); errorResponse.setMessage(
-			 * " Update source and ACL value are different "); elapsedTime =
-			 * UserConstants.TIME_IN_MILLI_SECONDS - startTime; LOGGER.info(
-			 * "Time taken by UserServiceImpl.updateAIL() : " + elapsedTime);
-			 * return
-			 * Response.status(Response.Status.BAD_REQUEST.getStatusCode()).
-			 * entity(errorResponse).build();
-			 * 
-			 * } }
-			 */
-
 			if (null != authorizedToken && !authorizedToken.isEmpty() && !getTechnicalUserDetails(authorizedToken)) {
 				errorResponse.setStatus(errorStatus);
 				errorResponse.setMessage("Unauthorized or session expired");
@@ -4435,24 +4259,18 @@ public class UserServiceImpl implements UserService {
 
 			idmsAclType_c = getIDMSAclType(ailRequest.getUserAILRecord().getIDMSAclType__c());
 			LOGGER.info("AIL type = " + idmsAclType_c);
-			// Getting the user data
-			// LOGGER.info("Going to call getSSOToken()");
 			try {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
 				LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
 				iPlanetDirectoryKey = "";
 			}
-			// LOGGER.info("call getSSOToken() finished");
 
 			if (null != ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c() && UserConstants.UIMS
 					.equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c())) {
 
-				// LOGGER.info("Going to call
-				// checkUserExistsWithFederationID()");
 				Response fedResponse = checkUserExistsWithFederationID(iPlanetDirectoryKey,
 						ailRequest.getUserAILRecord().getIDMS_Federated_ID__c(), startTime);
-				// LOGGER.info("checkUserExistsWithFederationID() finished");
 				if (fedResponse.getStatus() == 200) {
 					JSONObject uimsResponse = (JSONObject) fedResponse.getEntity();
 					userId = (String) uimsResponse.get("userId");
@@ -4473,8 +4291,6 @@ public class UserServiceImpl implements UserService {
 						LOGGER.info("End: This UIMS user is not existing in IDMS, finished creating this user in IDMS-China"
 								+ ailRequest.getUserAILRecord().getIDMS_Federated_ID__c());
 						if(200 == createUserInIDMSResponse.getStatus()){
-							//response.put(UserConstants.STATUS_L, successStatus);
-							//response.put(UserConstants.MESSAGE_L, "UIMS user created and updated in IDMS");
 							userId = ailRequest.getUserAILRecord().getIDMSUser__c();
 							if (null == userId) {
 								userId =fedID ;
@@ -4482,7 +4298,6 @@ public class UserServiceImpl implements UserService {
 							elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 							LOGGER.info("UIMS user created and updated in IDMS");
 							LOGGER.info("Time taken by updateUser() : " + elapsedTime);
-							//return Response.status(Response.Status.OK).entity(response).build();
 						} else {
 							response.put(UserConstants.STATUS_L, errorStatus);
 							response.put(UserConstants.MESSAGE_L, "UIMS user creation and updatation failed in IDMS");
@@ -4492,7 +4307,6 @@ public class UserServiceImpl implements UserService {
 							return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 						}
 					}
-					//return fedResponse;
 				}
 			} else {
 				userId = ailRequest.getUserAILRecord().getIDMSUser__c();
@@ -4508,18 +4322,11 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Start: getUser() of OpenAMService for userId=" + userId);
 				userData = productService.getUser(iPlanetDirectoryKey, userId);
 				LOGGER.info("End: getUser() of OpenAMService finished for userId=" + userId);
-				// LOGGER.info("productService.getUser : Response ->
-				// "+userData);
 			}
 			//Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();//Senthil
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
-			// LOGGER.info("SSOTOKEN--------------------------->" +
-			// iPlanetDirectoryKey);
 			LOGGER.info("productDocCtx in updateAil=" + ChinaIdmsUtil.printOpenAMInfo(productDocCtx.jsonString()));
 			IDMSAil__c = productDocCtx.read("$.IDMSAil_c[0]");
-
-			// IDMSAil__c = IDMSAil__c.replace("\"", "");
-			// LOGGER.info("1st var IDMSAil_c" + IDMSAil__c);
 
 			if (null != IDMSAil__c) {
 				listOfAil_c = Arrays.asList(IDMSAil__c.replaceAll("[\\(\\)\\[\\]\\{\\}]", "").split(","));
@@ -4534,35 +4341,20 @@ public class UserServiceImpl implements UserService {
 					+ ailRequest.getUserAILRecord().getIDMSAcl__c()))
 					&& ("GRANT".equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMSOperation__c()))) {
 				String aclType_c = productDocCtx.read("$.IDMSAIL_" + idmsAclType_c + "_c[0]");
-				/*
-				 * LOGGER.info("2nd Var ------->" + idmsAclType_c + "--------->"
-				 * + aclType_c); aclType_c = aclType_c.substring(0,
-				 * aclType_c.length() - 1); aclType_c = aclType_c.substring(1);
-				 * aclType_c = aclType_c.replace("\"", ""); aclType_c =
-				 * aclType_c.replaceAll("\\[", ""); aclType_c =
-				 * aclType_c.replaceAll("\\]", "");
-				 */
+				
 				// Checking the value does not contain null value
 				if (!(aclType_c == null || aclType_c.length() == 0))
 					aclType_c = aclType_c + "," + ailRequest.getUserAILRecord().getIDMSAcl__c();
 				else
 					aclType_c = ailRequest.getUserAILRecord().getIDMSAcl__c();
-				// aclType_c = "[" + aclType_c + "]";
 				PRODUCT_JSON_STRING = "{" + "\"IDMSAIL_" + idmsAclType_c + "_c\": \"" + aclType_c.trim() + "\"" + "}";
-				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
-						+ "openAMApi:GET/updateUser/{userId}");
+				
 				LOGGER.info("Grant Operation: updateAIL : Request -> " + PRODUCT_JSON_STRING);
 				LOGGER.info("Start: updateUser() of OpenAMService for userId=" + userId);
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 						PRODUCT_JSON_STRING);
 				LOGGER.info("End: updateUser() of OpenAMService finished for userId=" + userId);
 
-				/*
-				 * String tempString = IDMSAil__c.substring(0,
-				 * IDMSAil__c.length() - 2); tempString =
-				 * tempString.replaceAll("\\[", "");
-				 */// LOGGER.info("tempString---------->" + tempString);
-					// tempString=tempString.substring(1);
 				if (null != IDMSAil__c && !IDMSAil__c.isEmpty())
 					IDMSAil__c = "" + IDMSAil__c + ",(" + ailRequest.getUserAILRecord().getIDMSAclType__c() + ";"
 							+ ailRequest.getUserAILRecord().getIDMSAcl__c() + ")";
@@ -4599,14 +4391,8 @@ public class UserServiceImpl implements UserService {
 				IDMSAil__c = IDMSAil__c.replace("\"", "");
 				if (!(IDMSAil__c == null || IDMSAil__c.length() == 0))
 					IDMSAil__c = IDMSAil__c.substring(0, IDMSAil__c.length() - 1);
-				// IDMSAil__c = "[" + IDMSAil__c + "]";
 				String aclType = productDocCtx.read("$.IDMSAIL_" + idmsAclType_c + "_c[0]");
-				/*
-				 * aclType = aclType.substring(0, aclType.length() - 1); aclType
-				 * = aclType.substring(1); aclType = aclType.replace("\"", "");
-				 * aclType = aclType.replaceAll("\\[", ""); aclType =
-				 * aclType.replaceAll("\\]", "");
-				 */
+				
 				ailParts = aclType.split(",");
 				aclType = "";
 				for (String pair : ailParts) {
@@ -4621,16 +4407,6 @@ public class UserServiceImpl implements UserService {
 					aclType = aclType.replaceAll("\\[", "");
 					aclType = aclType.replaceAll("\\]", "");
 				}
-				// aclType = "[" + aclType + "]";
-
-				/*
-				 * if(null == aclType || aclType.isEmpty()) { aclType = "[]";
-				 * }else{ aclType = aclType.trim(); }
-				 */
-				/*
-				 * PRODUCT_JSON_STRING = "{" + "\"IDMSAIL_" + idmsAclType_c +
-				 * "_c\": \"" + aclType + "\"" + "}";
-				 */
 
 				if (null == aclType || aclType.isEmpty()) {
 					PRODUCT_JSON_STRING = "{" + "\"IDMSAIL_" + idmsAclType_c + "_c\":".concat("[]}");
@@ -4651,8 +4427,7 @@ public class UserServiceImpl implements UserService {
 				} else {
 					PRODUCT_JSON_STRING = "{" + "\"IDMSAil_c\": \"" + IDMSAil__c.trim() + "\"" + "}";
 				}
-				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
-						+ "openAMApi:GET/getUser/{userId}");
+				
 				LOGGER.info("Revoke Operation -> : productService.updateAIL : Request -> " + PRODUCT_JSON_STRING);
 				LOGGER.info("Start: updateUser() of OpenAMService for userId=" + userId);
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
@@ -4697,7 +4472,6 @@ public class UserServiceImpl implements UserService {
 			// calling Async methods of UIMS api in updateUserAil IDMS api
 			if (null != ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c() && !UserConstants.UIMS
 					.equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c())) {
-				// Adding V_New
 				LOGGER.info("UserServiceImpl:updateAIL -> Request -> " + version);
 				LOGGER.info("Start: updateUser() of OpenAMService for userId=" + userId + " ,version=" + version);
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, version);
@@ -4863,16 +4637,13 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info(
 					"Parameter  passwordRecoveryRequest -> " + objMapper.writeValueAsString(passwordRecoveryRequest));
 
-			// LOGGER.info("calling getSSOToken()");
 			try {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
 				LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
 				iPlanetDirectoryKey = "";
 			}
-			// LOGGER.info("getSSOToken() finished");
-			LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
-					+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + loginIdentifier + AUDIT_LOG_CLOSURE);
+			
 			LOGGER.info(
 					"Start: checkUserExistsWithEmailMobile() of OpenAMService for loginIdentifier=" + loginIdentifier);
 			String userExists = productService.checkUserExistsWithEmailMobile(
@@ -4886,7 +4657,6 @@ public class UserServiceImpl implements UserService {
 			Integer resultCount = productDocCtx.read(JsonConstants.RESULT_COUNT);
 			userName = productDocCtx.read("$.result[0].username");
 
-			// user exists and resultcount > 0
 			LOGGER.info("resultCount=" + resultCount);
 			LOGGER.info("userName=" + userName);
 			if (resultCount.intValue() > 0) {
@@ -5024,12 +4794,7 @@ public class UserServiceImpl implements UserService {
 			String emailUserNameFormat = null;
 			boolean maintenanceMode=false;
 			ErrorResponse errorResponse = new ErrorResponse();
-			//List<String> accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
 			List<String> accssControlList =null;
-			// Step 1:
-
-			// LOGGER.info(" UserServiceImpl :: updateUser
-			// getUserInfoByAccessToken ");
 
 			/**
 			 * Check mandatory values and user type (home/work)
@@ -9194,6 +8959,7 @@ public class UserServiceImpl implements UserService {
 				checkUserExistsResponse = checkUserExists(userName, UserConstants.FALSE, app);
 				jsonObject =  (JSONObject) checkUserExistsResponse.getEntity();
 				LOGGER.info("Response from checkUserExists China: " + jsonObject.toString());
+				Integer invalidCount = Integer.valueOf(jsonObject.get("invalidCount").toString());
 				
 				if(400 == checkUserExistsResponse.getStatus()){
 					elapsedTime = (System.currentTimeMillis() - startTime);
@@ -9217,6 +8983,8 @@ public class UserServiceImpl implements UserService {
 					if(UserConstants.CN_USER_ACTIVE.equalsIgnoreCase(jsonObject.get(UserConstants.USER_INFO).toString())){
 						jsonObjectResponse.put("user_store", "CN");
 						jsonObjectResponse.put("user_status", "Registered-Active");
+						if(invalidCount>0)
+							jsonObjectResponse.put("user_invalid_attempt", invalidCount);
 						elapsedTime = (System.currentTimeMillis() - startTime);
 						AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource
 								+ "," + elapsedTime + "ms" + "," + UserConstants.INCORRECT_PASSWORD);
