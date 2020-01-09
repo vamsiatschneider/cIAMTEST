@@ -296,6 +296,7 @@ public class SendEmail {
 				LOGGER.info("bfoSupportUrl = "+bfoSupportUrl);
 				
 				String templateColor = productDJData.read("_IDMS_Application_CSS");
+				LOGGER.info("templateColor: "+templateColor);
 				// For email name configuration 
 				if (null != applicationDetails && 200 == applicationDetails.getStatus()) {
 					String userNameFormatOpenDJ = productDJData.read("_userNameFormat");
@@ -526,6 +527,7 @@ public class SendEmail {
 		LOGGER.info("Parameter to -> " + to+" ,subject -> "+subject);//Senthil consider this to handle PRM scenario
 		LOGGER.info("Parameter lang -> " + lang+" ,hotpOperationType -> "+hotpOperationType);
 		LOGGER.info("firstName emailContentTemplate -> " + firstName);
+		LOGGER.info("templateColor -> " + templateColor);
 		String filePath;
 		boolean chineseLangCheck = ((lang != null && lang.equalsIgnoreCase(EmailConstants.HOTP_LAN_CN)) || (hotpLanguage != null && hotpLanguage.equalsIgnoreCase(EmailConstants.HOTP_LAN_CN)));
 		int startIndex=0;
