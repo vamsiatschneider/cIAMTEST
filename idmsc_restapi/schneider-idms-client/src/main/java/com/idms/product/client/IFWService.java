@@ -27,7 +27,6 @@ public interface IFWService {
 	//CODE-RE-STRUCTURING - 3-Feb-19 merge (API upgrade from 2.0 to 4.0)
 	@POST
 	@Path("/rest/idms/user/4.1/users/exist")
-	@Consumes("application/json")
 	Response checkUserExistsWithEmail(@HeaderParam("X-BFO-Authorization") String bfoAuthorization,
 			@HeaderParam("X-SE-IFW-ApplicationName") String applicationName,
 			@HeaderParam("X-SE-IFW-CountryCode") String countryCode,
@@ -38,7 +37,6 @@ public interface IFWService {
 	
 	@POST
 	@Path("/rest/idms/user/4.1/users/exist")
-	@Consumes("application/json")
 	Response checkUserExistsWithFedId(@HeaderParam("X-BFO-Authorization") String bfoAuthorization,
 			@HeaderParam("X-SE-IFW-ApplicationName") String applicationName,
 			@HeaderParam("X-SE-IFW-CountryCode") String countryCode,
@@ -50,7 +48,6 @@ public interface IFWService {
 	//CODE-RE-STRUCTURING - 3-Feb-19 merge (API upgrade from 2.0 to 4.0)
 	@POST
 	@Path("/rest/idms/user/4.1/users/exist")
-	@Consumes("application/json")
 	Response checkUserExistsWithMobile(@HeaderParam("X-BFO-Authorization") String bfoAuthorization,
 			@HeaderParam("X-SE-IFW-ApplicationName") String applicationName,
 			@HeaderParam("X-SE-IFW-CountryCode") String countryCode,
