@@ -65,6 +65,7 @@
 	<jaxrs:client id="ifwService" address="${ifwService.url}"
 		serviceClass="com.idms.product.client.IFWService">
 		<jaxrs:headers>
+			<entry key="Content-Type" value="application/json"/>
 			<entry key="Accept" value="application/json"/>
 			<entry key="Host" value="${headerHostname}" />
 			<entry key="Connection" value="keep-alive" />
