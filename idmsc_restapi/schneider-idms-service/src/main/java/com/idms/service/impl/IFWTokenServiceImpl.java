@@ -34,13 +34,16 @@ public class IFWTokenServiceImpl {
 
 	@Inject
 	private IFWService ifwService;
-
+	
 	@Value("${ifwClientId}")
 	private String ifwClientId;
-
+	
 	@Value("${ifwClientSecret}")
 	private String ifwClientSecret;
-
+	
+	@Value("${tokengenerationurl}")
+	private String tokengenerationurl;
+	
 	public static Map<String,String> ifwtokenMap = new HashMap<String,String>();
 
 	/**
@@ -87,19 +90,28 @@ public class IFWTokenServiceImpl {
 		String generatedIFWToken = null, ifwTokenString = null;
 		Integer ifwTokenExpiryDuration = null;
 		DocumentContext productDocCtx = null;
-		//IFWTokenAttribute ifwTokenAttribute = new IFWTokenAttribute();
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		ifwtokenMap.clear();
 		try {
-			LOGGER.info("Start: getIFWToken() of IFWService");
-			ifwTokenString = ifwService.getIFWToken(UserConstants.CONTENT_TYPE_URL_FROM, "client_credentials", ifwClientId, ifwClientSecret);
-			LOGGER.info("End: getIFWToken() of IFWService");
+			if(tokengenerationurl.equalsIgnoreCase("ifw")){
+				LOGGER.info("Start: getIFWToken() of IFWService");
+				ifwTokenString = ifwService.getIFWToken(UserConstants.CONTENT_TYPE_URL_FROM, "client_credentials", ifwClientId, ifwClientSecret);
+				LOGGER.info("End: getIFWToken() of IFWService");
+			}
+			if(tokengenerationurl.equalsIgnoreCase("apigee")){
+				LOGGER.info("Start: getAPIGEEToken() of IFWService");
+				ifwTokenString = ifwService.getAPIGEEToken(UserConstants.CONTENT_TYPE_URL_FROM, "client_credentials", ifwClientId, ifwClientSecret);
+				LOGGER.info("End: getAPIGEEToken() of IFWService");
+			}
 
 			if (null != ifwTokenString && !ifwTokenString.isEmpty()) {
 				conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 				productDocCtx = JsonPath.using(conf).parse(ifwTokenString);
 				generatedIFWToken = productDocCtx.read("$.access_token");
-				ifwTokenExpiryDuration = productDocCtx.read("$.expires_in");
+				if(productDocCtx.read("$.expires_in") instanceof Integer)
+					ifwTokenExpiryDuration = productDocCtx.read("$.expires_in");
+				if(productDocCtx.read("$.expires_in") instanceof String)
+					ifwTokenExpiryDuration = Integer.valueOf(productDocCtx.read("$.expires_in"));
 			}
 
 			if (null != generatedIFWToken && !generatedIFWToken.isEmpty()) {

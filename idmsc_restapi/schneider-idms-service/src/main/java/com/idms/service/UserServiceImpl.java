@@ -5,7 +5,6 @@ import static com.se.idms.util.UserConstants.AUDIT_IMPERSONATING_USER;
 import static com.se.idms.util.UserConstants.AUDIT_LOG_CLOSURE;
 import static com.se.idms.util.UserConstants.AUDIT_OPENAM_API;
 import static com.se.idms.util.UserConstants.AUDIT_OPENAM_AUTHENTICATE_CALL;
-import static com.se.idms.util.UserConstants.AUDIT_OPENAM_AUTHORIZE_CALL;
 import static com.se.idms.util.UserConstants.AUDIT_OPENAM_AUTHORIZE_POST_CALL;
 import static com.se.idms.util.UserConstants.AUDIT_OPENAM_GET_CALL;
 import static com.se.idms.util.UserConstants.AUDIT_OPENAM_UPDATE_CALL;
@@ -113,11 +112,9 @@ import com.idms.model.UserDetailByApplicationRequest;
 import com.idms.model.UserMFADataRequest;
 import com.idms.model.VerifyPinRequest;
 import com.idms.product.client.IFWService;
-import com.idms.product.client.IdentityService;
 import com.idms.product.client.OpenAMService;
 import com.idms.product.client.OpenAMTokenService;
 import com.idms.product.client.OpenDjService;
-import com.idms.product.client.SalesForceService;
 import com.idms.product.model.Attributes;
 import com.idms.product.model.OpenAMGetUserHomeResponse;
 import com.idms.product.model.OpenAMGetUserWorkResponse;
@@ -209,14 +206,8 @@ public class UserServiceImpl implements UserService {
 	private OpenAMTokenService openAMTokenService;
 
 	@Inject
-	private IdentityService identityService;
-
-	@Inject
 	private IFWService ifwService;
-
-	@Inject
-	private SalesForceService salesForceService;
-
+	
 	@Inject
 	private SaleforceServiceImpl datePopulationSerivce;
 
@@ -3112,7 +3103,11 @@ public class UserServiceImpl implements UserService {
 					productDocCtx = JsonPath.using(conf).parse(userExists);
 					resultCount = productDocCtx.read("$.resultCount");
 					LOGGER.info("resultCount of loginIdentifier = " + resultCount);
-					String invalidAttempValue = ChinaIdmsUtil.getInvalidCount(productDocCtx.read("$.result[0].sunAMAuthInvalidAttemptsData[0]"));
+					String invalidAttempData = productDocCtx.read("$.result[0].sunAMAuthInvalidAttemptsData[0]");
+					String invalidAttempValue = null;
+					if(null != invalidAttempData && !invalidAttempData.isEmpty()){
+						invalidAttempValue = ChinaIdmsUtil.getInvalidCount(invalidAttempData);
+					}
 					LOGGER.info("invalidAttempValue = " + invalidAttempValue);
 					
 					if(resultCount == 1){
@@ -3137,7 +3132,9 @@ public class UserServiceImpl implements UserService {
 						}
 						response.put(UserConstants.USER_INFO, UserConstants.CN_USER_ACTIVE);
 						response.put(UserConstants.MESSAGE_L, UserConstants.TRUE);
-						response.put("invalidCount", invalidAttempValue);
+						if(null != invalidAttempValue && !invalidAttempValue.isEmpty()){
+							response.put("invalidCount", invalidAttempValue);
+						}
 						
 						return Response.status(Response.Status.OK).entity(response).build();
 					}
@@ -8153,7 +8150,7 @@ public class UserServiceImpl implements UserService {
 			}
 			
 			if (resultCount.intValue() == 0 && UserConstants.TRUE.equalsIgnoreCase(request.getWithGlobalUsers())
-					&& (loginId.contains("@") || fieldType.equalsIgnoreCase("idmsFederatedId"))) {				
+					&& (loginId.contains("@") || fieldType.equalsIgnoreCase("idmsFederatedId"))) {
 				ifwAccessToken = ifwTokenServiceImpl.getIFWToken();
 				String bfoAuthorizationToken = sfSyncServiceImpl.getSFToken();
 
@@ -8959,7 +8956,11 @@ public class UserServiceImpl implements UserService {
 				checkUserExistsResponse = checkUserExists(userName, UserConstants.FALSE, app);
 				jsonObject =  (JSONObject) checkUserExistsResponse.getEntity();
 				LOGGER.info("Response from checkUserExists China: " + jsonObject.toString());
-				Integer invalidCount = Integer.valueOf(jsonObject.get("invalidCount").toString());
+				String invalidCountStr = (String) jsonObject.get("invalidCount");
+				Integer invalidCount = 0;
+				if(null != invalidCountStr && !invalidCountStr.isEmpty()){
+					invalidCount = Integer.valueOf(invalidCountStr);
+				}
 				
 				if(400 == checkUserExistsResponse.getStatus()){
 					elapsedTime = (System.currentTimeMillis() - startTime);
@@ -9083,10 +9084,6 @@ public class UserServiceImpl implements UserService {
 		DocumentContext productDocCtx = null;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		String authIdSecuredLogin = null, header = null, stageNameFromUI = null, fileName = null;
-		String fileNameDevice = "DeviceDataInformation.txt";
-		String fileNameOTP = "DeviceOTPInformation.txt";
-		String fileNameResendOTP = "ResendOTPInformation.txt";
-		String stageData = null;
 
 		try {
 			if (null == userMFADataRequest.getAuthId() || userMFADataRequest.getAuthId().isEmpty()) {
