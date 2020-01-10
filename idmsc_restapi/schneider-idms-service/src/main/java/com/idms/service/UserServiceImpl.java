@@ -8156,6 +8156,16 @@ public class UserServiceImpl implements UserService {
 
 				if (loginId.contains("@")) {
 					LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for email:" + loginId);
+					
+					LOGGER.info("Request Params for CheckUserExists: "+
+							"bfoAuthorizationToken = "+bfoAuthorizationToken+" ,"+
+							"UserConstants.APPLICATION_NAME = "+UserConstants.APPLICATION_NAME+" ,"+
+							"UserConstants.COUNTRY_CODE = "+UserConstants.COUNTRY_CODE+" ,"+
+							"UserConstants.LANGUAGE_CODE = "+UserConstants.LANGUAGE_CODE+" ,"+
+							"UserConstants.REQUEST_ID = "+UserConstants.REQUEST_ID+" ,"+
+							"ifwAccessToken = "+ifwAccessToken+" ,"+
+							"loginId = "+loginId);
+					
 					ifwResponse = ifwService.checkUserExistsWithEmail(bfoAuthorizationToken, UserConstants.APPLICATION_NAME,
 							UserConstants.COUNTRY_CODE, UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID,
 							ifwAccessToken, loginId, false);
@@ -8163,6 +8173,16 @@ public class UserServiceImpl implements UserService {
 				}
 				if (fieldType.equalsIgnoreCase("idmsFederatedId")) {
 					LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for fedID:" + loginId);
+					
+					LOGGER.info("Request Params for CheckUserExists: "+
+							"bfoAuthorizationToken = "+bfoAuthorizationToken+" ,"+
+							"UserConstants.APPLICATION_NAME = "+UserConstants.APPLICATION_NAME+" ,"+
+							"UserConstants.COUNTRY_CODE = "+UserConstants.COUNTRY_CODE+" ,"+
+							"UserConstants.LANGUAGE_CODE = "+UserConstants.LANGUAGE_CODE+" ,"+
+							"UserConstants.REQUEST_ID = "+UserConstants.REQUEST_ID+" ,"+
+							"ifwAccessToken = "+ifwAccessToken+" ,"+
+							"loginId = "+loginId);
+					
 					ifwResponse = ifwService.checkUserExistsWithFedId(bfoAuthorizationToken, UserConstants.APPLICATION_NAME,
 							UserConstants.COUNTRY_CODE, UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID,
 							ifwAccessToken, loginId, false);
