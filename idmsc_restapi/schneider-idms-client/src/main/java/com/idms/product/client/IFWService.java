@@ -28,7 +28,7 @@ public interface IFWService {
 	@POST
 	@Path("/rest/idms/user/4.1/users/exist")
 	@Consumes("application/json")
-	Response checkUserExistsWithEmail(@HeaderParam("Content-Type") String contetType,@HeaderParam("X-BFO-Authorization") String bfoAuthorization,
+	Response checkUserExistsWithEmail(@HeaderParam("X-BFO-Authorization") String bfoAuthorization,
 			@HeaderParam("X-SE-IFW-ApplicationName") String applicationName,
 			@HeaderParam("X-SE-IFW-CountryCode") String countryCode,
 			@HeaderParam("X-SE-IFW-LanguageCode") String languageCode,
@@ -39,7 +39,7 @@ public interface IFWService {
 	@POST
 	@Path("/rest/idms/user/4.1/users/exist")
 	@Consumes("application/json")
-	Response checkUserExistsWithFedId(@HeaderParam("Content-Type") String contetType,@HeaderParam("X-BFO-Authorization") String bfoAuthorization,
+	Response checkUserExistsWithFedId(@HeaderParam("X-BFO-Authorization") String bfoAuthorization,
 			@HeaderParam("X-SE-IFW-ApplicationName") String applicationName,
 			@HeaderParam("X-SE-IFW-CountryCode") String countryCode,
 			@HeaderParam("X-SE-IFW-LanguageCode") String languageCode,

@@ -100,7 +100,7 @@ public class IFWTokenServiceImpl {
 			}
 			if(tokengenerationurl.equalsIgnoreCase("apigee")){
 				LOGGER.info("Start: getAPIGEEToken() of IFWService");
-				ifwTokenString = ifwService.getAPIGEEToken(UserConstants.CONTENT_TYPE_URL_FROM, "client_credentials", ifwClientId, ifwClientSecret);
+				ifwTokenString = ifwService.getAPIGEEToken(UserConstants.ACCEPT_TYPE_APP_JSON, "client_credentials", ifwClientId, ifwClientSecret);
 				LOGGER.info("End: getAPIGEEToken() of IFWService");
 			}
 
