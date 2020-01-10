@@ -3174,7 +3174,7 @@ public class UserServiceImpl implements UserService {
 							LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for loginIdentifier="
 									+ loginIdentifier);
 							PROCESSING_STATE = "IFW-CHK-USER-WITH-MAIL";
-							ifwResponse = ifwService.checkUserExistsWithEmail(bfoAuthorizationToken,
+							ifwResponse = ifwService.checkUserExistsWithEmail(UserConstants.ACCEPT_TYPE_APP_JSON,bfoAuthorizationToken,
 									UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE,
 									UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID, ifwAccessToken,
 									loginIdentifier.trim(), false);
@@ -8155,35 +8155,15 @@ public class UserServiceImpl implements UserService {
 				String bfoAuthorizationToken = sfSyncServiceImpl.getSFToken();
 
 				if (loginId.contains("@")) {
-					LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for email:" + loginId);
-					
-					LOGGER.info("Request Params for CheckUserExists: "+
-							"bfoAuthorizationToken = "+bfoAuthorizationToken+" ,"+
-							"UserConstants.APPLICATION_NAME = "+UserConstants.APPLICATION_NAME+" ,"+
-							"UserConstants.COUNTRY_CODE = "+UserConstants.COUNTRY_CODE+" ,"+
-							"UserConstants.LANGUAGE_CODE = "+UserConstants.LANGUAGE_CODE+" ,"+
-							"UserConstants.REQUEST_ID = "+UserConstants.REQUEST_ID+" ,"+
-							"ifwAccessToken = "+ifwAccessToken+" ,"+
-							"loginId = "+loginId);
-					
-					ifwResponse = ifwService.checkUserExistsWithEmail(bfoAuthorizationToken, UserConstants.APPLICATION_NAME,
+					LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for email:" + loginId);					
+					ifwResponse = ifwService.checkUserExistsWithEmail(UserConstants.ACCEPT_TYPE_APP_JSON,bfoAuthorizationToken, UserConstants.APPLICATION_NAME,
 							UserConstants.COUNTRY_CODE, UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID,
 							ifwAccessToken, loginId, false);
 					LOGGER.info("End: checkUserExistsWithEmail() of IFWService finished for email:" + loginId);
 				}
 				if (fieldType.equalsIgnoreCase("idmsFederatedId")) {
-					LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for fedID:" + loginId);
-					
-					LOGGER.info("Request Params for CheckUserExists: "+
-							"bfoAuthorizationToken = "+bfoAuthorizationToken+" ,"+
-							"UserConstants.APPLICATION_NAME = "+UserConstants.APPLICATION_NAME+" ,"+
-							"UserConstants.COUNTRY_CODE = "+UserConstants.COUNTRY_CODE+" ,"+
-							"UserConstants.LANGUAGE_CODE = "+UserConstants.LANGUAGE_CODE+" ,"+
-							"UserConstants.REQUEST_ID = "+UserConstants.REQUEST_ID+" ,"+
-							"ifwAccessToken = "+ifwAccessToken+" ,"+
-							"loginId = "+loginId);
-					
-					ifwResponse = ifwService.checkUserExistsWithFedId(bfoAuthorizationToken, UserConstants.APPLICATION_NAME,
+					LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for fedID:" + loginId);					
+					ifwResponse = ifwService.checkUserExistsWithFedId(UserConstants.ACCEPT_TYPE_APP_JSON,bfoAuthorizationToken, UserConstants.APPLICATION_NAME,
 							UserConstants.COUNTRY_CODE, UserConstants.LANGUAGE_CODE, UserConstants.REQUEST_ID,
 							ifwAccessToken, loginId, false);
 					LOGGER.info("End: checkUserExistsWithEmail() of IFWService finished for fedID:" + loginId);
@@ -9623,7 +9603,7 @@ public class UserServiceImpl implements UserService {
 
 				if (loginId.contains("@")) {
 					LOGGER.info("Start: checkUserExistsWithEmail() of IFWService for loginId:" + loginId);
-					ifwResponse = ifwService.checkUserExistsWithEmail(bfoAuthorizationToken,
+					ifwResponse = ifwService.checkUserExistsWithEmail(UserConstants.ACCEPT_TYPE_APP_JSON,bfoAuthorizationToken,
 							UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE, UserConstants.LANGUAGE_CODE,
 							UserConstants.REQUEST_ID, ifwAccessToken, loginId, false);
 					LOGGER.info("End: checkUserExistsWithEmail() of IFWService finished for loginId:" + loginId);
