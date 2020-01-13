@@ -1,5 +1,7 @@
 package com.se.idms.util;
 
+import static com.se.idms.util.UserConstants.APP_ROOT_PLACE_HOLDER;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -8,7 +10,6 @@ import java.util.Properties;
 
 import javax.inject.Inject;
 
-import org.hibernate.validator.internal.constraintvalidators.LengthValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +22,6 @@ import com.idms.service.UimsSetPasswordSoapService;
 import com.idms.service.UserService;
 import com.idms.service.UserServiceImpl;
 import com.idms.service.digital.GoDigitalUserService;
-import com.idms.service.digital.impl.GoDigitalUserServiceImpl;
 import com.schneider.idms.salesforce.service.SaleforceServiceImpl;
 import com.schneider.idms.salesforce.service.SalesforceSyncServiceImpl;
 import com.schneider.idms.service.impl.CreateUserServiceImpl;
@@ -31,8 +31,7 @@ import com.se.idms.cache.validate.impl.FieldsMappingValidatorImpl;
 import com.se.idms.cache.validate.impl.LengthValidatorImpl;
 import com.se.idms.cache.validate.impl.MandatoryValidatorImpl;
 import com.se.idms.cache.validate.impl.MultiPickListValidatorImpl;
-import com.se.idms.cache.validate.impl.PickListValidatorImpl;
-import static com.se.idms.util.UserConstants.APP_ROOT_PLACE_HOLDER;;
+import com.se.idms.cache.validate.impl.PickListValidatorImpl;;
 
 @Service("propertyFileAutoRefresh")
 public class PropertyFileAutoRefresh {
@@ -172,6 +171,27 @@ public class PropertyFileAutoRefresh {
 	private String IDMS_USER_ADD_EMAILTEMPLATE_CN;
 	
 	private String IDMS_USER_ADD_EMAILTEMPLATE_EN;
+	
+	//OTP Templates
+	private String IDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE_CN;
+	
+	private String IDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE_EN;
+	
+	private String IDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE_CN;
+
+	private String IDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE_EN;
+
+	private String IDMS_USER_UPDATE_OTP_EMAILTEMPLATE_CN;
+	
+	private String IDMS_USER_UPDATE_OTP_EMAILTEMPLATE_EN;
+	
+	private String IDMS_USER_DEFAULT_OTP_EMAILTEMPLATE_CN;
+	
+	private String IDMS_USER_DEFAULT_OTP_EMAILTEMPLATE_EN;	
+	
+	private String IDMS_USER_ADD_OTP_EMAILTEMPLATE_CN;
+	
+	private String IDMS_USER_ADD_OTP_EMAILTEMPLATE_EN;
 	
 	private String sftokentimeinminute;
 	
@@ -748,6 +768,90 @@ public class PropertyFileAutoRefresh {
 
 	public String getConfigurationWithDefaultValue(final String key, final String defaultValue) {
 		return (String) getConfiguration().getProperty(key, defaultValue);
+	}
+
+	public String getIDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE_CN() {
+		return IDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE_CN;
+	}
+
+	public void setIDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE_CN(
+			String iDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE_CN) {
+		IDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE_CN = iDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE_CN;
+	}
+
+	public String getIDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE_EN() {
+		return IDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE_EN;
+	}
+
+	public void setIDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE_EN(
+			String iDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE_EN) {
+		IDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE_EN = iDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE_EN;
+	}
+
+	public String getIDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE_CN() {
+		return IDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE_CN;
+	}
+
+	public void setIDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE_CN(
+			String iDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE_CN) {
+		IDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE_CN = iDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE_CN;
+	}
+
+	public String getIDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE_EN() {
+		return IDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE_EN;
+	}
+
+	public void setIDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE_EN(
+			String iDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE_EN) {
+		IDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE_EN = iDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE_EN;
+	}
+
+	public String getIDMS_USER_UPDATE_OTP_EMAILTEMPLATE_CN() {
+		return IDMS_USER_UPDATE_OTP_EMAILTEMPLATE_CN;
+	}
+
+	public void setIDMS_USER_UPDATE_OTP_EMAILTEMPLATE_CN(String iDMS_USER_UPDATE_OTP_EMAILTEMPLATE_CN) {
+		IDMS_USER_UPDATE_OTP_EMAILTEMPLATE_CN = iDMS_USER_UPDATE_OTP_EMAILTEMPLATE_CN;
+	}
+
+	public String getIDMS_USER_UPDATE_OTP_EMAILTEMPLATE_EN() {
+		return IDMS_USER_UPDATE_OTP_EMAILTEMPLATE_EN;
+	}
+
+	public void setIDMS_USER_UPDATE_OTP_EMAILTEMPLATE_EN(String iDMS_USER_UPDATE_OTP_EMAILTEMPLATE_EN) {
+		IDMS_USER_UPDATE_OTP_EMAILTEMPLATE_EN = iDMS_USER_UPDATE_OTP_EMAILTEMPLATE_EN;
+	}
+
+	public String getIDMS_USER_DEFAULT_OTP_EMAILTEMPLATE_CN() {
+		return IDMS_USER_DEFAULT_OTP_EMAILTEMPLATE_CN;
+	}
+
+	public void setIDMS_USER_DEFAULT_OTP_EMAILTEMPLATE_CN(String iDMS_USER_DEFAULT_OTP_EMAILTEMPLATE_CN) {
+		IDMS_USER_DEFAULT_OTP_EMAILTEMPLATE_CN = iDMS_USER_DEFAULT_OTP_EMAILTEMPLATE_CN;
+	}
+
+	public String getIDMS_USER_DEFAULT_OTP_EMAILTEMPLATE_EN() {
+		return IDMS_USER_DEFAULT_OTP_EMAILTEMPLATE_EN;
+	}
+
+	public void setIDMS_USER_DEFAULT_OTP_EMAILTEMPLATE_EN(String iDMS_USER_DEFAULT_OTP_EMAILTEMPLATE_EN) {
+		IDMS_USER_DEFAULT_OTP_EMAILTEMPLATE_EN = iDMS_USER_DEFAULT_OTP_EMAILTEMPLATE_EN;
+	}
+
+	public String getIDMS_USER_ADD_OTP_EMAILTEMPLATE_CN() {
+		return IDMS_USER_ADD_OTP_EMAILTEMPLATE_CN;
+	}
+
+	public void setIDMS_USER_ADD_OTP_EMAILTEMPLATE_CN(String iDMS_USER_ADD_OTP_EMAILTEMPLATE_CN) {
+		IDMS_USER_ADD_OTP_EMAILTEMPLATE_CN = iDMS_USER_ADD_OTP_EMAILTEMPLATE_CN;
+	}
+
+	public String getIDMS_USER_ADD_OTP_EMAILTEMPLATE_EN() {
+		return IDMS_USER_ADD_OTP_EMAILTEMPLATE_EN;
+	}
+
+	public void setIDMS_USER_ADD_OTP_EMAILTEMPLATE_EN(String iDMS_USER_ADD_OTP_EMAILTEMPLATE_EN) {
+		IDMS_USER_ADD_OTP_EMAILTEMPLATE_EN = iDMS_USER_ADD_OTP_EMAILTEMPLATE_EN;
 	}
 
 }

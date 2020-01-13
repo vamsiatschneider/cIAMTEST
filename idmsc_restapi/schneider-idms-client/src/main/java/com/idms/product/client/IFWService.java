@@ -12,16 +12,16 @@ import javax.ws.rs.core.Response;
 
 @Produces("application/json")
 public interface IFWService {
-	/*@POST
+	@POST
 	@Path("/token")
 	@Consumes("application/json")
 	String getIFWToken(@HeaderParam("Content-Type") String contetType, @QueryParam("grant_type") String grantType,
-			@QueryParam("client_id") String clientId, @QueryParam("client_secret") String clientSecret);*/
+			@QueryParam("client_id") String clientId, @QueryParam("client_secret") String clientSecret);
 	
 	@POST
 	@Path("/token")
 	@Consumes("application/json")
-	String getIFWToken(@HeaderParam("Content-Type") String contetType, @FormParam("grant_type") String grant_type, 
+	String getAPIGEEToken(@HeaderParam("Content-Type") String contetType, @FormParam("grant_type") String grant_type, 
 			@FormParam("client_id") String client_id, @FormParam("client_secret") String client_secret);
 
 	//CODE-RE-STRUCTURING - 3-Feb-19 merge (API upgrade from 2.0 to 4.0)
@@ -34,6 +34,7 @@ public interface IFWService {
 			@HeaderParam("X-SE-IFW-RequestId") String requestId, 
 			@HeaderParam("Authorization") String authorization,
 			@FormParam("email") String email, @FormParam("withGlobalUsers") Boolean withGlobalUsers);
+	
 	@POST
 	@Path("/rest/idms/user/4.1/users/exist")
 	Response checkUserExistsWithFedId(@HeaderParam("X-BFO-Authorization") String bfoAuthorization,
@@ -51,7 +52,8 @@ public interface IFWService {
 			@HeaderParam("X-SE-IFW-ApplicationName") String applicationName,
 			@HeaderParam("X-SE-IFW-CountryCode") String countryCode,
 			@HeaderParam("X-SE-IFW-LanguageCode") String languageCode,
-			@HeaderParam("X-SE-IFW-RequestId") String requestId, @HeaderParam("Authorization") String authorization,
+			@HeaderParam("X-SE-IFW-RequestId") String requestId, 
+			@HeaderParam("Authorization") String authorization,
 			@FormParam("mobile") String email, @FormParam("withGlobalUsers") Boolean withGlobalUsers);
 	
 	@POST
