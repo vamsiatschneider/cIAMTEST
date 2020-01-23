@@ -110,6 +110,7 @@ import com.idms.model.UpdateUserRequest;
 import com.idms.model.UpdateUserResponse;
 import com.idms.model.UserDetailByApplicationRequest;
 import com.idms.model.UserMFADataRequest;
+import com.idms.model.VerifyEmailPinRequest;
 import com.idms.model.VerifyPinRequest;
 import com.idms.product.client.IFWService;
 import com.idms.product.client.OpenAMService;
@@ -2509,7 +2510,7 @@ public class UserServiceImpl implements UserService {
 		 * IDMSClassLevel1__c and other  mandatory field check for @Work profile
 		 */
 
-		if((!checkMandatoryFields) && userRequest.getIDMS_User_Context__c()!=null && !userRequest.getIDMS_User_Context__c().isEmpty()){
+		if((!checkMandatoryFields) && (null != userRequest.getIDMS_Profile_update_source__c() && !UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Profile_update_source__c())) && userRequest.getIDMS_User_Context__c()!=null && !userRequest.getIDMS_User_Context__c().isEmpty()){
 			if(userRequest.getIDMS_User_Context__c().equalsIgnoreCase(UserConstants.USER_CONTEXT_WORK) || userRequest.getIDMS_User_Context__c().equalsIgnoreCase(UserConstants.USER_CONTEXT_WORK_1)){	
 				if ((null == userRequest.getIDMSClassLevel1__c() || userRequest.getIDMSClassLevel1__c().isEmpty())) {
 					userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.IDMS_CLASS_LEVEL_C);
@@ -9280,6 +9281,85 @@ public class UserServiceImpl implements UserService {
 		}
 		response = getUser(userId);
 		return response;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Response verifyEmailPIN(VerifyEmailPinRequest pinRequest) {
+		LOGGER.info("Entered verifyEmailPIN() -> Start");
+		long elapsedTime;
+		boolean validPinStatus;
+		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
+		DocumentContext productDocCtx = null;
+		String iPlanetDirectoryToken = null;
+		String userId = null;
+		JSONObject response = new JSONObject();
+		if (null == pinRequest.getEmail() || pinRequest.getEmail().isEmpty()) {
+			response.put(UserConstants.STATUS_L, errorStatus);
+			response.put(UserConstants.MESSAGE_L, UserConstants.EMAIL_EMPTY);
+			LOGGER.error("Error in verifyEmailPIN() is ::" + UserConstants.EMAIL_EMPTY);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by verifyEmailPIN() : " + elapsedTime);
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+		}
+		if (null == pinRequest.getOtp() || pinRequest.getOtp().isEmpty()) {
+			response.put(UserConstants.STATUS_L, errorStatus);
+			response.put(UserConstants.MESSAGE_L, UserConstants.OTP_EMPTY);
+			LOGGER.error("Error in verifyEmailPIN() is ::" + UserConstants.OTP_EMPTY);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by verifyEmailPIN() : " + elapsedTime);
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+		}
+		try {
+			iPlanetDirectoryToken = getSSOToken();
+			LOGGER.info("iPlanetDirectoryKey: " + iPlanetDirectoryToken);
+			String email = pinRequest.getEmail();
+			String userExists = productService.checkUserExistsWithEmailMobile(
+					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryToken,
+					"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(email , "UTF-8"), "UTF-8") + "\"");
+			LOGGER.info("End: checkUserExistsWithEmailMobile() of openam finished for email:" + email);
+
+			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+			productDocCtx = JsonPath.using(conf).parse(userExists);
+			LOGGER.info("productDocCtx = " + productDocCtx.jsonString());
+			Integer resultCount = productDocCtx.read(JsonConstants.RESULT_COUNT);
+			LOGGER.info("resultCount=" + resultCount);
+			if (resultCount.intValue() == 0) {
+				response.put(UserConstants.STATUS, errorStatus);
+				response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_EXISTS);
+				response.put(UserConstants.EMAIL_OR_MOBILE_NOT_MATCHING, email);
+				LOGGER.error("Error is -> " + UserConstants.USER_NOT_EXISTS);
+				return Response.status(Response.Status.NOT_FOUND).entity(response).build();
+			} else {
+				userId = productDocCtx.read(JsonConstants.RESULT);
+			}
+			// call existing validate pin method
+			String otp = pinRequest.getOtp();
+			LOGGER.info("Start: validatePin() for verifyEmailPIN for uniqueIdentifier= " + userId);
+			validPinStatus = sendEmail.validatePin(otp, userId);
+			LOGGER.info("End: validatePin() for verifyEmailPIN finished for uniqueIdentifier= " + userId);
+			if (!validPinStatus) {
+				throw new Exception("Pin got expired or invalid!!");
+			}
+			userResponse.setStatus(successStatus);
+			userResponse.setMessage(UserConstants.OTP_VALIDATED_SUCCESS);
+			LOGGER.info(UserConstants.OTP_VALIDATED_SUCCESS + " for email :: " + email);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by verifyEmailPIN() : " + elapsedTime);
+			return Response.status(Response.Status.OK).entity(userResponse).build();
+		} catch (Exception e) {
+			userResponse.setStatus(errorStatus);
+			if(e.getMessage().contains(UserConstants.PIN_CONFIRMATION_ERROR_CODE))
+				userResponse.setMessage(UserConstants.PIN_CONFIRMATION_ERROR);
+			else
+				userResponse.setMessage(e.getMessage());
+			userResponse.setId(userId);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by UserServiceImpl.verifyEmailPIN() : " + elapsedTime);
+			LOGGER.error("Exception while verifyEmailPIN:: -> " + e.getMessage(),e);
+			LOGGER.error("ECODE-USER-PIN-PROC-ERR : Unknown error during verifyEmailPIN");
+			return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+		}
 	}
 
 	/**

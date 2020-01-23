@@ -34,6 +34,7 @@ import com.idms.model.UpdatePasswordRequest;
 import com.idms.model.UpdateUserRequest;
 import com.idms.model.UserDetailByApplicationRequest;
 import com.idms.model.UserMFADataRequest;
+import com.idms.model.VerifyEmailPinRequest;
 import com.idms.model.VerifyPinRequest;
 import com.se.idms.dto.SetPasswordRequest;
 
@@ -244,6 +245,10 @@ public interface UserService {
 	@POST
 	@Path("/apexrest/verifyPIN")
 	Response verifyPIN(VerifyPinRequest pinRequest);
+	
+	@POST
+	@Path("/apexrest/verifyEmailPIN")
+	Response verifyEmailPIN(VerifyEmailPinRequest pinRequest);
 
 	@POST
 	@Path("/apexrest/ssopost")
