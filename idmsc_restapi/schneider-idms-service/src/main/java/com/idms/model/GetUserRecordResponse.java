@@ -19,7 +19,12 @@ public class GetUserRecordResponse {
 	private String IDMSAil__c;	
 	private String IDMSAIL_Applications__c;	
 	private String IDMSAIL_Features__c;	
-	private String IDMSAIL_Programs__c;	
+	private String IDMSAIL_Programs__c;
+	private String Country;
+	private String PostalCode;
+	private String iam1;
+	private String city;
+	private String street;
 	
 	/*private String State;
 	private String Country;
@@ -149,6 +154,26 @@ public class GetUserRecordResponse {
 	@JsonProperty("IDMSAIL_Programs__c")
 	public void setIDMSAIL_Programs__c(String iDMSAIL_Programs__c) {
 		IDMSAIL_Programs__c = iDMSAIL_Programs__c;
+	}
+	
+	@JsonProperty("Country")
+	public String getCountry() {
+		return Country;
+	}
+
+	@JsonProperty("Country")
+	public void setCountry(String country) {
+		Country = country;
+	}
+	
+	@JsonProperty("PostalCode")
+	public String getPostalCode() {
+		return PostalCode;
+	}
+
+	@JsonProperty("PostalCode")
+	public void setPostalCode(String postalCode) {
+		PostalCode = postalCode;
 	}
 
 	/*@JsonProperty("State")

@@ -768,8 +768,11 @@ public class ParseValuesByOauthHomeWorkContextDto {
 				? getValue(userProductDocCtx.read("$.result[0].mail[0]").toString()) : getDelimeter());
 		userResponse.setMobilePhone(null != userProductDocCtx.read("$.result[0].mobile[0]")
 				? getValue(userProductDocCtx.read("$.result[0].mobile[0]").toString()) : getDelimeter());
-		
-		
+		userResponse.setCountry(null != userProductDocCtx.read("$.result[0].c[0]")
+				? getValue(userProductDocCtx.read("$.result[0].c[0]").toString()) : getDelimeter());
+		userResponse.setPostalCode(null != userProductDocCtx.read("$.result[0].postalCode[0]")
+				? getValue(userProductDocCtx.read("$.result[0].postalCode[0]").toString()) : getDelimeter());
+	
 		userResponse.setIDMSAil__c(null != userProductDocCtx.read("$.result[0].IDMSAil_c[0]")
 				? getValue(userProductDocCtx.read("$.result[0].IDMSAil_c[0]").toString()) : getDelimeter());
 
@@ -781,6 +784,7 @@ public class ParseValuesByOauthHomeWorkContextDto {
 
 		userResponse.setIDMSAIL_Programs__c(null != userProductDocCtx.read("$.result[0].IDMSAIL_Programs_c[0]")
 				? getValue(userProductDocCtx.read("$.result[0].IDMSAIL_Programs_c[0]").toString()) : getDelimeter());
+		//1100092
 	}
 	
 

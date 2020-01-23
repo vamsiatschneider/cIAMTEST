@@ -2509,7 +2509,9 @@ public class UserServiceImpl implements UserService {
 		 * IDMSClassLevel1__c and other  mandatory field check for @Work profile
 		 */
 
+
 		if((!checkMandatoryFields) && (null != userRequest.getIDMS_Profile_update_source__c() && !UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Profile_update_source__c())) && userRequest.getIDMS_User_Context__c()!=null && !userRequest.getIDMS_User_Context__c().isEmpty()){
+
 			if(userRequest.getIDMS_User_Context__c().equalsIgnoreCase(UserConstants.USER_CONTEXT_WORK) || userRequest.getIDMS_User_Context__c().equalsIgnoreCase(UserConstants.USER_CONTEXT_WORK_1)){	
 				if ((null == userRequest.getIDMSClassLevel1__c() || userRequest.getIDMSClassLevel1__c().isEmpty())) {
 					userResponse.setMessage(UserConstants.REQUIRED_FIELDS_MISSING + UserConstants.IDMS_CLASS_LEVEL_C);
@@ -4916,7 +4918,7 @@ public class UserServiceImpl implements UserService {
 							return Response.status(Response.Status.OK).entity(response).build();
 						} else {
 							response.put(UserConstants.STATUS_L, errorStatus);
-							response.put(UserConstants.MESSAGE_L, "UIMS user created and updated in IDMS");
+							response.put(UserConstants.MESSAGE_L, "UIMS user creation and updatation failed in IDMS");
 							LOGGER.error("Error in updateUser() is ::" + "UIMS user creation and updatation failed in IDMS");
 							elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 							LOGGER.info("Time taken by updateUser() : " + elapsedTime);
