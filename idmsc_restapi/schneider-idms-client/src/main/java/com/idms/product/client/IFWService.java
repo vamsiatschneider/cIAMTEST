@@ -17,7 +17,7 @@ public interface IFWService {
 	@Consumes("application/json")
 	String getIFWToken(@HeaderParam("Content-Type") String contetType, @QueryParam("grant_type") String grantType,
 			@QueryParam("client_id") String clientId, @QueryParam("client_secret") String clientSecret);
-	//rest/idms/user/version/appusers/list
+	
 	@POST
 	@Path("/token")
 	@Consumes("application/json")
