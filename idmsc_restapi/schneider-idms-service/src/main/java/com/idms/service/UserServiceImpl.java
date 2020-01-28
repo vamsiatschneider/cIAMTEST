@@ -10674,7 +10674,7 @@ public class UserServiceImpl implements UserService {
 				resultCount = productDocCtx.read("$.resultCount");
 				LOGGER.info("resultCount=" + resultCount);
 			}
-			if (resultCount.intValue() == 1) {
+			if (resultCount.intValue() >= 1) {
 				appNameInOpenDJ = productDocCtx.read(JsonConstants.APP_ID);
 				LOGGER.info("App name/id = " + appNameInOpenDJ);
 			}

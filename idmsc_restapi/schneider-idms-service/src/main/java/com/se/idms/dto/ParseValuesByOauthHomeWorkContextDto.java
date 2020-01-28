@@ -772,7 +772,110 @@ public class ParseValuesByOauthHomeWorkContextDto {
 				? getValue(userProductDocCtx.read("$.result[0].c[0]").toString()) : getDelimeter());
 		userResponse.setPostalCode(null != userProductDocCtx.read("$.result[0].postalCode[0]")
 				? getValue(userProductDocCtx.read("$.result[0].postalCode[0]").toString()) : getDelimeter());
-	
+		userResponse.setAboutMe(null != userProductDocCtx.read("$.result[0].AboutMe[0]")
+				? getValue(userProductDocCtx.read("$.result[0].AboutMe[0]").toString()) : getDelimeter());
+		userResponse.setAdditionalInfo(null != userProductDocCtx.read("$.result[0].additionalInfo[0]")
+				? getValue(userProductDocCtx.read("$.result[0].additionalInfo[0]").toString()) : getDelimeter());
+		userResponse.setAnnualRevenue(null != userProductDocCtx.read("$.result[0].annualRevenue[0]")
+				? getValue(userProductDocCtx.read("$.result[0].annualRevenue[0]").toString()) : getDelimeter());
+		userResponse.setBfoAccountId(null != userProductDocCtx.read("$.result[0].bfoAccountId[0]")
+				? getValue(userProductDocCtx.read("$.result[0].bfoAccountId[0]").toString()) : getDelimeter());
+		userResponse.setCompanyCity(null != userProductDocCtx.read("$.result[0].companyCity[0]")
+				? getValue(userProductDocCtx.read("$.result[0].companyCity[0]").toString()) : getDelimeter());
+		userResponse.setCompanyCountry(null != userProductDocCtx.read("$.result[0].companyCountry[0]")
+				? getValue(userProductDocCtx.read("$.result[0].companyCountry[0]").toString()) : getDelimeter());
+		userResponse.setCompanyCounty(null != userProductDocCtx.read("$.result[0].companyCounty[0]")
+				? getValue(userProductDocCtx.read("$.result[0].companyCounty[0]").toString()) : getDelimeter());
+		userResponse.setCompanyFederatedID(null != userProductDocCtx.read("$.result[0].companyFederatedID[0]")
+				? getValue(userProductDocCtx.read("$.result[0].companyFederatedID[0]").toString()) : getDelimeter());
+		
+		userResponse.setCompanyName(null != userProductDocCtx.read("$.result[0].companyName[0]")
+				? getValue(userProductDocCtx.read("$.result[0].companyNamey[0]").toString()) : getDelimeter());
+		userResponse.setCompanyPostalCode(null != userProductDocCtx.read("$.result[0].companyPostalCode[0]")
+				? getValue(userProductDocCtx.read("$.result[0].companyPostalCode[0]").toString()) : getDelimeter());
+		userResponse.setCompanyPostOfficeBox(null != userProductDocCtx.read("$.result[0].companyPostOfficeBox[0]")
+				? getValue(userProductDocCtx.read("$.result[0].companyPostOfficeBox[0]").toString()) : getDelimeter());
+		userResponse.setCompanyState(null != userProductDocCtx.read("$.result[0].companyState[0]")
+				? getValue(userProductDocCtx.read("$.result[0].companyState[0]").toString()) : getDelimeter());
+		
+		userResponse.setCompanyStreet(null != userProductDocCtx.read("$.result[0].companyStreet[0]")
+				? getValue(userProductDocCtx.read("$.result[0].companyStreet[0]").toString()) : getDelimeter());
+		userResponse.setCompanyWebSite(null != userProductDocCtx.read("$.result[0].companyWebSite[0]")
+				? getValue(userProductDocCtx.read("$.result[0].companyWebSite[0]").toString()) : getDelimeter());
+		
+		userResponse.setContactId(null != userProductDocCtx.read("$.result[0].contactId[0]")
+				? getValue(userProductDocCtx.read("$.result[0].contactId[0]").toString()) : getDelimeter());
+		userResponse.setContext(null != userProductDocCtx.read("$.result[0].context[0]")
+				? getValue(userProductDocCtx.read("$.result[0].context[0]").toString()) : getDelimeter());
+		userResponse.setCounty(null != userProductDocCtx.read("$.result[0].county[0]")
+				? getValue(userProductDocCtx.read("$.result[0].county[0]").toString()) : getDelimeter());
+		userResponse.setCurrency(null != userProductDocCtx.read("$.result[0].currency[0]")
+				? getValue(userProductDocCtx.read("$.result[0].currency[0]").toString()) : getDelimeter());
+		
+		userResponse.setDivision(null != userProductDocCtx.read("$.result[0].Division[0]")
+				? getValue(userProductDocCtx.read("$.result[0].Division[0]").toString()) : getDelimeter());
+		userResponse.setEmailOptIn(null != userProductDocCtx.read("$.result[0].emailOptInt[0]")
+				? getValue(userProductDocCtx.read("$.result[0].emailOptIn[0]").toString()) : getDelimeter());
+		userResponse.setEmployeeSize(null != userProductDocCtx.read("$.result[0].employeesize[0]")
+				? getValue(userProductDocCtx.read("$.result[0].employeesize[0]").toString()) : getDelimeter());
+		userResponse.setFax(null != userProductDocCtx.read("$.result[0].fax[0]")
+				? getValue(userProductDocCtx.read("$.result[0].fax[0]").toString()) : getDelimeter());
+		userResponse.setFederationID(null != userProductDocCtx.read("$.result[0].federationID[0]")
+				? getValue(userProductDocCtx.read("$.result[0].federationID[0]").toString()) : getDelimeter());
+		
+		userResponse.setHeadQuarters(null != userProductDocCtx.read("$.result[0].headquarters[0]")
+				? getValue(userProductDocCtx.read("$.result[0].headquarters[0]").toString()) : getDelimeter());
+		userResponse.setHomePhone(null != userProductDocCtx.read("$.result[0].homePhone[0]")
+				? getValue(userProductDocCtx.read("$.result[0].homePhone[0]").toString()) : getDelimeter());
+		
+		userResponse.setIam1(null != userProductDocCtx.read("$.result[0].iam1[0]")
+				? getValue(userProductDocCtx.read("$.result[0].iam1[0]").toString()) : getDelimeter());
+		userResponse.setIam2(null != userProductDocCtx.read("$.result[0].iam2[0]")
+				? getValue(userProductDocCtx.read("$.result[0].iam2[0]").toString()) : getDelimeter());
+		userResponse.setIdentityType(null != userProductDocCtx.read("$.result[0].identityType[0]")
+				? getValue(userProductDocCtx.read("$.result[0].identityType[0]").toString()) : getDelimeter());
+		
+		userResponse.setIndustrySegment(null != userProductDocCtx.read("$.result[0].industrySegment[0]")
+				? getValue(userProductDocCtx.read("$.result[0].industrySegment[0]").toString()) : getDelimeter());
+		userResponse.setIndustrySubSegment(null != userProductDocCtx.read("$.result[0].industrySubSegment[0]")
+				? getValue(userProductDocCtx.read("$.result[0].industrySubSegment[0]").toString()) : getDelimeter());
+		userResponse.setInetuserActive(null != userProductDocCtx.read("$.result[0].inetUserStatus[0]")
+				? getValue(userProductDocCtx.read("$.result[0].inetUserStatus[0]").toString()) : getDelimeter());
+		userResponse.setIsActivated(null != userProductDocCtx.read("$.result[0].isActivated[0]")
+				? getValue(userProductDocCtx.read("$.result[0].isActivated[0]").toString()) : getDelimeter());
+		
+		userResponse.setJobDescription(null != userProductDocCtx.read("$.result[0].jobDescription[0]")
+				? getValue(userProductDocCtx.read("$.result[0].jobDescription[0]").toString()) : getDelimeter());
+		userResponse.setJobFunction(null != userProductDocCtx.read("$.result[0].jobFunction[0]")
+				? getValue(userProductDocCtx.read("$.result[0].jobFunction[0]").toString()) : getDelimeter());
+		
+		userResponse.setCity(null != userProductDocCtx.read("$.result[0].l[0]")
+				? getValue(userProductDocCtx.read("$.result[0].l[0]").toString()) : getDelimeter());
+		
+		userResponse.setMiddleName(null != userProductDocCtx.read("$.result[0].middleName[0]")
+				? getValue(userProductDocCtx.read("$.result[0].middleName[0]").toString()) : getDelimeter());
+		userResponse.setPostOfficeBox(null != userProductDocCtx.read("$.result[0].postOfficeBox[0]")
+				? getValue(userProductDocCtx.read("$.result[0].postOfficeBox[0]").toString()) : getDelimeter());
+		
+		userResponse.setPreferredLanguage(null != userProductDocCtx.read("$.result[0].preferredLanguage[0]")
+				? getValue(userProductDocCtx.read("$.result[0].preferredLanguage[0]").toString()) : getDelimeter());
+		userResponse.setSEAccountNumber(null != userProductDocCtx.read("$.result[0].SEAccountNumber[0]")
+				? getValue(userProductDocCtx.read("$.result[0].SEAccountNumber[0]").toString()) : getDelimeter());
+		
+		userResponse.setStateOrProvinceName(null != userProductDocCtx.read("$.result[0].stateOrProvinceName[0]")
+				? getValue(userProductDocCtx.read("$.result[0].stateOrProvinceName[0]").toString()) : getDelimeter());
+		userResponse.setStreet(null != userProductDocCtx.read("$.result[0].street[0]")
+				? getValue(userProductDocCtx.read("$.result[0].street[0]").toString()) : getDelimeter());
+		userResponse.setSuffix(null != userProductDocCtx.read("$.result[0].suffix[0]")
+				? getValue(userProductDocCtx.read("$.result[0].suffix[0]").toString()) : getDelimeter());
+		
+		userResponse.setTaxID(null != userProductDocCtx.read("$.result[0].taxID[0]")
+				? getValue(userProductDocCtx.read("$.result[0].taxID[0]").toString()) : getDelimeter());
+		userResponse.setTelephoneNumber(null != userProductDocCtx.read("$.result[0].telephoneNumber[0]")
+				? getValue(userProductDocCtx.read("$.result[0].telephoneNumber[0]").toString()) : getDelimeter());
+		userResponse.setTitle(null != userProductDocCtx.read("$.result[0].title[0]")
+				? getValue(userProductDocCtx.read("$.result[0].title[0]").toString()) : getDelimeter());
+		
 		userResponse.setIDMSAil__c(null != userProductDocCtx.read("$.result[0].IDMSAil_c[0]")
 				? getValue(userProductDocCtx.read("$.result[0].IDMSAil_c[0]").toString()) : getDelimeter());
 
