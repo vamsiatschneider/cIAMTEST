@@ -790,7 +790,7 @@ public class ParseValuesByOauthHomeWorkContextDto {
 				? getValue(userProductDocCtx.read("$.result[0].companyFederatedID[0]").toString()) : getDelimeter());
 		
 		userResponse.setCompanyName(null != userProductDocCtx.read("$.result[0].companyName[0]")
-				? getValue(userProductDocCtx.read("$.result[0].companyNamey[0]").toString()) : getDelimeter());
+				? getValue(userProductDocCtx.read("$.result[0].companyName[0]").toString()) : getDelimeter());
 		userResponse.setCompanyPostalCode(null != userProductDocCtx.read("$.result[0].companyPostalCode[0]")
 				? getValue(userProductDocCtx.read("$.result[0].companyPostalCode[0]").toString()) : getDelimeter());
 		userResponse.setCompanyPostOfficeBox(null != userProductDocCtx.read("$.result[0].companyPostOfficeBox[0]")
