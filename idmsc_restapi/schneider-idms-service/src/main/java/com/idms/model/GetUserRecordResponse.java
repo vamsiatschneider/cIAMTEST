@@ -19,7 +19,12 @@ public class GetUserRecordResponse {
 	private String IDMSAil__c;	
 	private String IDMSAIL_Applications__c;	
 	private String IDMSAIL_Features__c;	
-	private String IDMSAIL_Programs__c;	
+	private String IDMSAIL_Programs__c;
+	private String country;
+	private String postalCode;
+	private String iam1;
+	private String city;
+	private String street;
 	
 	/*private String State;
 	private String Country;
@@ -60,6 +65,97 @@ public class GetUserRecordResponse {
 	private String ContactId;
 	private String IDMSCompanyFederationIdentifier__c;
 	private String IDMSWorkPhone__c;*/
+	//@JsonProperty("aboutMe")
+	private String aboutMe;
+	//@JsonProperty("additionalInfo")
+	private String additionalInfo;
+	//@JsonProperty("annualRevenue")
+	private String annualRevenue;
+	//@JsonProperty("bfoAccountId")
+	private String bfoAccountId;
+	//@JsonProperty("companyAdditionalInfo")
+	private String companyAdditionalInfo;
+	
+	private String companyCity;
+	private String companyCountry;
+	private String companyCounty;
+	private String companyFederatedID;
+	private String companyName;
+	private String companyPostalCode;
+	private String companyPostOfficeBox;
+	private String companyState;
+	private String companyStreet;
+	private String companyWebSite;
+	private String contactId;
+	private String context;
+	private String county;
+	private String currency;
+	private String Division;
+	private String emailOptIn;
+	private String employeeSize;
+	private String fax;
+	private String federationID;
+	private String headQuarters;
+	private String homePhone;
+	private String iam2;
+	private String identityType;
+	private String industrySegment;
+	private String industrySubSegment;
+	private String inetuserActive;
+	private String isActivated;
+	private String jobDescription;
+	private String jobFunction;
+	private String middleName;
+	private String postOfficeBox;
+	private String preferredLanguage;
+	private String SEAccountNumber;
+	private String stateOrProvinceName;
+	private String suffix;
+	private String taxID;
+	private String telephoneNumber;
+	private String title;
+	
+	
+
+	public String getCompanyAdditionalInfo() {
+		return companyAdditionalInfo;
+	}
+	@JsonProperty("companyAdditionalInfo")
+	public void setCompanyAdditionalInfo(String companyAdditionalInfo) {
+		this.companyAdditionalInfo = companyAdditionalInfo;
+	}
+
+	public String getBfoAccountId() {
+		return bfoAccountId;
+	}
+	@JsonProperty("bfoAccountId")
+	public void setBfoAccountId(String accountId) {
+		bfoAccountId = accountId;
+	}
+
+	public String getAnnualRevenue() {
+		return annualRevenue;
+	}
+	@JsonProperty("annualRevenue")
+	public void setAnnualRevenue(String annualRevenue) {
+		this.annualRevenue = annualRevenue;
+	}
+
+	public String getAdditionalInfo() {
+		return additionalInfo;
+	}
+	@JsonProperty("additionalInfo")
+	public void setAdditionalInfo(String additionalInfo) {
+		this.additionalInfo = additionalInfo;
+	}
+
+	public String getAboutMe() {
+		return aboutMe;
+	}
+	@JsonProperty("aboutMe")
+	public void setAboutMe(String aboutMe) {
+		this.aboutMe = aboutMe;
+	}
 
 	@JsonProperty("Id")
 	public String getId() {
@@ -149,6 +245,354 @@ public class GetUserRecordResponse {
 	@JsonProperty("IDMSAIL_Programs__c")
 	public void setIDMSAIL_Programs__c(String iDMSAIL_Programs__c) {
 		IDMSAIL_Programs__c = iDMSAIL_Programs__c;
+	}
+	
+	@JsonProperty("Country")
+	public String getCountry() {
+		return country;
+	}
+
+	public String getIam1() {
+		return iam1;
+	}
+	@JsonProperty("iam1")
+	public void setIam1(String iam1) {
+		this.iam1 = iam1;
+	}
+
+	public String getCity() {
+		return city;
+	}
+	@JsonProperty("city")
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	public String getStreet() {
+		return street;
+	}
+	@JsonProperty("street")
+	public void setStreet(String street) {
+		this.street = street;
+	}
+
+	public String getCompanyCity() {
+		return companyCity;
+	}
+	@JsonProperty("companyCity")
+	public void setCompanyCity(String companyCity) {
+		this.companyCity = companyCity;
+	}
+
+	public String getCompanyCountry() {
+		return companyCountry;
+	}
+	@JsonProperty("companyCountry")
+	public void setCompanyCountry(String companyCountry) {
+		this.companyCountry = companyCountry;
+	}
+
+	public String getCompanyCounty() {
+		return companyCounty;
+	}
+	@JsonProperty("companyCounty")
+	public void setCompanyCounty(String companyCounty) {
+		this.companyCounty = companyCounty;
+	}
+
+	public String getCompanyFederatedID() {
+		return companyFederatedID;
+	}
+	@JsonProperty("companyFederatedID")
+	public void setCompanyFederatedID(String companyFederatedID) {
+		this.companyFederatedID = companyFederatedID;
+	}
+
+	public String getCompanyName() {
+		return companyName;
+	}
+	@JsonProperty("companyName")
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
+	}
+
+	public String getCompanyPostalCode() {
+		return companyPostalCode;
+	}
+	@JsonProperty("companyPostalCode")
+	public void setCompanyPostalCode(String companyPostalCode) {
+		this.companyPostalCode = companyPostalCode;
+	}
+
+	public String getCompanyPostOfficeBox() {
+		return companyPostOfficeBox;
+	}
+	@JsonProperty("companyPostOfficeBox")													//@JsonProperty
+	public void setCompanyPostOfficeBox(String companyPostOfficeBox) {
+		this.companyPostOfficeBox = companyPostOfficeBox;
+	}
+
+	public String getCompanyState() {
+		return companyState;
+	}
+	@JsonProperty("companyState")
+	public void setCompanyState(String companyState) {
+		this.companyState = companyState;
+	}
+
+	public String getCompanyStreet() {
+		return companyStreet;
+	}
+	@JsonProperty("companyStreet")
+	public void setCompanyStreet(String companyStreet) {
+		this.companyStreet = companyStreet;
+	}
+
+	public String getCompanyWebSite() {
+		return companyWebSite;
+	}
+	@JsonProperty("companyWebSite")
+	public void setCompanyWebSite(String companyWebSite) {
+		this.companyWebSite = companyWebSite;
+	}
+	
+	public String getContactId() {
+		return contactId;
+	}
+	@JsonProperty("contactId")
+	public void setContactId(String contactId) {
+		this.contactId = contactId;
+	}
+
+	public String getContext() {
+		return context;
+	}
+	@JsonProperty("context")
+	public void setContext(String context) {
+		this.context = context;
+	}
+
+	public String getCounty() {
+		return county;
+	}
+	@JsonProperty("county")
+	public void setCounty(String county) {
+		this.county = county;
+	}
+
+	public String getCurrency() {
+		return currency;
+	}
+	@JsonProperty("currency")
+	public void setCurrency(String currency) {
+		this.currency = currency;
+	}
+
+	public String getDivision() {
+		return Division;
+	}
+	@JsonProperty("Division")
+	public void setDivision(String division) {
+		Division = division;
+	}
+
+	public String getEmailOptIn() {
+		return emailOptIn;
+	}
+	@JsonProperty("emailOptIn")
+	public void setEmailOptIn(String emailOptIn) {
+		this.emailOptIn = emailOptIn;
+	}
+
+	public String getEmployeeSize() {
+		return employeeSize;
+	}
+	@JsonProperty("employeesize")
+	public void setEmployeeSize(String employeesize) {
+		this.employeeSize = employeesize;
+	}
+
+	public String getFax() {
+		return fax;
+	}
+	@JsonProperty("fax")
+	public void setFax(String fax) {
+		this.fax = fax;
+	}
+
+	public String getFederationID() {
+		return federationID;
+	}
+	@JsonProperty("federationID")
+	public void setFederationID(String federationID) {
+		this.federationID = federationID;
+	}
+
+	public String getHeadQuarters() {
+		return headQuarters;
+	}
+	@JsonProperty("headQuarters")
+	public void setHeadQuarters(String headquarters) {
+		this.headQuarters = headquarters;
+	}
+
+	public String getHomePhone() {
+		return homePhone;
+	}
+	@JsonProperty("homePhone")
+	public void setHomePhone(String homePhone) {
+		this.homePhone = homePhone;
+	}
+
+	public String getIam2() {
+		return iam2;
+	}
+	@JsonProperty("iam2")
+	public void setIam2(String iam2) {
+		this.iam2 = iam2;
+	}
+
+	public String getIdentityType() {
+		return identityType;
+	}
+	@JsonProperty("identityType")
+	public void setIdentityType(String identityType) {
+		this.identityType = identityType;
+	}
+
+	public String getIndustrySegment() {
+		return industrySegment;
+	}
+	@JsonProperty("industrySegment")	
+	public void setIndustrySegment(String industrySegment) {
+		this.industrySegment = industrySegment;
+	}
+
+	public String getIndustrySubSegment() {
+		return industrySubSegment;
+	}
+	@JsonProperty("industrySubSegment")
+	public void setIndustrySubSegment(String industrySubSegment) {
+		this.industrySubSegment = industrySubSegment;
+	}
+
+	public String getInetuserActive() {
+		return inetuserActive;
+	}
+	@JsonProperty("inetuserActive")
+	public void setInetuserActive(String inetuserActive) {
+		this.inetuserActive = inetuserActive;
+	}
+
+	public String getIsActivated() {
+		return isActivated;
+	}
+	@JsonProperty("isActivated")
+	public void setIsActivated(String isActivated) {
+		this.isActivated = isActivated;
+	}
+
+	public String getJobDescription() {
+		return jobDescription;
+	}
+	@JsonProperty("jobDescription")
+	public void setJobDescription(String jobDescription) {
+		this.jobDescription = jobDescription;
+	}
+
+	public String getJobFunction() {
+		return jobFunction;
+	}
+	@JsonProperty("jobFunction")
+	public void setJobFunction(String jobFunction) {
+		this.jobFunction = jobFunction;
+	}
+
+	public String getMiddleName() {
+		return middleName;
+	}
+	@JsonProperty("middleName")
+	public void setMiddleName(String middleName) {
+		this.middleName = middleName;
+	}
+
+	public String getPostOfficeBox() {
+		return postOfficeBox;
+	}
+	@JsonProperty("postOfficeBox")
+	public void setPostOfficeBox(String postOfficeBox) {
+		this.postOfficeBox = postOfficeBox;
+	}
+
+	public String getPreferredLanguage() {
+		return preferredLanguage;
+	}
+	@JsonProperty("preferredLanguage")
+	public void setPreferredLanguage(String preferredLanguage) {
+		this.preferredLanguage = preferredLanguage;
+	}
+
+	public String getSEAccountNumber() {
+		return SEAccountNumber;
+	}
+	@JsonProperty("SEAccountNumber")
+	public void setSEAccountNumber(String sEAccountNumber) {
+		SEAccountNumber = sEAccountNumber;
+	}
+
+	public String getStateOrProvinceName() {
+		return stateOrProvinceName;
+	}
+	@JsonProperty("stateOrProvinceName")
+	public void setStateOrProvinceName(String stateOrProvinceName) {
+		this.stateOrProvinceName = stateOrProvinceName;
+	}
+
+	public String getSuffix() {
+		return suffix;
+	}
+	@JsonProperty("suffix")
+	public void setSuffix(String suffix) {
+		this.suffix = suffix;
+	}
+
+	public String getTaxID() {
+		return taxID;
+	}
+	@JsonProperty("taxID")
+	public void setTaxID(String taxID) {
+		this.taxID = taxID;
+	}
+
+	public String getTelephoneNumber() {
+		return telephoneNumber;
+	}
+	@JsonProperty("telephoneNumber")
+	public void setTelephoneNumber(String telephoneNumber) {
+		this.telephoneNumber = telephoneNumber;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+	@JsonProperty("title")
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	@JsonProperty("Country")
+	public void setCountry(String country) {
+		this.country = country;
+	}
+	
+	@JsonProperty("postalCode")
+	public String getPostalCode() {
+		return postalCode;
+	}
+
+	@JsonProperty("postalCode")
+	public void setPostalCode(String postalCode) {
+		this.postalCode = postalCode;
 	}
 
 	/*@JsonProperty("State")
