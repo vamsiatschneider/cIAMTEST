@@ -264,8 +264,8 @@ public class PropertyFileAutoRefresh {
 			if(!((UserServiceImpl) userService).getCALLER_FID().equals(CALLER_FID) && CALLER_FID!=null && !CALLER_FID.isEmpty())
 				((UserServiceImpl) userService).setCALLER_FID(CALLER_FID);
 			
-			if(!((UserServiceImpl) userService).getLOGIN_ERROR().equals(LOGIN_ERROR) && LOGIN_ERROR!=null && !LOGIN_ERROR.isEmpty())
-			((UserServiceImpl) userService).setLOGIN_ERROR(LOGIN_ERROR);
+			/*if(!((UserServiceImpl) userService).getLOGIN_ERROR().equals(LOGIN_ERROR) && LOGIN_ERROR!=null && !LOGIN_ERROR.isEmpty())
+			((UserServiceImpl) userService).setLOGIN_ERROR(LOGIN_ERROR);*/
 			
 			//LOGGER.info("Userservice email template dir:##"+((UserServiceImpl) userService).getEMAIL_TEMPLATE_DIR());
 			//LOGGER.info("Config  email template dir:##"+EMAIL_TEMPLATE_DIR);

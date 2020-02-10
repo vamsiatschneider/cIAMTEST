@@ -65,7 +65,7 @@ public class UIMSCompanyManagerSoapServiceSync {
 
 			LOGGER.info("Start: getPort() of UIMS");
 			userManagerUIMSV2 = service.getPort(CompanyManagerUIMSV2.class);
-			LOGGER.info("End: getPort() of UIMS -> End, response is:" + userManagerUIMSV2);
+			LOGGER.info("End: getPort() of UIMS");
 
 		}catch (MalformedURLException e) {
 			LOGGER.error("MalformedURLException in getCompanyManager()::" + e.getMessage());

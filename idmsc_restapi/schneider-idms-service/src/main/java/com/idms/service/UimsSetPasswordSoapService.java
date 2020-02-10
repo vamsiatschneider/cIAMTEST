@@ -466,6 +466,41 @@ public class UimsSetPasswordSoapService {
 		}
 		return ispasswordupdated;
 	}
+	
+	
+	public void ReActivateIdentityNoPassword(String userId, String loginid, String loginmobile) throws MalformedURLException {
+		LOGGER.info("Entered ReActivateIdentityNoPassword() -> Start");
+		LOGGER.info("Parameter userId -> " + userId);
+		LOGGER.info("Parameter loginid -> " + loginid);
+		LOGGER.info("Parameter loginmobile -> " + loginmobile);
+		boolean emailActivated = false, mobileActivated = false;
+
+		try {
+			samlAssertion = samlTokenService.getSamlAssertionToken(userId, "12");
+			LOGGER.info("samlAssertion=" + samlAssertion);
+			UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
+			if (null != loginid && !loginid.isEmpty()) {
+				LOGGER.info("Start: activateIdentityNoPassword() of UIMS for EMAIL.." + loginid);
+				emailActivated = userManagerUIMSV22.activateIdentityNoPassword(CALLER_FID, samlAssertion);
+				LOGGER.info("End: activateIdentityNoPassword() of UIMS finished for EMAIL.. userId:" + userId);
+				
+				LOGGER.info("UIMS user email isActivated status:" + emailActivated);
+			} 
+			if (null != loginmobile && !loginmobile.isEmpty()) {
+				LOGGER.info("Start: activateIdentityWithMobileNoPassword() of UIMS..Mobile :" + loginmobile);
+				mobileActivated = userManagerUIMSV22.activateIdentityWithMobileNoPassword(CALLER_FID, loginmobile,
+						samlAssertion);
+				LOGGER.info("End: activateIdentityWithMobileNoPassword() of UIMS finished.. Mobile:"
+						+ loginmobile);
+				
+				LOGGER.info("UIMS user mobile isActivated status:" + mobileActivated);
+			}
+
+		} catch (Exception e) {
+			LOGGER.error(
+					"Exception in ReActivateIdentityNoPassword() for userId::" + userId + " is ->" + e.getMessage(), e);
+		}
+	}
 
 	public void setFromUserName(String fromUserName) {
 		this.fromUserName = fromUserName;
