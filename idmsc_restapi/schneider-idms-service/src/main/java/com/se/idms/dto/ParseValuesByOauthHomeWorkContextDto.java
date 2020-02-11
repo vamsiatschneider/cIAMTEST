@@ -945,8 +945,6 @@ public class ParseValuesByOauthHomeWorkContextDto {
 				? getValue(userProductDocCtx.read("$.result[0].contactId[0]").toString()) : getDelimeter());
 		userInfo.setPhoneId(null != userProductDocCtx.read("$.result[0].login_mobile[0]")
 				? getValue(userProductDocCtx.read("$.result[0].login_mobile[0]").toString()) : getDelimeter());
-		userInfo.setCompanyId(null != userProductDocCtx.read("$.result[0].companyFederatedID[0]")
-				? getValue(userProductDocCtx.read("$.result[0].companyFederatedID[0]").toString()) : getDelimeter());
 		userInfo.setPrefComEmail(null != userProductDocCtx.read("$.result[0].emailOptIn[0]")
 				? Boolean.valueOf(userProductDocCtx.read("$.result[0].emailOptIn[0]")) : false);
 		userInfo.setIsInternalUser(null != userProductDocCtx.read("$.result[0].IDMSisInternal__c[0]")

@@ -10904,6 +10904,9 @@ public class UserServiceImpl implements UserService {
 			try {
 				String uimsFedId = uimsAuthenticatedUserManagerSoapServiceSync.createUIMSUserWithPassword(CALLER_FID,
 						userInfo, password, userFedId);
+				
+				if (uimsFedId.equals(userFedId))
+					uimsSetPasswordSoapService.ReActivateIdentityNoPassword(userFedId, loginId, loginMobile);
 
 				if (null != context && !context.isEmpty() && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)
 						|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context))) {
@@ -10911,9 +10914,6 @@ public class UserServiceImpl implements UserService {
 						companyManagerSoapServiceSync.createUIMSCompanyWithCompanyForceIdmsId(userFedId, compFed, UimsConstants.VNEW, companyInfo);
 					}
 				}
-
-				if (uimsFedId.equals(userFedId))
-					uimsSetPasswordSoapService.ReActivateIdentityNoPassword(userFedId, loginId, loginMobile);
 			} catch (MalformedURLException | ForcedFidAlreadyExistException_Exception e1) {
 				LOGGER.error("Exception in recreating user in UIMS:: " + e1.getMessage(), e);
 			}
