@@ -22,6 +22,7 @@ import javax.mail.internet.MimeMessage;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.helpers.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -565,15 +566,7 @@ public class SendEmail {
 		int endIndex=0;
 
 		// changes for otp based email templates
-		
-		/* Check for combination of isOTPEnabled and IDMS_Application_CSS application 
-		 * attributes. Currently isOTPEnabled flag is supported with Green proface which
-		 * is the default color.
-		 * If blue proface is enabled with isOTPEnabled flag, this check will ensure
-		 * isOTPEnabled flag is ignored and user will receive blue proface email
-		 * with confirmation link.
-		*/
-		if (isOTPEnabled && (templateColor == null)) {
+		if (isOTPEnabled) {
 			LOGGER.info("isOTPEnabled: "+ isOTPEnabled + " templateColor: "+templateColor);
 			filePath = refactoredCode(subject, hotpOperationType, prmTemplate, templateColor, isOTPEnabled,
 					chineseLangCheck);
@@ -657,7 +650,7 @@ public class SendEmail {
 			}
 		}
 		LOGGER.info("subject="+subject);
-		if (isOTPEnabled && (templateColor == null)) {
+		if (isOTPEnabled) {
 			LOGGER.info("isOTPEnabled: "+ isOTPEnabled + " templateColor: "+templateColor);
 			startIndex = contentBuilder.indexOf("{!otp}");
 			endIndex = startIndex+6;
@@ -683,6 +676,18 @@ public class SendEmail {
 	private String refactoredCode(String subject, String hotpOperationType, String prmTemplate, String templateColor,
 			boolean isOTPEnabled, boolean chineseLangCheck) {
 		String filePath;
+
+		/* Check for combination of isOTPEnabled and IDMS_Application_CSS application 
+		 * attributes. Currently isOTPEnabled flag is supported with Green proface which
+		 * is the default color.
+		 * If blue proface is enabled with isOTPEnabled flag for an app, this check will 
+		 * ensure that user receives a default otp email. This will be refactored once 
+		 * dynamic email template is implemented.
+		*/
+		if(isOTPEnabled && StringUtils.isNotBlank(templateColor)) {
+			return getDefaultTemplateForProfaceAndOTPCombination(chineseLangCheck);
+		}
+
 		EmailTemplateInput input = new EmailTemplateInput();
 		if (chineseLangCheck)
 			input.setLocale(Locale.CN);
@@ -699,6 +704,14 @@ public class SendEmail {
 		EmailTemplateAbstractFactory factory = new EmailTemplateAbstractFactoryImpl(input);
 		filePath = factory.getEmailTemplateFactory().getEmailTemplatePath();
 		return filePath;
+	}
+
+
+	private String getDefaultTemplateForProfaceAndOTPCombination(boolean chineseLangCheck) {
+		if (chineseLangCheck)
+			return IDMS_USER_DEFAULT_OTP_EMAILTEMPLATE_CN;
+		else
+			return IDMS_USER_DEFAULT_OTP_EMAILTEMPLATE_EN;
 	}
 
 
