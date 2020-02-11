@@ -574,6 +574,7 @@ public class SendEmail {
 		 * with confirmation link.
 		*/
 		if (isOTPEnabled && (templateColor == null)) {
+			LOGGER.info("isOTPEnabled: "+ isOTPEnabled + " templateColor: "+templateColor);
 			filePath = refactoredCode(subject, hotpOperationType, prmTemplate, templateColor, isOTPEnabled,
 					chineseLangCheck);
 		} else {
@@ -656,7 +657,8 @@ public class SendEmail {
 			}
 		}
 		LOGGER.info("subject="+subject);
-		if(isOTPEnabled) {
+		if (isOTPEnabled && (templateColor == null)) {
+			LOGGER.info("isOTPEnabled: "+ isOTPEnabled + " templateColor: "+templateColor);
 			startIndex = contentBuilder.indexOf("{!otp}");
 			endIndex = startIndex+6;
 			contentBuilder.replace(startIndex, endIndex, encodedHOTPcode);
