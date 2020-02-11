@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.idms.service.exception.MyException;
 import com.uims.authenticatedUsermanager.AccessElement;
 import com.uims.authenticatedUsermanager.AuthenticatedUserManagerUIMSV22;
 import com.uims.authenticatedUsermanager.CreatedIdentityReport;
@@ -62,7 +63,7 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 
 			LOGGER.info("Start: getPort() of UIMS");
 			authenticatedUserManagerUIMSV22 = service.getPort(AuthenticatedUserManagerUIMSV22.class);
-			LOGGER.info("End: getPort() of UIMS -> End, response is:" + authenticatedUserManagerUIMSV22);
+			LOGGER.info("End: getPort() of UIMS");
 		} catch (MalformedURLException e) {
 			LOGGER.error("MalformedURLException in getAuthenticatedUserManager()::" + e.getMessage());
 			LOGGER.error("Exception >"+e);
@@ -181,7 +182,7 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 	}
 	
 	
-	public UserV6 getUIMSUser(String callerFid,String federatedId){
+	public UserV6 getUIMSUser(String callerFid,String federatedId) throws MyException{
 		LOGGER.info("Entered getUIMSUser() sync method - > Start");
 		LOGGER.info("Parameter callerFid -> " + callerFid);
 		LOGGER.info("Parameter federatedId -> " + federatedId);
@@ -201,6 +202,9 @@ public class UIMSAuthenticatedUserManagerSoapServiceSync {
 				| RequestedEntryNotExistsException_Exception | SecuredImsException_Exception
 				| UnexpectedLdapResponseException_Exception | UnexpectedRuntimeImsException_Exception e) {
 			LOGGER.error("Exception in getUIMSUser() of UIMS:: " + e.getMessage(),e);
+			if(e.getMessage().contains("Unable to find the SeUser")){
+				throw new MyException(e.getMessage());
+			}
 		}
 		LOGGER.info("getUIMSUser() Sync method -> End");
 		return userdetails;

@@ -565,7 +565,15 @@ public class SendEmail {
 		int endIndex=0;
 
 		// changes for otp based email templates
-		if (isOTPEnabled) {
+		
+		/* Check for combination of isOTPEnabled and IDMS_Application_CSS application 
+		 * attributes. Currently isOTPEnabled flag is supported with Green proface which
+		 * is the default color.
+		 * If blue proface is enabled with isOTPEnabled flag, this check will ensure
+		 * isOTPEnabled flag is ignored and user will receive blue proface email
+		 * with confirmation link.
+		*/
+		if (isOTPEnabled && (templateColor == null)) {
 			filePath = refactoredCode(subject, hotpOperationType, prmTemplate, templateColor, isOTPEnabled,
 					chineseLangCheck);
 		} else {
