@@ -83,6 +83,8 @@ public class UimsSetPasswordSoapService {
 	
 	private boolean isIdentityActvated = false;
 	
+	private boolean resetPasswordStatus = false;
+	
 	/**
 	 * 
 	 * @return
@@ -500,6 +502,53 @@ public class UimsSetPasswordSoapService {
 			LOGGER.error(
 					"Exception in ReActivateIdentityNoPassword() for userId::" + userId + " is ->" + e.getMessage(), e);
 		}
+	}
+	
+	
+	public boolean ResetUIMSPassword(String userId, String password, String emailOrMobile)
+			throws MalformedURLException {
+		LOGGER.info("Entered ResetUIMSPassword() -> Start");
+		LOGGER.info("Parameter userId -> " + userId);
+		LOGGER.info("Parameter emailOrMobile -> " + emailOrMobile);
+
+		try {
+			samlAssertion = samlTokenService.getSamlAssertionToken(userId, "22");
+			LOGGER.info("samlAssertion=" + samlAssertion);
+
+			Callable<Boolean> callableSetUIMSPassword = new Callable<Boolean>() {
+				public Boolean call() throws Exception {
+					UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
+					if (emailOrMobile.contains("@")) {
+						LOGGER.info("Start: setPassword() of UIMS for email:" + emailOrMobile);
+						resetPasswordStatus = userManagerUIMSV22.setPassword(CALLER_FID, samlAssertion, password);
+						LOGGER.info("End: setPassword() of UIMS finished for email:" + emailOrMobile);
+					} else {
+						LOGGER.info("Start: setPasswordWithSms() of UIMS for Mobile:" + emailOrMobile);
+						resetPasswordStatus = userManagerUIMSV22.setPasswordWithSms(CALLER_FID, emailOrMobile,
+								samlAssertion, UserConstants.TOKEN_TYPE, password);
+						LOGGER.info("End: setPasswordWithSms() of UIMS finished of Mobile:" + emailOrMobile);
+					}
+					LOGGER.info("setPasswordStatus from UIMS: " + resetPasswordStatus);
+					if (!resetPasswordStatus) {
+						UIMSSYNCLOGGER.error("setUIMSPassword failed in UIMS for emailOrMobile = " + emailOrMobile);
+					}
+					return true;
+				}
+			};
+
+			Retryer<Boolean> retryer = RetryerBuilder.<Boolean> newBuilder()
+					.retryIfResult(Predicates.<Boolean> isNull()).retryIfExceptionOfType(Exception.class)
+					.retryIfRuntimeException().withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
+			retryer.call(callableSetUIMSPassword);
+		} catch (RetryException e) {
+			LOGGER.error("RetryException in ResetUIMSPassword()::" + e.getMessage(), e);
+		} catch (ExecutionException e) {
+			LOGGER.error("ExecutionException in ResetUIMSPassword()::" + e.getMessage(), e);
+		} catch (Exception e) {
+			LOGGER.error("Exception in ResetUIMSPassword()::" + e.getMessage(), e);
+		}
+		LOGGER.info("UIMS ResetUIMSPassword() finished!");
+		return resetPasswordStatus;
 	}
 
 	public void setFromUserName(String fromUserName) {

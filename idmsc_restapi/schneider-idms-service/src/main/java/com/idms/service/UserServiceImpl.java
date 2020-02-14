@@ -10910,6 +10910,8 @@ public class UserServiceImpl implements UserService {
 						companyManagerSoapServiceSync.createUIMSCompanyWithCompanyForceIdmsId(userFedId, compFed, UimsConstants.VNEW, companyInfo);
 					}
 				}
+				uimsSetPasswordSoapService.ResetUIMSPassword(userFedId, password, username);
+				
 			} catch (MalformedURLException | ForcedFidAlreadyExistException_Exception e1) {
 				LOGGER.error("Exception in recreating user in UIMS:: " + e1.getMessage(), e);
 			}
