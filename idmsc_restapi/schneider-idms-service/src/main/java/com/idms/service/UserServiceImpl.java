@@ -124,10 +124,8 @@ import com.idms.product.model.OpenAmUserInput;
 import com.idms.product.model.OpenAmUserRequest;
 import com.idms.product.model.PasswordRecoveryUser;
 import com.idms.product.model.PostMobileRecord;
-import com.idms.service.exception.MyException;
 import com.idms.service.impl.IFWTokenServiceImpl;
 import com.idms.service.uims.sync.UIMSAuthenticatedUserManagerSoapServiceSync;
-import com.idms.service.uims.sync.UIMSCompanyManagerSoapServiceSync;
 import com.idms.service.uims.sync.UIMSUserManagerSoapServiceSync;
 import com.idms.service.util.AsyncUtil;
 import com.idms.service.util.ChinaIdmsUtil;
@@ -164,9 +162,7 @@ import com.se.idms.util.EmailValidator;
 import com.se.idms.util.JsonConstants;
 import com.se.idms.util.LangSupportUtil;
 import com.se.idms.util.PhoneValidator;
-import com.se.idms.util.UimsConstants;
 import com.se.idms.util.UserConstants;
-import com.uims.authenticatedUsermanager.ForcedFidAlreadyExistException_Exception;
 import com.uims.authenticatedUsermanager.UserV6;
 
 @Service("userService")
@@ -266,9 +262,6 @@ public class UserServiceImpl implements UserService {
 	
 	@Inject
 	private UIMSAuthenticatedUserManagerSoapServiceSync uimsAuthenticatedUserManagerSoapServiceSync;
-	
-	@Autowired
-	private UIMSCompanyManagerSoapServiceSync companyManagerSoapServiceSync;
 
 	@Value("${authCsvPath}")
 	private String authCsvPath;
@@ -5758,13 +5751,10 @@ public class UserServiceImpl implements UserService {
 		String openamVnew = null;
 		String fedId = null;
 		Integer vNewCntValue = 0;
-		ObjectMapper objMapper = new ObjectMapper();
 		ErrorResponse errorResponse = new ErrorResponse();
 		Response passwordOpenAMResponse = null;
 		boolean isPasswordUpdatedInUIMS = false;
 		try {
-			// LOGGER.info("UserServiceImpl:updatePassword : sendOtp : Request
-			// -> "+ objMapper.writeValueAsString(updatePasswordRequest));
 			// Fetching the userid from the Authorization Token
 
 			if ((null == updatePasswordRequest.getUIFlag()
@@ -8650,7 +8640,7 @@ public class UserServiceImpl implements UserService {
 		String regSource = app;
 		List<String> accssControlList =null;
 		ErrorResponse errorResponse = new ErrorResponse();
-		boolean maintenanceMode = false, uimsAlreadyCreatedFlag = false;
+		boolean maintenanceMode = false;
 		DocumentContext productDocCtx = null;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		
@@ -8817,17 +8807,6 @@ public class UserServiceImpl implements UserService {
 		elapsedTime = (System.currentTimeMillis() - startTime);
 		AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + successStatus + "," + regSource + ","
 				+ elapsedTime + "ms" + "," + UserConstants.LOGIN_SUCCESS);
-		
-		if (!uimsAlreadyCreatedFlag) {
-			Thread thread = new Thread(new Runnable() {
-				public void run() {
-					LOGGER.info("Start: In thread, loginCheck");
-					loginCheck(userName, password);
-					LOGGER.info("End: In thread, loginCheck");
-				}
-			});
-			thread.start();
-		}
 		
 		LOGGER.info("securedLogin() -> Ending");
 		return Response.status(Response.Status.OK.getStatusCode()).entity(successResponse).build();
@@ -10857,66 +10836,6 @@ public class UserServiceImpl implements UserService {
 		openAmReq.getInput().getUser().setIDMSisInternal__c("FALSE");
 		
 		return openAmReq;
-	}
-	
-	private void loginCheck(String username, String password) {
-		LOGGER.info("Entered loginCheck() -> Start");
-		String iPlanetDirectoryKey = null;
-		String userExists = null;
-		DocumentContext productDocCtx = null;
-		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
-		String userFedId = null;
-		UserV6 userInfo = null;
-		CompanyV3 companyInfo = null;
-		try {
-			iPlanetDirectoryKey = getSSOToken();
-			userExists = productService.checkUserExistsWithEmailMobile(
-					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-					"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(username, "UTF-8"), "UTF-8")
-							+ "\" or mobile_reg eq " + "\""
-							+ URLEncoder.encode(URLDecoder.decode(username, "UTF-8"), "UTF-8") + "\"");
-
-			productDocCtx = JsonPath.using(conf).parse(userExists);
-			userFedId = productDocCtx.read("$.result[0].username");
-
-			userInfo = uimsAuthenticatedUserManagerSoapServiceSync.getUIMSUser(CALLER_FID, userFedId);
-		} catch (IOException e) {
-			LOGGER.error("IOException in loginCheck:: " + e.getMessage(), e);
-		} catch (MyException e) {
-			LOGGER.error("MyException in loginCheck:: " + e.getMessage());
-			userInfo = new UserV6();
-			companyInfo = new CompanyV3();
-			String loginId = productDocCtx.read("$.result[0].Loginid[0]");
-			String context = productDocCtx.read("$.result[0].employeeType[0]");
-			String compFed = productDocCtx.read("$.result[0].companyFederatedID[0]");
-			String compName = productDocCtx.read("$.result[0].companyName[0]");
-			
-			if(null == loginId || loginId.isEmpty())
-				loginId = productDocCtx.read("$.result[0].loginid[0]");
-			String loginMobile = productDocCtx.read("$.result[0].login_mobile[0]");
-			
-			valuesByOauthHomeWorkContext.parseValuesForUIMSuser(userInfo, productDocCtx);
-			valuesByOauthHomeWorkContext.parseValuesForUIMSCompany(companyInfo, productDocCtx);
-			try {
-				String uimsFedId = uimsAuthenticatedUserManagerSoapServiceSync.createUIMSUserWithPassword(CALLER_FID,
-						userInfo, password, userFedId);
-				
-				if (uimsFedId.equals(userFedId))
-					uimsSetPasswordSoapService.ReActivateIdentityNoPassword(userFedId, loginId, loginMobile);
-
-				if (null != context && !context.isEmpty() && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)
-						|| UserConstants.USER_CONTEXT_WORK_1.equalsIgnoreCase(context))) {
-					if (null != compFed && !compFed.isEmpty() && null != compName && !compName.isEmpty()) {
-						companyManagerSoapServiceSync.createUIMSCompanyWithCompanyForceIdmsId(userFedId, compFed, UimsConstants.VNEW, companyInfo);
-					}
-				}
-				uimsSetPasswordSoapService.ResetUIMSPassword(userFedId, password, username);
-				
-			} catch (MalformedURLException | ForcedFidAlreadyExistException_Exception e1) {
-				LOGGER.error("Exception in recreating user in UIMS:: " + e1.getMessage(), e);
-			}
-		}
-		LOGGER.info("loginCheck() -> END");
 	}
 	
 	public void setEMAIL_TEMPLATE_DIR(String eMAIL_TEMPLATE_DIR) {
