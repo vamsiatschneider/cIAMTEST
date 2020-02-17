@@ -3265,6 +3265,7 @@ public class UserServiceImpl implements UserService {
 		String federationID = null, loginIdCheck = null;
 		Response passwordOpenAMResponse = null;
 		boolean isPasswordUpdatedInUIMS = false;
+		String invalidAttempt=null;
 		try {
 			LOGGER.info("Parameter confirmRequest -> "
 					+ ChinaIdmsUtil.printInfo(ChinaIdmsUtil.printData(objMapper.writeValueAsString(confirmRequest))));
@@ -3481,7 +3482,11 @@ public class UserServiceImpl implements UserService {
 				}
 
 				federationID = productDocCtx.read("$.federationID[0]");
-
+				// 1108- Lockout Scenario 
+				String invalidAttempData = productDocCtx.read("$.sunAMAuthInvalidAttemptsData[0]");
+				if(invalidAttempData!=null && !invalidAttempData.equals("[]"))
+				{invalidAttempt=ChinaIdmsUtil.getInvalidCount(invalidAttempData);
+				}
 				if (UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(confirmRequest.getOperation())) {
 					LOGGER.info("Start: getUser() of OpenAMService for uniqueIdentifier=" + uniqueIdentifier);
 					getUserReponseProv = productService.getUser(iPlanetDirectoryKey, uniqueIdentifier);
@@ -3723,7 +3728,14 @@ public class UserServiceImpl implements UserService {
 			}
 
 			LOGGER.info("authToken  " + authId);
-
+			// 1108- unlock account on password reset
+			LOGGER.info("Lockout Attempts  " + invalidAttempt);
+			if(null!= invalidAttempt && Integer.parseInt(invalidAttempt)>4)
+			{
+				LOGGER.info("Unlocking Account on using Forget Password Flow");
+				PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
+					.concat(",\"sunAMAuthInvalidAttemptsData\":\"" + "[]" + "\"}");
+			}
 			PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
 					.concat(",\"authId\":\"" + "[]" + "\"}");
 
