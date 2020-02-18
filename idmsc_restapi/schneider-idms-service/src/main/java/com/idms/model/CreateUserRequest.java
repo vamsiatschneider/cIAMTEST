@@ -4,7 +4,9 @@ import java.util.List;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 public class CreateUserRequest {
 
@@ -19,6 +21,9 @@ public class CreateUserRequest {
 	
 	@JsonProperty
 	private String mobileRegFlag;
+	
+	@JsonInclude(Include.NON_NULL)
+	private String pathValue;
 
 	@JsonProperty
 	private List<RegistrationAttributes> attributes;
@@ -67,6 +72,14 @@ public class CreateUserRequest {
 
 	public void setMobileRegFlag(String mobileRegFlag) {
 		this.mobileRegFlag = mobileRegFlag;
+	}
+
+	public String getPathValue() {
+		return pathValue;
+	}
+
+	public void setPathValue(String pathValue) {
+		this.pathValue = pathValue;
 	}
 
 	@Override
