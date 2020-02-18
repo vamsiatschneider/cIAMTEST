@@ -510,7 +510,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 						String otp = sendEmail.generateOtp(userName);
 						LOGGER.info("Successfully OTP generated for email user, userName=" + userName+" ,OTP="+otp);
 						sendEmail.sendOpenAmEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
-								userRequest.getRegistrationSource());
+								userRequest.getRegistrationSource(), null);
 					} else if (null != userRequest.getRegistrationSource()
 							&& (pickListValidator.validate(UserConstants.IDMS_BFO_profile,
 									userRequest.getRegistrationSource()))) {

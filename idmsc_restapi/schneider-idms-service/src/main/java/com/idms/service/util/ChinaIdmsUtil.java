@@ -379,5 +379,19 @@ public class ChinaIdmsUtil {
 		}
 		return countValue;
 	}
+	
+	public static String getPathString(String data) {
+		String[] pathStrings = data.split("&");
+		String finalPathString = "";
+		for (String pathKeyVal : pathStrings) {
+			String[] keyValue = pathKeyVal.split("=");
+			if (keyValue.length > 1 && !keyValue[1].isEmpty() && !keyValue[1].equalsIgnoreCase("null")) {
+				finalPathString = finalPathString + pathKeyVal + "&";
+			}
+		}
+		if (null != finalPathString && !finalPathString.isEmpty())
+			finalPathString = finalPathString.substring(0, finalPathString.lastIndexOf("&"));
+		return finalPathString;
+	}
 		
 }

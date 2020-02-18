@@ -347,7 +347,7 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				String otp = sendEmail.generateOtp(userId);
 				LOGGER.info("Successfully OTP generated for " + userId);
 				sendEmail.sendOpenAmEmail(otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userId,
-						userRequest.getProfileLastUpdateSource());
+						userRequest.getProfileLastUpdateSource(), null);
 
 				/**
 				 * To update authId in openAM extended attribute

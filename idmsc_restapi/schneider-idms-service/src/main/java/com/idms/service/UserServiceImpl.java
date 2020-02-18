@@ -1491,7 +1491,7 @@ public class UserServiceImpl implements UserService {
 						String otp = sendEmail.generateOtp(userName);
 						LOGGER.info("Start: sendOpenAmEmail() of SendEmail for non-PRM, userName:" + userName);
 						sendEmail.sendOpenAmEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
-								userRequest.getUserRecord().getIDMS_Registration_Source__c());
+								userRequest.getUserRecord().getIDMS_Registration_Source__c(), null);
 						LOGGER.info("End: sendOpenAmEmail() of SendEmail finished for non-PRM, userName:" + userName);
 					} else if (null != userRequest.getUserRecord().getIDMS_Registration_Source__c()
 							&& (pickListValidator.validate(UserConstants.IDMS_BFO_profile,
@@ -2960,7 +2960,7 @@ public class UserServiceImpl implements UserService {
 							String otp = sendEmail.generateOtp(userName);
 							if(pwdSetFirstLoginString.equalsIgnoreCase("false")){
 								if(loginIdentifier.contains("@")){
-									sendEmail.sendOpenAmEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName, applicationName);
+									sendEmail.sendOpenAmEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName, applicationName, null);
 								} else {
 									sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName, applicationName);
 									sendEmail.sendSMSNewGateway(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,applicationName);
@@ -4475,9 +4475,9 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Parameter hotpService -> " + hotpService+" ,loginIdentifier -> "+loginIdentifier);
 		LOGGER.info("Parameter withGlobalUsers -> "+withGlobalUsers);
 
-		String userData = null;
+		String userData = null, pathString = null;
 		DocumentContext productDocCtx;
-		String userName;
+		String userName, finalPathString = null;
 		String iPlanetDirectoryKey = null;
 		long elapsedTime;
 		String ifwAccessToken = null;
@@ -4506,6 +4506,11 @@ public class UserServiceImpl implements UserService {
 			productDocCtx = JsonPath.using(conf).parse(userExists);
 			Integer resultCount = productDocCtx.read(JsonConstants.RESULT_COUNT);
 			userName = productDocCtx.read("$.result[0].username");
+			
+			pathString = passwordRecoveryRequest.getPathValue();
+			if(null != pathString && !pathString.isEmpty()){
+				finalPathString = ChinaIdmsUtil.getPathString(pathString);
+			}
 
 			LOGGER.info("resultCount=" + resultCount);
 			LOGGER.info("userName=" + userName);
@@ -4514,7 +4519,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Successfully OTP generated for " + userName);
 				if (UserConstants.HOTP_EMAIL_RESET_PR.equalsIgnoreCase(hotpService)) {
 					sendEmail.sendOpenAmEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,
-							passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c());
+							passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c(), finalPathString);
 				} else if (UserConstants.HOTP_MOBILE_RESET_PR.equalsIgnoreCase(hotpService)) {
 					sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,
 							passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c());
@@ -5092,7 +5097,7 @@ public class UserServiceImpl implements UserService {
 					String otp = sendEmail.generateOtp(userId);
 					LOGGER.info("Successfully OTP generated for " + userId);
 					sendEmail.sendOpenAmEmail(otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userId,
-							userRequest.getUserRecord().getIDMS_Profile_update_source__c());
+							userRequest.getUserRecord().getIDMS_Profile_update_source__c(), null);
 
 					if (UserConstants.EMAIL.equalsIgnoreCase(identifierType) && null != updatingUser) {
 						String prefferedLanguage = null != productDocCtxUser.read("$.preferredlanguage")
@@ -7045,7 +7050,7 @@ public class UserServiceImpl implements UserService {
 		long elapsedTime;
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 
-		String iPlanetDirectoryKey = null;
+		String iPlanetDirectoryKey = null, finalPathString = null, pathString = null;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		DocumentContext productDocCtx = null;
 		String userId = null, userType = null, userCName = null, userExistsQuery = null;
@@ -7086,6 +7091,11 @@ public class UserServiceImpl implements UserService {
 				LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
 				iPlanetDirectoryKey = "";
 			}
+			
+			 pathString = resendRegEmail.getPathValue();
+				if(null != pathString && !pathString.isEmpty()){
+					finalPathString = ChinaIdmsUtil.getPathString(pathString);
+				}
 
 			if (null != resendRegEmail.getEmail() && !resendRegEmail.getEmail().isEmpty()) {
 				userId = resendRegEmail.getEmail();
@@ -7149,7 +7159,7 @@ public class UserServiceImpl implements UserService {
 
 						if (userType.equalsIgnoreCase("mail")) {
 							sendEmail.sendOpenAmEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userCName,
-									regSource);
+									regSource, finalPathString);
 						}
 						if (userType.equalsIgnoreCase("mobile")) {
 							LOGGER.info("Start: sendSMSMessage() for mobile userName:" + userCName);
@@ -7263,7 +7273,7 @@ public class UserServiceImpl implements UserService {
 		String iPlanetDirectoryKey = "";
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		DocumentContext productDocCtx = null;
-		String userName = null;
+		String userName = null, pathString = null, finalPathString = null;
 		ObjectMapper objMapper = new ObjectMapper();
 
 		try {
@@ -7279,6 +7289,11 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Time taken by resendRegEmail() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 			} else {
+				
+				pathString = emailChangeRequest.getPathValue();
+				if(null != pathString && !pathString.isEmpty()){
+					finalPathString = ChinaIdmsUtil.getPathString(pathString);
+				}
 
 				try {
 					iPlanetDirectoryKey = getSSOToken();
@@ -7328,11 +7343,11 @@ public class UserServiceImpl implements UserService {
 							String otp = sendEmail.generateOtp(userName);
 							LOGGER.info("Successfully OTP generated for " + userName);
 							sendEmail.sendOpenAmEmail(otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userName,
-									regSource);
+									regSource, finalPathString);
 						} else {
 							userResponse.setStatus(errorStatus);
 							userResponse
-									.setMessage("newEmail or FirstName or LastName are not mached with Email given!!");
+									.setMessage("newEmail or FirstName or LastName are not matched with Email given!!");
 							userResponse.setId(userName);
 							LOGGER.error("Error is -> " + userResponse.getMessage());
 							return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
@@ -8084,7 +8099,7 @@ public class UserServiceImpl implements UserService {
 									regestrationSource);
 						} else {
 							sendEmail.sendOpenAmEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
-									regestrationSource);
+									regestrationSource, null);
 						}
 
 						mailCount = mailCount + 1;
@@ -10017,7 +10032,7 @@ public class UserServiceImpl implements UserService {
 						+ fedid);
 				String otp = sendEmail.generateOtp(fedid);
 				LOGGER.info("sending mail notification to added email");
-				sendEmail.sendOpenAmEmail(otp, EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE, fedid, source);
+				sendEmail.sendOpenAmEmail(otp, EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE, fedid, source, null);
 
 				response.put(UserConstants.STATUS_L, successStatus);
 				response.put(UserConstants.MESSAGE_L, UserConstants.ADD_EMAIL_PROFILE);
