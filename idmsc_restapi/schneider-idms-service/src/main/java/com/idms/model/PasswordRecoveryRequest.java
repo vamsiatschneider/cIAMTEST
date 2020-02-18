@@ -1,6 +1,8 @@
 package com.idms.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 /**
  * The Password Recovery Request.
@@ -14,6 +16,9 @@ public class PasswordRecoveryRequest  extends BaseEntity {
 
 	@JsonProperty
 	private String WithGlobalUsers;
+	
+	@JsonInclude(Include.NON_NULL)
+	private String pathValue;
 	
 	public UserRecord getUserRecord() {
 		return UserRecord;
@@ -30,6 +35,12 @@ public class PasswordRecoveryRequest  extends BaseEntity {
 	public void setWithGlobalUsers(String withGlobalUsers) {
 		WithGlobalUsers = withGlobalUsers;
 	}
-	
-	
+
+	public String getPathValue() {
+		return pathValue;
+	}
+
+	public void setPathValue(String pathValue) {
+		this.pathValue = pathValue;
+	}
 }

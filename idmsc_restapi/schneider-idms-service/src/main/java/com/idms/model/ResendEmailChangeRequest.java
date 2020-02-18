@@ -1,6 +1,8 @@
 package com.idms.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 public class ResendEmailChangeRequest {
 
@@ -15,6 +17,9 @@ public class ResendEmailChangeRequest {
 	
 	@JsonProperty
 	private String lastName;
+	
+	@JsonInclude(Include.NON_NULL)
+	private String pathValue;
 
 	@JsonProperty("OldEmail")
 	public String getOldEmail() {
@@ -54,6 +59,14 @@ public class ResendEmailChangeRequest {
 	@JsonProperty("Lastname")
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
+	}
+
+	public String getPathValue() {
+		return pathValue;
+	}
+
+	public void setPathValue(String pathValue) {
+		this.pathValue = pathValue;
 	}
 	
 }

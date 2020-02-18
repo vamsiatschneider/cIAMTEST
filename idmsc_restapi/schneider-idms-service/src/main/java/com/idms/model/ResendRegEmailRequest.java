@@ -1,6 +1,8 @@
 package com.idms.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 /**
  * 
@@ -20,6 +22,9 @@ public class ResendRegEmailRequest {
 	
 	@JsonProperty
 	private String mobile;
+	
+	@JsonInclude(Include.NON_NULL)
+	private String pathValue;
 
 	public String getEmail() {
 		return email;
@@ -51,6 +56,14 @@ public class ResendRegEmailRequest {
 
 	public void setMobile(String mobile) {
 		this.mobile = mobile;
+	}
+
+	public String getPathValue() {
+		return pathValue;
+	}
+
+	public void setPathValue(String pathValue) {
+		this.pathValue = pathValue;
 	}
 	
 }

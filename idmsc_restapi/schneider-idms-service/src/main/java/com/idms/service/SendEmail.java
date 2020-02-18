@@ -293,7 +293,7 @@ public class SendEmail {
 	}
 	
 	
-	public void  sendOpenAmEmail(String code, String hotpOperationType,String userId, String appid ){
+	public void  sendOpenAmEmail(String code, String hotpOperationType,String userId, String appid, String pathString){
 		LOGGER.info("Entered sendOpenAmEmail() -> Start");
 		LOGGER.info("Parameter hotpOperationType -> "+hotpOperationType+" ,userId -> "+userId);
 		LOGGER.info("Parameter appid -> " + appid);
@@ -411,15 +411,21 @@ public class SendEmail {
 				LOGGER.info("linkParam: "+linkParam);
 				
 				String mailDomain = to.substring(to.indexOf("@") + 1);
-				
+
 				LOGGER.info("mailDomain in sendOpenAmEmail= " + mailDomain);
 				if(mailDomain.contains(UserConstants.YOP_MAIL)){
 					url = hotpEmailVerificationURL + "?userid=" + userId + "&amp;pin=" + encodedHOTPcode + "&amp;operationType="
 							+ hotpOperationType + "&amp;lang=" + lang + "&amp;app=" + appid + "&amp;uid=" + userId+linkParam;
+					if (null != pathString && !pathString.isEmpty()){
+						pathString = pathString.replaceAll("&", "&amp;");
+						url = url + "&amp;" + pathString;
+					}
 				}
 				else{
 					url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + encodedHOTPcode + "&operationType="
 							+ hotpOperationType + "&lang=" + lang + "&app=" + appid + "&uid=" + userId+linkParam;
+					if (null != pathString && !pathString.isEmpty())
+						url = url + "&" + pathString;
 				}
 				
 				LOGGER.info("sendOpenAmEmail : URL compiled to : " + url);
