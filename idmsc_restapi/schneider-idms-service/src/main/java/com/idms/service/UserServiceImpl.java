@@ -880,7 +880,7 @@ public class UserServiceImpl implements UserService {
 		String identifierType = null;
 		ObjectMapper objMapper = null;
 		String userName = null, userExists = null;
-		String iPlanetDirectoryKey = null;
+		String iPlanetDirectoryKey = null, finalPathString = null, pathString = null;
 		boolean uimsAlreadyCreatedFlag = false, mobileRegFlag = false;
 		Response userCreation = null, checkUserExist = null;
 		String otpinOpendj = null, hexPinMobile = null, otpStatus = null;
@@ -1475,6 +1475,10 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("End: updateUser() call of openamservice finished for username=" + userName + " ,version ="
 					+ version);
 			// Checking profile update and update login id
+			pathString = userRequest.getPathValue();
+			if(null != pathString && !pathString.isEmpty()){
+				finalPathString = ChinaIdmsUtil.getPathString(pathString);
+			}
 
 			if (null == openAmReq.getInput().getUser().getRegisterationSource()
 					|| !UserConstants.UIMS.equalsIgnoreCase(openAmReq.getInput().getUser().getRegisterationSource())) {
@@ -1491,7 +1495,7 @@ public class UserServiceImpl implements UserService {
 						String otp = sendEmail.generateOtp(userName);
 						LOGGER.info("Start: sendOpenAmEmail() of SendEmail for non-PRM, userName:" + userName);
 						sendEmail.sendOpenAmEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
-								userRequest.getUserRecord().getIDMS_Registration_Source__c(), null);
+								userRequest.getUserRecord().getIDMS_Registration_Source__c(), finalPathString);
 						LOGGER.info("End: sendOpenAmEmail() of SendEmail finished for non-PRM, userName:" + userName);
 					} else if (null != userRequest.getUserRecord().getIDMS_Registration_Source__c()
 							&& (pickListValidator.validate(UserConstants.IDMS_BFO_profile,
