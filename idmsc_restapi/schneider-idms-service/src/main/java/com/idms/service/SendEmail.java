@@ -5,6 +5,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
@@ -12,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.mail.Message.RecipientType;
@@ -34,6 +38,17 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.idms.dynamic.mail.template.LinkTemplatePlaceholderCreator;
+import com.idms.dynamic.mail.template.OTPTemplatePlaceholderCreator;
+import com.idms.dynamic.mail.template.OpenDJAttributes;
+import com.idms.dynamic.mail.template.PRMInternalRegTemplatePlaceholder;
+import com.idms.dynamic.mail.template.TemplatePlaceholderCreator;
+import com.idms.dynamic.mail.template.TemplatePlaceholderSubstitutor;
+import com.idms.dynamic.mail.template.factory.DynamicEmailTemplateFactory;
+import com.idms.dynamic.mail.template.factory.DynamicTemplatePHAbstractSubstitutorFactory;
+import com.idms.dynamic.mail.template.factory.impl.DynamicEmailTemplateFactoryImpl;
+import com.idms.dynamic.mail.template.factory.impl.DynamicTemplatePHAbstractSubstitutorFactoryImpl;
+import com.idms.dynamic.mail.template.util.DynamicEmailTemplateInput;
 import com.idms.mail.template.factory.EmailTemplateAbstractFactory;
 import com.idms.mail.template.factory.impl.EmailTemplateAbstractFactoryImpl;
 import com.idms.mail.template.util.EmailTemplateColor;
@@ -210,10 +225,19 @@ public class SendEmail {
 	@Value("${prm.eclipse.registration.email.template.en}")
 	private String PRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_EN;
 	
+	// Dynamic Email Templates
+	@Value("${user.registration.withpwd.otp.email.template}")
+	private String IDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE;
+	
+	@Value("${user.registration.withpwd.email.template}")
+	private String IDMS_USER_REGISTRATION_WITHPWD_EMAILTEMPLATE;
+	
+	@Value("${prm.internal.registration.email.template}")
+	private String PRM_INTERNAL_USER_REGISTRATION_EMAILTEMPLATE;
+	
 	public String getDefaultUserNameFormat() {
 		return defaultUserNameFormat;
 	}
-
 
 	public void setDefaultUserNameFormat(String defaultUserNameFormat) {
 		this.defaultUserNameFormat = defaultUserNameFormat;
@@ -310,6 +334,7 @@ public class SendEmail {
 		String appNameParam="";
 		String prmTemplate=null;
 		boolean isOTPEnabled = false;
+		boolean isDynamicEmailEnabled = false;
 			try {
 				encodedHOTPcode = code;
 				LOGGER.info("Start: getUser() of openamService for userId="+userId);
@@ -344,6 +369,12 @@ public class SendEmail {
 					if(null!=isOTPEnabledForApp && !isOTPEnabledForApp.equals("")) {
 						isOTPEnabled = Boolean.valueOf(isOTPEnabledForApp);
 						LOGGER.info("isOTPEnabled: "+ isOTPEnabled);
+					}
+					//check if dynamic email template is enabled for app
+					String isDynamicEmailEnabledForApp = productDJData.read("_isDynamicEmailEnabled");
+					if(null!=isDynamicEmailEnabledForApp && !isDynamicEmailEnabledForApp.equals("")) {
+						isDynamicEmailEnabled = Boolean.valueOf(isDynamicEmailEnabledForApp);
+						LOGGER.info("isDynamicEmailEnabled: "+ isDynamicEmailEnabled);
 					}
 				}
 				if (null != applicationDetails && 200 != applicationDetails.getStatus()) {
@@ -438,12 +469,12 @@ public class SendEmail {
 					|| (hotpLanguage != null && (hotpLanguage.equalsIgnoreCase("zh")
 							|| hotpLanguage.equalsIgnoreCase("zh_cn") || hotpLanguage.equalsIgnoreCase("zh_tw")))) {
 					LOGGER.info("sendOpenAmEmail :  Building Chinese email content..for.."+to);
-					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,firstName,bfoSupportUrl,prmTemplate,templateColor, isOTPEnabled);
+					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,firstName,bfoSupportUrl,prmTemplate,templateColor, isOTPEnabled, isDynamicEmailEnabled);
 				}
 				// Else section for English user
 				else {
 					LOGGER.info("sendOpenAmEmail :  Building English email content..for.."+to);
-					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,firstName,bfoSupportUrl,prmTemplate,templateColor, isOTPEnabled);
+					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,firstName,bfoSupportUrl,prmTemplate,templateColor, isOTPEnabled, isDynamicEmailEnabled);
 
 				}
 
@@ -560,7 +591,7 @@ public class SendEmail {
 		return validatePin;
 	}
 
-	private String emailContentTemplate(String to, String subject, String lang,String hotpOperationType,String firstName, String bfoSupportUrl,String prmTemplate, String templateColor, boolean isOTPEnabled)  {
+	private String emailContentTemplate(String to, String subject, String lang,String hotpOperationType,String firstName, String bfoSupportUrl,String prmTemplate, String templateColor, boolean isOTPEnabled, boolean isDynamicEmailEnabled)  {
 		LOGGER.info("Entered emailContentTemplate() -> Start");
 		LOGGER.info("Parameter to -> " + to+" ,subject -> "+subject);//Senthil consider this to handle PRM scenario
 		LOGGER.info("Parameter lang -> " + lang+" ,hotpOperationType -> "+hotpOperationType);
@@ -571,8 +602,24 @@ public class SendEmail {
 		int startIndex=0;
 		int endIndex=0;
 
-		// changes for otp based email templates
+		boolean isOperationTypeUserReg = false;
+		if(hotpOperationType != null && EmailConstants.USERREGISTRATION_OPT_TYPE.equalsIgnoreCase(hotpOperationType)) {
+			isOperationTypeUserReg = true;
+		}
+		//changes for dynamic email templates
+		/*
+		 * This check is required to ensure that dynamic email template implementation is called
+		 * only for user registration operation type at this point in time. Once dynamic
+		 * email templates for other flows are implemented, this check will be removed.
+		 */
+		if(isDynamicEmailEnabled && isOperationTypeUserReg) {
+			return buildDynamicEmailTemplate(subject, hotpOperationType,firstName,
+					bfoSupportUrl, prmTemplate, templateColor, isOTPEnabled, chineseLangCheck);
+		}
+		// Below Static Templates will be refactored once dynamic email template 
+		// implementation is complete.
 		if (isOTPEnabled) {
+		// changes for otp based email templates
 			LOGGER.info("isOTPEnabled: "+ isOTPEnabled + " templateColor: "+templateColor);
 			filePath = refactoredCode(subject, hotpOperationType, prmTemplate, templateColor, isOTPEnabled,
 					chineseLangCheck);
@@ -674,10 +721,87 @@ public class SendEmail {
 			}
 		}
 
-		content = contentBuilder.toString();
-		return subject;
+		 content = contentBuilder.toString();
+		 return subject;
 	}
 
+	private String buildDynamicEmailTemplate(String appName, String hotpOperationType, String firstName,
+			String bfoSupportUrl, String prmTemplate, String templateColor, boolean isOTPEnabled,
+			boolean chineseLangCheck) {
+		
+		DynamicEmailTemplateInput input = new DynamicEmailTemplateInput();
+		if (chineseLangCheck)
+			input.setLocale(Locale.CN);
+		else
+			input.setLocale(Locale.EN);
+
+		input.setOperationType(OperationType.getKey(hotpOperationType));
+		input.setOTPEnabled(isOTPEnabled);
+		input.setEtColor(EmailTemplateColor.getKey(templateColor));
+		if (appName.equalsIgnoreCase(UserConstants.PRM_APP_NAME) && prmTemplate != null)
+			input.setPRMApp(true);
+		input.setPrmTemplateType(PRMTemplateType.getKey(prmTemplate));
+		input.setConfiguration(this);
+		input.setBfoSupportUrl(bfoSupportUrl);
+		input.setSubject(appName);
+		input.setAppName(appName);
+		input.setFirstName(firstName);
+		input.setOtp(encodedHOTPcode);
+		input.setConfirmationURL(url);
+		DynamicEmailTemplateFactory factory = new DynamicEmailTemplateFactoryImpl(input);
+		String filePath = factory.getEmailTemplate().getEmailTemplatePath();
+		LOGGER.info("Dynamic Email FilePath: " + filePath);
+		
+		try {
+			Response applicationDetails = openDJService.getEmailTemplateDetails(djUserName, djUserPwd,
+					input.getOperationType().getType());
+			LOGGER.info("End: getEmailTemplateDetails() of OpenDjService =" + applicationDetails.getStatus());
+
+			DocumentContext emailTemplateDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
+			String djDataAsJSON = emailTemplateDJData.jsonString();
+			ObjectMapper objectMapper = new ObjectMapper();
+			OpenDJAttributes openDJAttributes = objectMapper.readValue(djDataAsJSON, OpenDJAttributes.class);
+			
+			String fileContentString = Files.readAllLines(Paths.get(filePath), Charset.forName("UTF-8")).stream().collect(Collectors.joining("\n"));
+			String[] searchList = getDynamicEmailSearchList(input);
+			String[] replacementList = getDynamicEmailReplacementList(input,openDJAttributes);
+			System.out.println("S length: "+ searchList.length);
+			System.out.println("R length: "+ replacementList.length);
+			String updatedContent = StringUtils.replaceEach(fileContentString, searchList, replacementList);
+			System.out.println("dynamicEmailContent: \n "+ updatedContent);
+			content = updatedContent;
+		} catch (IOException e) {
+			LOGGER.error("ECODE-OPENDJ-DATA-RETREIVAL-FAILED : Error fetching OpenDJ Data");
+			LOGGER.info("Exception in getting OPENDJ data() => "+e.getMessage(),e);
+		}
+		return input.getSubject();
+	}
+
+	private String[] getDynamicEmailReplacementList(DynamicEmailTemplateInput input, OpenDJAttributes openDJAttributes) {
+		
+		DynamicTemplatePHAbstractSubstitutorFactory factory = new DynamicTemplatePHAbstractSubstitutorFactoryImpl(input, openDJAttributes);
+		TemplatePlaceholderSubstitutor substitutor = factory.getTemplatePlaceholderSubstitutorFactory().getTemplatePlaceholderSubstitutor();
+		substitutor.buildDynamicEmailPlaceholderValues();
+		
+		List<String> placeholderValues =substitutor.getPlaceholderValues();
+		String[] replacementList = placeholderValues.toArray(new String[placeholderValues.size()]);
+		return replacementList;
+	}
+
+	private String[] getDynamicEmailSearchList(DynamicEmailTemplateInput input) {
+		
+		TemplatePlaceholderCreator placeHolder = new LinkTemplatePlaceholderCreator();
+		if(input.isOTPEnabled()) {
+			placeHolder = new OTPTemplatePlaceholderCreator();
+		}
+		if(input.isPRMApp() && PRMTemplateType.PRM_INTERNAL_REGISTRATION.equals(input.getPrmTemplateType())) {
+			placeHolder = new PRMInternalRegTemplatePlaceholder();
+		}
+		placeHolder.buildDynamicEmailPlaceholders();
+		List<String> placeholders = placeHolder.getPlaceholders();
+		String[] searchList = placeholders.toArray(new String[placeholders.size()]);
+		return searchList;
+	}
 
 	private String refactoredCode(String subject, String hotpOperationType, String prmTemplate, String templateColor,
 			boolean isOTPEnabled, boolean chineseLangCheck) {
@@ -712,14 +836,12 @@ public class SendEmail {
 		return filePath;
 	}
 
-
 	private String getDefaultTemplateForProfaceAndOTPCombination(boolean chineseLangCheck) {
 		if (chineseLangCheck)
 			return IDMS_USER_DEFAULT_OTP_EMAILTEMPLATE_CN;
 		else
 			return IDMS_USER_DEFAULT_OTP_EMAILTEMPLATE_EN;
 	}
-
 
 	private String oldCode(String subject, String hotpOperationType, String prmTemplate, String templateColor,
 			boolean chineseLangCheck) {
@@ -920,12 +1042,12 @@ public class SendEmail {
 			// if section for chinese user
 			if ((lang != null && lang.equalsIgnoreCase("zh")) || (hotpLanguage != null && hotpLanguage.equalsIgnoreCase("zh"))) {
 				LOGGER.info("sendInvitationEmail :  Building Chinese email content..");
-				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,email,null,null,null, false);
+				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,email,null,null,null, false, false);
 			}
 			// Else section for English user
 			else {
 				LOGGER.info("sendInvitationEmail :  Building English email content..");
-				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,email,null,null,null, false);
+				subject = emailContentTemplate(email, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,email,null,null,null, false, false);
 				LOGGER.info("subject="+subject);
 			}
 
@@ -1041,12 +1163,12 @@ public class SendEmail {
 			// if section for chinese user
 			if ((lang != null && lang.equalsIgnoreCase("zh")) || (hotpLanguage != null && hotpLanguage.equalsIgnoreCase("zh"))) {
 				LOGGER.info("Building Chinese email content..");
-				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,to,null,null,null, false);
+				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,to,null,null,null, false, false);
 			}
 			// Else section for English user
 			else {
 				LOGGER.info("Building English email content..");
-				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,to,null,null,null, false);
+				subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,to,null,null,null, false, false);
 
 			}
 
@@ -1685,5 +1807,30 @@ public class SendEmail {
 
 	public void setIDMS_USER_OTP_ADD_EMAILTEMPLATE_EN(String iDMS_USER_OTP_ADD_EMAILTEMPLATE_EN) {
 		IDMS_USER_OTP_ADD_EMAILTEMPLATE_EN = iDMS_USER_OTP_ADD_EMAILTEMPLATE_EN;
+	}
+
+	public String getIDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE() {
+		return IDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE;
+	}
+
+	public void setIDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE(
+			String iDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE) {
+		IDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE = iDMS_USER_REGISTRATION_WITHPWD_OTP_EMAILTEMPLATE;
+	}
+
+	public String getIDMS_USER_REGISTRATION_WITHPWD_EMAILTEMPLATE() {
+		return IDMS_USER_REGISTRATION_WITHPWD_EMAILTEMPLATE;
+	}
+
+	public void setIDMS_USER_REGISTRATION_WITHPWD_EMAILTEMPLATE(String iDMS_USER_REGISTRATION_WITHPWD_EMAILTEMPLATE) {
+		IDMS_USER_REGISTRATION_WITHPWD_EMAILTEMPLATE = iDMS_USER_REGISTRATION_WITHPWD_EMAILTEMPLATE;
+	}
+
+	public String getPRM_INTERNAL_USER_REGISTRATION_EMAILTEMPLATE() {
+		return PRM_INTERNAL_USER_REGISTRATION_EMAILTEMPLATE;
+	}
+
+	public void setPRM_INTERNAL_USER_REGISTRATION_EMAILTEMPLATE(String pRM_INTERNAL_USER_REGISTRATION_EMAILTEMPLATE) {
+		PRM_INTERNAL_USER_REGISTRATION_EMAILTEMPLATE = pRM_INTERNAL_USER_REGISTRATION_EMAILTEMPLATE;
 	}
 }

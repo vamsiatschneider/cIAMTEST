@@ -42,4 +42,7 @@ public interface OpenDjService {
 	@Path("/mobileotp/{mobilenumber}")
 	Response deleteMobileOTPDetails(@HeaderParam("Content-Type") String type,@HeaderParam("X-OpenIDM-Username") String userName,@HeaderParam("X-OpenIDM-Password") String password,@PathParam("mobilenumber") String mobilenumber);
 
+	@GET
+	@Path("/emailtemplates/{operationType}")
+	Response getEmailTemplateDetails(@HeaderParam("X-OpenIDM-Username") String userName,@HeaderParam("X-OpenIDM-Password") String password,@PathParam("operationType") String operationType);
 }
