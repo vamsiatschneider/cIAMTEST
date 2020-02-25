@@ -765,10 +765,10 @@ public class SendEmail {
 			String fileContentString = Files.readAllLines(Paths.get(filePath), Charset.forName("UTF-8")).stream().collect(Collectors.joining("\n"));
 			String[] searchList = getDynamicEmailSearchList(input);
 			String[] replacementList = getDynamicEmailReplacementList(input,openDJAttributes);
-			System.out.println("S length: "+ searchList.length);
-			System.out.println("R length: "+ replacementList.length);
+//			System.out.println("S length: "+ searchList.length);
+//			System.out.println("R length: "+ replacementList.length);
 			String updatedContent = StringUtils.replaceEach(fileContentString, searchList, replacementList);
-			System.out.println("dynamicEmailContent: \n "+ updatedContent);
+//			System.out.println("dynamicEmailContent: \n "+ updatedContent);
 			content = updatedContent;
 		} catch (IOException e) {
 			LOGGER.error("ECODE-OPENDJ-DATA-RETREIVAL-FAILED : Error fetching OpenDJ Data");
