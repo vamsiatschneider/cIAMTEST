@@ -446,7 +446,7 @@ public class SendEmail {
 				LOGGER.info("mailDomain in sendOpenAmEmail= " + mailDomain);
 				if(mailDomain.contains(UserConstants.YOP_MAIL)){
 					url = hotpEmailVerificationURL + "?userid=" + userId + "&amp;pin=" + encodedHOTPcode + "&amp;operationType="
-							+ hotpOperationType + "&amp;lang=" + lang + "&amp;app=" + appid + "&amp;uid=" + userId+linkParam;
+							+ hotpOperationType + "&amp;app=" + appid + "&amp;uid=" + userId+linkParam;
 					if (null != pathString && !pathString.isEmpty()){
 						pathString = pathString.replaceAll("&", "&amp;");
 						url = url + "&amp;" + pathString;
@@ -454,7 +454,7 @@ public class SendEmail {
 				}
 				else{
 					url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + encodedHOTPcode + "&operationType="
-							+ hotpOperationType + "&lang=" + lang + "&app=" + appid + "&uid=" + userId+linkParam;
+							+ hotpOperationType + "&app=" + appid + "&uid=" + userId+linkParam;
 					if (null != pathString && !pathString.isEmpty())
 						url = url + "&" + pathString;
 				}
@@ -1153,7 +1153,7 @@ public class SendEmail {
 			lang=productDocCtxUser.read("$.preferredlanguage[0]");
 			
 			url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + encodedHOTPcode + "&operationType="
-					+ hotpOperationType + "&lang=" + lang + "&app=" + appid + "&uid=" + userId;
+					+ hotpOperationType + "&app=" + appid + "&uid=" + userId;
 			
 			LOGGER.info("URL compiled to : " + url);
 			
