@@ -441,6 +441,10 @@ public class SendEmail {
 				}
 				LOGGER.info("linkParam: "+linkParam);
 				
+				if(!hotpOperationType.equalsIgnoreCase(EmailConstants.SETUSERPWD_OPT_TYPE)){
+					token = code;
+				}
+				
 				String mailDomain = to.substring(to.indexOf("@") + 1);
 
 				LOGGER.info("mailDomain in sendOpenAmEmail= " + mailDomain);
