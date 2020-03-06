@@ -346,7 +346,7 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				// if(!isUserFromSocialLogin){
 				String otp = sendEmail.generateOtp(userId);
 				LOGGER.info("Successfully OTP generated for " + userId);
-				sendEmail.sendOpenAmEmail(otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userId,
+				sendEmail.sendOpenAmEmail(null, otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userId,
 						userRequest.getProfileLastUpdateSource(), null);
 
 				/**

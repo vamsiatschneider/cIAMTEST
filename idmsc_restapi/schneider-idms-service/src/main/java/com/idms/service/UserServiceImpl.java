@@ -1494,7 +1494,7 @@ public class UserServiceImpl implements UserService {
 						LOGGER.info("Start: generateOtp() of SendEmail for non-PRM, userName:" + userName);
 						String otp = sendEmail.generateOtp(userName);
 						LOGGER.info("Start: sendOpenAmEmail() of SendEmail for non-PRM, userName:" + userName);
-						sendEmail.sendOpenAmEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
+						sendEmail.sendOpenAmEmail(null, otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
 								userRequest.getUserRecord().getIDMS_Registration_Source__c(), finalPathString);
 						LOGGER.info("End: sendOpenAmEmail() of SendEmail finished for non-PRM, userName:" + userName);
 					} else if (null != userRequest.getUserRecord().getIDMS_Registration_Source__c()
@@ -2964,7 +2964,7 @@ public class UserServiceImpl implements UserService {
 							String otp = sendEmail.generateOtp(userName);
 							if(pwdSetFirstLoginString.equalsIgnoreCase("false")){
 								if(loginIdentifier.contains("@")){
-									sendEmail.sendOpenAmEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName, applicationName, null);
+									sendEmail.sendOpenAmEmail(null, otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName, applicationName, null);
 								} else {
 									sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName, applicationName);
 									sendEmail.sendSMSNewGateway(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,applicationName);
@@ -4522,7 +4522,8 @@ public class UserServiceImpl implements UserService {
 				String otp = sendEmail.generateOtp(userName);
 				LOGGER.info("Successfully OTP generated for " + userName);
 				if (UserConstants.HOTP_EMAIL_RESET_PR.equalsIgnoreCase(hotpService)) {
-					sendEmail.sendOpenAmEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,
+					String token = sendEmail.generateEmailToken(userName);
+					sendEmail.sendOpenAmEmail(token, otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,
 							passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c(), finalPathString);
 				} else if (UserConstants.HOTP_MOBILE_RESET_PR.equalsIgnoreCase(hotpService)) {
 					sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,
@@ -5100,7 +5101,7 @@ public class UserServiceImpl implements UserService {
 
 					String otp = sendEmail.generateOtp(userId);
 					LOGGER.info("Successfully OTP generated for " + userId);
-					sendEmail.sendOpenAmEmail(otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userId,
+					sendEmail.sendOpenAmEmail(null, otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userId,
 							userRequest.getUserRecord().getIDMS_Profile_update_source__c(), null);
 
 					if (UserConstants.EMAIL.equalsIgnoreCase(identifierType) && null != updatingUser) {
@@ -7162,7 +7163,7 @@ public class UserServiceImpl implements UserService {
 						LOGGER.info("Successfully OTP generated for " + userCName);
 
 						if (userType.equalsIgnoreCase("mail")) {
-							sendEmail.sendOpenAmEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userCName,
+							sendEmail.sendOpenAmEmail(null, otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userCName,
 									regSource, finalPathString);
 						}
 						if (userType.equalsIgnoreCase("mobile")) {
@@ -7346,7 +7347,7 @@ public class UserServiceImpl implements UserService {
 										&& newEmail.equalsIgnoreCase(emailChangeRequest.getNewEmail()))) {
 							String otp = sendEmail.generateOtp(userName);
 							LOGGER.info("Successfully OTP generated for " + userName);
-							sendEmail.sendOpenAmEmail(otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userName,
+							sendEmail.sendOpenAmEmail(null, otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userName,
 									regSource, finalPathString);
 						} else {
 							userResponse.setStatus(errorStatus);
@@ -8102,7 +8103,7 @@ public class UserServiceImpl implements UserService {
 							sendEmail.sendSMSNewGateway(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
 									regestrationSource);
 						} else {
-							sendEmail.sendOpenAmEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
+							sendEmail.sendOpenAmEmail(null, otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
 									regestrationSource, null);
 						}
 
@@ -10036,7 +10037,7 @@ public class UserServiceImpl implements UserService {
 						+ fedid);
 				String otp = sendEmail.generateOtp(fedid);
 				LOGGER.info("sending mail notification to added email");
-				sendEmail.sendOpenAmEmail(otp, EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE, fedid, source, null);
+				sendEmail.sendOpenAmEmail(null, otp, EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE, fedid, source, null);
 
 				response.put(UserConstants.STATUS_L, successStatus);
 				response.put(UserConstants.MESSAGE_L, UserConstants.ADD_EMAIL_PROFILE);
