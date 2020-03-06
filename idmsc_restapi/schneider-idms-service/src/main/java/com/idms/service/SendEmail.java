@@ -317,7 +317,7 @@ public class SendEmail {
 	}
 	
 	
-	public void  sendOpenAmEmail(String code, String hotpOperationType,String userId, String appid, String pathString){
+	public void  sendOpenAmEmail(String token, String code, String hotpOperationType,String userId, String appid, String pathString){
 		LOGGER.info("Entered sendOpenAmEmail() -> Start");
 		LOGGER.info("Parameter hotpOperationType -> "+hotpOperationType+" ,userId -> "+userId);
 		LOGGER.info("Parameter appid -> " + appid);
@@ -445,7 +445,7 @@ public class SendEmail {
 
 				LOGGER.info("mailDomain in sendOpenAmEmail= " + mailDomain);
 				if(mailDomain.contains(UserConstants.YOP_MAIL)){
-					url = hotpEmailVerificationURL + "?userid=" + userId + "&amp;pin=" + encodedHOTPcode + "&amp;operationType="
+					url = hotpEmailVerificationURL + "?userid=" + userId + "&amp;pin=" + token + "&amp;operationType="
 							+ hotpOperationType + "&amp;app=" + appid + "&amp;uid=" + userId+linkParam;
 					if (null != pathString && !pathString.isEmpty()){
 						pathString = pathString.replaceAll("&", "&amp;");
@@ -453,7 +453,7 @@ public class SendEmail {
 					}
 				}
 				else{
-					url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + encodedHOTPcode + "&operationType="
+					url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + token + "&operationType="
 							+ hotpOperationType + "&app=" + appid + "&uid=" + userId+linkParam;
 					if (null != pathString && !pathString.isEmpty())
 						url = url + "&" + pathString;
@@ -515,6 +515,28 @@ public class SendEmail {
 		product_json_string = "{" + "\"authId\": \"" + hexpin + "\"}";
 		// Need add the timestamp
 		// update hashkey in openAM.
+		LOGGER.info("Start: updateUser() of openamservice to update hashkey for userId:"+userId);
+		productService.updateUser(UserConstants.CHINA_IDMS_TOKEN+userService.getSSOToken(), userId,
+				product_json_string);
+		LOGGER.info("End: updateUser() of openamservice to update hashkey finished for userId:"+userId);
+		return pin;
+	}
+	
+	public String generateEmailToken(String userId) throws Exception {
+		LOGGER.info("Entered generateEmailToken() -> Start");
+		LOGGER.info("Parameter userId -> " + userId);
+
+		String hexpin = "";
+		String product_json_string = "";
+		String pin = "";
+		pin = generateRandomToken();
+		hexpin = ChinaIdmsUtil.generateHashValue(pin);
+		
+		LocalDateTime currentDatenTime = LocalDateTime.now();
+		long currentDatenTimeInMillisecs = currentDatenTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+		
+		hexpin = hexpin+":"+currentDatenTimeInMillisecs;
+		product_json_string = "{" + "\"authId\": \"" + hexpin + "\"}";
 		LOGGER.info("Start: updateUser() of openamservice to update hashkey for userId:"+userId);
 		productService.updateUser(UserConstants.CHINA_IDMS_TOKEN+userService.getSSOToken(), userId,
 				product_json_string);
@@ -983,6 +1005,12 @@ public class SendEmail {
 		return tmpPr;
 	}
 	
+	private String generateRandomToken() {
+		LOGGER.info("Entered generateRandomToken() -> Start");
+		String tmpPr = RandomStringUtils.random(10, UserConstants.RANDOM_CHARS);
+		return tmpPr;
+	}
+	
 	private boolean checkTimeStamp(long localDTInMilli, String loginIdentifierType) {
 		LOGGER.info("Entered checkTimeStamp() -> Start");
 		LOGGER.info("Parameter localDTInMilli() ->"+ localDTInMilli);
@@ -1152,7 +1180,7 @@ public class SendEmail {
 
 			lang=productDocCtxUser.read("$.preferredlanguage[0]");
 			
-			url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + encodedHOTPcode + "&operationType="
+			url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=qyw1fnewri" + "&operationType="
 					+ hotpOperationType + "&app=" + appid + "&uid=" + userId;
 			
 			LOGGER.info("URL compiled to : " + url);
