@@ -235,6 +235,27 @@ public class SendEmail {
 	@Value("${prm.internal.registration.email.template}")
 	private String PRM_INTERNAL_USER_REGISTRATION_EMAILTEMPLATE;
 	
+	@Value("${user.reset.password.otp.email.template}")
+	private String IDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE;
+	
+	@Value("${user.reset.password.email.template}")
+	private String IDMS_USER_RESET_PASSWORD_EMAILTEMPLATE;
+	
+	@Value("${user.add.otp.email.template}")
+	private String IDMS_USER_OTP_ADD_EMAILTEMPLATE;
+	
+	@Value("${user.add.email.template}")
+	private String IDMS_USER_ADD_EMAILTEMPLATE;
+	
+	@Value("${user.update.otp.email.template}")
+	private String IDMS_USER_UPDATE_OTP_EMAILTEMPLATE;
+	
+	@Value("${user.update.email.template}")
+	private String IDMS_USER_UPDATE_EMAILTEMPLATE;
+	
+	@Value("${user.change.email.notification.template}")
+	private String IDMS_USER_CHANGE_EMAILTEMPLATE;
+	
 	public String getDefaultUserNameFormat() {
 		return defaultUserNameFormat;
 	}
@@ -444,7 +465,7 @@ public class SendEmail {
 				if(!hotpOperationType.equalsIgnoreCase(EmailConstants.SETUSERPWD_OPT_TYPE)){
 					token = code;
 				}
-				
+
 				String mailDomain = to.substring(to.indexOf("@") + 1);
 
 				LOGGER.info("mailDomain in sendOpenAmEmail= " + mailDomain);
@@ -628,9 +649,11 @@ public class SendEmail {
 		int startIndex=0;
 		int endIndex=0;
 
-		boolean isOperationTypeUserReg = false;
-		if(hotpOperationType != null && EmailConstants.USERREGISTRATION_OPT_TYPE.equalsIgnoreCase(hotpOperationType)) {
-			isOperationTypeUserReg = true;
+		boolean isSupportedOperationType = false;
+		if(hotpOperationType != null && (EmailConstants.USERREGISTRATION_OPT_TYPE.equalsIgnoreCase(hotpOperationType)
+				|| EmailConstants.SETUSERPWD_OPT_TYPE.equalsIgnoreCase(hotpOperationType)
+				|| EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE.equalsIgnoreCase(hotpOperationType))) {
+			isSupportedOperationType = true;
 		}
 		//changes for dynamic email templates
 		/*
@@ -638,7 +661,7 @@ public class SendEmail {
 		 * only for user registration operation type at this point in time. Once dynamic
 		 * email templates for other flows are implemented, this check will be removed.
 		 */
-		if(isDynamicEmailEnabled && isOperationTypeUserReg) {
+		if(isDynamicEmailEnabled && isSupportedOperationType) {
 			return buildDynamicEmailTemplate(subject, hotpOperationType,firstName,
 					bfoSupportUrl, prmTemplate, templateColor, isOTPEnabled, chineseLangCheck);
 		}
@@ -780,7 +803,7 @@ public class SendEmail {
 		
 		try {
 			Response applicationDetails = openDJService.getEmailTemplateDetails(djUserName, djUserPwd,
-					input.getOperationType().getType());
+					input.getOperationType().getOpenDJType());
 			LOGGER.info("End: getEmailTemplateDetails() of OpenDjService =" + applicationDetails.getStatus());
 
 			DocumentContext emailTemplateDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
@@ -1864,5 +1887,61 @@ public class SendEmail {
 
 	public void setPRM_INTERNAL_USER_REGISTRATION_EMAILTEMPLATE(String pRM_INTERNAL_USER_REGISTRATION_EMAILTEMPLATE) {
 		PRM_INTERNAL_USER_REGISTRATION_EMAILTEMPLATE = pRM_INTERNAL_USER_REGISTRATION_EMAILTEMPLATE;
+	}
+
+	public String getIDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE() {
+		return IDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE;
+	}
+
+	public void setIDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE(String iDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE) {
+		IDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE = iDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE;
+	}
+
+	public String getIDMS_USER_RESET_PASSWORD_EMAILTEMPLATE() {
+		return IDMS_USER_RESET_PASSWORD_EMAILTEMPLATE;
+	}
+
+	public void setIDMS_USER_RESET_PASSWORD_EMAILTEMPLATE(String iDMS_USER_RESET_PASSWORD_EMAILTEMPLATE) {
+		IDMS_USER_RESET_PASSWORD_EMAILTEMPLATE = iDMS_USER_RESET_PASSWORD_EMAILTEMPLATE;
+	}
+
+	public String getIDMS_USER_OTP_ADD_EMAILTEMPLATE() {
+		return IDMS_USER_OTP_ADD_EMAILTEMPLATE;
+	}
+
+	public void setIDMS_USER_OTP_ADD_EMAILTEMPLATE(String iDMS_USER_OTP_ADD_EMAILTEMPLATE) {
+		IDMS_USER_OTP_ADD_EMAILTEMPLATE = iDMS_USER_OTP_ADD_EMAILTEMPLATE;
+	}
+
+	public String getIDMS_USER_ADD_EMAILTEMPLATE() {
+		return IDMS_USER_ADD_EMAILTEMPLATE;
+	}
+
+	public void setIDMS_USER_ADD_EMAILTEMPLATE(String iDMS_USER_ADD_EMAILTEMPLATE) {
+		IDMS_USER_ADD_EMAILTEMPLATE = iDMS_USER_ADD_EMAILTEMPLATE;
+	}
+
+	public String getIDMS_USER_UPDATE_OTP_EMAILTEMPLATE() {
+		return IDMS_USER_UPDATE_OTP_EMAILTEMPLATE;
+	}
+
+	public void setIDMS_USER_UPDATE_OTP_EMAILTEMPLATE(String iDMS_USER_UPDATE_OTP_EMAILTEMPLATE) {
+		IDMS_USER_UPDATE_OTP_EMAILTEMPLATE = iDMS_USER_UPDATE_OTP_EMAILTEMPLATE;
+	}
+
+	public String getIDMS_USER_UPDATE_EMAILTEMPLATE() {
+		return IDMS_USER_UPDATE_EMAILTEMPLATE;
+	}
+
+	public void setIDMS_USER_UPDATE_EMAILTEMPLATE(String iDMS_USER_UPDATE_EMAILTEMPLATE) {
+		IDMS_USER_UPDATE_EMAILTEMPLATE = iDMS_USER_UPDATE_EMAILTEMPLATE;
+	}
+
+	public String getIDMS_USER_CHANGE_EMAILTEMPLATE() {
+		return IDMS_USER_CHANGE_EMAILTEMPLATE;
+	}
+
+	public void setIDMS_USER_CHANGE_EMAILTEMPLATE(String iDMS_USER_CHANGE_EMAILTEMPLATE) {
+		IDMS_USER_CHANGE_EMAILTEMPLATE = iDMS_USER_CHANGE_EMAILTEMPLATE;
 	}
 }
