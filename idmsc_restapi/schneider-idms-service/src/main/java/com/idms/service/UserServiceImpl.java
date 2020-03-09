@@ -4485,9 +4485,10 @@ public class UserServiceImpl implements UserService {
 		String userName, finalPathString = null;
 		String iPlanetDirectoryKey = null;
 		long elapsedTime;
-		String ifwAccessToken = null;
+		String ifwAccessToken = null, token = null;
 		JSONObject response = new JSONObject();
 		ObjectMapper objMapper = new ObjectMapper();
+		boolean isOTPEnabled = false;
 		try {
 			LOGGER.info(
 					"Parameter  passwordRecoveryRequest -> " + objMapper.writeValueAsString(passwordRecoveryRequest));
@@ -4520,10 +4521,22 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("resultCount=" + resultCount);
 			LOGGER.info("userName=" + userName);
 			if (resultCount.intValue() > 0) {
+				String appName = passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c();
+				LOGGER.info("Start: getUser() of OpenDjService for appId="+appName);
+				Response applicationDetails = openDJService.getUser(djUserName, djUserPwd, appName);
+				LOGGER.info("End: getUser() of OpenDjService finished for appId="+appName);
+				DocumentContext productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
+				String isOTPEnabledForApp = productDJData.read("_isOTPEnabled");
+				if(null!=isOTPEnabledForApp && !isOTPEnabledForApp.equals("")) {
+					isOTPEnabled = Boolean.valueOf(isOTPEnabledForApp);
+					LOGGER.info("isOTPEnabled: "+ isOTPEnabled);
+				}
+				
 				String otp = sendEmail.generateOtp(userName);
 				LOGGER.info("Successfully OTP generated for " + userName);
 				if (UserConstants.HOTP_EMAIL_RESET_PR.equalsIgnoreCase(hotpService)) {
-					String token = sendEmail.generateEmailToken(userName);
+					if(!isOTPEnabled)
+						token = sendEmail.generateEmailToken(userName);
 					sendEmail.sendOpenAmEmail(token, otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,
 							passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c(), finalPathString);
 				} else if (UserConstants.HOTP_MOBILE_RESET_PR.equalsIgnoreCase(hotpService)) {
