@@ -295,7 +295,7 @@ public class SendEmail {
 	StringBuilder mailBuilder = null;
 	
 	Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
-	DocumentContext productDocCtxUser = null, productDJData = null;;
+	DocumentContext productDocCtxUser = null, productDJData = null;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SendEmail.class);
 	
@@ -462,8 +462,11 @@ public class SendEmail {
 				}
 				LOGGER.info("linkParam: "+linkParam);
 				
-				if(!hotpOperationType.equalsIgnoreCase(EmailConstants.SETUSERPWD_OPT_TYPE)){
+				if(isOTPEnabled){
 					token = code;
+				}
+				if(!hotpOperationType.equalsIgnoreCase(EmailConstants.SETUSERPWD_OPT_TYPE)){
+				token = code;
 				}
 
 				String mailDomain = to.substring(to.indexOf("@") + 1);
