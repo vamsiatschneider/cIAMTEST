@@ -1,7 +1,9 @@
 package com.idms.dynamic.mail.template.factory.impl;
 
 import com.idms.dynamic.mail.template.factory.DynamicEmailTemplateFactory;
+import com.idms.dynamic.mail.template.impl.DynamicAddEmailLinkTemplate;
 import com.idms.dynamic.mail.template.impl.DynamicPRMInternalRegistrationTemplate;
+import com.idms.dynamic.mail.template.impl.DynamicResetPasswordLinkTemplate;
 import com.idms.dynamic.mail.template.impl.DynamicUserRegistrationLinkTemplate;
 import com.idms.dynamic.mail.template.util.DynamicEmailTemplate;
 import com.idms.dynamic.mail.template.util.DynamicEmailTemplateInput;
@@ -27,11 +29,13 @@ public class DynamicLinkEmailTemplateFactoryImpl implements DynamicEmailTemplate
 					emailTemplate = new DynamicUserRegistrationLinkTemplate(input).getTemplate();
 				}
 				break;
-//			case SET_USER_PASSWORD:
-//				break;
+			case SET_USER_PASSWORD:
+				emailTemplate = new DynamicResetPasswordLinkTemplate(input).getTemplate();
+				break;
+			case ADD_EMAIL_USER_RECORD:
+				emailTemplate = new DynamicAddEmailLinkTemplate(input).getTemplate();
+				break;
 //			case UPDATE_USER_RECORD:
-//				break;
-//			case ADD_EMAIL_USER_RECORD:
 //				break;
 //			case SEND_INVITATION:
 //				break;

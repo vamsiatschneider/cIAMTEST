@@ -1,7 +1,9 @@
 package com.idms.dynamic.mail.template.factory.impl;
 
 import com.idms.dynamic.mail.template.factory.DynamicEmailTemplateFactory;
+import com.idms.dynamic.mail.template.impl.DynamicAddEmailOTPTemplate;
 import com.idms.dynamic.mail.template.impl.DynamicPRMInternalRegistrationTemplate;
+import com.idms.dynamic.mail.template.impl.DynamicResetPasswordOTPTemplate;
 import com.idms.dynamic.mail.template.impl.DynamicUserRegistrationOTPTemplate;
 import com.idms.dynamic.mail.template.util.DynamicEmailTemplate;
 import com.idms.dynamic.mail.template.util.DynamicEmailTemplateInput;
@@ -26,11 +28,13 @@ public class DynamicOTPEmailTemplateFactoryImpl implements DynamicEmailTemplateF
 					emailTemplate = new DynamicUserRegistrationOTPTemplate(input).getTemplate();
 				}
 				break;
-//			case SET_USER_PASSWORD:
-//				break;
+			case SET_USER_PASSWORD:
+				emailTemplate = new DynamicResetPasswordOTPTemplate(input).getTemplate();
+				break;
+			case ADD_EMAIL_USER_RECORD:
+				emailTemplate = new DynamicAddEmailOTPTemplate(input).getTemplate();
+				break;
 //			case UPDATE_USER_RECORD:
-//				break;
-//			case ADD_EMAIL_USER_RECORD:
 //				break;
 //			case SEND_INVITATION:
 //				break;

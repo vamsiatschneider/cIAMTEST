@@ -3,6 +3,7 @@ package com.idms.dynamic.mail.template;
 import org.apache.commons.lang3.StringUtils;
 
 import com.idms.dynamic.mail.template.util.DynamicEmailTemplateInput;
+import com.idms.mail.template.util.OperationType;
 import com.se.idms.cache.utils.EmailConstants;
 
 public class OTPBlueTemplatePlaceholderCNSubstitutor extends TemplatePlaceholderSubstitutor {
@@ -23,7 +24,11 @@ public class OTPBlueTemplatePlaceholderCNSubstitutor extends TemplatePlaceholder
 		placeholderValues.add(openDJAttributes.get_bodySalutationCN());
 		placeholderValues.add(input.getFirstName());
 		placeholderValues.add(openDJAttributes.get_bodySignOffCN());
-		placeholderValues.add(openDJAttributes.get_bodyOTPNote1CN());
+		if(input.getOperationType().getType().equals(OperationType.USER_REGISTRATION.getType())) {
+			placeholderValues.add(openDJAttributes.get_bodyOTPNote1CN());
+		} else {
+			placeholderValues.add(openDJAttributes.get_bodyLinkNote1CN());
+		}
 		placeholderValues.add("15");
 		placeholderValues.add(openDJAttributes.get_bodyOTPNote2CN());
 		if(StringUtils.isNotBlank(input.getBfoSupportUrl())) {
