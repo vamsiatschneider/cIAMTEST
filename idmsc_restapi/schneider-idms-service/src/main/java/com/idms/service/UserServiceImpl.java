@@ -4189,33 +4189,32 @@ public class UserServiceImpl implements UserService {
 				listOfAil_c = new ArrayList<String>();
 			}
 
-			usermail = productDocCtx.read("$.mail[0]");
-
+			String ail=	ailRequest.getUserAILRecord().getAILvalue(ailRequest.getUserAILRecord().getIDMSAclType__c(),ailRequest.getUserAILRecord().getIDMSAcl__c());			
 			// Updating the IDMSAil__c attribute based on the provided operation
-			if ((!listOfAil_c.contains(ailRequest.getUserAILRecord().getIDMSAclType__c() + ";"
-					+ ailRequest.getUserAILRecord().getIDMSAcl__c()))
-					&& ("GRANT".equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMSOperation__c()))) {
-				String aclType_c = productDocCtx.read("$.IDMSAIL_" + idmsAclType_c + "_c[0]");
+			LOGGER.info("AIL Values to be updated: "+ail);
+				if((!IDMSAil__c.contains(ail))&&("GRANT".equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMSOperation__c()))) {
+				
+				String acl_appc = productDocCtx.read("$.IDMSAIL_" + idmsAclType_c + "_c[0]");
 				
 				// Checking the value does not contain null value
-				if (!(aclType_c == null || aclType_c.length() == 0))
-					aclType_c = aclType_c + "," + ailRequest.getUserAILRecord().getIDMSAcl__c();
+				if (!(acl_appc == null || acl_appc.length() == 0))
+					acl_appc = acl_appc + "," + ailRequest.getUserAILRecord().getIDMSAcl__c();
 				else
-					aclType_c = ailRequest.getUserAILRecord().getIDMSAcl__c();
-				PRODUCT_JSON_STRING = "{" + "\"IDMSAIL_" + idmsAclType_c + "_c\": \"" + aclType_c.trim() + "\"" + "}";
+					acl_appc = ailRequest.getUserAILRecord().getIDMSAcl__c();
+				PRODUCT_JSON_STRING = "{" + "\"IDMSAIL_" + idmsAclType_c + "_c\": \"" + acl_appc.trim() + "\"" + "}";
 				
 				LOGGER.info("Grant Operation: updateAIL : Request -> " + PRODUCT_JSON_STRING);
 				LOGGER.info("Start: updateUser() of OpenAMService for userId=" + userId);
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 						PRODUCT_JSON_STRING);
 				LOGGER.info("End: updateUser() of OpenAMService finished for userId=" + userId);
-
-				if (null != IDMSAil__c && !IDMSAil__c.isEmpty())
-					IDMSAil__c = "" + IDMSAil__c + ",(" + ailRequest.getUserAILRecord().getIDMSAclType__c() + ";"
-							+ ailRequest.getUserAILRecord().getIDMSAcl__c() + ")";
+				//1277
+				
+				if (null != IDMSAil__c && !IDMSAil__c.isEmpty()){
+					IDMSAil__c = IDMSAil__c + ","+ail;
+				}
 				else
-					IDMSAil__c = "(" + ailRequest.getUserAILRecord().getIDMSAclType__c() + ";"
-							+ ailRequest.getUserAILRecord().getIDMSAcl__c() + ")";
+					IDMSAil__c = ail;
 
 				// Update the IDMSAil__c in OpenAm
 				PRODUCT_JSON_STRING = "{" + "\"IDMSAil_c\": \"" + IDMSAil__c.trim() + "\"" + "}";
@@ -4227,36 +4226,24 @@ public class UserServiceImpl implements UserService {
 						PRODUCT_JSON_STRING);
 				LOGGER.info("End: updateUser() of OpenAMService finished for userId=" + userId);
 				LOGGER.info("IDMSAil__c Modified After Grant Operation -------------->" + IDMSAil__c);
-			} else if ((listOfAil_c.contains(ailRequest.getUserAILRecord().getIDMSAclType__c() + ";"
-					+ ailRequest.getUserAILRecord().getIDMSAcl__c()))
-					&& ("REVOKE".equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMSOperation__c()))) {
+			}   else if ("REVOKE".equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMSOperation__c())) {
 				IDMSAil__c = productDocCtx.read("$.IDMSAil_c[0]");
 				IDMSAil__c = IDMSAil__c.replaceAll("\\[", "");
 				IDMSAil__c = IDMSAil__c.replaceAll("\\]", "");
-				String[] ailParts = IDMSAil__c.split(",");
-				IDMSAil__c = "";
-				for (String pair : ailParts) {
-					pair = pair.replace("\"", "");
-					String revokepair = "(" + ailRequest.getUserAILRecord().getIDMSAclType__c() + ";"
-							+ ailRequest.getUserAILRecord().getIDMSAcl__c() + ")";
-					if (!pair.equalsIgnoreCase(revokepair)) {
-						IDMSAil__c = IDMSAil__c + pair + ",";
-					}
-				}
-				IDMSAil__c = IDMSAil__c.replace("\"", "");
+				
+				String revokeValues = ailRequest.getUserAILRecord().getAILvalue(ailRequest.getUserAILRecord().getIDMSAclType__c(),ailRequest.getUserAILRecord().getIDMSAcl__c());
+				LOGGER.info("UniquePair to be Revoked:"+revokeValues);
+				IDMSAil__c = ailRequest.getUserAILRecord().revoke(IDMSAil__c, revokeValues); 
 				if (!(IDMSAil__c == null || IDMSAil__c.length() == 0))
 					IDMSAil__c = IDMSAil__c.substring(0, IDMSAil__c.length() - 1);
-				String aclType = productDocCtx.read("$.IDMSAIL_" + idmsAclType_c + "_c[0]");
+				LOGGER.info("After Revoke UniqueAIL:"+IDMSAil__c);
 				
-				ailParts = aclType.split(",");
-				aclType = "";
-				for (String pair : ailParts) {
-					String revokepair = ailRequest.getUserAILRecord().getIDMSAcl__c();
-					if (!pair.equalsIgnoreCase(revokepair)) {
-						aclType = aclType + pair + ",";
-					}
-				}
-
+				String aclType = productDocCtx.read("$.IDMSAIL_" + idmsAclType_c + "_c[0]");
+				String revokeacl = ailRequest.getUserAILRecord().getIDMSAcl__c();
+				LOGGER.info("Apps to be Revoked:"+revokeacl);
+				aclType= ailRequest.getUserAILRecord().revoke(aclType,revokeacl);
+				LOGGER.info("After Revoked:"+aclType);	
+				
 				if (!(aclType == null || aclType.length() == 0)) {
 					aclType = aclType.substring(0, aclType.length() - 1);
 					aclType = aclType.replaceAll("\\[", "");
@@ -4289,7 +4276,6 @@ public class UserServiceImpl implements UserService {
 						PRODUCT_JSON_STRING);
 				LOGGER.info("End: updateUser() of OpenAMService finished for userId=" + userId);
 			}
-
 			// Building the Response
 			Attributes idmsUser_rAttributes = new Attributes();
 			IDMSUser__r idmsUser__r = new IDMSUser__r();
