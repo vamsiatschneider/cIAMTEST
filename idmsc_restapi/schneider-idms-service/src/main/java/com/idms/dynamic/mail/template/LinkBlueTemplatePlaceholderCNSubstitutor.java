@@ -24,9 +24,9 @@ public class LinkBlueTemplatePlaceholderCNSubstitutor extends TemplatePlaceholde
 		placeholderValues.add(openDJAttributes.get_bodyContentLinkMsgCN());
 		placeholderValues.add(input.getConfirmationURL());
 		placeholderValues.add(openDJAttributes.get_bodyContentConfirmBtnCN());
-		placeholderValues.add(openDJAttributes.get_bodyLinkNote1EN());
+		placeholderValues.add(openDJAttributes.get_bodyLinkNote1CN());
 		placeholderValues.add("7");
-		placeholderValues.add(openDJAttributes.get_bodyLinkNote2EN());
+		placeholderValues.add(openDJAttributes.get_bodyLinkNote2CN());
 		if(StringUtils.isNotBlank(input.getBfoSupportUrl())) {
 			placeholderValues.add(input.getBfoSupportUrl());
 		}else {

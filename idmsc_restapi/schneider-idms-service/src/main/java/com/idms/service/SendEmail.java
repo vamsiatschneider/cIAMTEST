@@ -235,6 +235,27 @@ public class SendEmail {
 	@Value("${prm.internal.registration.email.template}")
 	private String PRM_INTERNAL_USER_REGISTRATION_EMAILTEMPLATE;
 	
+	@Value("${user.reset.password.otp.email.template}")
+	private String IDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE;
+	
+	@Value("${user.reset.password.email.template}")
+	private String IDMS_USER_RESET_PASSWORD_EMAILTEMPLATE;
+	
+	@Value("${user.add.otp.email.template}")
+	private String IDMS_USER_OTP_ADD_EMAILTEMPLATE;
+	
+	@Value("${user.add.email.template}")
+	private String IDMS_USER_ADD_EMAILTEMPLATE;
+	
+	@Value("${user.update.otp.email.template}")
+	private String IDMS_USER_UPDATE_OTP_EMAILTEMPLATE;
+	
+	@Value("${user.update.email.template}")
+	private String IDMS_USER_UPDATE_EMAILTEMPLATE;
+	
+	@Value("${user.change.email.notification.template}")
+	private String IDMS_USER_CHANGE_EMAILTEMPLATE;
+	
 	public String getDefaultUserNameFormat() {
 		return defaultUserNameFormat;
 	}
@@ -274,7 +295,7 @@ public class SendEmail {
 	StringBuilder mailBuilder = null;
 	
 	Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
-	DocumentContext productDocCtxUser = null, productDJData = null;;
+	DocumentContext productDocCtxUser = null, productDJData = null;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SendEmail.class);
 	
@@ -317,7 +338,7 @@ public class SendEmail {
 	}
 	
 	
-	public void  sendOpenAmEmail(String code, String hotpOperationType,String userId, String appid, String pathString){
+	public void  sendOpenAmEmail(String token, String code, String hotpOperationType,String userId, String appid, String pathString){
 		LOGGER.info("Entered sendOpenAmEmail() -> Start");
 		LOGGER.info("Parameter hotpOperationType -> "+hotpOperationType+" ,userId -> "+userId);
 		LOGGER.info("Parameter appid -> " + appid);
@@ -441,20 +462,27 @@ public class SendEmail {
 				}
 				LOGGER.info("linkParam: "+linkParam);
 				
+				if(isOTPEnabled){
+					token = code;
+				}
+				if(!hotpOperationType.equalsIgnoreCase(EmailConstants.SETUSERPWD_OPT_TYPE)){
+				token = code;
+				}
+
 				String mailDomain = to.substring(to.indexOf("@") + 1);
 
 				LOGGER.info("mailDomain in sendOpenAmEmail= " + mailDomain);
 				if(mailDomain.contains(UserConstants.YOP_MAIL)){
-					url = hotpEmailVerificationURL + "?userid=" + userId + "&amp;pin=" + encodedHOTPcode + "&amp;operationType="
-							+ hotpOperationType + "&amp;lang=" + lang + "&amp;app=" + appid + "&amp;uid=" + userId+linkParam;
+					url = hotpEmailVerificationURL + "?userid=" + userId + "&amp;pin=" + token + "&amp;operationType="
+							+ hotpOperationType + "&amp;app=" + appid + "&amp;uid=" + userId+linkParam;
 					if (null != pathString && !pathString.isEmpty()){
 						pathString = pathString.replaceAll("&", "&amp;");
 						url = url + "&amp;" + pathString;
 					}
 				}
 				else{
-					url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + encodedHOTPcode + "&operationType="
-							+ hotpOperationType + "&lang=" + lang + "&app=" + appid + "&uid=" + userId+linkParam;
+					url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + token + "&operationType="
+							+ hotpOperationType + "&app=" + appid + "&uid=" + userId+linkParam;
 					if (null != pathString && !pathString.isEmpty())
 						url = url + "&" + pathString;
 				}
@@ -515,6 +543,28 @@ public class SendEmail {
 		product_json_string = "{" + "\"authId\": \"" + hexpin + "\"}";
 		// Need add the timestamp
 		// update hashkey in openAM.
+		LOGGER.info("Start: updateUser() of openamservice to update hashkey for userId:"+userId);
+		productService.updateUser(UserConstants.CHINA_IDMS_TOKEN+userService.getSSOToken(), userId,
+				product_json_string);
+		LOGGER.info("End: updateUser() of openamservice to update hashkey finished for userId:"+userId);
+		return pin;
+	}
+	
+	public String generateEmailToken(String userId) throws Exception {
+		LOGGER.info("Entered generateEmailToken() -> Start");
+		LOGGER.info("Parameter userId -> " + userId);
+
+		String hexpin = "";
+		String product_json_string = "";
+		String pin = "";
+		pin = generateRandomToken();
+		hexpin = ChinaIdmsUtil.generateHashValue(pin);
+		
+		LocalDateTime currentDatenTime = LocalDateTime.now();
+		long currentDatenTimeInMillisecs = currentDatenTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+		
+		hexpin = hexpin+":"+currentDatenTimeInMillisecs;
+		product_json_string = "{" + "\"authId\": \"" + hexpin + "\"}";
 		LOGGER.info("Start: updateUser() of openamservice to update hashkey for userId:"+userId);
 		productService.updateUser(UserConstants.CHINA_IDMS_TOKEN+userService.getSSOToken(), userId,
 				product_json_string);
@@ -602,9 +652,11 @@ public class SendEmail {
 		int startIndex=0;
 		int endIndex=0;
 
-		boolean isOperationTypeUserReg = false;
-		if(hotpOperationType != null && EmailConstants.USERREGISTRATION_OPT_TYPE.equalsIgnoreCase(hotpOperationType)) {
-			isOperationTypeUserReg = true;
+		boolean isSupportedOperationType = false;
+		if(hotpOperationType != null && (EmailConstants.USERREGISTRATION_OPT_TYPE.equalsIgnoreCase(hotpOperationType)
+				|| EmailConstants.SETUSERPWD_OPT_TYPE.equalsIgnoreCase(hotpOperationType)
+				|| EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE.equalsIgnoreCase(hotpOperationType))) {
+			isSupportedOperationType = true;
 		}
 		//changes for dynamic email templates
 		/*
@@ -612,7 +664,7 @@ public class SendEmail {
 		 * only for user registration operation type at this point in time. Once dynamic
 		 * email templates for other flows are implemented, this check will be removed.
 		 */
-		if(isDynamicEmailEnabled && isOperationTypeUserReg) {
+		if(isDynamicEmailEnabled && isSupportedOperationType) {
 			return buildDynamicEmailTemplate(subject, hotpOperationType,firstName,
 					bfoSupportUrl, prmTemplate, templateColor, isOTPEnabled, chineseLangCheck);
 		}
@@ -754,7 +806,7 @@ public class SendEmail {
 		
 		try {
 			Response applicationDetails = openDJService.getEmailTemplateDetails(djUserName, djUserPwd,
-					input.getOperationType().getType());
+					input.getOperationType().getOpenDJType());
 			LOGGER.info("End: getEmailTemplateDetails() of OpenDjService =" + applicationDetails.getStatus());
 
 			DocumentContext emailTemplateDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
@@ -983,6 +1035,12 @@ public class SendEmail {
 		return tmpPr;
 	}
 	
+	private String generateRandomToken() {
+		LOGGER.info("Entered generateRandomToken() -> Start");
+		String tmpPr = RandomStringUtils.random(10, UserConstants.RANDOM_CHARS);
+		return tmpPr;
+	}
+	
 	private boolean checkTimeStamp(long localDTInMilli, String loginIdentifierType) {
 		LOGGER.info("Entered checkTimeStamp() -> Start");
 		LOGGER.info("Parameter localDTInMilli() ->"+ localDTInMilli);
@@ -1152,8 +1210,8 @@ public class SendEmail {
 
 			lang=productDocCtxUser.read("$.preferredlanguage[0]");
 			
-			url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + encodedHOTPcode + "&operationType="
-					+ hotpOperationType + "&lang=" + lang + "&app=" + appid + "&uid=" + userId;
+			url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=qyw1fnewri" + "&operationType="
+					+ hotpOperationType + "&app=" + appid + "&uid=" + userId;
 			
 			LOGGER.info("URL compiled to : " + url);
 			
@@ -1832,5 +1890,61 @@ public class SendEmail {
 
 	public void setPRM_INTERNAL_USER_REGISTRATION_EMAILTEMPLATE(String pRM_INTERNAL_USER_REGISTRATION_EMAILTEMPLATE) {
 		PRM_INTERNAL_USER_REGISTRATION_EMAILTEMPLATE = pRM_INTERNAL_USER_REGISTRATION_EMAILTEMPLATE;
+	}
+
+	public String getIDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE() {
+		return IDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE;
+	}
+
+	public void setIDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE(String iDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE) {
+		IDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE = iDMS_USER_RESET_PASSWORD_OTP_EMAILTEMPLATE;
+	}
+
+	public String getIDMS_USER_RESET_PASSWORD_EMAILTEMPLATE() {
+		return IDMS_USER_RESET_PASSWORD_EMAILTEMPLATE;
+	}
+
+	public void setIDMS_USER_RESET_PASSWORD_EMAILTEMPLATE(String iDMS_USER_RESET_PASSWORD_EMAILTEMPLATE) {
+		IDMS_USER_RESET_PASSWORD_EMAILTEMPLATE = iDMS_USER_RESET_PASSWORD_EMAILTEMPLATE;
+	}
+
+	public String getIDMS_USER_OTP_ADD_EMAILTEMPLATE() {
+		return IDMS_USER_OTP_ADD_EMAILTEMPLATE;
+	}
+
+	public void setIDMS_USER_OTP_ADD_EMAILTEMPLATE(String iDMS_USER_OTP_ADD_EMAILTEMPLATE) {
+		IDMS_USER_OTP_ADD_EMAILTEMPLATE = iDMS_USER_OTP_ADD_EMAILTEMPLATE;
+	}
+
+	public String getIDMS_USER_ADD_EMAILTEMPLATE() {
+		return IDMS_USER_ADD_EMAILTEMPLATE;
+	}
+
+	public void setIDMS_USER_ADD_EMAILTEMPLATE(String iDMS_USER_ADD_EMAILTEMPLATE) {
+		IDMS_USER_ADD_EMAILTEMPLATE = iDMS_USER_ADD_EMAILTEMPLATE;
+	}
+
+	public String getIDMS_USER_UPDATE_OTP_EMAILTEMPLATE() {
+		return IDMS_USER_UPDATE_OTP_EMAILTEMPLATE;
+	}
+
+	public void setIDMS_USER_UPDATE_OTP_EMAILTEMPLATE(String iDMS_USER_UPDATE_OTP_EMAILTEMPLATE) {
+		IDMS_USER_UPDATE_OTP_EMAILTEMPLATE = iDMS_USER_UPDATE_OTP_EMAILTEMPLATE;
+	}
+
+	public String getIDMS_USER_UPDATE_EMAILTEMPLATE() {
+		return IDMS_USER_UPDATE_EMAILTEMPLATE;
+	}
+
+	public void setIDMS_USER_UPDATE_EMAILTEMPLATE(String iDMS_USER_UPDATE_EMAILTEMPLATE) {
+		IDMS_USER_UPDATE_EMAILTEMPLATE = iDMS_USER_UPDATE_EMAILTEMPLATE;
+	}
+
+	public String getIDMS_USER_CHANGE_EMAILTEMPLATE() {
+		return IDMS_USER_CHANGE_EMAILTEMPLATE;
+	}
+
+	public void setIDMS_USER_CHANGE_EMAILTEMPLATE(String iDMS_USER_CHANGE_EMAILTEMPLATE) {
+		IDMS_USER_CHANGE_EMAILTEMPLATE = iDMS_USER_CHANGE_EMAILTEMPLATE;
 	}
 }
