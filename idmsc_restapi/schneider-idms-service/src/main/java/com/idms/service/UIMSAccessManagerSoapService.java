@@ -213,19 +213,46 @@ public class UIMSAccessManagerSoapService {
 			}else if(null == ailRequest.getUserAILRecord().getIDMSUser__c()){
 				ailRequest.getUserAILRecord().setIDMSUser__c(ailRequest.getUserAILRecord().getIDMS_Federated_ID__c());
 			}
+			//1277
 			
 			if (idmsUserAIL.getIdmsoperation__c().equalsIgnoreCase("GRANT") && !(idmsUserAIL.isIdmsisRevokedOperation__c())) {
+				if(!access.getId().contains(",")) {
 				grantAccessControlToUser(CALLER_FID,
 						ailRequest.getUserAILRecord().getIDMSUser__c(),
 						ailRequest.getUserAILRecord().getIDMSUser__c(), access, vNewCntValue, productService,
-						iPlanetDirectoryKey, usermail);
-			} else if (idmsUserAIL.getIdmsoperation__c().equalsIgnoreCase("REVOKE") && idmsUserAIL.isIdmsisRevokedOperation__c()) {
-				revokeAccessControlToUser(CALLER_FID,
-						ailRequest.getUserAILRecord().getIDMSUser__c(),
-						ailRequest.getUserAILRecord().getIDMSUser__c(), access, vNewCntValue, productService,
-						iPlanetDirectoryKey, usermail);
+						iPlanetDirectoryKey, usermail);}
+				else {
+					String[] multipleID=access.getId().split(",");
+					for(int i=0;i<multipleID.length;i++) {
+						access.setId(multipleID[i]);
+						grantAccessControlToUser(CALLER_FID,
+								ailRequest.getUserAILRecord().getIDMSUser__c(),
+								ailRequest.getUserAILRecord().getIDMSUser__c(), access, vNewCntValue, productService,
+								iPlanetDirectoryKey, usermail);
+						
+					}
+				}
+			} 
+			else if (idmsUserAIL.getIdmsoperation__c().equalsIgnoreCase("REVOKE") && idmsUserAIL.isIdmsisRevokedOperation__c()) {
+				if(!access.getId().contains(",")) {
+					revokeAccessControlToUser(CALLER_FID,
+							ailRequest.getUserAILRecord().getIDMSUser__c(),
+							ailRequest.getUserAILRecord().getIDMSUser__c(), access, vNewCntValue, productService,
+							iPlanetDirectoryKey, usermail);}
+					else {
+						String[] multipleID=access.getId().split(",");
+						for(int i=0;i<multipleID.length;i++) {
+							access.setId(multipleID[i]);
+							revokeAccessControlToUser(CALLER_FID,
+									ailRequest.getUserAILRecord().getIDMSUser__c(),
+									ailRequest.getUserAILRecord().getIDMSUser__c(), access, vNewCntValue, productService,
+									iPlanetDirectoryKey, usermail);
+							
+						}
+				
 			}
-		} catch (Exception e) {
+		} }
+			catch (Exception e) {
 			//productService.sessionLogout(iPlanetDirectoryKey, "logout");
 			uimsLog.error("Exception in updateUIMSUserAIL():"+ e.getMessage(),e);
 			LOGGER.error("ECODE-ACCESSMGR-UPDATE-UIMSUSER-AIL-GEN-ERR : Generic error while calling the updateUIMSUserAIL");
