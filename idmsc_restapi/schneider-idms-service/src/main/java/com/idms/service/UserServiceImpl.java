@@ -338,8 +338,6 @@ public class UserServiceImpl implements UserService {
 	@Value("${enable.sendOtpOverEmail}")
 	private String sendOTPOverEmail;
 	
-	
-	
 	@Value("${enableTestMailDomain}")
 	private String enableTestMailDomain;
 	
@@ -7289,9 +7287,10 @@ public class UserServiceImpl implements UserService {
 			if ((null == emailChangeRequest.getOldEmail() || emailChangeRequest.getOldEmail().isEmpty())
 					|| (null == emailChangeRequest.getNewEmail() || emailChangeRequest.getNewEmail().isEmpty())
 					|| (null == emailChangeRequest.getFirstName() || emailChangeRequest.getFirstName().isEmpty())
-					|| (null == emailChangeRequest.getLastName() || emailChangeRequest.getLastName().isEmpty())) {
+					|| (null == emailChangeRequest.getLastName() || emailChangeRequest.getLastName().isEmpty())
+					||(null == emailChangeRequest.getApplicationName()|| emailChangeRequest.getApplicationName().isEmpty())) {
 				userResponse.setStatus(errorStatus);
-				userResponse.setMessage("OldEmail,NewEmail, FirstName and LastName are mandatory");
+				userResponse.setMessage("OldEmail,NewEmail, FirstName,LastName and AppSource are mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error is -> " + userResponse.getMessage());
 				LOGGER.info("Time taken by resendRegEmail() : " + elapsedTime);
@@ -7333,7 +7332,7 @@ public class UserServiceImpl implements UserService {
 					if (resultCount.intValue() > 0) {
 						userName = productDocCtx.read("$.result[0].username");
 						//String regSource = productDocCtx.read("$.result[0].registerationSource[0]");
-						String appSource= emailChangeRequest.getappSource();
+						String appSource= emailChangeRequest.getApplicationName();
 						String firstName = null != productDocCtx.read("$.result[0].givenName")
 								? getValue(productDocCtx.read("$.result[0].givenName").toString()) : getDelimeter();
 						String lastName = null != productDocCtx.read("$.result[0].sn")
