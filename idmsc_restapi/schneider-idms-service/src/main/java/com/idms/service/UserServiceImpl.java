@@ -338,6 +338,8 @@ public class UserServiceImpl implements UserService {
 	@Value("${enable.sendOtpOverEmail}")
 	private String sendOTPOverEmail;
 	
+	
+	
 	@Value("${enableTestMailDomain}")
 	private String enableTestMailDomain;
 	
@@ -4080,7 +4082,7 @@ public class UserServiceImpl implements UserService {
 
 			// IDMSAcl__c
 			if (null == ailRequest.getUserAILRecord().getIDMSAcl__c()
-					|| ailRequest.getUserAILRecord().getIDMSAcl__c().isEmpty()) {
+					|| ailRequest.getUserAILRecord().getIDMSAcl__c().trim().isEmpty()) {
 				errorResponse.setStatus(errorStatus);
 				errorResponse.setMessage(UserConstants.MANDATORY_ACL);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -4091,7 +4093,7 @@ public class UserServiceImpl implements UserService {
 
 			// Operation
 			if (null == ailRequest.getUserAILRecord().getIDMSOperation__c()
-					|| ailRequest.getUserAILRecord().getIDMSOperation__c().isEmpty()
+					|| ailRequest.getUserAILRecord().getIDMSOperation__c().trim().isEmpty()
 					|| (!pickListValidator.validate(UserConstants.IDMS_OPERATION_C,
 							ailRequest.getUserAILRecord().getIDMSOperation__c()))) {
 				errorResponse.setStatus(errorStatus);
@@ -4101,6 +4103,8 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
+			
+		
 
 			if (null != authorizedToken && !authorizedToken.isEmpty() && !getTechnicalUserDetails(authorizedToken)) {
 				errorResponse.setStatus(errorStatus);
@@ -7287,7 +7291,7 @@ public class UserServiceImpl implements UserService {
 					|| (null == emailChangeRequest.getFirstName() || emailChangeRequest.getFirstName().isEmpty())
 					|| (null == emailChangeRequest.getLastName() || emailChangeRequest.getLastName().isEmpty())) {
 				userResponse.setStatus(errorStatus);
-				userResponse.setMessage("OldEmail,NewEmail, FirstNmae and LastName are mandatory");
+				userResponse.setMessage("OldEmail,NewEmail, FirstName and LastName are mandatory");
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error is -> " + userResponse.getMessage());
 				LOGGER.info("Time taken by resendRegEmail() : " + elapsedTime);
@@ -7328,7 +7332,8 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info("resultCount=" + resultCount);
 					if (resultCount.intValue() > 0) {
 						userName = productDocCtx.read("$.result[0].username");
-						String regSource = productDocCtx.read("$.result[0].registerationSource[0]");
+						//String regSource = productDocCtx.read("$.result[0].registerationSource[0]");
+						String appSource= emailChangeRequest.getappSource();
 						String firstName = null != productDocCtx.read("$.result[0].givenName")
 								? getValue(productDocCtx.read("$.result[0].givenName").toString()) : getDelimeter();
 						String lastName = null != productDocCtx.read("$.result[0].sn")
@@ -7347,7 +7352,7 @@ public class UserServiceImpl implements UserService {
 							String otp = sendEmail.generateOtp(userName);
 							LOGGER.info("Successfully OTP generated for " + userName);
 							sendEmail.sendOpenAmEmail(null, otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userName,
-									regSource, finalPathString);
+									appSource, finalPathString);
 						} else {
 							userResponse.setStatus(errorStatus);
 							userResponse
