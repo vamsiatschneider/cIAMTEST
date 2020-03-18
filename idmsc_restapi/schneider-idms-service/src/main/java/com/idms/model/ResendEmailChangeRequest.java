@@ -19,7 +19,7 @@ public class ResendEmailChangeRequest {
 	private String lastName;
 	
 	@JsonProperty
-	private String applicationName;
+	private String appSource;
 	
 	@JsonInclude(Include.NON_NULL)
 	private String pathValue;
@@ -64,14 +64,14 @@ public class ResendEmailChangeRequest {
 		this.lastName = lastName;
 	}
 	
-	@JsonProperty("applicationName")
-	public void setApplicationName(String applicationName) {
-		this.applicationName = applicationName;
+	@JsonProperty("appSource")
+	public void setappSource(String appSource) {
+		this.appSource = appSource;
 	}
 	
-	@JsonProperty("applicationName")
-	public String getApplicationName() {
-		return applicationName;
+	@JsonProperty("appSource")
+	public String getappSource() {
+		return appSource;
 	}
 
 	
@@ -83,7 +83,5 @@ public class ResendEmailChangeRequest {
 	public void setPathValue(String pathValue) {
 		this.pathValue = pathValue;
 	}
-
-	
 	
 }
