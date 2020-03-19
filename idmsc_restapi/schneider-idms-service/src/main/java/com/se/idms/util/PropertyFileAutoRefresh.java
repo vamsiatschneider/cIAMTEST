@@ -221,6 +221,8 @@ public class PropertyFileAutoRefresh {
 	
 	private String maintenanceModeGlobal;
 	
+	private String stopidmstouimsflag;
+	
 	public static PropertyFileAutoRefresh getInstance() {
 		return INSTANCE;
 	}
@@ -355,6 +357,9 @@ public class PropertyFileAutoRefresh {
 			
 			if(!((UserServiceImpl) userService).getMaintenanceModeGlobal().equals(maintenanceModeGlobal) && maintenanceModeGlobal!=null && !maintenanceModeGlobal.isEmpty())
 				((UserServiceImpl) userService).setMaintenanceModeGlobal(maintenanceModeGlobal);
+			
+			if(!((UserServiceImpl) userService).getStopidmstouimsflag().equals(stopidmstouimsflag) && stopidmstouimsflag!=null && !stopidmstouimsflag.isEmpty())
+				((UserServiceImpl) userService).setStopidmstouimsflag(stopidmstouimsflag);
 			
 			if(!(goDigitalUserService.getFromUserName().equals(fromUserName)) && fromUserName!=null && !fromUserName.isEmpty())
 			goDigitalUserService.setFromUserName(fromUserName);
@@ -725,6 +730,8 @@ public class PropertyFileAutoRefresh {
 		emailUserNameFormat =configuration.getProperty("idmsc.emailUserNameFormat");
 		
 		maintenanceModeGlobal=configuration.getProperty("idmsc.maintenance_mode_global");
+		
+		stopidmstouimsflag=configuration.getProperty("stopidmstouimsflag");
 	}
 
 	public void initilize() throws Exception {
