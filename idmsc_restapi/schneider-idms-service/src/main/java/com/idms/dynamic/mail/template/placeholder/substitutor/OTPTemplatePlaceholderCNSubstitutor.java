@@ -1,14 +1,15 @@
-package com.idms.dynamic.mail.template;
+package com.idms.dynamic.mail.template.placeholder.substitutor;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.idms.dynamic.mail.template.util.DynamicEmailTemplateInput;
+import com.idms.dynamic.mail.template.util.OpenDJAttributes;
 import com.idms.mail.template.util.OperationType;
 import com.se.idms.cache.utils.EmailConstants;
 
-public class OTPBlueTemplatePlaceholderCNSubstitutor extends TemplatePlaceholderSubstitutor {
+public class OTPTemplatePlaceholderCNSubstitutor extends TemplatePlaceholderSubstitutor {
 
-	public OTPBlueTemplatePlaceholderCNSubstitutor(DynamicEmailTemplateInput input, OpenDJAttributes openDJAttributes) {
+	public OTPTemplatePlaceholderCNSubstitutor(DynamicEmailTemplateInput input, OpenDJAttributes openDJAttributes) {
 		this.openDJAttributes = openDJAttributes;
 		this.input = input;
 	}
@@ -40,14 +41,13 @@ public class OTPBlueTemplatePlaceholderCNSubstitutor extends TemplatePlaceholder
 		placeholderValues.add(openDJAttributes.get_bodySignoff1CN());
 		placeholderValues.add(openDJAttributes.get_bodySignoff2CN());
 		// get subject from OpenDJ and update it per operationType
-		String emailSubject = input.getSubject() + EmailConstants.HYPHEN + openDJAttributes.get_subjectCN();
+		String emailSubject = "";
+		if (OperationType.CHANGE_EMAIL_NOTIFICATION.getType().equals(input.getOperationType().getType())) {
+			emailSubject = openDJAttributes.get_subjectCN();
+		} else {
+			emailSubject = input.getSubject() + EmailConstants.HYPHEN + openDJAttributes.get_subjectCN();
+		}
 		input.setSubject(emailSubject);	
-	}
-
-	@Override
-	public void buildEmailProfacePlaceholderValues() {
-		
-		placeholderValues.add(openDJAttributes.get_bodyBlueColorCode());
 	}
 
 	@Override

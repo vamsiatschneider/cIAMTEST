@@ -1,12 +1,14 @@
-package com.idms.dynamic.mail.template;
+package com.idms.dynamic.mail.template.placeholder.substitutor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.idms.dynamic.mail.template.util.DynamicEmailTemplateInput;
+import com.idms.dynamic.mail.template.util.OpenDJAttributes;
 
 public abstract class TemplatePlaceholderSubstitutor {
 
+	private static final String GREEN_COLOR_CODE = "#3DCD58;";
 	protected List<String> placeholderValues = new ArrayList<String>();
 	protected OpenDJAttributes openDJAttributes;
 	protected DynamicEmailTemplateInput input;
@@ -29,9 +31,15 @@ public abstract class TemplatePlaceholderSubstitutor {
 		placeholderValues.add(openDJAttributes.get_bodyLink());
 	}
 
-	public abstract void buildEmailProfacePlaceholderValues();
 	public abstract void buildEmailBodyPlaceholderValues();
 	
+	public void buildEmailProfacePlaceholderValues() {
+		if(openDJAttributes.get_bodyColorCode().length == 1) {
+			placeholderValues.add(openDJAttributes.get_bodyColorCode()[0]);
+		}else {
+			placeholderValues.add(GREEN_COLOR_CODE);
+		}
+	}
 	public void buildEmailFooterLinkPlaceholderValues() {
 		placeholderValues.add(openDJAttributes.get_footerWeiboLink());
 		placeholderValues.add(openDJAttributes.get_footerWeiboTitle());

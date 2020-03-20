@@ -1,32 +1,30 @@
-package com.idms.dynamic.mail.template;
+package com.idms.dynamic.mail.template.placeholder.substitutor;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.idms.dynamic.mail.template.util.DynamicEmailTemplateInput;
+import com.idms.dynamic.mail.template.util.OpenDJAttributes;
+import com.idms.mail.template.util.OperationType;
 import com.se.idms.cache.utils.EmailConstants;
 
-public class LinkGreenPRMEclipseRegTPHolderCNSubstitutor extends LinkGreenTemplatePlaceholderCNSubstitutor {
-	
-	public LinkGreenPRMEclipseRegTPHolderCNSubstitutor(DynamicEmailTemplateInput input,
-			OpenDJAttributes openDJAttributes) {
-		super(input, openDJAttributes);
-	}
+public class LinkTemplatePlaceholderCNSubstitutor extends TemplatePlaceholderSubstitutor {
 
+	public LinkTemplatePlaceholderCNSubstitutor(DynamicEmailTemplateInput input, OpenDJAttributes openDJAttributes) {
+		this.openDJAttributes = openDJAttributes;
+		this.input = input;
+	}
+	
 	@Override
 	public void buildEmailBodyPlaceholderValues() {
 		placeholderValues.add(openDJAttributes.get_bodyContent1CN());
-		placeholderValues.add(openDJAttributes.get_bodyContentPRMEclipseRegSource());
+		placeholderValues.add(input.getAppName());
 		placeholderValues.add(openDJAttributes.get_bodyContent2CN());
 		placeholderValues.add(openDJAttributes.get_bodySalutationCN());
 		placeholderValues.add(input.getFirstName());
-		placeholderValues.add(openDJAttributes.get_bodyContentPRMInfoCN());
-		placeholderValues.add(openDJAttributes.get_bodyContentPRMInfoList1CN());
-		placeholderValues.add(openDJAttributes.get_bodyContentPRMInfoList2CN());
-		placeholderValues.add(openDJAttributes.get_bodyContentPRMInfoList3CN());
-		placeholderValues.add(openDJAttributes.get_bodyContentPRMInfoList4CN());
+		placeholderValues.add(openDJAttributes.get_bodySignOffCN());
 		placeholderValues.add(openDJAttributes.get_bodyContentLinkMsgCN());
 		placeholderValues.add(input.getConfirmationURL());
-		placeholderValues.add(openDJAttributes.get_bodyContentPRMConfirmBtnCN());
+		placeholderValues.add(openDJAttributes.get_bodyContentConfirmBtnCN());
 		placeholderValues.add(openDJAttributes.get_bodyLinkNote1CN());
 		placeholderValues.add("7");
 		placeholderValues.add(openDJAttributes.get_bodyLinkNote2CN());
@@ -39,7 +37,19 @@ public class LinkGreenPRMEclipseRegTPHolderCNSubstitutor extends LinkGreenTempla
 		placeholderValues.add(openDJAttributes.get_bodySignoff1CN());
 		placeholderValues.add(openDJAttributes.get_bodySignoff2CN());
 		// get subject from OpenDJ and update it per operationType
-		String emailSubject = input.getSubject() + EmailConstants.HYPHEN + openDJAttributes.get_subjectCN();
+		String emailSubject = "";
+		if (OperationType.CHANGE_EMAIL_NOTIFICATION.getType().equals(input.getOperationType().getType())) {
+			emailSubject = openDJAttributes.get_subjectCN();
+		} else {
+			emailSubject = input.getSubject() + EmailConstants.HYPHEN + openDJAttributes.get_subjectCN();
+		}
 		input.setSubject(emailSubject);	
 	}
+
+	@Override
+	protected void buildEmailFooterCRightTextPlaceholderValues() {
+		placeholderValues.add(openDJAttributes.get_footerCopyrightTextCN());
+		placeholderValues.add(openDJAttributes.get_footerDontReplyTextCN());
+	}
+	
 }

@@ -9,7 +9,8 @@ public enum OperationType {
 	UPDATE_USER_RECORD("UpdateUserRecord", "UserUpdate"),
 	ADD_EMAIL_USER_RECORD("AddEmailUserRecord", "AddEmail"),
 	CHANGE_EMAIL("ChangeEmail", "ChangeEmail"), 
-	SEND_INVITATION("sendInvitation", "SendInvitation"), 
+	SEND_INVITATION("sendInvitation", "SendInvitation"),
+	CHANGE_EMAIL_NOTIFICATION("changeEmailNotification", "ChangeEmail"),
 	INVALID("Invalid", "Invalid");
 
 	private String type;

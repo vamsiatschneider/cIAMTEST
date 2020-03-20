@@ -1,26 +1,30 @@
-package com.idms.dynamic.mail.template;
+package com.idms.dynamic.mail.template.placeholder.substitutor;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.idms.dynamic.mail.template.util.DynamicEmailTemplateInput;
+import com.idms.dynamic.mail.template.util.OpenDJAttributes;
 import com.se.idms.cache.utils.EmailConstants;
 
-public class LinkBlueTemplatePlaceholderENSubstitutor extends TemplatePlaceholderSubstitutor {
-
-	public LinkBlueTemplatePlaceholderENSubstitutor(DynamicEmailTemplateInput input,
+public class LinkPRMSelfRegTPHolderENSubstitutor extends LinkTemplatePlaceholderENSubstitutor {
+	
+	public LinkPRMSelfRegTPHolderENSubstitutor(DynamicEmailTemplateInput input,
 			OpenDJAttributes openDJAttributes) {
-		this.input = input;
-		this.openDJAttributes = openDJAttributes;
+		super(input, openDJAttributes);
 	}
 
 	@Override
 	public void buildEmailBodyPlaceholderValues() {
-		placeholderValues.add(openDJAttributes.get_bodyContent1EN());
-		placeholderValues.add(input.getAppName());
+		placeholderValues.add("");
+		placeholderValues.add(openDJAttributes.get_bodyContentPRMSelfEN());
 		placeholderValues.add(openDJAttributes.get_bodyContent2EN());
 		placeholderValues.add(openDJAttributes.get_bodySalutationEN());
 		placeholderValues.add(input.getFirstName());
-		placeholderValues.add(openDJAttributes.get_bodySignOffEN());
+		placeholderValues.add(openDJAttributes.get_bodyContentPRMInfoEN());
+		placeholderValues.add(openDJAttributes.get_bodyContentPRMInfoList1EN());
+		placeholderValues.add(openDJAttributes.get_bodyContentPRMInfoList2EN());
+		placeholderValues.add(openDJAttributes.get_bodyContentPRMInfoList3EN());
+		placeholderValues.add(openDJAttributes.get_bodyContentPRMInfoList4EN());
 		placeholderValues.add(openDJAttributes.get_bodyContentLinkMsgEN());
 		placeholderValues.add(input.getConfirmationURL());
 		placeholderValues.add(openDJAttributes.get_bodyContentConfirmBtnEN());
@@ -39,17 +43,4 @@ public class LinkBlueTemplatePlaceholderENSubstitutor extends TemplatePlaceholde
 		String emailSubject = input.getSubject() + EmailConstants.HYPHEN + openDJAttributes.get_subjectEN();
 		input.setSubject(emailSubject);	
 	}
-
-	@Override
-	public void buildEmailProfacePlaceholderValues() {
-		
-		placeholderValues.add(openDJAttributes.get_bodyBlueColorCode());
-	}
-
-	@Override
-	protected void buildEmailFooterCRightTextPlaceholderValues() {
-		placeholderValues.add(openDJAttributes.get_footerCopyrightTextEN());
-		placeholderValues.add(openDJAttributes.get_footerDontReplyTextEN());
-	}
-	
 }

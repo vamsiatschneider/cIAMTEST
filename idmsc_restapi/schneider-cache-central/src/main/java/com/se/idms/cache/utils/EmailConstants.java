@@ -47,6 +47,7 @@ public class EmailConstants {
 	public static final String UPDATEUSERRECORD_OPT_TYPE= "UpdateUserRecord";
 	public static final String ADDEMAILUSERRECORD_OPT_TYPE= "AddEmailUserRecord";
 	public static final String SENDINVITATION_OPT_TYPE= "sendInvitation";
+	public static final String CHANGE_EMAIL_NOTIFICATION= "changeEmailNotification";
 	
 	public static final String SCHE_PWD_RESET_CN = "施耐德电气 – 密码重置";
 	public static final String SCHE_PWD_RESET_EN= "Schneider Electric - Password Reset";

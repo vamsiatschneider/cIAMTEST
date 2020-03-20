@@ -5123,7 +5123,7 @@ public class UserServiceImpl implements UserService {
 						Response applicationDetails   = openDJService.getUser(djUserName, djUserPwd, userRequest.getUserRecord().getIDMS_Profile_update_source__c());
 						productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
 						if (null != applicationDetails && 200 == applicationDetails.getStatus()) {
-							String userNameFormatOpenDJ = productDJData.read("userNameFormat");
+							String userNameFormatOpenDJ = productDJData.read("_userNameFormat");
 							LOGGER.info("update user userNameFormatOpenDJ:"+userNameFormatOpenDJ);
 							LOGGER.info("update user defaultUserNameFormat:"+defaultUserNameFormat);
 							if(null != userNameFormatOpenDJ && !userNameFormatOpenDJ.isEmpty()){
@@ -5145,20 +5145,33 @@ public class UserServiceImpl implements UserService {
 							firstName=productDocCtxUser.read("$.givenName[0]");
 						LOGGER.info("Update user Email format Name:"+firstName);
 						String templateColor = productDJData.read("_IDMS_Application_CSS");
-						contentBuilder = getContentFromTemplate(UserConstants.UPDATE_EMAIL_NOTIFICATION,
-								prefferedLanguage, templateColor);
-						int startName = contentBuilder.indexOf("{!User.FirstName},");
-						int endName = startName + "{!User.FirstName}".length();
-						contentBuilder.replace(startName, endName, firstName);
-						try {
-							// sending email to old user
-							sendEmail.emailReadyToSendEmail(updatingUser, fromUserName, subject,
-									contentBuilder.toString());
-						} catch (Exception e) {							
-							LOGGER.error("Exception while sending email to old User :: -> " + e.getMessage(),e);
+
+						//check if dynamic email template is enabled for app
+						boolean isDynamicEmailEnabled = false;
+						String isDynamicEmailEnabledForApp = productDJData.read("_isDynamicEmailEnabled");
+						if(null!=isDynamicEmailEnabledForApp && !isDynamicEmailEnabledForApp.equals("")) {
+							isDynamicEmailEnabled = Boolean.valueOf(isDynamicEmailEnabledForApp);
+							LOGGER.info("isDynamicEmailEnabled: "+ isDynamicEmailEnabled);
+						}
+						if(isDynamicEmailEnabled){
+							sendEmail.sendOpenAmEmail(null, otp, EmailConstants.CHANGE_EMAIL_NOTIFICATION, userId,
+									userRequest.getUserRecord().getIDMS_Profile_update_source__c(), null);
+
+						}else{
+							contentBuilder = getContentFromTemplate(UserConstants.UPDATE_EMAIL_NOTIFICATION,
+									prefferedLanguage, templateColor);
+							int startName = contentBuilder.indexOf("{!User.FirstName},");
+							int endName = startName + "{!User.FirstName}".length();
+							contentBuilder.replace(startName, endName, firstName);
+							try {
+								// sending email to old user
+								sendEmail.emailReadyToSendEmail(updatingUser, fromUserName, subject,
+										contentBuilder.toString());
+							} catch (Exception e) {
+								LOGGER.error("Exception while sending email to old User :: -> " + e.getMessage(),e);
+							}
 						}
 					}
-					// }
 
 				} else if (UserConstants.MOBILE.equalsIgnoreCase(identifierType) && !userUpdateforSameUser) {
 					// for mobile scenarios

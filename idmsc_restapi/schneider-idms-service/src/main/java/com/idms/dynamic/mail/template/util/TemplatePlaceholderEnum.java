@@ -1,4 +1,4 @@
-package com.idms.dynamic.mail.template;
+package com.idms.dynamic.mail.template.util;
 
 public enum TemplatePlaceholderEnum {
 
