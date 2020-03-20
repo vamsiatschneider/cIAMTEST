@@ -1,7 +1,9 @@
-package com.idms.dynamic.mail.template;
+package com.idms.dynamic.mail.template.placeholder.creator;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.idms.dynamic.mail.template.util.TemplatePlaceholderEnum;
 
 public abstract class TemplatePlaceholderCreator {
 

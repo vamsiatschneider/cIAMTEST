@@ -1,4 +1,4 @@
-package com.idms.dynamic.mail.template;
+package com.idms.dynamic.mail.template.util;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -60,13 +60,12 @@ public class OpenDJAttributes {
 	private String _subjectCN;
 
 	// Common Attributes
+	private String[] _bodyColorCode;
 	private String _pageTitle;
 	private String _bodyLogo;
 	private String _bodyLink;
 	private String _bodySupportMail;
 	private String _bodySupportText;
-	private String _bodyGreenColorCode;
-	private String _bodyBlueColorCode;
 	private String _bodyContentPRMEclipseRegSource;
 	private String _footerWeiboLink;
 	private String _footerWeiboTitle;
@@ -84,6 +83,7 @@ public class OpenDJAttributes {
 	private String _footerJingdongTitle;
 	private String _footerJingdongLogo;
 	private String _footerCopyrightYear;
+
 	public String get_bodyContent1EN() {
 		return _bodyContent1EN;
 	}
@@ -414,18 +414,6 @@ public class OpenDJAttributes {
 	public void set_bodySupportText(String _bodySupportText) {
 		this._bodySupportText = _bodySupportText;
 	}
-	public String get_bodyGreenColorCode() {
-		return _bodyGreenColorCode;
-	}
-	public void set_bodyGreenColorCode(String _bodyGreenColorCode) {
-		this._bodyGreenColorCode = _bodyGreenColorCode;
-	}
-	public String get_bodyBlueColorCode() {
-		return _bodyBlueColorCode;
-	}
-	public void set_bodyBlueColorCode(String _bodyBlueColorCode) {
-		this._bodyBlueColorCode = _bodyBlueColorCode;
-	}
 	public String get_bodyContentPRMEclipseRegSource() {
 		return _bodyContentPRMEclipseRegSource;
 	}
@@ -528,5 +516,10 @@ public class OpenDJAttributes {
 	public void set_footerCopyrightYear(String _footerCopyrightYear) {
 		this._footerCopyrightYear = _footerCopyrightYear;
 	}
-
+	public String[] get_bodyColorCode() {
+		return _bodyColorCode;
+	}
+	public void set_bodyColorCode(String[] _bodyColorCode) {
+		this._bodyColorCode = _bodyColorCode;
+	}
 }

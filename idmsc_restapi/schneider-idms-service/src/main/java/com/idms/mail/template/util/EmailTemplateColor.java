@@ -4,6 +4,8 @@ import java.util.Arrays;
 
 public enum EmailTemplateColor {
 	BLUE("Blue"),
+	GREEN("Green"),
+	RED("Red"),
 	INVALID("Invalid");
 	
 	private String color;

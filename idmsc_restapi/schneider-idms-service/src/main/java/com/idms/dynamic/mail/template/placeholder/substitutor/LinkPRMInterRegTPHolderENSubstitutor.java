@@ -1,13 +1,14 @@
-package com.idms.dynamic.mail.template;
+package com.idms.dynamic.mail.template.placeholder.substitutor;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.idms.dynamic.mail.template.util.DynamicEmailTemplateInput;
+import com.idms.dynamic.mail.template.util.OpenDJAttributes;
 import com.se.idms.cache.utils.EmailConstants;
 
-public class LinkGreenPRMInterRegTPHolderENSubstitutor extends LinkGreenTemplatePlaceholderENSubstitutor {
+public class LinkPRMInterRegTPHolderENSubstitutor extends LinkTemplatePlaceholderENSubstitutor {
 	
-	public LinkGreenPRMInterRegTPHolderENSubstitutor(DynamicEmailTemplateInput input,
+	public LinkPRMInterRegTPHolderENSubstitutor(DynamicEmailTemplateInput input,
 			OpenDJAttributes openDJAttributes) {
 		super(input, openDJAttributes);
 	}

@@ -1,22 +1,22 @@
-package com.idms.dynamic.mail.template;
+package com.idms.dynamic.mail.template.placeholder.substitutor;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.idms.dynamic.mail.template.util.DynamicEmailTemplateInput;
+import com.idms.dynamic.mail.template.util.OpenDJAttributes;
 import com.se.idms.cache.utils.EmailConstants;
 
-public class LinkGreenPRMSelfRegTPHolderCNSubstitutor extends LinkGreenTemplatePlaceholderCNSubstitutor {
+public class LinkPRMInterRegTPHolderCNSubstitutor extends LinkTemplatePlaceholderCNSubstitutor {
 	
-	public LinkGreenPRMSelfRegTPHolderCNSubstitutor(DynamicEmailTemplateInput input,
+	public LinkPRMInterRegTPHolderCNSubstitutor(DynamicEmailTemplateInput input,
 			OpenDJAttributes openDJAttributes) {
 		super(input, openDJAttributes);
 	}
 
 	@Override
 	public void buildEmailBodyPlaceholderValues() {
-		placeholderValues.add("");
 		placeholderValues.add(openDJAttributes.get_bodyContentPRMSelfCN());
-		placeholderValues.add(openDJAttributes.get_bodyContent2CN());
+		placeholderValues.add(openDJAttributes.get_bodyContentPRMInternalCN());
 		placeholderValues.add(openDJAttributes.get_bodySalutationCN());
 		placeholderValues.add(input.getFirstName());
 		placeholderValues.add(openDJAttributes.get_bodyContentPRMInfoCN());

@@ -38,17 +38,18 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.idms.dynamic.mail.template.LinkTemplatePlaceholderCreator;
-import com.idms.dynamic.mail.template.OTPTemplatePlaceholderCreator;
-import com.idms.dynamic.mail.template.OpenDJAttributes;
-import com.idms.dynamic.mail.template.PRMInternalRegTemplatePlaceholder;
-import com.idms.dynamic.mail.template.TemplatePlaceholderCreator;
-import com.idms.dynamic.mail.template.TemplatePlaceholderSubstitutor;
+import com.ibm.icu.util.StringTokenizer;
 import com.idms.dynamic.mail.template.factory.DynamicEmailTemplateFactory;
-import com.idms.dynamic.mail.template.factory.DynamicTemplatePHAbstractSubstitutorFactory;
+import com.idms.dynamic.mail.template.factory.DynamicTemplatePHSubstitutorFactory;
 import com.idms.dynamic.mail.template.factory.impl.DynamicEmailTemplateFactoryImpl;
-import com.idms.dynamic.mail.template.factory.impl.DynamicTemplatePHAbstractSubstitutorFactoryImpl;
+import com.idms.dynamic.mail.template.factory.impl.DynamicTemplatePHSubstitutorFactoryImpl;
+import com.idms.dynamic.mail.template.placeholder.creator.LinkTemplatePlaceholderCreator;
+import com.idms.dynamic.mail.template.placeholder.creator.OTPTemplatePlaceholderCreator;
+import com.idms.dynamic.mail.template.placeholder.creator.PRMInternalRegTemplatePHCreator;
+import com.idms.dynamic.mail.template.placeholder.creator.TemplatePlaceholderCreator;
+import com.idms.dynamic.mail.template.placeholder.substitutor.TemplatePlaceholderSubstitutor;
 import com.idms.dynamic.mail.template.util.DynamicEmailTemplateInput;
+import com.idms.dynamic.mail.template.util.OpenDJAttributes;
 import com.idms.mail.template.factory.EmailTemplateAbstractFactory;
 import com.idms.mail.template.factory.impl.EmailTemplateAbstractFactoryImpl;
 import com.idms.mail.template.util.EmailTemplateColor;
@@ -401,7 +402,7 @@ public class SendEmail {
 				if (null != applicationDetails && 200 != applicationDetails.getStatus()) {
 					emailUserNameFormat = defaultUserNameFormat;
 				}
-				if(hotpOperationType.equalsIgnoreCase(EmailConstants.UPDATEUSERRECORD_OPT_TYPE)){
+			    if(hotpOperationType.equalsIgnoreCase(EmailConstants.UPDATEUSERRECORD_OPT_TYPE)){
 					subject=appid;
 					to = productDocCtxUser.read("$.newmail[0]");
 				}else if(hotpOperationType.equalsIgnoreCase(EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE)){
@@ -653,9 +654,7 @@ public class SendEmail {
 		int endIndex=0;
 
 		boolean isSupportedOperationType = false;
-		if(hotpOperationType != null && (EmailConstants.USERREGISTRATION_OPT_TYPE.equalsIgnoreCase(hotpOperationType)
-				|| EmailConstants.SETUSERPWD_OPT_TYPE.equalsIgnoreCase(hotpOperationType)
-				|| EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE.equalsIgnoreCase(hotpOperationType))) {
+		if(hotpOperationType != null && !(EmailConstants.SENDINVITATION_OPT_TYPE.equalsIgnoreCase(hotpOperationType))) {
 			isSupportedOperationType = true;
 		}
 		//changes for dynamic email templates
@@ -816,9 +815,13 @@ public class SendEmail {
 			
 			String fileContentString = Files.readAllLines(Paths.get(filePath), Charset.forName("UTF-8")).stream().collect(Collectors.joining("\n"));
 			String[] searchList = getDynamicEmailSearchList(input);
+
+			// set the correct color code for email templates based on templateColor
+			setColorCode(templateColor, openDJAttributes);
+
 			String[] replacementList = getDynamicEmailReplacementList(input,openDJAttributes);
-//			System.out.println("S length: "+ searchList.length);
-//			System.out.println("R length: "+ replacementList.length);
+			LOGGER.info("SearchList length: "+ searchList.length);
+			LOGGER.info("ReplacementList length: "+ replacementList.length);
 			String updatedContent = StringUtils.replaceEach(fileContentString, searchList, replacementList);
 //			System.out.println("dynamicEmailContent: \n "+ updatedContent);
 			content = updatedContent;
@@ -829,10 +832,32 @@ public class SendEmail {
 		return input.getSubject();
 	}
 
+	private void setColorCode(String templateColor, OpenDJAttributes openDJAttributes) {
+		String[] tcCodeArray = openDJAttributes.get_bodyColorCode();
+		for(String tcCode: tcCodeArray) {
+			StringTokenizer tokens = new StringTokenizer(tcCode, "=");
+			int noOfTokens = tokens.countTokens();
+			boolean hasEvenTokens = noOfTokens%2 == 0;
+			while(hasEvenTokens && tokens.hasMoreTokens()){
+				 String color = tokens.nextToken();
+				 if(StringUtils.isNotBlank(templateColor) && templateColor.equalsIgnoreCase(color)) {
+					 openDJAttributes.set_bodyColorCode(new String[] {tokens.nextToken()});
+					 break;
+				 }else {
+					 tokens.nextToken();
+				 }
+			 }
+			if(openDJAttributes.get_bodyColorCode().length == 1) {
+				LOGGER.info("Template Color code: " + openDJAttributes.get_bodyColorCode()[0]);
+				break;
+			}
+		}
+	}
+
 	private String[] getDynamicEmailReplacementList(DynamicEmailTemplateInput input, OpenDJAttributes openDJAttributes) {
 		
-		DynamicTemplatePHAbstractSubstitutorFactory factory = new DynamicTemplatePHAbstractSubstitutorFactoryImpl(input, openDJAttributes);
-		TemplatePlaceholderSubstitutor substitutor = factory.getTemplatePlaceholderSubstitutorFactory().getTemplatePlaceholderSubstitutor();
+		DynamicTemplatePHSubstitutorFactory substitutorFactory = new DynamicTemplatePHSubstitutorFactoryImpl(input, openDJAttributes);
+		TemplatePlaceholderSubstitutor substitutor = substitutorFactory.getTemplatePlaceholderSubstitutor();
 		substitutor.buildDynamicEmailPlaceholderValues();
 		
 		List<String> placeholderValues =substitutor.getPlaceholderValues();
@@ -843,11 +868,15 @@ public class SendEmail {
 	private String[] getDynamicEmailSearchList(DynamicEmailTemplateInput input) {
 		
 		TemplatePlaceholderCreator placeHolder = new LinkTemplatePlaceholderCreator();
-		if(input.isOTPEnabled()) {
+		boolean isEmailNotificationType = false;
+		if(OperationType.CHANGE_EMAIL_NOTIFICATION.getType().equals(input.getOperationType().getType())) {
+			isEmailNotificationType = true;
+		}
+		if(!isEmailNotificationType && input.isOTPEnabled()) {
 			placeHolder = new OTPTemplatePlaceholderCreator();
 		}
-		if(input.isPRMApp() && PRMTemplateType.PRM_INTERNAL_REGISTRATION.equals(input.getPrmTemplateType())) {
-			placeHolder = new PRMInternalRegTemplatePlaceholder();
+		if(!isEmailNotificationType && input.isPRMApp() && PRMTemplateType.PRM_INTERNAL_REGISTRATION.equals(input.getPrmTemplateType())) {
+			placeHolder = new PRMInternalRegTemplatePHCreator();
 		}
 		placeHolder.buildDynamicEmailPlaceholders();
 		List<String> placeholders = placeHolder.getPlaceholders();
