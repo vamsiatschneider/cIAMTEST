@@ -10167,7 +10167,7 @@ public class UserServiceImpl implements UserService {
 			response.put(UserConstants.MESSAGE_L, e.getMessage());
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by addEmailToUser() : " + elapsedTime);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		}
 		response.put(UserConstants.STATUS_L, errorStatus);
 		response.put(UserConstants.MESSAGE_L, "User not found with fedID : " + fedid);
