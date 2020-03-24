@@ -219,6 +219,8 @@ public class UserConstants {
 	
 	public static final String IDMS_ACL_TYPE_C="IDMSAclType__c";
 	
+	public static final String INVALID_AIL="SML Verification Failed";
+	
 	public static final String IDMS_OPERATION_C="IDMSOperation__c";
 	
 	
