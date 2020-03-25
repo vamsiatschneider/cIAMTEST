@@ -143,6 +143,8 @@ public class PropertyFileAutoRefresh {
 	private String sendOTPOverEmail;
 	
 	private String enableTestMailDomain;
+	
+	private String enableSMLVerification;
 		
 	private String supportUser;
 	
@@ -357,6 +359,10 @@ public class PropertyFileAutoRefresh {
 			
 			if(!((UserServiceImpl) userService).getMaintenanceModeGlobal().equals(maintenanceModeGlobal) && maintenanceModeGlobal!=null && !maintenanceModeGlobal.isEmpty())
 				((UserServiceImpl) userService).setMaintenanceModeGlobal(maintenanceModeGlobal);
+			
+			 //SML Verification
+			if(enableSMLVerification!=null && !enableSMLVerification.isEmpty())
+				((UserServiceImpl) userService).setEnableTestMailDomain(enableSMLVerification);	
 			
 			if(!((UserServiceImpl) userService).getStopidmstouimsflag().equals(stopidmstouimsflag) && stopidmstouimsflag!=null && !stopidmstouimsflag.isEmpty())
 				((UserServiceImpl) userService).setStopidmstouimsflag(stopidmstouimsflag);

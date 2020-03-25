@@ -341,6 +341,9 @@ public class UserServiceImpl implements UserService {
 	@Value("${enableTestMailDomain}")
 	private String enableTestMailDomain;
 	
+	@Value("${enableSMLVerification}")
+	private String enableSMLVerification;
+	
 	@Value("${idmsc.maintenance_mode_global}")
 	private String maintenanceModeGlobal;
 	
@@ -4062,7 +4065,7 @@ public class UserServiceImpl implements UserService {
 
 			// IDMSAclType__c
 			if (null == ailRequest.getUserAILRecord().getIDMSAclType__c()
-					|| ailRequest.getUserAILRecord().getIDMSAclType__c().isEmpty()
+					|| ailRequest.getUserAILRecord().getIDMSAclType__c().trim().isEmpty()
 					|| (!pickListValidator.validate(UserConstants.IDMS_ACL_TYPE_C,
 							ailRequest.getUserAILRecord().getIDMSAclType__c()))) {
 				errorResponse.setStatus(errorStatus);
@@ -4075,7 +4078,7 @@ public class UserServiceImpl implements UserService {
 
 			// IDMSAcl__c
 			if (null == ailRequest.getUserAILRecord().getIDMSAcl__c()
-					|| ailRequest.getUserAILRecord().getIDMSAcl__c().isEmpty()) {
+					|| ailRequest.getUserAILRecord().getIDMSAcl__c().trim().isEmpty()) {
 				errorResponse.setStatus(errorStatus);
 				errorResponse.setMessage(UserConstants.MANDATORY_ACL);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -4172,6 +4175,25 @@ public class UserServiceImpl implements UserService {
 				userData = productService.getUser(iPlanetDirectoryKey, userId);
 				LOGGER.info("End: getUser() of OpenAMService finished for userId=" + userId);
 			}
+			
+			LOGGER.info("Global AIL Update" + enableSMLVerification);
+			String Acl__c = ailRequest.getUserAILRecord().getIDMSAcl__c();
+			String[] acl = Acl__c.split(",");
+			if (enableSMLVerification.equalsIgnoreCase("True")) {
+				LOGGER.info("Verifying AIL from Master List");
+				for (int i = 0; i < acl.length; i++) {
+					String ail = ailRequest.getUserAILRecord().getIDMSAclType__c() + "_" + acl[i];
+					ail = smlVerification(ail);
+					if (ail == null) {
+						errorResponse.setStatus(errorStatus);
+						errorResponse.setMessage(UserConstants.INVALID_AIL + " for " + acl[i]);
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.error("Error is " + errorResponse.getMessage());
+						LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
+						return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+					}
+				}
+			}
 			//Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();//Senthil
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
 			LOGGER.info("productDocCtx in updateAil=" + ChinaIdmsUtil.printOpenAMInfo(productDocCtx.jsonString()));
@@ -4183,14 +4205,36 @@ public class UserServiceImpl implements UserService {
 				listOfAil_c = new ArrayList<String>();
 			}
 
-			String ail=	ailRequest.getUserAILRecord().getAILvalue(ailRequest.getUserAILRecord().getIDMSAclType__c(),ailRequest.getUserAILRecord().getIDMSAcl__c());			
+			//String ail=	ailRequest.getUserAILRecord().getAILvalue(ailRequest.getUserAILRecord().getIDMSAclType__c(),ailRequest.getUserAILRecord().getIDMSAcl__c());			
 			// Updating the IDMSAil__c attribute based on the provided operation
-			LOGGER.info("AIL Values to be updated: "+ail);
-				if((!IDMSAil__c.contains(ail))&&("GRANT".equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMSOperation__c()))) {
-				
+			//LOGGER.info("AIL Values to be updated: "+ail);
+				if(("GRANT".equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMSOperation__c()))) {
+					String ail = "";
+					for (int i = 0; i < acl.length; i++) {
+						if (!IDMSAil__c.contains("(" + ailRequest.getUserAILRecord().getIDMSAclType__c() + ";" + acl[i] + ")")) {
+							if (ail.isEmpty()) {
+								ail = "(" + ailRequest.getUserAILRecord().getIDMSAclType__c() + ";" + acl[i] + ")";
+							} else {
+								ail = ail + ",(" + ailRequest.getUserAILRecord().getIDMSAclType__c() + ";" + acl[i] + ")";
+							}
+						}
+					}
+
 				String acl_appc = productDocCtx.read("$.IDMSAIL_" + idmsAclType_c + "_c[0]");
-				
+				String reqAclApp = "";
+				acl = ailRequest.getUserAILRecord().getIDMSAcl__c().split(",");
+				for (int i = 0; i < acl.length; i++) {
+					if (!acl_appc.contains(acl[0])) {
+						if (ail.isEmpty()) {
+							reqAclApp = acl[i];
+						} else {
+							reqAclApp = ail + "," + acl[i];
+						}
+					}
+				}
+
 				// Checking the value does not contain null value
+				if(!reqAclApp.isEmpty()) {
 				if (!(acl_appc == null || acl_appc.length() == 0))
 					acl_appc = acl_appc + "," + ailRequest.getUserAILRecord().getIDMSAcl__c();
 				else
@@ -4203,6 +4247,8 @@ public class UserServiceImpl implements UserService {
 						PRODUCT_JSON_STRING);
 				LOGGER.info("End: updateUser() of OpenAMService finished for userId=" + userId);
 				//1277
+				}
+				if(!ail.isEmpty()) {
 				
 				if (null != IDMSAil__c && !IDMSAil__c.isEmpty()){
 					IDMSAil__c = IDMSAil__c + ","+ail;
@@ -4220,6 +4266,7 @@ public class UserServiceImpl implements UserService {
 						PRODUCT_JSON_STRING);
 				LOGGER.info("End: updateUser() of OpenAMService finished for userId=" + userId);
 				LOGGER.info("IDMSAil__c Modified After Grant Operation -------------->" + IDMSAil__c);
+				}
 			}   else if ("REVOKE".equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMSOperation__c())) {
 				IDMSAil__c = productDocCtx.read("$.IDMSAil_c[0]");
 				IDMSAil__c = IDMSAil__c.replaceAll("\\[", "");
@@ -4346,6 +4393,16 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
+	private String smlVerification(String ailVal) throws Exception {
+		Response ail = openDJService.verifyAIL(djUserName, djUserPwd, ailVal);
+		if (null != ail && 200 == ail.getStatus()) {
+			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+			DocumentContext productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) ail.getEntity()));
+			return ailVal;
+		}
+
+		return null;
+	}
 	private Response updateAILSuccessResponse(IDMSUserAIL idmsUserAIL) {
 		LOGGER.info("Entered updateAILSuccessResponse() -> Start");
 		LOGGER.info("Parameter idmsUserAIL -> " + idmsUserAIL);

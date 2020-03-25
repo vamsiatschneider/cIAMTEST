@@ -45,4 +45,9 @@ public interface OpenDjService {
 	@GET
 	@Path("/emailtemplates/{operationType}")
 	Response getEmailTemplateDetails(@HeaderParam("X-OpenIDM-Username") String userName,@HeaderParam("X-OpenIDM-Password") String password,@PathParam("operationType") String operationType);
+	
+	@GET
+	@Path("/AILMaster/{ailValue}")
+	Response verifyAIL(@HeaderParam("X-OpenIDM-Username") String userName,@HeaderParam("X-OpenIDM-Password") String password,@PathParam("ailValue") String ailValue);
+
 }
