@@ -4224,7 +4224,7 @@ public class UserServiceImpl implements UserService {
 				String reqAclApp = "";
 				acl = ailRequest.getUserAILRecord().getIDMSAcl__c().split(",");
 				for (int i = 0; i < acl.length; i++) {
-					if (!acl_appc.contains(acl[0])) {
+					if (acl_appc== null|| !acl_appc.contains(acl[0])) {
 						if (ail.isEmpty()) {
 							reqAclApp = acl[i];
 						} else {
