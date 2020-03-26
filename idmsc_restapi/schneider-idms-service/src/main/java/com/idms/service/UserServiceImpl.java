@@ -4211,7 +4211,7 @@ public class UserServiceImpl implements UserService {
 				if(("GRANT".equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMSOperation__c()))) {
 					String ail = "";
 					for (int i = 0; i < acl.length; i++) {
-						if (!IDMSAil__c.contains("(" + ailRequest.getUserAILRecord().getIDMSAclType__c() + ";" + acl[i] + ")")) {
+						if (IDMSAil__c==null||!IDMSAil__c.contains("(" + ailRequest.getUserAILRecord().getIDMSAclType__c() + ";" + acl[i] + ")")) {
 							if (ail.isEmpty()) {
 								ail = "(" + ailRequest.getUserAILRecord().getIDMSAclType__c() + ";" + acl[i] + ")";
 							} else {
@@ -4225,10 +4225,10 @@ public class UserServiceImpl implements UserService {
 				acl = ailRequest.getUserAILRecord().getIDMSAcl__c().split(",");
 				for (int i = 0; i < acl.length; i++) {
 					if (acl_appc== null|| !acl_appc.contains(acl[0])) {
-						if (ail.isEmpty()) {
+						if (reqAclApp.isEmpty()) {
 							reqAclApp = acl[i];
 						} else {
-							reqAclApp = ail + "," + acl[i];
+							reqAclApp = reqAclApp + "," + acl[i];
 						}
 					}
 				}
