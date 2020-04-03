@@ -7121,6 +7121,7 @@ public class UserServiceImpl implements UserService {
 
 				if(StringUtils.isNotBlank(mail) && StringUtils.isNotBlank(mobile)) {
 					isDualIdentifer = true;
+					LOGGER.info("isDualIdentifer: " + isDualIdentifer);
 				}
 
 				if (!isDualIdentifer && UserConstants.TRUE.equalsIgnoreCase(productDocCtx.read("$.result[0].isActivated[0]"))) {
