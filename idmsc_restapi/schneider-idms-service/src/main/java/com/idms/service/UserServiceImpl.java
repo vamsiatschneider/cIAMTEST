@@ -7026,6 +7026,7 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Entered resendRegEmail() -> Start");
 		long elapsedTime;
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
+		boolean isDualIdentifer = false;
 
 		String iPlanetDirectoryKey = null, finalPathString = null, pathString = null;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
@@ -7114,7 +7115,15 @@ public class UserServiceImpl implements UserService {
 					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 				}
 
-				if (UserConstants.TRUE.equalsIgnoreCase(productDocCtx.read("$.result[0].isActivated[0]"))) {
+				// check for dual identifier case
+				String mail = productDocCtx.read("$.result[0].mail[0]");
+				String mobile = productDocCtx.read("$.result[0].mobile_reg[0]");
+
+				if(StringUtils.isNotBlank(mail) && StringUtils.isNotBlank(mobile)) {
+					isDualIdentifer = true;
+				}
+
+				if (!isDualIdentifer && UserConstants.TRUE.equalsIgnoreCase(productDocCtx.read("$.result[0].isActivated[0]"))) {
 					userResponse.setStatus(errorStatus);
 					userResponse.setMessage("You have already registered");
 					LOGGER.error("Error is -> " + userResponse.getMessage());
