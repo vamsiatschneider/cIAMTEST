@@ -7116,12 +7116,15 @@ public class UserServiceImpl implements UserService {
 				}
 
 				// check for dual identifier case
+				String optType = EmailConstants.USERREGISTRATION_OPT_TYPE;
 				String mail = productDocCtx.read("$.result[0].mail[0]");
 				String mobile = productDocCtx.read("$.result[0].mobile_reg[0]");
 
 				if(StringUtils.isNotBlank(mail) && StringUtils.isNotBlank(mobile)) {
 					isDualIdentifer = true;
+					optType = EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE;
 					LOGGER.info("isDualIdentifer: " + isDualIdentifer);
+					LOGGER.info("optType: " + optType);
 				}
 
 				if (!isDualIdentifer && UserConstants.TRUE.equalsIgnoreCase(productDocCtx.read("$.result[0].isActivated[0]"))) {
@@ -7145,7 +7148,7 @@ public class UserServiceImpl implements UserService {
 						LOGGER.info("Successfully OTP generated for " + userCName);
 
 						if (userType.equalsIgnoreCase("mail")) {
-							sendEmail.sendOpenAmEmail(null, otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userCName,
+							sendEmail.sendOpenAmEmail(null, otp, optType, userCName,
 									regSource, finalPathString);
 						}
 						if (userType.equalsIgnoreCase("mobile")) {
