@@ -3970,7 +3970,7 @@ public class UserServiceImpl implements UserService {
 		boolean maintenanceMode=false, stopUIMSFlag = false ;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		try {
-			LOGGER.info("UserServiceImpl:updateAIL -> : Requset :  -> " + objMapper.writeValueAsString(ailRequest));
+			LOGGER.info("UserServiceImpl:updateAIL -> : Request :  -> " + objMapper.writeValueAsString(ailRequest));
 			LOGGER.info("Access Control List:"+maintenanceModeGlobal);
 			LOGGER.info("AuthorizedToken updateAIL()"+authorizedToken);
 			if(maintenanceModeGlobal!=null)
@@ -4099,7 +4099,6 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
-
 			if (null != authorizedToken && !authorizedToken.isEmpty() && !getTechnicalUserDetails(authorizedToken)) {
 				errorResponse.setStatus(errorStatus);
 				errorResponse.setMessage("Unauthorized or session expired");
@@ -4109,6 +4108,55 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 			}
 
+			//SML Validation
+			LOGGER.info("Global Level AIL Setting: " + enableSMLVerification);
+			String Acl__c = ailRequest.getUserAILRecord().getIDMSAcl__c();
+			String[] acl = Acl__c.split(",");
+			String profileUpdateSource=ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c();
+			if( null != authorizedToken && !authorizedToken.isEmpty() &&
+					enableSMLVerification.equalsIgnoreCase("False") && !getTechnicalUserDetails(authorizedToken)) {
+				errorResponse.setStatus(errorStatus);
+				errorResponse.setMessage("Unauthorized or session expired");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Error is " + errorResponse.getMessage());
+				LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
+				return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+			}
+			else if (enableSMLVerification.equalsIgnoreCase("True")) {
+			LOGGER.info("Verifying AIL from Master List");
+			for (int i = 0; i < acl.length; i++) {
+					String ail = ailRequest.getUserAILRecord().getIDMSAclType__c() + "_" + acl[i];
+					ail = smlVerification(ail);
+					if (ail == null) {
+						errorResponse.setStatus(errorStatus);
+						errorResponse.setMessage(UserConstants.INVALID_AIL + " for " + acl[i]);
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.error("Error is " + errorResponse.getMessage());
+						LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
+						return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+					}
+					
+				}
+			LOGGER.info("SML Verification Successful");
+			Response appDetails = openDJService.getUser(djUserName, djUserPwd, profileUpdateSource);
+			DocumentContext productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) appDetails.getEntity()));
+			String appUser=productDJData.read("_technicalUser");
+			String appLevelValidation=null;
+			if(productDJData.read("_isAILValidation")!=null) {
+				appLevelValidation=productDJData.read("_isAILValidation");
+			};
+			LOGGER.info("App Level AIL Validation: " + appLevelValidation);			
+			if (null!=appLevelValidation && appLevelValidation.equalsIgnoreCase("True")  && !isAILApp(authorizedToken,appUser)) 
+				{
+				errorResponse.setStatus(errorStatus);
+				errorResponse.setMessage("Unauthorized Technical User");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.error("Error is " + errorResponse.getMessage());
+				LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
+				return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+				}
+			}
+			
 			idmsAclType_c = getIDMSAclType(ailRequest.getUserAILRecord().getIDMSAclType__c());
 			LOGGER.info("AIL type = " + idmsAclType_c);
 			try {
@@ -4131,7 +4179,7 @@ public class UserServiceImpl implements UserService {
 					if (fedResponse.getStatus() == 404) {
 						JSONObject response = new JSONObject();
 						String fedID=ailRequest.getUserAILRecord().getIDMS_Federated_ID__c();
-						String profileUpdateSource=ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c();
+						//String profileUpdateSource=ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c();
 						LOGGER.info("Start: This UIMS user is not existing in IDMS, now creating this user in IDMS-China"
 								+ fedID);
 						UpdateUserRequest request = new UpdateUserRequest();
@@ -4175,26 +4223,6 @@ public class UserServiceImpl implements UserService {
 				userData = productService.getUser(iPlanetDirectoryKey, userId);
 				LOGGER.info("End: getUser() of OpenAMService finished for userId=" + userId);
 			}
-			
-			LOGGER.info("Global AIL Update" + enableSMLVerification);
-			String Acl__c = ailRequest.getUserAILRecord().getIDMSAcl__c();
-			String[] acl = Acl__c.split(",");
-			if (enableSMLVerification.equalsIgnoreCase("True")) {
-				LOGGER.info("Verifying AIL from Master List");
-				for (int i = 0; i < acl.length; i++) {
-					String ail = ailRequest.getUserAILRecord().getIDMSAclType__c() + "_" + acl[i];
-					ail = smlVerification(ail);
-					if (ail == null) {
-						errorResponse.setStatus(errorStatus);
-						errorResponse.setMessage(UserConstants.INVALID_AIL + " for " + acl[i]);
-						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-						LOGGER.error("Error is " + errorResponse.getMessage());
-						LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
-						return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-					}
-				}
-			}
-			//Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();//Senthil
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
 			LOGGER.info("productDocCtx in updateAil=" + ChinaIdmsUtil.printOpenAMInfo(productDocCtx.jsonString()));
 			IDMSAil__c = productDocCtx.read("$.IDMSAil_c[0]");
@@ -4205,9 +4233,6 @@ public class UserServiceImpl implements UserService {
 				listOfAil_c = new ArrayList<String>();
 			}
 
-			//String ail=	ailRequest.getUserAILRecord().getAILvalue(ailRequest.getUserAILRecord().getIDMSAclType__c(),ailRequest.getUserAILRecord().getIDMSAcl__c());			
-			// Updating the IDMSAil__c attribute based on the provided operation
-			//LOGGER.info("AIL Values to be updated: "+ail);
 				if(("GRANT".equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMSOperation__c()))) {
 					String ail = "";
 					for (int i = 0; i < acl.length; i++) {
@@ -4269,6 +4294,14 @@ public class UserServiceImpl implements UserService {
 				}
 			}   else if ("REVOKE".equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMSOperation__c())) {
 				IDMSAil__c = productDocCtx.read("$.IDMSAil_c[0]");
+				if(IDMSAil__c==null) {
+					errorResponse.setStatus(errorStatus);
+					errorResponse.setMessage("No AIL Values Present to be Revoked");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.error("Error is " + errorResponse.getMessage());
+					LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+				}
 				IDMSAil__c = IDMSAil__c.replaceAll("\\[", "");
 				IDMSAil__c = IDMSAil__c.replaceAll("\\]", "");
 				
@@ -4392,7 +4425,23 @@ public class UserServiceImpl implements UserService {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
 		}
 	}
-
+	public boolean isAILApp(String authorizationToken,String appuser) {
+		LOGGER.info("Entered getTechnicalUserDetails() -> Start");
+		try {
+			String userInfo = openAMTokenService.getUserDetails(authorizationToken);
+			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+			DocumentContext productDocCtx = JsonPath.using(conf).parse(userInfo);
+			String technicalUser=productDocCtx.read("federatedId");	
+			if(appuser!=null && appuser.equalsIgnoreCase(technicalUser)) {
+				return true;
+			}
+			
+		} catch (Exception e) {
+			LOGGER.error("Exception in getTechnicalUserDetails() ::" + e.getMessage(), e);
+			return false;
+		}
+		return false;
+	}
 	private String smlVerification(String ailVal) throws Exception {
 		Response ail = openDJService.verifyAIL(djUserName, djUserPwd, ailVal);
 		if (null != ail && 200 == ail.getStatus()) {
@@ -4400,7 +4449,6 @@ public class UserServiceImpl implements UserService {
 			DocumentContext productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) ail.getEntity()));
 			return ailVal;
 		}
-
 		return null;
 	}
 	private Response updateAILSuccessResponse(IDMSUserAIL idmsUserAIL) {
