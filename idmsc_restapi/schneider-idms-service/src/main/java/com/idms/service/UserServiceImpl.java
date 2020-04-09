@@ -3644,6 +3644,9 @@ public class UserServiceImpl implements UserService {
 
 				PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
 						.concat(",\"isActivated\":\"true\"}");
+				
+				PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
+						.concat(",\"updateSource\":\"" + confirmRequest.getIDMS_Profile_update_source() + "\"}");
 
 				/**
 				 * The below code to activate the IDMSSetActivationDate
@@ -3665,6 +3668,8 @@ public class UserServiceImpl implements UserService {
 							+ "\",\"idmsuid\": \"" + emailOrMobile + "\",\"hotpEmailVerification\": \""
 							+ hotpEmailVerification + "\"" + "}";
 				}
+				PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
+						.concat(",\"updateSource\":\"" + confirmRequest.getIDMS_Profile_update_source() + "\"}");
 
 				EMAIL_CHANGE_LOGGER.info("{},{},{}", formatter.format(new Date()), uniqueIdentifier, emailOrMobile);
 
@@ -3719,6 +3724,8 @@ public class UserServiceImpl implements UserService {
 						}
 					}
 				}
+				PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
+						.concat(",\"updateSource\":\"" + confirmRequest.getIDMS_Profile_update_source() + "\"}");
 			}
 
 			LOGGER.info("authToken  " + authId);
@@ -4383,6 +4390,8 @@ public class UserServiceImpl implements UserService {
 				vNewCntValue = Integer.parseInt(openamVnew) + 1;
 			}
 			String version = "{\"V_New\": \"" + vNewCntValue + "\"" + "}";
+			version = version.substring(0, version.length() - 1)
+					.concat(",\"updateSource\":\"" + ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c() + "\"}");
 
 			// calling Async methods of UIMS api in updateUserAil IDMS api
 			if (null != ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c() && !UserConstants.UIMS
@@ -5348,6 +5357,8 @@ public class UserServiceImpl implements UserService {
 				vNewCntValue = Integer.parseInt(openamVnew) + 1;
 			}
 			String version = "{\"V_New\": \"" + vNewCntValue + "\"" + "}";
+			version = version.substring(0, version.length() - 1)
+					.concat(",\"updateSource\":\"" + userRequest.getUserRecord().getIDMS_Profile_update_source__c() + "\"}");
 
 			LOGGER.info("Json Response " + ChinaIdmsUtil.printOpenAMInfo(jsonResponse));
 
@@ -5980,6 +5991,8 @@ public class UserServiceImpl implements UserService {
 				vNewCntValue = Integer.parseInt(openamVnew) + 1;
 			}
 			String version = "{\"V_New\": \"" + vNewCntValue + "\"" + "}";
+			version = version.substring(0, version.length() - 1)
+					.concat(",\"updateSource\":\"" + updatePasswordRequest.getIDMS_Profile_update_source() + "\"}");
 
 			// Adding V_New
 			LOGGER.info("Start: UpdatePassword - Updating version in openam for userId=" + userId);
@@ -6042,7 +6055,6 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("MalformedURLException in updatePassword():: ->" + me.getMessage(),me);
 			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 		} catch (Exception e) {
-
 			errorResponse.setStatus(errorStatus);
 			errorResponse.setMessage(e.getMessage());
 			LOGGER.error("Exception in updatePassword():" + e.getMessage(),e);
@@ -6278,6 +6290,9 @@ public class UserServiceImpl implements UserService {
 					userId = (String) uimsResponse.get("userId");
 					PRODUCT_JSON_STRING = "{" + "\"userPassword\": \"" + setPasswordRequest.getNewPwd().trim() + "\""
 							+ "}";
+					PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
+							.concat(",\"updateSource\":\"" + setPasswordRequest.getIDMS_Profile_update_source() + "\"}");
+					
 					LOGGER.info("Start: updateUser() of openam to update new password for userid=" + userId);
 					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 							PRODUCT_JSON_STRING);
@@ -6430,6 +6445,8 @@ public class UserServiceImpl implements UserService {
 
 					PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
 							.concat(",\"authId\":\"" + "[]" + "\"}");
+					PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
+							.concat(",\"updateSource\":\"" + setPasswordRequest.getIDMS_Profile_update_source() + "\"}");
 					
 					if(!stopUIMSFlag){
 						// check UIMSPasswordSync to call sync or Async method
@@ -6655,6 +6672,9 @@ public class UserServiceImpl implements UserService {
 							? getValue(productDocCtx.read(JsonConstants.MOBILE_REG).toString()) : null;
 					PRODUCT_JSON_STRING = "{" + "\"login_mobile\": \"" + loginIdentifier + "\"" + "}";
 				}
+				
+				PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
+						.concat(",\"updateSource\":\"" + activateUserRequest.getUserRecord().getIDMS_Registration_Source__c() + "\"}");
 
 				if (null != loginIdentifier && !loginIdentifier.isEmpty()) {
 					LOGGER.info(AUDIT_REQUESTING_USER + userId + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
@@ -6694,7 +6714,6 @@ public class UserServiceImpl implements UserService {
 				// "logout");
 			}
 		} catch (BadRequestException e) {
-
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			response.put(UserConstants.ID, activateUserRequest.getUserRecord().getId());
@@ -6703,7 +6722,6 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("BadRequestException in ActivateUser the User :: -> " + UserConstants.USER_NOT_FOUND);
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (NotAuthorizedException e) {
-
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			response.put(UserConstants.ID, activateUserRequest.getUserRecord().getId());
@@ -6712,7 +6730,6 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("NotAuthorizedException in ActivateUser :: -> " + UserConstants.USER_NOT_FOUND);
 			return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
 		} catch (NotFoundException e) {
-
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
 			response.put(UserConstants.ID, activateUserRequest.getUserRecord().getId());
@@ -9021,10 +9038,10 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Parameter jsonData -> " + ChinaIdmsUtil.printOpenAMInfo(jsonData));
 
 		try {
-			LOGGER.info("Start: updateUserForPassword() of openam for federatioId=" + federationId);
+			LOGGER.info("Start: updateUserForPassword() of openam for federationId=" + federationId);
 			Response updateResponse = productService.updateUserForPassword(
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, federationId, jsonData);
-			LOGGER.info("End: updateUserForPassword() of openam finished for federatioId=" + federationId);
+			LOGGER.info("End: updateUserForPassword() of openam finished for federationId=" + federationId);
 			//LOGGER.info("Information from OPENAM=" + IOUtils.toString((InputStream) updateResponse.getEntity()));
 		} catch (Exception e) {
 			LOGGER.error("ECODE-UPDT-OAM-PROC-ERROR : Error updating details into OpenAM");
@@ -9885,6 +9902,8 @@ public class UserServiceImpl implements UserService {
 			if (resultCount.intValue() == 1) {
 				String addMobileString = "{" + "\"mobile\": \"" + mobile + "\",\"mobile_reg\": \"" + mobile
 						+ "\",\"login_mobile\": \"" + mobile + "\",\"V_New\": \"" + vNewCntValue + "\"" + "}";
+				addMobileString = addMobileString.substring(0, addMobileString.length() - 1)
+						.concat(",\"updateSource\":\"" + addMobileRequest.getProfileUpdateSource() + "\"}");
 				LOGGER.info(
 						"Start: updateUser() of openamservice to add mobile as dual indentifier for userId:" + fedid);
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + ssoToken, fedid, addMobileString);
@@ -10245,6 +10264,10 @@ public class UserServiceImpl implements UserService {
 				}
 				
 				String addEmailString = "{" + "\"mail\": \"" + email + "\",\"loginid\": \"" + email + "\",\"authId\":\"" + "[]" + "\"" + "}";
+				
+				addEmailString = addEmailString.substring(0, addEmailString.length() - 1)
+				.concat(",\"updateSource\":\"" + addEmailRequest.getProfileUpdateSource() + "\"}");
+				
 				LOGGER.info(
 						"Start: updateUser() of openamservice to add email as dual indentifier for userId:" + fedid);
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + ssoToken, fedid, addEmailString);
