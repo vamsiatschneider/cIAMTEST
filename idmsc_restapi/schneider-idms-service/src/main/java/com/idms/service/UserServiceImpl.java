@@ -34,9 +34,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,6 +68,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.ehcache.EhCacheCache;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -76,11 +79,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.ibm.icu.text.Transliterator;
 import com.idms.mapper.IdmsMapper;
+import com.idms.model.AILRecord;
 import com.idms.model.AILRequest;
 import com.idms.model.ActivateUser;
 import com.idms.model.ActivateUserRequest;
 import com.idms.model.AddEmailRequest;
 import com.idms.model.AddMobileRequest;
+import com.idms.model.BulkAILRecord;
+import com.idms.model.BulkAILRequest;
+import com.idms.model.BulkAILResponse;
+import com.idms.model.BulkAILResultHolder;
 import com.idms.model.CheckUserExistsRequest;
 import com.idms.model.CheckUserIdentityRequest;
 import com.idms.model.ConfirmPinErrorResponse;
@@ -124,6 +132,8 @@ import com.idms.product.model.OpenAmUserInput;
 import com.idms.product.model.OpenAmUserRequest;
 import com.idms.product.model.PasswordRecoveryUser;
 import com.idms.product.model.PostMobileRecord;
+import com.idms.service.bulkail.util.BulkAILConstants;
+import com.idms.service.bulkail.util.BulkAILUtil;
 import com.idms.service.impl.IFWTokenServiceImpl;
 import com.idms.service.uims.sync.UIMSAuthenticatedUserManagerSoapServiceSync;
 import com.idms.service.uims.sync.UIMSUserManagerSoapServiceSync;
@@ -11178,5 +11188,153 @@ public class UserServiceImpl implements UserService {
 
 	public void setStopidmstouimsflag(String stopidmstouimsflag) {
 		this.stopidmstouimsflag = stopidmstouimsflag;
+	}
+
+	@Override
+	public Response bulkUpdateAIL(String authorizedToken, String clientId, String clientSecret,
+			BulkAILRequest bulkAILRequest) {
+		LOGGER.info("<-- Entered Bulk updateAIL -->");
+		String userData = "";
+		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
+		ObjectMapper objMapper = new ObjectMapper();
+		String iPlanetDirectoryKey = null;
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		try {
+			LOGGER.info("Bulk update ail -> : Request :  -> " + objMapper.writeValueAsString(bulkAILRequest));
+			LOGGER.info("AuthorizedToken bulkupdateAIL(): " + authorizedToken);
+
+			Response response = validateAILRequest(authorizedToken, bulkAILRequest, startTime);
+			if (response != null) {
+				return response;
+			}
+			Map<String, Map<Integer, BulkAILResultHolder>> userAndAILReqMap = new HashMap<String, Map<Integer, BulkAILResultHolder>>();
+			for (BulkAILRecord ailRecord : bulkAILRequest.getUserAils()) {
+				String userFedID = ailRecord.getUserFedID();
+				boolean isUserFoundInDJ = true;
+				if (StringUtils.isBlank(userFedID)) {
+					BulkAILUtil.buildNullFedIdResult(userAndAILReqMap, ailRecord, userFedID);
+					continue;
+				}
+				if (userAndAILReqMap.get(userFedID) != null) {
+					BulkAILUtil.buildDuplicateFedIdsResult(userAndAILReqMap, ailRecord, userFedID);
+					continue;
+				}
+				Map<String, String> grantMap = new HashMap<String, String>();
+				Map<String, String> revokeMap = new HashMap<String, String>();
+				try {
+					iPlanetDirectoryKey = getSSOToken();
+				} catch (IOException ioExp) {
+					LOGGER.error("Unable to get SSO Token: " + ioExp.getMessage(),ioExp);
+					iPlanetDirectoryKey = "";
+				}
+				if (StringUtils.isNotBlank(userFedID)) {
+					// Get User data
+					userData = getUserDetails(userFedID, iPlanetDirectoryKey);
+					if (userData == null) {
+						isUserFoundInDJ = false;
+					}
+					System.out.println("isUserFoundInDJ bulkupdateAIL() : " + isUserFoundInDJ);
+				}
+				if (isUserFoundInDJ) {
+					DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
+					LOGGER.info(
+							"productDocCtx in bulkUpdateAil=" + ChinaIdmsUtil.printOpenAMInfo(productDocCtx.jsonString()));
+					String idmsAIL_c = productDocCtx.read("$.IDMSAil_c[0]");
+
+					List<AILRecord> ails = ailRecord.getAils();
+					Map<Integer, BulkAILResultHolder> ailCountMap = new HashMap<Integer, BulkAILResultHolder>();
+					if (ails == null || ails.isEmpty()) {
+						BulkAILUtil.buildNullAILResult(ailCountMap);
+						continue;
+					}
+					Map<AILRecord, Integer> recordCountMap = new HashMap<AILRecord, Integer>();
+					BulkAILUtil.processGrantRequest(grantMap, productDocCtx, idmsAIL_c, ails, ailCountMap, recordCountMap);
+					if(!grantMap.isEmpty()) {
+						String grantJson = BulkAILUtil.buildUserUpdateJson(grantMap);
+						LOGGER.info("Grant Operation: BulkUpdateAIL -> " + grantJson);
+						LOGGER.info("Start: updateUser() for userId=" + userFedID);
+						productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userFedID,
+								grantJson);
+						LOGGER.info("End: updateUser() for userId=" + userFedID);
+
+						userData = getUserDetails(userFedID, iPlanetDirectoryKey);
+						productDocCtx = JsonPath.using(conf).parse(userData);
+						LOGGER.info("productDocCtx in bulkUpdateAil=" + ChinaIdmsUtil.printOpenAMInfo(productDocCtx.jsonString()));
+						idmsAIL_c = productDocCtx.read("$.IDMSAil_c[0]");
+					}
+					BulkAILUtil.processRevokeRequest(revokeMap, productDocCtx, idmsAIL_c, ails, ailCountMap, recordCountMap);
+					if(!revokeMap.isEmpty()) {
+						String revokeJson = BulkAILUtil.buildUserUpdateJson(revokeMap);
+						LOGGER.info("Revoke Operation: BulkUpdateAIL -> " + revokeJson);
+						LOGGER.info("Start: updateUser() for userId=" + userFedID);
+						productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userFedID,
+								revokeJson);
+						LOGGER.info("End: updateUser() for userId=" + userFedID);
+					}
+					userAndAILReqMap.put(userFedID, ailCountMap);
+				} else {
+					Map<Integer, BulkAILResultHolder> ailCountMap = BulkAILUtil.buildUserNotFoundResult(ailRecord);
+					userAndAILReqMap.put(userFedID, ailCountMap);
+				}
+			}
+			List<BulkAILResponse> responseList = BulkAILUtil.buildResponseList(userAndAILReqMap);
+			return Response.status(HttpStatus.OK.value()).entity(responseList).build();
+
+			/* 4 calls in bulk update AIL */
+			// 1. update IDMSAil_c for grant/revoke -- done
+			// 2. update IDMSAIL_Applications_c for grant/revoke -- done
+			/* TODO: */
+			// 3. update V_New
+			// 4. Sync to UIMS
+
+		} catch (Exception e) {
+			return BulkAILUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, BulkAILConstants.INTERNAL_SERVER_ERROR, startTime);
+		}
+	}
+
+	private Response validateAILRequest(String authorizedToken, BulkAILRequest bulkAILRequest, long startTime) {
+		// Authorized token
+		if (StringUtils.isBlank(authorizedToken)) {
+			return BulkAILUtil.getErrorResponse(HttpStatus.BAD_REQUEST, BulkAILConstants.MANDATORY_TOKEN, startTime);
+		}
+		if(!getTechnicalUserDetails(authorizedToken)){
+			return BulkAILUtil.getErrorResponse(HttpStatus.UNAUTHORIZED, BulkAILConstants.UNAUTHORIZED_USER, startTime);
+		}
+		if(bulkAILRequest.getUserAils() == null || (bulkAILRequest.getUserAils() != null && bulkAILRequest.getUserAils().isEmpty())) {
+			return BulkAILUtil.getErrorResponse(HttpStatus.BAD_REQUEST, BulkAILConstants.MANDATORY_AIL_FIELDS, startTime);
+		}
+		if(bulkAILRequest.getUserAils().size() > 100) {
+			return BulkAILUtil.getErrorResponse(HttpStatus.BAD_REQUEST, BulkAILConstants.GOVERNANCE_ERROR, startTime);
+		}
+		boolean isInputInvalid = false;
+		for(BulkAILRecord ailRecord: bulkAILRequest.getUserAils()) {
+			if(ailRecord.getAils()!= null && ailRecord.getAils().size() > 50){
+				isInputInvalid = true;
+				break;
+			}
+		}
+		if(isInputInvalid) {
+			return BulkAILUtil.getErrorResponse(HttpStatus.BAD_REQUEST, BulkAILConstants.GOVERNANCE_ERROR, startTime);
+		}
+		if (StringUtils.isBlank(bulkAILRequest.getProfileLastUpdateSource())) {
+			return BulkAILUtil.getErrorResponse(HttpStatus.BAD_REQUEST, BulkAILConstants.MANDATORY_PROFILE_UPDATE_SOURCE, startTime);
+		}
+		return null;
+	}
+
+	private String getUserDetails(String userFedID, String iPlanetDirectoryKey) {
+		String userData;
+		LOGGER.info("AUDIT: userFedID->" + userFedID + "," + "impersonatingUser : amadmin,"
+				+ "openAMApi:GET/getUser/{userId}");
+
+		LOGGER.info("Start: getUser() in BulkUpdateAIL for userId=" + userFedID);
+		try {
+			userData = productService.getUser(iPlanetDirectoryKey, userFedID);
+			LOGGER.info("End: getUser() of BulkUpdateAIL finished for userId=" + userFedID);
+		}catch(NotFoundException nfe) {
+			LOGGER.info("End: getUser() of BulkUpdateAIL finished with User Not Found Exception");
+			userData = null;
+		}
+		return userData;
 	}
 }

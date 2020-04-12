@@ -20,6 +20,7 @@ import com.idms.model.AILRequest;
 import com.idms.model.ActivateUserRequest;
 import com.idms.model.AddEmailRequest;
 import com.idms.model.AddMobileRequest;
+import com.idms.model.BulkAILRequest;
 import com.idms.model.CheckUserExistsRequest;
 import com.idms.model.CheckUserIdentityRequest;
 import com.idms.model.ConfirmPinRequest;
@@ -122,6 +123,12 @@ public interface UserService {
 	@Consumes("application/json")
 	Response updateAIL(@HeaderParam("Authorization") String authorizedToken, @HeaderParam("client_id") String clientId,
 			@HeaderParam("client_secret") String clientSecret, @Valid AILRequest aRequest);
+
+	@PUT
+	@Path("/apexrest/BulkUpdateUserAIL")
+	@Consumes("application/json")
+	Response bulkUpdateAIL(@HeaderParam("Authorization") String authorizedToken, @HeaderParam("client_id") String clientId,
+			@HeaderParam("client_secret") String clientSecret, @Valid BulkAILRequest bulkAILRequest);
 
 	@POST
 	@Path("/apexrest/IDMSPassword")
