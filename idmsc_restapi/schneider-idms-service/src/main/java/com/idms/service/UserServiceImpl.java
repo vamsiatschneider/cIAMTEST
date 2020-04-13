@@ -4266,7 +4266,7 @@ public class UserServiceImpl implements UserService {
 				String reqAclApp = "";
 				acl = ailRequest.getUserAILRecord().getIDMSAcl__c().split(",");
 				for (int i = 0; i < acl.length; i++) {
-					if (acl_appc== null|| !acl_appc.contains(acl[0])) {
+					if (acl_appc== null|| !acl_appc.contains(acl[i])) {
 						if (reqAclApp.isEmpty()) {
 							reqAclApp = acl[i];
 						} else {
@@ -4278,9 +4278,9 @@ public class UserServiceImpl implements UserService {
 				// Checking the value does not contain null value
 				if(!reqAclApp.isEmpty()) {
 				if (!(acl_appc == null || acl_appc.length() == 0))
-					acl_appc = acl_appc + "," + ailRequest.getUserAILRecord().getIDMSAcl__c();
+					acl_appc = acl_appc + "," + reqAclApp;
 				else
-					acl_appc = ailRequest.getUserAILRecord().getIDMSAcl__c();
+					acl_appc = reqAclApp;
 				PRODUCT_JSON_STRING = "{" + "\"IDMSAIL_" + idmsAclType_c + "_c\": \"" + acl_appc.trim() + "\"" + "}";
 				
 				LOGGER.info("Grant Operation: updateAIL : Request -> " + PRODUCT_JSON_STRING);
