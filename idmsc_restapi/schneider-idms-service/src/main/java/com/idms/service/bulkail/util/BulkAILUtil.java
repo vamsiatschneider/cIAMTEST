@@ -191,6 +191,9 @@ public class BulkAILUtil {
 		
 		String idmsAclType_c = getIDMSAclType(ail.getAclType());
 		String aclType_c = productDocCtx.read("$.IDMSAIL_" + idmsAclType_c + "_c[0]");
+		if(aclType_c == null) {
+			aclType_c ="[]";
+		}
 		aclType_c = aclType_c.replaceAll("\\[", "");
 		aclType_c = aclType_c.replaceAll("\\]", "");
 		String revokeACLVal = "";
@@ -264,6 +267,9 @@ public class BulkAILUtil {
 			
 		String idmsAclType_c = getIDMSAclType(ail.getAclType());
 		String aclType_c = productDocCtx.read("$.IDMSAIL_" + idmsAclType_c + "_c[0]");
+		if(aclType_c == null) {
+			aclType_c ="[]";
+		}
 		aclType_c = aclType_c.replaceAll("\\[", "");
 		aclType_c = aclType_c.replaceAll("\\]", "");
 		String ailTypeValue = "";

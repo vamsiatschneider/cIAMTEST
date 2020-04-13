@@ -11240,7 +11240,9 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info(
 							"productDocCtx in bulkUpdateAil=" + ChinaIdmsUtil.printOpenAMInfo(productDocCtx.jsonString()));
 					String idmsAIL_c = productDocCtx.read("$.IDMSAil_c[0]");
-
+					if(idmsAIL_c == null) {
+						idmsAIL_c = "[]";
+					}
 					List<AILRecord> ails = ailRecord.getAils();
 					Map<Integer, BulkAILResultHolder> ailCountMap = new HashMap<Integer, BulkAILResultHolder>();
 					if (ails == null || ails.isEmpty()) {
@@ -11261,6 +11263,9 @@ public class UserServiceImpl implements UserService {
 						productDocCtx = JsonPath.using(conf).parse(userData);
 						LOGGER.info("productDocCtx in bulkUpdateAil=" + ChinaIdmsUtil.printOpenAMInfo(productDocCtx.jsonString()));
 						idmsAIL_c = productDocCtx.read("$.IDMSAil_c[0]");
+						if(idmsAIL_c == null) {
+							idmsAIL_c = "[]";
+						}
 					}
 					BulkAILUtil.processRevokeRequest(revokeMap, productDocCtx, idmsAIL_c, ails, ailCountMap, recordCountMap);
 					if(!revokeMap.isEmpty()) {
