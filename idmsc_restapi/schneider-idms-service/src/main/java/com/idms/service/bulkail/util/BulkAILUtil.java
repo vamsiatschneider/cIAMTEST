@@ -13,27 +13,37 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 
 import com.idms.model.AILRecord;
+import com.idms.model.AILRequest;
+import com.idms.model.BulkAILMapValue;
 import com.idms.model.BulkAILRecord;
 import com.idms.model.BulkAILResponse;
 import com.idms.model.BulkAILResultHolder;
+import com.idms.model.UserAILRecord;
+import com.idms.product.client.OpenAMService;
+import com.idms.product.model.Attributes;
+import com.idms.service.UIMSAccessManagerSoapService;
 import com.jayway.jsonpath.DocumentContext;
+import com.se.idms.dto.IDMSUserAIL;
+import com.se.idms.dto.IDMSUser__r;
 import com.se.idms.util.UserConstants;
 
 public class BulkAILUtil {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BulkAILUtil.class);
 	
-	public static List<BulkAILResponse> buildResponseList(Map<String, Map<Integer, BulkAILResultHolder>> userAndAILReqMap) {
-		List<BulkAILResponse> responseList = new ArrayList<BulkAILResponse>();
+	public static BulkAILResponse buildResponse(Map<String, Map<Integer, BulkAILResultHolder>> userAndAILReqMap, String profileUpdateSource) {
+		BulkAILResponse baResponse = new BulkAILResponse();
+		List<BulkAILRecord> userAils = new ArrayList<BulkAILRecord>();
+
 		for (Entry<String, Map<Integer, BulkAILResultHolder>> entry : userAndAILReqMap.entrySet()) {
+			BulkAILRecord bulkAILRecord = new BulkAILRecord();
 			String userId = entry.getKey();
 			Map<Integer, BulkAILResultHolder> resultHolderMap = entry.getValue();
-			BulkAILResponse baResponse = new BulkAILResponse();
-			baResponse.setUserFedID(userId);
-			List<com.idms.model.AILResponse> ailResponseList = new ArrayList<com.idms.model.AILResponse>();
+			bulkAILRecord.setUserFedID(userId);
+			List<AILRecord> ailResponseList = new ArrayList<AILRecord>();
 
 			for (Entry<Integer, BulkAILResultHolder> subEntry : resultHolderMap.entrySet()) {
-				com.idms.model.AILResponse ailResponse = new com.idms.model.AILResponse();
+				AILRecord ailResponse = new AILRecord();
 				BulkAILResultHolder resultHolder = subEntry.getValue();
 				AILRecord ailRecord = resultHolder.getAilRecord();
 				if (ailRecord != null) {
@@ -43,16 +53,19 @@ public class BulkAILUtil {
 				}
 				ailResponse.setStatus(resultHolder.getStatus());
 				ailResponse.setStatusCode(resultHolder.getStatusCode());
-				ailResponse.setErrorMessage(resultHolder.getErrorMessage());
+				ailResponse.setMessage(resultHolder.getMessage());
 				ailResponseList.add(ailResponse);
 			}
-			baResponse.setResponse(ailResponseList);
-			responseList.add(baResponse);
+			bulkAILRecord.setAils(ailResponseList);
+			userAils.add(bulkAILRecord);
 		}
-		return responseList;
+		baResponse.setProfileLastUpdateSource(profileUpdateSource);
+		baResponse.setMessage(BulkAILConstants.SUCCESS);
+		baResponse.setUserAils(userAils );
+		return baResponse;
 	}
 
-	public static void processGrantRequest(Map<String, String> grantMap, DocumentContext productDocCtx, String idmsAIL_c,
+	public static void processGrantRequest(Map<String, BulkAILMapValue> grantMap, DocumentContext productDocCtx, String idmsAIL_c,
 			List<AILRecord> ails, Map<Integer, BulkAILResultHolder> ailCountMap,
 			Map<AILRecord, Integer> recordCountMap) {
 		for (AILRecord ail : ails) {
@@ -95,11 +108,16 @@ public class BulkAILUtil {
 		holder.setDupRequest(false);
 		holder.setStatusCode(HttpStatus.OK.value());
 		holder.setStatus(BulkAILConstants.SUCCESS);
+		if(AILOperationType.GRANT.getType().equalsIgnoreCase(ail.getOperation())) {
+			holder.setMessage(BulkAILConstants.AIL_GRANT_MSG);
+		}else {
+			holder.setMessage(BulkAILConstants.AIL_REVOKE_MSG);
+		}
 		ailCountMap.put(++count, holder);
 		return count;
 	}
 
-	public static void processRevokeRequest(Map<String, String> revokeMap, DocumentContext productDocCtx, String idmsAIL_c,
+	public static void processRevokeRequest(Map<String, BulkAILMapValue> revokeMap, DocumentContext productDocCtx, String idmsAIL_c,
 			List<AILRecord> ails, Map<Integer, BulkAILResultHolder> ailCountMap,
 			Map<AILRecord, Integer> recordCountMap) {
 		for (AILRecord ail : ails) {
@@ -130,23 +148,23 @@ public class BulkAILUtil {
 		holder.setDupRequest(dupRequest);
 		holder.setStatusCode(statusCode);
 		holder.setStatus(BulkAILConstants.FAILURE);
-		holder.setErrorMessage(invalidOp);
+		holder.setMessage(invalidOp);
 		return holder;
 	}
 
-	public static String buildUserUpdateJson(Map<String, String> map) {
+	public static String buildUserUpdateJson(Map<String, BulkAILMapValue> grantMap) {
 		String ailType_json = "" ;
  		List<String> ail_jsonList = new ArrayList<String>();
- 		for (Entry<String, String> entry : map.entrySet()) {
+ 		for (Entry<String, BulkAILMapValue> entry : grantMap.entrySet()) {
  			String key = entry.getKey();
- 			String value = entry.getValue();
- 			if(value.isEmpty()) {
- 				value = "[]";
+ 			String openDJValue = entry.getValue().getOpenDJAILValue();
+ 			if(openDJValue.isEmpty()) {
+ 				openDJValue = "[]";
  			}
  			if("IDMSAil_c".equals(key)) {         				
- 				ailType_json = "\"IDMSAil_c\": \"" + value + "\"";
+ 				ailType_json = "\"IDMSAil_c\": \"" + openDJValue + "\"";
  			}else {
- 				ail_jsonList.add("\"" + key +"\"" + ": \"" + value + "\"");
+ 				ail_jsonList.add("\"" + key +"\"" + ": \"" + openDJValue + "\"");
  			}
  		}
  		StringBuilder updateJson = new StringBuilder("{");
@@ -164,7 +182,7 @@ public class BulkAILUtil {
 		return updateJson.toString();
 	}
 
-	private static void buildRevokeAILMap(Map<String, String> revokeMap, DocumentContext productDocCtx, String idmsAIL_c,
+	private static void buildRevokeAILMap(Map<String, BulkAILMapValue> revokeMap, DocumentContext productDocCtx, String idmsAIL_c,
 			AILRecord ail) {
 		idmsAIL_c = idmsAIL_c.replaceAll("\\[", "");
 		idmsAIL_c = idmsAIL_c.replaceAll("\\]", "");
@@ -173,22 +191,32 @@ public class BulkAILUtil {
 		if (idmsAIL_c==null || idmsAIL_c.contains(ailApplnAndType)) {
 			revokeValue = ailApplnAndType;
 		}
-		LOGGER.info("AIl Value to be Revoked: " + revokeValue);
-		String idmsAIL_temp = revoke(idmsAIL_c, revokeValue);
-		LOGGER.info("AIL value after revoking: " + idmsAIL_temp);
-		
+		String idmsAIL_temp = "";
+		if (!revokeValue.isEmpty()) {
+			LOGGER.info("AIl Value to be Revoked: " + revokeValue);
+			idmsAIL_temp = revoke(idmsAIL_c, revokeValue);
+			LOGGER.info("AIL value after revoking: " + idmsAIL_temp);
+		}
+		BulkAILMapValue mapAilcValue = new BulkAILMapValue();
 		if (revokeMap.get("IDMSAil_c") != null) {
 			if (!revokeValue.isEmpty()) {
-				String ailc_Value = revokeMap.get("IDMSAil_c");
+				String ailc_Value = revokeMap.get("IDMSAil_c").getOpenDJAILValue();
+				List<AILRecord> ailRecordList = revokeMap.get("IDMSAil_c").getAilRecords();
+				ailRecordList.add(ail);
+				mapAilcValue.setAilRecords(ailRecordList);
 				String ailc_newValue = revoke(ailc_Value, revokeValue);
-				revokeMap.put("IDMSAil_c", ailc_newValue);
+				mapAilcValue.setOpenDJAILValue(ailc_newValue);
+				revokeMap.put("IDMSAil_c", mapAilcValue);
 			}
 		} else {
 			if (!idmsAIL_temp.isEmpty()) {
-				revokeMap.put("IDMSAil_c", idmsAIL_temp);
+				List<AILRecord> ailRecordList = new ArrayList<AILRecord>();
+				ailRecordList.add(ail);
+				mapAilcValue.setAilRecords(ailRecordList);
+				mapAilcValue.setOpenDJAILValue(idmsAIL_temp);
+				revokeMap.put("IDMSAil_c", mapAilcValue);
 			}
 		}
-		
 		String idmsAclType_c = getIDMSAclType(ail.getAclType());
 		String aclType_c = productDocCtx.read("$.IDMSAIL_" + idmsAclType_c + "_c[0]");
 		if(aclType_c == null) {
@@ -198,23 +226,34 @@ public class BulkAILUtil {
 		aclType_c = aclType_c.replaceAll("\\]", "");
 		String revokeACLVal = "";
 		String idmsAclAndType = ail.getAcl();
-		if (aclType_c==null || aclType_c.contains(idmsAclAndType)) {
-			revokeACLVal = idmsAclAndType;
+		if (aclType_c != null) {
+			String[] aclArr = aclType_c.split(",");
+			for(String acl : aclArr) {
+				if(acl.equals(idmsAclAndType)) {
+					revokeACLVal = idmsAclAndType;
+					break;
+				}
+			}
 		}
-		LOGGER.info("App value to be revoked: " + revokeACLVal);
-		String idmsAclType_temp = revoke(aclType_c, revokeACLVal);
-		LOGGER.info("App value after revoking: " + idmsAclType_temp);
-		
+		String idmsAclType_temp = "";
+		if (!revokeACLVal.isEmpty()) {
+			LOGGER.info("App value to be revoked: " + revokeACLVal);
+			idmsAclType_temp = revoke(aclType_c, revokeACLVal);
+			LOGGER.info("App value after revoking: " + idmsAclType_temp);
+		}
 		String ailType_c = "IDMSAIL_" + idmsAclType_c + "_c";
+		BulkAILMapValue ailTypecMapVal = new BulkAILMapValue() ;
 		if(revokeMap.get(ailType_c) != null) {
 			if(!revokeACLVal.isEmpty()) {
-				String ailTypec_Value = revokeMap.get(ailType_c);
+				String ailTypec_Value = revokeMap.get(ailType_c).getOpenDJAILValue();
 				String ailTypec_newValue = revoke(ailTypec_Value, revokeACLVal);
-				revokeMap.put(ailType_c, ailTypec_newValue);
+				ailTypecMapVal.setOpenDJAILValue(ailTypec_newValue);
+				revokeMap.put(ailType_c, ailTypecMapVal);
 			}
 		}else {
 			if(!idmsAclType_temp.isEmpty()) {
-				revokeMap.put(ailType_c, idmsAclType_temp);
+				ailTypecMapVal.setOpenDJAILValue(idmsAclType_temp);
+				revokeMap.put(ailType_c, ailTypecMapVal);
 			}
 		}
 	}
@@ -237,7 +276,7 @@ public class BulkAILUtil {
 		return idmsAIL_temp;
 	}
 
-	private static void buildGrantAILMap(Map<String, String> grantMap,
+	private static void buildGrantAILMap(Map<String, BulkAILMapValue> grantMap,
 			DocumentContext productDocCtx, String idmsAIL_c, AILRecord ail) {
 		idmsAIL_c = idmsAIL_c.replaceAll("\\[", "");
 		idmsAIL_c = idmsAIL_c.replaceAll("\\]", "");
@@ -253,15 +292,24 @@ public class BulkAILUtil {
 			else
 				idmsAIL_temp = ailValue;
 		}
+		BulkAILMapValue mapAilcValue = new BulkAILMapValue();
 		if(grantMap.get("IDMSAil_c") != null) {
-			String ailc_Value = grantMap.get("IDMSAil_c");
+			String ailc_Value = grantMap.get("IDMSAil_c").getOpenDJAILValue();
+			List<AILRecord> ailRecordList = grantMap.get("IDMSAil_c").getAilRecords();
+			ailRecordList.add(ail);
+			mapAilcValue.setAilRecords(ailRecordList);
 			if(!ailValue.isEmpty()) {
 				ailc_Value += "," + ailValue;
 			}
-			grantMap.put("IDMSAil_c", ailc_Value);
+			mapAilcValue.setOpenDJAILValue(ailc_Value);
+			grantMap.put("IDMSAil_c", mapAilcValue);
 		}else {
 			if(!idmsAIL_temp.isEmpty()) {
-				grantMap.put("IDMSAil_c", idmsAIL_temp);
+				List<AILRecord> ailRecordList = new ArrayList<AILRecord>();
+				ailRecordList.add(ail);
+				mapAilcValue.setAilRecords(ailRecordList);
+				mapAilcValue.setOpenDJAILValue(idmsAIL_temp);
+				grantMap.put("IDMSAil_c", mapAilcValue);
 			}
 		}
 			
@@ -273,26 +321,42 @@ public class BulkAILUtil {
 		aclType_c = aclType_c.replaceAll("\\[", "");
 		aclType_c = aclType_c.replaceAll("\\]", "");
 		String ailTypeValue = "";
-		if (aclType_c == null||!aclType_c.contains(ail.getAcl())) {
-			ailTypeValue = ail.getAcl();
+		String aclReq = ail.getAcl();
+		boolean isAILValPresent = false;
+		if (aclType_c != null) {
+			String[] aclArr = aclType_c.split(",");
+			for(String acl : aclArr) {
+				if(acl.equals(aclReq)) {
+					isAILValPresent = true;
+					break;
+				}
+			}
+			if(!isAILValPresent) {
+				ailTypeValue = aclReq;
+			}
+		}else {
+			ailTypeValue = aclReq;
 		}
 		String idmsAILValue_temp = new String();
 		if(!ailTypeValue.isEmpty()) {
 			if (null != aclType_c && !aclType_c.isEmpty())
-				idmsAILValue_temp = aclType_c + ","+ailTypeValue;
+				idmsAILValue_temp = aclType_c + "," + ailTypeValue;
 			else
 				idmsAILValue_temp = ailTypeValue;
 		}
 		String ailType_c = "IDMSAIL_" + idmsAclType_c + "_c";
+		BulkAILMapValue ailTypecMapVal = new BulkAILMapValue() ;
 		if(grantMap.get(ailType_c) != null) {
-			String ailTypec_Value = grantMap.get(ailType_c);
+			String ailTypec_Value = grantMap.get(ailType_c).getOpenDJAILValue();
 			if(!ailTypeValue.isEmpty()) {
 				ailTypec_Value += "," + ailTypeValue;
 			}
-			grantMap.put(ailType_c, ailTypec_Value);
+			ailTypecMapVal.setOpenDJAILValue(ailTypec_Value);
+			grantMap.put(ailType_c, ailTypecMapVal);
 		}else {
 			if(!idmsAILValue_temp.isEmpty()) {
-				grantMap.put(ailType_c, idmsAILValue_temp);
+				ailTypecMapVal.setOpenDJAILValue(idmsAILValue_temp);
+				grantMap.put(ailType_c, ailTypecMapVal);
 			}
 		}
 	}
@@ -332,7 +396,7 @@ public class BulkAILUtil {
 		holder.setDupRequest(false);
 		holder.setStatusCode(HttpStatus.BAD_REQUEST.value());
 		holder.setStatus(BulkAILConstants.FAILURE);
-		holder.setErrorMessage(BulkAILConstants.MISSING_MANDATORY_FIELDS);
+		holder.setMessage(BulkAILConstants.MISSING_MANDATORY_FIELDS);
 		int size = ailCountMap.size();
 		ailCountMap.put(++size , holder);
 	}
@@ -349,7 +413,7 @@ public class BulkAILUtil {
 			holder.setDupRequest(false);
 			holder.setStatusCode(HttpStatus.BAD_REQUEST.value());
 			holder.setStatus(BulkAILConstants.FAILURE);
-			holder.setErrorMessage(BulkAILConstants.MALFORMED_REQUEST);
+			holder.setMessage(BulkAILConstants.MALFORMED_REQUEST);
 			ailCountMap.put(++count, holder);
 		}
 		map.putAll(ailCountMap);
@@ -374,7 +438,7 @@ public class BulkAILUtil {
 			holder.setDupRequest(false);
 			holder.setStatusCode(HttpStatus.NOT_FOUND.value());
 			holder.setStatus(BulkAILConstants.FAILURE);
-			holder.setErrorMessage(BulkAILConstants.USER_NOT_FOUND);
+			holder.setMessage(BulkAILConstants.USER_NOT_FOUND);
 			ailCountMap.put(++count, holder);
 		}
 		return ailCountMap;
@@ -398,5 +462,80 @@ public class BulkAILUtil {
 			return UserConstants.ACLTYPE_FEATURES;
 
 		return null;
+	}
+
+	public static String buildVersionUpdateJson(int vNewCntValue, String updateSrc) {
+		String vNew = "\"V_New\": \"" + vNewCntValue + "\"";
+		String updateSource = "\"updateSource\": \"" + updateSrc + "\"";
+		StringBuilder updateVerAndSrc = new StringBuilder("{");
+		updateVerAndSrc.append(vNew).append(",").append(updateSource).append("}");
+		return updateVerAndSrc.toString();
+	}
+
+	public static void updateUIMSBulkUserAIL(String userId, Map<String, BulkAILMapValue> grantMap,
+			Map<String, BulkAILMapValue> revokeMap, int vNewCntValue, OpenAMService productService, UIMSAccessManagerSoapService uimsAccessManagerSoapService, String iPlanetDirectoryKey, String profileUpdateSource) {
+
+		Attributes idmsUser_rAttributes = new Attributes();
+		IDMSUser__r idmsUser__r = new IDMSUser__r();
+		idmsUser__r.setAttributes(idmsUser_rAttributes);
+		idmsUser__r.setId(userId);
+		idmsUser__r.setIDMS_Federated_ID__c(userId);
+
+		IDMSUserAIL idmsUserAIL = new IDMSUserAIL(idmsUser__r);
+		Attributes attributes = new Attributes();
+		attributes.setType("IDMSUserAIL__c");
+		idmsUserAIL.setAttributes(attributes);
+		idmsUserAIL.setId(userId);
+		idmsUserAIL.setIdmsuser__c(userId);
+		idmsUserAIL.setIDMS_Federated_Id__c(userId);
+		idmsUserAIL.setIdms_Profile_update_source__c(profileUpdateSource);
+
+		// Sync grant requests to UIMS
+		syncRequestsToUIMS(userId, grantMap, vNewCntValue, productService, uimsAccessManagerSoapService,
+				iPlanetDirectoryKey, idmsUserAIL);
+		// Sync revoke requests to UIMS
+		syncRequestsToUIMS(userId, revokeMap, vNewCntValue, productService, uimsAccessManagerSoapService,
+				iPlanetDirectoryKey, idmsUserAIL);
+	}
+
+	private static void syncRequestsToUIMS(String userId, Map<String, BulkAILMapValue> map, int vNewCntValue,
+			OpenAMService productService, UIMSAccessManagerSoapService uimsAccessManagerSoapService,
+			String iPlanetDirectoryKey, IDMSUserAIL idmsUserAIL) {
+		if (!map.isEmpty()) {
+			for (Entry<String, BulkAILMapValue> entry : map.entrySet()) {
+				String ailKey = entry.getKey();
+				if (null != ailKey && "IDMSAil_c".equals(ailKey)) {
+					List<AILRecord> ailRecords = entry.getValue().getAilRecords();
+					for(AILRecord ailRecord : ailRecords) {
+						AILRequest ailRequest = populateUIMSInput(userId, idmsUserAIL, ailRecord);
+						//sync call to UIMS
+						uimsAccessManagerSoapService.updateUIMSUserAIL(ailRequest , idmsUserAIL, String.valueOf(vNewCntValue), productService, iPlanetDirectoryKey, "");
+					}
+				} else {
+					continue;
+				}
+			}
+		}
+	}
+
+	private static AILRequest populateUIMSInput(String userId, IDMSUserAIL idmsUserAIL, AILRecord ailRecord) {
+		if(AILOperationType.GRANT.getType().equalsIgnoreCase(ailRecord.getOperation())) {
+			idmsUserAIL.setIdmsisRevokedOperation__c(false);
+		}else {
+			idmsUserAIL.setIdmsisRevokedOperation__c(true);
+		}
+		idmsUserAIL.setIdmsaclType__c(ailRecord.getAclType());
+		idmsUserAIL.setIdmsacl__c(ailRecord.getAcl());
+		idmsUserAIL.setIdmsoperation__c(ailRecord.getOperation());
+
+		AILRequest ailRequest = new AILRequest();
+		UserAILRecord userAILRecord = new UserAILRecord();
+		userAILRecord.setIDMSAcl__c(ailRecord.getAcl());
+		userAILRecord.setIDMSAclType__c(ailRecord.getAclType());
+		userAILRecord.setIDMS_Federated_ID__c(userId);
+		userAILRecord.setIDMSUser__c(userId);
+		userAILRecord.setIDMSOperation__c(ailRecord.getOperation());
+		ailRequest.setUserAILRecord(userAILRecord );
+		return ailRequest;
 	}
 }

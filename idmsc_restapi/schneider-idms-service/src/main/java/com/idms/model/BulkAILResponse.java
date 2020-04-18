@@ -10,32 +10,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class BulkAILResponse {
 	
 	@JsonProperty
-	private String userFedID;
+	private List<BulkAILRecord> userAils;
 
 	@JsonProperty
-	private List<AILResponse> response;
+	private String profileLastUpdateSource;
 	
 	@JsonProperty
 	private String code;
 	
 	@JsonProperty
 	private String message;
-
-	public String getUserFedID() {
-		return userFedID;
-	}
-
-	public void setUserFedID(String userFedID) {
-		this.userFedID = userFedID;
-	}
-
-	public List<AILResponse> getResponse() {
-		return response;
-	}
-
-	public void setResponse(List<AILResponse> response) {
-		this.response = response;
-	}
 
 	public String getCode() {
 		return code;
@@ -51,6 +35,22 @@ public class BulkAILResponse {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	public String getProfileLastUpdateSource() {
+		return profileLastUpdateSource;
+	}
+
+	public void setProfileLastUpdateSource(String profileLastUpdateSource) {
+		this.profileLastUpdateSource = profileLastUpdateSource;
+	}
+
+	public List<BulkAILRecord> getUserAils() {
+		return userAils;
+	}
+
+	public void setUserAils(List<BulkAILRecord> userAils) {
+		this.userAils = userAils;
 	}
 	
 	

@@ -1,7 +1,10 @@
 package com.idms.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+@JsonInclude(Include.NON_NULL)
 public class AILRecord {
 
 	@JsonProperty
@@ -12,6 +15,15 @@ public class AILRecord {
 
 	@JsonProperty
 	private String operation;
+
+	@JsonProperty
+	private String status;
+
+	@JsonProperty
+	private int statusCode;
+
+	@JsonProperty
+	private String message;
 
 	public String getAclType() {
 		return aclType;
@@ -35,6 +47,30 @@ public class AILRecord {
 
 	public void setOperation(String operation) {
 		this.operation = operation;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public int getStatusCode() {
+		return statusCode;
+	}
+
+	public void setStatusCode(int statusCode) {
+		this.statusCode = statusCode;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
 
 	@Override
