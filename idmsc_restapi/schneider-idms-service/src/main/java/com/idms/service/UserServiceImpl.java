@@ -85,6 +85,7 @@ import com.idms.model.ActivateUser;
 import com.idms.model.ActivateUserRequest;
 import com.idms.model.AddEmailRequest;
 import com.idms.model.AddMobileRequest;
+import com.idms.model.BulkAILMapValue;
 import com.idms.model.BulkAILRecord;
 import com.idms.model.BulkAILRequest;
 import com.idms.model.BulkAILResponse;
@@ -11198,11 +11199,15 @@ public class UserServiceImpl implements UserService {
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		ObjectMapper objMapper = new ObjectMapper();
 		String iPlanetDirectoryKey = null;
+		boolean stopUIMSSyncFlag = false;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		try {
 			LOGGER.info("Bulk update ail -> : Request :  -> " + objMapper.writeValueAsString(bulkAILRequest));
 			LOGGER.info("AuthorizedToken bulkupdateAIL(): " + authorizedToken);
 
+			if(StringUtils.isNotBlank(stopidmstouimsflag)) {
+				stopUIMSSyncFlag = Boolean.valueOf(stopidmstouimsflag);
+			}
 			Response response = validateAILRequest(authorizedToken, bulkAILRequest, startTime);
 			if (response != null) {
 				return response;
@@ -11219,8 +11224,8 @@ public class UserServiceImpl implements UserService {
 					BulkAILUtil.buildDuplicateFedIdsResult(userAndAILReqMap, ailRecord, userFedID);
 					continue;
 				}
-				Map<String, String> grantMap = new HashMap<String, String>();
-				Map<String, String> revokeMap = new HashMap<String, String>();
+				Map<String, BulkAILMapValue> grantMap = new HashMap<String, BulkAILMapValue>();
+				Map<String, BulkAILMapValue> revokeMap = new HashMap<String, BulkAILMapValue>();
 				try {
 					iPlanetDirectoryKey = getSSOToken();
 				} catch (IOException ioExp) {
@@ -11277,24 +11282,52 @@ public class UserServiceImpl implements UserService {
 						LOGGER.info("End: updateUser() for userId=" + userFedID);
 					}
 					userAndAILReqMap.put(userFedID, ailCountMap);
+
+					String profileLastUpdateSource = bulkAILRequest.getProfileLastUpdateSource();
+					if(!(grantMap.isEmpty() && revokeMap.isEmpty())) {
+						if (!UserConstants.UIMS
+								.equalsIgnoreCase(profileLastUpdateSource)) {
+							int vNewCntValue = updateVersion(iPlanetDirectoryKey, userFedID, productDocCtx,
+									profileLastUpdateSource);
+							if(!stopUIMSSyncFlag){
+								// Sync data to UIMS
+								LOGGER.info("Start: UIMSAccessManagerSoapService in BULKAILUpdate for userID = " + userFedID);
+								BulkAILUtil.updateUIMSBulkUserAIL(userFedID, grantMap, revokeMap, vNewCntValue,
+										productService, uimsAccessManagerSoapService, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, profileLastUpdateSource);
+								LOGGER.info(
+										"End: UIMSAccessManagerSoapService in BULKAILUpdate= " + userFedID);
+							}
+						  }
+					}
 				} else {
 					Map<Integer, BulkAILResultHolder> ailCountMap = BulkAILUtil.buildUserNotFoundResult(ailRecord);
 					userAndAILReqMap.put(userFedID, ailCountMap);
 				}
 			}
-			List<BulkAILResponse> responseList = BulkAILUtil.buildResponseList(userAndAILReqMap);
-			return Response.status(HttpStatus.OK.value()).entity(responseList).build();
-
-			/* 4 calls in bulk update AIL */
-			// 1. update IDMSAil_c for grant/revoke -- done
-			// 2. update IDMSAIL_Applications_c for grant/revoke -- done
-			/* TODO: */
-			// 3. update V_New
-			// 4. Sync to UIMS
+			BulkAILResponse baResponse = BulkAILUtil.buildResponse(userAndAILReqMap, bulkAILRequest.getProfileLastUpdateSource());
+			return Response.status(HttpStatus.OK.value()).entity(baResponse).build();
 
 		} catch (Exception e) {
 			return BulkAILUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, BulkAILConstants.INTERNAL_SERVER_ERROR, startTime);
 		}
+	}
+
+	private int updateVersion(String iPlanetDirectoryKey, String userFedID, DocumentContext productDocCtx,
+			String profileLastUpdateSource) {
+		int vNewCntValue = 0;
+		String vNew = null != productDocCtx.read("$.V_New[0]") ? getValue(productDocCtx.read("$.V_New[0]"))
+				: getDelimeter();
+
+		if (null != vNew) {
+			vNewCntValue = Integer.parseInt(vNew) + 1;
+		}
+		//update version and source
+		String verUpdateJson = BulkAILUtil.buildVersionUpdateJson(vNewCntValue, profileLastUpdateSource);
+		LOGGER.info("UserServiceImpl:updateAIL -> Request -> " + verUpdateJson);
+		LOGGER.info("Start: bulkUpdateAIL for userId= " + userFedID + " ,version= " + verUpdateJson);
+		productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userFedID, verUpdateJson);
+		LOGGER.info("End: bulkUpdateAIL for userId= " + userFedID + " ,version=" + verUpdateJson);
+		return vNewCntValue;
 	}
 
 	private Response validateAILRequest(String authorizedToken, BulkAILRequest bulkAILRequest, long startTime) {

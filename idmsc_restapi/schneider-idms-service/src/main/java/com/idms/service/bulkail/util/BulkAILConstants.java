@@ -14,4 +14,6 @@ public class BulkAILConstants {
 	public static final String USER_NOT_FOUND = "User not found";
 	public static final String INVALID_OPERATION = "Invalid Operation (Only Grant or Revoke are valid)";
 	public static final String UNAUTHORIZED_USER = "Unauthorized user";
+	public static final String AIL_GRANT_MSG = "User AIL created successfully";
+	public static final String AIL_REVOKE_MSG = "User AIL revoked successfully";
 }

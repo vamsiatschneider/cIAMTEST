@@ -8,7 +8,7 @@ public class BulkAILResultHolder {
 	
 	private int statusCode;
 	
-	private String errorMessage;
+	private String message;
 	
 	private boolean isDupRequest;
 	
@@ -56,12 +56,12 @@ public class BulkAILResultHolder {
 		this.status = status;
 	}
 
-	public String getErrorMessage() {
-		return errorMessage;
+	public String getMessage() {
+		return message;
 	}
 
-	public void setErrorMessage(String errorMessage) {
-		this.errorMessage = errorMessage;
+	public void setMessage(String message) {
+		this.message = message;
 	}
 
 	public int getStatusCode() {
