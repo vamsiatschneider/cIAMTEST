@@ -875,7 +875,7 @@ public class UserServiceImpl implements UserService {
 		CreateUserResponse sucessRespone;
 		ErrorResponse errorResponse = new ErrorResponse();
 		String loginIdentifier = null;
-		String identifierType = null;
+		String identifierType = null, otp = null, token = null;
 		ObjectMapper objMapper = null;
 		String userName = null, userExists = null;
 		String iPlanetDirectoryKey = null, finalPathString = null, pathString = null;
@@ -883,7 +883,7 @@ public class UserServiceImpl implements UserService {
 		Response userCreation = null, checkUserExist = null;
 		String otpinOpendj = null, hexPinMobile = null, otpStatus = null;
 		List<String> accssControlList=null;
-		boolean maintenanceMode=false, stopUIMSFlag = false;
+		boolean maintenanceMode=false, stopUIMSFlag = false, isOTPEnabled = false;
 		try {
 			objMapper = new ObjectMapper();
 
@@ -1483,17 +1483,25 @@ public class UserServiceImpl implements UserService {
 
 			if (null == openAmReq.getInput().getUser().getRegisterationSource()
 					|| !UserConstants.UIMS.equalsIgnoreCase(openAmReq.getInput().getUser().getRegisterationSource())) {
+				Response applicationDetails = openDJService.getUser(djUserName, djUserPwd, userRequest.getUserRecord().getIDMS_Registration_Source__c());
+				DocumentContext productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
 
+				String isOTPEnabledForApp = productDJData.read("_isOTPEnabled");
+				if(null!=isOTPEnabledForApp && !isOTPEnabledForApp.equals("")) {
+					isOTPEnabled = Boolean.valueOf(isOTPEnabledForApp);
+					LOGGER.info("isOTPEnabled: "+ isOTPEnabled);
+				}
 				if (UserConstants.EMAIL.equalsIgnoreCase(identifierType)) {
 					LOGGER.info("For Email users--");
-
 					// if Registration source is not PRM then send mail
 					if (null != userRequest.getUserRecord().getIDMS_Registration_Source__c()
 							&& (!pickListValidator.validate(UserConstants.IDMS_BFO_profile,
 									userRequest.getUserRecord().getIDMS_Registration_Source__c()))) {
-						LOGGER.info("Start: generateOtp() of SendEmail for non-PRM, userName:" + userName);
-						String token = sendEmail.generateEmailToken(userName);
-						String otp = sendEmail.generateOtp(userName);
+						if(isOTPEnabled){
+							otp = sendEmail.generateOtp(userName);
+						} else {
+							token = sendEmail.generateEmailToken(userName);
+						}
 						LOGGER.info("Start: sendOpenAmEmail() of SendEmail for non-PRM, userName:" + userName);
 						sendEmail.sendOpenAmEmail(token, otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
 								userRequest.getUserRecord().getIDMS_Registration_Source__c(), finalPathString);
@@ -1518,7 +1526,7 @@ public class UserServiceImpl implements UserService {
 
 					if (!mobileRegFlag) {
 						LOGGER.info("Start: generateOtp() for mobile, userName:" + userName);
-						String otp = sendEmail.generateOtp(userName);
+						otp = sendEmail.generateOtp(userName);
 						LOGGER.info("Start: sendSMSMessage() for mobile userName:" + userName);
 						sendEmail.sendSMSNewGateway(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
 								userRequest.getUserRecord().getIDMS_Registration_Source__c());
