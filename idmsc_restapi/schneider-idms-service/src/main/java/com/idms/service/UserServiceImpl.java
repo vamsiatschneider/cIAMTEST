@@ -7129,6 +7129,8 @@ public class UserServiceImpl implements UserService {
 		String userId = null, userType = null, userCName = null, userExistsQuery = null;
 		Integer resultCount = 0;
 		ObjectMapper objMapper = new ObjectMapper();
+		boolean isOTPEnabled = false;
+		String otp = null, token = null;
 
 		try {
 			LOGGER.info("Parameter userRequest -> " + objMapper.writeValueAsString(resendRegEmail));
@@ -7179,10 +7181,6 @@ public class UserServiceImpl implements UserService {
 			}
 
 			if (null != userId && !userId.isEmpty()) {
-				LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
-						+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + resendRegEmail.getEmail()
-						+ AUDIT_LOG_CLOSURE);
-
 				if (userType.equalsIgnoreCase("mail")) {
 					LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for email=" + userId);
 					userExistsQuery = productService.checkUserExistsWithEmailMobile(
@@ -7239,11 +7237,21 @@ public class UserServiceImpl implements UserService {
 					if ((null != fName && !fName.isEmpty()) && (fName.equalsIgnoreCase(resendRegEmail.getFirstName()))
 							&& ((null != lName && !lName.isEmpty())
 									&& (lName.equalsIgnoreCase(resendRegEmail.getLastName())))) {
-						String otp = sendEmail.generateOtp(userCName);
-						LOGGER.info("Successfully OTP generated for " + userCName);
+						Response applicationDetails = openDJService.getUser(djUserName, djUserPwd, regSource);
+						DocumentContext productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
 
+						String isOTPEnabledForApp = productDJData.read("_isOTPEnabled");
+						if(null!=isOTPEnabledForApp && !isOTPEnabledForApp.equals("")) {
+							isOTPEnabled = Boolean.valueOf(isOTPEnabledForApp);
+							LOGGER.info("isOTPEnabled: "+ isOTPEnabled);
+						}
 						if (userType.equalsIgnoreCase("mail")) {
-							sendEmail.sendOpenAmEmail(null, otp, optType, userCName,
+							if(isOTPEnabled){
+								otp = sendEmail.generateOtp(userCName);
+							} else {
+								token = sendEmail.generateEmailToken(userCName);
+							}
+							sendEmail.sendOpenAmEmail(token, otp, optType, userCName,
 									regSource, finalPathString);
 						}
 						if (userType.equalsIgnoreCase("mobile")) {
