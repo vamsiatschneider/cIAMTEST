@@ -4831,6 +4831,20 @@ public class UserServiceImpl implements UserService {
 					}
 					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 				}
+				if(null!=userRequest.getUserRecord().getTrustedAdmin() && userRequest.getUserRecord().getTrustedAdmin().equalsIgnoreCase(UserConstants.SE_TRUSTED_ADMIN)){
+					String userInfoByAccessToken = openAMTokenService.getUserInfoByAccessToken(authorizedToken, "/se");
+					productDocCtx = JsonPath.using(conf).parse(userInfoByAccessToken);
+					LOGGER.info("productDocCtx = " + ChinaIdmsUtil.printOpenAMInfo(productDocCtx.jsonString()));
+					String trustedAdminVal=productDocCtx.read("$.trustedAdmin");
+					if(null==trustedAdminVal || !trustedAdminVal.equalsIgnoreCase(UserConstants.SE_TRUSTED_ADMIN)) {
+						userResponse.setStatus(errorStatus);
+						userResponse.setMessage("User is not authorized");
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.error("Error in updateUser()-> " + userResponse.getMessage());
+						LOGGER.info("Time taken by updateUser() : " + elapsedTime);
+						return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
+					}
+				}
 			} catch (Exception e) {
 				userResponse.setMessage(UserConstants.ATTRIBUTE_NOT_AVAILABELE);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
