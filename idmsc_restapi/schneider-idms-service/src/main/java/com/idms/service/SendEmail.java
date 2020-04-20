@@ -466,8 +466,9 @@ public class SendEmail {
 				if(isOTPEnabled){
 					token = code;
 				}
-				if(!hotpOperationType.equalsIgnoreCase(EmailConstants.SETUSERPWD_OPT_TYPE)){
-				token = code;
+				if(!(hotpOperationType.equalsIgnoreCase(EmailConstants.SETUSERPWD_OPT_TYPE)
+						|| hotpOperationType.equalsIgnoreCase(EmailConstants.USERREGISTRATION_OPT_TYPE))){
+					token = code;
 				}
 
 				String mailDomain = to.substring(to.indexOf("@") + 1);
@@ -1066,7 +1067,7 @@ public class SendEmail {
 	
 	private String generateRandomToken() {
 		LOGGER.info("Entered generateRandomToken() -> Start");
-		String tmpPr = RandomStringUtils.random(10, UserConstants.RANDOM_CHARS);
+		String tmpPr = RandomStringUtils.random(20, UserConstants.RANDOM_CHARS);
 		return tmpPr;
 	}
 	

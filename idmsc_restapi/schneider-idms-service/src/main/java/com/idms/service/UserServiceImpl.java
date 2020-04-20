@@ -1491,17 +1491,16 @@ public class UserServiceImpl implements UserService {
 					if (null != userRequest.getUserRecord().getIDMS_Registration_Source__c()
 							&& (!pickListValidator.validate(UserConstants.IDMS_BFO_profile,
 									userRequest.getUserRecord().getIDMS_Registration_Source__c()))) {
-
 						LOGGER.info("Start: generateOtp() of SendEmail for non-PRM, userName:" + userName);
+						String token = sendEmail.generateEmailToken(userName);
 						String otp = sendEmail.generateOtp(userName);
 						LOGGER.info("Start: sendOpenAmEmail() of SendEmail for non-PRM, userName:" + userName);
-						sendEmail.sendOpenAmEmail(null, otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
+						sendEmail.sendOpenAmEmail(token, otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
 								userRequest.getUserRecord().getIDMS_Registration_Source__c(), finalPathString);
 						LOGGER.info("End: sendOpenAmEmail() of SendEmail finished for non-PRM, userName:" + userName);
 					} else if (null != userRequest.getUserRecord().getIDMS_Registration_Source__c()
 							&& (pickListValidator.validate(UserConstants.IDMS_BFO_profile,
 									userRequest.getUserRecord().getIDMS_Registration_Source__c()))) {
-
 						// HashedToken field is to store the hashed pin which
 						// comes from global IDMS
 						LOGGER.info(
@@ -1529,14 +1528,12 @@ public class UserServiceImpl implements UserService {
 							sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
 									userRequest.getUserRecord().getIDMS_Profile_update_source__c());
 							LOGGER.info("End: sendOpenAmMobileEmail() finsihed for  mobile userName:" + userName);
-							}
-						else{
+						} else{
 							LOGGER.info("Send Mobile OTP over Email() for mobile userName:" + userName +" disallowed");
 							/**LOGGER.info("Start: sendOpenAmMobileEmail() for mobile userName:" + userName);
 							sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
 									userRequest.getUserRecord().getIDMS_Profile_update_source__c());
 							LOGGER.info("End: sendOpenAmMobileEmail() finsihed for  mobile userName:" + userName);*/
-							
 						}
 					}
 					if (mobileRegFlag) {
