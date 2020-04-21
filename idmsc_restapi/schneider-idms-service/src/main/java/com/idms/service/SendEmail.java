@@ -467,7 +467,8 @@ public class SendEmail {
 					token = code;
 				}
 				if(!(hotpOperationType.equalsIgnoreCase(EmailConstants.SETUSERPWD_OPT_TYPE)
-						|| hotpOperationType.equalsIgnoreCase(EmailConstants.USERREGISTRATION_OPT_TYPE))){
+						|| hotpOperationType.equalsIgnoreCase(EmailConstants.USERREGISTRATION_OPT_TYPE)
+						|| hotpOperationType.equalsIgnoreCase(EmailConstants.UPDATEUSERRECORD_OPT_TYPE))){
 					token = code;
 				}
 

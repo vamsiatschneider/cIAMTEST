@@ -4776,11 +4776,11 @@ public class UserServiceImpl implements UserService {
 			String companyFedIdInOpenAM = "";
 			String usermail = "";
 			boolean isUserFromSocialLogin = false;
-			String attributeText = null;
+			String attributeText = null, otp = null, token = null;
 			JSONObject responseCheck = new JSONObject();
 			DocumentContext  productDJData = null;
 			String emailUserNameFormat = null;
-			boolean maintenanceMode=false;
+			boolean maintenanceMode=false, isOTPEnabled = false;
 			ErrorResponse errorResponse = new ErrorResponse();
 			List<String> accssControlList =null;
 
@@ -5242,10 +5242,22 @@ public class UserServiceImpl implements UserService {
 					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 							product_json_string);
 					LOGGER.info("End: updateUser() of OpenAMService to update new email finished for userid:" + userId);
+					
+					Response applicationDetails   = openDJService.getUser(djUserName, djUserPwd, userRequest.getUserRecord().getIDMS_Profile_update_source__c());
+					productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
+					String isOTPEnabledForApp = productDJData.read("_isOTPEnabled");
+					if(null!=isOTPEnabledForApp && !isOTPEnabledForApp.equals("")) {
+						isOTPEnabled = Boolean.valueOf(isOTPEnabledForApp);
+						LOGGER.info("isOTPEnabled: "+ isOTPEnabled);
+					}
+					if(isOTPEnabled){
+						otp = sendEmail.generateOtp(userId);
+					} else {
+						token = sendEmail.generateEmailToken(userId);
+					}
 
-					String otp = sendEmail.generateOtp(userId);
 					LOGGER.info("Successfully OTP generated for " + userId);
-					sendEmail.sendOpenAmEmail(null, otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userId,
+					sendEmail.sendOpenAmEmail(token, otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userId,
 							userRequest.getUserRecord().getIDMS_Profile_update_source__c(), null);
 
 					if (UserConstants.EMAIL.equalsIgnoreCase(identifierType) && null != updatingUser) {
@@ -5266,9 +5278,6 @@ public class UserServiceImpl implements UserService {
 							subject = UserConstants.UPDATE_EMAIL_NOTIFICATION;
 						}
 
-						// cal send email
-						Response applicationDetails   = openDJService.getUser(djUserName, djUserPwd, userRequest.getUserRecord().getIDMS_Profile_update_source__c());
-						productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
 						if (null != applicationDetails && 200 == applicationDetails.getStatus()) {
 							String userNameFormatOpenDJ = productDJData.read("_userNameFormat");
 							LOGGER.info("update user userNameFormatOpenDJ:"+userNameFormatOpenDJ);
@@ -5303,7 +5312,6 @@ public class UserServiceImpl implements UserService {
 						if(isDynamicEmailEnabled){
 							sendEmail.sendOpenAmEmail(null, otp, EmailConstants.CHANGE_EMAIL_NOTIFICATION, userId,
 									userRequest.getUserRecord().getIDMS_Profile_update_source__c(), null);
-
 						}else{
 							contentBuilder = getContentFromTemplate(UserConstants.UPDATE_EMAIL_NOTIFICATION,
 									prefferedLanguage, templateColor);
@@ -5331,7 +5339,7 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info(
 							"End: updateUser() of OpenAMService to update new mobile finished for userid:" + userId);
 
-					String otp = sendEmail.generateOtp(userId);
+					otp = sendEmail.generateOtp(userId);
 					LOGGER.info("Successfully OTP generated for " + userId);
 					sendEmail.sendSMSNewGateway(otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userName,
 							userRequest.getUserRecord().getIDMS_Registration_Source__c());
