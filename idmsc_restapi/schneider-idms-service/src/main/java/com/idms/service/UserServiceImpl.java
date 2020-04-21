@@ -4844,7 +4844,7 @@ public class UserServiceImpl implements UserService {
 					productDocCtx = JsonPath.using(conf).parse(userInfoByAccessToken);
 					LOGGER.info("productDocCtx = " + ChinaIdmsUtil.printOpenAMInfo(productDocCtx.jsonString()));
 					String trustedAdminVal=productDocCtx.read("$.trustedAdmin");
-					if(null==trustedAdminVal || !trustedAdminVal.equalsIgnoreCase(UserConstants.SE_TRUSTED_ADMIN)) {
+					if(null==trustedAdminVal || !trustedAdminVal.contains("TRUSTED_ADMIN")) {
 						userResponse.setStatus(errorStatus);
 						userResponse.setMessage("User is not authorized");
 						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
