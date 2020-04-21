@@ -7376,6 +7376,8 @@ public class UserServiceImpl implements UserService {
 		DocumentContext productDocCtx = null;
 		String userName = null, pathString = null, finalPathString = null;
 		ObjectMapper objMapper = new ObjectMapper();
+		boolean isOTPEnabled = false;
+		String token = null, otp = null;
 
 		try {
 			LOGGER.info("Parameter emailChangeRequest -> " + objMapper.writeValueAsString(emailChangeRequest));
@@ -7446,9 +7448,20 @@ public class UserServiceImpl implements UserService {
 										&& email.equalsIgnoreCase(emailChangeRequest.getOldEmail()))
 								&& (null != newEmail && !newEmail.isEmpty()
 										&& newEmail.equalsIgnoreCase(emailChangeRequest.getNewEmail()))) {
-							String otp = sendEmail.generateOtp(userName);
-							LOGGER.info("Successfully OTP generated for " + userName);
-							sendEmail.sendOpenAmEmail(null, otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userName,
+							Response applicationDetails = openDJService.getUser(djUserName, djUserPwd, emailChangeRequest.getNewEmail());
+							DocumentContext productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
+
+							String isOTPEnabledForApp = productDJData.read("_isOTPEnabled");
+							if(null!=isOTPEnabledForApp && !isOTPEnabledForApp.equals("")) {
+								isOTPEnabled = Boolean.valueOf(isOTPEnabledForApp);
+								LOGGER.info("isOTPEnabled: "+ isOTPEnabled);
+							}
+							if(isOTPEnabled){
+								otp = sendEmail.generateOtp(userName);
+							} else {
+								token = sendEmail.generateEmailToken(userName);
+							}
+							sendEmail.sendOpenAmEmail(token, otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userName,
 									appSource, finalPathString);
 						} else {
 							userResponse.setStatus(errorStatus);
