@@ -4734,15 +4734,13 @@ public class UserServiceImpl implements UserService {
 					jsonStr = obj.toString();
 					if(!isOTPEnabled)
 						token = sendEmail.generateEmailToken(userName);
-					/*
-					 * sendEmail.sendOpenAmEmail(token, otp, EmailConstants.SETUSERPWD_OPT_TYPE,
-					 * userName,
-					 * passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c(),
-					 * finalPathString); Reinstate
-					 */
-					productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
-					strcurrentMailCounter = Integer.toString(intcurrentMailCounter);
-					strCurrentCounter = strcurrentMailCounter;
+					
+					  sendEmail.sendOpenAmEmail(token, otp, EmailConstants.SETUSERPWD_OPT_TYPE,
+					  userName,passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c(), finalPathString); /* Reinstate */
+					 
+					  productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
+					  strcurrentMailCounter = Integer.toString(intcurrentMailCounter);
+					  strCurrentCounter = strcurrentMailCounter;
 					
 				} else if (UserConstants.HOTP_MOBILE_RESET_PR.equalsIgnoreCase(hotpService)) {
 					identifierType=UserConstants.MOBILE;
@@ -4755,7 +4753,7 @@ public class UserServiceImpl implements UserService {
 					else {
 							strcurrentMobCounter="0";
 						}
-					if(intcurrentMobCounter == Integer.parseInt(maxMobLimit)){
+							if(intcurrentMobCounter == Integer.parseInt(maxMobLimit)){
 					  				userResponseMobCounter.setStatus(errorStatus);
 					  				userResponseMobCounter.setMessage("Maximum resend Mobile count breached.");
 					  				userResponseMobCounter.setId(userName);
@@ -4764,20 +4762,18 @@ public class UserServiceImpl implements UserService {
 					  				LOGGER.info("Maximum resend Mobile count breached.");
 					  				return Response.status(Response.Status.BAD_REQUEST).entity(userResponseMobCounter).build();
 									}
-							else {		
+								else {		
 										intcurrentMobCounter = increment(intcurrentMobCounter);
 									}
 							
 							obj.put(UserConstants.MOBILE_RATE_COUNTER, intcurrentMobCounter);
 							jsonStr = obj.toString();	
-					/*
-					 * sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE,
-					 * userName,
-					 * passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c());
-					 * sendEmail.sendSMSNewGateway(otp, EmailConstants.SETUSERPWD_OPT_TYPE,
-					 * userName,
-					 * passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c()); Reinstate
-					 */
+					
+					  sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE,
+					  userName, passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c());
+					  sendEmail.sendSMSNewGateway(otp, EmailConstants.SETUSERPWD_OPT_TYPE,
+					  userName, passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c()); /* Reinstate */
+					 
 					productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
 					strcurrentMobCounter=Integer.toString(intcurrentMobCounter);
 					strCurrentCounter=strcurrentMobCounter;
@@ -7402,9 +7398,9 @@ public class UserServiceImpl implements UserService {
 						}
 						if (userType.equalsIgnoreCase("mail")) {
 							if(isOTPEnabled){
-								/* otp = sendEmail.generateOtp(userCName); Reinstate*/
+								otp = sendEmail.generateOtp(userCName);
 							} else {
-								/* token = sendEmail.generateEmailToken(userCName); Reinstate*/
+								token = sendEmail.generateEmailToken(userCName);
 							}
 							/* Counter */
 						if(userExistsQuery.contains(UserConstants.MAIL_RATE_COUNTER)) {
@@ -7427,10 +7423,10 @@ public class UserServiceImpl implements UserService {
 							}
 						obj.put(UserConstants.MAIL_RATE_COUNTER, intcurrentMailCounter);
 						jsonStr = obj.toString();
-							/*
-							 * sendEmail.sendOpenAmEmail(token, otp, optType, userCName, regSource,
-							 * finalPathString);  Reinstate
-							 */
+							
+							  sendEmail.sendOpenAmEmail(token, otp, optType, userCName, regSource,
+									finalPathString); /* Reinstate */
+							 
 							LOGGER.info("resendRegEmail :: Update mail counter :: Start");
 							productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userCName, jsonStr);
 							LOGGER.info("resendRegEmail :: Update mail counter :: Finish");
@@ -7460,22 +7456,17 @@ public class UserServiceImpl implements UserService {
 		  					LOGGER.info("Maximum resend Mobile count breached.");
 		  					return Response.status(Response.Status.BAD_REQUEST).entity(userResponseMobCounter).build();
 						}
-						else{		
+						else {		
 								intcurrentMobCounter = increment(intcurrentMobCounter);
 							}
 						obj.put(UserConstants.MOBILE_RATE_COUNTER, intcurrentMobCounter);
 						jsonStr = obj.toString();
-							
-							/*
-							 * sendEmail.sendSMSNewGateway(otp, EmailConstants.USERREGISTRATION_OPT_TYPE,
-							 * userCName, regSource);
-							 * LOGGER.info("End: sendSMSMessage() finished for  mobile userName:" +
-							 * userCName); LOGGER.info("Start: sendOpenAmMobileEmail() for mobile userName:"
-							 * + userCName); sendEmail.sendOpenAmMobileEmail(otp,
-							 * EmailConstants.USERREGISTRATION_OPT_TYPE, userCName, regSource);
-							 * LOGGER.info("End: sendOpenAmMobileEmail() finsihed for  mobile userName:" +
-							 * userCName);  Reinstate
-							 */
+							  sendEmail.sendSMSNewGateway(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userCName, regSource);
+							  LOGGER.info("End: sendSMSMessage() finished for  mobile userName:" + userCName); 
+							  LOGGER.info("Start: sendOpenAmMobileEmail() for mobile userName:"+ userCName); 
+							  sendEmail.sendOpenAmMobileEmail(otp,EmailConstants.USERREGISTRATION_OPT_TYPE, userCName, regSource);
+							  LOGGER.info("End: sendOpenAmMobileEmail() finsihed for  mobile userName:" +userCName); /* Reinstate */
+							 
 							LOGGER.info("resendRegEmail :: Update mobile counter :: Start");
 							productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userCName, jsonStr);
 							LOGGER.info("resendRegEmail :: Update mobile counter :: Finish");
@@ -7710,11 +7701,10 @@ public class UserServiceImpl implements UserService {
 									}
 								obj.put(UserConstants.MAIL_RATE_COUNTER, intcurrentMailCounter);
 								jsonStr = obj.toString();	
-							/*
-							 * sendEmail.sendOpenAmEmail(token, otp,
-							 * EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userName, appSource,
-							 * finalPathString); Reinstate
-							 */
+							
+							  sendEmail.sendOpenAmEmail(token, otp,EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userName, appSource,
+									finalPathString); /* Reinstate */
+							 
 								LOGGER.info("resendChangeEmail :: Update mail counter :: Start");
 								productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
 								LOGGER.info("resendChangeEmail :: Update mail counter :: Finish");
