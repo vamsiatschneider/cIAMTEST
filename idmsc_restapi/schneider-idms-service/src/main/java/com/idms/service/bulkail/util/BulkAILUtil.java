@@ -66,38 +66,23 @@ public class BulkAILUtil {
 	}
 
 	public static void processGrantRequest(Map<String, BulkAILMapValue> grantMap, DocumentContext productDocCtx, String idmsAIL_c,
-			List<AILRecord> ails, Map<Integer, BulkAILResultHolder> ailCountMap,
+			AILRecord ail, Map<Integer, BulkAILResultHolder> ailCountMap,
 			Map<AILRecord, Integer> recordCountMap) {
-		for (AILRecord ail : ails) {
-			if (ail == null) {
-				buildNullAILResult(ailCountMap);
-				continue;
-			}
-			int count = ailCountMap.size();
-			boolean isValidOperationType = false;
-			if (AILOperationType.GRANT.getType().equalsIgnoreCase(ail.getOperation())
-					|| AILOperationType.REVOKE.getType().equalsIgnoreCase(ail.getOperation())) {
-				isValidOperationType = true;
-			}
-			if (!isValidOperationType) {
-				BulkAILResultHolder holder = buildInvalidResult(ail, HttpStatus.BAD_REQUEST.value(),
-						BulkAILConstants.INVALID_OPERATION, true);
-				ailCountMap.put(++count, holder);
-			}
-			if (AILOperationType.GRANT.getType().equalsIgnoreCase(ail.getOperation())) {
-				if (recordCountMap.get(ail) != null) {
-					// create new holder object since grant/revoke on same acl type/value
-					// combination is invalid.
-					recordCountMap.put(ail, recordCountMap.get(ail) + 1);
-					BulkAILResultHolder holder = buildInvalidResult(ail, HttpStatus.BAD_REQUEST.value(),
-							BulkAILConstants.MALFORMED_REQUEST, true);
-					ailCountMap.put(++count, holder);
-				} else {
-					count = buildSuccessResult(ailCountMap, ail, count);
-					recordCountMap.put(ail, 1);
 
-					buildGrantAILMap(grantMap, productDocCtx, idmsAIL_c, ail);
-				}
+		int count = ailCountMap.size();
+		if (AILOperationType.GRANT.getType().equalsIgnoreCase(ail.getOperation())) {
+			if (recordCountMap.get(ail) != null) {
+				// create new holder object since grant/revoke on same acl type/value
+				// combination is invalid.
+				recordCountMap.put(ail, recordCountMap.get(ail) + 1);
+				BulkAILResultHolder holder = buildInvalidResult(ail, HttpStatus.BAD_REQUEST.value(),
+						BulkAILConstants.MALFORMED_REQUEST, true);
+				ailCountMap.put(++count, holder);
+			} else {
+				count = buildSuccessResult(ailCountMap, ail, count);
+				recordCountMap.put(ail, 1);
+
+				buildGrantAILMap(grantMap, productDocCtx, idmsAIL_c, ail);
 			}
 		}
 	}
@@ -118,31 +103,27 @@ public class BulkAILUtil {
 	}
 
 	public static void processRevokeRequest(Map<String, BulkAILMapValue> revokeMap, DocumentContext productDocCtx, String idmsAIL_c,
-			List<AILRecord> ails, Map<Integer, BulkAILResultHolder> ailCountMap,
+			AILRecord ail, Map<Integer, BulkAILResultHolder> ailCountMap,
 			Map<AILRecord, Integer> recordCountMap) {
-		for (AILRecord ail : ails) {
-			if (ail == null) {
-				continue;
-			}
-			int count = ailCountMap.size();
-			if (AILOperationType.REVOKE.getType().equalsIgnoreCase(ail.getOperation())) {
-				if (recordCountMap.get(ail) != null) {
-					// create new holder object since grant/revoke on same acl type/value
-					// combination is invalid.
-					recordCountMap.put(ail, recordCountMap.get(ail) + 1);
-					BulkAILResultHolder holder = buildInvalidResult(ail, HttpStatus.BAD_REQUEST.value(),
-							BulkAILConstants.MALFORMED_REQUEST, true);
-					ailCountMap.put(++count, holder);
-				} else {
-					count = buildSuccessResult(ailCountMap, ail, count);
-					recordCountMap.put(ail, 1);
-					buildRevokeAILMap(revokeMap, productDocCtx, idmsAIL_c, ail);
-				}
+
+		int count = ailCountMap.size();
+		if (AILOperationType.REVOKE.getType().equalsIgnoreCase(ail.getOperation())) {
+			if (recordCountMap.get(ail) != null) {
+				// create new holder object since grant/revoke on same acl type/value
+				// combination is invalid.
+				recordCountMap.put(ail, recordCountMap.get(ail) + 1);
+				BulkAILResultHolder holder = buildInvalidResult(ail, HttpStatus.BAD_REQUEST.value(),
+						BulkAILConstants.MALFORMED_REQUEST, true);
+				ailCountMap.put(++count, holder);
+			} else {
+				count = buildSuccessResult(ailCountMap, ail, count);
+				recordCountMap.put(ail, 1);
+				buildRevokeAILMap(revokeMap, productDocCtx, idmsAIL_c, ail);
 			}
 		}
 	}
 	
-	private static BulkAILResultHolder buildInvalidResult(AILRecord ail, int statusCode, String invalidOp, boolean dupRequest) {
+	public static BulkAILResultHolder buildInvalidResult(AILRecord ail, int statusCode, String invalidOp, boolean dupRequest) {
 		BulkAILResultHolder holder = new BulkAILResultHolder();
 		holder.setAilRecord(ail);
 		holder.setDupRequest(dupRequest);
