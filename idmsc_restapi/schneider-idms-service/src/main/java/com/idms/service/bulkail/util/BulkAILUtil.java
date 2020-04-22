@@ -2,12 +2,14 @@ package com.idms.service.bulkail.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.log4j.pattern.LogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -473,12 +475,14 @@ public class BulkAILUtil {
 
 		// Sync grant requests to UIMS
 		LOGGER.info("START: Grant request to UIMS in BULKAILUpdate for userID = " + userId);
+		LOGGER.info("Grant map size : " + grantMap.size());
 		syncRequestsToUIMS(userId, grantMap, vNewCntValue, productService, uimsAccessManagerSoapService,
 				iPlanetDirectoryKey, idmsUserAIL);
 		LOGGER.info("END: Grant request to UIMS in BULKAILUpdate for userID = " + userId);
 
 		LOGGER.info("START: Revoke request to UIMS in BULKAILUpdate for userID = " + userId);
 		// Sync revoke requests to UIMS
+		LOGGER.info("Revoke map size : " + grantMap.size());
 		syncRequestsToUIMS(userId, revokeMap, vNewCntValue, productService, uimsAccessManagerSoapService,
 				iPlanetDirectoryKey, idmsUserAIL);
 		LOGGER.info("END: Revoke request to UIMS in BULKAILUpdate for userID = " + userId);
