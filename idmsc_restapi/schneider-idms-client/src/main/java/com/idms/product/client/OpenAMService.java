@@ -28,6 +28,11 @@ public interface OpenAMService {
 	@Cacheable(value="iPlanetToken", key="#p0")
 	String authenticateUser(@HeaderParam("X-OpenAM-Username") String userName,@HeaderParam("X-OpenAM-Password") String password,@QueryParam("realm") String realm);
 	
+	@PUT
+	@Path("/se/users/{userId}")
+	@Consumes("application/json")
+	String updateCounter(@HeaderParam("Cookie") String iPlanetDirectoryPro, @PathParam("userId") String userId, String request);
+	
 	@GET
 	@Path("/se/users/{userId}")
 	String getUser(@HeaderParam("iPlanetDirectoryPro") String iPlanetDirectoryKey,@PathParam("userId") String userId);
@@ -76,8 +81,7 @@ public interface OpenAMService {
 	@Path("/se/authenticate")
 	@Consumes("application/form-data")
 	Response initSocialLogin(@QueryParam("service") String service,@QueryParam("authIndexType") String authIndexType, @QueryParam("authIndexValue") String authIndexValue);
-	
-	
+		
 	@POST
 	@Path("/authenticate")
 	String authenticateIdmsChinaUser(@HeaderParam("X-OpenAM-Username") String userName,@HeaderParam("X-OpenAM-Password") String password,@QueryParam("realm") String realm);

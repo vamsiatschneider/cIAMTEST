@@ -36,6 +36,8 @@ public class UserConstants {
 	
 	public static final String RESEND_REGEMAIL_SUCCESS_MESSAGE="Resend Registration Email or mobile OTP successful";
 	
+	public static final String RESEND_REGEMOB_SUCCESS_MESSAGE="Resend Registration Email or mobile OTP successful";
+	
 	public static final String RESEND_REGEMAIL_ERROR_MESSAGE="Error in Resend Registration Email or mobile OTP";
 	
 	public static final String IDMSIDPCHANING_SUCCESS_MESSAGE="Idms Idp Chaning completed successfully";
@@ -619,5 +621,11 @@ public class UserConstants {
 	//UIMS user creation in IDMS
 	public static final String UIMS_USER_CREATE_IN_IDMS="UIMS user created in IDMS";
 	public static final String PWD_NOT_SET_IN_IDMS="PasswordNotSetInIDMS : Email/SMS sent to reset password";
+	
+	//Counter
+	public static final String MAIL_RATE_COUNTER="mailRateCounter";
+	public static final String MOBILE_RATE_COUNTER="mobileRateCounter";
+	public static final String ZERO = "0";
+	
 	
 }
