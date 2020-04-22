@@ -456,47 +456,42 @@ public class BulkAILUtil {
 	public static void updateUIMSBulkUserAIL(String userId, Map<String, BulkAILMapValue> grantMap,
 			Map<String, BulkAILMapValue> revokeMap, int vNewCntValue, OpenAMService productService, UIMSAccessManagerSoapService uimsAccessManagerSoapService, String iPlanetDirectoryKey, String profileUpdateSource) {
 
-		Attributes idmsUser_rAttributes = new Attributes();
-		IDMSUser__r idmsUser__r = new IDMSUser__r();
-		idmsUser__r.setAttributes(idmsUser_rAttributes);
-		idmsUser__r.setId(userId);
-		idmsUser__r.setIDMS_Federated_ID__c(userId);
-
-		IDMSUserAIL idmsUserAIL = new IDMSUserAIL(idmsUser__r);
-		Attributes attributes = new Attributes();
-		attributes.setType("IDMSUserAIL__c");
-		idmsUserAIL.setAttributes(attributes);
-		idmsUserAIL.setId(userId);
-		idmsUserAIL.setIdmsuser__c(userId);
-		idmsUserAIL.setIDMS_Federated_Id__c(userId);
-		idmsUserAIL.setIdms_Profile_update_source__c(profileUpdateSource);
-
 		// Sync grant requests to UIMS
 		LOGGER.info("START: Grant request to UIMS in BULKAILUpdate for userID = " + userId);
 		LOGGER.info("Grant map size : " + grantMap.size());
 		syncRequestsToUIMS(userId, grantMap, vNewCntValue, productService, uimsAccessManagerSoapService,
-				iPlanetDirectoryKey, idmsUserAIL);
+				iPlanetDirectoryKey, profileUpdateSource);
 		LOGGER.info("END: Grant request to UIMS in BULKAILUpdate for userID = " + userId);
 
 		LOGGER.info("START: Revoke request to UIMS in BULKAILUpdate for userID = " + userId);
 		// Sync revoke requests to UIMS
 		LOGGER.info("Revoke map size : " + revokeMap.size());
 		syncRequestsToUIMS(userId, revokeMap, vNewCntValue, productService, uimsAccessManagerSoapService,
-				iPlanetDirectoryKey, idmsUserAIL);
+				iPlanetDirectoryKey, profileUpdateSource);
 		LOGGER.info("END: Revoke request to UIMS in BULKAILUpdate for userID = " + userId);
 	}
 
 	private static void syncRequestsToUIMS(String userId, Map<String, BulkAILMapValue> map, int vNewCntValue,
 			OpenAMService productService, UIMSAccessManagerSoapService uimsAccessManagerSoapService,
-			String iPlanetDirectoryKey, IDMSUserAIL idmsUserAIL) {
+			String iPlanetDirectoryKey, String profileUpdateSource) {
 		if (!map.isEmpty()) {
 			for (Entry<String, BulkAILMapValue> entry : map.entrySet()) {
 				String ailKey = entry.getKey();
 				if (null != ailKey && "IDMSAil_c".equals(ailKey)) {
 					List<AILRecord> ailRecords = entry.getValue().getAilRecords();
 					for(AILRecord ailRecord : ailRecords) {
+						LOGGER.info(" AIL Operation = " + ailRecord.getOperation());
+						LOGGER.info(" AIL Type = " + ailRecord.getAclType());
+						LOGGER.info(" AIL Val = " + ailRecord.getAcl());
+						Attributes idmsUser_rAttributes = new Attributes();
+						IDMSUser__r idmsUser__r = new IDMSUser__r();
+						idmsUser__r.setAttributes(idmsUser_rAttributes);
+						idmsUser__r.setId(userId);
+						idmsUser__r.setIDMS_Federated_ID__c(userId);
+
+						IDMSUserAIL idmsUserAIL = new IDMSUserAIL(idmsUser__r);
 						LOGGER.info(" Processing " + ailRecord.getOperation() +" Operation request for userID = " + userId);
-						AILRequest ailRequest = populateUIMSInput(userId, idmsUserAIL, ailRecord);
+						AILRequest ailRequest = populateUIMSInput(userId, idmsUserAIL, ailRecord, profileUpdateSource);
 						LOGGER.info(" Revoke Operation in IDMSUserAIL: "+ idmsUserAIL.isIdmsisRevokedOperation__c());
 						//sync call to UIMS
 						LOGGER.info("Start: Sync call for " + ailRecord.getOperation() + " operation to UIMS for userId: " + userId);
@@ -510,7 +505,15 @@ public class BulkAILUtil {
 		}
 	}
 
-	private static AILRequest populateUIMSInput(String userId, IDMSUserAIL idmsUserAIL, AILRecord ailRecord) {
+	private static AILRequest populateUIMSInput(String userId, IDMSUserAIL idmsUserAIL, AILRecord ailRecord, String profileUpdateSource) {
+		Attributes attributes = new Attributes();
+		attributes.setType("IDMSUserAIL__c");
+		idmsUserAIL.setAttributes(attributes);
+		idmsUserAIL.setId(userId);
+		idmsUserAIL.setIdmsuser__c(userId);
+		idmsUserAIL.setIDMS_Federated_Id__c(userId);
+		idmsUserAIL.setIdms_Profile_update_source__c(profileUpdateSource);
+
 		if(AILOperationType.GRANT.getType().equalsIgnoreCase(ailRecord.getOperation())) {
 			idmsUserAIL.setIdmsisRevokedOperation__c(false);
 		}else {
