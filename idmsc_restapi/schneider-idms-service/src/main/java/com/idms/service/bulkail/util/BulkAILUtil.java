@@ -472,11 +472,18 @@ public class BulkAILUtil {
 		idmsUserAIL.setIdms_Profile_update_source__c(profileUpdateSource);
 
 		// Sync grant requests to UIMS
+		LOGGER.info("START: Grant request to UIMS in BULKAILUpdate for userID = " + userId);
+		LOGGER.info("Grant map size : " + grantMap.size());
 		syncRequestsToUIMS(userId, grantMap, vNewCntValue, productService, uimsAccessManagerSoapService,
 				iPlanetDirectoryKey, idmsUserAIL);
+		LOGGER.info("END: Grant request to UIMS in BULKAILUpdate for userID = " + userId);
+
+		LOGGER.info("START: Revoke request to UIMS in BULKAILUpdate for userID = " + userId);
 		// Sync revoke requests to UIMS
+		LOGGER.info("Revoke map size : " + revokeMap.size());
 		syncRequestsToUIMS(userId, revokeMap, vNewCntValue, productService, uimsAccessManagerSoapService,
 				iPlanetDirectoryKey, idmsUserAIL);
+		LOGGER.info("END: Revoke request to UIMS in BULKAILUpdate for userID = " + userId);
 	}
 
 	private static void syncRequestsToUIMS(String userId, Map<String, BulkAILMapValue> map, int vNewCntValue,
@@ -488,9 +495,13 @@ public class BulkAILUtil {
 				if (null != ailKey && "IDMSAil_c".equals(ailKey)) {
 					List<AILRecord> ailRecords = entry.getValue().getAilRecords();
 					for(AILRecord ailRecord : ailRecords) {
+						LOGGER.info(" Processing " + ailRecord.getOperation() +" Operation request for userID = " + userId);
 						AILRequest ailRequest = populateUIMSInput(userId, idmsUserAIL, ailRecord);
+						LOGGER.info(" Revoke Operation in IDMSUserAIL: "+ idmsUserAIL.isIdmsisRevokedOperation__c());
 						//sync call to UIMS
+						LOGGER.info("Start: Sync call for " + ailRecord.getOperation() + " operation to UIMS for userId: " + userId);
 						uimsAccessManagerSoapService.updateUIMSUserAIL(ailRequest , idmsUserAIL, String.valueOf(vNewCntValue), productService, iPlanetDirectoryKey, "");
+						LOGGER.info("End: Sync call for " + ailRecord.getOperation() + " operation to UIMS for userId: "+ userId);
 					}
 				} else {
 					continue;
