@@ -480,7 +480,7 @@ public class BulkAILUtil {
 
 		LOGGER.info("START: Revoke request to UIMS in BULKAILUpdate for userID = " + userId);
 		// Sync revoke requests to UIMS
-		LOGGER.info("Revoke map size : " + grantMap.size());
+		LOGGER.info("Revoke map size : " + revokeMap.size());
 		syncRequestsToUIMS(userId, revokeMap, vNewCntValue, productService, uimsAccessManagerSoapService,
 				iPlanetDirectoryKey, idmsUserAIL);
 		LOGGER.info("END: Revoke request to UIMS in BULKAILUpdate for userID = " + userId);
