@@ -16,4 +16,5 @@ public class BulkAILConstants {
 	public static final String UNAUTHORIZED_USER = "Unauthorized user";
 	public static final String AIL_GRANT_MSG = "User AIL created successfully";
 	public static final String AIL_REVOKE_MSG = "User AIL revoked successfully";
+	public static final String NOT_FOUND_SML = "Not found in SML";
 }

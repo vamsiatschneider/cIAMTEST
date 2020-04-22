@@ -133,6 +133,7 @@ import com.idms.product.model.OpenAmUserInput;
 import com.idms.product.model.OpenAmUserRequest;
 import com.idms.product.model.PasswordRecoveryUser;
 import com.idms.product.model.PostMobileRecord;
+import com.idms.service.bulkail.util.AILOperationType;
 import com.idms.service.bulkail.util.BulkAILConstants;
 import com.idms.service.bulkail.util.BulkAILUtil;
 import com.idms.service.impl.IFWTokenServiceImpl;
@@ -11260,6 +11261,10 @@ public class UserServiceImpl implements UserService {
 			if (response != null) {
 				return response;
 			}
+			Response appDetails = openDJService.getUser(djUserName, djUserPwd, bulkAILRequest.getProfileLastUpdateSource());
+			DocumentContext openDJAttrs = JsonPath.using(conf).parse(IOUtils.toString((InputStream) appDetails.getEntity()));
+
+			String profileUpdateSource = bulkAILRequest.getProfileLastUpdateSource();
 			Map<String, Map<Integer, BulkAILResultHolder>> userAndAILReqMap = new HashMap<String, Map<Integer, BulkAILResultHolder>>();
 			for (BulkAILRecord ailRecord : bulkAILRequest.getUserAils()) {
 				String userFedID = ailRecord.getUserFedID();
@@ -11279,6 +11284,13 @@ public class UserServiceImpl implements UserService {
 				} catch (IOException ioExp) {
 					LOGGER.error("Unable to get SSO Token: " + ioExp.getMessage(),ioExp);
 					iPlanetDirectoryKey = "";
+				}
+				// if update source is UIMS, then create missing user in cIAM
+				boolean isUserCreatedInCIAM = createMissingUIMSUserInCIAM(startTime, iPlanetDirectoryKey, profileUpdateSource, userFedID);
+				if(!isUserCreatedInCIAM) {
+					Map<Integer, BulkAILResultHolder> ailCountMap = BulkAILUtil.buildUserNotFoundResult(ailRecord);
+					userAndAILReqMap.put(userFedID, ailCountMap);
+					continue;
 				}
 				if (StringUtils.isNotBlank(userFedID)) {
 					// Get User data
@@ -11303,7 +11315,11 @@ public class UserServiceImpl implements UserService {
 						continue;
 					}
 					Map<AILRecord, Integer> recordCountMap = new HashMap<AILRecord, Integer>();
-					BulkAILUtil.processGrantRequest(grantMap, productDocCtx, idmsAIL_c, ails, ailCountMap, recordCountMap);
+
+					processNullAndInvalidOpTypeRecords(ails, ailCountMap);
+
+					validateSMLAndProcessGrantRequest(authorizedToken, openDJAttrs, grantMap, productDocCtx, idmsAIL_c,
+							ails, ailCountMap, recordCountMap);
 					if(!grantMap.isEmpty()) {
 						String grantJson = BulkAILUtil.buildUserUpdateJson(grantMap);
 						LOGGER.info("Grant Operation: BulkUpdateAIL -> " + grantJson);
@@ -11320,7 +11336,8 @@ public class UserServiceImpl implements UserService {
 							idmsAIL_c = "[]";
 						}
 					}
-					BulkAILUtil.processRevokeRequest(revokeMap, productDocCtx, idmsAIL_c, ails, ailCountMap, recordCountMap);
+					validateSMLAndProcessRevokeRequest(authorizedToken, openDJAttrs, revokeMap, productDocCtx,
+							idmsAIL_c, ails, ailCountMap, recordCountMap);
 					if(!revokeMap.isEmpty()) {
 						String revokeJson = BulkAILUtil.buildUserUpdateJson(revokeMap);
 						LOGGER.info("Revoke Operation: BulkUpdateAIL -> " + revokeJson);
@@ -11331,17 +11348,16 @@ public class UserServiceImpl implements UserService {
 					}
 					userAndAILReqMap.put(userFedID, ailCountMap);
 
-					String profileLastUpdateSource = bulkAILRequest.getProfileLastUpdateSource();
 					if(!(grantMap.isEmpty() && revokeMap.isEmpty())) {
 						if (!UserConstants.UIMS
-								.equalsIgnoreCase(profileLastUpdateSource)) {
+								.equalsIgnoreCase(profileUpdateSource)) {
 							int vNewCntValue = updateVersion(iPlanetDirectoryKey, userFedID, productDocCtx,
-									profileLastUpdateSource);
+									profileUpdateSource);
 							if(!stopUIMSSyncFlag){
 								// Sync data to UIMS
 								LOGGER.info("Start: UIMSAccessManagerSoapService in BULKAILUpdate for userID = " + userFedID);
 								BulkAILUtil.updateUIMSBulkUserAIL(userFedID, grantMap, revokeMap, vNewCntValue,
-										productService, uimsAccessManagerSoapService, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, profileLastUpdateSource);
+										productService, uimsAccessManagerSoapService, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, profileUpdateSource);
 								LOGGER.info(
 										"End: UIMSAccessManagerSoapService in BULKAILUpdate= " + userFedID);
 							}
@@ -11358,6 +11374,153 @@ public class UserServiceImpl implements UserService {
 		} catch (Exception e) {
 			return BulkAILUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, BulkAILConstants.INTERNAL_SERVER_ERROR, startTime);
 		}
+	}
+
+	private boolean createMissingUIMSUserInCIAM(long startTime, String iPlanetDirectoryKey, String profileUpdateSource,
+			String userFedID) {
+		boolean isUserCreated = true;
+		if (UserConstants.UIMS.equalsIgnoreCase(profileUpdateSource)) {
+			Response fedResponse = checkUserExistsWithFederationID(iPlanetDirectoryKey, userFedID, startTime);
+			// if status code is 404 then create user
+			if (fedResponse.getStatus() == 404) {
+				LOGGER.info("Start: UIMS user does not exist in IDMS, so creating this user in IDMS-China"
+						+ userFedID);
+				UpdateUserRequest request = new UpdateUserRequest();
+				IFWUser user = new IFWUser();
+				request.setUserRecord(user);
+				request.getUserRecord().setIDMS_Federated_ID__c(userFedID);
+				request.getUserRecord().setIDMS_Profile_update_source__c(profileUpdateSource);
+				Response createUserInIDMSResponse = createAbhagaUIMSUserInIDMS(iPlanetDirectoryKey, request);
+				LOGGER.info("End: UIMS user does not exist in IDMS, finished creating this user in IDMS-China"
+						+ userFedID);
+				if (200 == createUserInIDMSResponse.getStatus()) {
+					isUserCreated = true;
+					long elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("UIMS user created and updated in IDMS");
+					LOGGER.info("Time taken by BulkUpdateAIL: " + elapsedTime);
+				} else {
+					isUserCreated = false;
+					LOGGER.error("Error in BulkUpdateAIL is ::" + "UIMS user creation and updation failed in IDMS");
+					long elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by BulkUpdateAIL: " + elapsedTime);
+				}
+			}
+		}
+		return isUserCreated;
+	}
+
+	private void processNullAndInvalidOpTypeRecords(List<AILRecord> ails,
+			Map<Integer, BulkAILResultHolder> ailCountMap) {
+		for (AILRecord ail : ails) {
+			if (ail == null) {
+				BulkAILUtil.buildNullAILResult(ailCountMap);
+				continue;
+			}
+			boolean isValidOperationType = false;
+			int count = ailCountMap.size();
+			if (AILOperationType.GRANT.getType().equalsIgnoreCase(ail.getOperation())
+					|| AILOperationType.REVOKE.getType().equalsIgnoreCase(ail.getOperation())) {
+				isValidOperationType = true;
+			}
+			if (!isValidOperationType) {
+				BulkAILResultHolder holder = BulkAILUtil.buildInvalidResult(ail, HttpStatus.BAD_REQUEST.value(),
+						BulkAILConstants.INVALID_OPERATION, false);
+				ailCountMap.put(++count, holder);
+				continue;
+			}
+		}
+	}
+
+	private void validateSMLAndProcessRevokeRequest(String authorizedToken, DocumentContext openDJAttrs,
+			Map<String, BulkAILMapValue> revokeMap, DocumentContext productDocCtx, String idmsAIL_c,
+			List<AILRecord> ails, Map<Integer, BulkAILResultHolder> ailCountMap,
+			Map<AILRecord, Integer> recordCountMap) {
+
+		for (AILRecord ail : ails) {
+			if (ail != null) {
+				int count = ailCountMap.size();
+				boolean verifnResult = false;
+				if (enableSMLVerification.equalsIgnoreCase("True")) {
+					if (AILOperationType.REVOKE.getType().equalsIgnoreCase(ail.getOperation())) {
+						LOGGER.info("In SML Verification block: " + enableSMLVerification);
+						String ailValue = ail.getAclType() + "_" + ail.getAcl();
+						verifnResult = verifyAilInSMLMaster(openDJService, ailValue);
+						if (!verifnResult) {
+							BulkAILResultHolder holder = BulkAILUtil.buildInvalidResult(ail,
+									HttpStatus.NOT_FOUND.value(), BulkAILConstants.NOT_FOUND_SML, false);
+							LOGGER.info("SML verification failed for ailValue: " + ailValue);
+							ailCountMap.put(++count, holder);
+							continue;
+						}
+						LOGGER.info("SML verification is successful");
+						String appTechnicalUser = openDJAttrs.read("_technicalUser");
+						String appLevelValidation = null;
+						if (openDJAttrs.read("_isAILValidation") != null) {
+							appLevelValidation = openDJAttrs.read("_isAILValidation");
+						}
+						LOGGER.info("App Level AIL Validation: " + appLevelValidation);
+						if (null != appLevelValidation && appLevelValidation.equalsIgnoreCase("True")
+								&& !isAILApp(authorizedToken, appTechnicalUser)) {
+							BulkAILResultHolder holder = BulkAILUtil.buildInvalidResult(ail,
+									HttpStatus.UNAUTHORIZED.value(), BulkAILConstants.UNAUTHORIZED_USER, false);
+							ailCountMap.put(++count, holder);
+							continue;
+						}
+					}
+				}
+				BulkAILUtil.processRevokeRequest(revokeMap, productDocCtx, idmsAIL_c, ail, ailCountMap, recordCountMap);
+			}
+		}
+	}
+
+	private void validateSMLAndProcessGrantRequest(String authorizedToken, DocumentContext openDJAttrs,
+			Map<String, BulkAILMapValue> grantMap, DocumentContext productDocCtx, String idmsAIL_c,
+			List<AILRecord> ails, Map<Integer, BulkAILResultHolder> ailCountMap,
+			Map<AILRecord, Integer> recordCountMap) {
+
+		for (AILRecord ail : ails) {
+			if (ail != null) {
+				int count = ailCountMap.size();
+				boolean verifnResult = false;
+				if (enableSMLVerification.equalsIgnoreCase("True")) {
+					if (AILOperationType.GRANT.getType().equalsIgnoreCase(ail.getOperation())) {
+						LOGGER.info("In SML Verification block: " + enableSMLVerification);
+						String ailValue = ail.getAclType() + "_" + ail.getAcl();
+						verifnResult = verifyAilInSMLMaster(openDJService, ailValue);
+						if (!verifnResult) {
+							BulkAILResultHolder holder = BulkAILUtil.buildInvalidResult(ail,
+									HttpStatus.NOT_FOUND.value(), BulkAILConstants.NOT_FOUND_SML, false);
+							LOGGER.info("SML verification failed for ailValue: " + ailValue);
+							ailCountMap.put(++count, holder);
+							continue;
+						}
+						LOGGER.info("SML verification is successful");
+						String appTechnicalUser = openDJAttrs.read("_technicalUser");
+						String appLevelValidation = null;
+						if (openDJAttrs.read("_isAILValidation") != null) {
+							appLevelValidation = openDJAttrs.read("_isAILValidation");
+						}
+						LOGGER.info("App Level AIL Validation: " + appLevelValidation);
+						if (null != appLevelValidation && appLevelValidation.equalsIgnoreCase("True")
+								&& !isAILApp(authorizedToken, appTechnicalUser)) {
+							BulkAILResultHolder holder = BulkAILUtil.buildInvalidResult(ail,
+									HttpStatus.UNAUTHORIZED.value(), BulkAILConstants.UNAUTHORIZED_USER, false);
+							ailCountMap.put(++count, holder);
+							continue;
+						}
+					}
+				}
+				BulkAILUtil.processGrantRequest(grantMap, productDocCtx, idmsAIL_c, ail, ailCountMap, recordCountMap);
+			}
+		}
+	}
+
+	private boolean verifyAilInSMLMaster(OpenDjService openDJService, String ailValue) {
+		Response ail = openDJService.verifyAIL(djUserName, djUserPwd, ailValue);
+		if (null != ail && 200 == ail.getStatus()) {
+			return true;
+		}
+		return false;
 	}
 
 	private int updateVersion(String iPlanetDirectoryKey, String userFedID, DocumentContext productDocCtx,
