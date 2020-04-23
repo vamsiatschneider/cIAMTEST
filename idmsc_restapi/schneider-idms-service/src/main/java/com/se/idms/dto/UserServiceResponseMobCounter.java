@@ -19,10 +19,10 @@ public class UserServiceResponseMobCounter {
 	@JsonProperty("Id")
 	private String Id;
 	
-	@JsonProperty("maxMobLimit")
+	@JsonProperty("MaxMobLimit")
 	private String maxMobLimit;
 	
-	@JsonProperty("strcurrentMobCounter")
+	@JsonProperty("CurrentMobCounter")
 	private String strcurrentMobCounter;
 	
 	public String getMaxMobLimit() {

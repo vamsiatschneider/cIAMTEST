@@ -9,19 +9,19 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @Component
 public class CounterResponse {
 	
-	@JsonProperty("strcurrentMailCounter")
+	@JsonProperty("CurrentMailCounter")
 	@JsonInclude(Include.NON_NULL)
 	private String strcurrentMailCounter;
 	
-	@JsonProperty("maxEmailLimit")
+	@JsonProperty("MaxEmailLimit")
 	@JsonInclude(Include.NON_NULL)
 	private String maxEmailLimit;
 	
-	@JsonProperty("strcurrentMobCounter")
+	@JsonProperty("CurrentMobCounter")
 	@JsonInclude(Include.NON_NULL)
 	private String strcurrentMobCounter;
 	
-	@JsonProperty("maxMobLimit")
+	@JsonProperty("MaxMobLimit")
 	@JsonInclude(Include.NON_NULL)
 	private String maxMobLimit;
 	

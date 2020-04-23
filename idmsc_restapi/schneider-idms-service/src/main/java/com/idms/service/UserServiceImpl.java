@@ -3300,9 +3300,7 @@ public class UserServiceImpl implements UserService {
 		String strcurrentMailCounter = UserConstants.ZERO;
 		String strcurrentMobCounter = UserConstants.ZERO;
 		String jsonStr = null;
-		JSONObject jsonMailCounter = new JSONObject();
-		JSONObject jsonMobCounter = new JSONObject();
-		
+		JSONObject jsonCounter = new JSONObject();
 		
 		try {
 			LOGGER.info("Parameter confirmRequest -> "
@@ -3939,15 +3937,12 @@ public class UserServiceImpl implements UserService {
 				passwordRecoveryResponse.setMessage("PIN validated Successfully");
 				
 				/* Set counter to 0 */				
-				LOGGER.info("ConfirmPIN :: Update mail counter to ZERO");
-				jsonMailCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
-				jsonStr = jsonMailCounter.toString();			
+				LOGGER.info("ConfirmPIN :: Update counter to ZERO");
+				jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
+				jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
+				jsonStr = jsonCounter.toString();			
 				productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, uniqueIdentifier, jsonStr);
-				jsonMobCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
-				LOGGER.info("ConfirmPIN :: Update mobile counter to ZERO");
-				jsonStr = jsonMobCounter.toString();
-				productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, uniqueIdentifier, jsonStr);
-
+				
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by userPinConfirmation() : " + elapsedTime);
 				return Response.status(Response.Status.OK).entity(passwordRecoveryResponse).build();
@@ -3999,15 +3994,11 @@ public class UserServiceImpl implements UserService {
 		passwordRecoveryResponse.setMessage("PIN validated Successfully");
 		
 		/* Set counter to 0 */				
-		LOGGER.info("ConfirmPIN :: Update mail counter to ZERO");
-		jsonMailCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
-		jsonStr = jsonMailCounter.toString();			
+		LOGGER.info("ConfirmPIN :: Update counter to ZERO");
+		jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
+		jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
+		jsonStr = jsonCounter.toString();			
 		productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, uniqueIdentifier, jsonStr);
-		jsonMobCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
-		LOGGER.info("ConfirmPIN :: Update mobile counter to ZERO");
-		jsonStr = jsonMobCounter.toString();
-		productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, uniqueIdentifier, jsonStr);
-
 
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info("Time taken by userPinConfirmation() : " + elapsedTime);
@@ -4733,14 +4724,11 @@ public class UserServiceImpl implements UserService {
 					obj.put(UserConstants.MAIL_RATE_COUNTER, intcurrentMailCounter);
 					jsonStr = obj.toString();
 					if(!isOTPEnabled)
-						token = sendEmail.generateEmailToken(userName);
-					
-					  sendEmail.sendOpenAmEmail(token, otp, EmailConstants.SETUSERPWD_OPT_TYPE,
-					  userName,passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c(),finalPathString); /* Reinstate */
-					 
-					  productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
-					  strcurrentMailCounter = Integer.toString(intcurrentMailCounter);
-					  strCurrentCounter = strcurrentMailCounter;
+					token = sendEmail.generateEmailToken(userName);
+					sendEmail.sendOpenAmEmail(token, otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName, passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c(),finalPathString); /* Reinstate */
+					productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
+					strcurrentMailCounter = Integer.toString(intcurrentMailCounter);
+					strCurrentCounter = strcurrentMailCounter;
 					
 				} else if (UserConstants.HOTP_MOBILE_RESET_PR.equalsIgnoreCase(hotpService)) {
 					identifierType=UserConstants.MOBILE;
@@ -4762,15 +4750,10 @@ public class UserServiceImpl implements UserService {
 								else {		
 										intcurrentMobCounter = increment(intcurrentMobCounter);
 									}
-							
-							obj.put(UserConstants.MOBILE_RATE_COUNTER, intcurrentMobCounter);
-							jsonStr = obj.toString();	
-					
-					  sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE,
-					  userName, passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c());
-					  sendEmail.sendSMSNewGateway(otp, EmailConstants.SETUSERPWD_OPT_TYPE,
-					  userName, passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c()); /* Reinstate */
-					 
+					obj.put(UserConstants.MOBILE_RATE_COUNTER, intcurrentMobCounter);
+					jsonStr = obj.toString();
+					sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName, passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c());
+					sendEmail.sendSMSNewGateway(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName, passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c()); /* Reinstate */
 					productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
 					strcurrentMobCounter=Integer.toString(intcurrentMobCounter);
 					strCurrentCounter=strcurrentMobCounter;
@@ -7420,9 +7403,7 @@ public class UserServiceImpl implements UserService {
 							}
 							obj.put(UserConstants.MAIL_RATE_COUNTER, intcurrentMailCounter);
 							jsonStr = obj.toString();
-							
 							sendEmail.sendOpenAmEmail(token, otp, optType, userCName, regSource, finalPathString); /* Reinstate */
-							 
 							LOGGER.info("resendRegEmail :: Update mail counter :: Start");
 							productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userCName, jsonStr);
 							LOGGER.info("resendRegEmail :: Update mail counter :: Finish");
@@ -7457,23 +7438,23 @@ public class UserServiceImpl implements UserService {
 						}
 						obj.put(UserConstants.MOBILE_RATE_COUNTER, intcurrentMobCounter);
 						jsonStr = obj.toString();
-							  sendEmail.sendSMSNewGateway(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userCName, regSource);
-							  LOGGER.info("End: sendSMSMessage() finished for  mobile userName:" + userCName); 
-							  LOGGER.info("Start: sendOpenAmMobileEmail() for mobile userName:"+ userCName); 
-							  sendEmail.sendOpenAmMobileEmail(otp,EmailConstants.USERREGISTRATION_OPT_TYPE, userCName, regSource);
-							  LOGGER.info("End: sendOpenAmMobileEmail() finsihed for  mobile userName:" +userCName); /* Reinstate */
+						sendEmail.sendSMSNewGateway(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userCName, regSource);
+					    LOGGER.info("End: sendSMSMessage() finished for  mobile userName:" + userCName); 
+					    LOGGER.info("Start: sendOpenAmMobileEmail() for mobile userName:"+ userCName); 
+					    sendEmail.sendOpenAmMobileEmail(otp,EmailConstants.USERREGISTRATION_OPT_TYPE, userCName, regSource);
+						LOGGER.info("End: sendOpenAmMobileEmail() finsihed for  mobile userName:" +userCName); /* Reinstate */
 							 
-							LOGGER.info("resendRegEmail :: Update mobile counter :: Start");
-							productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userCName, jsonStr);
-							LOGGER.info("resendRegEmail :: Update mobile counter :: Finish");
-							userResponseMobCounter.setStatus(successStatus);
-							userResponseMobCounter.setMessage(UserConstants.RESEND_REGEMOB_SUCCESS_MESSAGE);
-							userResponseMobCounter.setId(userCName);
-							userResponseMobCounter.setMaxMobLimit(maxMobLimit);
-							strcurrentMobCounter = Integer.toString(intcurrentMobCounter);
-							userResponseMobCounter.setStrcurrentMobCounter(strcurrentMobCounter);
-							return Response.status(Response.Status.OK).entity(userResponseMobCounter).build();
-						}
+						LOGGER.info("resendRegEmail :: Update mobile counter :: Start");
+						productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userCName, jsonStr);
+						LOGGER.info("resendRegEmail :: Update mobile counter :: Finish");
+						userResponseMobCounter.setStatus(successStatus);
+						userResponseMobCounter.setMessage(UserConstants.RESEND_REGEMOB_SUCCESS_MESSAGE);
+						userResponseMobCounter.setId(userCName);
+						userResponseMobCounter.setMaxMobLimit(maxMobLimit);
+						strcurrentMobCounter = Integer.toString(intcurrentMobCounter);
+						userResponseMobCounter.setStrcurrentMobCounter(strcurrentMobCounter);
+						return Response.status(Response.Status.OK).entity(userResponseMobCounter).build();
+					}
 					} else {
 						userResponse.setStatus(errorStatus);
 						userResponse.setMessage("FirstName and LastName are not matched with Email/mobile given!!");
@@ -8095,8 +8076,7 @@ public class UserServiceImpl implements UserService {
 		String strcurrentMailCounter = UserConstants.ZERO;
 		String strcurrentMobCounter = UserConstants.ZERO;
 		String jsonStr = null;
-		JSONObject jsonMailCounter = new JSONObject();
-		JSONObject jsonMobCounter = new JSONObject();
+		JSONObject jsonCounter = new JSONObject();
 		String UID = null;
 	
 
@@ -8265,12 +8245,11 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("User found in IDMS China");
 				/* Counter set to 0 */
 				UID = productDocCtx.read("$.result[0].uid[0]");
-				jsonMailCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
-				jsonStr = jsonMailCounter.toString();			
-				productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, UID, jsonStr);
-				jsonMobCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
-				jsonStr = jsonMobCounter.toString();
-				productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, UID, jsonStr);			
+				LOGGER.info("ConfirmPIN :: Update counter to ZERO");
+				jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
+				jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
+				jsonStr = jsonCounter.toString();			
+				productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, UID, jsonStr);	
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 				return Response.status(Response.Status.OK).entity(responseMultiLine).build();

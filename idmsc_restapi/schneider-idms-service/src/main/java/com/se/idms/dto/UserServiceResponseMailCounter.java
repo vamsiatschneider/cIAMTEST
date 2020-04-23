@@ -19,10 +19,10 @@ public class UserServiceResponseMailCounter {
 	@JsonProperty("Id")
 	private String Id;
 	
-	@JsonProperty("maxEmailLimit")
+	@JsonProperty("MaxEmailLimit")
 	private String maxEmailLimit;
 	
-	@JsonProperty("strcurrentMailCounter")
+	@JsonProperty("CurrentMailCounter")
 	private String strcurrentMailCounter;
 	
 	public String getMaxEmailLimit() {
