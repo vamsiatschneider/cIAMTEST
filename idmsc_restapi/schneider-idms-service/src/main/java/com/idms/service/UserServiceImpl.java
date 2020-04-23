@@ -11369,7 +11369,12 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 			BulkAILResponse baResponse = BulkAILUtil.buildResponse(userAndAILReqMap, bulkAILRequest.getProfileLastUpdateSource());
-			return Response.status(HttpStatus.OK.value()).entity(baResponse).build();
+
+			if(BulkAILConstants.FAILURE.equalsIgnoreCase(baResponse.getMessage())) {
+				return Response.status(HttpStatus.BAD_REQUEST.value()).entity(baResponse).build();
+			} else {
+				return Response.status(HttpStatus.OK.value()).entity(baResponse).build();
+			}
 
 		} catch (Exception e) {
 			return BulkAILUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, BulkAILConstants.INTERNAL_SERVER_ERROR, startTime);

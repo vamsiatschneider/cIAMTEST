@@ -34,6 +34,7 @@ public class BulkAILUtil {
 	public static BulkAILResponse buildResponse(Map<String, Map<Integer, BulkAILResultHolder>> userAndAILReqMap, String profileUpdateSource) {
 		BulkAILResponse baResponse = new BulkAILResponse();
 		List<BulkAILRecord> userAils = new ArrayList<BulkAILRecord>();
+		boolean allEntitiesFailed = true;
 
 		for (Entry<String, Map<Integer, BulkAILResultHolder>> entry : userAndAILReqMap.entrySet()) {
 			BulkAILRecord bulkAILRecord = new BulkAILRecord();
@@ -55,13 +56,20 @@ public class BulkAILUtil {
 				ailResponse.setStatusCode(resultHolder.getStatusCode());
 				ailResponse.setMessage(resultHolder.getMessage());
 				ailResponseList.add(ailResponse);
+				if(resultHolder.getStatusCode() == HttpStatus.OK.value()) {
+					allEntitiesFailed = false;
+				}
 			}
 			bulkAILRecord.setAils(ailResponseList);
 			userAils.add(bulkAILRecord);
 		}
+		if(allEntitiesFailed) {
+			baResponse.setMessage(BulkAILConstants.FAILURE);
+		} else {
+			baResponse.setMessage(BulkAILConstants.SUCCESS);
+		}
 		baResponse.setProfileLastUpdateSource(profileUpdateSource);
-		baResponse.setMessage(BulkAILConstants.SUCCESS);
-		baResponse.setUserAils(userAils );
+		baResponse.setUserAils(userAils);
 		return baResponse;
 	}
 
