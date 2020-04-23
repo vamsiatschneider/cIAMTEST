@@ -7675,8 +7675,7 @@ public class UserServiceImpl implements UserService {
 							} else {
 								token = sendEmail.generateEmailToken(userName);
 							}
-							
-								//Check if limit is breached, if yes, return;							
+								/* Check if limit is breached, if yes, return; */							
 								if(userExists.contains(UserConstants.MAIL_RATE_COUNTER)){
 										strcurrentMailCounter = productDocCtx.read("$.result[0].mailRateCounter[0]");
 											if(null != strcurrentMailCounter && !strcurrentMailCounter.isEmpty()){	
@@ -7694,13 +7693,10 @@ public class UserServiceImpl implements UserService {
 									}
 								else{		
 										intcurrentMailCounter = increment(intcurrentMailCounter);
-									}
+								}
 								obj.put(UserConstants.MAIL_RATE_COUNTER, intcurrentMailCounter);
 								jsonStr = obj.toString();	
-							
-							  sendEmail.sendOpenAmEmail(token, otp,EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userName, appSource,
-									finalPathString); /* Reinstate */
-							 
+								sendEmail.sendOpenAmEmail(token, otp,EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userName, appSource, finalPathString); /* Reinstate */
 								LOGGER.info("resendChangeEmail :: Update mail counter :: Start");
 								productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
 								LOGGER.info("resendChangeEmail :: Update mail counter :: Finish");
