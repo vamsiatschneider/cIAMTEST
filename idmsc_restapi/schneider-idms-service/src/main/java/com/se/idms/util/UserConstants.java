@@ -626,6 +626,7 @@ public class UserConstants {
 	public static final String MAIL_RATE_COUNTER="mailRateCounter";
 	public static final String MOBILE_RATE_COUNTER="mobileRateCounter";
 	public static final String ZERO = "0";
+	public static final int ONE = 1;
 	
 	
 }
