@@ -248,6 +248,10 @@ public Response getUserResponse (String userId,String iPlanetDirectoryToken ){
 	String lastNameValue = null != productDocCtx.read("$.sn")
 			? getValue(productDocCtx.read("$.sn").toString()) : getDelimeter();
 	userResponse.put("LastName", lastNameValue);
+	String idValue = null != productDocCtx.read(JsonConstants.USER_NAME)
+					? getValue(productDocCtx.read(JsonConstants.USER_NAME).toString()) : getDelimeter();
+	userResponse.put("Id", idValue);
+
 	return Response.status(Response.Status.OK.getStatusCode()).entity(userResponse).build();
 }
 
