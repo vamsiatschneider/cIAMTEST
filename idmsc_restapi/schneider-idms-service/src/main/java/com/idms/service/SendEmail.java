@@ -1241,7 +1241,7 @@ public class SendEmail {
 
 			lang=productDocCtxUser.read("$.preferredlanguage[0]");
 			
-			url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=qyw1fnewri" + "&operationType="
+			url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=qyw1fnewri21sd5gsgdy" + "&operationType="
 					+ hotpOperationType + "&app=" + appid + "&uid=" + userId;
 			
 			LOGGER.info("URL compiled to : " + url);

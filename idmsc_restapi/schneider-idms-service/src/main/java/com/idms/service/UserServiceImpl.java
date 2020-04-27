@@ -7264,6 +7264,7 @@ public class UserServiceImpl implements UserService {
 									regSource, finalPathString);
 						}
 						if (userType.equalsIgnoreCase("mobile")) {
+							otp = sendEmail.generateOtp(userCName);
 							LOGGER.info("Start: sendSMSMessage() for mobile userName:" + userCName);
 							sendEmail.sendSMSNewGateway(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userCName,
 									regSource);
@@ -7449,7 +7450,7 @@ public class UserServiceImpl implements UserService {
 										&& email.equalsIgnoreCase(emailChangeRequest.getOldEmail()))
 								&& (null != newEmail && !newEmail.isEmpty()
 										&& newEmail.equalsIgnoreCase(emailChangeRequest.getNewEmail()))) {
-							Response applicationDetails = openDJService.getUser(djUserName, djUserPwd, emailChangeRequest.getNewEmail());
+							Response applicationDetails = openDJService.getUser(djUserName, djUserPwd, emailChangeRequest.getApplicationName());
 							DocumentContext productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
 
 							String isOTPEnabledForApp = productDJData.read("_isOTPEnabled");
