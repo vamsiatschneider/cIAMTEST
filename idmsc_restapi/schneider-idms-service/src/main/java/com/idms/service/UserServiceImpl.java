@@ -3951,7 +3951,8 @@ public class UserServiceImpl implements UserService {
 				jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
 				jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
 				jsonStr = jsonCounter.toString();			
-				productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, uniqueIdentifier, jsonStr);
+				String temp = productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, uniqueIdentifier, jsonStr);
+				LOGGER.info("Status of PIN updateCounter :: " + temp);
 				
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by userPinConfirmation() : " + elapsedTime);
@@ -3993,7 +3994,7 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 
-		Attributes attributes = new Attributes();
+		Attributes attributes = new Attributes();	
 		IDMSUserRecord idmsUserRecord = new IDMSUserRecord();
 		idmsUserRecord.setAttributes(attributes);
 		idmsUserRecord.setId(uniqueIdentifier);
@@ -4008,7 +4009,8 @@ public class UserServiceImpl implements UserService {
 		jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
 		jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
 		jsonStr = jsonCounter.toString();			
-		productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, uniqueIdentifier, jsonStr);
+		String temp = productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, uniqueIdentifier, jsonStr);
+		LOGGER.info("Status of PIN updateCounter :: " + temp);
 
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info("Time taken by userPinConfirmation() : " + elapsedTime);
@@ -4732,9 +4734,9 @@ public class UserServiceImpl implements UserService {
 						}
 					obj.put(UserConstants.MAIL_RATE_COUNTER, intcurrentMailCounter);
 					jsonStr = obj.toString();
+					otp = sendEmail.generateOtp(userName);
 					if(!isOTPEnabled)
 					token = sendEmail.generateEmailToken(userName);
-					otp = sendEmail.generateOtp(userName);
 					LOGGER.info("Successfully OTP generated for " + userName);
 					sendEmail.sendOpenAmEmail(token, otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName, passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c(),finalPathString); /* Reinstate */
 					productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
@@ -6022,6 +6024,11 @@ public class UserServiceImpl implements UserService {
 		ErrorResponse errorResponse = new ErrorResponse();
 		Response passwordOpenAMResponse = null;
 		boolean isPasswordUpdatedInUIMS = false, stopUIMSFlag = false ;
+		/* Counter */
+		String strcurrentMailCounter = UserConstants.ZERO;
+		String strcurrentMobCounter = UserConstants.ZERO;
+		String jsonStr = null;
+		JSONObject jsonCounter = new JSONObject();
 		try {
 			// Fetching the userid from the Authorization Token
 
@@ -6197,6 +6204,12 @@ public class UserServiceImpl implements UserService {
 									+ userId);
 				}
 			}
+			/* Set counter to 0 */				
+			LOGGER.info("IDMSPassword :: Update counter to ZERO");
+			jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
+			jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
+			jsonStr = jsonCounter.toString();			
+			productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userId, jsonStr);
 			if (isPasswordUpdatedInUIMS) {
 				userResponse.setStatus(successStatus);
 				userResponse.setMessage("User Password updated successfully in IDMS China and UIMS");
