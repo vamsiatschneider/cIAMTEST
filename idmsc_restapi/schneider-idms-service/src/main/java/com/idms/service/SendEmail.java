@@ -539,6 +539,7 @@ public class SendEmail {
 		hexpin = ChinaIdmsUtil.generateHashValue(pin);
 		
 		LocalDateTime currentDatenTime = LocalDateTime.now();
+		currentDatenTime = currentDatenTime.plusMinutes(15);
 		long currentDatenTimeInMillisecs = currentDatenTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 		
 		hexpin = hexpin+":"+currentDatenTimeInMillisecs;
@@ -564,6 +565,7 @@ public class SendEmail {
 		hexpin = ChinaIdmsUtil.generateHashValue(pin);
 		
 		LocalDateTime currentDatenTime = LocalDateTime.now();
+		currentDatenTime = currentDatenTime.plusDays(7);
 		long currentDatenTimeInMillisecs = currentDatenTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 		
 		hexpin = hexpin+":"+currentDatenTimeInMillisecs;
@@ -582,6 +584,7 @@ public class SendEmail {
 		LOGGER.info("Parameter userId -> " + userId);
 		
 		LocalDateTime currentDatenTime = LocalDateTime.now();
+		currentDatenTime = currentDatenTime.plusDays(7);
 		long currentDatenTimeInMillisecs = currentDatenTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 		
 		hashedPin = hashedPin+":"+currentDatenTimeInMillisecs;
@@ -620,20 +623,13 @@ public class SendEmail {
 			}
 			if ((null != authIdTimeStmp && !authIdTimeStmp.isEmpty()) && (!"[]".equals(authIdTimeStmp))) {
 				authIdTime = authIdTimeStmp.split(":");
-
 				String storedHashedValue = authIdTime[0];
 
-				long localDTInMilli = Long.valueOf(authIdTime[1]).longValue();
-				// figure out login identifier type
-				String emailOrMobile = productDocCtx.read("$.mail[0]");
-				String loginIdentifierType = UserConstants.EMAIL;
-				if (null == emailOrMobile) {
-					emailOrMobile = productDocCtx.read("$.mobile_reg[0]");
-					loginIdentifierType = UserConstants.MOBILE;
-				}
-				LOGGER.info("loginIdentifierType: "+loginIdentifierType);
-				// compare Stored hashkey and generated hash key
-				if (newHashedValue.equals(storedHashedValue) && checkTimeStamp(localDTInMilli, loginIdentifierType)) {
+				long authTimeInMilli = Long.valueOf(authIdTime[1]).longValue();
+				LocalDateTime currentDatenTime = LocalDateTime.now();
+				long currentTimeInMilli = currentDatenTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+				
+				if (newHashedValue.equals(storedHashedValue) && currentTimeInMilli < authTimeInMilli) {
 					validatePin = true;
 				}
 			}else{
