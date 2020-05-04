@@ -2879,7 +2879,7 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Parameter applicationName -> " + applicationName);
 		String PROCESSING_STATE = "UNKNOWN";
 		DocumentContext productDocCtx = null;
-		String iPlanetDirectoryKey = null;
+		String iPlanetDirectoryKey = null, otp = null;
 		String ifwAccessToken = null, userExists = null;
 		JSONObject response = new JSONObject();
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
@@ -2967,11 +2967,12 @@ public class UserServiceImpl implements UserService {
 						LOGGER.info("pwdSetFirstLoginString = "+pwdSetFirstLoginString);
 						LOGGER.info("userName = "+userName);
 						if(null != pwdSetFirstLoginString && !pwdSetFirstLoginString.isEmpty()){
-							String otp = sendEmail.generateOtp(userName);
 							if(pwdSetFirstLoginString.equalsIgnoreCase("false")){
 								if(loginIdentifier.contains("@")){
+									otp = sendEmail.generateOtp(userName);
 									sendEmail.sendOpenAmEmail(null, otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName, applicationName, null);
 								} else {
+									otp = sendEmail.generateOtp(userName);
 									sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName, applicationName);
 									sendEmail.sendSMSNewGateway(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,applicationName);
 								}
@@ -4599,7 +4600,7 @@ public class UserServiceImpl implements UserService {
 		String userName, finalPathString = null;
 		String iPlanetDirectoryKey = null;
 		long elapsedTime;
-		String ifwAccessToken = null, token = null;
+		String ifwAccessToken = null, token = null, otp = null;
 		JSONObject response = new JSONObject();
 		ObjectMapper objMapper = new ObjectMapper();
 		boolean isOTPEnabled = false;
@@ -4646,14 +4647,17 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info("isOTPEnabled: "+ isOTPEnabled);
 				}
 				
-				String otp = sendEmail.generateOtp(userName);
 				LOGGER.info("Successfully OTP generated for " + userName);
 				if (UserConstants.HOTP_EMAIL_RESET_PR.equalsIgnoreCase(hotpService)) {
-					if(!isOTPEnabled)
+					if (!isOTPEnabled) {
 						token = sendEmail.generateEmailToken(userName);
+					} else {
+						otp = sendEmail.generateOtp(userName);
+					}
 					sendEmail.sendOpenAmEmail(token, otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,
 							passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c(), finalPathString);
 				} else if (UserConstants.HOTP_MOBILE_RESET_PR.equalsIgnoreCase(hotpService)) {
+					otp = sendEmail.generateOtp(userName);
 					sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,
 							passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c());
 					sendEmail.sendSMSNewGateway(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,
@@ -8208,18 +8212,19 @@ public class UserServiceImpl implements UserService {
 						}
 
 						String regestrationSource = productDocCtx.read("$.registerationSource[0]");
-						String otp = sendEmail.generateOtp(federationId);
 						LOGGER.info("Email Reminder count  for " + federationId +" :"+mailCount);
 						LOGGER.info("Successfully OTP generated for " + federationId);
 
 						if (!emailValidator.validate(uniqueIdentifier)) {
+							String otp = sendEmail.generateOtp(federationId);
 							sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
 									regestrationSource);
 
 							sendEmail.sendSMSNewGateway(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
 									regestrationSource);
 						} else {
-							sendEmail.sendOpenAmEmail(null, otp, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
+							String token = sendEmail.generateEmailToken(federationId);
+							sendEmail.sendOpenAmEmail(token, null, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
 									regestrationSource, null);
 						}
 
@@ -10155,9 +10160,9 @@ public class UserServiceImpl implements UserService {
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + ssoToken, fedid, addEmailString);
 				LOGGER.info("End: updateUser() of openamservice to add email as dual indentifier finished for userId:"
 						+ fedid);
-				String otp = sendEmail.generateOtp(fedid);
+				String token = sendEmail.generateEmailToken(fedid);
 				LOGGER.info("sending mail notification to added email");
-				sendEmail.sendOpenAmEmail(null, otp, EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE, fedid, source, null);
+				sendEmail.sendOpenAmEmail(null, token, EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE, fedid, source, null);
 
 				response.put(UserConstants.STATUS_L, successStatus);
 				response.put(UserConstants.MESSAGE_L, UserConstants.ADD_EMAIL_PROFILE);
