@@ -39,6 +39,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.*;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -4138,16 +4139,7 @@ public class UserServiceImpl implements UserService {
 			String Acl__c = ailRequest.getUserAILRecord().getIDMSAcl__c();
 			String[] acl = Acl__c.split(",");
 			String profileUpdateSource=ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c();
-			if( null != authorizedToken && !authorizedToken.isEmpty() &&
-					enableSMLVerification.equalsIgnoreCase("False") && !getTechnicalUserDetails(authorizedToken)) {
-				errorResponse.setStatus(errorStatus);
-				errorResponse.setMessage("Unauthorized or session expired");
-				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.error("Error is " + errorResponse.getMessage());
-				LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
-				return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
-			}
-			else if (enableSMLVerification.equalsIgnoreCase("True")) {
+			if (enableSMLVerification.equalsIgnoreCase("True")) {
 			LOGGER.info("Verifying AIL from Master List");
 			for (int i = 0; i < acl.length; i++) {
 					String ail = ailRequest.getUserAILRecord().getIDMSAclType__c() + "_" + acl[i];
@@ -4271,10 +4263,11 @@ public class UserServiceImpl implements UserService {
 					}
 
 				String acl_appc = productDocCtx.read("$.IDMSAIL_" + idmsAclType_c + "_c[0]");
+				List<String> IDMSAIL_app=Arrays.asList(acl_appc.split(","));
 				String reqAclApp = "";
 				acl = ailRequest.getUserAILRecord().getIDMSAcl__c().split(",");
 				for (int i = 0; i < acl.length; i++) {
-					if (acl_appc== null|| !acl_appc.contains(acl[i])) {
+					if (acl_appc== null|| !IDMSAIL_app.contains(acl[i])) {
 						if (reqAclApp.isEmpty()) {
 							reqAclApp = acl[i];
 						} else {
