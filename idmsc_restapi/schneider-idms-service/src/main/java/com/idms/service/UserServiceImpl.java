@@ -39,7 +39,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.*;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -134,7 +133,9 @@ import com.idms.product.model.OpenAmUserInput;
 import com.idms.product.model.OpenAmUserRequest;
 import com.idms.product.model.PasswordRecoveryUser;
 import com.idms.product.model.PostMobileRecord;
+import com.idms.service.bulkail.util.AILMasterRecord;
 import com.idms.service.bulkail.util.AILOperationType;
+import com.idms.service.bulkail.util.AILStatus;
 import com.idms.service.bulkail.util.BulkAILConstants;
 import com.idms.service.bulkail.util.BulkAILUtil;
 import com.idms.service.impl.IFWTokenServiceImpl;
@@ -11256,7 +11257,7 @@ public class UserServiceImpl implements UserService {
 			if(StringUtils.isNotBlank(stopidmstouimsflag)) {
 				stopUIMSSyncFlag = Boolean.valueOf(stopidmstouimsflag);
 			}
-			Response response = validateAILRequest(authorizedToken, bulkAILRequest, startTime);
+			Response response = validateAILRequest(authorizedToken, clientId, clientSecret, bulkAILRequest, startTime);
 			if (response != null) {
 				return response;
 			}
@@ -11265,6 +11266,7 @@ public class UserServiceImpl implements UserService {
 
 			String profileUpdateSource = bulkAILRequest.getProfileLastUpdateSource();
 			Map<String, Map<Integer, BulkAILResultHolder>> userAndAILReqMap = new HashMap<String, Map<Integer, BulkAILResultHolder>>();
+
 			for (BulkAILRecord ailRecord : bulkAILRequest.getUserAils()) {
 				String userFedID = ailRecord.getUserFedID();
 				boolean isUserFoundInDJ = true;
@@ -11297,7 +11299,7 @@ public class UserServiceImpl implements UserService {
 					if (userData == null) {
 						isUserFoundInDJ = false;
 					}
-					System.out.println("isUserFoundInDJ bulkupdateAIL() : " + isUserFoundInDJ);
+					LOGGER.info("isUserFoundInDJ bulkupdateAIL() : " + isUserFoundInDJ);
 				}
 				if (isUserFoundInDJ) {
 					DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
@@ -11318,7 +11320,7 @@ public class UserServiceImpl implements UserService {
 					processNullAndInvalidOpTypeRecords(ails, ailCountMap);
 
 					validateSMLAndProcessGrantRequest(authorizedToken, openDJAttrs, grantMap, productDocCtx, idmsAIL_c,
-							ails, ailCountMap, recordCountMap);
+							ails, ailCountMap, recordCountMap, profileUpdateSource);
 					if(!grantMap.isEmpty()) {
 						String grantJson = BulkAILUtil.buildUserUpdateJson(grantMap);
 						LOGGER.info("Grant Operation: BulkUpdateAIL -> " + grantJson);
@@ -11336,7 +11338,7 @@ public class UserServiceImpl implements UserService {
 						}
 					}
 					validateSMLAndProcessRevokeRequest(authorizedToken, openDJAttrs, revokeMap, productDocCtx,
-							idmsAIL_c, ails, ailCountMap, recordCountMap);
+							idmsAIL_c, ails, ailCountMap, recordCountMap, profileUpdateSource);
 					if(!revokeMap.isEmpty()) {
 						String revokeJson = BulkAILUtil.buildUserUpdateJson(revokeMap);
 						LOGGER.info("Revoke Operation: BulkUpdateAIL -> " + revokeJson);
@@ -11438,7 +11440,7 @@ public class UserServiceImpl implements UserService {
 	private void validateSMLAndProcessRevokeRequest(String authorizedToken, DocumentContext openDJAttrs,
 			Map<String, BulkAILMapValue> revokeMap, DocumentContext productDocCtx, String idmsAIL_c,
 			List<AILRecord> ails, Map<Integer, BulkAILResultHolder> ailCountMap,
-			Map<AILRecord, Integer> recordCountMap) {
+			Map<AILRecord, Integer> recordCountMap, String profileUpdateSource) throws Exception {
 
 		for (AILRecord ail : ails) {
 			if (ail != null) {
@@ -11449,26 +11451,40 @@ public class UserServiceImpl implements UserService {
 						LOGGER.info("In SML Verification block: " + enableSMLVerification);
 						String ailValue = ail.getAclType() + "_" + ail.getAcl();
 						verifnResult = verifyAilInSMLMaster(openDJService, ailValue);
-						if (!verifnResult) {
-							BulkAILResultHolder holder = BulkAILUtil.buildInvalidResult(ail,
-									HttpStatus.NOT_FOUND.value(), BulkAILConstants.NOT_FOUND_SML, false);
-							LOGGER.info("SML verification failed for ailValue: " + ailValue);
-							ailCountMap.put(++count, holder);
-							continue;
-						}
-						LOGGER.info("SML verification is successful");
-						String appTechnicalUser = openDJAttrs.read("_technicalUser");
-						String appLevelValidation = null;
-						if (openDJAttrs.read("_isAILValidation") != null) {
-							appLevelValidation = openDJAttrs.read("_isAILValidation");
-						}
-						LOGGER.info("App Level AIL Validation: " + appLevelValidation);
-						if (null != appLevelValidation && appLevelValidation.equalsIgnoreCase("True")
-								&& !isAILApp(authorizedToken, appTechnicalUser)) {
-							BulkAILResultHolder holder = BulkAILUtil.buildInvalidResult(ail,
-									HttpStatus.UNAUTHORIZED.value(), BulkAILConstants.UNAUTHORIZED_USER, false);
-							ailCountMap.put(++count, holder);
-							continue;
+						if(UserConstants.UIMS.equalsIgnoreCase(profileUpdateSource)) {
+							if (!verifnResult) {
+								Response createResponse = createSMLEntryForUIMSReq(ail, ailValue);
+								if(createResponse == null) {
+									throw new Exception(HttpStatus.INTERNAL_SERVER_ERROR +"-" +BulkAILConstants.INTERNAL_SERVER_ERROR);
+								}
+								if(201 == createResponse.getStatus()) {
+									LOGGER.info("AIL Master Entry Created for UIMS value: " + ail.getAcl());
+								}
+							}
+							LOGGER.info("UIMS Entry- SML verification is successful");
+						} else {
+							if (!verifnResult) {
+								BulkAILResultHolder holder = BulkAILUtil.buildInvalidResult(ail,
+										HttpStatus.NOT_FOUND.value(), BulkAILConstants.NOT_FOUND_SML, false);
+								LOGGER.info("SML verification failed for ailValue: " + ailValue);
+								ailCountMap.put(++count, holder);
+								continue;
+							} else {
+								LOGGER.info("SML verification is successful");
+								String appTechnicalUser = openDJAttrs.read("_technicalUser");
+								String appLevelValidation = null;
+								if (openDJAttrs.read("_isAILValidation") != null) {
+									appLevelValidation = openDJAttrs.read("_isAILValidation");
+								}
+								LOGGER.info("App Level AIL Validation: " + appLevelValidation);
+								if (null != appLevelValidation && appLevelValidation.equalsIgnoreCase("True")
+										&& !isAILApp(authorizedToken, appTechnicalUser)) {
+									BulkAILResultHolder holder = BulkAILUtil.buildInvalidResult(ail,
+											HttpStatus.UNAUTHORIZED.value(), BulkAILConstants.UNAUTHORIZED_USER, false);
+									ailCountMap.put(++count, holder);
+									continue;
+								}
+							}
 						}
 					}
 				}
@@ -11477,10 +11493,32 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
+	private Response createSMLEntryForUIMSReq(AILRecord ail, String ailValue) {
+		AILMasterRecord ailMasterRecord = new AILMasterRecord();
+		ailMasterRecord.setId(ailValue);
+		ailMasterRecord.setAilStatus(AILStatus.ACTIVE.getStatus());
+		ailMasterRecord.setAilType(ail.getAclType());
+		ailMasterRecord.setAilValue(ail.getAcl());
+
+		ObjectMapper objMapper = new ObjectMapper();
+		Response response = null;
+		try {
+			String ailEntryJson = objMapper.writeValueAsString(ailMasterRecord);
+			ailEntryJson = ailEntryJson.replace("\"\"", "[]");
+
+			response = openDJService.createAILMasterEntry(
+					"application/json", "application/json",
+					djUserName, djUserPwd, "create", ailEntryJson);
+		} catch (Exception ex) {
+			LOGGER.error("Exception in bulkAILUpdate: " + ex.getMessage(),ex);
+		}
+		return response;
+	}
+
 	private void validateSMLAndProcessGrantRequest(String authorizedToken, DocumentContext openDJAttrs,
 			Map<String, BulkAILMapValue> grantMap, DocumentContext productDocCtx, String idmsAIL_c,
 			List<AILRecord> ails, Map<Integer, BulkAILResultHolder> ailCountMap,
-			Map<AILRecord, Integer> recordCountMap) {
+			Map<AILRecord, Integer> recordCountMap, String profileUpdateSource) throws Exception {
 
 		for (AILRecord ail : ails) {
 			if (ail != null) {
@@ -11491,26 +11529,40 @@ public class UserServiceImpl implements UserService {
 						LOGGER.info("In SML Verification block: " + enableSMLVerification);
 						String ailValue = ail.getAclType() + "_" + ail.getAcl();
 						verifnResult = verifyAilInSMLMaster(openDJService, ailValue);
-						if (!verifnResult) {
-							BulkAILResultHolder holder = BulkAILUtil.buildInvalidResult(ail,
-									HttpStatus.NOT_FOUND.value(), BulkAILConstants.NOT_FOUND_SML, false);
-							LOGGER.info("SML verification failed for ailValue: " + ailValue);
-							ailCountMap.put(++count, holder);
-							continue;
-						}
-						LOGGER.info("SML verification is successful");
-						String appTechnicalUser = openDJAttrs.read("_technicalUser");
-						String appLevelValidation = null;
-						if (openDJAttrs.read("_isAILValidation") != null) {
-							appLevelValidation = openDJAttrs.read("_isAILValidation");
-						}
-						LOGGER.info("App Level AIL Validation: " + appLevelValidation);
-						if (null != appLevelValidation && appLevelValidation.equalsIgnoreCase("True")
-								&& !isAILApp(authorizedToken, appTechnicalUser)) {
-							BulkAILResultHolder holder = BulkAILUtil.buildInvalidResult(ail,
-									HttpStatus.UNAUTHORIZED.value(), BulkAILConstants.UNAUTHORIZED_USER, false);
-							ailCountMap.put(++count, holder);
-							continue;
+						if(UserConstants.UIMS.equalsIgnoreCase(profileUpdateSource)) {
+							if (!verifnResult) {
+								Response createResponse = createSMLEntryForUIMSReq(ail, ailValue);
+								if(createResponse == null) {
+									throw new Exception(HttpStatus.INTERNAL_SERVER_ERROR +"-" +BulkAILConstants.INTERNAL_SERVER_ERROR);
+								}
+								if(201 == createResponse.getStatus()) {
+									LOGGER.info("AIL Master Entry Created for UIMS value: " + ail.getAcl());
+								}
+							}
+							LOGGER.info("UIMS Entry- SML verification is successful");
+						} else {
+							if (!verifnResult) {
+								BulkAILResultHolder holder = BulkAILUtil.buildInvalidResult(ail,
+										HttpStatus.NOT_FOUND.value(), BulkAILConstants.NOT_FOUND_SML, false);
+								LOGGER.info("SML verification failed for ailValue: " + ailValue);
+								ailCountMap.put(++count, holder);
+								continue;
+							} else {
+								LOGGER.info("SML verification is successful");
+								String appTechnicalUser = openDJAttrs.read("_technicalUser");
+								String appLevelValidation = null;
+								if (openDJAttrs.read("_isAILValidation") != null) {
+									appLevelValidation = openDJAttrs.read("_isAILValidation");
+								}
+								LOGGER.info("App Level AIL Validation: " + appLevelValidation);
+								if (null != appLevelValidation && appLevelValidation.equalsIgnoreCase("True")
+										&& !isAILApp(authorizedToken, appTechnicalUser)) {
+									BulkAILResultHolder holder = BulkAILUtil.buildInvalidResult(ail,
+											HttpStatus.UNAUTHORIZED.value(), BulkAILConstants.UNAUTHORIZED_USER, false);
+									ailCountMap.put(++count, holder);
+									continue;
+								}
+							}
 						}
 					}
 				}
@@ -11545,13 +11597,26 @@ public class UserServiceImpl implements UserService {
 		return vNewCntValue;
 	}
 
-	private Response validateAILRequest(String authorizedToken, BulkAILRequest bulkAILRequest, long startTime) {
-		// Authorized token
-		if (StringUtils.isBlank(authorizedToken)) {
-			return BulkAILUtil.getErrorResponse(HttpStatus.BAD_REQUEST, BulkAILConstants.MANDATORY_TOKEN, startTime);
+	private Response validateAILRequest(String authorizedToken, String clientId, String clientSecret, BulkAILRequest bulkAILRequest, long startTime) {
+		if (StringUtils.isBlank(bulkAILRequest.getProfileLastUpdateSource())) {
+			return BulkAILUtil.getErrorResponse(HttpStatus.BAD_REQUEST, BulkAILConstants.MANDATORY_PROFILE_UPDATE_SOURCE, startTime);
 		}
-		if(!getTechnicalUserDetails(authorizedToken)){
-			return BulkAILUtil.getErrorResponse(HttpStatus.UNAUTHORIZED, BulkAILConstants.UNAUTHORIZED_USER, startTime);
+		if (UserConstants.UIMS.equalsIgnoreCase(bulkAILRequest.getProfileLastUpdateSource())) {
+			if (null == clientId || null == clientSecret) {
+				return BulkAILUtil.getErrorResponse(HttpStatus.UNAUTHORIZED, BulkAILConstants.MANDATORY_CLIENTID_SECRET, startTime);
+			}
+			if ((null != clientId && !clientId.equalsIgnoreCase(uimsClientId))
+					|| (null != clientSecret && !clientSecret.equalsIgnoreCase(uimsClientSecret))) {
+				return BulkAILUtil.getErrorResponse(HttpStatus.UNAUTHORIZED, BulkAILConstants.INVALID_UIMS_CREDENTIALS, startTime);
+			}
+		} else {
+			// Authorized token
+			if (StringUtils.isBlank(authorizedToken)) {
+				return BulkAILUtil.getErrorResponse(HttpStatus.BAD_REQUEST, BulkAILConstants.MANDATORY_TOKEN, startTime);
+			}
+			if(!getTechnicalUserDetails(authorizedToken)){
+				return BulkAILUtil.getErrorResponse(HttpStatus.UNAUTHORIZED, BulkAILConstants.UNAUTHORIZED_USER, startTime);
+			}
 		}
 		if(bulkAILRequest.getUserAils() == null || (bulkAILRequest.getUserAils() != null && bulkAILRequest.getUserAils().isEmpty())) {
 			return BulkAILUtil.getErrorResponse(HttpStatus.BAD_REQUEST, BulkAILConstants.MANDATORY_AIL_FIELDS, startTime);
@@ -11568,9 +11633,6 @@ public class UserServiceImpl implements UserService {
 		}
 		if(isInputInvalid) {
 			return BulkAILUtil.getErrorResponse(HttpStatus.BAD_REQUEST, BulkAILConstants.GOVERNANCE_ERROR, startTime);
-		}
-		if (StringUtils.isBlank(bulkAILRequest.getProfileLastUpdateSource())) {
-			return BulkAILUtil.getErrorResponse(HttpStatus.BAD_REQUEST, BulkAILConstants.MANDATORY_PROFILE_UPDATE_SOURCE, startTime);
 		}
 		return null;
 	}
