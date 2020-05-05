@@ -13,6 +13,9 @@ public class AILMasterRecord {
 	@JsonProperty(value = "_AILValue__c")
 	private String ailValue;
 
+	@JsonProperty(value = "_AILStatus")
+	private String ailStatus;
+
 	public String getId() {
 		return id;
 	}
@@ -35,5 +38,13 @@ public class AILMasterRecord {
 
 	public void setAilValue(String ailValue) {
 		this.ailValue = ailValue;
+	}
+
+	public String getAilStatus() {
+		return ailStatus;
+	}
+
+	public void setAilStatus(String ailStatus) {
+		this.ailStatus = ailStatus;
 	}
 }
