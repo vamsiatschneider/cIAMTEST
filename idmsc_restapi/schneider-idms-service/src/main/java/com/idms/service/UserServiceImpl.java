@@ -4143,17 +4143,36 @@ public class UserServiceImpl implements UserService {
 			if (enableSMLVerification.equalsIgnoreCase("True")) {
 			LOGGER.info("Verifying AIL from Master List");
 			for (int i = 0; i < acl.length; i++) {
+					boolean entryFound = false;
 					String ail = ailRequest.getUserAILRecord().getIDMSAclType__c() + "_" + acl[i];
-					ail = smlVerification(ail);
-					if (ail == null) {
+
+					Response ailEntry = openDJService.verifyAIL(djUserName, djUserPwd, ail);
+					if (null != ailEntry && 200 == ailEntry.getStatus()) {
+						entryFound = true;
+					}
+					if (!entryFound) {
 						errorResponse.setStatus(errorStatus);
 						errorResponse.setMessage(UserConstants.INVALID_AIL + " for " + acl[i]);
 						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 						LOGGER.error("Error is " + errorResponse.getMessage());
 						LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
 						return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+					} else {
+						Configuration confg = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+						DocumentContext productDocCtxt = JsonPath.using(confg)
+								.parse(IOUtils.toString((InputStream) ailEntry.getEntity()));
+						String ailStatus = productDocCtxt.read("_AILStatus");
+
+						if(AILStatus.INACTIVE.getStatus().equalsIgnoreCase(ailStatus)) {
+							LOGGER.info("AIL in SML is inactive for ail value: " + ail);
+							errorResponse.setStatus(errorStatus);
+							errorResponse.setMessage(BulkAILConstants.INVALID_ACL_TYPE + " for " + acl[i]);
+							elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+							LOGGER.error("Error is " + errorResponse.getMessage());
+							LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
+							return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+						}
 					}
-					
 				}
 			LOGGER.info("SML Verification Successful");
 			Response appDetails = openDJService.getUser(djUserName, djUserPwd, profileUpdateSource);
@@ -4462,15 +4481,6 @@ public class UserServiceImpl implements UserService {
 			return false;
 		}
 		return false;
-	}
-	private String smlVerification(String ailVal) throws Exception {
-		Response ail = openDJService.verifyAIL(djUserName, djUserPwd, ailVal);
-		if (null != ail && 200 == ail.getStatus()) {
-			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
-			DocumentContext productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) ail.getEntity()));
-			return ailVal;
-		}
-		return null;
 	}
 	private Response updateAILSuccessResponse(IDMSUserAIL idmsUserAIL) {
 		LOGGER.info("Entered updateAILSuccessResponse() -> Start");
@@ -8799,8 +8809,8 @@ public class UserServiceImpl implements UserService {
 		Response checkUserExistsResponse = null;
 		JSONObject jsonObject = new JSONObject();
 		JSONObject jsonObjectResponse = new JSONObject();
-		LOGGER.info(AUDIT_REQUESTING_USER.concat(userName).concat(AUDIT_IMPERSONATING_USER).concat(AUDIT_API_ADMIN)
-				.concat(AUDIT_OPENAM_API).concat(AUDIT_OPENAM_AUTHENTICATE_CALL).concat(AUDIT_LOG_CLOSURE));
+		/*LOGGER.info(AUDIT_REQUESTING_USER.concat(userName).concat(AUDIT_IMPERSONATING_USER).concat(AUDIT_API_ADMIN)
+				.concat(AUDIT_OPENAM_API).concat(AUDIT_OPENAM_AUTHENTICATE_CALL).concat(AUDIT_LOG_CLOSURE));*/
 		cache = (EhCacheCache) cacheManager.getCache("iPlanetToken");
 		if (null != cache) {
 			LOGGER.info("cacahe NotNull");
@@ -11445,14 +11455,18 @@ public class UserServiceImpl implements UserService {
 		for (AILRecord ail : ails) {
 			if (ail != null) {
 				int count = ailCountMap.size();
-				boolean verifnResult = false;
+				boolean entryFound = false;
 				if (enableSMLVerification.equalsIgnoreCase("True")) {
 					if (AILOperationType.REVOKE.getType().equalsIgnoreCase(ail.getOperation())) {
 						LOGGER.info("In SML Verification block: " + enableSMLVerification);
 						String ailValue = ail.getAclType() + "_" + ail.getAcl();
-						verifnResult = verifyAilInSMLMaster(openDJService, ailValue);
+
+						Response ailEntry = openDJService.verifyAIL(djUserName, djUserPwd, ailValue);
+						if (null != ailEntry && 200 == ailEntry.getStatus()) {
+							entryFound = true;
+						}
 						if(UserConstants.UIMS.equalsIgnoreCase(profileUpdateSource)) {
-							if (!verifnResult) {
+							if (!entryFound) {
 								Response createResponse = createSMLEntryForUIMSReq(ail, ailValue);
 								if(createResponse == null) {
 									throw new Exception(HttpStatus.INTERNAL_SERVER_ERROR +"-" +BulkAILConstants.INTERNAL_SERVER_ERROR);
@@ -11463,26 +11477,39 @@ public class UserServiceImpl implements UserService {
 							}
 							LOGGER.info("UIMS Entry- SML verification is successful");
 						} else {
-							if (!verifnResult) {
+							if (!entryFound) {
 								BulkAILResultHolder holder = BulkAILUtil.buildInvalidResult(ail,
 										HttpStatus.NOT_FOUND.value(), BulkAILConstants.NOT_FOUND_SML, false);
 								LOGGER.info("SML verification failed for ailValue: " + ailValue);
 								ailCountMap.put(++count, holder);
 								continue;
 							} else {
-								LOGGER.info("SML verification is successful");
-								String appTechnicalUser = openDJAttrs.read("_technicalUser");
-								String appLevelValidation = null;
-								if (openDJAttrs.read("_isAILValidation") != null) {
-									appLevelValidation = openDJAttrs.read("_isAILValidation");
-								}
-								LOGGER.info("App Level AIL Validation: " + appLevelValidation);
-								if (null != appLevelValidation && appLevelValidation.equalsIgnoreCase("True")
-										&& !isAILApp(authorizedToken, appTechnicalUser)) {
+								Configuration confg = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+								DocumentContext productDocCtxt = JsonPath.using(confg)
+										.parse(IOUtils.toString((InputStream) ailEntry.getEntity()));
+								String ailStatus = productDocCtxt.read("_AILStatus");
+
+								if(AILStatus.INACTIVE.getStatus().equalsIgnoreCase(ailStatus)) {
+									LOGGER.info("SML AIL found to be inactive for ailValue: " + ailValue);
 									BulkAILResultHolder holder = BulkAILUtil.buildInvalidResult(ail,
-											HttpStatus.UNAUTHORIZED.value(), BulkAILConstants.UNAUTHORIZED_USER, false);
+											HttpStatus.BAD_REQUEST.value(), BulkAILConstants.INVALID_ACL_TYPE, false);
 									ailCountMap.put(++count, holder);
 									continue;
+								}else {
+									LOGGER.info("SML verification is successful");
+									String appTechnicalUser = openDJAttrs.read("_technicalUser");
+									String appLevelValidation = null;
+									if (openDJAttrs.read("_isAILValidation") != null) {
+										appLevelValidation = openDJAttrs.read("_isAILValidation");
+									}
+									LOGGER.info("App Level AIL Validation: " + appLevelValidation);
+									if (null != appLevelValidation && appLevelValidation.equalsIgnoreCase("True")
+											&& !isAILApp(authorizedToken, appTechnicalUser)) {
+										BulkAILResultHolder holder = BulkAILUtil.buildInvalidResult(ail,
+												HttpStatus.UNAUTHORIZED.value(), BulkAILConstants.UNAUTHORIZED_USER, false);
+										ailCountMap.put(++count, holder);
+										continue;
+									}
 								}
 							}
 						}
@@ -11523,14 +11550,18 @@ public class UserServiceImpl implements UserService {
 		for (AILRecord ail : ails) {
 			if (ail != null) {
 				int count = ailCountMap.size();
-				boolean verifnResult = false;
+				boolean entryFound = false;
 				if (enableSMLVerification.equalsIgnoreCase("True")) {
 					if (AILOperationType.GRANT.getType().equalsIgnoreCase(ail.getOperation())) {
 						LOGGER.info("In SML Verification block: " + enableSMLVerification);
 						String ailValue = ail.getAclType() + "_" + ail.getAcl();
-						verifnResult = verifyAilInSMLMaster(openDJService, ailValue);
+
+						Response ailEntry = openDJService.verifyAIL(djUserName, djUserPwd, ailValue);
+						if (null != ailEntry && 200 == ailEntry.getStatus()) {
+							entryFound = true;
+						}
 						if(UserConstants.UIMS.equalsIgnoreCase(profileUpdateSource)) {
-							if (!verifnResult) {
+							if (!entryFound) {
 								Response createResponse = createSMLEntryForUIMSReq(ail, ailValue);
 								if(createResponse == null) {
 									throw new Exception(HttpStatus.INTERNAL_SERVER_ERROR +"-" +BulkAILConstants.INTERNAL_SERVER_ERROR);
@@ -11541,26 +11572,39 @@ public class UserServiceImpl implements UserService {
 							}
 							LOGGER.info("UIMS Entry- SML verification is successful");
 						} else {
-							if (!verifnResult) {
+							if (!entryFound) {
 								BulkAILResultHolder holder = BulkAILUtil.buildInvalidResult(ail,
 										HttpStatus.NOT_FOUND.value(), BulkAILConstants.NOT_FOUND_SML, false);
 								LOGGER.info("SML verification failed for ailValue: " + ailValue);
 								ailCountMap.put(++count, holder);
 								continue;
 							} else {
-								LOGGER.info("SML verification is successful");
-								String appTechnicalUser = openDJAttrs.read("_technicalUser");
-								String appLevelValidation = null;
-								if (openDJAttrs.read("_isAILValidation") != null) {
-									appLevelValidation = openDJAttrs.read("_isAILValidation");
-								}
-								LOGGER.info("App Level AIL Validation: " + appLevelValidation);
-								if (null != appLevelValidation && appLevelValidation.equalsIgnoreCase("True")
-										&& !isAILApp(authorizedToken, appTechnicalUser)) {
+								Configuration confg = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+								DocumentContext productDocCtxt = JsonPath.using(confg)
+										.parse(IOUtils.toString((InputStream) ailEntry.getEntity()));
+								String ailStatus = productDocCtxt.read("_AILStatus");
+
+								if(AILStatus.INACTIVE.getStatus().equalsIgnoreCase(ailStatus)) {
+									LOGGER.info("SML AIL found to be inactive for ailValue: " + ailValue);
 									BulkAILResultHolder holder = BulkAILUtil.buildInvalidResult(ail,
-											HttpStatus.UNAUTHORIZED.value(), BulkAILConstants.UNAUTHORIZED_USER, false);
+											HttpStatus.BAD_REQUEST.value(), BulkAILConstants.INVALID_ACL_TYPE, false);
 									ailCountMap.put(++count, holder);
 									continue;
+								}else {
+									LOGGER.info("SML verification is successful");
+									String appTechnicalUser = openDJAttrs.read("_technicalUser");
+									String appLevelValidation = null;
+									if (openDJAttrs.read("_isAILValidation") != null) {
+										appLevelValidation = openDJAttrs.read("_isAILValidation");
+									}
+									LOGGER.info("App Level AIL Validation: " + appLevelValidation);
+									if (null != appLevelValidation && appLevelValidation.equalsIgnoreCase("True")
+											&& !isAILApp(authorizedToken, appTechnicalUser)) {
+										BulkAILResultHolder holder = BulkAILUtil.buildInvalidResult(ail,
+												HttpStatus.UNAUTHORIZED.value(), BulkAILConstants.UNAUTHORIZED_USER, false);
+										ailCountMap.put(++count, holder);
+										continue;
+									}
 								}
 							}
 						}
@@ -11569,14 +11613,6 @@ public class UserServiceImpl implements UserService {
 				BulkAILUtil.processGrantRequest(grantMap, productDocCtx, idmsAIL_c, ail, ailCountMap, recordCountMap);
 			}
 		}
-	}
-
-	private boolean verifyAilInSMLMaster(OpenDjService openDJService, String ailValue) {
-		Response ail = openDJService.verifyAIL(djUserName, djUserPwd, ailValue);
-		if (null != ail && 200 == ail.getStatus()) {
-			return true;
-		}
-		return false;
 	}
 
 	private int updateVersion(String iPlanetDirectoryKey, String userFedID, DocumentContext productDocCtx,
