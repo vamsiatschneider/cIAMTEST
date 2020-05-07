@@ -8799,8 +8799,8 @@ public class UserServiceImpl implements UserService {
 		Response checkUserExistsResponse = null;
 		JSONObject jsonObject = new JSONObject();
 		JSONObject jsonObjectResponse = new JSONObject();
-		LOGGER.info(AUDIT_REQUESTING_USER.concat(userName).concat(AUDIT_IMPERSONATING_USER).concat(AUDIT_API_ADMIN)
-				.concat(AUDIT_OPENAM_API).concat(AUDIT_OPENAM_AUTHENTICATE_CALL).concat(AUDIT_LOG_CLOSURE));
+		/*LOGGER.info(AUDIT_REQUESTING_USER.concat(userName).concat(AUDIT_IMPERSONATING_USER).concat(AUDIT_API_ADMIN)
+				.concat(AUDIT_OPENAM_API).concat(AUDIT_OPENAM_AUTHENTICATE_CALL).concat(AUDIT_LOG_CLOSURE));*/
 		cache = (EhCacheCache) cacheManager.getCache("iPlanetToken");
 		if (null != cache) {
 			LOGGER.info("cacahe NotNull");
