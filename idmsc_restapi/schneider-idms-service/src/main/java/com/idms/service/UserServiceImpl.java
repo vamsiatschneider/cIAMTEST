@@ -4226,13 +4226,36 @@ public class UserServiceImpl implements UserService {
 						entryFound = true;
 					}
 					if (!entryFound) {
+						if(UserConstants.UIMS
+								.equalsIgnoreCase(profileUpdateSource)) {
+							AILMasterRecord ailMasterRecord = new AILMasterRecord();
+							ailMasterRecord.setId(ail);
+							ailMasterRecord.setAilStatus(AILStatus.ACTIVE.getStatus());
+							ailMasterRecord.setAilType(ailRequest.getUserAILRecord().getIDMSAclType__c());
+							ailMasterRecord.setAilValue(acl[i]);
+							objMapper = new ObjectMapper();
+							Response response = null;
+							try {
+								String ailEntryJson = objMapper.writeValueAsString(ailMasterRecord);
+								ailEntryJson = ailEntryJson.replace("\"\"", "[]");
+
+								response = openDJService.createAILMasterEntry(
+										"application/json", "application/json",
+										djUserName, djUserPwd, "create", ailEntryJson);
+							} catch (Exception ex) {
+								LOGGER.error("Exception in bulkAILUpdate: " + ex.getMessage(),ex);
+							}
+						
+						}	
+						else {
 						errorResponse.setStatus(errorStatus);
 						errorResponse.setMessage(UserConstants.INVALID_AIL + " for " + acl[i]);
 						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 						LOGGER.error("Error is " + errorResponse.getMessage());
 						LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
 						return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-					} else {
+						}} 
+						else {
 						Configuration confg = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 						DocumentContext productDocCtxt = JsonPath.using(confg)
 								.parse(IOUtils.toString((InputStream) ailEntry.getEntity()));
@@ -4357,35 +4380,29 @@ public class UserServiceImpl implements UserService {
 						}
 					}
 
-				String acl_appc = productDocCtx.read("$.IDMSAIL_" + idmsAclType_c + "_c[0]");
-				List<String> IDMSAIL_app=Arrays.asList(acl_appc.split(","));
-				String reqAclApp = "";
-				acl = ailRequest.getUserAILRecord().getIDMSAcl__c().split(",");
-				for (int i = 0; i < acl.length; i++) {
-					if (acl_appc== null|| !IDMSAIL_app.contains(acl[i])) {
-						if (reqAclApp.isEmpty()) {
-							reqAclApp = acl[i];
-						} else {
-							reqAclApp = reqAclApp + "," + acl[i];
+
+					String acl_appc = productDocCtx.read("$.IDMSAIL_" + idmsAclType_c + "_c[0]");
+					if (acl_appc != null) {
+					List<String> IDMSAIL_app=Arrays.asList(acl_appc.split(","));
+					acl = ailRequest.getUserAILRecord().getIDMSAcl__c().split(",");
+					for (int i = 0; i < acl.length; i++) {
+						if (!IDMSAIL_app.contains(acl[i])) {
+							acl_appc = acl_appc + "," +acl[i];
 						}
 					}
-				}
-
-				// Checking the value does not contain null value
-				if(!reqAclApp.isEmpty()) {
-				if (!(acl_appc == null || acl_appc.length() == 0))
-					acl_appc = acl_appc + "," + reqAclApp;
-				else
-					acl_appc = reqAclApp;
-				PRODUCT_JSON_STRING = "{" + "\"IDMSAIL_" + idmsAclType_c + "_c\": \"" + acl_appc.trim() + "\"" + "}";
-				
+					
+					}
+					else
+						acl_appc = ailRequest.getUserAILRecord().getIDMSAcl__c();
+					PRODUCT_JSON_STRING = "{" + "\"IDMSAIL_" + idmsAclType_c + "_c\": \"" + acl_appc.trim() + "\"" + "}";
+			
 				LOGGER.info("Grant Operation: updateAIL : Request -> " + PRODUCT_JSON_STRING);
 				LOGGER.info("Start: updateUser() of OpenAMService for userId=" + userId);
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 						PRODUCT_JSON_STRING);
 				LOGGER.info("End: updateUser() of OpenAMService finished for userId=" + userId);
-				//1277
-				}
+				
+				
 				if(!ail.isEmpty()) {
 				
 				if (null != IDMSAil__c && !IDMSAil__c.isEmpty()){
@@ -4500,8 +4517,9 @@ public class UserServiceImpl implements UserService {
 					.concat(",\"updateSource\":\"" + ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c() + "\"}");
 
 			// calling Async methods of UIMS api in updateUserAil IDMS api
-			if (null != ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c() && !UserConstants.UIMS
-					.equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c())) {
+			/*if (null != ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c() && !UserConstants.UIMS
+					.equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c())) {*/
+			if (null != ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c()) {
 				LOGGER.info("UserServiceImpl:updateAIL -> Request -> " + version);
 				LOGGER.info("Start: updateUser() of OpenAMService for userId=" + userId + " ,version=" + version);
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, version);
