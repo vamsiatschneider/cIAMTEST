@@ -393,7 +393,7 @@ public class UserServiceImpl implements UserService {
 	static {
 		emailValidator = EmailValidator.getInstance();
 		formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-		userResponse = new UserServiceResponse();		
+		userResponse = new UserServiceResponse();
 	}
 
 	/*
@@ -2866,6 +2866,81 @@ public class UserServiceImpl implements UserService {
 
 		return false;
 	}
+	
+	private boolean checkFewMandatoryFields(DocumentContext userData,UpdateUserRequest userRequest){
+		LOGGER.info("Entered checkFewMandatoryFields() -> Start");
+		String userCompanyName = null, userBusinessType = null, userIndustrySegment = null;
+		String userCompanyAddress = null, userCompanyCity = null, userCompanyCountry = null;
+		String userCompanyZip = null, userUid = null;
+		userResponse = new UserServiceResponse();
+		
+		userCompanyName = userData.read(JsonConstants.COMPANY_NAME);
+		userBusinessType = userData.read(JsonConstants.BUSINESS_TYPE);
+		userIndustrySegment = userData.read(JsonConstants.INDUSTRY_SEGMENT);
+		userCompanyAddress = userData.read(JsonConstants.COMPANY_ADDRESS);
+		userCompanyCity = userData.read(JsonConstants.COMPANY_CITY);
+		userCompanyCountry = userData.read(JsonConstants.COMPANY_COUNTRY);
+		userCompanyZip = userData.read(JsonConstants.COMPANY_POSTAL);
+		userUid = userData.read(JsonConstants.FEDERATION_ID_0);
+		
+		if(null != userCompanyName && !userCompanyName.isEmpty() && 
+				(null == userRequest.getUserRecord().getCompanyName() || userRequest.getUserRecord().getCompanyName().isEmpty())){
+			userResponse.setStatus(errorStatus);
+			userResponse.setMessage("Company Name should have value");
+			userResponse.setId(userUid);
+			LOGGER.error("Company Name should have value");
+			return true;
+		}
+		if(null != userBusinessType && !userBusinessType.isEmpty() && 
+				(null == userRequest.getUserRecord().getIDMSClassLevel1__c() || userRequest.getUserRecord().getIDMSClassLevel1__c().isEmpty())){
+			userResponse.setStatus(errorStatus);
+			userResponse.setMessage("Business Type should have value");
+			userResponse.setId(userUid);
+			LOGGER.error("Business Type should have value");
+			return true;
+		}
+		if(null != userIndustrySegment && !userIndustrySegment.isEmpty() && 
+				(null == userRequest.getUserRecord().getIDMSMarketSegment__c() || userRequest.getUserRecord().getIDMSMarketSegment__c().isEmpty())){
+			userResponse.setStatus(errorStatus);
+			userResponse.setMessage("Industry Segment should have value");
+			userResponse.setId(userUid);
+			LOGGER.error("Industry Segment should have value");
+			return true;
+		}
+		if(null != userCompanyAddress && !userCompanyAddress.isEmpty() && 
+				(null == userRequest.getUserRecord().getCompany_Address1__c() || userRequest.getUserRecord().getCompany_Address1__c().isEmpty())){
+			userResponse.setStatus(errorStatus);
+			userResponse.setMessage("Company Address should have value");
+			userResponse.setId(userUid);
+			LOGGER.error("Company Address should have value");
+			return true;
+		}
+		if(null != userCompanyCity && !userCompanyCity.isEmpty() && 
+				(null == userRequest.getUserRecord().getCompany_City__c() || userRequest.getUserRecord().getCompany_City__c().isEmpty())){
+			userResponse.setStatus(errorStatus);
+			userResponse.setMessage("Company City should have value");
+			userResponse.setId(userUid);
+			LOGGER.error("Company City should have value");
+			return true;
+		}
+		if(null != userCompanyCountry && !userCompanyCountry.isEmpty() && 
+				(null == userRequest.getUserRecord().getCompany_Country__c() || userRequest.getUserRecord().getCompany_Country__c().isEmpty())){
+			userResponse.setStatus(errorStatus);
+			userResponse.setMessage("Company Country should have value");
+			userResponse.setId(userUid);
+			LOGGER.error("Company Country should have value");
+			return true;
+		}
+		if(null != userCompanyZip && !userCompanyZip.isEmpty() && 
+				(null == userRequest.getUserRecord().getCompany_Postal_Code__c() || userRequest.getUserRecord().getCompany_Postal_Code__c().isEmpty())){
+			userResponse.setStatus(errorStatus);
+			userResponse.setMessage("Company Zip should have value");
+			userResponse.setId(userUid);
+			LOGGER.error("Company Zip should have value");
+			return true;
+		}
+		return false;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -4754,6 +4829,7 @@ public class UserServiceImpl implements UserService {
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
 		ObjectMapper objMapper = new ObjectMapper();
+		userResponse = new UserServiceResponse();
 		userResponse.setStatus(errorStatus);
 		String companyFedIdInRequest = null;
 		boolean updateMobileIdentifierCheck = false, stopUIMSFlag = false ;
@@ -5015,8 +5091,18 @@ public class UserServiceImpl implements UserService {
 				userData = productService.getUser(iPlanetDirectoryKey, userId);
 
 				LOGGER.info("userData -> " + ChinaIdmsUtil.printOpenAMInfo(userData));
-
 				productDocCtxUser = JsonPath.using(conf).parse(userData);
+				
+				if(checkFewMandatoryFields(productDocCtxUser,userRequest)){
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by updateUser() : " + elapsedTime);
+					if(UserConstants.UIMS
+							.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Profile_update_source__c())){
+						return handleUIMSError(Response.Status.BAD_REQUEST, userResponse.getMessage());
+					}
+					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+				}
+				
 				updatingUser = productDocCtxUser.read(JsonConstants.LOGIN_ID_LOWER_0);
 				if (null == updatingUser) {
 					updatingUser = productDocCtxUser.read(JsonConstants.LOGIN_ID_UPPER_0);
