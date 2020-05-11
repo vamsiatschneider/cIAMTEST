@@ -4442,9 +4442,8 @@ public class UserServiceImpl implements UserService {
 					.concat(",\"updateSource\":\"" + ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c() + "\"}");
 
 			// calling Async methods of UIMS api in updateUserAil IDMS api
-			/*if (null != ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c() && !UserConstants.UIMS
-					.equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c())) {*/
-			if (null != ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c()) {
+			if (null != ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c() && !UserConstants.UIMS
+					.equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c())) {
 				LOGGER.info("UserServiceImpl:updateAIL -> Request -> " + version);
 				LOGGER.info("Start: updateUser() of OpenAMService for userId=" + userId + " ,version=" + version);
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, version);
