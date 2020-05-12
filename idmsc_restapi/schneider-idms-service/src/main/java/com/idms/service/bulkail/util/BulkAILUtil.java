@@ -34,6 +34,7 @@ public class BulkAILUtil {
 	public static BulkAILResponse buildResponse(Map<String, Map<Integer, BulkAILResultHolder>> userAndAILReqMap, String profileUpdateSource) {
 		BulkAILResponse baResponse = new BulkAILResponse();
 		List<BulkAILRecord> userAils = new ArrayList<BulkAILRecord>();
+		boolean allEntitiesFailed = true;
 
 		for (Entry<String, Map<Integer, BulkAILResultHolder>> entry : userAndAILReqMap.entrySet()) {
 			BulkAILRecord bulkAILRecord = new BulkAILRecord();
@@ -55,49 +56,41 @@ public class BulkAILUtil {
 				ailResponse.setStatusCode(resultHolder.getStatusCode());
 				ailResponse.setMessage(resultHolder.getMessage());
 				ailResponseList.add(ailResponse);
+				if(resultHolder.getStatusCode() == HttpStatus.OK.value()) {
+					allEntitiesFailed = false;
+				}
 			}
 			bulkAILRecord.setAils(ailResponseList);
 			userAils.add(bulkAILRecord);
 		}
+		if(allEntitiesFailed) {
+			baResponse.setMessage(BulkAILConstants.FAILURE);
+		} else {
+			baResponse.setMessage(BulkAILConstants.SUCCESS);
+		}
 		baResponse.setProfileLastUpdateSource(profileUpdateSource);
-		baResponse.setMessage(BulkAILConstants.SUCCESS);
-		baResponse.setUserAils(userAils );
+		baResponse.setUserAils(userAils);
 		return baResponse;
 	}
 
 	public static void processGrantRequest(Map<String, BulkAILMapValue> grantMap, DocumentContext productDocCtx, String idmsAIL_c,
-			List<AILRecord> ails, Map<Integer, BulkAILResultHolder> ailCountMap,
+			AILRecord ail, Map<Integer, BulkAILResultHolder> ailCountMap,
 			Map<AILRecord, Integer> recordCountMap) {
-		for (AILRecord ail : ails) {
-			if (ail == null) {
-				buildNullAILResult(ailCountMap);
-				continue;
-			}
-			int count = ailCountMap.size();
-			boolean isValidOperationType = false;
-			if (AILOperationType.GRANT.getType().equalsIgnoreCase(ail.getOperation())
-					|| AILOperationType.REVOKE.getType().equalsIgnoreCase(ail.getOperation())) {
-				isValidOperationType = true;
-			}
-			if (!isValidOperationType) {
-				BulkAILResultHolder holder = buildInvalidResult(ail, HttpStatus.BAD_REQUEST.value(),
-						BulkAILConstants.INVALID_OPERATION, true);
-				ailCountMap.put(++count, holder);
-			}
-			if (AILOperationType.GRANT.getType().equalsIgnoreCase(ail.getOperation())) {
-				if (recordCountMap.get(ail) != null) {
-					// create new holder object since grant/revoke on same acl type/value
-					// combination is invalid.
-					recordCountMap.put(ail, recordCountMap.get(ail) + 1);
-					BulkAILResultHolder holder = buildInvalidResult(ail, HttpStatus.BAD_REQUEST.value(),
-							BulkAILConstants.MALFORMED_REQUEST, true);
-					ailCountMap.put(++count, holder);
-				} else {
-					count = buildSuccessResult(ailCountMap, ail, count);
-					recordCountMap.put(ail, 1);
 
-					buildGrantAILMap(grantMap, productDocCtx, idmsAIL_c, ail);
-				}
+		int count = ailCountMap.size();
+		if (AILOperationType.GRANT.getType().equalsIgnoreCase(ail.getOperation())) {
+			if (recordCountMap.get(ail) != null) {
+				// create new holder object since grant/revoke on same acl type/value
+				// combination is invalid.
+				recordCountMap.put(ail, recordCountMap.get(ail) + 1);
+				BulkAILResultHolder holder = buildInvalidResult(ail, HttpStatus.BAD_REQUEST.value(),
+						BulkAILConstants.MALFORMED_REQUEST, true);
+				ailCountMap.put(++count, holder);
+			} else {
+				count = buildSuccessResult(ailCountMap, ail, count);
+				recordCountMap.put(ail, 1);
+
+				buildGrantAILMap(grantMap, productDocCtx, idmsAIL_c, ail);
 			}
 		}
 	}
@@ -118,31 +111,27 @@ public class BulkAILUtil {
 	}
 
 	public static void processRevokeRequest(Map<String, BulkAILMapValue> revokeMap, DocumentContext productDocCtx, String idmsAIL_c,
-			List<AILRecord> ails, Map<Integer, BulkAILResultHolder> ailCountMap,
+			AILRecord ail, Map<Integer, BulkAILResultHolder> ailCountMap,
 			Map<AILRecord, Integer> recordCountMap) {
-		for (AILRecord ail : ails) {
-			if (ail == null) {
-				continue;
-			}
-			int count = ailCountMap.size();
-			if (AILOperationType.REVOKE.getType().equalsIgnoreCase(ail.getOperation())) {
-				if (recordCountMap.get(ail) != null) {
-					// create new holder object since grant/revoke on same acl type/value
-					// combination is invalid.
-					recordCountMap.put(ail, recordCountMap.get(ail) + 1);
-					BulkAILResultHolder holder = buildInvalidResult(ail, HttpStatus.BAD_REQUEST.value(),
-							BulkAILConstants.MALFORMED_REQUEST, true);
-					ailCountMap.put(++count, holder);
-				} else {
-					count = buildSuccessResult(ailCountMap, ail, count);
-					recordCountMap.put(ail, 1);
-					buildRevokeAILMap(revokeMap, productDocCtx, idmsAIL_c, ail);
-				}
+
+		int count = ailCountMap.size();
+		if (AILOperationType.REVOKE.getType().equalsIgnoreCase(ail.getOperation())) {
+			if (recordCountMap.get(ail) != null) {
+				// create new holder object since grant/revoke on same acl type/value
+				// combination is invalid.
+				recordCountMap.put(ail, recordCountMap.get(ail) + 1);
+				BulkAILResultHolder holder = buildInvalidResult(ail, HttpStatus.BAD_REQUEST.value(),
+						BulkAILConstants.MALFORMED_REQUEST, true);
+				ailCountMap.put(++count, holder);
+			} else {
+				count = buildSuccessResult(ailCountMap, ail, count);
+				recordCountMap.put(ail, 1);
+				buildRevokeAILMap(revokeMap, productDocCtx, idmsAIL_c, ail);
 			}
 		}
 	}
 	
-	private static BulkAILResultHolder buildInvalidResult(AILRecord ail, int statusCode, String invalidOp, boolean dupRequest) {
+	public static BulkAILResultHolder buildInvalidResult(AILRecord ail, int statusCode, String invalidOp, boolean dupRequest) {
 		BulkAILResultHolder holder = new BulkAILResultHolder();
 		holder.setAilRecord(ail);
 		holder.setDupRequest(dupRequest);
@@ -475,41 +464,47 @@ public class BulkAILUtil {
 	public static void updateUIMSBulkUserAIL(String userId, Map<String, BulkAILMapValue> grantMap,
 			Map<String, BulkAILMapValue> revokeMap, int vNewCntValue, OpenAMService productService, UIMSAccessManagerSoapService uimsAccessManagerSoapService, String iPlanetDirectoryKey, String profileUpdateSource) {
 
-		Attributes idmsUser_rAttributes = new Attributes();
-		IDMSUser__r idmsUser__r = new IDMSUser__r();
-		idmsUser__r.setAttributes(idmsUser_rAttributes);
-		idmsUser__r.setId(userId);
-		idmsUser__r.setIDMS_Federated_ID__c(userId);
-
-		IDMSUserAIL idmsUserAIL = new IDMSUserAIL(idmsUser__r);
-		Attributes attributes = new Attributes();
-		attributes.setType("IDMSUserAIL__c");
-		idmsUserAIL.setAttributes(attributes);
-		idmsUserAIL.setId(userId);
-		idmsUserAIL.setIdmsuser__c(userId);
-		idmsUserAIL.setIDMS_Federated_Id__c(userId);
-		idmsUserAIL.setIdms_Profile_update_source__c(profileUpdateSource);
-
 		// Sync grant requests to UIMS
+		LOGGER.info("START: Grant request to UIMS in BULKAILUpdate for userID = " + userId);
+		LOGGER.info("Grant map size : " + grantMap.size());
 		syncRequestsToUIMS(userId, grantMap, vNewCntValue, productService, uimsAccessManagerSoapService,
-				iPlanetDirectoryKey, idmsUserAIL);
+				iPlanetDirectoryKey, profileUpdateSource);
+		LOGGER.info("END: Grant request to UIMS in BULKAILUpdate for userID = " + userId);
+
+		LOGGER.info("START: Revoke request to UIMS in BULKAILUpdate for userID = " + userId);
 		// Sync revoke requests to UIMS
+		LOGGER.info("Revoke map size : " + revokeMap.size());
 		syncRequestsToUIMS(userId, revokeMap, vNewCntValue, productService, uimsAccessManagerSoapService,
-				iPlanetDirectoryKey, idmsUserAIL);
+				iPlanetDirectoryKey, profileUpdateSource);
+		LOGGER.info("END: Revoke request to UIMS in BULKAILUpdate for userID = " + userId);
 	}
 
 	private static void syncRequestsToUIMS(String userId, Map<String, BulkAILMapValue> map, int vNewCntValue,
 			OpenAMService productService, UIMSAccessManagerSoapService uimsAccessManagerSoapService,
-			String iPlanetDirectoryKey, IDMSUserAIL idmsUserAIL) {
+			String iPlanetDirectoryKey, String profileUpdateSource) {
 		if (!map.isEmpty()) {
 			for (Entry<String, BulkAILMapValue> entry : map.entrySet()) {
 				String ailKey = entry.getKey();
 				if (null != ailKey && "IDMSAil_c".equals(ailKey)) {
 					List<AILRecord> ailRecords = entry.getValue().getAilRecords();
 					for(AILRecord ailRecord : ailRecords) {
-						AILRequest ailRequest = populateUIMSInput(userId, idmsUserAIL, ailRecord);
+						LOGGER.info(" AIL Operation = " + ailRecord.getOperation());
+						LOGGER.info(" AIL Type = " + ailRecord.getAclType());
+						LOGGER.info(" AIL Val = " + ailRecord.getAcl());
+						Attributes idmsUser_rAttributes = new Attributes();
+						IDMSUser__r idmsUser__r = new IDMSUser__r();
+						idmsUser__r.setAttributes(idmsUser_rAttributes);
+						idmsUser__r.setId(userId);
+						idmsUser__r.setIDMS_Federated_ID__c(userId);
+
+						IDMSUserAIL idmsUserAIL = new IDMSUserAIL(idmsUser__r);
+						LOGGER.info(" Processing " + ailRecord.getOperation() +" Operation request for userID = " + userId);
+						AILRequest ailRequest = populateUIMSInput(userId, idmsUserAIL, ailRecord, profileUpdateSource);
+						LOGGER.info(" Revoke Operation in IDMSUserAIL: "+ idmsUserAIL.isIdmsisRevokedOperation__c());
 						//sync call to UIMS
+						LOGGER.info("Start: Sync call for " + ailRecord.getOperation() + " operation to UIMS for userId: " + userId);
 						uimsAccessManagerSoapService.updateUIMSUserAIL(ailRequest , idmsUserAIL, String.valueOf(vNewCntValue), productService, iPlanetDirectoryKey, "");
+						LOGGER.info("End: Sync call for " + ailRecord.getOperation() + " operation to UIMS for userId: "+ userId);
 					}
 				} else {
 					continue;
@@ -518,7 +513,15 @@ public class BulkAILUtil {
 		}
 	}
 
-	private static AILRequest populateUIMSInput(String userId, IDMSUserAIL idmsUserAIL, AILRecord ailRecord) {
+	private static AILRequest populateUIMSInput(String userId, IDMSUserAIL idmsUserAIL, AILRecord ailRecord, String profileUpdateSource) {
+		Attributes attributes = new Attributes();
+		attributes.setType("IDMSUserAIL__c");
+		idmsUserAIL.setAttributes(attributes);
+		idmsUserAIL.setId(userId);
+		idmsUserAIL.setIdmsuser__c(userId);
+		idmsUserAIL.setIDMS_Federated_Id__c(userId);
+		idmsUserAIL.setIdms_Profile_update_source__c(profileUpdateSource);
+
 		if(AILOperationType.GRANT.getType().equalsIgnoreCase(ailRecord.getOperation())) {
 			idmsUserAIL.setIdmsisRevokedOperation__c(false);
 		}else {

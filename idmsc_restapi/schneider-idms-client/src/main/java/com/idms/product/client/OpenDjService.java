@@ -50,4 +50,7 @@ public interface OpenDjService {
 	@Path("/AILMaster/{ailValue}")
 	Response verifyAIL(@HeaderParam("X-OpenIDM-Username") String userName,@HeaderParam("X-OpenIDM-Password") String password,@PathParam("ailValue") String ailValue);
 
+	@POST
+	@Path("/AILMaster")
+	Response createAILMasterEntry(@HeaderParam("Content-Type") String contentType, @HeaderParam("Accept") String acceptHeader, @HeaderParam("X-OpenIDM-Username") String userName,@HeaderParam("X-OpenIDM-Password") String password, @QueryParam("_action") String action, String ailEntryJson);
 }

@@ -37,4 +37,12 @@ public class JsonConstants {
 	public static final String MAIL_0 = "$.mail[0]";
 	public static final String MOBILE_0 = "$.mobile[0]";
 	public static final String MOBILEREG_0 = "$.mobile_reg[0]";
+	public static final String COMPANY_NAME = "$.companyName[0]";
+	public static final String COMPANY_ADDRESS = "$.companyStreet[0]";
+	public static final String COMPANY_CITY = "$.companyCity[0]";
+	public static final String COMPANY_COUNTRY= "$.companyCountry[0]";
+	public static final String COMPANY_POSTAL = "$.companyPostalCode[0]";
+	public static final String INDUSTRY_SEGMENT = "$.industrySegment[0]";
+	public static final String BUSINESS_TYPE = "$.iam1[0]";
+	public static final String FEDERATION_ID_0 = "$.federationID[0]";
 }

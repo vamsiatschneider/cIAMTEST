@@ -3,8 +3,6 @@
  */
 package com.schneider.idms.service.impl;
 
-import static com.se.idms.util.UserConstants.GET_USER_TIME_LOG;
-
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
@@ -21,9 +19,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.idms.product.model.Attributes;
-import com.idms.product.model.OpenAMGetUserHomeResponse;
-import com.idms.product.model.OpenAMGetUserWorkResponse;
 import com.idms.service.util.ChinaIdmsUtil;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
@@ -226,7 +221,6 @@ public class GetAILServiceImpl extends IdmsCommonServiceImpl implements GetAILSe
 
 @SuppressWarnings("unchecked")
 public Response getUserResponse (String userId,String iPlanetDirectoryToken ){
-	long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 	String userData = null;
 	try{
 		userData = productService.getUser(iPlanetDirectoryToken, userId);
@@ -245,33 +239,20 @@ public Response getUserResponse (String userId,String iPlanetDirectoryToken ){
 	Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 	// getting the context
 	DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
-	String context = null != productDocCtx.read(JsonConstants.EMPLOYEE_TYPE)
-			? getValue(productDocCtx.read(JsonConstants.EMPLOYEE_TYPE).toString()) : null;
-	LOGGER.info("context=" + context);
-	OpenAMGetUserHomeResponse userHomeResponse = new OpenAMGetUserHomeResponse();
-	OpenAMGetUserWorkResponse userWorkResponse = new OpenAMGetUserWorkResponse();
-	DocumentContext userProductDocCtx = JsonPath.using(conf).parse(userData);
-	Attributes attributes = new Attributes();
-	userHomeResponse.setAttributes(attributes);
-	userWorkResponse.setAttributes(attributes);
-	if ("@home".equalsIgnoreCase(context)|| "home".equalsIgnoreCase(context)) {
-		return returnGetUserHomeContext(startTime, userHomeResponse, userProductDocCtx);
-	} else if ("@work".equalsIgnoreCase(context)|| "work".equalsIgnoreCase(context)) {
-		valuesByOauthHomeWorkContext.parseValuesWorkContext(userWorkResponse, userProductDocCtx);
-		
-		return Response.status(Response.Status.OK.getStatusCode()).entity(userWorkResponse).build();
-	} else if (null == context || "".equals(context)) {
-		return returnGetUserHomeContext(startTime, userHomeResponse, userProductDocCtx);
-	}
-	return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).build();
-}
-private Response returnGetUserHomeContext(long startTime, OpenAMGetUserHomeResponse userHomeResponse,
-		DocumentContext userProductDocCtx) {
-	long elapsedTime;
-	valuesByOauthHomeWorkContext.parseValuesHomeContext(userHomeResponse, userProductDocCtx);
-	elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-	LOGGER.info(GET_USER_TIME_LOG + elapsedTime);
-	return Response.status(Response.Status.OK.getStatusCode()).entity(userHomeResponse).build();
+
+	// IDMSC-1385 Bug Fix - returning first name and last name as response
+	JSONObject userResponse = new JSONObject();
+	String firstNameValue = null != productDocCtx.read("$.givenName")
+			? getValue(productDocCtx.read("$.givenName").toString()) : getDelimeter();
+	userResponse.put("FirstName", firstNameValue);
+	String lastNameValue = null != productDocCtx.read("$.sn")
+			? getValue(productDocCtx.read("$.sn").toString()) : getDelimeter();
+	userResponse.put("LastName", lastNameValue);
+	String idValue = null != productDocCtx.read(JsonConstants.USER_NAME)
+					? getValue(productDocCtx.read(JsonConstants.USER_NAME).toString()) : getDelimeter();
+	userResponse.put("Id", idValue);
+
+	return Response.status(Response.Status.OK.getStatusCode()).entity(userResponse).build();
 }
 
 /**
