@@ -40,6 +40,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -155,6 +156,7 @@ import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.cache.utils.EmailConstants;
 import com.se.idms.cache.validate.IValidator;
 import com.se.idms.dto.AILResponse;
+import com.se.idms.dto.CounterResponse;
 import com.se.idms.dto.ErrorResponse;
 import com.se.idms.dto.GetUserHomeByOauthResponse;
 import com.se.idms.dto.GetUserWorkByOauthResponse;
@@ -172,6 +174,8 @@ import com.se.idms.dto.UIMSResponse;
 import com.se.idms.dto.UIMSStatusInfo;
 import com.se.idms.dto.UserExistsResponse;
 import com.se.idms.dto.UserServiceResponse;
+import com.se.idms.dto.UserServiceResponseMailCounter;
+import com.se.idms.dto.UserServiceResponseMobCounter;
 import com.se.idms.util.EmailValidator;
 import com.se.idms.util.JsonConstants;
 import com.se.idms.util.LangSupportUtil;
@@ -246,6 +250,12 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private static UserServiceResponse userResponse;
+	
+	@Autowired
+	private UserServiceResponseMobCounter userResponseMobCounter;
+	
+	@Autowired
+	private UserServiceResponseMailCounter userResponseMailCounter;
 
 	/*
 	 * @Inject
@@ -384,6 +394,17 @@ public class UserServiceImpl implements UserService {
 
 	String userIdExistInUIMS = null;
 	
+	/* Counter */
+	@Value("${maxEmailLimit}")
+	private String maxEmailLimit;
+
+	@Value("${maxMobLimit}")
+	private String maxMobLimit;
+	
+	String maxEmailLimitPasswordRecovery = null;
+	String maxMobLimitPasswordRecovery = null;
+	
+		
 	@Value("${idmsc.emailUserNameFormat}")
 	private String defaultUserNameFormat;
 	
@@ -407,12 +428,20 @@ public class UserServiceImpl implements UserService {
 	public Response authenticateUser(String userName, String password, String realm) {
 		LOGGER.info("Entered authenticateUser() -> Start");
 		LOGGER.info("Parameter userName -> " + userName + " ,realm -> " + realm);
-
 		String successResponse = null;
 		String regSource = "";
 		Response checkUserExistsResponse = null;
 		UserExistsResponse checkUserExistsFlag = null;
 		JSONObject jsonObject = new JSONObject();
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		DocumentContext productDocCtx = null;
+		String PlanetDirectoryKey = null;
+		String userData = null;
+		String UID = null;
+		String strcurrentMailCounter = UserConstants.ZERO;
+		String strcurrentMobCounter = UserConstants.ZERO;
+		String jsonStr = null;
+		JSONObject jsonCounter = new JSONObject();
 		LOGGER.info(AUDIT_REQUESTING_USER.concat(userName).concat(AUDIT_IMPERSONATING_USER).concat(AUDIT_API_ADMIN)
 				.concat(AUDIT_OPENAM_API).concat(AUDIT_OPENAM_AUTHENTICATE_CALL).concat(AUDIT_LOG_CLOSURE));
 
@@ -426,17 +455,14 @@ public class UserServiceImpl implements UserService {
 		// productService.authenticateIdmsChinaUser(userName, password, realm);
 
 		try {
-
 			// The below snippet for authentication logs.
-			String PlanetDirectoryKey = null;
 			try {
 				PlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExcep) {
 				LOGGER.error("ECODE-AUTHUSER-NO-TOKEN : Unable to get SSO Token" + ioExcep.getMessage(),ioExcep);
 			}
-
 			LOGGER.info("Start: checkUserExistsWithEmailMobile() of OpenAMService for userName=" + userName);
-			String userData = productService.checkUserExistsWithEmailMobile(
+			userData = productService.checkUserExistsWithEmailMobile(
 					UserConstants.CHINA_IDMS_TOKEN + PlanetDirectoryKey,
 					"loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(userName, "UTF-8"), "UTF-8")
 							+ "\" or login_mobile eq " + "\""
@@ -444,9 +470,8 @@ public class UserServiceImpl implements UserService {
 
 			LOGGER.info("End: checkUserExistsWithEmailMobile() of OpenAMService finished for userName=" + userName);
 
-			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+			
 			// getting the context
-			DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
 			productDocCtx = JsonPath.using(conf).parse(userData);
 			Integer resultCount = productDocCtx.read("$.resultCount");
 			LOGGER.info("resultCount = "+resultCount);
@@ -505,7 +530,13 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("ECODE-AUTHUSER-PROC-ERROR : Error authenticating user : " + userName);
 			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
 		}
-
+		/* Set counter to 0 */	
+		UID = productDocCtx.read("$.result[0].uid[0]");
+		LOGGER.info("Authenticate :: Update counter to ZERO");
+		jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
+		jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
+		jsonStr = jsonCounter.toString();			
+		productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+PlanetDirectoryKey, UID, jsonStr);
 		AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + successStatus + "," + regSource);
 		LOGGER.info("authenticateUser() -> Ending");
 		return Response.status(Response.Status.OK.getStatusCode()).entity(successResponse).build();
@@ -3354,6 +3385,12 @@ public class UserServiceImpl implements UserService {
 		Response passwordOpenAMResponse = null;
 		boolean isPasswordUpdatedInUIMS = false, stopUIMSFlag = false ;
 		String invalidAttempt=null;
+		/* Counter */
+		String strcurrentMailCounter = UserConstants.ZERO;
+		String strcurrentMobCounter = UserConstants.ZERO;
+		String jsonStr = null;
+		JSONObject jsonCounter = new JSONObject();
+		
 		try {
 			LOGGER.info("Parameter confirmRequest -> "
 					+ ChinaIdmsUtil.printInfo(ChinaIdmsUtil.printData(objMapper.writeValueAsString(confirmRequest))));
@@ -3987,7 +4024,15 @@ public class UserServiceImpl implements UserService {
 				PasswordRecoveryResponse passwordRecoveryResponse = new PasswordRecoveryResponse(idmsUserRecord);
 				passwordRecoveryResponse.setStatus(successStatus);
 				passwordRecoveryResponse.setMessage("PIN validated Successfully");
-
+				
+				/* Set counter to 0 */				
+				LOGGER.info("ConfirmPIN :: Update counter to ZERO");
+				jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
+				jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
+				jsonStr = jsonCounter.toString();			
+				String temp = productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, uniqueIdentifier, jsonStr);
+				LOGGER.info("Status of PIN updateCounter :: " + temp);
+				
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by userPinConfirmation() : " + elapsedTime);
 				return Response.status(Response.Status.OK).entity(passwordRecoveryResponse).build();
@@ -4028,7 +4073,7 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 
-		Attributes attributes = new Attributes();
+		Attributes attributes = new Attributes();	
 		IDMSUserRecord idmsUserRecord = new IDMSUserRecord();
 		idmsUserRecord.setAttributes(attributes);
 		idmsUserRecord.setId(uniqueIdentifier);
@@ -4037,6 +4082,14 @@ public class UserServiceImpl implements UserService {
 		PasswordRecoveryResponse passwordRecoveryResponse = new PasswordRecoveryResponse(idmsUserRecord);
 		passwordRecoveryResponse.setStatus(successStatus);
 		passwordRecoveryResponse.setMessage("PIN validated Successfully");
+		
+		/* Set counter to 0 */				
+		LOGGER.info("ConfirmPIN :: Update counter to ZERO");
+		jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
+		jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
+		jsonStr = jsonCounter.toString();			
+		String temp = productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, uniqueIdentifier, jsonStr);
+		LOGGER.info("Status of PIN updateCounter :: " + temp);
 
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info("Time taken by userPinConfirmation() : " + elapsedTime);
@@ -4700,6 +4753,18 @@ public class UserServiceImpl implements UserService {
 		JSONObject response = new JSONObject();
 		ObjectMapper objMapper = new ObjectMapper();
 		boolean isOTPEnabled = false;
+		/* Counter */
+		String jsonStr = null;
+		String strcurrentMailCounter = null;		  
+		int intcurrentMailCounter=0;
+		String identifierType= null;
+		String strcurrentMobCounter = null;
+		int intcurrentMobCounter=0;
+		String strCurrentCounter=null;
+		JSONObject obj = new JSONObject();
+		maxEmailLimitPasswordRecovery = Integer.toString((Integer.parseInt(maxEmailLimit) + UserConstants.ONE));
+		maxMobLimitPasswordRecovery = Integer.toString((Integer.parseInt(maxMobLimit) + UserConstants.ONE));
+		
 		try {
 			LOGGER.info(
 					"Parameter  passwordRecoveryRequest -> " + objMapper.writeValueAsString(passwordRecoveryRequest));
@@ -4742,7 +4807,61 @@ public class UserServiceImpl implements UserService {
 					isOTPEnabled = Boolean.valueOf(isOTPEnabledForApp);
 					LOGGER.info("isOTPEnabled: "+ isOTPEnabled);
 				}
-				
+				if (UserConstants.HOTP_EMAIL_RESET_PR.equalsIgnoreCase(hotpService)) {
+					identifierType=UserConstants.EMAIL;
+					/* Counter */
+					if(userExists.contains(UserConstants.MAIL_RATE_COUNTER)) {
+						strcurrentMailCounter = productDocCtx.read("$.result[0].mailRateCounter[0]");
+						if(null != strcurrentMailCounter && !strcurrentMailCounter.isEmpty()){
+								intcurrentMailCounter = Integer.parseInt(strcurrentMailCounter);
+							}
+						}
+					if(intcurrentMailCounter == Integer.parseInt(maxEmailLimitPasswordRecovery)){
+				  		userResponseMailCounter.setStatus(errorStatus);
+				  		userResponseMailCounter.setMessage("Maximum resend Email count breached.");
+				  		userResponseMailCounter.setId(userName);
+				  		userResponseMailCounter.setMaxEmailLimit(maxEmailLimitPasswordRecovery);
+				  		userResponseMailCounter.setStrcurrentMailCounter(strcurrentMailCounter);
+				  		LOGGER.info("Maximum resend Email count breached.");
+					  	return Response.status(Response.Status.BAD_REQUEST).entity(userResponseMailCounter).build();
+					}
+					else{		
+							intcurrentMailCounter = increment(intcurrentMailCounter);
+						}
+					obj.put(UserConstants.MAIL_RATE_COUNTER, intcurrentMailCounter);
+					jsonStr = obj.toString();
+					otp = sendEmail.generateOtp(userName);
+					if(!isOTPEnabled)
+					token = sendEmail.generateEmailToken(userName);
+					LOGGER.info("Successfully OTP generated for " + userName);
+					sendEmail.sendOpenAmEmail(token, otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName, passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c(),finalPathString); /* Reinstate */
+					productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
+					LOGGER.info("Counter updated for " + userName);
+					strcurrentMailCounter = Integer.toString(intcurrentMailCounter);
+					strCurrentCounter = strcurrentMailCounter;
+					
+				} else if (UserConstants.HOTP_MOBILE_RESET_PR.equalsIgnoreCase(hotpService)) {
+					identifierType=UserConstants.MOBILE;
+					if(userExists.contains(UserConstants.MOBILE_RATE_COUNTER)){
+								strcurrentMobCounter = productDocCtx.read("$.result[0].mobileRateCounter[0]");
+									if(null != strcurrentMobCounter && !strcurrentMobCounter.isEmpty()){	
+											intcurrentMobCounter = Integer.parseInt(strcurrentMobCounter);
+									}
+							}
+					if(intcurrentMobCounter == Integer.parseInt(maxMobLimitPasswordRecovery)){
+					  	userResponseMobCounter.setStatus(errorStatus);
+					  	userResponseMobCounter.setMessage("Maximum resend Mobile count breached.");
+					  	userResponseMobCounter.setId(userName);
+					  	userResponseMobCounter.setMaxMobLimit(maxMobLimitPasswordRecovery);
+					  	userResponseMobCounter.setStrcurrentMobCounter(strcurrentMobCounter);
+					  	LOGGER.info("Maximum resend Mobile count breached.");
+					  	return Response.status(Response.Status.BAD_REQUEST).entity(userResponseMobCounter).build();
+					}
+					else {		
+							intcurrentMobCounter = increment(intcurrentMobCounter);
+					}
+					obj.put(UserConstants.MOBILE_RATE_COUNTER, intcurrentMobCounter);
+					jsonStr = obj.toString();
 				LOGGER.info("Successfully OTP generated for " + userName);
 				if (UserConstants.HOTP_EMAIL_RESET_PR.equalsIgnoreCase(hotpService)) {
 					if (!isOTPEnabled) {
@@ -4759,7 +4878,12 @@ public class UserServiceImpl implements UserService {
 					sendEmail.sendSMSNewGateway(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,
 							passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c());
 				}
-			} else if (resultCount.intValue() < 1) {
+				productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
+				LOGGER.info("Counter updated for " + userName);
+				strcurrentMobCounter=Integer.toString(intcurrentMobCounter);
+				strCurrentCounter=strcurrentMobCounter;
+			} 
+		} else if (resultCount.intValue() < 1) {
 				if (UserConstants.TRUE.equalsIgnoreCase(withGlobalUsers)) {
 					ifwAccessToken = ifwTokenServiceImpl.getIFWToken();
 					String bfoAuthorizationToken = sfSyncServiceImpl.getSFToken();
@@ -4825,7 +4949,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("ECODE-PWD-RECOVERY-PROC-ERR : Generic exception");
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
-		return passwordRecoverySuccessResponse(userName, startTime, userData);
+		return passwordRecoverySuccessResponse(userName, startTime, userData, strCurrentCounter, identifierType);
 	}
 
 	/*
@@ -5657,13 +5781,14 @@ public class UserServiceImpl implements UserService {
 		return Response.status(Response.Status.OK).entity(sucessRespone).build();
 	}
 
-	private Response passwordRecoverySuccessResponse(String userName, long startTime, String userData) {
+	private Response passwordRecoverySuccessResponse(String userName, long startTime, String userData, String strcurrentCounter, String identifierType) {
 		LOGGER.info("Entered passwordRecoverySuccessResponse() -> Start");
 		LOGGER.info("Parameter userName -> " + userName);
 		LOGGER.info("Parameter userData -> " + ChinaIdmsUtil.printOpenAMInfo(userData));
 		PasswordRecoveryResponse passwordRecoveryResponse;
 		Attributes attributes = new Attributes();
 		IDMSUserRecord idmsUserRecord = new IDMSUserRecord();
+		CounterResponse counterResponse = new CounterResponse();
 
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
@@ -5701,6 +5826,19 @@ public class UserServiceImpl implements UserService {
 		passwordRecoveryResponse = new PasswordRecoveryResponse(idmsUserRecord);
 		passwordRecoveryResponse.setStatus(successStatus);
 		passwordRecoveryResponse.setMessage("Reset Password Done successfully.");
+		
+		if(identifierType.equalsIgnoreCase(UserConstants.EMAIL))
+		{
+		counterResponse.setMaxEmailLimit(maxEmailLimitPasswordRecovery);
+		counterResponse.setStrcurrentMailCounter(strcurrentCounter);
+		}
+		else if(identifierType.equalsIgnoreCase(UserConstants.MOBILE))
+		{
+			counterResponse.setMaxMobLimit(maxMobLimitPasswordRecovery);
+			counterResponse.setStrcurrentMobCounter(strcurrentCounter);
+		}
+		
+		passwordRecoveryResponse.setCounterResponse(counterResponse);
 
 		long elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info("Time taken by UserServiceImpl.passwordRecovery() : " + elapsedTime);
@@ -6005,6 +6143,11 @@ public class UserServiceImpl implements UserService {
 		ErrorResponse errorResponse = new ErrorResponse();
 		Response passwordOpenAMResponse = null;
 		boolean isPasswordUpdatedInUIMS = false, stopUIMSFlag = false ;
+		/* Counter */
+		String strcurrentMailCounter = UserConstants.ZERO;
+		String strcurrentMobCounter = UserConstants.ZERO;
+		String jsonStr = null;
+		JSONObject jsonCounter = new JSONObject();
 		try {
 			// Fetching the userid from the Authorization Token
 
@@ -6180,6 +6323,12 @@ public class UserServiceImpl implements UserService {
 									+ userId);
 				}
 			}
+			/* Set counter to 0 */				
+			LOGGER.info("IDMSPassword :: Update counter to ZERO");
+			jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
+			jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
+			jsonStr = jsonCounter.toString();			
+			productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userId, jsonStr);
 			if (isPasswordUpdatedInUIMS) {
 				userResponse.setStatus(successStatus);
 				userResponse.setMessage("User Password updated successfully in IDMS China and UIMS");
@@ -7236,6 +7385,7 @@ public class UserServiceImpl implements UserService {
 	/**
 	 * Resending email to user with token
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public Response resendRegEmail(ResendRegEmailRequest resendRegEmail) {
 		LOGGER.info("Entered resendRegEmail() -> Start");
@@ -7251,6 +7401,14 @@ public class UserServiceImpl implements UserService {
 		ObjectMapper objMapper = new ObjectMapper();
 		boolean isOTPEnabled = false;
 		String otp = null, token = null;
+		
+		/* Counter */
+		int intcurrentMailCounter=0;
+		String strcurrentMailCounter = null;
+		String strcurrentMobCounter = null;		  
+		int intcurrentMobCounter=0;
+		String jsonStr = null;
+		JSONObject obj = new JSONObject();
 
 		try {
 			LOGGER.info("Parameter userRequest -> " + objMapper.writeValueAsString(resendRegEmail));
@@ -7366,25 +7524,86 @@ public class UserServiceImpl implements UserService {
 							LOGGER.info("isOTPEnabled: "+ isOTPEnabled);
 						}
 						if (userType.equalsIgnoreCase("mail")) {
+							/* Counter */
+							if(userExistsQuery.contains(UserConstants.MAIL_RATE_COUNTER)) {
+								strcurrentMailCounter = productDocCtx.read("$.result[0].mailRateCounter[0]");
+									if(null != strcurrentMailCounter && !strcurrentMailCounter.isEmpty()){	
+											intcurrentMailCounter = Integer.parseInt(strcurrentMailCounter);
+									}
+								}
+							if(intcurrentMailCounter == Integer.parseInt(maxEmailLimit)) {
+				  					userResponseMailCounter.setStatus(errorStatus);
+				  					userResponseMailCounter.setMessage("Maximum resend Email count breached.");
+				  					userResponseMailCounter.setId(userCName);
+				  					userResponseMailCounter.setMaxEmailLimit(maxEmailLimit);
+				  					userResponseMailCounter.setStrcurrentMailCounter(strcurrentMailCounter);
+				  					LOGGER.info("Maximum resend Email count breached.");
+				  					return Response.status(Response.Status.BAD_REQUEST).entity(userResponseMailCounter).build();
+								}
+							else {		
+									intcurrentMailCounter = increment(intcurrentMailCounter);
+								}
+								obj.put(UserConstants.MAIL_RATE_COUNTER, intcurrentMailCounter);
+								jsonStr = obj.toString();
+								
 							if(isOTPEnabled){
 								otp = sendEmail.generateOtp(userCName);
 							} else {
 								token = sendEmail.generateEmailToken(userCName);
 							}
-							sendEmail.sendOpenAmEmail(token, otp, optType, userCName,
-									regSource, finalPathString);
+							sendEmail.sendOpenAmEmail(token, otp, optType, userCName, regSource, finalPathString); /* Reinstate */
+							LOGGER.info("resendRegEmail :: Update mail counter :: Start");
+							productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userCName, jsonStr);
+							LOGGER.info("resendRegEmail :: Update mail counter :: Finish");
+							userResponseMailCounter.setStatus(successStatus);
+							userResponseMailCounter.setMessage(UserConstants.RESEND_REGEMAIL_SUCCESS_MESSAGE);
+							userResponseMailCounter.setId(userCName);
+							userResponseMailCounter.setMaxEmailLimit(maxEmailLimit);
+							strcurrentMailCounter = Integer.toString(intcurrentMailCounter);
+							userResponseMailCounter.setStrcurrentMailCounter(strcurrentMailCounter);
+							return Response.status(Response.Status.OK).entity(userResponseMailCounter).build();
 						}
 						if (userType.equalsIgnoreCase("mobile")) {
 							otp = sendEmail.generateOtp(userCName);
 							LOGGER.info("Start: sendSMSMessage() for mobile userName:" + userCName);
-							sendEmail.sendSMSNewGateway(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userCName,
-									regSource);
-							LOGGER.info("End: sendSMSMessage() finished for  mobile userName:" + userCName);
-							LOGGER.info("Start: sendOpenAmMobileEmail() for mobile userName:" + userCName);
-							sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userCName,
-									regSource);
-							LOGGER.info("End: sendOpenAmMobileEmail() finsihed for  mobile userName:" + userCName);
+							if(userExistsQuery.contains(UserConstants.MOBILE_RATE_COUNTER)){
+									strcurrentMobCounter = productDocCtx.read("$.result[0].mobileRateCounter[0]");
+										if(null != strcurrentMobCounter && !strcurrentMobCounter.isEmpty()) {	
+												intcurrentMobCounter = Integer.parseInt(strcurrentMobCounter);
+											}
+	  
+							}
+						if(intcurrentMobCounter == Integer.parseInt(maxMobLimit)) {
+		  					userResponseMobCounter.setStatus(errorStatus);
+		  					userResponseMobCounter.setMessage("Maximum resend Mobile count breached.");
+		  					userResponseMobCounter.setId(userCName);
+		  					userResponseMobCounter.setMaxMobLimit(maxMobLimit);
+		  					userResponseMobCounter.setStrcurrentMobCounter(strcurrentMobCounter);
+		  					LOGGER.info("Maximum resend Mobile count breached.");
+		  					return Response.status(Response.Status.BAD_REQUEST).entity(userResponseMobCounter).build();
 						}
+						else{		
+								intcurrentMobCounter = increment(intcurrentMobCounter);
+						}
+						obj.put(UserConstants.MOBILE_RATE_COUNTER, intcurrentMobCounter);
+						jsonStr = obj.toString();
+						sendEmail.sendSMSNewGateway(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userCName, regSource);
+					    LOGGER.info("End: sendSMSMessage() finished for  mobile userName:" + userCName); 
+					    LOGGER.info("Start: sendOpenAmMobileEmail() for mobile userName:"+ userCName); 
+					    sendEmail.sendOpenAmMobileEmail(otp,EmailConstants.USERREGISTRATION_OPT_TYPE, userCName, regSource);
+						LOGGER.info("End: sendOpenAmMobileEmail() finsihed for  mobile userName:" +userCName); /* Reinstate */
+							 
+						LOGGER.info("resendRegEmail :: Update mobile counter :: Start");
+						productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userCName, jsonStr);
+						LOGGER.info("resendRegEmail :: Update mobile counter :: Finish");
+						userResponseMobCounter.setStatus(successStatus);
+						userResponseMobCounter.setMessage(UserConstants.RESEND_REGEMOB_SUCCESS_MESSAGE);
+						userResponseMobCounter.setId(userCName);
+						userResponseMobCounter.setMaxMobLimit(maxMobLimit);
+						strcurrentMobCounter = Integer.toString(intcurrentMobCounter);
+						userResponseMobCounter.setStrcurrentMobCounter(strcurrentMobCounter);
+						return Response.status(Response.Status.OK).entity(userResponseMobCounter).build();
+					}
 					} else {
 						userResponse.setStatus(errorStatus);
 						userResponse.setMessage("FirstName and LastName are not matched with Email/mobile given!!");
@@ -7403,6 +7622,14 @@ public class UserServiceImpl implements UserService {
 		userResponse.setMessage(UserConstants.RESEND_REGEMAIL_SUCCESS_MESSAGE);
 		userResponse.setId(userCName);
 		return Response.status(Response.Status.OK).entity(userResponse).build();
+	}
+	
+	int increment(Integer value)
+	{
+		LongAdder num = new LongAdder();
+		num.add(value.intValue());
+		num.increment();
+		return num.intValue();
 	}
 
 	/**
@@ -7481,6 +7708,10 @@ public class UserServiceImpl implements UserService {
 	public Response resendChangeEmail(ResendEmailChangeRequest emailChangeRequest) {
 		LOGGER.info("Entered resendChangeEmail() -> Start");
 		LOGGER.info("Parameter emailChangeRequest -> " + emailChangeRequest);
+		String jsonStr = null;
+		String strcurrentMailCounter = null;		  
+		int intcurrentMailCounter=0;
+		JSONObject obj = new JSONObject();
 		long elapsedTime;
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 
@@ -7569,17 +7800,39 @@ public class UserServiceImpl implements UserService {
 								isOTPEnabled = Boolean.valueOf(isOTPEnabledForApp);
 								LOGGER.info("isOTPEnabled: "+ isOTPEnabled);
 							}
-							if(isOTPEnabled){
-								otp = sendEmail.generateOtp(userName);
-							} else {
-								token = sendEmail.generateEmailToken(userName);
-							}
-							sendEmail.sendOpenAmEmail(token, otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userName,
-									appSource, finalPathString);
+								/* Counter */							
+								if(userExists.contains(UserConstants.MAIL_RATE_COUNTER)){
+										strcurrentMailCounter = productDocCtx.read("$.result[0].mailRateCounter[0]");
+											if(null != strcurrentMailCounter && !strcurrentMailCounter.isEmpty()){	
+													intcurrentMailCounter = Integer.parseInt(strcurrentMailCounter);
+												}
+								}
+								if(intcurrentMailCounter == Integer.parseInt(maxEmailLimit)){
+										userResponseMailCounter.setStatus(errorStatus);
+										userResponseMailCounter.setMessage("Maximum resend Email count breached.");
+										userResponseMailCounter.setId(userName);
+										userResponseMailCounter.setMaxEmailLimit(maxEmailLimit);
+										userResponseMailCounter.setStrcurrentMailCounter(strcurrentMailCounter);
+										LOGGER.info("Maximum resend Email count breached.");
+										return Response.status(Response.Status.BAD_REQUEST).entity(userResponseMailCounter).build();
+									}
+								else{		
+										intcurrentMailCounter = increment(intcurrentMailCounter);
+								}
+								obj.put(UserConstants.MAIL_RATE_COUNTER, intcurrentMailCounter);
+								jsonStr = obj.toString();
+								if(isOTPEnabled){
+									otp = sendEmail.generateOtp(userName);
+								} else {
+									token = sendEmail.generateEmailToken(userName);
+								}
+								sendEmail.sendOpenAmEmail(token, otp,EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userName, appSource, finalPathString); /* Reinstate */
+								LOGGER.info("resendChangeEmail :: Update mail counter :: Start");
+								productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
+								LOGGER.info("resendChangeEmail :: Update mail counter :: Finish");
 						} else {
 							userResponse.setStatus(errorStatus);
-							userResponse
-									.setMessage("newEmail or FirstName or LastName are not matched with Email given!!");
+							userResponse.setMessage("newEmail or FirstName or LastName are not matched with Email given!!");
 							userResponse.setId(userName);
 							LOGGER.error("Error is -> " + userResponse.getMessage());
 							return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
@@ -7601,10 +7854,14 @@ public class UserServiceImpl implements UserService {
 			userResponse.setId(userName);
 			return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 		}
-		userResponse.setStatus(successStatus);
-		userResponse.setMessage(UserConstants.RESEND_REGEMAIL_SUCCESS_MESSAGE);
-		userResponse.setId(userName);
-		return Response.status(Response.Status.OK).entity(userResponse).build();
+		
+		userResponseMailCounter.setStatus(successStatus);
+		userResponseMailCounter.setMessage(UserConstants.RESEND_REGEMAIL_SUCCESS_MESSAGE);
+		userResponseMailCounter.setId(userName);
+		userResponseMailCounter.setMaxEmailLimit(maxEmailLimit);
+		strcurrentMailCounter = Integer.toString(intcurrentMailCounter);
+		userResponseMailCounter.setStrcurrentMailCounter(strcurrentMailCounter);
+		return Response.status(Response.Status.OK).entity(userResponseMailCounter).build();
 	}
 
 	/*
@@ -7965,6 +8222,12 @@ public class UserServiceImpl implements UserService {
 		Integer resultCount = 0;
 		ArrayList<String> varList = new ArrayList<String>();
 		String appname = null, enableTestMailStatus = null;
+		String strcurrentMailCounter = UserConstants.ZERO;
+		String strcurrentMobCounter = UserConstants.ZERO;
+		String jsonStr = null;
+		JSONObject jsonCounter = new JSONObject();
+		String UID = null;
+	
 
 		try {
 			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(request));
@@ -8129,6 +8392,13 @@ public class UserServiceImpl implements UserService {
 				}
 				responseMultiLine.put("countryCode", UserConstants.CHINA_CODE);
 				LOGGER.info("User found in IDMS China");
+				/* Counter set to 0 */
+				UID = productDocCtx.read("$.result[0].uid[0]");
+				LOGGER.info("IDMSCheckUser :: Update counter to ZERO");
+				jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
+				jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
+				jsonStr = jsonCounter.toString();			
+				productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, UID, jsonStr);	
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 				return Response.status(Response.Status.OK).entity(responseMultiLine).build();
@@ -8903,6 +9173,15 @@ public class UserServiceImpl implements UserService {
 		boolean maintenanceMode = false;
 		DocumentContext productDocCtx = null;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		/* Counter */
+		String userExists = null;
+		String UID = null;
+		String strcurrentMailCounter = UserConstants.ZERO;
+		String strcurrentMobCounter = UserConstants.ZERO;
+		String jsonStr = null;
+		JSONObject jsonCounter = new JSONObject();
+		String iPlanetDirectoryKey = null;
+		String loginId = null;
 		
 		if ((app == null || app.equalsIgnoreCase("undefined"))) {
 			regSource = UserConstants.LOGZ_IO_DEFAULT_APP;
@@ -8947,6 +9226,21 @@ public class UserServiceImpl implements UserService {
 			productDocCtx = JsonPath.using(conf).parse(successResponse);
 			String authIdSecuredLogin = productDocCtx.read("$.authId");
 			String stage = productDocCtx.read("$.stage");
+			
+			/* Counter */
+			if(200 == authenticateResponse.getStatus()) {
+				iPlanetDirectoryKey = getSSOToken();
+				loginId = userName;
+				LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for loginId=" + loginId);
+				userExists = productService.checkUserExistsWithEmailMobile(
+						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+						"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginId, "UTF-8"), "UTF-8")
+								+ "\" or mobile_reg eq " + "\""
+								+ URLEncoder.encode(URLDecoder.decode(loginId, "UTF-8"), "UTF-8") + "\"");
+				LOGGER.info("End: checkUserExistsWithEmailMobile() of openam finished for loginId=" + loginId);
+				productDocCtx = JsonPath.using(conf).parse(userExists);
+				UID = productDocCtx.read("$.result[0].uid[0]");
+			}
 			
 			if (401 == authenticateResponse.getStatus() && successResponse.contains(UserConstants.ACCOUNT_BLOCKED)) {
 				jsonObjectResponse.put("message", UserConstants.ACCOUNT_BLOCKED);
@@ -9050,6 +9344,12 @@ public class UserServiceImpl implements UserService {
 				JSONObject response = new JSONObject();
 				response.put("authID", authIdSecuredLogin);
 				response.put("stage", stage);
+				/* Set counter to 0 */				
+				LOGGER.info("securedLogin :: Update counter to ZERO");
+				jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
+				jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
+				jsonStr = jsonCounter.toString();			
+				productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, UID, jsonStr);
 				LOGGER.info("securedLogin() -> Ending");
 				return Response.status(Response.Status.OK.getStatusCode()).entity(response).build();
 			}
@@ -9067,7 +9367,12 @@ public class UserServiceImpl implements UserService {
 		elapsedTime = (System.currentTimeMillis() - startTime);
 		AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + successStatus + "," + regSource + ","
 				+ elapsedTime + "ms" + "," + UserConstants.LOGIN_SUCCESS);
-		
+		/* Set counter to 0 */				
+		LOGGER.info("ConfirmPIN :: Update counter to ZERO");
+		jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
+		jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
+		jsonStr = jsonCounter.toString();			
+		productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, UID, jsonStr);
 		LOGGER.info("securedLogin() -> Ending");
 		return Response.status(Response.Status.OK.getStatusCode()).entity(successResponse).build();
 	}

@@ -3,7 +3,9 @@ package com.se.idms.dto;
 import javax.inject.Inject;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 /**
  * The PasswordRecoveryResponse class.
@@ -23,6 +25,20 @@ public class PasswordRecoveryResponse {
 	@Inject
 	private IDMSUserRecord idmsUserRecord;
 	
+	@JsonProperty("CounterResponse")
+	@JsonInclude(Include.NON_NULL)
+	@Inject
+	private CounterResponse counterResponse;
+	
+	
+	public CounterResponse getCounterResponse() {
+		return counterResponse;
+	}
+
+	public void setCounterResponse(CounterResponse counterResponse) {
+		this.counterResponse = counterResponse;
+	}
+
 	public PasswordRecoveryResponse(){
 		
 	}
