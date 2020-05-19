@@ -248,6 +248,9 @@ public class OpenAmUser {
 	private String login_mobile;
 	
 	@JsonInclude(Include.NON_NULL)
+	private String loginmobile;
+
+	@JsonInclude(Include.NON_NULL)
 	private String AdminBFOAccoountID;
 	
 	@JsonProperty("IDMSWorkPhone__c")
@@ -995,6 +998,14 @@ public class OpenAmUser {
 
 	public void setLogin_mobile(String login_mobile) {
 		this.login_mobile = login_mobile;
+	}
+
+	public String getLoginmobile() {
+		return loginmobile;
+	}
+
+	public void setLoginmobile(String loginmobile) {
+		this.loginmobile = loginmobile;
 	}
 
 	@Override
