@@ -1035,6 +1035,7 @@ public class UserServiceImpl implements UserService {
 						&& !userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty()
 						&& userRequest.getUserRecord().getIDMS_Federated_ID__c().startsWith("cn00")
 						&& userRequest.getUserRecord().getIDMS_Registration_Source__c().equalsIgnoreCase("UIMS")) {
+					userName=userRequest.getUserRecord().getIDMS_Federated_ID__c();
 					errorResponse.setStatus(errorStatus);
 					errorResponse.setMessage(
 							"Registration from UIMS, federationID should not contain cn00. May be duplicate entry.");
@@ -1052,6 +1053,7 @@ public class UserServiceImpl implements UserService {
 						&& !userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty()
 						&& !userRequest.getUserRecord().getIDMS_Federated_ID__c().startsWith("cn00")
 						&& !userRequest.getUserRecord().getIDMS_Registration_Source__c().equalsIgnoreCase("UIMS")) {
+					userName=userRequest.getUserRecord().getIDMS_Federated_ID__c();
 					errorResponse.setStatus(errorStatus);
 					errorResponse.setMessage("Registration from non-UIMS, federationID must start with cn00.");
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -1092,6 +1094,8 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info("idmsCheckUserExists reponse ::" + objMapper.writeValueAsString(checkUserExist));
 					org.json.simple.JSONObject checkUserJson = (org.json.simple.JSONObject) checkUserExist.getEntity();
 					String messageUser = checkUserJson.get(UserConstants.MESSAGE_L).toString();
+					if(checkUserJson.get("idmsFederatedId")!=null)
+					userName=checkUserJson.get("idmsFederatedId").toString();
 					if (!messageUser.equalsIgnoreCase(UserConstants.FALSE)) {
 						if (200 != checkUserExist.getStatus()) {
 							errorResponse.setMessage(messageUser);
