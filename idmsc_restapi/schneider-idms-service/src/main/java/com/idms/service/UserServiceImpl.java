@@ -462,10 +462,11 @@ public class UserServiceImpl implements UserService {
 				LOGGER.error("ECODE-AUTHUSER-NO-TOKEN : Unable to get SSO Token" + ioExcep.getMessage(),ioExcep);
 			}
 			LOGGER.info("Start: checkUserExistsWithEmailMobile() of OpenAMService for userName=" + userName);
+			// API query changes from login_mobile to loginmobile to support FR 6.5 upgrade
 			userData = productService.checkUserExistsWithEmailMobile(
 					UserConstants.CHINA_IDMS_TOKEN + PlanetDirectoryKey,
 					"loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(userName, "UTF-8"), "UTF-8")
-							+ "\" or login_mobile eq " + "\""
+							+ "\" or loginmobile eq " + "\""
 							+ URLEncoder.encode(URLDecoder.decode(userName, "UTF-8"), "UTF-8") + "\"");
 
 			LOGGER.info("End: checkUserExistsWithEmailMobile() of OpenAMService finished for userName=" + userName);
@@ -1348,19 +1349,20 @@ public class UserServiceImpl implements UserService {
 					"Start: checkUserExistsWithEmailMobile() of OpenAMService for loginIdentifier=" + loginIdentifier);
 			if (null != openAmReq.getInput().getUser().getRegisterationSource()
 					&& UserConstants.UIMS.equalsIgnoreCase(openAmReq.getInput().getUser().getRegisterationSource())) {
-
+				// API query changes from login_mobile to loginmobile to support FR 6.5 upgrade
 				userExists = productService.checkUserExistsWithEmailMobile(
 						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						"federationID eq " + "\"" + openAmReq.getInput().getUser().getFederationID()
 								+ "\" or loginid eq " + "\""
 								+ URLEncoder.encode(URLDecoder.decode(loginIdentifier, "UTF-8"), "UTF-8")
-								+ "\" or login_mobile eq " + "\""
+								+ "\" or loginmobile eq " + "\""
 								+ URLEncoder.encode(URLDecoder.decode(loginIdentifier, "UTF-8"), "UTF-8") + "\"");
 			} else {
+				// API query changes from login_mobile to loginmobile to support FR 6.5 upgrade
 				userExists = productService.checkUserExistsWithEmailMobile(
 						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						"loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginIdentifier, "UTF-8"), "UTF-8")
-								+ "\" or login_mobile eq " + "\""
+								+ "\" or loginmobile eq " + "\""
 								+ URLEncoder.encode(URLDecoder.decode(loginIdentifier, "UTF-8"), "UTF-8") + "\"");
 			}
 			LOGGER.info("End: checkUserExistsWithEmailMobile() of OpenAMService finished for loginIdentifier="
@@ -3051,17 +3053,18 @@ public class UserServiceImpl implements UserService {
 
 			if (null != loginIdentifier && !loginIdentifier.isEmpty()) {
 				if(!UserConstants.TRUE.equalsIgnoreCase(withGlobalUsers)){
-					LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for login/login_mobile="
+					LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for login/loginmobile="
 							+ loginIdentifier);
 					PROCESSING_STATE = "IDMS-CHINA-CHK-USR";
+					// API query changes from login_mobile to loginmobile to support FR 6.5 upgrade
 					userExists = productService.checkUserExistsWithEmailMobile(
 							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 							"loginid eq " + "\""
 									+ URLEncoder.encode(URLDecoder.decode(loginIdentifier.trim(), "UTF-8"), "UTF-8")
-									+ "\" or login_mobile eq " + "\""
+									+ "\" or loginmobile eq " + "\""
 									+ URLEncoder.encode(URLDecoder.decode(loginIdentifier.trim(), "UTF-8"), "UTF-8")
 									+ "\"");
-					LOGGER.info("End: checkUserExistsWithEmailMobile() of openam finished for login/login_mobile="
+					LOGGER.info("End: checkUserExistsWithEmailMobile() of openam finished for login/loginmobile="
 							+ loginIdentifier);
 					productDocCtx = JsonPath.using(conf).parse(userExists);
 					resultCount = productDocCtx.read("$.resultCount");
@@ -3236,10 +3239,11 @@ public class UserServiceImpl implements UserService {
 		if (null != email && !email.isEmpty()) {
 			try {
 				LOGGER.info("Start: checkUserExistsWithEmailMobile() of OpenAMService for email=" + email);
+				// API query changes from login_mobile to loginmobile to support FR 6.5 upgrade
 				userExists = productService.checkUserExistsWithEmailMobile(
 						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						"loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(email, "UTF-8"), "UTF-8")
-								+ "\" or login_mobile eq " + "\""
+								+ "\" or loginmobile eq " + "\""
 								+ URLEncoder.encode(URLDecoder.decode(email, "UTF-8"), "UTF-8") + "\"");
 
 				LOGGER.info("End: checkUserExistsWithEmailMobile() of OpenAMService fisnihed for email=" + email);
@@ -3742,14 +3746,14 @@ public class UserServiceImpl implements UserService {
 			if (UserConstants.USER_REGISTRATION.equalsIgnoreCase(confirmRequest.getOperation())) {
 
 				if (UserConstants.MOBILE.equalsIgnoreCase(loginIdentifierType)) {
-
-					PRODUCT_JSON_STRING = "{" + "\"login_mobile\": \"" + emailOrMobile + "\",\"mobile_reg\": \""
-							+ emailOrMobile + "\"" + "}";
+					// Changes from login_mobile to loginmobile to support FR 6.5 upgrade
+					PRODUCT_JSON_STRING = "{" + "\"login_mobile\": \"" + emailOrMobile + "\",\"loginmobile\": \"" + emailOrMobile + 
+							"\",\"mobile_reg\": \"" + emailOrMobile + "\"" + "}";
 
 					if ((null != confirmRequest.getUIFlag() && !confirmRequest.getUIFlag().isEmpty())
 							&& (null != confirmRequest.getPassword() && !confirmRequest.getPassword().isEmpty())) {
-						PRODUCT_JSON_STRING = "{" + "\"login_mobile\": \"" + emailOrMobile + "\",\"mobile_reg\": \""
-								+ emailOrMobile + "\",\"userPassword\": \"" + confirmRequest.getPassword().trim() + "\""
+						PRODUCT_JSON_STRING = "{" + "\"login_mobile\": \"" + emailOrMobile + "\",\"loginmobile\": \"" + emailOrMobile + 
+								"\",\"mobile_reg\": \""	+ emailOrMobile + "\",\"userPassword\": \"" + confirmRequest.getPassword().trim() + "\""
 								+ "}";
 					}
 				} else if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
@@ -3796,9 +3800,10 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 			if (UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(confirmRequest.getOperation())) {
+				// Changes from login_mobile to loginmobile to support FR 6.5 upgrade
 				if (UserConstants.MOBILE.equalsIgnoreCase(loginIdentifierType)) {
-					PRODUCT_JSON_STRING = "{" + "\"login_mobile\": \"" + emailOrMobile + "\",\"mobile_reg\": \""
-							+ emailOrMobile + "\",\"hotpMobileVerification\": \"" + hotpMobileVerification + "\"" + "}";
+					PRODUCT_JSON_STRING = "{" + "\"login_mobile\": \"" + emailOrMobile + "\",\"loginmobile\": \"" + emailOrMobile
+							+ "\",\"mobile_reg\": \"" + emailOrMobile + "\",\"hotpMobileVerification\": \"" + hotpMobileVerification + "\"" + "}";
 				} else if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
 					PRODUCT_JSON_STRING = "{" + "\"loginid\": \"" + emailOrMobile + "\",\"mail\": \"" + emailOrMobile
 							+ "\",\"idmsuid\": \"" + emailOrMobile + "\",\"hotpEmailVerification\": \""
@@ -3819,14 +3824,15 @@ public class UserServiceImpl implements UserService {
 				if (UserConstants.FALSE.equalsIgnoreCase(isUserAcitvated)) {
 
 					if (UserConstants.MOBILE.equalsIgnoreCase(loginIdentifierType)) {
-
-						PRODUCT_JSON_STRING = "{" + "\"login_mobile\": \"" + emailOrMobile + "\",\"mobile_reg\": \""
+						// Changes from login_mobile to loginmobile to support FR 6.5 upgrade
+						PRODUCT_JSON_STRING = "{" + "\"login_mobile\": \"" + emailOrMobile + 
+								"\",\"loginmobile\": \"" + emailOrMobile + "\",\"mobile_reg\": \""
 								+ emailOrMobile + "\"" + "}";
 
 						if ((null != confirmRequest.getUIFlag() && !confirmRequest.getUIFlag().isEmpty())
 								&& (null != confirmRequest.getPassword() && !confirmRequest.getPassword().isEmpty())) {
-							PRODUCT_JSON_STRING = "{" + "\"login_mobile\": \"" + emailOrMobile + "\",\"mobile_reg\": \""
-									+ emailOrMobile + "\",\"userPassword\": \"" + confirmRequest.getPassword().trim()
+							PRODUCT_JSON_STRING = "{" + "\"login_mobile\": \"" + emailOrMobile + "\",\"loginmobile\": \"" + emailOrMobile 
+									+ "\",\"mobile_reg\": \""	+ emailOrMobile + "\",\"userPassword\": \"" + confirmRequest.getPassword().trim()
 									+ "\"" + "}";
 						}
 					} else if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
@@ -5130,6 +5136,8 @@ public class UserServiceImpl implements UserService {
 							&& null != userRequest.getUserRecord().getMobilePhone()
 							&& !userRequest.getUserRecord().getMobilePhone().isEmpty()) {
 						openAmReq.getInput().getUser().setLogin_mobile(userRequest.getUserRecord().getMobilePhone());
+						// Changes from login_mobile to loginmobile to support FR 6.5 upgrade
+						openAmReq.getInput().getUser().setLoginmobile(userRequest.getUserRecord().getMobilePhone());
 					}
 					userId = (String) uimsResponse.get("userId");
 				} else {
@@ -5450,9 +5458,10 @@ public class UserServiceImpl implements UserService {
 					}
 				}
 
+				// API query changes from login_mobile to loginmobile to support FR 6.5 upgrade
 				String userExists = productService.checkUserExistsWithEmailMobile(
 						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\"" + loginIdentifier
-								+ "\" or login_mobile eq " + "\"" + loginIdentifier + "\"");
+								+ "\" or loginmobile eq " + "\"" + loginIdentifier + "\"");
 
 				productDocCtx = JsonPath.using(conf).parse(userExists);
 				Integer resultCount = productDocCtx.read(JsonConstants.RESULT_COUNT);
@@ -6973,7 +6982,8 @@ public class UserServiceImpl implements UserService {
 				if (null == loginIdentifier || loginIdentifier.isEmpty()) {
 					loginIdentifier = null != productDocCtx.read(JsonConstants.MOBILE_REG)
 							? getValue(productDocCtx.read(JsonConstants.MOBILE_REG).toString()) : null;
-					PRODUCT_JSON_STRING = "{" + "\"login_mobile\": \"" + loginIdentifier + "\"" + "}";
+					// Changes from login_mobile to loginmobile to support FR 6.5 upgrade
+					PRODUCT_JSON_STRING = "{" + "\"login_mobile\": \"" + loginIdentifier + "\",\"loginmobile\": \"" + loginIdentifier + "\"" + "}";
 				}
 				
 				PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
@@ -10382,8 +10392,9 @@ public class UserServiceImpl implements UserService {
 			}
 			
 			if (resultCount.intValue() == 1) {
+				// Changes from login_mobile to loginmobile to support FR 6.5 upgrade
 				String addMobileString = "{" + "\"mobile\": \"" + mobile + "\",\"mobile_reg\": \"" + mobile
-						+ "\",\"login_mobile\": \"" + mobile + "\",\"V_New\": \"" + vNewCntValue + "\"" + "}";
+						+ "\",\"login_mobile\": \"" + mobile + "\",\"loginmobile\": \"" + mobile + "\",\"V_New\": \"" + vNewCntValue + "\"" + "}";
 				addMobileString = addMobileString.substring(0, addMobileString.length() - 1)
 						.concat(",\"updateSource\":\"" + addMobileRequest.getProfileUpdateSource() + "\"}");
 				LOGGER.info(
@@ -11229,8 +11240,9 @@ public class UserServiceImpl implements UserService {
 			if (null != userInfo.getPhoneId() && !userInfo.getPhoneId().isEmpty() && null != userInfo.getEmail()
 					&& !userInfo.getEmail().isEmpty()) {
 				LOGGER.info("BOTH");
+				// Changes from login_mobile to loginmobile to support FR 6.5 upgrade
 				updateString = "{" + "\"loginid\": \"" + userInfo.getEmail() + "\",\"login_mobile\": \""
-						+ userInfo.getPhoneId() + "\",\"pwdSetFirstLogin\": \"" + false + "\"" + "}";
+						+ userInfo.getPhoneId() + "\",\"loginmobile\": \"" + userInfo.getPhoneId() + "\",\"pwdSetFirstLogin\": \"" + false + "\"" + "}";
 				if(null == openAmReq.getInput().getUser().getMail() || openAmReq.getInput().getUser().getMail().isEmpty()){
 					  openAmReq.getInput().getUser().setMail(userInfo.getEmail());
 				}
@@ -11260,7 +11272,8 @@ public class UserServiceImpl implements UserService {
 		
 			} else if (null != userInfo.getPhoneId() && !userInfo.getPhoneId().isEmpty()) {
 				LOGGER.info("PHONE");
-				updateString = "{" + "\"login_mobile\": \"" + userInfo.getPhoneId() + "\",\"pwdSetFirstLogin\": \"" +false+ "\"" + "}";
+				// Changes from login_mobile to loginmobile to support FR 6.5 upgrade
+				updateString = "{" + "\"login_mobile\": \"" + userInfo.getPhoneId() + "\",\"loginmobile\": \"" + userInfo.getPhoneId() + "\",\"pwdSetFirstLogin\": \"" +false+ "\"" + "}";
 				if(null == openAmReq.getInput().getUser().getMobile_reg() || openAmReq.getInput().getUser().getMobile_reg().isEmpty()){
 					  openAmReq.getInput().getUser().setMobile_reg(userInfo.getPhoneId());
 				} 
@@ -11324,7 +11337,9 @@ public class UserServiceImpl implements UserService {
 			if (null != userInfo.getPhoneId() && !userInfo.getPhoneId().isEmpty() && null != userInfo.getEmail()
 					&& !userInfo.getEmail().isEmpty()) {
 				LOGGER.info("BOTH");
-				updateString = "{" + "\"loginid\": \"" + userInfo.getEmail() + "\",\"login_mobile\": \""
+				// Changes from login_mobile to loginmobile to support FR 6.5 upgrade
+				updateString = "{" + "\"loginid\": \"" + userInfo.getEmail() + "\",\"loginmobile\": \""
+						+ userInfo.getPhoneId() + "\",\"login_mobile\": \""
 						+ userInfo.getPhoneId() + "\"" + "}";
 			} else if (null != userInfo.getEmail() && !userInfo.getEmail().isEmpty()) {
 				LOGGER.info("EMAIL");
@@ -11344,7 +11359,9 @@ public class UserServiceImpl implements UserService {
 				updateString = "{" + "\"loginid\": \"" + userInfo.getEmail() + "\"}";
 			} else if (null != userInfo.getPhoneId() && !userInfo.getPhoneId().isEmpty()) {
 				LOGGER.info("PHONE");
-				updateString = "{" + "\"login_mobile\": \"" + userInfo.getPhoneId() + "\"}";
+				// Changes from login_mobile to loginmobile to support FR 6.5 upgrade
+				updateString = "{" + "\"loginmobile\": \""
+						+ userInfo.getPhoneId() + "\",\"login_mobile\": \"" + userInfo.getPhoneId() + "\"}";
 			}
 
 			OpenAmUser openAmUser = new OpenAmUser();

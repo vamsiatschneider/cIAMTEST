@@ -16,6 +16,7 @@ public class JsonConstants {
 	public static final String LOGIN_ID_UPPER_0 = "$.Loginid[0]";
 	public static final String LOGIN_ID_LOWER_0 = "$.loginid[0]";
 	public static final String LOGIN_MOBILE_0 = "$.login_mobile[0]";
+	public static final String LOGINMOBILE_0 = "$.loginmobile[0]";
 	public static final String EMPLOYEE_TYPE = "$.employeeType";
 	public static final String RESULT_COUNT = "$.resultCount";
 	public static final String JSON_STRING = "Json String is {}";
@@ -29,6 +30,7 @@ public class JsonConstants {
 	public static final String RESULT_Loginid = "$.result[0].Loginid[0]";
 	public static final String RESULT_Loginid_L = "$.result[0].loginid[0]";
 	public static final String RESULT_LOGIN_MOBILE = "$.result[0].login_mobile[0]";
+	public static final String RESULTLOGIN_MOBILE = "$.result[0].loginmobile[0]";
 	
 	public static final String USER_LEVEL = "_registrationLevel";
 	public static final String BFO_SUPPORT_URL = "_bfoSupportUrl";
