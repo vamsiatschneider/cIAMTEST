@@ -11005,7 +11005,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Start: getAppInfo() of OpenDjService for appHash="
 						+ userDetailByApplicationRequest.getAppHash().trim());
 				applicationDetails = openDJService.getAppInfo(djUserName, djUserPwd,
-						"_Application_Hash eq " + "\"" + appHash + "\"");
+						"_ApplicationHash eq " + "\"" + appHash + "\"");
 				LOGGER.info("End: getAppInfo() of OpenDjService finished for appHash="
 						+ userDetailByApplicationRequest.getAppHash().trim());
 				LOGGER.info("Response code from OpenDJ for get call: " + applicationDetails.getStatus());
