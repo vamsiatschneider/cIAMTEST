@@ -16,6 +16,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+
 import com.idms.model.AILRequest;
 import com.idms.model.ActivateUserRequest;
 import com.idms.model.AddEmailRequest;
@@ -295,4 +297,9 @@ public interface UserService {
 	@POST
 	@Path("/apexrest/securedLoginNext")
 	Response securedLoginNext(UserMFADataRequest userMFADataRequest);
+	
+	@POST
+	@Path("/apexrest/fileSyncToUIMS")
+	@Consumes("multipart/form-data")
+	Response fileSyncToUIMS(Attachment attachment);
 }

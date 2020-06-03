@@ -1,9 +1,13 @@
 package com.idms.service.uims.sync;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
+import javax.xml.namespace.QName;
+import javax.xml.ws.Service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +30,19 @@ import com.idms.service.SendEmail;
 import com.idms.service.digital.GoDigitalUserService;
 import com.idms.service.util.ChinaIdmsUtil;
 import com.schneider.ims.service.uimsv2.CompanyV3;
+import com.se.idms.util.SamlAssertionTokenGenerator;
 import com.se.idms.util.UimsConstants;
 import com.se.idms.util.UserConstants;
+import com.se.uims.usermanager.IMSServiceSecurityCallNotAllowedException_Exception;
+import com.se.uims.usermanager.InactiveUserImsException_Exception;
+import com.se.uims.usermanager.InvalidImsServiceMethodArgumentException_Exception;
+import com.se.uims.usermanager.LdapTemplateNotReadyException_Exception;
+import com.se.uims.usermanager.RequestedEntryNotExistsException_Exception;
+import com.se.uims.usermanager.SecuredImsException_Exception;
+import com.se.uims.usermanager.UnexpectedLdapResponseException_Exception;
+import com.se.uims.usermanager.UnexpectedRuntimeImsException_Exception;
+import com.se.uims.usermanager.UserManagerUIMSV22;
+import com.se.uims.usermanager.UserV6;
 import com.uims.authenticatedUsermanager.AccessElement;
 import com.uims.authenticatedUsermanager.Type;
 
@@ -44,6 +59,9 @@ public class UIMSUserManagerSoapServiceSync {
 	
 	@Autowired
 	private UIMSAuthenticatedUserManagerSoapServiceSync authenticatedUserManagerSoapServiceSync;
+	
+	@Inject
+	private SamlAssertionTokenGenerator samlTokenService;
 	
 	@Inject
 	private OpenAMService productService;
@@ -63,6 +81,15 @@ public class UIMSUserManagerSoapServiceSync {
 	@Value("${goDigitalValue}")
 	private String goDigitalValue;
 	
+	@Value("${userManagerUIMSWsdl}")
+	private String userManagerUIMSWsdl;
+	
+	@Value("${userManagerUIMSWsdlQname}")
+	private String userManagerUIMSWsdlQname;
+	
+	@Value("${userManagerUIMSWsdlPortName}")
+	private String userManagerUIMSWsdlPortName;
+	
 	@Value("${goDitalToken}")
 	private String goDitalToken;
 	
@@ -77,6 +104,29 @@ public class UIMSUserManagerSoapServiceSync {
 	private String createdFedId = null;
 	private SendEmail sendEmail;
 	String createdCompanyFedId = null;
+	
+	public UserManagerUIMSV22 getUserManager(){
+		LOGGER.info("Entered getUserManager() of UIMS -> Start");
+		UserManagerUIMSV22 userManagerUIMSV22 = null;
+		URL url;
+		try {
+			url = new URL(userManagerUIMSWsdl);
+
+			QName qname = new QName(userManagerUIMSWsdlQname, userManagerUIMSWsdlPortName);
+			Service service = Service.create(url, qname);
+
+			LOGGER.info("Start: getPort() ");
+			userManagerUIMSV22 = service.getPort(UserManagerUIMSV22.class);
+			LOGGER.info("End: getPort()");
+
+		}catch (MalformedURLException e) {
+			LOGGER.error("MalformedURLException in getUserManager()::" + e.getMessage(),e);
+		} catch (Exception e) {
+			LOGGER.error("Exception in getUserManager()::" + e.getMessage(),e);
+		}
+		return userManagerUIMSV22;
+	}
+
 	
 	public String createUIMSUserAndCompany(String callerFid, com.uims.authenticatedUsermanager.UserV6 identity,
 			String context, CompanyV3 company, String userName,
@@ -310,6 +360,55 @@ public class UIMSUserManagerSoapServiceSync {
 		}
 		objMapper = null;
 		return jsonString;
+	}
+	
+	public boolean updateUIMSUser(String fedId, UserV6 user, String vnew) throws MalformedURLException {
+		LOGGER.info("Entered updateUIMSUser() -> Start");
+		LOGGER.info("Parameter fedId -> " + fedId + " ,vnew -> " + vnew);
+
+		boolean status = false;
+		UserManagerUIMSV22 userManagerUIMSV22 = getUserManager();
+		String samlAssertion = null;
+		ObjectMapper objMapper = new ObjectMapper();
+		try {
+			LOGGER.info("Parameter user -> " + objMapper.writeValueAsString(user));
+
+			samlAssertion = samlTokenService.getSamlAssertionToken(fedId, vnew);
+			LOGGER.info("samlAssertion="+samlAssertion);
+
+			LOGGER.info("Start: updateUser() of UIMS for user:" + user.getFirstName());
+			status = userManagerUIMSV22.updateUser(CALLER_FID, samlAssertion, user);
+			LOGGER.info("End: updateUser() of UIMS finished for user:" + user.getFirstName());
+
+			if(status){
+				LOGGER.info("UIMS updateUIMSUser() successful, status:" + status);
+			}else{
+				LOGGER.error("UIMS updateUIMSUser() failed, status:" + status);
+				UIMSSYNCLOGGER.error("updateUIMSUser failed in UIMS, fedId = "+fedId);
+				UIMSSYNCLOGGER.error("updateUIMSUser failed in UIMS, user info = "+objMapper.writeValueAsString(user));
+			}
+		} catch (IMSServiceSecurityCallNotAllowedException_Exception | InactiveUserImsException_Exception
+				| InvalidImsServiceMethodArgumentException_Exception | LdapTemplateNotReadyException_Exception
+				| RequestedEntryNotExistsException_Exception | SecuredImsException_Exception
+				| UnexpectedLdapResponseException_Exception | UnexpectedRuntimeImsException_Exception e) {
+			UIMSSYNCLOGGER.error("UIMS updateUIMSUser() failed, Exception ::" + e.getMessage(),e);
+			UIMSSYNCLOGGER.error("updateUIMSUser failed in UIMS, fedId = "+fedId);
+			try {
+				UIMSSYNCLOGGER.error("updateUIMSUser failed in UIMS, user info = "+objMapper.writeValueAsString(user));
+			} catch (JsonProcessingException e1) {
+				LOGGER.error("JsonProcessingException1 in updateUIMSUser()::" + e1.getMessage(),e1);
+			}
+		} catch (Exception e) {
+			LOGGER.error("Exception executing while getting samlAssertion::" + e.getMessage(),e);
+			UIMSSYNCLOGGER.error("updateUIMSUser failed in UIMS, fedId = "+fedId);
+			LOGGER.error("ECODE-SOAP-USERMGR-UPDATE-UIMSUSER-GEN-ERR : updateUIMSUser failed in UIMS, fedId = "+fedId);
+			try {
+				UIMSSYNCLOGGER.error("updateUIMSUser failed in UIMS, user info = "+objMapper.writeValueAsString(user));
+			} catch (JsonProcessingException e1) {
+				LOGGER.error("JsonProcessingException2 in updateUIMSUser()::" + e1.getMessage(),e);
+			}
+		}
+		return status;
 	}
 	
 }
