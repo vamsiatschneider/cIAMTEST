@@ -1599,6 +1599,7 @@ public class UserServiceImpl implements UserService {
 						if (otpStatus.equalsIgnoreCase(UserConstants.PIN_VERIFIED)) {
 							hexPinMobile = ChinaIdmsUtil.generateHashValue(otpinOpendj);
 							LocalDateTime currentDatenTime = LocalDateTime.now();
+							currentDatenTime = currentDatenTime.plusMinutes(15);
 							long currentDatenTimeInMillisecs = currentDatenTime.atZone(ZoneId.systemDefault())
 									.toInstant().toEpochMilli();
 
