@@ -11,7 +11,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
 import javax.naming.InvalidNameException;
 import javax.naming.SizeLimitExceededException;
 import javax.ws.rs.core.Response;
@@ -27,11 +26,9 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.ResourceUtils;
 
 import com.idms.product.model.OpenAmUser;
-import com.idms.service.uims.sync.UIMSAuthenticatedUserManagerSoapServiceSync;
 import com.schneider.idms.common.ErrorCodeConstants;
 import com.se.idms.dto.ErrorResponse;
 import com.se.idms.util.UserConstants;
@@ -39,13 +36,6 @@ import com.se.idms.util.UserConstants;
 public class ChinaIdmsUtil {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ChinaIdmsUtil.class);
-	
-	@Inject
-	private static UIMSAuthenticatedUserManagerSoapServiceSync uimsAuthenticatedUserManagerSoapServiceSync;
-	
-	@Value("${caller.fid}")
-	private static String CALLER_FID;
-
 
 	public static String generateHashValue(String generatedPin) {
 		MessageDigest md;
