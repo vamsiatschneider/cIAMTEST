@@ -10,6 +10,7 @@ import com.idms.model.UIMSCompanyRequest;
 import com.idms.model.UpdateUserRequest;
 import com.idms.model.UserRegistrationInfoRequest;
 import com.idms.product.model.OpenAMPasswordRecoveryInput;
+import com.idms.product.model.OpenAmUser;
 import com.idms.product.model.OpenAmUserRequest;
 import com.idms.product.model.PasswordRecoveryUser;
 import com.idms.product.model.UimsUserRequest;
@@ -41,9 +42,79 @@ public class IdmsMapper extends ConfigurableMapper{
     	
     	configureIFWUserRequestToIDMSUserRecord(mapperFactory);
     	configureIFWGetUserResponseToIDMSCreateUserRequest(mapperFactory);
+    	configureOpenAMUserToUimsV6User(mapperFactory);
+    	configureOpenAMUserToUimsV3Company(mapperFactory);
     }
     
    
+	private void configureOpenAMUserToUimsV3Company(MapperFactory mapperFactory) {
+		mapperFactory.classMap(OpenAmUser.class,com.se.uims.usermanager.UserV6.class)
+		.field("mail", "email") 
+        .field("mobile", "cell")
+        .field("givenName", "firstName")
+        .field("sn", "lastName")
+        .field("federationID", "federatedID")
+        .field("preferredlanguage", "languageCode")
+        .field("c", "countryCode")
+        .field("additionalInfo", "addInfoAddress")
+        .field("jobDescription", "jobDescription")
+        .field("jobFunction", "jobFunction")
+        .field("title", "jobTitle")
+        .field("l", "localityName")
+        .field("middleName", "middleName")
+        .field("postOfficeBox", "postOfficeBox")
+        .field("initials", "salutation")
+        .field("street", "street")
+        .field("postalCode", "postalCode")
+        .field("st", "state")
+        .field("telephoneNumber", "phone")
+        .field("fax", "fax")
+        .field("county", "county")
+        .field("channel", "channel")
+        .field("subchannel", "subChannel")
+        .field("primaryContact", "primaryContact")
+        .field("contactId", "bfoId")
+        .byDefault()
+        .register();
+	}
+
+
+	private void configureOpenAMUserToUimsV6User(MapperFactory mapperFactory) {
+		mapperFactory.classMap(OpenAmUser.class,CompanyV3.class)
+		.field("companyName", "organizationName")
+		.field("companyFederatedID", "federatedId")
+        .field("companyCountry", "countryCode")
+        .field("currency", "currencyCode")
+        .field("iam2", "customerClass")
+        .field("companyCity", "localityName")
+        .field("industrySegment", "marketSegment")
+        .field("companyPostalCode", "postalCode")
+        .field("companyPostOfficeBox", "postOfficeBox")
+        .field("companyState", "state")
+        .field("companyStreet", "street")
+        .field("headquarters", "headQuarter")
+        .field("companyAdditionalInfo", "addInfoAddress")
+        .field("companyStreet", "postalAddress")
+        .field("companyCounty", "county")
+        .field("companyWebSite", "webSite")
+        .field("industries", "marketServed")
+        .field("employeeSize", "employeeSize")
+        .field("employeeSize", "numberEmployees")
+        .field("taxID", "taxIdentificationNumber")
+        .field("preferredlanguage", "languageCode")
+        .field("companyPostOfficeBox", "postOfficeBoxCode")
+        .field("iam1", "businessType")
+        .field("industries", "marketServed")
+        .field("annualRevenue", "annualSales")
+        .field("bfoAccountId", "bfoId")
+        .field("IDMSWorkPhone__c", "telephoneNumber")
+        .byDefault()
+        .register();
+    
+		
+	}
+
+
 	/**
 	 * User Registration
 	 * @param mapperFactory

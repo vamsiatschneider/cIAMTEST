@@ -22,11 +22,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -46,6 +50,8 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
+import javax.naming.InvalidNameException;
+import javax.naming.SizeLimitExceededException;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotAuthorizedException;
@@ -60,6 +66,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.helpers.IOUtils;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -274,6 +282,9 @@ public class UserServiceImpl implements UserService {
 
 	@Inject
 	private UIMSUserManagerSoapService uimsUserManagerSoapService;
+	
+	@Inject
+	private UIMSCompanyManagerSoapService companyManagerSoapService;
 
 	@Inject
 	private UIMSAccessManagerSoapService uimsAccessManagerSoapService;
@@ -1039,16 +1050,16 @@ public class UserServiceImpl implements UserService {
 					userName=userRequest.getUserRecord().getIDMS_Federated_ID__c();
 					errorResponse.setStatus(errorStatus);
 					errorResponse.setMessage(
-							"Registration from UIMS, federationID should not contain cn00. May be duplicate entry.");
+							"Registration from UIMS, federationID should not starts with cn00. May be duplicate entry.");
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 					LOGGER.error(
-							"Registration from UIMS, federationID should not contain cn00. May be duplicate entry.");
+							"Registration from UIMS, federationID should not starts with cn00. May be duplicate entry.");
 					//return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 					LOGGER.error(
 							"ECODE-REG-WRONG-UIMS-REG-CN00 : User registration: FederationID from UIMS has cn00 for : "
 									+ userName);
-					return handleUIMSError(Response.Status.BAD_REQUEST, "Registration from UIMS, federationID should not contain cn00. May be duplicate entry.");
+					return handleUIMSError(Response.Status.BAD_REQUEST, "Registration from UIMS, federationID should not starts with cn00. May be duplicate entry.");
 				}
 				if (null != userRequest.getUserRecord().getIDMS_Federated_ID__c()
 						&& !userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty()
@@ -1061,7 +1072,7 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info(UserConstants.USER_REGISTRATION_TIME_LOG + elapsedTime);
 					LOGGER.error("Registration from non-UIMS, federationID must start with cn00.");
 					LOGGER.error(
-							"ECODE-REG-WRONG-NON-UIMS-REG-CN00 : User registration: FederationID from non-UIMS does not have cn00 for : "
+							"ECODE-REG-WRONG-NON-UIMS-REG-CN00 : User registration: FederationID from non-UIMS does not starts with cn00 for : "
 									+ userName);
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 					
@@ -1588,6 +1599,7 @@ public class UserServiceImpl implements UserService {
 						if (otpStatus.equalsIgnoreCase(UserConstants.PIN_VERIFIED)) {
 							hexPinMobile = ChinaIdmsUtil.generateHashValue(otpinOpendj);
 							LocalDateTime currentDatenTime = LocalDateTime.now();
+							currentDatenTime = currentDatenTime.plusMinutes(15);
 							long currentDatenTimeInMillisecs = currentDatenTime.atZone(ZoneId.systemDefault())
 									.toInstant().toEpochMilli();
 
@@ -12116,5 +12128,195 @@ public class UserServiceImpl implements UserService {
 			userData = null;
 		}
 		return userData;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Response fileSyncToUIMS(@Multipart("upfile") Attachment attachment) {
+		LOGGER.info("Entered fileSyncToUIMS() -> Start");
+
+		List<String> dataFile = new ArrayList<String>();
+		JSONObject response = new JSONObject();
+		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
+		long elapsedTime;
+		List<String> responseList = new ArrayList<String>();
+		boolean identityUpdateStatus = false;
+		boolean updateUIMSCompany = false;
+
+		DateFormat df = new SimpleDateFormat("ddMMyyyy");
+		Date dateobj = new Date();
+		String date1 = df.format(dateobj);
+
+		String fileName = "DataSync_" + date1 + ".csv";
+		LOGGER.info("file name should be = " + fileName);
+
+		String fileUploadName = attachment.getContentDisposition().getParameter("filename");
+		LOGGER.info("uploaded filename = "+fileUploadName);
+
+		if(!fileName.equals(fileUploadName)){
+			response.put(UserConstants.STATUS_L, errorStatus);
+			response.put(UserConstants.MESSAGE_L, "Invalid File Name. It should be DataSync_<TodayDate(dd mm yyyy)>.csv");
+			LOGGER.error("Error is :: Invalid File Name. It should be DataSync_<TodayDate(dd mm yyyy)>.csv");
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by fileSyncToUIMS() : " + elapsedTime);
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+		}
+
+		//java.nio.file.Path pathTo = Paths.get("c:\\santosh\\");
+		java.nio.file.Path pathTo = Paths.get("/home/ec2-user/santosh/");
+		java.nio.file.Path destination;
+		try {
+			destination = Paths.get(pathTo.toString() + "\\" + fileUploadName);
+			System.out.println("destination = "+destination);
+			Files.deleteIfExists(destination);
+			InputStream in = attachment.getObject(InputStream.class);
+			Files.copy(in, destination);
+
+			dataFile = ChinaIdmsUtil.getDataFromFile(destination.toString());
+			System.out.println("size of dataFile = " + dataFile.size());
+
+			List<OpenAmUser> listUsers = ChinaIdmsUtil.buildUserObject(dataFile);
+			String ufedid=null;
+
+			responseList.add("CSV file validation...");
+			for(int i = 0;i<listUsers.size();i++){
+				ufedid = listUsers.get(i).getFederationID();
+				com.se.uims.usermanager.UserV6 identity = mapper.map(listUsers.get(i), com.se.uims.usermanager.UserV6.class);
+				if (null != identity.getLanguageCode()) {
+					identity.setLanguageCode(identity.getLanguageCode().toLowerCase());
+				}
+
+				CompanyV3 company = mapper.map(listUsers.get(i), CompanyV3.class);
+				if (null != company.getLanguageCode()) {
+					company.setLanguageCode(company.getLanguageCode().toLowerCase());
+				}
+
+				Class<?> c = company.getClass();
+				Field[] companyFields = c.getDeclaredFields();
+				int valueCounter = 0;
+				for(Field f : companyFields){
+					//String fName = f.getName();
+					f.setAccessible(true);
+					Object value = f.get(company);
+					if(null != value && !((String)value).isEmpty()){
+						valueCounter++;
+					}
+				}
+
+				LOGGER.info("valueCounter = "+ valueCounter);
+
+				if(null == listUsers.get(i).getFederationID() || listUsers.get(i).getFederationID().isEmpty()){
+					response.put(UserConstants.STATUS_L, errorStatus);
+					response.put(UserConstants.MESSAGE_L, "Row "+(i+1)+" ,User federation ID is missing or null");
+					LOGGER.error("Error is :: Row "+(i+1)+" ,User federation ID is missing or null");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by fileSyncToUIMS() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+				}
+
+				if(valueCounter>0){
+					if(null == company.getFederatedId() || company.getFederatedId().isEmpty()){
+						response.put(UserConstants.STATUS_L, errorStatus);
+						response.put(UserConstants.MESSAGE_L, "Row "+(i+1)+" ,Company federation ID is missing or null");
+						LOGGER.error("Error is :: Row "+(i+1)+" ,Company federation ID is missing or null");
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.info("Time taken by fileSyncToUIMS() : " + elapsedTime);
+						return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+					}
+				}
+
+				LOGGER.info("Start: getUIMSUser() for userId:" + ufedid);
+				UserV6 userInfo = uimsAuthenticatedUserManagerSoapServiceSync.getUIMSUser(CALLER_FID, ufedid);
+				LOGGER.info("userinfo from UIMS:"+userInfo);
+				LOGGER.info("End: getUIMSUser() finished for userId:" + ufedid);
+
+				if(null==userInfo){
+					LOGGER.info("User not found in UIMS: " + ufedid);
+					responseList.add("User Federation ID "+ufedid +" is not found in UIMS.");
+					continue;
+				}
+
+				if(null != company.getFederatedId() && !company.getFederatedId().isEmpty() 
+						&& !userInfo.getCompanyId().equals(company.getFederatedId())){
+					response.put(UserConstants.STATUS_L, errorStatus);
+					response.put(UserConstants.MESSAGE_L, "Row "+(i+1)+" ,Company federation ID is not matching with UIMS company federation ID");
+					LOGGER.error("Error is :: Row "+(i+1)+" ,Company federation ID is not matching with UIMS company federation ID");
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by fileSyncToUIMS() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+				}
+			}
+
+			if(responseList.size()<=1){
+				responseList.add("Updation information in UIMS...");
+				for(int icount = 0;icount<listUsers.size();icount++){
+					ufedid = listUsers.get(icount).getFederationID();
+					com.se.uims.usermanager.UserV6 identity = mapper.map(listUsers.get(icount), com.se.uims.usermanager.UserV6.class);
+					if (null != identity.getLanguageCode()) {
+						identity.setLanguageCode(identity.getLanguageCode().toLowerCase());
+					}
+
+					CompanyV3 company = mapper.map(listUsers.get(icount), CompanyV3.class);
+					if (null != company.getLanguageCode()) {
+						company.setLanguageCode(company.getLanguageCode().toLowerCase());
+					}
+
+					identityUpdateStatus = uimsUserManagerSync.updateUIMSUser(ufedid, identity, "123");
+					LOGGER.info("User Identity Updated in UIMS = "+identityUpdateStatus);
+					if(identityUpdateStatus){
+						responseList.add("Row "+(icount+1)+" ,User Federation ID "+ufedid +" FOUND in UIMS and User Identity updated in UIMS.");
+					} else {
+						responseList.add("Row "+(icount+1)+" ,User Federation ID "+ufedid +" FOUND in UIMS and User Identity NOT updated in UIMS.");
+					}
+
+					updateUIMSCompany = companyManagerSoapService.updateUIMSCompany(ufedid, "124", company,company.getFederatedId());
+					LOGGER.info("User Company Updated in UIMS = "+updateUIMSCompany);
+					if(updateUIMSCompany){
+						responseList.add("Row "+(icount+1)+" ,Company Federation ID "+company.getFederatedId() +" FOUND in UIMS and company information updated in UIMS.");
+					} else {
+						responseList.add("Row "+(icount+1)+" ,Company Federation ID "+company.getFederatedId() +" FOUND in UIMS and company information NOT updated in UIMS.");
+					}
+				}
+			}
+
+		} catch (IOException e) {
+			response.put(UserConstants.STATUS_L, errorStatus);
+			response.put(UserConstants.MESSAGE_L, e.getMessage());
+			LOGGER.error("Error is :: "+e.getMessage(),e);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by fileSyncToUIMS() : " + elapsedTime);
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+		} catch (NullPointerException e) {
+			response.put(UserConstants.STATUS_L, errorStatus);
+			response.put(UserConstants.MESSAGE_L, e.getMessage());
+			LOGGER.error("Error is :: "+e.getMessage(),e);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by fileSyncToUIMS() : " + elapsedTime);
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+		} catch (SizeLimitExceededException e) {
+			response.put(UserConstants.STATUS_L, errorStatus);
+			response.put(UserConstants.MESSAGE_L, e.getMessage());
+			LOGGER.error("Error is :: "+e.getMessage(),e);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by fileSyncToUIMS() : " + elapsedTime);
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+		} catch (InvalidNameException e) {
+			response.put(UserConstants.STATUS_L, errorStatus);
+			response.put(UserConstants.MESSAGE_L, e.getMessage());
+			LOGGER.error("Error is :: "+e.getMessage(),e);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by fileSyncToUIMS() : " + elapsedTime);
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+		} catch (IllegalArgumentException e) {
+			response.put(UserConstants.STATUS_L, errorStatus);
+			response.put(UserConstants.MESSAGE_L, e.getMessage());
+			LOGGER.error("Error is :: "+e.getMessage(),e);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by fileSyncToUIMS() : " + elapsedTime);
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return Response.status(Response.Status.OK).entity(responseList).build();
 	}
 }

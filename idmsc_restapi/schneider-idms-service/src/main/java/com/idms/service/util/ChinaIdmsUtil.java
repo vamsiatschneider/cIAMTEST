@@ -2,12 +2,17 @@ package com.idms.service.util;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.naming.InvalidNameException;
+import javax.naming.SizeLimitExceededException;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.codec.binary.Hex;
@@ -23,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ResourceUtils;
 
+import com.idms.product.model.OpenAmUser;
 import com.schneider.idms.common.ErrorCodeConstants;
 import com.se.idms.dto.ErrorResponse;
 import com.se.idms.util.UserConstants;
@@ -393,5 +399,353 @@ public class ChinaIdmsUtil {
 			finalPathString = finalPathString.substring(0, finalPathString.lastIndexOf("&"));
 		return finalPathString;
 	}
+	
+	public static List<String> getDataFromFile(String filename) throws Exception {
+		BufferedReader reader;
+		List<String> lines = new ArrayList<>();
+		String line = null;
+		try {
+			reader = new BufferedReader(new FileReader(filename));
+			while ((line = reader.readLine()) != null) {
+				lines.add(line);
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		checkFileData(lines);
+		return lines;
+	}
+
+	public static void checkFileData(List<String> lines) throws Exception {
+		String[] splitedFirstRecord = lines.get(0).split(",");
+		if(!"federationID".equals(splitedFirstRecord[0])){
+			throw new InvalidNameException("First column name should be federationID");
+		}
+		for (String value : splitedFirstRecord) {
+			if (null == value || value.isEmpty()) {
+				throw new NullPointerException("Header column is Null in CSV file");
+			}
+		}
+		LOGGER.info("Header length = " + splitedFirstRecord.length);
+
+		for (int i = 1; i < lines.size(); i++) {
+			if (splitedFirstRecord.length < lines.get(i).split(",").length) {
+				throw new SizeLimitExceededException("Row number " + (i + 1) + " has more column.");
+			}
+		}
+	}
+	
+	public static List<OpenAmUser> buildUserObject(List<String> dataFile) {
+		String headerNames = dataFile.get(0);
+		String[] headers = headerNames.split(",");
+		List<OpenAmUser> queryList = new ArrayList<OpenAmUser>();
+
+		for(int i=1;i<dataFile.size();i++){
+			String rowContent = dataFile.get(i);
+			String[] rowContentInfo = rowContent.split(",");
+			//String singleQuery = createQuery(headers,rowContentInfo);
+			OpenAmUser oam = buildObject(headers,rowContentInfo);
+			queryList.add(oam);
+		}
+		return queryList;
+	}
+	
+	public static OpenAmUser buildObject(String[] header, String[] data) {
+		OpenAmUser openAmUser = new OpenAmUser();
+		/*
+		 * String singleQuery = "{\"userRecord\":{\""; for(int
+		 * i=0;i<header.length;i++){ singleQuery =
+		 * singleQuery+header[i]+"\":\""+data[i]+"\",\""; } LOGGER.info(
+		 * "Query = "+singleQuery); singleQuery =
+		 * singleQuery.substring(0,singleQuery.length()-2).concat("}}");
+		 * LOGGER.info("again query = "+singleQuery); return singleQuery;
+		 */
+
+		for (int i = 0; i < header.length; i++) {
+			if (header[i].equals("mail")) {
+				if (data.length < i+1) {
+					openAmUser.setMail(null);
+				} else {
+					openAmUser.setMail((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("mobile")) {
+				if (data.length < i+1) {
+					openAmUser.setMobile(null);
+				} else {
+					openAmUser.setMobile((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("givenName")) {
+				if (data.length < i+1) {
+					openAmUser.setGivenName(null);
+				} else {
+					openAmUser.setGivenName((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("sn")) {
+				if (data.length < i+1) {
+					openAmUser.setSn(null);
+				} else {
+					openAmUser.setSn((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("c")) {
+				if (data.length < i+1) {
+					openAmUser.setC(null);
+				} else {
+					openAmUser.setC((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("federationID")) {
+				if (data.length < i+1) {
+					openAmUser.setFederationID(null);
+				} else {
+					openAmUser.setFederationID((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("preferredlanguage")) {
+				if (data.length < i+1) {
+					openAmUser.setPreferredlanguage(null);
+				} else {
+					openAmUser.setPreferredlanguage((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("additionalInfo")) {
+				if (data.length < i+1) {
+					openAmUser.setAdditionalInfo(null);
+				} else {
+					openAmUser.setAdditionalInfo((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("jobDescription")) {
+				if (data.length < i+1) {
+					openAmUser.setJobDescription(null);
+				} else {
+					openAmUser.setJobDescription((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("jobFunction")) {
+				if (data.length < i+1) {
+					openAmUser.setJobFunction(null);
+				} else {
+					openAmUser.setJobFunction((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("title")) {
+				if (data.length < i+1) {
+					openAmUser.setTitle(null);
+				} else {
+					openAmUser.setTitle((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("l")) {
+				if (data.length < i+1) {
+					openAmUser.setL(null);
+				} else {
+					openAmUser.setL((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("middleName")) {
+				if (data.length < i+1) {
+					openAmUser.setMiddleName(null);
+				} else {
+					openAmUser.setMiddleName((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("postOfficeBox")) {
+				if (data.length < i+1) {
+					openAmUser.setPostOfficeBox(null);
+				} else {
+					openAmUser.setPostOfficeBox((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("initials")) {
+				if (data.length < i+1) {
+					openAmUser.setInitials(null);
+				} else {
+					openAmUser.setInitials((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("street")) {
+				if (data.length < i+1) {
+					openAmUser.setStreet(null);
+				} else {
+					openAmUser.setStreet((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("postalCode")) {
+				if (data.length < i+1) {
+					openAmUser.setPostalCode(null);
+				} else {
+					openAmUser.setPostalCode((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("st")) {
+				if (data.length < i+1) {
+					openAmUser.setSt(null);
+				} else {
+					openAmUser.setSt((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("telephoneNumber")) {
+				if (data.length < i+1) {
+					openAmUser.setTelephoneNumber(null);
+				} else {
+					openAmUser.setTelephoneNumber((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("fax")) {
+				if (data.length < i+1) {
+					openAmUser.setFax(null);
+				} else {
+					openAmUser.setFax((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("county")) {
+				if (data.length < i+1) {
+					openAmUser.setCounty(null);
+				} else {
+					openAmUser.setCounty((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("channel")) {
+				if (data.length < i+1) {
+					openAmUser.setChannel(null);
+				} else {
+					openAmUser.setChannel((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("subchannel")) {
+				if (data.length < i+1) {
+					openAmUser.setSubchannel(null);
+				} else {
+					openAmUser.setSubchannel((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("primaryContact")) {
+				if (data.length < i+1) {
+					openAmUser.setPrimaryContact(null);
+				} else {
+					openAmUser.setPrimaryContact((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("contactId")) {
+				if (data.length < i+1) {
+					openAmUser.setContactId(null);
+				} else {
+					openAmUser.setContactId((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("companyName")) {
+				if (data.length < i+1) {
+					openAmUser.setCompanyName(null);
+				} else {
+					openAmUser.setCompanyName((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("companyCountry")) {
+				if (data.length < i+1) {
+					openAmUser.setCompanyCountry(null);
+				} else {
+					openAmUser.setCompanyCountry((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("currency")) {
+				if (data.length < i+1) {
+					openAmUser.setCurrency(null);
+				} else {
+					openAmUser.setCurrency((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("iam1")) {
+				if (data.length < i+1) {
+					openAmUser.setIam1(null);
+				} else {
+					openAmUser.setIam1((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("iam2")) {
+				if (data.length < i+1) {
+					openAmUser.setIam2(null);
+				} else {
+					openAmUser.setIam2((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("companyCity")) {
+				if (data.length < i+1) {
+					openAmUser.setCompanyCity(null);
+				} else {
+					openAmUser.setCompanyCity((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("industrySegment")) {
+				if (data.length < i+1) {
+					openAmUser.setIndustrySegment(null);
+				} else {
+					openAmUser.setIndustrySegment((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("companyPostalCode")) {
+				if (data.length < i+1) {
+					openAmUser.setCompanyPostalCode(null);
+				} else {
+					openAmUser.setCompanyPostalCode((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("companyPostOfficeBox")) {
+				if (data.length < i+1) {
+					openAmUser.setCompanyPostOfficeBox(null);
+				} else {
+					openAmUser.setCompanyPostOfficeBox((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("companyState")) {
+				if (data.length < i+1) {
+					openAmUser.setCompanyState(null);
+				} else {
+					openAmUser.setCompanyState((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("companyStreet")) {
+				if (data.length < i+1) {
+					openAmUser.setCompanyStreet(null);
+				} else {
+					openAmUser.setCompanyStreet((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("headquarters")) {
+				if (data.length < i+1) {
+					openAmUser.setHeadquarters(null);
+				} else {
+					openAmUser.setHeadquarters((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("companyAdditionalInfo")) {
+				if (data.length < i+1) {
+					openAmUser.setCompanyAdditionalInfo(null);
+				} else {
+					openAmUser.setCompanyAdditionalInfo((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("companyCounty")) {
+				if (data.length < i+1) {
+					openAmUser.setCompanyCounty(null);
+				} else {
+					openAmUser.setCompanyCounty((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("companyWebSite")) {
+				if (data.length < i+1) {
+					openAmUser.setCompanyWebSite(null);
+				} else {
+					openAmUser.setCompanyWebSite((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("industries")) {
+				if (data.length < i+1) {
+					openAmUser.setIndustries(null);
+				} else {
+					openAmUser.setIndustries((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("employeeSize")) {
+				if (data.length < i+1) {
+					openAmUser.setEmployeeSize(null);
+				} else {
+					openAmUser.setEmployeeSize((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("taxID")) {
+				if (data.length < i+1) {
+					openAmUser.setTaxID(null);
+				} else {
+					openAmUser.setTaxID((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("annualRevenue")) {
+				if (data.length < i+1) {
+					openAmUser.setAnnualRevenue(null);
+				} else {
+					openAmUser.setAnnualRevenue((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("IDMSWorkPhone__c")) {
+				if (data.length < i+1) {
+					openAmUser.setIDMSWorkPhone__c(null);
+				} else {
+					openAmUser.setIDMSWorkPhone__c((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else if (header[i].equals("companyFederatedID")) {
+				if (data.length < i+1) {
+					openAmUser.setCompanyFederatedID(null);
+				} else {
+					openAmUser.setCompanyFederatedID((null != data[i] && !data[i].isEmpty()) ? data[i] : null);
+				}
+			} else {
+				throw new IllegalArgumentException(header[i] + " is not a valid field in file");
+			}
+		}
+		return openAmUser;
+	}
+		
+
 		
 }
