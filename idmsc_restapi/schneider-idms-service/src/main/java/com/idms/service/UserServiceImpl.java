@@ -12132,7 +12132,7 @@ public class UserServiceImpl implements UserService {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Response fileSyncToUIMS(@Multipart("upfile") Attachment attachment) {
+	public Response fileSyncToUIMS(String authorizedToken, @Multipart("upfile") Attachment attachment) {
 		LOGGER.info("Entered fileSyncToUIMS() -> Start");
 
 		List<String> dataFile = new ArrayList<String>();
@@ -12142,6 +12142,23 @@ public class UserServiceImpl implements UserService {
 		List<String> responseList = new ArrayList<String>();
 		boolean identityUpdateStatus = false;
 		boolean updateUIMSCompany = false;
+		
+		if (null == authorizedToken || authorizedToken.isEmpty()) {
+			response.put(UserConstants.STATUS_L, errorStatus);
+			response.put(UserConstants.MESSAGE_L, UserConstants.ADMIN_TOKEN_MANDATORY);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.error("Error is " + UserConstants.ADMIN_TOKEN_MANDATORY);
+			LOGGER.info("Time taken by fileSyncToUIMS() : " + elapsedTime);
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+		}
+		if (null != authorizedToken && !authorizedToken.isEmpty() && !getTechnicalUserDetails(authorizedToken)) {
+			response.put(UserConstants.STATUS_L, errorStatus);
+			response.put(UserConstants.MESSAGE_L, "Unauthorized or session expired");
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.error("Error is " + "Unauthorized or session expired");
+			LOGGER.info("Time taken by fileSyncToUIMS() : " + elapsedTime);
+			return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
+		}
 
 		DateFormat df = new SimpleDateFormat("ddMMyyyy");
 		Date dateobj = new Date();

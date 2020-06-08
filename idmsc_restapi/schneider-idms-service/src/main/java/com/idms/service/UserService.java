@@ -301,5 +301,5 @@ public interface UserService {
 	@POST
 	@Path("/apexrest/fileSyncToUIMS")
 	@Consumes("multipart/form-data")
-	Response fileSyncToUIMS(Attachment attachment);
+	Response fileSyncToUIMS(@HeaderParam("Authorization") String authorizedToken, Attachment attachment);
 }
