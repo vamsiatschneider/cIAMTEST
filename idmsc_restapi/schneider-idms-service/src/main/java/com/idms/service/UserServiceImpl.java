@@ -10474,6 +10474,8 @@ public class UserServiceImpl implements UserService {
 		JSONObject response = new JSONObject();
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		DocumentContext productDocCtx = null;
+		boolean isOTPEnabled = false;
+		String otp = null, token = null;
 		try {
 			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(addEmailRequest));
 
@@ -10599,9 +10601,23 @@ public class UserServiceImpl implements UserService {
 				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + ssoToken, fedid, addEmailString);
 				LOGGER.info("End: updateUser() of openamservice to add email as dual indentifier finished for userId:"
 						+ fedid);
-				String token = sendEmail.generateEmailToken(fedid);
+				
+				Response applicationDetails = openDJService.getUser(djUserName, djUserPwd, source);
+				DocumentContext productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
+
+				String isOTPEnabledForApp = productDJData.read("_isOTPEnabled");
+				if(null!=isOTPEnabledForApp && !isOTPEnabledForApp.equals("")) {
+					isOTPEnabled = Boolean.valueOf(isOTPEnabledForApp);
+					LOGGER.info("isOTPEnabled: "+ isOTPEnabled);
+				}
+				if(isOTPEnabled){
+					otp = sendEmail.generateOtp(fedid);
+				} else {
+					token = sendEmail.generateEmailToken(fedid);
+				}
+				
 				LOGGER.info("sending mail notification to added email");
-				sendEmail.sendOpenAmEmail(null, token, EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE, fedid, source, null);
+				sendEmail.sendOpenAmEmail(token, otp, EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE, fedid, source, null);
 
 				response.put(UserConstants.STATUS_L, successStatus);
 				response.put(UserConstants.MESSAGE_L, UserConstants.ADD_EMAIL_PROFILE);
