@@ -365,7 +365,7 @@ public Response getUserBySearch(String authorization, String region, String fede
 	    //call using mobile id
 		try{
 		String	userExists = productService.checkUserExistsWithEmailMobile(
-					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryToken, "mobile_reg eq " + "\"" + URLEncoder.encode(URLDecoder.decode(mobile, "UTF-8"), "UTF-8")
+					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryToken, "mobilereg eq " + "\"" + URLEncoder.encode(URLDecoder.decode(mobile, "UTF-8"), "UTF-8")
 					+ "\" or mobile eq " + "\"" + URLEncoder.encode(URLDecoder.decode(mobile, "UTF-8"), "UTF-8")  + "\"");
 		LOGGER.info("End: checkUserExistsWithEmailMobile() of openam finished for mobile:"+mobile);
 		productDocCtx = JsonPath.using(conf).parse(userExists);

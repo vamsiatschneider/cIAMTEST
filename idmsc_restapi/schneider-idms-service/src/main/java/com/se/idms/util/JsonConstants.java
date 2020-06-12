@@ -24,6 +24,7 @@ public class JsonConstants {
 	public static final String GIVEN_NAME = "$.givenName";
 	public static final String MOBILE = "$.mobile";
 	public static final String MOBILE_REG = "$.mobile_reg";
+	public static final String MOBILEREG = "$.mobilereg";
 	public static final String REGISTRATION_SOURCE = "$.registerationSource";
 	public static final String RESULT = "$.result[0].username";
 	public static final String FEDERATION_ID = "$.federationID";
@@ -39,6 +40,7 @@ public class JsonConstants {
 	public static final String MAIL_0 = "$.mail[0]";
 	public static final String MOBILE_0 = "$.mobile[0]";
 	public static final String MOBILEREG_0 = "$.mobile_reg[0]";
+	public static final String MOBILEREG0 = "$.mobilereg[0]";
 	public static final String COMPANY_NAME = "$.companyName[0]";
 	public static final String COMPANY_ADDRESS = "$.companyStreet[0]";
 	public static final String COMPANY_CITY = "$.companyCity[0]";
