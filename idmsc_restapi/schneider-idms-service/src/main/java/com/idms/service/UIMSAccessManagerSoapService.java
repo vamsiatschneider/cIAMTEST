@@ -30,6 +30,7 @@ import com.github.rholder.retry.StopStrategies;
 import com.google.common.base.Predicates;
 import com.idms.model.AILRequest;
 import com.idms.product.client.OpenAMService;
+import com.idms.service.util.UserServiceUtil;
 import com.se.idms.dto.IDMSUserAIL;
 import com.se.idms.util.UimsConstants;
 import com.se.idms.util.UserConstants;
@@ -60,6 +61,9 @@ public class UIMSAccessManagerSoapService {
 		this.sendEmail = sendEmail;
 	}
 	
+	@Value("${frVersion}")
+	private String frVersion;
+
 	@Value("${fromUserName}")
 	private String fromUserName;
 	
@@ -123,7 +127,7 @@ public class UIMSAccessManagerSoapService {
 				// the v_old
 				if (isgrantresult) {
 					String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
-					productService.updateUser(iPlanetDirectoryKey, userId, version);
+					UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userId, version);
 				}
 			} catch (RetryException e) {
 				uimsLog.error("Retry failed while calling the grantAccessControlToUser::" + e.getMessage(),e);
@@ -166,7 +170,7 @@ public class UIMSAccessManagerSoapService {
 				// the v_old
 				if (isrevokeresult) {
 					String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
-					productService.updateUser(iPlanetDirectoryKey, userId, version);
+					UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userId, version);
 				}
 			} catch (RetryException e) {
 				uimsLog.error("Retry failed while calling the revokeAccessControlToUser::" + e.getMessage(),e);

@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.idms.service.util.ChinaIdmsUtil;
+import com.idms.service.util.UserServiceUtil;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -104,7 +105,7 @@ public class GetAILServiceImpl extends IdmsCommonServiceImpl implements GetAILSe
 			iPlanetDirectoryKey = getSSOToken();
 
 			LOGGER.info("Start: calling getUser() of OpenAMService to fetch AIL values for federationId=" + federationId);
-			userData = productService.getUser(iPlanetDirectoryKey, federationId);
+			userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, federationId);
 			LOGGER.info("End: getUser() of OpenAMService to fetch AIL values finsihed for federationId=" + federationId);
 
 			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
@@ -223,7 +224,7 @@ public class GetAILServiceImpl extends IdmsCommonServiceImpl implements GetAILSe
 public Response getUserResponse (String userId,String iPlanetDirectoryToken ){
 	String userData = null;
 	try{
-		userData = productService.getUser(iPlanetDirectoryToken, userId);
+		userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryToken, userId);
 	}
 	catch (Exception e) {
 		
@@ -307,7 +308,7 @@ public Response getUserBySearch(String authorization, String region, String fede
 	}
 	else if(null != federationId && ! federationId.isEmpty()){
 		try{
-		String userExists = productService.checkUserExistsWithEmailMobile(
+		String userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 				UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryToken, "federationID eq " + "\"" + federationId + "\" or uid eq " + "\"" + federationId + "\"");
 		LOGGER.info("End: checkUserExistsWithEmailMobile() of openam finished for federationId:"+federationId);
 		productDocCtx = JsonPath.using(conf).parse(userExists);
@@ -335,7 +336,7 @@ public Response getUserBySearch(String authorization, String region, String fede
 	else if(null != email && !email .isEmpty()){
 		//call using email id
 		try{
-		String	userExists = productService.checkUserExistsWithEmailMobile(
+		String	userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryToken, "mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(email, "UTF-8"), "UTF-8")  + "\"");
 		LOGGER.info("End: checkUserExistsWithEmailMobile() of openam finished for email:"+email);
 		productDocCtx = JsonPath.using(conf).parse(userExists);
@@ -364,7 +365,7 @@ public Response getUserBySearch(String authorization, String region, String fede
 	else if(null != mobile && !mobile .isEmpty()){
 	    //call using mobile id
 		try{
-		String	userExists = productService.checkUserExistsWithEmailMobile(
+		String	userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryToken, "mobilereg eq " + "\"" + URLEncoder.encode(URLDecoder.decode(mobile, "UTF-8"), "UTF-8")
 					+ "\" or mobile eq " + "\"" + URLEncoder.encode(URLDecoder.decode(mobile, "UTF-8"), "UTF-8")  + "\"");
 		LOGGER.info("End: checkUserExistsWithEmailMobile() of openam finished for mobile:"+mobile);

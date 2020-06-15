@@ -17,6 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.idms.product.model.Attributes;
 import com.idms.service.util.ChinaIdmsUtil;
+import com.idms.service.util.UserServiceUtil;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -217,7 +218,7 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 					+ "openAMApi:GET/getUser/{userId}");
 
 			LOGGER.info("Start: calling getUser() of OpenAMService to fetch AIL values for userId=" + userId);
-			userData = productService.getUser(iPlanetDirectoryKey, userId);
+			userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userId);
 			LOGGER.info("End: getUser() of OpenAMService to fetch AIL values finsihed for userId=" + userId);
 			LOGGER.info("Returned User Data from OpenAM=" + userData);
 			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
@@ -260,7 +261,7 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
 						+ "openAMApi:GET/getUser/{userId}");
 				LOGGER.info("Start: updateUser() of OpenAMService to update AIL for userId=" + userId);
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 						PRODUCT_JSON_STRING);
 				LOGGER.info("End: updateUser() of OpenAMService to update AIL finished for userId=" + userId);
 				// response
@@ -325,7 +326,7 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 					LOGGER.info("Revoke Operation: JSON String to Update=" + PRODUCT_JSON_STRING);
 					LOGGER.info("Start: updateUser() of OpenAMService to update AIL values for userId=" + userId);
 
-					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+					UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 							PRODUCT_JSON_STRING);
 					LOGGER.info("End: updateUser() of OpenAMService to update AIL values finished for userId=" + userId);
 					// response

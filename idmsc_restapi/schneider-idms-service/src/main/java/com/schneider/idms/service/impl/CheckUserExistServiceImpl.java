@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.idms.model.CheckUserExistsRequest;
 import com.idms.service.util.ChinaIdmsUtil;
+import com.idms.service.util.UserServiceUtil;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.schneider.idms.common.DirectApiConstants;
@@ -171,9 +172,9 @@ public class CheckUserExistServiceImpl extends IdmsCommonServiceImpl implements 
 			LOGGER.info(
 					"Start:Calling checkUserExistsWithEmailMobile() of OpenAMService for user having emailOrMobile: "
 							+ emailOrMobile);
-			String userExists = productService
-					.checkUserExistsWithEmailMobile(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq "
-							+ "\"" + URLEncoder.encode(URLDecoder.decode(emailOrMobile, "UTF-8"), "UTF-8") + "\"");
+			String userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
+								UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq "
+								+ "\"" + URLEncoder.encode(URLDecoder.decode(emailOrMobile, "UTF-8"), "UTF-8") + "\"");
 			LOGGER.info("End:checkUserExistsWithEmailMobile() of OpenAMService Finished for user having emailOrMobile: "
 					+ emailOrMobile);
 			productDocCtx = JsonPath.using(conf).parse(userExists);

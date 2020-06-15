@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.idms.product.model.OpenAmUserRequest;
 import com.idms.service.util.AsyncUtil;
 import com.idms.service.util.ChinaIdmsUtil;
+import com.idms.service.util.UserServiceUtil;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -306,15 +307,14 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			if (null != openAmReq.getInput().getUser().getRegisterationSource()
 					&& UserConstants.UIMS.equalsIgnoreCase(openAmReq.getInput().getUser().getRegisterationSource())) {
 				LOGGER.info("Start: For reg source UIMS, calling checkUserExistsWithEmailMobile() of OpenAMService");
-				userExists = productService
-						.checkUserExistsWithEmailMobile(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+				userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 								"federationID eq " + "\"" + openAmReq.getInput().getUser().getFederationID()
 										+ "\" or loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginIdentifier,"UTF-8"), "UTF-8")
 										+ "\"");
 				LOGGER.info("End: For reg source UIMS, calling checkUserExistsWithEmailMobile() of OpenAMService finished");
 			} else {
 				LOGGER.info("Start: For reg source non-UIMS, calling checkUserExistsWithEmailMobile() of OpenAMService");
-				userExists = productService.checkUserExistsWithEmailMobile(
+				userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						"loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginIdentifier,"UTF-8"), "UTF-8") + "\"");
 				LOGGER.info("End: For reg source non-UIMS, calling checkUserExistsWithEmailMobile() of OpenAMService finished");
@@ -341,7 +341,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			 */
 
 			// new logic
-			String userExistsInOpenam = productService.checkUserExistsWithEmailMobile(
+			String userExistsInOpenam = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 					"mail eq " + "\"" + loginIdentifier + "\" or mobile eq " + "\"" + loginIdentifier + "\"");
 			productDocCtxCheck = JsonPath.using(conf).parse(userExistsInOpenam);
@@ -353,7 +353,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				for (int i = 0; i < resultCountCheck.intValue(); i++) {
 					String isActivated = productDocCtxCheck.read("$.result[" + i + "].isActivated[0]");
 					if (!Boolean.valueOf(isActivated)) {
-						Response deleteResponse = productService.deleteUser(
+						Response deleteResponse = UserServiceUtil.deleteUserBasedOnFRVersion(productService, frVersion,
 								UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 								productDocCtxCheck.read("$.result[" + i + "].username"));
 						if (deleteResponse.getStatus() == 200) {
@@ -374,8 +374,8 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				// deleting already existing id in openam
 
 				String userIdFromOpenam = productDocCtxCheck.read("$.result[0].username");
-				Response deleteResponse = productService
-						.deleteUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userIdFromOpenam);
+				Response deleteResponse = UserServiceUtil.deleteUserBasedOnFRVersion(productService, frVersion,
+						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userIdFromOpenam);
 
 				if (deleteResponse.getStatus() == 200) {
 					LOGGER.info("Deleted the old entry from openam"
@@ -464,13 +464,13 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 				LOGGER.info(
 						"DirectAPI:userRegistration -> Json Request social login user -> " + json);
 				LOGGER.info("Start: calling updateUser() of OPENAM for social login");
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userName, json);
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userName, json);
 				LOGGER.info("End: calling updateUser() of OPENAM for social login");
 
 			} else {
 				LOGGER.info(
 						"Start: DirectAPI:userRegistration -> calling  userRegistration() to create new user:" + json);
-				userCreation = productService.userRegistration(iPlanetDirectoryKey, userAction, json);
+				userCreation = UserServiceUtil.userRegistrationBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userAction, json);
 				LOGGER.info(
 						"End: DirectAPI:userRegistration -> finished  userRegistration() to create new user:");
 				// return productDocCtx;
@@ -492,7 +492,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 					+ "\"" + "}";
 			// Adding v_old and v_new
 			LOGGER.info("Start: DirectAPI:userRegistration -> For new user, updating version in openam-> " + version);
-			productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userName, version);
+			UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userName, version);
 			LOGGER.info("End: DirectAPI:userRegistration -> For new user, updating version in openam-> " + version);
 
 			// Checking profile update and update login id
@@ -591,7 +591,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 		DocumentContext productDocCtxCheck = null;
 		
 		String iPlanetDirectoryKey = getSSOToken();
-		String companyMapped = productService.checkUserExistsWithEmailMobile(
+		String companyMapped = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 				UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "companyFederatedID eq " + "\"" + companyId + "\"");
 		productDocCtxCheck = JsonPath.using(conf).parse(companyMapped);
 		Integer resultCountCheck = productDocCtxCheck.read(JsonConstants.RESULT_COUNT);

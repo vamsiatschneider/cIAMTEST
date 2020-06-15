@@ -628,5 +628,18 @@ public class UserConstants {
 	public static final String ZERO = "0";
 	public static final int ONE = 1;
 	
+	// FR 6.5 Version
+	public static final String FR6_5Version ="6.5";
+	// Accept API Version Header for POST, PUT, DELETE
+	public static final String ACCEPT_VERSION_HEADER ="resource=1.0, protocol=1.0";
+	// Accept API Version Header for GET, QUERY
+	public static final String ACCEPT_VERSION_GET_HEADER ="resource=3.0, protocol=1.0";
+
+	// Accept API Version Header for OpenAM Authenticate APIs
+	public static final String AUTH_VERSION_HEADER="resource=2.0, protocol=1.0";
+	// Accept API Version Header for OpenAM Session APIs
+	public static final String TOKEN_STATUS_VERSION_HEADER="resource=1.2";
+	public static final String SESSION_LOGOUT_VERSION_HEADER="resource=3.1";
+	public static final String CONTENT_TYPE_APP_JSON = "application/json";
 	
 }
