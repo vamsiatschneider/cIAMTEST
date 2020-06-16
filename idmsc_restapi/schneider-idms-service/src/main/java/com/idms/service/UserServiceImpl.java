@@ -1340,7 +1340,7 @@ public class UserServiceImpl implements UserService {
 				identifierType = UserConstants.EMAIL;
 			} else if ((null != userRequest.getUserRecord().getMobilePhone())
 					&& (!userRequest.getUserRecord().getMobilePhone().isEmpty())) {
-				openAmReq.getInput().getUser().setMobile_reg(userRequest.getUserRecord().getMobilePhone());
+				//openAmReq.getInput().getUser().setMobile_reg(userRequest.getUserRecord().getMobilePhone());
 				openAmReq.getInput().getUser().setMobilereg(userRequest.getUserRecord().getMobilePhone());
 				loginIdentifier = userRequest.getUserRecord().getMobilePhone();
 				identifierType = UserConstants.MOBILE;
