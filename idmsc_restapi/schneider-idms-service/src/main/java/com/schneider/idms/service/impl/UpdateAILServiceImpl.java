@@ -218,7 +218,7 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 					+ "openAMApi:GET/getUser/{userId}");
 
 			LOGGER.info("Start: calling getUser() of OpenAMService to fetch AIL values for userId=" + userId);
-			userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userId);
+			userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userId, iPlanetDirectoryKey);
 			LOGGER.info("End: getUser() of OpenAMService to fetch AIL values finsihed for userId=" + userId);
 			LOGGER.info("Returned User Data from OpenAM=" + userData);
 			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();

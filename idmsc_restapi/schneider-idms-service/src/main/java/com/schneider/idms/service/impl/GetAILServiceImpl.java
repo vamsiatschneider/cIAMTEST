@@ -105,7 +105,7 @@ public class GetAILServiceImpl extends IdmsCommonServiceImpl implements GetAILSe
 			iPlanetDirectoryKey = getSSOToken();
 
 			LOGGER.info("Start: calling getUser() of OpenAMService to fetch AIL values for federationId=" + federationId);
-			userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, federationId);
+			userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, federationId, iPlanetDirectoryKey);
 			LOGGER.info("End: getUser() of OpenAMService to fetch AIL values finsihed for federationId=" + federationId);
 
 			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
@@ -224,7 +224,7 @@ public class GetAILServiceImpl extends IdmsCommonServiceImpl implements GetAILSe
 public Response getUserResponse (String userId,String iPlanetDirectoryToken ){
 	String userData = null;
 	try{
-		userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryToken, userId);
+		userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userId, iPlanetDirectoryToken);
 	}
 	catch (Exception e) {
 		
