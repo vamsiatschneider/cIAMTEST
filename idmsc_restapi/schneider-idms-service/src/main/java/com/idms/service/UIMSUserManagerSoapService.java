@@ -35,6 +35,7 @@ import com.idms.product.client.OpenAMService;
 import com.idms.service.digital.GoDigitalUserService;
 import com.idms.service.uims.sync.UIMSCompanyManagerSoapServiceSync;
 import com.idms.service.util.ChinaIdmsUtil;
+import com.idms.service.util.UserServiceUtil;
 import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.cache.validate.IValidator;
 import com.se.idms.util.SamlAssertionTokenGenerator;
@@ -92,7 +93,9 @@ public class UIMSUserManagerSoapService {
 	public void setSendEmail(SendEmail sendEmail) {
 		this.sendEmail = sendEmail;
 	}
-	
+	@Value("${frVersion}")
+	private String frVersion;
+
 	@Value("${fromUserName}")
 	private String fromUserName;
 	
@@ -259,7 +262,7 @@ public class UIMSUserManagerSoapService {
 			if (isIdentityActvated) {
 				String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
 				LOGGER.info("Start: updateUser() of openamservice to update version for userId:" + userId);
-				productService.updateUser(iPlanetDirectoryKey, userId, version);
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userId, version);
 				LOGGER.info("End: updateUser() of openamservice to update version finished for userId:" + userId);
 			}
 			if (!isIdentityActvated) {
@@ -332,7 +335,7 @@ public class UIMSUserManagerSoapService {
 			if (setPasswordStatus) {
 				String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
 				LOGGER.info("Start: updateUser() of openamservice to update version for userId:" + userId);
-				productService.updateUser(iPlanetDirectoryKey, userId, version);
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userId, version);
 				LOGGER.info("End: updateUser() call of openamservice to update version finished for userId:" + userId);
 			}
 			if (!setPasswordStatus) {
@@ -397,7 +400,7 @@ public class UIMSUserManagerSoapService {
 			if (ispasswordupdated) {
 				String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
 				LOGGER.info("Start: updateUser() of openamservice to update version for userId:" + userId);
-				productService.updateUser(iPlanetDirectoryKey, userId, version);
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userId, version);
 				LOGGER.info("End: updateUser() call of openamservice to update version finished for userId:" + userId);
 			}
 		} catch (RetryException e) {
@@ -550,7 +553,7 @@ public class UIMSUserManagerSoapService {
 			if (isNoPwdactivated) {
 				String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
 				LOGGER.info("Start: updateUser() of openamservice to update version for userID:" + userId);
-				productService.updateUser(iPlanetDirectoryKey, userId, version);
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userId, version);
 				LOGGER.info("End: updateUser() of openamservice finished to update version for userID:" + userId);
 			}
 			if (!isNoPwdactivated) {
@@ -629,7 +632,7 @@ public class UIMSUserManagerSoapService {
 					if (null != createdFedId) {
 						String fedID = "{" + "\"federationID\": \"" + createdFedId + "\"" + "}";
 						LOGGER.info("fedID in creating UIMS user: " + fedID);
-						productService.updateUser(iPlanetDirectoryKey, userName, fedID);
+						UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userName, fedID);
 					}
 
 					return true;
@@ -708,7 +711,7 @@ public class UIMSUserManagerSoapService {
 					if (null != createdCompanyFedId) {
 						String companyFedID = "{" + "\"companyFederatedID\": \"" + createdCompanyFedId + "\"" + "}";
 						LOGGER.info("companyFedID in creating UIMS Company: " + companyFedID);
-						productService.updateUser(iPlanetDirectoryKey, userName, companyFedID);
+						UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userName, companyFedID);
 
 						if ((null == userRequest.getUserRecord().getBFO_ACCOUNT_ID__c()
 								|| userRequest.getUserRecord().getBFO_ACCOUNT_ID__c().isEmpty())
@@ -743,7 +746,7 @@ public class UIMSUserManagerSoapService {
 					// after successful creation of user and company, we
 					// need to update the v_old
 					String version = "{" + "\"V_Old\": \"" + v_new + "\"" + "}";
-					productService.updateUser(iPlanetDirectoryKey, userName, version);
+					UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userName, version);
 				}
 			}
 
@@ -851,7 +854,7 @@ public class UIMSUserManagerSoapService {
 						String companyFederatedIDQuery = "{" + "\"companyFederatedID\": \"" + companyFedId + "\"" + "}";
 						LOGGER.info("companyFederatedIDQuery in case1 = "+companyFederatedIDQuery);
 						LOGGER.info("Start: updateUser() of openam to update companyFedId for username : "+userName);
-						productService.updateUser(iPlanetDirectoryKey, userName, companyFederatedIDQuery);
+						UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userName, companyFederatedIDQuery);
 						LOGGER.info("End: updateUser() of openam to update companyFedId finished for username : "+userName);
 						
 						//true means create company with this user
@@ -866,7 +869,7 @@ public class UIMSUserManagerSoapService {
 						String companyFederatedIDQuery = "{" + "\"companyFederatedID\": \"" + newcompanyFedId + "\"" + "}";
 						LOGGER.info("companyFederatedIDQuery in case2 = "+companyFederatedIDQuery);
 						LOGGER.info("Start: updateUser() of openam to update companyFedId for username : "+userName);
-						productService.updateUser(iPlanetDirectoryKey, userName, companyFederatedIDQuery);
+						UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userName, companyFederatedIDQuery);
 						LOGGER.info("End: updateUser() of openam to update companyFedId finished for username : "+userName);
 						String uimsUserResponse = companyManagerSoapServiceSync.createUIMSCompanyWithCompanyForceIdmsId(fedId, newcompanyFedId, vnew, company);
 						LOGGER.info("uimsUserResponse = "+uimsUserResponse);
@@ -901,7 +904,7 @@ public class UIMSUserManagerSoapService {
 					// after successful creation of user and company, we
 					// need to update the v_old
 					String version = "{" + "\"V_Old\": \"" + vnew + "\"" + "}";
-					productService.updateUser(iPlanetDirectoryKey, userName, version);
+					UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userName, version);
 				}
 				if (!(updateUIMSUser && updateUIMSCompany)
 						&& (null != context && (UserConstants.USER_CONTEXT_WORK.equalsIgnoreCase(context)
@@ -1136,6 +1139,14 @@ public class UIMSUserManagerSoapService {
 
 	public String getGoDigitalValue() {
 		return goDigitalValue;
+	}
+
+	public String getFrVersion() {
+		return frVersion;
+	}
+
+	public void setFrVersion(String frVersion) {
+		this.frVersion = frVersion;
 	}
 
 }

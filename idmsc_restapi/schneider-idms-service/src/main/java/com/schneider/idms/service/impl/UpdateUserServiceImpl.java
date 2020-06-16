@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.idms.model.IFWUser;
 import com.idms.product.model.OpenAmUser;
 import com.idms.product.model.OpenAmUserRequest;
+import com.idms.service.util.UserServiceUtil;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -208,7 +209,7 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				productDocCtx = JsonPath.using(conf).parse(userInfoByAccessToken);
 
 				if(null != productDocCtx.read("$.email") && productDocCtx.read("$.email").toString().contains(UserConstants.TECHNICAL_USER)){
-					String userExistsInOpenam = productService.checkUserExistsWithEmailMobile(
+					String userExistsInOpenam = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 							"loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(userRequest.getEmail(),"UTF-8"),"UTF-8") + "\"");
 
@@ -243,7 +244,7 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 
 			LOGGER.info(AUDIT_REQUESTING_USER + userId + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN + AUDIT_OPENAM_API
 					+ AUDIT_OPENAM_GET_CALL + userId + AUDIT_LOG_CLOSURE);
-			userData = productService.getUser(iPlanetDirectoryKey, userId);
+			userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userId);
 
 			LOGGER.info("UserServiceImpl:updateUser -> : productService.getUser : userData -> ", userData);
 
@@ -310,7 +311,7 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				}
 			}
 
-			String userExists = productService.checkUserExistsWithEmailMobile(
+			String userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 					"loginid eq " + "\"" + loginIdentifier + "\"");
 
@@ -336,7 +337,7 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 
 				String product_json_string = "{" + "\"newmail\": \"" + userRequest.getEmail() + "\"" + "}";
 
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 						product_json_string);
 
 				/**
@@ -393,7 +394,7 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				// for mobile scenarios
 
 				String product_json_string = "{" + "\"newmobile\": \"" + userRequest.getMobilePhone() + "\"" + "}";
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 						product_json_string);
 
 				String otp = sendEmail.generateOtp(userId);
@@ -433,7 +434,7 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 			LOGGER.info(AUDIT_REQUESTING_USER + userId + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN + AUDIT_OPENAM_API
 					+ AUDIT_OPENAM_UPDATE_CALL + userId + AUDIT_LOG_CLOSURE);
 			LOGGER.info("Json  REquest  for  updtae  user ------------->" + jsonRequset);
-			jsonResponse = productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+			jsonResponse = UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 					jsonRequset);
 			LOGGER.info("UserServiceImpl:userRegistration -> productService.updateUser : Response -> " + jsonResponse);
 			productDocCtx = JsonPath.using(conf).parse(jsonResponse);
@@ -450,7 +451,7 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 			if ((!isUserFromSocialLogin) && (null != userRequest.getProfileLastUpdateSource()
 					&& !UserConstants.UIMS.equalsIgnoreCase(userRequest.getProfileLastUpdateSource()))) {
 				// Adding V_New
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, version);
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, version);
 				// mapping IFW request to UserCompany
 				CompanyV3 company = mapper.map(userRequest, CompanyV3.class);
 

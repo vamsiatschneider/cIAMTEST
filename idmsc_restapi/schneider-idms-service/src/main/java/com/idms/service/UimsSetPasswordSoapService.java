@@ -25,6 +25,7 @@ import com.google.common.base.Predicates;
 import com.idms.model.ConfirmPinRequest;
 import com.idms.product.client.OpenAMService;
 import com.idms.service.util.ChinaIdmsUtil;
+import com.idms.service.util.UserServiceUtil;
 import com.se.idms.util.SamlAssertionTokenGenerator;
 import com.se.idms.util.UserConstants;
 import com.se.uims.usermanager.UserManagerUIMSV22;
@@ -54,6 +55,9 @@ public class UimsSetPasswordSoapService {
 	@Lazy	
 	private SendEmail sendEmail;
 	
+	@Value("${frVersion}")
+	private String frVersion;
+
 	@Value("${fromUserName}")
 	private String fromUserName;
 	
@@ -173,7 +177,7 @@ public class UimsSetPasswordSoapService {
 			if (isIdentityActvated) {
 				String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
 				LOGGER.info("Start: updateUser() of OpenAMService for userId:"+userId+" ,version:"+version);
-				productService.updateUser(iPlanetDirectoryKey, userId, version);
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userId, version);
 				LOGGER.info("End: updateUser() of OpenAMService finished for userId:"+userId+" ,version:"+version);
 			}
 			if(!isIdentityActvated) {
@@ -260,7 +264,7 @@ public class UimsSetPasswordSoapService {
 				String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
 				LOGGER.info(
 						"Start: updateUser() of OpenAMService to update version for userId:" + userId + " ,version:" + version);
-				productService.updateUser(iPlanetDirectoryKey, userId, version);
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userId, version);
 				LOGGER.info("End: updateUser() of OpenAMService finished to update version for userId:" + userId + " ,version:" + version);
 			}
 			if (!setPasswordStatus) {
@@ -377,7 +381,7 @@ public class UimsSetPasswordSoapService {
 			if (isNoPwdactivated) {
 				String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
 				LOGGER.info("Start: updateUser() of openamservice to update version for userID:"+userId);
-				productService.updateUser(iPlanetDirectoryKey, userId, version);
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userId, version);
 				LOGGER.info("End: updateUser() of openamservice finsihed to update version for userID:"+userId);
 			}
 			if(!isNoPwdactivated) {
@@ -446,7 +450,7 @@ public class UimsSetPasswordSoapService {
 			if (ispasswordupdated) {
 				String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
 				LOGGER.info("Start: updateUser() of openamservice to update version for userId:" + userId);
-				productService.updateUser(iPlanetDirectoryKey, userId, version);
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userId, version);
 				LOGGER.info("End: updateUser() of openamservice to update version  finished for userId:" + userId);
 			}
 		} catch (RetryException e) {
@@ -491,6 +495,14 @@ public class UimsSetPasswordSoapService {
 
 	public String getSupportUser() {
 		return supportUser;
+	}
+
+	public String getFrVersion() {
+		return frVersion;
+	}
+
+	public void setFrVersion(String frVersion) {
+		this.frVersion = frVersion;
 	}
 
 }

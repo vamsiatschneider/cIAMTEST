@@ -63,6 +63,7 @@ import com.idms.product.client.OpenAMService;
 import com.idms.product.client.OpenDjService;
 import com.idms.product.client.SmsService;
 import com.idms.service.util.ChinaIdmsUtil;
+import com.idms.service.util.UserServiceUtil;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -100,6 +101,9 @@ public class SendEmail {
 	@Value("${openDJUserPassword}")
 	private String djUserPwd;
 	
+	@Value("${frVersion}")
+	private String frVersion;
+
 	//CODE-RE-STRUCTURING
 	@Value("${user.reset.password.email.template.cn}")
 	private String IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN;
@@ -360,7 +364,7 @@ public class SendEmail {
 			try {
 				encodedHOTPcode = code;
 				LOGGER.info("Start: getUser() of openamService for userId="+userId);
-				userData = productService.getUser(userService.getSSOToken(), userId);
+				userData = UserServiceUtil.getUserBasedOnFRVersion(productService, getFrVersion(), userService.getSSOToken(), userId);
 				LOGGER.info("End: getUser() of openamService finished for userId="+userId);
 				productDocCtxUser = JsonPath.using(conf).parse(userData);
 				
@@ -548,7 +552,7 @@ public class SendEmail {
 		// Need add the timestamp
 		// update hashkey in openAM.
 		LOGGER.info("Start: updateUser() of openamservice to update hashkey for userId:"+userId);
-		productService.updateUser(UserConstants.CHINA_IDMS_TOKEN+userService.getSSOToken(), userId,
+		UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+userService.getSSOToken(), userId,
 				product_json_string);
 		LOGGER.info("End: updateUser() of openamservice to update hashkey finished for userId:"+userId);
 		return pin;
@@ -571,7 +575,7 @@ public class SendEmail {
 		hexpin = hexpin+":"+currentDatenTimeInMillisecs;
 		product_json_string = "{" + "\"authId\": \"" + hexpin + "\"}";
 		LOGGER.info("Start: updateUser() of openamservice to update hashkey for userId:"+userId);
-		productService.updateUser(UserConstants.CHINA_IDMS_TOKEN+userService.getSSOToken(), userId,
+		UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+userService.getSSOToken(), userId,
 				product_json_string);
 		LOGGER.info("End: updateUser() of openamservice to update hashkey finished for userId:"+userId);
 		return pin;
@@ -593,7 +597,7 @@ public class SendEmail {
 		// update hashkey in openAM.
 		//LOGGER.info("hashedPin is " + hashedPin);
 		LOGGER.info("Start: updateUser() of openamservice to store PRM hashedPin");
-		productService.updateUser(UserConstants.CHINA_IDMS_TOKEN+userService.getSSOToken(), userId,
+		UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+userService.getSSOToken(), userId,
 				product_json_string);
 		LOGGER.info("End: updateUser() of openamservice to store PRM hashedPin finished");
 
@@ -611,7 +615,7 @@ public class SendEmail {
 
 			// get user details to get stored hashkey.
 			LOGGER.info("Start: getUser() of openamservice to get stored hashkey");
-			String userData = productService.getUser(userService.getSSOToken(), userId);
+			String userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userService.getSSOToken(), userId);
 			LOGGER.info("End: getUser() of openamservice to get stored hashkey finished");
 			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
@@ -1172,7 +1176,7 @@ public class SendEmail {
 		try {
 
 			LOGGER.info("Start: getUser() of openamservice for sending SMS of user:"+userId);
-			userData = productService.getUser(userService.getSSOToken(), userId);
+			userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userService.getSSOToken(), userId);
 			LOGGER.info("End: getUser() of openamservice finished for sending SMS of user:"+userId);
 			productDocCtxUser = JsonPath.using(conf).parse(userData);
 
@@ -1217,7 +1221,7 @@ public class SendEmail {
 			encodedHOTPcode = code;
 			LOGGER.info("Start: getUser() of openamservice for sendOpenAmMobileEmail of userid:"+userId);
 			try {
-				userData = productService.getUser(userService.getSSOToken(), userId);
+				userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userService.getSSOToken(), userId);
 			} catch (IOException ioExp) {
 				LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
 			}
@@ -1369,7 +1373,7 @@ public class SendEmail {
 		try {
 
 			LOGGER.info("Start: getUser() of openamservice for sending SMS of user:"+userId);
-			userData = productService.getUser(userService.getSSOToken(), userId);
+			userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userService.getSSOToken(), userId);
 			LOGGER.info("End: getUser() of openamservice finished for sending SMS of user:"+userId);
 			productDocCtxUser = JsonPath.using(conf).parse(userData);
 
@@ -1973,5 +1977,13 @@ public class SendEmail {
 
 	public void setIDMS_USER_CHANGE_EMAILTEMPLATE(String iDMS_USER_CHANGE_EMAILTEMPLATE) {
 		IDMS_USER_CHANGE_EMAILTEMPLATE = iDMS_USER_CHANGE_EMAILTEMPLATE;
+	}
+
+	public String getFrVersion() {
+		return frVersion;
+	}
+
+	public void setFrVersion(String frVersion) {
+		this.frVersion = frVersion;
 	}
 }

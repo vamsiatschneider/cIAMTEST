@@ -34,6 +34,7 @@ import com.idms.service.SendEmail;
 import com.idms.service.UIMSAuthenticatedUserManagerSoapService;
 import com.idms.service.UIMSCompanyManagerSoapService;
 import com.idms.service.digital.GoDigitalUserService;
+import com.idms.service.util.UserServiceUtil;
 import com.schneider.idms.model.IdmsUserAilRequest;
 import com.schneider.idms.model.IdmsUserConfirmRequest;
 import com.schneider.idms.model.IdmsUserRequest;
@@ -93,6 +94,9 @@ public class DirectUIMSUserManagerSoapService {
 	public void setSendEmail(SendEmail sendEmail) {
 		this.sendEmail = sendEmail;
 	}
+
+	@Value("${frVersion}")
+	private String frVersion;
 
 	@Value("${fromUserName}")
 	private String fromUserName;
@@ -313,7 +317,7 @@ public class DirectUIMSUserManagerSoapService {
 				if (setPasswordStatus) {
 					String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
 					LOGGER.info("Going to call updateUser() of openamservice to update version for userId:" + userId);
-					productService.updateUser(iPlanetDirectoryKey, userId, version);
+					UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userId, version);
 					LOGGER.info("updateUser() call of openamservice finished for userId:" + userId);
 				}
 			} catch (RetryException e) {
@@ -396,7 +400,7 @@ public class DirectUIMSUserManagerSoapService {
 				if (ispasswordupdated) {
 					String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
 					LOGGER.info("Going to call updateUser() of openamservice to update version for userId:" + userId);
-					productService.updateUser(iPlanetDirectoryKey, userId, version);
+					UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userId, version);
 					LOGGER.info("updateUser() call of openamservice finished for userId:" + userId);
 				}
 			} catch (RetryException e) {
@@ -559,7 +563,7 @@ public class DirectUIMSUserManagerSoapService {
 				if (isNoPwdactivated) {
 					String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
 					LOGGER.info("Going to call updateUser() of openamservice to update version for userID:" + userId);
-					productService.updateUser(iPlanetDirectoryKey, userId, version);
+					UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userId, version);
 					LOGGER.info("updateUser() of openamservice finsihed to update version for userID:" + userId);
 				}
 			} catch (RetryException e) {
@@ -654,7 +658,7 @@ public class DirectUIMSUserManagerSoapService {
 						String fedID = "{" + "\"federationID\": \"" + createdFedId + "\"" + "}";
 						LOGGER.info("fedID in creating UIMS user: " + fedID);
 						UIMSLOGGER.info("fedID in creating UIMS user: " + fedID);
-						productService.updateUser(iPlanetDirectoryKey, userName, fedID);
+						UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userName, fedID);
 					}
 
 					return true;
@@ -730,7 +734,7 @@ public class DirectUIMSUserManagerSoapService {
 						String companyFedID = "{" + "\"companyFederatedID\": \"" + createdCompanyFedId + "\"" + "}";
 						LOGGER.info("companyFedID in creating UIMS Company: " + companyFedID);
 						UIMSLOGGER.info("companyFedID in creating UIMS Company: " + companyFedID);
-						productService.updateUser(iPlanetDirectoryKey, userName, companyFedID);
+						UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userName, companyFedID);
 
 						if ((null == userRequest.getAccountId() || userRequest.getAccountId().isEmpty())
 								&& (null != goDigitalValue
@@ -760,7 +764,7 @@ public class DirectUIMSUserManagerSoapService {
 						// after successful creation of user and company, we
 						// need to update the v_old
 						String version = "{" + "\"V_Old\": \"" + v_new + "\"" + "}";
-						productService.updateUser(iPlanetDirectoryKey, userName, version);
+						UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userName, version);
 						// productService.sessionLogout(iPlanetDirectoryKey,
 						// "logout");
 					}
@@ -893,7 +897,7 @@ public class DirectUIMSUserManagerSoapService {
 						// after successful creation of user and company, we
 						// need to update the v_old
 						String version = "{" + "\"V_Old\": \"" + vnew + "\"" + "}";
-						productService.updateUser(iPlanetDirectoryKey, userName, version);
+						UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userName, version);
 					}
 				}
 
@@ -1035,7 +1039,7 @@ public class DirectUIMSUserManagerSoapService {
 				// the v_old
 				if (isgrantresult) {
 					String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
-					productService.updateUser(iPlanetDirectoryKey, userId, version);
+					UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userId, version);
 				}
 			} catch (RetryException e) {
 				
@@ -1077,7 +1081,7 @@ public class DirectUIMSUserManagerSoapService {
 				// the v_old
 				if (isrevokeresult) {
 					String version = "{" + "\"V_Old\": \"" + openamVnew + "\"" + "}";
-					productService.updateUser(iPlanetDirectoryKey, userId, version);
+					UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userId, version);
 				}
 			} catch (RetryException e) {
 				
@@ -1185,4 +1189,11 @@ public class DirectUIMSUserManagerSoapService {
 		return supportUser;
 	}
 
+	public String getFrVersion() {
+		return frVersion;
+	}
+
+	public void setFrVersion(String frVersion) {
+		this.frVersion = frVersion;
+	}
 }

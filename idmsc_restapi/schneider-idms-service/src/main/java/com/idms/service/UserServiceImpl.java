@@ -152,6 +152,7 @@ import com.idms.service.uims.sync.UIMSAuthenticatedUserManagerSoapServiceSync;
 import com.idms.service.uims.sync.UIMSUserManagerSoapServiceSync;
 import com.idms.service.util.AsyncUtil;
 import com.idms.service.util.ChinaIdmsUtil;
+import com.idms.service.util.UserServiceUtil;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -384,7 +385,10 @@ public class UserServiceImpl implements UserService {
 	
 	@Value("${stopidmstouimsflag}")
 	private String stopidmstouimsflag;
-	
+
+	@Value("${frVersion}")
+	private String frVersion;
+
 	private static String userAction = "submitRequirements";
 
 	private static String errorStatus = "Error";
@@ -474,7 +478,7 @@ public class UserServiceImpl implements UserService {
 			}
 			LOGGER.info("Start: checkUserExistsWithEmailMobile() of OpenAMService for userName=" + userName);
 			// API query changes from login_mobile to loginmobile to support FR 6.5 upgrade
-			userData = productService.checkUserExistsWithEmailMobile(
+			userData = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 					UserConstants.CHINA_IDMS_TOKEN + PlanetDirectoryKey,
 					"loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(userName, "UTF-8"), "UTF-8")
 							+ "\" or loginmobile eq " + "\""
@@ -548,7 +552,7 @@ public class UserServiceImpl implements UserService {
 		jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
 		jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
 		jsonStr = jsonCounter.toString();			
-		productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+PlanetDirectoryKey, UID, jsonStr);
+		UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+PlanetDirectoryKey, UID, jsonStr);
 		AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + successStatus + "," + regSource);
 		LOGGER.info("authenticateUser() -> Ending");
 		return Response.status(Response.Status.OK.getStatusCode()).entity(successResponse).build();
@@ -591,7 +595,7 @@ public class UserServiceImpl implements UserService {
 			// cacahe.flush();
 		}
 
-		String tokenResponse = productService.authenticateUser(adminUserName, adminPassword, UserConstants.REALM);
+		String tokenResponse = UserServiceUtil.authenticateUserBasedOnFRVersion(productService, frVersion, adminUserName, adminPassword, UserConstants.REALM);
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		DocumentContext productDocCtx = JsonPath.using(conf).parse(tokenResponse);
 		return productDocCtx.read(JsonConstants.TOKEN_ID);
@@ -637,7 +641,7 @@ public class UserServiceImpl implements UserService {
 						.concat(AUDIT_API_ADMIN).concat(AUDIT_OPENAM_API).concat(AUDIT_OPENAM_GET_CALL).concat(userId)
 						.concat(AUDIT_LOG_CLOSURE));
 				LOGGER.info("Start: getUser() of OpenAMService for userId=" + userId);
-				userData = productService.getUser(token, userId);
+				userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userId, token);
 				LOGGER.info("End: getUser() of OpenAMService finished with userdata: " + ChinaIdmsUtil.printOpenAMInfo(userData));
 			}
 		} catch (Exception e) {
@@ -724,7 +728,7 @@ public class UserServiceImpl implements UserService {
 						.concat(AUDIT_API_ADMIN).concat(AUDIT_OPENAM_API).concat(AUDIT_OPENAM_GET_CALL).concat(userId)
 						.concat(AUDIT_LOG_CLOSURE));
 				LOGGER.info("Start: getUser() of OpenAMService for userId=" + userId);
-				userData = productService.getUser(token, userId);
+				userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userId, token);
 				LOGGER.info("End: getUser() of OpenAMService finished with userdata: " + ChinaIdmsUtil.printOpenAMInfo(userData));
 			}
 		} catch (Exception e) {
@@ -800,7 +804,7 @@ public class UserServiceImpl implements UserService {
 						.concat(AUDIT_API_ADMIN).concat(AUDIT_OPENAM_API).concat(AUDIT_OPENAM_GET_CALL).concat(userId)
 						.concat(AUDIT_LOG_CLOSURE));
 				LOGGER.info("Start: getUser() of OpenAMService with userId:" + userId);
-				userData = productService.getUser(token, userId);
+				userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userId, token);
 				LOGGER.info("End: getUser() of OpenAMService finished with userdata: " + ChinaIdmsUtil.printOpenAMInfo(userData));
 			}
 		} catch (Exception e) {
@@ -1362,7 +1366,7 @@ public class UserServiceImpl implements UserService {
 			if (null != openAmReq.getInput().getUser().getRegisterationSource()
 					&& UserConstants.UIMS.equalsIgnoreCase(openAmReq.getInput().getUser().getRegisterationSource())) {
 				// API query changes from login_mobile to loginmobile to support FR 6.5 upgrade
-				userExists = productService.checkUserExistsWithEmailMobile(
+				userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						"federationID eq " + "\"" + openAmReq.getInput().getUser().getFederationID()
 								+ "\" or loginid eq " + "\""
@@ -1371,7 +1375,7 @@ public class UserServiceImpl implements UserService {
 								+ URLEncoder.encode(URLDecoder.decode(loginIdentifier, "UTF-8"), "UTF-8") + "\"");
 			} else {
 				// API query changes from login_mobile to loginmobile to support FR 6.5 upgrade
-				userExists = productService.checkUserExistsWithEmailMobile(
+				userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						"loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginIdentifier, "UTF-8"), "UTF-8")
 								+ "\" or loginmobile eq " + "\""
@@ -1494,13 +1498,13 @@ public class UserServiceImpl implements UserService {
 				json = json.replace("\"\"", "[]");
 				LOGGER.info("productService.userRegistration :  Request -> " + ChinaIdmsUtil.printOpenAMInfo(json));
 				LOGGER.info("Start: calling updateUser() of OpenAMService...userName=" + userName);
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userName, json);
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userName, json);
 				LOGGER.info("End: updateUser() of OpenAMService finished for userName: " + userName);
 
 			} else {
 				LOGGER.info("productService.userRegistration :  Request -> " + ChinaIdmsUtil.printOpenAMInfo(json));
 				LOGGER.info("Start: calling userRegistration() of OpenAMService...userAction=" + userAction);
-				userCreation = productService.userRegistration(iPlanetDirectoryKey, userAction, json);
+				userCreation = UserServiceUtil.userRegistrationBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userAction, json);
 				LOGGER.info("End: userRegistration() of OpenAMService finished with status code: "
 						+ userCreation.getStatus());
 				if (userCreation.getStatus() != 200) {
@@ -1524,7 +1528,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("version -> " + version);
 			LOGGER.info(
 					"Start: calling updateUser() of openamservice with username=" + userName + " ,version =" + version);
-			productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userName, version);
+			UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userName, version);
 			LOGGER.info("End: updateUser() call of openamservice finished for username=" + userName + " ,version ="
 					+ version);
 			// Checking profile update and update login id
@@ -1609,7 +1613,7 @@ public class UserServiceImpl implements UserService {
 							// update hashkey in openAM.
 							LOGGER.info(
 									"Start: updateUser() of openamservice to update hashkey for userId:" + userName);
-							productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userName,
+							UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userName,
 									product_pin_string);
 							LOGGER.info("End: updateUser() of openamservice to update hashkey finished for userId:"
 									+ userName);
@@ -3070,7 +3074,7 @@ public class UserServiceImpl implements UserService {
 							+ loginIdentifier);
 					PROCESSING_STATE = "IDMS-CHINA-CHK-USR";
 					// API query changes from login_mobile to loginmobile to support FR 6.5 upgrade
-					userExists = productService.checkUserExistsWithEmailMobile(
+					userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 							"loginid eq " + "\""
 									+ URLEncoder.encode(URLDecoder.decode(loginIdentifier.trim(), "UTF-8"), "UTF-8")
@@ -3121,7 +3125,7 @@ public class UserServiceImpl implements UserService {
 					if(resultCount == 0){
 						LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for mail/mobile="
 								+ loginIdentifier);
-						userExists = productService.checkUserExistsWithEmailMobile(
+						userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 								UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 								"mail eq " + "\""
 										+ URLEncoder.encode(URLDecoder.decode(loginIdentifier.trim(), "UTF-8"), "UTF-8")
@@ -3253,7 +3257,7 @@ public class UserServiceImpl implements UserService {
 			try {
 				LOGGER.info("Start: checkUserExistsWithEmailMobile() of OpenAMService for email=" + email);
 				// API query changes from login_mobile to loginmobile to support FR 6.5 upgrade
-				userExists = productService.checkUserExistsWithEmailMobile(
+				userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						"loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(email, "UTF-8"), "UTF-8")
 								+ "\" or loginmobile eq " + "\""
@@ -3548,7 +3552,7 @@ public class UserServiceImpl implements UserService {
 			String getUserReponseProv = null;
 			if (null != iPlanetDirectoryKey) {
 				LOGGER.info("Start: getUser() of OpenAMService for uniqueIdentifier=" + uniqueIdentifier);
-				getUserResponse = productService.getUser(iPlanetDirectoryKey, uniqueIdentifier);
+				getUserResponse = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, uniqueIdentifier, iPlanetDirectoryKey);
 				LOGGER.info("End: getUser() of OpenAMService finished for uniqueIdentifier=" + uniqueIdentifier);
 				LOGGER.info("getUser(): Response :  -> " + ChinaIdmsUtil.printOpenAMInfo(getUserResponse));
 				productDocCtx = JsonPath.using(conf).parse(getUserResponse);
@@ -3605,7 +3609,7 @@ public class UserServiceImpl implements UserService {
 				String version = "{\"V_New\": \"" + vNewCntValue + "\"" + "}";
 				// Adding V_New
 				LOGGER.info("Start: updateUser() of OpenAMService for uniqueIdentifier=" + uniqueIdentifier);
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, uniqueIdentifier,
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, uniqueIdentifier,
 						version);
 				LOGGER.info("End: updateUser() of OpenAMService finished for uniqueIdentifier=" + uniqueIdentifier);
 				amlbcookieValue = null != productDocCtx.read("$.amlbcookie")
@@ -3636,7 +3640,7 @@ public class UserServiceImpl implements UserService {
 				}
 				if (UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(confirmRequest.getOperation())) {
 					LOGGER.info("Start: getUser() of OpenAMService for uniqueIdentifier=" + uniqueIdentifier);
-					getUserReponseProv = productService.getUser(iPlanetDirectoryKey, uniqueIdentifier);
+					getUserReponseProv = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, uniqueIdentifier, iPlanetDirectoryKey);
 					LOGGER.info("End: getUser() of OpenAMService finished for uniqueIdentifier=" + uniqueIdentifier);
 					provProductDocCtx = JsonPath.using(conf).parse(getUserReponseProv);
 					amlbcookieValue = null != provProductDocCtx.read("$.amlbcookie")
@@ -4054,7 +4058,7 @@ public class UserServiceImpl implements UserService {
 				jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
 				jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
 				jsonStr = jsonCounter.toString();			
-				String temp = productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, uniqueIdentifier, jsonStr);
+				String temp = UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, uniqueIdentifier, jsonStr);
 				LOGGER.info("Status of PIN updateCounter :: " + temp);
 				
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -4112,7 +4116,7 @@ public class UserServiceImpl implements UserService {
 		jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
 		jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
 		jsonStr = jsonCounter.toString();			
-		String temp = productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, uniqueIdentifier, jsonStr);
+		String temp = UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, uniqueIdentifier, jsonStr);
 		LOGGER.info("Status of PIN updateCounter :: " + temp);
 
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -4432,7 +4436,7 @@ public class UserServiceImpl implements UserService {
 						+ "openAMApi:GET/getUser/{userId}");
 
 				LOGGER.info("Start: getUser() of OpenAMService for userId=" + userId);
-				userData = productService.getUser(iPlanetDirectoryKey, userId);
+				userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userId, iPlanetDirectoryKey);
 				LOGGER.info("End: getUser() of OpenAMService finished for userId=" + userId);
 			}
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
@@ -4475,7 +4479,7 @@ public class UserServiceImpl implements UserService {
 			
 				LOGGER.info("Grant Operation: updateAIL : Request -> " + PRODUCT_JSON_STRING);
 				LOGGER.info("Start: updateUser() of OpenAMService for userId=" + userId);
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 						PRODUCT_JSON_STRING);
 				LOGGER.info("End: updateUser() of OpenAMService finished for userId=" + userId);
 				
@@ -4494,7 +4498,7 @@ public class UserServiceImpl implements UserService {
 						+ "openAMApi:GET/getUser/{userId}");
 				LOGGER.info("updateAIL : Request -> " + PRODUCT_JSON_STRING);
 				LOGGER.info("Start: updateUser() of OpenAMService for userId=" + userId);
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 						PRODUCT_JSON_STRING);
 				LOGGER.info("End: updateUser() of OpenAMService finished for userId=" + userId);
 				LOGGER.info("IDMSAil__c Modified After Grant Operation -------------->" + IDMSAil__c);
@@ -4540,7 +4544,7 @@ public class UserServiceImpl implements UserService {
 						+ "openAMApi:GET/getUser/{userId}");
 				LOGGER.info("Revoke Operation: productService.updateAIL : Request -> " + PRODUCT_JSON_STRING);
 				LOGGER.info("Start: updateUser() of OpenAMService for userId=" + userId);
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 						PRODUCT_JSON_STRING);
 				LOGGER.info("End: updateUser() of OpenAMService finished for userId=" + userId);
 
@@ -4553,7 +4557,7 @@ public class UserServiceImpl implements UserService {
 				
 				LOGGER.info("Revoke Operation -> : productService.updateAIL : Request -> " + PRODUCT_JSON_STRING);
 				LOGGER.info("Start: updateUser() of OpenAMService for userId=" + userId);
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 						PRODUCT_JSON_STRING);
 				LOGGER.info("End: updateUser() of OpenAMService finished for userId=" + userId);
 			}
@@ -4598,7 +4602,7 @@ public class UserServiceImpl implements UserService {
 					.equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c())) {
 				LOGGER.info("UserServiceImpl:updateAIL -> Request -> " + version);
 				LOGGER.info("Start: updateUser() of OpenAMService for userId=" + userId + " ,version=" + version);
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, version);
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, version);
 				LOGGER.info(
 						"End: updateUser() of OpenAMService finished for userId=" + userId + " ,version=" + version);
 				
@@ -4802,7 +4806,7 @@ public class UserServiceImpl implements UserService {
 			
 			LOGGER.info(
 					"Start: checkUserExistsWithEmailMobile() of OpenAMService for loginIdentifier=" + loginIdentifier);
-			String userExists = productService.checkUserExistsWithEmailMobile(
+			String userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 					"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginIdentifier, "UTF-8"), "UTF-8")
 							+ "\" or mobilereg eq " + "\""
@@ -4859,7 +4863,7 @@ public class UserServiceImpl implements UserService {
 					token = sendEmail.generateEmailToken(userName);
 					LOGGER.info("Successfully OTP generated for " + userName);
 					sendEmail.sendOpenAmEmail(token, otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName, passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c(),finalPathString); /* Reinstate */
-					productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
+					UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
 					LOGGER.info("Counter updated for " + userName);
 					strcurrentMailCounter = Integer.toString(intcurrentMailCounter);
 					strCurrentCounter = strcurrentMailCounter;
@@ -4902,7 +4906,7 @@ public class UserServiceImpl implements UserService {
 					sendEmail.sendSMSNewGateway(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,
 							passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c());
 				}
-				productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
+				UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
 				LOGGER.info("Counter updated for " + userName);
 				strcurrentMobCounter=Integer.toString(intcurrentMobCounter);
 				strCurrentCounter=strcurrentMobCounter;
@@ -4938,7 +4942,7 @@ public class UserServiceImpl implements UserService {
 					return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 				}
 			}
-			userData = productService.getUser(iPlanetDirectoryKey, userName);
+			userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userName, iPlanetDirectoryKey);
 			LOGGER.info("getPasswordRecoveryResponse -> " + ChinaIdmsUtil.printOpenAMInfo(userData));
 		} catch (BadRequestException e) {
 			response.put(UserConstants.STATUS, errorStatus);
@@ -5209,8 +5213,8 @@ public class UserServiceImpl implements UserService {
 							&& productDocCtx.read("$.email").toString().contains(UserConstants.TECHNICAL_USER)) {
 						LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for email="
 								+ userRequest.getUserRecord().getEmail());
-						String userExistsInOpenam = productService
-								.checkUserExistsWithEmailMobile(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+						String userExistsInOpenam = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion, 
+								        UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 										"loginid eq " + "\""
 												+ URLEncoder.encode(URLDecoder.decode(
 														userRequest.getUserRecord().getEmail(), "UTF-8"), "UTF-8")
@@ -5255,7 +5259,7 @@ public class UserServiceImpl implements UserService {
 				 */
 
 				LOGGER.info("Start: getUser() of OpenAMService for userId:" + userId);
-				userData = productService.getUser(iPlanetDirectoryKey, userId);
+				userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userId, iPlanetDirectoryKey);
 
 				LOGGER.info("userData -> " + ChinaIdmsUtil.printOpenAMInfo(userData));
 				productDocCtxUser = JsonPath.using(conf).parse(userData);
@@ -5473,7 +5477,7 @@ public class UserServiceImpl implements UserService {
 				}
 
 				// API query changes from login_mobile to loginmobile to support FR 6.5 upgrade
-				String userExists = productService.checkUserExistsWithEmailMobile(
+				String userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "loginid eq " + "\"" + loginIdentifier
 								+ "\" or loginmobile eq " + "\"" + loginIdentifier + "\"");
 
@@ -5502,7 +5506,7 @@ public class UserServiceImpl implements UserService {
 							+ "}";
 
 					LOGGER.info("Start: updateUser() of OpenAMService to update new email for userid:" + userId);
-					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+					UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 							product_json_string);
 					LOGGER.info("End: updateUser() of OpenAMService to update new email finished for userid:" + userId);
 					
@@ -5597,7 +5601,7 @@ public class UserServiceImpl implements UserService {
 					String product_json_string = "{" + "\"newmobile\": \""
 							+ userRequest.getUserRecord().getMobilePhone() + "\"" + "}";
 					LOGGER.info("Start: updateUser() of OpenAMService to update new mobile for userid:" + userId);
-					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+					UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 							product_json_string);
 					LOGGER.info(
 							"End: updateUser() of OpenAMService to update new mobile finished for userid:" + userId);
@@ -5649,7 +5653,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info(AUDIT_REQUESTING_USER + userId + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN + AUDIT_OPENAM_API
 					+ AUDIT_OPENAM_UPDATE_CALL + userId + AUDIT_LOG_CLOSURE);
 			LOGGER.info("Json  Request  for  update  user ------------->" + jsonRequset);
-			jsonResponse = productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+			jsonResponse = UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 					jsonRequset);
 			productDocCtx = JsonPath.using(conf).parse(jsonResponse);
 			String openamVnew = null != productDocCtx.read("$.V_New[0]") ? getValue(productDocCtx.read("$.V_New[0]"))
@@ -5679,7 +5683,7 @@ public class UserServiceImpl implements UserService {
 							.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Profile_update_source__c()))) {
 				// Adding V_New
 				LOGGER.info("Start: updateUser() of OpenAMService for updating version for userid=" + userId);
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, version);
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, version);
 				LOGGER.info("End: updateUser() of OpenAMService for updating version finished for userid=" + userId);
 				// mapping IFW request to UserCompany
 				CompanyV3 company = mapper.map(userRequest, CompanyV3.class);
@@ -5702,7 +5706,7 @@ public class UserServiceImpl implements UserService {
 								attributeText = "{" + "\"publicVisibility\": \"" + KeyValue + "\"" + "}";
 								LOGGER.info("Start: updateUser() of openam to update publicVisibility for userid="
 										+ userId);
-								productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+								UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 										attributeText);
 								LOGGER.info(
 										"End: updateUser() of openam to update publicVisibility finished for userid="
@@ -5716,7 +5720,7 @@ public class UserServiceImpl implements UserService {
 								attributeText = "{" + "\"companyFederatedID\": \"" + KeyValue + "\"" + "}";
 								LOGGER.info("Start: updateUser() of openam to update companyFederatedID for userid="
 										+ userId);
-								productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+								UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 										attributeText);
 								LOGGER.info(
 										"End: updateUser() of openam to update companyFederatedID finished for userid="
@@ -6038,7 +6042,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 						+ AUDIT_OPENAM_API + AUDIT_OPENAM_GET_CALL + AUDIT_LOG_CLOSURE);
 				LOGGER.info("Start: getUser() of OpenAMService in resendPIN for resendId:" + resendId);
-				userData = productService.getUser(iPlanetDirectoryKey, resendId);
+				userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, resendId, iPlanetDirectoryKey);
 				LOGGER.info("End: getUser() of OpenAMService in resendPIN finished for resendId:" + resendId);
 				LOGGER.info("user data from Openam: " + ChinaIdmsUtil.printOpenAMInfo(userData));
 
@@ -6258,7 +6262,7 @@ public class UserServiceImpl implements UserService {
 					+ "openAMApi:GET/se/users/getUser{userId}");
 			if (null != userId) {
 				LOGGER.info("Start: retrieving getUser() of OpenAMService for userId:" + userId);
-				userData = productService.getUser(iPlanetDirectoryKey, userId);
+				userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userId, iPlanetDirectoryKey);
 				LOGGER.info("End: getUser() of OpenAMService finished for userId:" + userId);
 				LOGGER.info("userData:" + ChinaIdmsUtil.printOpenAMInfo(userData));
 			}
@@ -6279,7 +6283,7 @@ public class UserServiceImpl implements UserService {
 			// Authenticate the given credentials
 			try {
 				LOGGER.info("Start: Authenticating oldpassword in OpenDJ for userid=" + userId);
-				productService.authenticateIdmsChinaUser(userId, oldPassword, UserConstants.REALM);
+				UserServiceUtil.authenticateChinaUserBasedOnFRVersion(productService, frVersion, userId, oldPassword, UserConstants.REALM);
 				LOGGER.info("End: Authenticating oldpassword in OpenDJ finished for userid=" + userId);
 			} catch (Exception e) {
 				LOGGER.error(e.getMessage(),e);
@@ -6316,7 +6320,7 @@ public class UserServiceImpl implements UserService {
 
 			// Adding V_New
 			LOGGER.info("Start: UpdatePassword - Updating version in openam for userId=" + userId);
-			productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, version);
+			UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId, version);
 			LOGGER.info("End: UpdatePassword - Updating version in openam finished for userId=" + userId);
 
 			// updating new password in openAM
@@ -6355,7 +6359,7 @@ public class UserServiceImpl implements UserService {
 			jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
 			jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
 			jsonStr = jsonCounter.toString();			
-			productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userId, jsonStr);
+			UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userId, jsonStr);
 			if (isPasswordUpdatedInUIMS) {
 				userResponse.setStatus(successStatus);
 				userResponse.setMessage("User Password updated successfully in IDMS China and UIMS");
@@ -6620,7 +6624,7 @@ public class UserServiceImpl implements UserService {
 							.concat(",\"updateSource\":\"" + setPasswordRequest.getIDMS_Profile_update_source() + "\"}");
 					
 					LOGGER.info("Start: updateUser() of openam to update new password for userid=" + userId);
-					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+					UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 							PRODUCT_JSON_STRING);
 					LOGGER.info("End: updateUser() of openam to update new password finished for userid=" + userId);
 				} else {
@@ -6658,7 +6662,7 @@ public class UserServiceImpl implements UserService {
 				if (null != userId) {
 					try {
 						LOGGER.info("Start: getUser() of OpenAm for userId=" + userId);
-						userData = productService.getUser(iPlanetDirectoryKey, userId);
+						userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userId, iPlanetDirectoryKey);
 						LOGGER.info("End: getUser() of OpenAm finished for userId=" + userId);
 					} catch (NotFoundException e) {
 						LOGGER.error( e.getMessage(),e);
@@ -6765,7 +6769,7 @@ public class UserServiceImpl implements UserService {
 						&& !UserConstants.UIMS.equalsIgnoreCase(setPasswordRequest.getIDMS_Profile_update_source())) {
 					// Adding V_New
 					LOGGER.info("Start: updateUser() of OpenAMService for version update");
-					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+					UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 							setPasswordRequest.getId(), version);
 					LOGGER.info("End: updateUser() of OpenAMService for version update");
 
@@ -6962,7 +6966,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info(AUDIT_REQUESTING_USER + userId + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 						+ AUDIT_OPENAM_API + AUDIT_OPENAM_GET_CALL + userId + AUDIT_LOG_CLOSURE);
 				LOGGER.info("Start: getUser() of openam for userid=" + userId);
-				userData = productService.getUser(iPlanetDirectoryKey, userId);
+				userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userId, iPlanetDirectoryKey);
 				LOGGER.info("End: getUser() of openam finished for userid=" + userId);
 				LOGGER.info(" productService.getUser :: " + ChinaIdmsUtil.printOpenAMInfo(userData));
 				productDocCtx = JsonPath.using(conf).parse(userData);
@@ -7007,7 +7011,7 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info(AUDIT_REQUESTING_USER + userId + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 							+ AUDIT_OPENAM_API + AUDIT_OPENAM_UPDATE_CALL + userId + AUDIT_LOG_CLOSURE);
 					LOGGER.info("Start: updateUser() of OpenAMService to update login for userid:" + userId);
-					productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+					UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
 							PRODUCT_JSON_STRING);
 					LOGGER.info("End: updateUser() of OpenAMService to update login finished for userid:" + userId);
 				}
@@ -7024,7 +7028,7 @@ public class UserServiceImpl implements UserService {
 					.equalsIgnoreCase(activateUserRequest.getUserRecord().getIDMS_Registration_Source__c())) {
 				// Adding V_New
 				LOGGER.info("Start: updateUser() of OpenAMService to update version");
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						activateUserRequest.getUserRecord().getId(), version);
 				LOGGER.info("End: updateUser() of OpenAMService to update version");
 				// call uims activate user
@@ -7113,7 +7117,7 @@ public class UserServiceImpl implements UserService {
 
 			try {
 				LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for loginIdentifier=" + loginIdentifier);
-				userExists = productService.checkUserExistsWithEmailMobile(
+				userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginIdentifier, "UTF-8"), "UTF-8")
 								+ "\" or mobilereg eq " + "\""
@@ -7192,7 +7196,7 @@ public class UserServiceImpl implements UserService {
 		}
 		try {
 			LOGGER.info("Start: activeToken() of openam");
-			activeToken = productService.activeToken(UserConstants.CHINA_IDMS_TOKEN + amAdminToken, "isActive",
+			activeToken = UserServiceUtil.checkTokenStatusBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + amAdminToken, "isActive",
 					userTokenId);
 			LOGGER.info("End: activeToken() of openam");
 		} catch (NotAuthorizedException e) {
@@ -7225,7 +7229,7 @@ public class UserServiceImpl implements UserService {
 		String loginIdentifierEmail = "", loginIdentifierMobile = "";
 
 		LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for federationId:" + federationId);
-		String userExists = productService.checkUserExistsWithEmailMobile(
+		String userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 				UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryToken,
 				"federationID eq " + "\"" + federationId + "\" or uid eq " + "\"" + federationId + "\"");
 		LOGGER.info("End: checkUserExistsWithEmailMobile() of openam finished for federationId:" + federationId);
@@ -7489,14 +7493,14 @@ public class UserServiceImpl implements UserService {
 			if (null != userId && !userId.isEmpty()) {
 				if (userType.equalsIgnoreCase("mail")) {
 					LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for email=" + userId);
-					userExistsQuery = productService.checkUserExistsWithEmailMobile(
+					userExistsQuery = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 							"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(userId, "UTF-8"), "UTF-8") + "\"");
 					LOGGER.info("End: checkUserExistsWithEmailMobile() of openam for email=" + userId);
 				}
 				if (userType.equalsIgnoreCase("mobile")) {
 					LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for mobile=" + userId);
-					userExistsQuery = productService.checkUserExistsWithEmailMobile(
+					userExistsQuery = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "mobilereg eq " + "\""
 									+ URLEncoder.encode(URLDecoder.decode(userId, "UTF-8"), "UTF-8") + "\"");
 					LOGGER.info("End: checkUserExistsWithEmailMobile() of openam for mobile=" + userId);
@@ -7581,7 +7585,7 @@ public class UserServiceImpl implements UserService {
 							}
 							sendEmail.sendOpenAmEmail(token, otp, optType, userCName, regSource, finalPathString); /* Reinstate */
 							LOGGER.info("resendRegEmail :: Update mail counter :: Start");
-							productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userCName, jsonStr);
+							UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userCName, jsonStr);
 							LOGGER.info("resendRegEmail :: Update mail counter :: Finish");
 							userResponseMailCounter.setStatus(successStatus);
 							userResponseMailCounter.setMessage(UserConstants.RESEND_REGEMAIL_SUCCESS_MESSAGE);
@@ -7622,7 +7626,7 @@ public class UserServiceImpl implements UserService {
 						LOGGER.info("End: sendOpenAmMobileEmail() finsihed for  mobile userName:" +userCName); /* Reinstate */
 							 
 						LOGGER.info("resendRegEmail :: Update mobile counter :: Start");
-						productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userCName, jsonStr);
+						UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userCName, jsonStr);
 						LOGGER.info("resendRegEmail :: Update mobile counter :: Finish");
 						userResponseMobCounter.setStatus(successStatus);
 						userResponseMobCounter.setMessage(UserConstants.RESEND_REGEMOB_SUCCESS_MESSAGE);
@@ -7785,9 +7789,9 @@ public class UserServiceImpl implements UserService {
 							+ emailChangeRequest.getOldEmail() + AUDIT_LOG_CLOSURE);
 					LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for email = "
 							+ emailChangeRequest.getOldEmail());
-					String userExists = productService
-							.checkUserExistsWithEmailMobile(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-									"mail eq " + "\""
+					String userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
+										UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+										"mail eq " + "\""
 											+ URLEncoder.encode(
 													URLDecoder.decode(emailChangeRequest.getOldEmail(), "UTF-8"),
 													"UTF-8")
@@ -7856,7 +7860,7 @@ public class UserServiceImpl implements UserService {
 								}
 								sendEmail.sendOpenAmEmail(token, otp,EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userName, appSource, finalPathString); /* Reinstate */
 								LOGGER.info("resendChangeEmail :: Update mail counter :: Start");
-								productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
+								UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
 								LOGGER.info("resendChangeEmail :: Update mail counter :: Finish");
 						} else {
 							userResponse.setStatus(errorStatus);
@@ -8173,7 +8177,7 @@ public class UserServiceImpl implements UserService {
 				rb = Response.status(Response.Status.MOVED_PERMANENTLY);
 
 				LOGGER.info("Start: authenticateIdmsChinaUser() of openam");
-				String tokenResponse = productService.authenticateIdmsChinaUser(idToken1, idToken2,
+				String tokenResponse = UserServiceUtil.authenticateChinaUserBasedOnFRVersion(productService, frVersion, idToken1, idToken2,
 						UserConstants.SE_REALM);
 				LOGGER.info("End: authenticateIdmsChinaUser() of openam finished");
 				conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
@@ -8390,7 +8394,7 @@ public class UserServiceImpl implements UserService {
 			
 			if(fieldType.equalsIgnoreCase("email") || fieldType.equalsIgnoreCase("mobile") || fieldType.equalsIgnoreCase("loginID")){
 				LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for loginId=" + loginId);
-				userExists = productService.checkUserExistsWithEmailMobile(
+				userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginId, "UTF-8"), "UTF-8")
 								+ "\" or mobilereg eq " + "\""
@@ -8400,7 +8404,7 @@ public class UserServiceImpl implements UserService {
 			
 			if(fieldType.equalsIgnoreCase("idmsFederatedId")){
 				LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for federationId=" + loginId);
-				userExists = productService.checkUserExistsWithEmailMobile(
+				userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						"federationID  eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginId, "UTF-8"), "UTF-8")
 								+ "\"");
@@ -8426,7 +8430,7 @@ public class UserServiceImpl implements UserService {
 				jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
 				jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
 				jsonStr = jsonCounter.toString();			
-				productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, UID, jsonStr);	
+				UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, UID, jsonStr);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 				return Response.status(Response.Status.OK).entity(responseMultiLine).build();
@@ -8592,7 +8596,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 						+ AUDIT_OPENAM_API + AUDIT_OPENAM_GET_CALL + AUDIT_LOG_CLOSURE);
 				LOGGER.info("Start: getUser() of openam for federationId:" + federationId);
-				userData = productService.getUser(iPlanetDirectoryKey, federationId);
+				userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, federationId, iPlanetDirectoryKey);
 				LOGGER.info("End: getUser() of openam finished for federationId:" + federationId);
 				LOGGER.info("user data from Openam: " + ChinaIdmsUtil.printOpenAMInfo(userData));
 
@@ -8637,7 +8641,7 @@ public class UserServiceImpl implements UserService {
 						product_json_string = "{" + "\"emailcount\": \"" + mailCount + "\"}";
 						LOGGER.info(
 								"Start: updateUser() of openam to update email count for federationId:" + federationId);
-						productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, federationId,
+						UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, federationId,
 								product_json_string);
 						LOGGER.info("End: updateUser() of openam to update email count finished for federationId:"
 								+ federationId);
@@ -8896,8 +8900,8 @@ public class UserServiceImpl implements UserService {
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		try {
 			LOGGER.info("Start: otpAuthentication() of openam");
-			Response authenticate = productService.otpAuthentication("", "OAuth2IPlanet", UserConstants.HOTP_SERVICE,
-					"OAuth2IPlanet", "");
+			Response authenticate = UserServiceUtil.otpAuthenticationBasedOnFRVersion(productService, frVersion,"", "OAuth2IPlanet", UserConstants.HOTP_SERVICE,
+					"OAuth2IPlanet", "", UserConstants.SE_REALM);
 			LOGGER.info("End: otpAuthentication() of openam");
 			String cookieOath = ChinaIdmsUtil.getCookie(authenticate, ha_mode);
 			LOGGER.info("cookieOath=" + cookieOath);
@@ -8974,7 +8978,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		LOGGER.info("Start: checkUserExistsWithEmailMobile() for companyId:" + companyId);
-		String companyMapped = productService.checkUserExistsWithEmailMobile(
+		String companyMapped = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 				UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 				"companyFederatedID eq " + "\"" + companyId + "\"");
 		LOGGER.info("End: checkUserExistsWithEmailMobile() for companyId:" + companyId);
@@ -9260,7 +9264,7 @@ public class UserServiceImpl implements UserService {
 				iPlanetDirectoryKey = getSSOToken();
 				loginId = userName;
 				LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for loginId=" + loginId);
-				userExists = productService.checkUserExistsWithEmailMobile(
+				userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginId, "UTF-8"), "UTF-8")
 								+ "\" or mobilereg eq " + "\""
@@ -9377,7 +9381,7 @@ public class UserServiceImpl implements UserService {
 				jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
 				jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
 				jsonStr = jsonCounter.toString();			
-				productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, UID, jsonStr);
+				UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, UID, jsonStr);
 				LOGGER.info("securedLogin() -> Ending");
 				return Response.status(Response.Status.OK.getStatusCode()).entity(response).build();
 			}
@@ -9400,7 +9404,7 @@ public class UserServiceImpl implements UserService {
 		jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
 		jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
 		jsonStr = jsonCounter.toString();			
-		productService.updateCounter(UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, UID, jsonStr);
+		UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, UID, jsonStr);
 		LOGGER.info("securedLogin() -> Ending");
 		return Response.status(Response.Status.OK.getStatusCode()).entity(successResponse).build();
 	}
@@ -9545,7 +9549,7 @@ public class UserServiceImpl implements UserService {
 
 		try {
 			LOGGER.info("Start: updateUserForPassword() of openam for federationId=" + federationId);
-			Response updateResponse = productService.updateUserForPassword(
+			Response updateResponse = UserServiceUtil.updateUserPasswordBasedOnFRVersion(productService, frVersion,
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, federationId, jsonData);
 			LOGGER.info("End: updateUserForPassword() of openam finished for federationId=" + federationId);
 			//LOGGER.info("Information from OPENAM=" + IOUtils.toString((InputStream) updateResponse.getEntity()));
@@ -9572,7 +9576,7 @@ public class UserServiceImpl implements UserService {
 		Response jsonResponse = null;
 		try {
 			LOGGER.info("Start: updateUserForPassword() of openam for federatioId=" + federatioId);
-			jsonResponse = productService.updateUserForPassword(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+			jsonResponse = UserServiceUtil.updateUserPasswordBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 					federatioId, jsonData);
 			LOGGER.info("End: updateUserForPassword() of openam finished for federatioId=" + federatioId);
 			message = IOUtils.toString((InputStream) jsonResponse.getEntity());
@@ -9650,7 +9654,7 @@ public class UserServiceImpl implements UserService {
 			iPlanetDirectoryToken = getSSOToken();
 			LOGGER.info("iPlanetDirectoryKey: " + iPlanetDirectoryToken);
 			String email = pinRequest.getEmail();
-			String userExists = productService.checkUserExistsWithEmailMobile(
+			String userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryToken,
 					"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(email , "UTF-8"), "UTF-8") + "\"");
 			LOGGER.info("End: checkUserExistsWithEmailMobile() of openam finished for email:" + email);
@@ -10000,7 +10004,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 					+ AUDIT_OPENAM_API + AUDIT_OPENAM_USER_EXISTS_CALL + loginId + AUDIT_LOG_CLOSURE);
 			LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for loginId=" + loginId);
-			String userExists = productService.checkUserExistsWithEmailMobile(
+			String userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 					"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginId, "UTF-8"), "UTF-8")
 							+ "\" or mobilereg eq " + "\""
@@ -10391,7 +10395,7 @@ public class UserServiceImpl implements UserService {
 				ssoToken = "";
 			}
 			LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for fedid = " + fedid);
-			String userExistsInOpenam = productService.checkUserExistsWithEmailMobile(
+			String userExistsInOpenam = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 					UserConstants.CHINA_IDMS_TOKEN + ssoToken,
 					"federationID eq " + "\"" + fedid + "\" or uid eq " + "\"" + fedid + "\"");
 			LOGGER.info("End: checkUserExistsWithEmailMobile() of openam for fedid = " + fedid);
@@ -10413,7 +10417,7 @@ public class UserServiceImpl implements UserService {
 						.concat(",\"updateSource\":\"" + addMobileRequest.getProfileUpdateSource() + "\"}");
 				LOGGER.info(
 						"Start: updateUser() of openamservice to add mobile as dual indentifier for userId:" + fedid);
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + ssoToken, fedid, addMobileString);
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + ssoToken, fedid, addMobileString);
 				LOGGER.info("End: updateUser() of openamservice to add mobile as dual indentifier finished for userId:"
 						+ fedid);
 
@@ -10589,7 +10593,7 @@ public class UserServiceImpl implements UserService {
 			}
 
 			LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for fedid = " + fedid);
-			String userExistsInOpenam = productService.checkUserExistsWithEmailMobile(
+			String userExistsInOpenam = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 					UserConstants.CHINA_IDMS_TOKEN + ssoToken,
 					"federationID eq " + "\"" + fedid + "\" or uid eq " + "\"" + fedid + "\"");
 			LOGGER.info("End: checkUserExistsWithEmailMobile() of openam for fedid = " + fedid);
@@ -10600,7 +10604,7 @@ public class UserServiceImpl implements UserService {
 				String addEmailString = "{" + "\"mail\": \"" + email + "\"}";
 				LOGGER.info(
 						"Start: updateUser() of openamservice to add email as dual indentifier for userId:" + fedid);
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + ssoToken, fedid, addEmailString);
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + ssoToken, fedid, addEmailString);
 				LOGGER.info("End: updateUser() of openamservice to add email as dual indentifier finished for userId:"
 						+ fedid);
 				
@@ -10737,7 +10741,7 @@ public class UserServiceImpl implements UserService {
 			}
 
 			LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for fedid = " + fedid);
-			String userExistsInOpenam = productService.checkUserExistsWithEmailMobile(
+			String userExistsInOpenam = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 					UserConstants.CHINA_IDMS_TOKEN + ssoToken,
 					"federationID eq " + "\"" + fedid + "\" or uid eq " + "\"" + fedid + "\"");
 			LOGGER.info("End: checkUserExistsWithEmailMobile() of openam for fedid = " + fedid);
@@ -10793,7 +10797,7 @@ public class UserServiceImpl implements UserService {
 				
 				LOGGER.info(
 						"Start: updateUser() of openamservice to add email as dual indentifier for userId:" + fedid);
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + ssoToken, fedid, addEmailString);
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + ssoToken, fedid, addEmailString);
 				LOGGER.info("End: updateUser() of openamservice to add email as dual indentifier finished for userId:"
 						+ fedid);
 				
@@ -11073,7 +11077,7 @@ public class UserServiceImpl implements UserService {
 
 			if (fieldType.equalsIgnoreCase("email") || fieldType.equalsIgnoreCase("mobile")) {
 				LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for loginId=" + loginId);
-				userExists = productService.checkUserExistsWithEmailMobile(
+				userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginId, "UTF-8"), "UTF-8")
 								+ "\" or mobilereg eq " + "\""
@@ -11082,7 +11086,7 @@ public class UserServiceImpl implements UserService {
 			}
 			if (fieldType.equalsIgnoreCase("idmsFederatedId")) {
 				LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for federationId=" + loginId);
-				userExists = productService.checkUserExistsWithEmailMobile(
+				userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, "federationID  eq " + "\""
 								+ URLEncoder.encode(URLDecoder.decode(loginId, "UTF-8"), "UTF-8") + "\"");
 				LOGGER.info("End: checkUserExistsWithEmailMobile() of openam finished for federationId=" + loginId);
@@ -11319,11 +11323,11 @@ public class UserServiceImpl implements UserService {
 			String json = objMapper.writeValueAsString(openAmReq);
 			json = json.replace("\"\"", "[]");
 			LOGGER.info("Start: userRegistration() of OpenAMService for AbaghaUIMSuser: " + userInfo.getFederatedID());
-			userCreation = productService.userRegistration(iPlanetDirectoryKey, userAction, json);
+			userCreation = UserServiceUtil.userRegistrationBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userAction, json);
 			LOGGER.info("End: userRegistration() of OpenAMService finished for AbaghaUIMSuser with status code: " + userCreation.getStatus());
 			if (userCreation.getStatus() == 200) {
 				LOGGER.info("Start: calling updateUser() of OpenAMService...userName = " + userInfo.getFederatedID());
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						userInfo.getFederatedID(), updateString);
 				LOGGER.info("End: updateUser() of OpenAMService finished for userName : " + userInfo.getFederatedID());
 			}
@@ -11410,12 +11414,12 @@ public class UserServiceImpl implements UserService {
 			json = json.replace("\"\"", "[]");
 			LOGGER.info("Start: userRegistration() of OpenAMService for AbaghaUIMSuser: "
 					+ setPasswordRequest.getIDMS_Federated_ID__c());
-			userCreation = productService.userRegistration(iPlanetDirectoryKey, userAction, json);
+			userCreation = UserServiceUtil.userRegistrationBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userAction, json);
 			LOGGER.info("End: userRegistration() of OpenAMService finished for AbaghaUIMSuser with status code: "
 					+ userCreation.getStatus());
 			if (userCreation.getStatus() == 200) {
 				LOGGER.info("Start: calling updateUser() of OpenAMService...userName = " + userInfo.getFederatedID());
-				productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 						userInfo.getFederatedID(), updateString);
 				LOGGER.info("End: updateUser() of OpenAMService finished for userName : " + userInfo.getFederatedID());
 			}
@@ -11711,6 +11715,14 @@ public class UserServiceImpl implements UserService {
 		this.stopidmstouimsflag = stopidmstouimsflag;
 	}
 
+	public String getFrVersion() {
+		return frVersion;
+	}
+
+	public void setFrVersion(String frVersion) {
+		this.frVersion = frVersion;
+	}
+
 	@Override
 	public Response bulkUpdateAIL(String authorizedToken, String clientId, String clientSecret,
 			BulkAILRequest bulkAILRequest) {
@@ -11796,7 +11808,7 @@ public class UserServiceImpl implements UserService {
 						String grantJson = BulkAILUtil.buildUserUpdateJson(grantMap);
 						LOGGER.info("Grant Operation: BulkUpdateAIL -> " + grantJson);
 						LOGGER.info("Start: updateUser() for userId=" + userFedID);
-						productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userFedID,
+						UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userFedID,
 								grantJson);
 						LOGGER.info("End: updateUser() for userId=" + userFedID);
 
@@ -11814,7 +11826,7 @@ public class UserServiceImpl implements UserService {
 						String revokeJson = BulkAILUtil.buildUserUpdateJson(revokeMap);
 						LOGGER.info("Revoke Operation: BulkUpdateAIL -> " + revokeJson);
 						LOGGER.info("Start: updateUser() for userId=" + userFedID);
-						productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userFedID,
+						UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userFedID,
 								revokeJson);
 						LOGGER.info("End: updateUser() for userId=" + userFedID);
 					}
@@ -12089,7 +12101,7 @@ public class UserServiceImpl implements UserService {
 		String verUpdateJson = BulkAILUtil.buildVersionUpdateJson(vNewCntValue, profileLastUpdateSource);
 		LOGGER.info("UserServiceImpl:updateAIL -> Request -> " + verUpdateJson);
 		LOGGER.info("Start: bulkUpdateAIL for userId= " + userFedID + " ,version= " + verUpdateJson);
-		productService.updateUser(UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userFedID, verUpdateJson);
+		UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userFedID, verUpdateJson);
 		LOGGER.info("End: bulkUpdateAIL for userId= " + userFedID + " ,version=" + verUpdateJson);
 		return vNewCntValue;
 	}
@@ -12141,7 +12153,7 @@ public class UserServiceImpl implements UserService {
 
 		LOGGER.info("Start: getUser() in BulkUpdateAIL for userId=" + userFedID);
 		try {
-			userData = productService.getUser(iPlanetDirectoryKey, userFedID);
+			userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userFedID, iPlanetDirectoryKey);
 			LOGGER.info("End: getUser() of BulkUpdateAIL finished for userId=" + userFedID);
 		}catch(NotFoundException nfe) {
 			LOGGER.info("End: getUser() of BulkUpdateAIL finished with User Not Found Exception");
