@@ -1373,7 +1373,7 @@ public class SendEmail {
 		try {
 
 			LOGGER.info("Start: getUser() of openamservice for sending SMS of user:"+userId);
-			userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userService.getSSOToken(), userId);
+			userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userId, userService.getSSOToken());
 			LOGGER.info("End: getUser() of openamservice finished for sending SMS of user:"+userId);
 			productDocCtxUser = JsonPath.using(conf).parse(userData);
 
