@@ -364,7 +364,7 @@ public class SendEmail {
 			try {
 				encodedHOTPcode = code;
 				LOGGER.info("Start: getUser() of openamService for userId="+userId);
-				userData = UserServiceUtil.getUserBasedOnFRVersion(productService, getFrVersion(), userService.getSSOToken(), userId);
+				userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userId, userService.getSSOToken());
 				LOGGER.info("End: getUser() of openamService finished for userId="+userId);
 				productDocCtxUser = JsonPath.using(conf).parse(userData);
 				
@@ -615,7 +615,7 @@ public class SendEmail {
 
 			// get user details to get stored hashkey.
 			LOGGER.info("Start: getUser() of openamservice to get stored hashkey");
-			String userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userService.getSSOToken(), userId);
+			String userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userId, userService.getSSOToken());
 			LOGGER.info("End: getUser() of openamservice to get stored hashkey finished");
 			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
@@ -1176,7 +1176,7 @@ public class SendEmail {
 		try {
 
 			LOGGER.info("Start: getUser() of openamservice for sending SMS of user:"+userId);
-			userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userService.getSSOToken(), userId);
+			userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userId, userService.getSSOToken());
 			LOGGER.info("End: getUser() of openamservice finished for sending SMS of user:"+userId);
 			productDocCtxUser = JsonPath.using(conf).parse(userData);
 
@@ -1221,7 +1221,7 @@ public class SendEmail {
 			encodedHOTPcode = code;
 			LOGGER.info("Start: getUser() of openamservice for sendOpenAmMobileEmail of userid:"+userId);
 			try {
-				userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userService.getSSOToken(), userId);
+				userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userId, userService.getSSOToken());
 			} catch (IOException ioExp) {
 				LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
 			}

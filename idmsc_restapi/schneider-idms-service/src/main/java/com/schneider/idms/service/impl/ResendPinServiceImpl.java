@@ -104,7 +104,7 @@ public class ResendPinServiceImpl extends IdmsCommonServiceImpl implements IRese
 			if (null != resendId) {
 				LOGGER.info(AUDIT_REQUESTING_USER + AUDIT_TECHNICAL_USER + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
 						+ AUDIT_OPENAM_API + AUDIT_OPENAM_GET_CALL + AUDIT_LOG_CLOSURE);
-				userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, resendId);
+				userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, resendId, iPlanetDirectoryKey);
 				LOGGER.info("user data from Openam: " + userData);
 
 				productDocCtx = JsonPath.using(conf).parse(userData);
