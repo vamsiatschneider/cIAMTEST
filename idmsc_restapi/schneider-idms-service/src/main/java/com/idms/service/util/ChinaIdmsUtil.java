@@ -63,6 +63,7 @@ public class ChinaIdmsUtil {
 		HttpPost request = new HttpPost(uri + "/accessmanager/json/authenticate?realm=" + realm);
 		request.setHeader("X-OpenAM-Username", userName);
 		request.setHeader("X-OpenAM-Password", password);
+		request.setHeader("Accept-API-Version", UserConstants.AUTH_VERSION_HEADER);
 		HttpResponse response = client.execute(request);
 		BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 
