@@ -1,5 +1,8 @@
 package com.idms.service.util;
 
+import static com.se.idms.util.UserConstants.AUTH_VERSION_HEADER;
+import static com.se.idms.util.UserConstants.FR6_5Version;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -56,14 +59,17 @@ public class ChinaIdmsUtil {
 		return hexString;
 	}
 	
-	public static Response executeHttpClient(String uri, String realm, String userName, String password)
+	public static Response executeHttpClient(String frVersion, String uri, String realm, String userName, String password)
 			throws ClientProtocolException, IOException {
 
 		HttpClient client = new DefaultHttpClient();
 		HttpPost request = new HttpPost(uri + "/accessmanager/json/authenticate?realm=" + realm);
 		request.setHeader("X-OpenAM-Username", userName);
 		request.setHeader("X-OpenAM-Password", password);
-		request.setHeader("Accept-API-Version", UserConstants.AUTH_VERSION_HEADER);
+		LOGGER.info("Execute http client for version : " + frVersion);
+		if(FR6_5Version.equalsIgnoreCase(frVersion)) {
+			request.setHeader("Accept-API-Version", AUTH_VERSION_HEADER);
+		}
 		HttpResponse response = client.execute(request);
 		BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 
@@ -286,7 +292,7 @@ public class ChinaIdmsUtil {
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	public static Response executeHttpDeviceClient(String uri, String realm, String authId, String deviceOrOTPData, String fileName)
+	public static Response executeHttpDeviceClient(String frVersion, String uri, String realm, String authId, String deviceOrOTPData, String fileName)
 			throws ClientProtocolException, IOException {
 		String jsonString = formJsonRequest(authId,deviceOrOTPData,fileName);
 		
@@ -297,7 +303,10 @@ public class ChinaIdmsUtil {
 			request.setEntity(entity);
 			request.setHeader("Accept", "application/json");
 			request.setHeader("Content-type", "application/json");
-
+			LOGGER.info("Execute http device client for version : " + frVersion);
+			if(FR6_5Version.equalsIgnoreCase(frVersion)) {
+				request.setHeader("Accept-API-Version", AUTH_VERSION_HEADER);
+			}
 			HttpResponse response = client.execute(request);
 			BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 

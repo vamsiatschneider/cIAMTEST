@@ -497,7 +497,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("regSource: " + regSource);
 			}
 			LOGGER.info("Start: aunthenticate User of OPENAMService for username=" + userName);
-			Response authenticateResponse = ChinaIdmsUtil.executeHttpClient(prefixStartUrl, realm, userName, password);
+			Response authenticateResponse = ChinaIdmsUtil.executeHttpClient(frVersion, prefixStartUrl, realm, userName, password);
 			LOGGER.info("End: aunthenticate User of OPENAMService finished for username=" + userName);
 			successResponse = (String) authenticateResponse.getEntity();
 			LOGGER.info("Authentication status code from OPENAMService:" + authenticateResponse.getStatus());
@@ -9250,7 +9250,7 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 			LOGGER.info("Start: aunthenticate User of OPENAMService for username=" + userName);
-			Response authenticateResponse = ChinaIdmsUtil.executeHttpClient(prefixStartUrl, realm, userName, password);
+			Response authenticateResponse = ChinaIdmsUtil.executeHttpClient(frVersion, prefixStartUrl, realm, userName, password);
 			LOGGER.info("End: aunthenticate User of OPENAMService for username=" + userName);
 			successResponse = (String) authenticateResponse.getEntity();
 			LOGGER.info("Response code from OPENAMService: " + authenticateResponse.getStatus());
@@ -9486,7 +9486,7 @@ public class UserServiceImpl implements UserService {
 			}
 			
 			LOGGER.info("Start: checkDeviceInfo of OPENAMService for username="+userMFADataRequest.getLoginUser());
-			Response authenticateResponse = ChinaIdmsUtil.executeHttpDeviceClient(prefixStartUrl, "se", userMFADataRequest.getAuthId(), 
+			Response authenticateResponse = ChinaIdmsUtil.executeHttpDeviceClient(frVersion, prefixStartUrl, "se", userMFADataRequest.getAuthId(),
 					ChinaIdmsUtil.removeEscapeCharacter(userMFADataRequest.getStageData()), fileName);
 			LOGGER.info("End: checkDeviceInfo of OPENAMService for username="+userMFADataRequest.getLoginUser());
 			successResponse = (String) authenticateResponse.getEntity();
