@@ -1340,7 +1340,7 @@ public class UserServiceImpl implements UserService {
 				identifierType = UserConstants.EMAIL;
 			} else if ((null != userRequest.getUserRecord().getMobilePhone())
 					&& (!userRequest.getUserRecord().getMobilePhone().isEmpty())) {
-				//openAmReq.getInput().getUser().setMobile_reg(userRequest.getUserRecord().getMobilePhone());
+				openAmReq.getInput().getUser().setMobile_reg(userRequest.getUserRecord().getMobilePhone());
 				openAmReq.getInput().getUser().setMobilereg(userRequest.getUserRecord().getMobilePhone());
 				loginIdentifier = userRequest.getUserRecord().getMobilePhone();
 				identifierType = UserConstants.MOBILE;
@@ -3765,7 +3765,7 @@ public class UserServiceImpl implements UserService {
 				if (UserConstants.MOBILE.equalsIgnoreCase(loginIdentifierType)) {
 					// Changes from login_mobile to loginmobile to support FR 6.5 upgrade
 					PRODUCT_JSON_STRING = "{" + "\"login_mobile\": \"" + emailOrMobile + "\",\"loginmobile\": \"" + emailOrMobile + 
-							"\",\"mobilereg\": \"" + emailOrMobile + "\"" + "\",\"mobile_reg\": \"" + emailOrMobile + "\"" + "}";
+							"\",\"mobilereg\": \"" + emailOrMobile  + "\",\"mobile_reg\": \"" + emailOrMobile + "\"" + "}";
 
 					if ((null != confirmRequest.getUIFlag() && !confirmRequest.getUIFlag().isEmpty())
 							&& (null != confirmRequest.getPassword() && !confirmRequest.getPassword().isEmpty())) {
