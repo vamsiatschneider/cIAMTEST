@@ -377,7 +377,7 @@ public class UserConstants {
 	public static final String CONTENT_TYPE="application/x-www-form-urlencoded";
 	public static final String REDIRECT_URI="https://identity-int.schneider-electric.com/openid/cb-basic.html";
 	public static final String SCOPE="openid%20profile";
-	public static final String BEARER_TOKEN="Basic bXljbGllbnRJRDpwYXNzd29yZA==";
+	public static final String BEARER_TOKEN="Basic bXlDbGllbnRJRDpwYXNzd29yZA==";
 	public static final String CACHE="no-cache";
 	public static final String GRANT_TYPE="authorization_code";
 	public static final String RESPONSE_TYPE="code";
