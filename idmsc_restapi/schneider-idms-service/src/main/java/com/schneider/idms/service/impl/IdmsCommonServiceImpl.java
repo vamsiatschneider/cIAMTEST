@@ -37,6 +37,7 @@ import com.idms.product.client.OpenAMTokenService;
 import com.idms.product.client.OpenDjService;
 import com.idms.product.client.SalesForceService;
 import com.idms.service.SendEmail;
+import com.idms.service.util.UserServiceUtil;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -183,6 +184,9 @@ public class IdmsCommonServiceImpl {
 	//CODE-RE-STRUCTURING
 	@Value("${email.template.dir}")
 	private String EMAIL_TEMPLATE_DIR;
+
+	@Value("${frVersion}")
+	protected String frVersion;
 
 	protected static String userAction = "submitRequirements";
 
@@ -956,7 +960,7 @@ public class IdmsCommonServiceImpl {
 			LOGGER.info("cacahe NotNull");
 		}*/
 
-		String tokenResponse = productService.authenticateUser(adminUserName, adminPassword, UserConstants.REALM);
+		String tokenResponse = UserServiceUtil.authenticateUserBasedOnFRVersion(productService, frVersion, adminUserName, adminPassword, UserConstants.REALM);
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		DocumentContext productDocCtx = JsonPath.using(conf).parse(tokenResponse);
 		LOGGER.info("getSSOToken() -> End");
@@ -1288,5 +1292,13 @@ public class IdmsCommonServiceImpl {
 
 	public String getPrefixStartUrl() {
 		return prefixStartUrl;
+	}
+
+	public String getFrVersion() {
+		return frVersion;
+	}
+
+	public void setFrVersion(String frVersion) {
+		this.frVersion = frVersion;
 	}
 }

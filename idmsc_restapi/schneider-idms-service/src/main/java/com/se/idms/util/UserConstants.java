@@ -377,7 +377,7 @@ public class UserConstants {
 	public static final String CONTENT_TYPE="application/x-www-form-urlencoded";
 	public static final String REDIRECT_URI="https://identity-int.schneider-electric.com/openid/cb-basic.html";
 	public static final String SCOPE="openid%20profile";
-	public static final String BEARER_TOKEN="Basic bXljbGllbnRJRDpwYXNzd29yZA==";
+	public static final String BEARER_TOKEN="Basic bXlDbGllbnRJRDpwYXNzd29yZA==";
 	public static final String CACHE="no-cache";
 	public static final String GRANT_TYPE="authorization_code";
 	public static final String RESPONSE_TYPE="code";
@@ -628,5 +628,18 @@ public class UserConstants {
 	public static final String ZERO = "0";
 	public static final int ONE = 1;
 	
+	// FR 6.5 Version
+	public static final String FR6_5Version ="6.5";
+	// Accept API Version Header for POST, PUT, DELETE
+	public static final String ACCEPT_VERSION_HEADER ="resource=1.0, protocol=1.0";
+	// Accept API Version Header for GET, QUERY
+	public static final String ACCEPT_VERSION_GET_HEADER ="resource=3.0, protocol=1.0";
+
+	// Accept API Version Header for OpenAM Authenticate APIs
+	public static final String AUTH_VERSION_HEADER="resource=2.0, protocol=1.0";
+	// Accept API Version Header for OpenAM Session APIs
+	public static final String TOKEN_STATUS_VERSION_HEADER="resource=1.2";
+	public static final String SESSION_LOGOUT_VERSION_HEADER="resource=3.1";
+	public static final String CONTENT_TYPE_APP_JSON = "application/json";
 	
 }

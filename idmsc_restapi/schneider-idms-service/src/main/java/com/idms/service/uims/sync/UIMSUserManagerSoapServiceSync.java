@@ -29,6 +29,7 @@ import com.idms.product.client.OpenAMService;
 import com.idms.service.SendEmail;
 import com.idms.service.digital.GoDigitalUserService;
 import com.idms.service.util.ChinaIdmsUtil;
+import com.idms.service.util.UserServiceUtil;
 import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.util.SamlAssertionTokenGenerator;
 import com.se.idms.util.UimsConstants;
@@ -72,6 +73,9 @@ public class UIMSUserManagerSoapServiceSync {
 	@Autowired
 	private UIMSCompanyManagerSoapServiceSync companyManagerSoapServiceSync;
 	
+	@Value("${frVersion}")
+	private String frVersion;
+
 	@Value("${supportUser}")
 	private String supportUser;
 	
@@ -188,7 +192,7 @@ public class UIMSUserManagerSoapServiceSync {
 					if (null != createdFedId && !createdFedId.isEmpty()) {
 						String fedID = "{" + "\"federationID\": \"" + createdFedId + "\"" + "}";
 						LOGGER.info("fedID in creating UIMS user: " + fedID);
-						productService.updateUser(iPlanetDirectoryKey, userName, fedID);
+						UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userName, fedID);
 					} else {
 						//TODO put into csv file
 						LOGGER.error("User not created in UIMS having fedID "+forcedFederatedId);
@@ -262,7 +266,7 @@ public class UIMSUserManagerSoapServiceSync {
 					if (null != createdCompanyFedId && !createdCompanyFedId.isEmpty()) {
 						String companyFedID = "{" + "\"companyFederatedID\": \"" + createdCompanyFedId + "\"" + "}";
 						LOGGER.info("companyFedID in creating UIMS Company: " + companyFedID);
-						productService.updateUser(iPlanetDirectoryKey, userName, companyFedID);
+						UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userName, companyFedID);
 
 						if ((null == userRequest.getUserRecord().getBFO_ACCOUNT_ID__c()
 								|| userRequest.getUserRecord().getBFO_ACCOUNT_ID__c().isEmpty())
@@ -303,7 +307,7 @@ public class UIMSUserManagerSoapServiceSync {
 							// after successful creation of user and company, we
 							// need to update the v_old
 							String version = "{" + "\"V_Old\": \"" + v_new + "\"" + "}";
-							productService.updateUser(iPlanetDirectoryKey, userName, version);
+							UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userName, version);
 							// productService.sessionLogout(iPlanetDirectoryKey,
 							// "logout");
 						} 

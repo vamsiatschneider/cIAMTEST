@@ -245,6 +245,9 @@ public class OpenAmUser {
 	private String mobile_reg;
 	
 	@JsonInclude(Include.NON_NULL)
+	private String mobilereg;
+	
+	@JsonInclude(Include.NON_NULL)
 	private String login_mobile;
 	
 	@JsonInclude(Include.NON_NULL)
@@ -990,6 +993,14 @@ public class OpenAmUser {
 
 	public void setMobile_reg(String mobile_reg) {
 		this.mobile_reg = mobile_reg;
+	}
+
+	public String getMobilereg() {
+		return mobilereg;
+	}
+
+	public void setMobilereg(String mobilereg) {
+		this.mobilereg = mobilereg;
 	}
 
 	public String getLogin_mobile() {
