@@ -2,7 +2,8 @@ package com.idms.service.bulkail.util;
 
 public class BulkAILConstants {
 
-	public static final String MANDATORY_PROFILE_UPDATE_SOURCE="Profile update source is Mandatory";
+	public static final String MANDATORY_REQUEST_BODY = "Request Body is Mandatory";
+	public static final String MANDATORY_PROFILE_UPDATE_SOURCE = "Profile update source is Mandatory";
 	public static final String MANDATORY_AIL_FIELDS = "AIL field values are required";
 	public static final String MISSING_MANDATORY_FIELDS = "Missing Mandatory Fields";
 	public static final String MANDATORY_TOKEN= "Mandatory token is missing";

@@ -97,6 +97,7 @@ import com.idms.model.AddMobileRequest;
 import com.idms.model.BulkAILMapValue;
 import com.idms.model.BulkAILRecord;
 import com.idms.model.BulkAILRequest;
+import com.idms.model.BulkAILRequestBody;
 import com.idms.model.BulkAILResponse;
 import com.idms.model.BulkAILResultHolder;
 import com.idms.model.CheckUserExistsRequest;
@@ -11739,17 +11740,18 @@ public class UserServiceImpl implements UserService {
 			if(StringUtils.isNotBlank(stopidmstouimsflag)) {
 				stopUIMSSyncFlag = Boolean.valueOf(stopidmstouimsflag);
 			}
-			Response response = validateAILRequest(authorizedToken, clientId, clientSecret, bulkAILRequest, startTime);
+			BulkAILRequestBody bulkAILRequestBody = bulkAILRequest.getRequestBody();
+			Response response = validateAILRequest(authorizedToken, clientId, clientSecret, bulkAILRequestBody , startTime);
 			if (response != null) {
 				return response;
 			}
-			Response appDetails = openDJService.getUser(djUserName, djUserPwd, bulkAILRequest.getProfileLastUpdateSource());
+			Response appDetails = openDJService.getUser(djUserName, djUserPwd, bulkAILRequestBody.getProfileLastUpdateSource());
 			DocumentContext openDJAttrs = JsonPath.using(conf).parse(IOUtils.toString((InputStream) appDetails.getEntity()));
 
-			String profileUpdateSource = bulkAILRequest.getProfileLastUpdateSource();
+			String profileUpdateSource = bulkAILRequestBody.getProfileLastUpdateSource();
 			Map<String, Map<Integer, BulkAILResultHolder>> userAndAILReqMap = new HashMap<String, Map<Integer, BulkAILResultHolder>>();
 
-			for (BulkAILRecord ailRecord : bulkAILRequest.getUserAils()) {
+			for (BulkAILRecord ailRecord : bulkAILRequestBody.getUserAils()) {
 				String userFedID = ailRecord.getUserFedID();
 				boolean isUserFoundInDJ = true;
 				if (StringUtils.isBlank(userFedID)) {
@@ -11795,6 +11797,7 @@ public class UserServiceImpl implements UserService {
 					Map<Integer, BulkAILResultHolder> ailCountMap = new HashMap<Integer, BulkAILResultHolder>();
 					if (ails == null || ails.isEmpty()) {
 						BulkAILUtil.buildNullAILResult(ailCountMap);
+						userAndAILReqMap.put(userFedID, ailCountMap);
 						continue;
 					}
 					Map<AILRecord, Integer> recordCountMap = new HashMap<AILRecord, Integer>();
@@ -11851,7 +11854,7 @@ public class UserServiceImpl implements UserService {
 					userAndAILReqMap.put(userFedID, ailCountMap);
 				}
 			}
-			BulkAILResponse baResponse = BulkAILUtil.buildResponse(userAndAILReqMap, bulkAILRequest.getProfileLastUpdateSource());
+			BulkAILResponse baResponse = BulkAILUtil.buildResponse(userAndAILReqMap, bulkAILRequestBody.getProfileLastUpdateSource());
 
 			if(BulkAILConstants.FAILURE.equalsIgnoreCase(baResponse.getMessage())) {
 				return Response.status(HttpStatus.BAD_REQUEST.value()).entity(baResponse).build();
@@ -12105,7 +12108,10 @@ public class UserServiceImpl implements UserService {
 		return vNewCntValue;
 	}
 
-	private Response validateAILRequest(String authorizedToken, String clientId, String clientSecret, BulkAILRequest bulkAILRequest, long startTime) {
+	private Response validateAILRequest(String authorizedToken, String clientId, String clientSecret, BulkAILRequestBody bulkAILRequest, long startTime) {
+		if(null == bulkAILRequest) {
+			return BulkAILUtil.getErrorResponse(HttpStatus.BAD_REQUEST, BulkAILConstants.MANDATORY_REQUEST_BODY, startTime);
+		}
 		if (StringUtils.isBlank(bulkAILRequest.getProfileLastUpdateSource())) {
 			return BulkAILUtil.getErrorResponse(HttpStatus.BAD_REQUEST, BulkAILConstants.MANDATORY_PROFILE_UPDATE_SOURCE, startTime);
 		}
