@@ -11,6 +11,7 @@ public class AILRecord {
 	private String aclType;
 
 	@JsonProperty
+	@JsonInclude(Include.ALWAYS)
 	private String acl;
 
 	@JsonProperty
