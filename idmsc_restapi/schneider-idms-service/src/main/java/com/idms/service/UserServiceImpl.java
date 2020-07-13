@@ -11933,9 +11933,16 @@ public class UserServiceImpl implements UserService {
 				boolean entryFound = false;
 				if (enableSMLVerification.equalsIgnoreCase("True")) {
 					if (AILOperationType.REVOKE.getType().equalsIgnoreCase(ail.getOperation())) {
+						if (StringUtils.isBlank(ail.getAcl())) {
+							BulkAILResultHolder holder = BulkAILUtil.buildInvalidResult(ail,
+									HttpStatus.BAD_REQUEST.value(), BulkAILConstants.MISSING_MANDATORY_FIELDS, false);
+							LOGGER.info("Invalid Acl Value: " + ail.getAcl());
+							ailCountMap.put(++count, holder);
+							continue;
+						}
 						LOGGER.info("In SML Verification block: " + enableSMLVerification);
 						String ailValue = ail.getAclType() + "_" + ail.getAcl();
-
+						LOGGER.info("OpenDJ Ail Value to be verified: " + ailValue);
 						Response ailEntry = openDJService.verifyAIL(djUserName, djUserPwd, ailValue);
 						if (null != ailEntry && 200 == ailEntry.getStatus()) {
 							entryFound = true;
@@ -12028,9 +12035,16 @@ public class UserServiceImpl implements UserService {
 				boolean entryFound = false;
 				if (enableSMLVerification.equalsIgnoreCase("True")) {
 					if (AILOperationType.GRANT.getType().equalsIgnoreCase(ail.getOperation())) {
+						if (StringUtils.isBlank(ail.getAcl())) {
+							BulkAILResultHolder holder = BulkAILUtil.buildInvalidResult(ail,
+									HttpStatus.BAD_REQUEST.value(), BulkAILConstants.MISSING_MANDATORY_FIELDS, false);
+							LOGGER.info("Invalid Acl Value: " + ail.getAcl());
+							ailCountMap.put(++count, holder);
+							continue;
+						}
 						LOGGER.info("In SML Verification block: " + enableSMLVerification);
 						String ailValue = ail.getAclType() + "_" + ail.getAcl();
-
+						LOGGER.info("OpenDJ Ail Value to be verified: " + ailValue);
 						Response ailEntry = openDJService.verifyAIL(djUserName, djUserPwd, ailValue);
 						if (null != ailEntry && 200 == ailEntry.getStatus()) {
 							entryFound = true;
