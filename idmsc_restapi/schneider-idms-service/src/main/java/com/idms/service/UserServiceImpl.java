@@ -3875,6 +3875,8 @@ public class UserServiceImpl implements UserService {
 
 						PRODUCT_JSON_STRING = "{" + "\"userPassword\": \"" + confirmRequest.getPassword().trim() + "\""
 								+ "}";
+						PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
+								.concat(",\"isActivated\":\"true\"}");
 						
 						String isPwdSetFirstLogin = productDocCtx.read("$.pwdSetFirstLogin[0]");
 						LOGGER.info("isPwdSetFirstLogin = "+isPwdSetFirstLogin);
@@ -7007,6 +7009,8 @@ public class UserServiceImpl implements UserService {
 				
 				PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
 						.concat(",\"updateSource\":\"" + activateUserRequest.getUserRecord().getIDMS_Registration_Source__c() + "\"}");
+				PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
+						.concat(",\"isActivated\":\"true\"}");
 
 				if (null != loginIdentifier && !loginIdentifier.isEmpty()) {
 					LOGGER.info(AUDIT_REQUESTING_USER + userId + AUDIT_IMPERSONATING_USER + AUDIT_API_ADMIN
