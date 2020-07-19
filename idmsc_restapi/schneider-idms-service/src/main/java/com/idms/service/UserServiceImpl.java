@@ -3867,17 +3867,33 @@ public class UserServiceImpl implements UserService {
 					PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
 							.concat(",\"isActivated\":\"true\"}");
 				} else {
+					if (UserConstants.MOBILE.equalsIgnoreCase(loginIdentifierType)) {
+						PRODUCT_JSON_STRING = "{" + "\"login_mobile\": \"" + emailOrMobile + 
+								"\",\"loginmobile\": \"" + emailOrMobile +  "\",\"mobilereg\": \""
+										+ emailOrMobile + "\"" + "\",\"mobile_reg\": \""
+								+ emailOrMobile + "\"" + "}";
 
-					/**
-					 * Checking if password want to update
-					 */
+						if ((null != confirmRequest.getUIFlag() && !confirmRequest.getUIFlag().isEmpty())
+								&& (null != confirmRequest.getPassword() && !confirmRequest.getPassword().isEmpty())) {
+							PRODUCT_JSON_STRING = "{" + "\"login_mobile\": \"" + emailOrMobile + "\",\"loginmobile\": \"" + emailOrMobile 
+									+ "\",\"mobilereg\": \""	+ emailOrMobile + "\",\"mobile_reg\": \""	+ emailOrMobile + "\",\"userPassword\": \"" + confirmRequest.getPassword().trim()
+									+ "\"" + "}";
+						}
+					} else if (UserConstants.EMAIL.equalsIgnoreCase(loginIdentifierType)) {
+						PRODUCT_JSON_STRING = "{" + "\"loginid\": \"" + emailOrMobile + "\",\"mail\": \""
+								+ emailOrMobile + "\"" + "}";
+						if ((null != confirmRequest.getUIFlag() && !confirmRequest.getUIFlag().isEmpty())
+								&& (null != confirmRequest.getPassword() && !confirmRequest.getPassword().isEmpty())) {
+							PRODUCT_JSON_STRING = "{" + "\"loginid\": \"" + emailOrMobile + "\",\"mail\": \""
+									+ emailOrMobile + "\",\"userPassword\": \"" + confirmRequest.getPassword().trim()
+									+ "\"" + "}";
+						}
+					}
+					
+					PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
+							.concat(",\"isActivated\":\"true\"}");
+
 					if (null != confirmRequest.getPassword() && !confirmRequest.getPassword().isEmpty()) {
-
-						PRODUCT_JSON_STRING = "{" + "\"userPassword\": \"" + confirmRequest.getPassword().trim() + "\""
-								+ "}";
-						PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
-								.concat(",\"isActivated\":\"true\"}");
-						
 						String isPwdSetFirstLogin = productDocCtx.read("$.pwdSetFirstLogin[0]");
 						LOGGER.info("isPwdSetFirstLogin = "+isPwdSetFirstLogin);
 						
