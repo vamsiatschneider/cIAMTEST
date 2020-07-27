@@ -7475,22 +7475,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Time taken by resendRegEmail() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 			}
-			if (null == resendRegEmail.getFirstName() || resendRegEmail.getFirstName().isEmpty()) {
-				userResponse.setStatus(errorStatus);
-				userResponse.setMessage("FirstName is mandatory");
-				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.error("Error is -> " + userResponse.getMessage());
-				LOGGER.info("Time taken by resendRegEmail() : " + elapsedTime);
-				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
-			}
-			if (null == resendRegEmail.getLastName() || resendRegEmail.getLastName().isEmpty()) {
-				userResponse.setStatus(errorStatus);
-				userResponse.setMessage("LastName is mandatory");
-				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.error("Error is -> " + userResponse.getMessage());
-				LOGGER.info("Time taken by resendRegEmail() : " + elapsedTime);
-				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
-			}
+			
 			try {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
@@ -7560,14 +7545,8 @@ public class UserServiceImpl implements UserService {
 
 					userCName = productDocCtx.read("$.result[0].username");
 					String regSource = productDocCtx.read("$.result[0].registerationSource[0]");
-					String fName = null != productDocCtx.read("$.result[0].givenName")
-							? getValue(productDocCtx.read("$.result[0].givenName").toString()) : getDelimeter();
-					String lName = null != productDocCtx.read("$.result[0].sn")
-							? getValue(productDocCtx.read("$.result[0].sn").toString()) : getDelimeter();
-
-					if ((null != fName && !fName.isEmpty()) && (fName.equalsIgnoreCase(resendRegEmail.getFirstName()))
-							&& ((null != lName && !lName.isEmpty())
-									&& (lName.equalsIgnoreCase(resendRegEmail.getLastName())))) {
+					
+				
 						Response applicationDetails = openDJService.getUser(djUserName, djUserPwd, regSource);
 						DocumentContext productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
 
@@ -7575,7 +7554,7 @@ public class UserServiceImpl implements UserService {
 						if(null!=isOTPEnabledForApp && !isOTPEnabledForApp.equals("")) {
 							isOTPEnabled = Boolean.valueOf(isOTPEnabledForApp);
 							LOGGER.info("isOTPEnabled: "+ isOTPEnabled);
-						}
+						
 						if (userType.equalsIgnoreCase("mail")) {
 							/* Counter */
 							if(userExistsQuery.contains(UserConstants.MAIL_RATE_COUNTER)) {
@@ -7659,7 +7638,7 @@ public class UserServiceImpl implements UserService {
 					}
 					} else {
 						userResponse.setStatus(errorStatus);
-						userResponse.setMessage("FirstName and LastName are not matched with Email/mobile given!!");
+						userResponse.setMessage("Check your Details");
 						LOGGER.error("Error is -> " + userResponse.getMessage());
 						return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 					}
@@ -7780,11 +7759,9 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Parameter emailChangeRequest -> " + objMapper.writeValueAsString(emailChangeRequest));
 			if ((null == emailChangeRequest.getOldEmail() || emailChangeRequest.getOldEmail().isEmpty())
 					|| (null == emailChangeRequest.getNewEmail() || emailChangeRequest.getNewEmail().isEmpty())
-					|| (null == emailChangeRequest.getFirstName() || emailChangeRequest.getFirstName().isEmpty())
-					|| (null == emailChangeRequest.getLastName() || emailChangeRequest.getLastName().isEmpty())
 					||(null == emailChangeRequest.getApplicationName()|| emailChangeRequest.getApplicationName().isEmpty())) {
 				userResponse.setStatus(errorStatus);
-				userResponse.setMessage("OldEmail,NewEmail, FirstName,LastName and AppSource are mandatory");
+				userResponse.setMessage("OldEmail,NewEmail and AppSource are mandatory");
 
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.error("Error is -> " + userResponse.getMessage());
@@ -7827,21 +7804,11 @@ public class UserServiceImpl implements UserService {
 					if (resultCount.intValue() > 0) {
 						userName = productDocCtx.read("$.result[0].username");
 
-						//String regSource = productDocCtx.read("$.result[0].registerationSource[0]");
 						String appSource= emailChangeRequest.getApplicationName();
-
-						String firstName = null != productDocCtx.read("$.result[0].givenName")
-								? getValue(productDocCtx.read("$.result[0].givenName").toString()) : getDelimeter();
-						String lastName = null != productDocCtx.read("$.result[0].sn")
-								? getValue(productDocCtx.read("$.result[0].sn").toString()) : getDelimeter();
 						String email = productDocCtx.read("$.result[0].mail[0]");
 						String newEmail = productDocCtx.read("$.result[0].newmail[0]");
 
-						if ((null != firstName && !firstName.isEmpty()
-								&& firstName.equalsIgnoreCase(emailChangeRequest.getFirstName()))
-								&& (null != lastName && !lastName.isEmpty()
-										&& lastName.equalsIgnoreCase(emailChangeRequest.getLastName()))
-								&& (null != email && !email.isEmpty()
+						if ((null != email && !email.isEmpty()
 										&& email.equalsIgnoreCase(emailChangeRequest.getOldEmail()))
 								&& (null != newEmail && !newEmail.isEmpty()
 										&& newEmail.equalsIgnoreCase(emailChangeRequest.getNewEmail()))) {
@@ -7885,7 +7852,7 @@ public class UserServiceImpl implements UserService {
 								LOGGER.info("resendChangeEmail :: Update mail counter :: Finish");
 						} else {
 							userResponse.setStatus(errorStatus);
-							userResponse.setMessage("newEmail or FirstName or LastName are not matched with Email given!!");
+							userResponse.setMessage("newEmail does not matched with Email given!!");
 							userResponse.setId(userName);
 							LOGGER.error("Error is -> " + userResponse.getMessage());
 							return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
