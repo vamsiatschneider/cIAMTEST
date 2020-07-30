@@ -7454,14 +7454,15 @@ public class UserServiceImpl implements UserService {
 		ObjectMapper objMapper = new ObjectMapper();
 		boolean isOTPEnabled = false;
 		String otp = null, token = null;
-		
+
 		/* Counter */
-		int intcurrentMailCounter=0;
+		int intcurrentMailCounter = 0;
 		String strcurrentMailCounter = null;
-		String strcurrentMobCounter = null;		  
-		int intcurrentMobCounter=0;
+		String strcurrentMobCounter = null;
+		int intcurrentMobCounter = 0;
 		String jsonStr = null;
 		JSONObject obj = new JSONObject();
+		String mailAC = null, mobileAC = null;
 
 		try {
 			LOGGER.info("Parameter userRequest -> " + objMapper.writeValueAsString(resendRegEmail));
@@ -7475,18 +7476,18 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("Time taken by resendRegEmail() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 			}
-			
+
 			try {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
-				LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
+				LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(), ioExp);
 				iPlanetDirectoryKey = "";
 			}
-			
-			 pathString = resendRegEmail.getPathValue();
-				if(null != pathString && !pathString.isEmpty()){
-					finalPathString = ChinaIdmsUtil.getPathString(pathString);
-				}
+
+			pathString = resendRegEmail.getPathValue();
+			if (null != pathString && !pathString.isEmpty()) {
+				finalPathString = ChinaIdmsUtil.getPathString(pathString);
+			}
 
 			if (null != resendRegEmail.getEmail() && !resendRegEmail.getEmail().isEmpty()) {
 				userId = resendRegEmail.getEmail();
@@ -7526,107 +7527,116 @@ public class UserServiceImpl implements UserService {
 
 				// check for dual identifier case
 				String optType = EmailConstants.USERREGISTRATION_OPT_TYPE;
-				String mail = productDocCtx.read("$.result[0].mail[0]");
-				String mobile = productDocCtx.read("$.result[0].mobile_reg[0]");
+				//String mail = productDocCtx.read("$.result[0].mail[0]");
+				//String mobile = productDocCtx.read("$.result[0].mobile_reg[0]");
 
-				if(StringUtils.isNotBlank(mail) && StringUtils.isNotBlank(mobile)) {
-					isDualIdentifer = true;
-					optType = EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE;
-					LOGGER.info("isDualIdentifer: " + isDualIdentifer);
-					LOGGER.info("optType: " + optType);
+				if (userType.equalsIgnoreCase("mail")) {
+					mailAC = productDocCtx.read(JsonConstants.RESULT_Loginid);
+					if (null == mailAC)
+						mailAC = productDocCtx.read(JsonConstants.RESULT_Loginid_L);
+					if (null != mailAC && !mailAC.isEmpty()) {
+						userResponse.setStatus(errorStatus);
+						userResponse.setMessage("You have already registered");
+						LOGGER.error("Error is -> " + userResponse.getMessage());
+						return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+					}
+				} else if (userType.equalsIgnoreCase("mobile")) {
+					mobileAC = productDocCtx.read(JsonConstants.RESULTLOGIN_MOBILE);
+					if (null != mobileAC && !mobileAC.isEmpty()) {
+						userResponse.setStatus(errorStatus);
+						userResponse.setMessage("You have already registered");
+						LOGGER.error("Error is -> " + userResponse.getMessage());
+						return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+					}
 				}
+				userCName = productDocCtx.read("$.result[0].username");
+				String regSource = productDocCtx.read("$.result[0].registerationSource[0]");
 
-				if (!isDualIdentifer && UserConstants.TRUE.equalsIgnoreCase(productDocCtx.read("$.result[0].isActivated[0]"))) {
-					userResponse.setStatus(errorStatus);
-					userResponse.setMessage("You have already registered");
-					LOGGER.error("Error is -> " + userResponse.getMessage());
-					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
-				} else {
+				Response applicationDetails = openDJService.getUser(djUserName, djUserPwd, regSource);
+				DocumentContext productDJData = JsonPath.using(conf)
+						.parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
 
-					userCName = productDocCtx.read("$.result[0].username");
-					String regSource = productDocCtx.read("$.result[0].registerationSource[0]");
-					
-				
-						Response applicationDetails = openDJService.getUser(djUserName, djUserPwd, regSource);
-						DocumentContext productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
+				String isOTPEnabledForApp = productDJData.read("_isOTPEnabled");
+				if (null != isOTPEnabledForApp && !isOTPEnabledForApp.equals("")) {
+					isOTPEnabled = Boolean.valueOf(isOTPEnabledForApp);
+					LOGGER.info("isOTPEnabled: " + isOTPEnabled);
 
-						String isOTPEnabledForApp = productDJData.read("_isOTPEnabled");
-						if(null!=isOTPEnabledForApp && !isOTPEnabledForApp.equals("")) {
-							isOTPEnabled = Boolean.valueOf(isOTPEnabledForApp);
-							LOGGER.info("isOTPEnabled: "+ isOTPEnabled);
-						
-						if (userType.equalsIgnoreCase("mail")) {
-							/* Counter */
-							if(userExistsQuery.contains(UserConstants.MAIL_RATE_COUNTER)) {
-								strcurrentMailCounter = productDocCtx.read("$.result[0].mailRateCounter[0]");
-									if(null != strcurrentMailCounter && !strcurrentMailCounter.isEmpty()){	
-											intcurrentMailCounter = Integer.parseInt(strcurrentMailCounter);
-									}
-								}
-							if(intcurrentMailCounter == Integer.parseInt(maxEmailLimit)) {
-				  					userResponseMailCounter.setStatus(errorStatus);
-				  					userResponseMailCounter.setMessage("Maximum resend Email count breached.");
-				  					userResponseMailCounter.setId(userCName);
-				  					userResponseMailCounter.setMaxEmailLimit(maxEmailLimit);
-				  					userResponseMailCounter.setStrcurrentMailCounter(strcurrentMailCounter);
-				  					LOGGER.info("Maximum resend Email count breached.");
-				  					return Response.status(Response.Status.BAD_REQUEST).entity(userResponseMailCounter).build();
-								}
-							else {		
-									intcurrentMailCounter = increment(intcurrentMailCounter);
-								}
-								obj.put(UserConstants.MAIL_RATE_COUNTER, intcurrentMailCounter);
-								jsonStr = obj.toString();
-								
-							if(isOTPEnabled){
-								otp = sendEmail.generateOtp(userCName);
-							} else {
-								token = sendEmail.generateEmailToken(userCName);
+					if (userType.equalsIgnoreCase("mail")) {
+						/* Counter */
+						if (userExistsQuery.contains(UserConstants.MAIL_RATE_COUNTER)) {
+							strcurrentMailCounter = productDocCtx.read("$.result[0].mailRateCounter[0]");
+							if (null != strcurrentMailCounter && !strcurrentMailCounter.isEmpty()) {
+								intcurrentMailCounter = Integer.parseInt(strcurrentMailCounter);
 							}
-							sendEmail.sendOpenAmEmail(token, otp, optType, userCName, regSource, finalPathString); /* Reinstate */
-							LOGGER.info("resendRegEmail :: Update mail counter :: Start");
-							UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userCName, jsonStr);
-							LOGGER.info("resendRegEmail :: Update mail counter :: Finish");
-							userResponseMailCounter.setStatus(successStatus);
-							userResponseMailCounter.setMessage(UserConstants.RESEND_REGEMAIL_SUCCESS_MESSAGE);
+						}
+						if (intcurrentMailCounter == Integer.parseInt(maxEmailLimit)) {
+							userResponseMailCounter.setStatus(errorStatus);
+							userResponseMailCounter.setMessage("Maximum resend Email count breached.");
 							userResponseMailCounter.setId(userCName);
 							userResponseMailCounter.setMaxEmailLimit(maxEmailLimit);
-							strcurrentMailCounter = Integer.toString(intcurrentMailCounter);
 							userResponseMailCounter.setStrcurrentMailCounter(strcurrentMailCounter);
-							return Response.status(Response.Status.OK).entity(userResponseMailCounter).build();
+							LOGGER.info("Maximum resend Email count breached.");
+							return Response.status(Response.Status.BAD_REQUEST).entity(userResponseMailCounter).build();
+						} else {
+							intcurrentMailCounter = increment(intcurrentMailCounter);
 						}
-						if (userType.equalsIgnoreCase("mobile")) {
+						obj.put(UserConstants.MAIL_RATE_COUNTER, intcurrentMailCounter);
+						jsonStr = obj.toString();
+
+						if (isOTPEnabled) {
 							otp = sendEmail.generateOtp(userCName);
-							LOGGER.info("Start: sendSMSMessage() for mobile userName:" + userCName);
-							if(userExistsQuery.contains(UserConstants.MOBILE_RATE_COUNTER)){
-									strcurrentMobCounter = productDocCtx.read("$.result[0].mobileRateCounter[0]");
-										if(null != strcurrentMobCounter && !strcurrentMobCounter.isEmpty()) {	
-												intcurrentMobCounter = Integer.parseInt(strcurrentMobCounter);
-											}
-	  
-							}
-						if(intcurrentMobCounter == Integer.parseInt(maxMobLimit)) {
-		  					userResponseMobCounter.setStatus(errorStatus);
-		  					userResponseMobCounter.setMessage("Maximum resend Mobile count breached.");
-		  					userResponseMobCounter.setId(userCName);
-		  					userResponseMobCounter.setMaxMobLimit(maxMobLimit);
-		  					userResponseMobCounter.setStrcurrentMobCounter(strcurrentMobCounter);
-		  					LOGGER.info("Maximum resend Mobile count breached.");
-		  					return Response.status(Response.Status.BAD_REQUEST).entity(userResponseMobCounter).build();
+						} else {
+							token = sendEmail.generateEmailToken(userCName);
 						}
-						else{		
-								intcurrentMobCounter = increment(intcurrentMobCounter);
+						sendEmail.sendOpenAmEmail(token, otp, optType, userCName, regSource,
+								finalPathString); /* Reinstate */
+						LOGGER.info("resendRegEmail :: Update mail counter :: Start");
+						UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion,
+								UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userCName, jsonStr);
+						LOGGER.info("resendRegEmail :: Update mail counter :: Finish");
+						userResponseMailCounter.setStatus(successStatus);
+						userResponseMailCounter.setMessage(UserConstants.RESEND_REGEMAIL_SUCCESS_MESSAGE);
+						userResponseMailCounter.setId(userCName);
+						userResponseMailCounter.setMaxEmailLimit(maxEmailLimit);
+						strcurrentMailCounter = Integer.toString(intcurrentMailCounter);
+						userResponseMailCounter.setStrcurrentMailCounter(strcurrentMailCounter);
+						return Response.status(Response.Status.OK).entity(userResponseMailCounter).build();
+					}
+					if (userType.equalsIgnoreCase("mobile")) {
+						otp = sendEmail.generateOtp(userCName);
+						LOGGER.info("Start: sendSMSMessage() for mobile userName:" + userCName);
+						if (userExistsQuery.contains(UserConstants.MOBILE_RATE_COUNTER)) {
+							strcurrentMobCounter = productDocCtx.read("$.result[0].mobileRateCounter[0]");
+							if (null != strcurrentMobCounter && !strcurrentMobCounter.isEmpty()) {
+								intcurrentMobCounter = Integer.parseInt(strcurrentMobCounter);
+							}
+
+						}
+						if (intcurrentMobCounter == Integer.parseInt(maxMobLimit)) {
+							userResponseMobCounter.setStatus(errorStatus);
+							userResponseMobCounter.setMessage("Maximum resend Mobile count breached.");
+							userResponseMobCounter.setId(userCName);
+							userResponseMobCounter.setMaxMobLimit(maxMobLimit);
+							userResponseMobCounter.setStrcurrentMobCounter(strcurrentMobCounter);
+							LOGGER.info("Maximum resend Mobile count breached.");
+							return Response.status(Response.Status.BAD_REQUEST).entity(userResponseMobCounter).build();
+						} else {
+							intcurrentMobCounter = increment(intcurrentMobCounter);
 						}
 						obj.put(UserConstants.MOBILE_RATE_COUNTER, intcurrentMobCounter);
 						jsonStr = obj.toString();
-						sendEmail.sendSMSNewGateway(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userCName, regSource);
-					    LOGGER.info("End: sendSMSMessage() finished for  mobile userName:" + userCName); 
-					    LOGGER.info("Start: sendOpenAmMobileEmail() for mobile userName:"+ userCName); 
-					    sendEmail.sendOpenAmMobileEmail(otp,EmailConstants.USERREGISTRATION_OPT_TYPE, userCName, regSource);
-						LOGGER.info("End: sendOpenAmMobileEmail() finsihed for  mobile userName:" +userCName); /* Reinstate */
-							 
+						sendEmail.sendSMSNewGateway(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userCName,
+								regSource);
+						LOGGER.info("End: sendSMSMessage() finished for  mobile userName:" + userCName);
+						LOGGER.info("Start: sendOpenAmMobileEmail() for mobile userName:" + userCName);
+						sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userCName,
+								regSource);
+						LOGGER.info("End: sendOpenAmMobileEmail() finsihed for  mobile userName:"
+								+ userCName); /* Reinstate */
+
 						LOGGER.info("resendRegEmail :: Update mobile counter :: Start");
-						UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userCName, jsonStr);
+						UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion,
+								UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userCName, jsonStr);
 						LOGGER.info("resendRegEmail :: Update mobile counter :: Finish");
 						userResponseMobCounter.setStatus(successStatus);
 						userResponseMobCounter.setMessage(UserConstants.RESEND_REGEMOB_SUCCESS_MESSAGE);
@@ -7636,13 +7646,13 @@ public class UserServiceImpl implements UserService {
 						userResponseMobCounter.setStrcurrentMobCounter(strcurrentMobCounter);
 						return Response.status(Response.Status.OK).entity(userResponseMobCounter).build();
 					}
-					} else {
-						userResponse.setStatus(errorStatus);
-						userResponse.setMessage("Check your Details");
-						LOGGER.error("Error is -> " + userResponse.getMessage());
-						return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
-					}
+				} else {
+					userResponse.setStatus(errorStatus);
+					userResponse.setMessage("Check your Details");
+					LOGGER.error("Error is -> " + userResponse.getMessage());
+					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 				}
+
 			}
 		} catch (Exception e) {
 			LOGGER.error("Exception in resendRegEmail :" + e.getMessage(), e);
