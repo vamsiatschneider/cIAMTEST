@@ -7527,21 +7527,30 @@ public class UserServiceImpl implements UserService {
 
 				// check for dual identifier case
 				String optType = EmailConstants.USERREGISTRATION_OPT_TYPE;
-				//String mail = productDocCtx.read("$.result[0].mail[0]");
-				//String mobile = productDocCtx.read("$.result[0].mobile_reg[0]");
+				String mail = productDocCtx.read("$.result[0].mail[0]");
+				String mobile = productDocCtx.read("$.result[0].mobile_reg[0]");
+				mailAC = productDocCtx.read(JsonConstants.RESULT_Loginid);
+				if (null == mailAC)
+					mailAC = productDocCtx.read(JsonConstants.RESULT_Loginid_L);
+				mobileAC = productDocCtx.read(JsonConstants.RESULTLOGIN_MOBILE);
+				
+				if(StringUtils.isNotBlank(mobile) && StringUtils.isNotBlank(mail)) {
+					isDualIdentifer = true;
+					if(StringUtils.isNotBlank(mobileAC) && StringUtils.isBlank(mailAC)){
+						optType = EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE;
+					}
+					LOGGER.info("isDualIdentifer: " + isDualIdentifer);
+					LOGGER.info("optType: " + optType);
+				}
 
-				if (userType.equalsIgnoreCase("mail")) {
-					mailAC = productDocCtx.read(JsonConstants.RESULT_Loginid);
-					if (null == mailAC)
-						mailAC = productDocCtx.read(JsonConstants.RESULT_Loginid_L);
+				if (!isDualIdentifer && userType.equalsIgnoreCase("mail")) {
 					if (null != mailAC && !mailAC.isEmpty()) {
 						userResponse.setStatus(errorStatus);
 						userResponse.setMessage("You have already registered");
 						LOGGER.error("Error is -> " + userResponse.getMessage());
 						return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
 					}
-				} else if (userType.equalsIgnoreCase("mobile")) {
-					mobileAC = productDocCtx.read(JsonConstants.RESULTLOGIN_MOBILE);
+				} else if (!isDualIdentifer && userType.equalsIgnoreCase("mobile")) {
 					if (null != mobileAC && !mobileAC.isEmpty()) {
 						userResponse.setStatus(errorStatus);
 						userResponse.setMessage("You have already registered");
