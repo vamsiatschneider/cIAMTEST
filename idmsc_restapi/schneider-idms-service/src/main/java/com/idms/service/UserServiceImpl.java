@@ -7534,6 +7534,22 @@ public class UserServiceImpl implements UserService {
 					mailAC = productDocCtx.read(JsonConstants.RESULT_Loginid_L);
 				mobileAC = productDocCtx.read(JsonConstants.RESULTLOGIN_MOBILE);
 				
+				if (userType.equalsIgnoreCase("mail")) {
+					if (null != mailAC && !mailAC.isEmpty()) {
+						userResponse.setStatus(errorStatus);
+						userResponse.setMessage("You have already registered");
+						LOGGER.error("Error is -> " + userResponse.getMessage());
+						return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+					}
+				} else if (userType.equalsIgnoreCase("mobile")) {
+					if (null != mobileAC && !mobileAC.isEmpty()) {
+						userResponse.setStatus(errorStatus);
+						userResponse.setMessage("You have already registered");
+						LOGGER.error("Error is -> " + userResponse.getMessage());
+						return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
+					}
+				}
+				
 				if(StringUtils.isNotBlank(mobile) && StringUtils.isNotBlank(mail)) {
 					isDualIdentifer = true;
 					if(StringUtils.isNotBlank(mobileAC) && StringUtils.isBlank(mailAC)){
