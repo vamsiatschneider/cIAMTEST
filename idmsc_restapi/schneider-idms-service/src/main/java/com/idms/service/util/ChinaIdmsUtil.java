@@ -64,7 +64,7 @@ public class ChinaIdmsUtil {
 
 		HttpClient client = new DefaultHttpClient();
 		//HttpPost request = new HttpPost(uri + "/accessmanager/json/authenticate?realm=" + realm);
-		HttpPost request = new HttpPost(uri + "/accessmanager/json/authenticate?realm=" + realm+"&authIndexType=service&authIndexValue=MFA");
+		HttpPost request = new HttpPost(uri + "/accessmanager/json/authenticate?realm=" + realm+"&authIndexType=service&authIndexValue=NewMFA");
 		request.setHeader("X-OpenAM-Username", userName);
 		request.setHeader("X-OpenAM-Password", password);
 		LOGGER.info("Execute http client for version : " + frVersion);
@@ -300,7 +300,7 @@ public class ChinaIdmsUtil {
 		if(null != jsonString && !jsonString.isEmpty()){
 			HttpClient client = new DefaultHttpClient();
 			//HttpPost request = new HttpPost(uri + "/accessmanager/json/authenticate?realm=" + realm);
-			HttpPost request = new HttpPost(uri + "/accessmanager/json/authenticate?realm=" + realm + "&authIndexType=service&authIndexValue=MFA");
+			HttpPost request = new HttpPost(uri + "/accessmanager/json/authenticate?realm=" + realm + "&authIndexType=service&authIndexValue=NewMFA");
 			StringEntity entity = new StringEntity(jsonString);
 			request.setEntity(entity);
 			request.setHeader("Accept", "application/json");
