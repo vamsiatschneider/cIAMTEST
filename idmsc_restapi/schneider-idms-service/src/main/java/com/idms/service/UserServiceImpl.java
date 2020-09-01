@@ -9452,6 +9452,10 @@ public class UserServiceImpl implements UserService {
 		DocumentContext productDocCtx = null;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		String authIdSecuredLogin = null, header = null, stageNameFromUI = null, fileName = null;
+		String fileNameDevice = "DeviceDataInformation.txt";
+		String fileNameOTP = "DeviceOTPInformation.txt";
+		String fileNameResendOTP = "ResendOTPInformation.txt";
+		String stageData = null;
 
 		try {
 			if (null == userMFADataRequest.getAuthId() || userMFADataRequest.getAuthId().isEmpty()) {
@@ -9506,6 +9510,21 @@ public class UserServiceImpl implements UserService {
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+			}
+			
+			if(stageNameFromUI.equalsIgnoreCase("deviceStage")){
+				fileName = fileNameDevice;
+			}
+			if(stageNameFromUI.equalsIgnoreCase("OTPStage")){
+				fileName = fileNameOTP;
+			}
+			if(stageNameFromUI.equalsIgnoreCase("ResendOTPStage")){
+				fileName = fileNameResendOTP;
+			}
+			//userMFADataRequest.getStageData();
+			if(userMFADataRequest.getStageData().contains("\\")){
+				stageData = ChinaIdmsUtil.removeEscapeCharacter(userMFADataRequest.getStageData());
+				LOGGER.info("without escaped stageData = "+ stageData);
 			}
 			
 			LOGGER.info("Start: checkDeviceInfo of OPENAMService for username="+userMFADataRequest.getLoginUser());
