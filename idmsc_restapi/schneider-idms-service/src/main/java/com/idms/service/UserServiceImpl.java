@@ -200,7 +200,7 @@ import com.uims.authenticatedUsermanager.UserV6;
 @Service("userService")
 public class UserServiceImpl implements UserService {
 
-	/**Test
+	/**
 	 * Logger instance.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
