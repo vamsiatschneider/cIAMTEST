@@ -174,6 +174,8 @@ import com.se.idms.dto.IDMSUserAIL;
 import com.se.idms.dto.IDMSUserRecord;
 import com.se.idms.dto.IDMSUser__r;
 import com.se.idms.dto.IFWCustomAttributesForWork;
+import com.se.idms.dto.NECaptchaVerifier;
+import com.se.idms.dto.NESecretPair;
 import com.se.idms.dto.ParseValuesByOauthHomeWorkContextDto;
 import com.se.idms.dto.PasswordRecoveryResponse;
 import com.se.idms.dto.SetPasswordErrorResponse;
@@ -186,6 +188,8 @@ import com.se.idms.dto.UserExistsResponse;
 import com.se.idms.dto.UserServiceResponse;
 import com.se.idms.dto.UserServiceResponseMailCounter;
 import com.se.idms.dto.UserServiceResponseMobCounter;
+import com.se.idms.dto.ValidatePOJO;
+import com.se.idms.dto.VerifyResult;
 import com.se.idms.util.EmailValidator;
 import com.se.idms.util.JsonConstants;
 import com.se.idms.util.LangSupportUtil;
@@ -416,6 +420,25 @@ public class UserServiceImpl implements UserService {
 
 	@Value("${maxMobLimit}")
 	private String maxMobLimit;
+	
+	/* Captcha */
+	@Value("${captchaType}")
+	private String captchaType;
+	
+	@Value("${secretId}")
+	private String secretId;
+	
+	@Value("${secretKey}")
+	private String secretKey;
+	
+	@Value("${sliderCaptchaId}")
+	private String sliderCaptchaId;
+	
+	@Value("${smartCaptchaId}")
+	private String smartCaptchaId;
+	
+	private static long serialVersionUID;
+	private static String captchaId = null; 
 	
 	String maxEmailLimitPasswordRecovery = null;
 	String maxMobLimitPasswordRecovery = null;
@@ -12427,5 +12450,52 @@ public class UserServiceImpl implements UserService {
 			e.printStackTrace();
 		}
 		return Response.status(Response.Status.OK).entity(responseList).build();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Response captchaValidationService(ValidatePOJO neCaptchaValidate) {
+		serialVersionUID = -3185301474503659058L;
+		JSONObject response = new JSONObject();
+		String user = null;
+		response.put(UserConstants.MESSAGE, UserConstants.CAPTCHA_TYPE_ERROR);
+		
+		if(captchaType.equalsIgnoreCase(UserConstants.CAPTCHA_TYPE_SLIDER))
+			captchaId = sliderCaptchaId;
+		
+		else if(captchaType.equalsIgnoreCase(UserConstants.CAPTCHA_TYPE_SMART))
+			captchaId = smartCaptchaId;
+		
+		else
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+		
+		LOGGER.info("Captcha Type chosen :: "+ captchaType);
+		
+		final NECaptchaVerifier verifier = new NECaptchaVerifier(captchaId, new NESecretPair(secretId, secretKey));
+		String validate = neCaptchaValidate.getNECaptchaValidate();
+		String username = neCaptchaValidate.getUsername();
+		boolean isEmpty = username == null || username.trim().isEmpty();
+		if(isEmpty)
+		user = "{'id':'testuser'}";
+		else
+		user = "{'id':'"+ username +"'}";
+		VerifyResult verifyResult = verifier.verify(validate, user);
+
+		LOGGER.info(String.format("validate = %s,  isValid = %s , msg = %s ",
+		validate, verifyResult.isResult(), verifyResult.getMsg()));
+		 
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode rootNode = mapper.createObjectNode();
+		((ObjectNode) rootNode).put("isValid", verifyResult.isResult());
+		((ObjectNode) rootNode).put("msg", verifyResult.getMsg());
+		((ObjectNode) rootNode).put("error", verifyResult.getError());
+		String jsonString = null;
+		try {
+			jsonString = mapper.writeValueAsString(rootNode);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		LOGGER.info("Captcha Validation Completed");
+		return Response.status(200).entity(jsonString).build();
+
 	}
 }

@@ -642,4 +642,9 @@ public class UserConstants {
 	public static final String SESSION_LOGOUT_VERSION_HEADER="resource=3.1";
 	public static final String CONTENT_TYPE_APP_JSON = "application/json";
 	
+	// Captcha Type
+	public static final String CAPTCHA_TYPE_SLIDER="Slider";
+	public static final String CAPTCHA_TYPE_SMART="Smart";
+	public static final String CAPTCHA_TYPE_ERROR="Invalid Captcha Type";
+	
 }

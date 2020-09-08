@@ -14,6 +14,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -40,6 +41,7 @@ import com.idms.model.UserMFADataRequest;
 import com.idms.model.VerifyEmailPinRequest;
 import com.idms.model.VerifyPinRequest;
 import com.se.idms.dto.SetPasswordRequest;
+import com.se.idms.dto.ValidatePOJO;
 
 @Path("/services")
 @Produces("application/json")
@@ -302,4 +304,10 @@ public interface UserService {
 	@Path("/apexrest/fileSyncToUIMS")
 	@Consumes("multipart/form-data")
 	Response fileSyncToUIMS(@HeaderParam("Authorization") String authorizedToken, Attachment attachment);
+
+	@POST
+	@Path("/apexrest/captcha")
+	@Consumes(MediaType.APPLICATION_JSON)
+	Response captchaValidationService(ValidatePOJO neCaptchaValidate);
+
 }
