@@ -50,7 +50,6 @@ public interface OpenAMService {
 	Response updateUserForPassword(@HeaderParam("Accept-API-Version") String acceptAPIVersion,
 			@HeaderParam("Cookie") String iPlanetDirectoryKey, @PathParam("userId") String userId, String authId);
 
-	
 	@DELETE
 	@Path("/se/users/{userId}")
 	@Consumes("application/json")
