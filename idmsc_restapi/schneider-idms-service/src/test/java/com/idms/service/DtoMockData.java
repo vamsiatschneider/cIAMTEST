@@ -131,7 +131,7 @@ public class DtoMockData {
      *
      * @return the constructed {@link ConfirmPinRequest} instance
      */
-    public static ResendPinRequest buildResendRequPinReuest() {
+    public static ResendPinRequest buildResendPinRequest() {
     	ResendPinRequest request = new ResendPinRequest();
     	request.setIdmsUserId(DomainMockData.ID);   	
         return request;
