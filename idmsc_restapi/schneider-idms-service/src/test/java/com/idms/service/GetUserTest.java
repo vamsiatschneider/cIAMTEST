@@ -1,12 +1,36 @@
 package com.idms.service;
 
-import static com.jayway.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
 
+import javax.ws.rs.NotFoundException;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.springframework.cache.ehcache.EhCacheCache;
+import org.springframework.http.HttpStatus;
 
-import com.jayway.restassured.path.json.JsonPath;
-import com.jayway.restassured.response.Response;
+import com.idms.product.client.IFWService;
+import com.idms.product.client.OpenAMService;
+import com.idms.product.client.OpenAMTokenService;
+import com.idms.product.client.SalesForceService;
+import com.idms.product.model.OpenAMGetUserWorkResponse;
+import com.idms.service.impl.IFWTokenServiceImpl;
+import com.jayway.jsonpath.DocumentContext;
+import com.schneider.idms.salesforce.service.SalesforceSyncServiceImpl;
+import com.se.idms.dto.ParseValuesByOauthHomeWorkContextDto;
 
 /**
  * Test class for Get User endpoint
@@ -15,33 +39,113 @@ import com.jayway.restassured.response.Response;
  */
 public class GetUserTest {
 
-	final String ROOT_URL = "http://localhost:8080/IDMS/services/apexrest/";
+	@InjectMocks
+	private UserService userService = new UserServiceImpl();
 
-	@Test
-	public void testGetUserSuccess() {
-		
-		given().when().get(ROOT_URL + "users/test").then().statusCode(200);
-
+	@Mock
+	private OpenAMService openAMService;
+	
+	@Mock
+	private OpenAMTokenService openAMTokenService;
+	
+	@Mock
+	private org.springframework.cache.ehcache.EhCacheCacheManager cacheManager;
+	
+	@Mock
+	private EhCacheCache cache;
+	
+	@Mock
+	private IFWService ifwService;
+	
+	@Mock
+	private SalesforceSyncServiceImpl sfSyncServiceImpl;
+	
+	@Mock
+	private IFWTokenServiceImpl ifwTokenServiceImpl;
+	
+	@Mock
+	private SalesForceService salesForceService;
+	
+	@Mock
+	private ParseValuesByOauthHomeWorkContextDto valuesByOauthHomeWorkContext;
+	
+	@Before
+	public void before() {
+		MockitoAnnotations.initMocks(this);
 	}
-
+	
 	@Test
-	public void testGetUserInvalidUser() {
+	public void testGetUser_ValidId() {
 		
-		given().when().get(ROOT_URL + "users/invalid").then().statusCode(404);
+		when(openAMTokenService.getUserDetails(anyString())).thenReturn(DomainMockData.TECHNICAL_USER);
+		when(openAMService.authenticateUser(anyString(), anyString(), anyString()))
+		.thenReturn(DomainMockData.AUTHENTICATION_JSON);
+		when(openAMService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER);
+		doAnswer(new Answer<Object>() {
+			@Override
+			public Object answer(InvocationOnMock invocation) throws Throwable {
+				Object[] arguments = invocation.getArguments();
+				OpenAMGetUserWorkResponse response =(OpenAMGetUserWorkResponse)arguments[0];
+				response.setUsername("TestUser");
+				return null;
+			}
+		}).when(valuesByOauthHomeWorkContext).parseValuesWorkContext(any(OpenAMGetUserWorkResponse.class), any(DocumentContext.class));
 
+		String userId = "cn00Nfbt-XRzP-zytK-VE68-THyztdBHxvg8";
+		javax.ws.rs.core.Response response = userService.getUser("Bearer 8rcWmUAB_-iRhprn4JH49rbMgW4", userId);
+		assertEquals(HttpStatus.OK, HttpStatus.valueOf(response.getStatus()));
+		OpenAMGetUserWorkResponse  actualResponse = (OpenAMGetUserWorkResponse)response.getEntity();
+		assertThat("Message ", actualResponse.getUsername(), equalTo("TestUser"));
 	}
-
+	
 	@Test
-	public void testGetUserData() {
+	public void testGetUser_NullId() {
 		
-		Response response = given().when().get(ROOT_URL + "users/test");
-		assertEquals(200, response.getStatusCode());
-		String json = response.asString();
+		when(openAMTokenService.getUserDetails(anyString())).thenReturn(DomainMockData.TECHNICAL_USER);
+		when(openAMService.authenticateUser(anyString(), anyString(), anyString()))
+		.thenReturn(DomainMockData.AUTHENTICATION_JSON);
+		when(openAMService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_INVALID_USER);
+
+		String userId = null;
+		javax.ws.rs.core.Response response = userService.getUser("Bearer 8rcWmUAB_-iRhprn4JH49rbMgW4", userId);
+		assertEquals(HttpStatus.NOT_FOUND, HttpStatus.valueOf(response.getStatus()));
+		JSONArray jsonArray = (JSONArray)response.getEntity();
+		JSONObject actualResponse = (JSONObject)jsonArray.get(0);
+		assertThat("ErrorCode: ", actualResponse.get("errorCode"), equalTo("NOT_FOUND"));
+		assertThat("message: ", actualResponse.get("message"), equalTo("Provided external ID field does not exist or is  not accessible: "+userId));
+	}
+	
+	@Test
+	public void testGetUser_EmptyId() {
 		
-		JsonPath jsonPath = new JsonPath(json);
-		assertEquals("demo3@example.com", jsonPath.get("Email"));
-		assertEquals("test", jsonPath.get("FirstName"));
-		assertEquals("test", jsonPath.get("LastName"));
-		assertEquals("@home", jsonPath.get("IDMS_User_Context__c"));
+		when(openAMTokenService.getUserDetails(anyString())).thenReturn(DomainMockData.TECHNICAL_USER);
+		when(openAMService.authenticateUser(anyString(), anyString(), anyString()))
+		.thenReturn(DomainMockData.AUTHENTICATION_JSON);
+		when(openAMService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_INVALID_USER);
+
+		String userId = "";
+		javax.ws.rs.core.Response response = userService.getUser("Bearer 8rcWmUAB_-iRhprn4JH49rbMgW4", userId);
+		assertEquals(HttpStatus.NOT_FOUND, HttpStatus.valueOf(response.getStatus()));
+		JSONArray jsonArray = (JSONArray)response.getEntity();
+		JSONObject actualResponse = (JSONObject)jsonArray.get(0);
+		assertThat("ErrorCode: ", actualResponse.get("errorCode"), equalTo("NOT_FOUND"));
+		assertThat("message: ", actualResponse.get("message"), equalTo("Provided external ID field does not exist or is  not accessible: "+userId));
+	}
+	
+	@Test
+	public void testGetUser_Exception() {
+		
+		when(openAMTokenService.getUserDetails(anyString())).thenReturn(DomainMockData.TECHNICAL_USER);
+		when(openAMService.authenticateUser(anyString(), anyString(), anyString()))
+		.thenReturn(DomainMockData.AUTHENTICATION_JSON);
+		when(openAMService.getUser(anyString(), anyString())).thenThrow(new NotFoundException());
+
+		String userId = "cn00Nfbt-XRzP-zytK-VE68-THyztdBHabc8";
+		javax.ws.rs.core.Response response = userService.getUser("Bearer 8rcWmUAB_-iRhprn4JH49rbMgW4", userId);
+		assertEquals(HttpStatus.UNAUTHORIZED, HttpStatus.valueOf(response.getStatus()));
+		JSONArray jsonArray = (JSONArray)response.getEntity();
+		JSONObject actualResponse = (JSONObject)jsonArray.get(0);
+		assertThat("ErrorCode: ", actualResponse.get("errorCode"), equalTo("Unauthorized"));
+		assertThat("message: ", actualResponse.get("message"), equalTo("OpenAM issue of Authorization for "+userId));
 	}
 }

@@ -2,6 +2,7 @@ package com.idms.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -21,6 +22,8 @@ import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.cache.ehcache.EhCacheCache;
+import org.springframework.http.HttpStatus;
 
 import com.idms.mapper.IdmsMapper;
 import com.idms.model.ResendPinRequest;
@@ -43,7 +46,7 @@ public class ResendPinTest implements PropertyVariables{
 	private IdmsMapper idmsMapper;
 
 	@Mock
-	private IValidator pickListValidator = new PickListValidatorImpl();;
+	private IValidator pickListValidator = new PickListValidatorImpl();
 
 	@Mock
 	private IValidator multiPickListValidator;
@@ -57,6 +60,14 @@ public class ResendPinTest implements PropertyVariables{
 	@Mock
 	private OpenAMService productService;
 	
+	@Mock
+	private org.springframework.cache.ehcache.EhCacheCacheManager cacheManager;
+	
+	@Mock
+	private EhCacheCache cache;
+	
+	@Mock
+	private SendEmail sendEmail;
 	
 	/**
 	 * Initialize mocks.
@@ -70,27 +81,26 @@ public class ResendPinTest implements PropertyVariables{
 	/**
 	 * Test Submitting of new pin when new user is registered provided - when
 	 * pin is not expired
+	 * @throws Exception 
 	 */
 	@Test
-	public void testUserPinConfirmation() {
+	public void testUserPinConfirmation() throws Exception {
 		
 		String token = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
-		ResendPinRequest confirmPinRequest = DtoMockData.buildResendRequPinReuest();
+		ResendPinRequest confirmPinRequest = DtoMockData.buildResendPinRequest();
 		
 		InputStream stream = new ByteArrayInputStream(DomainMockData.ENTITY.getBytes(StandardCharsets.UTF_8));
 		Response otpResponse = Response.status(Response.Status.OK).entity(stream).build();
-		
 		when(productService.authenticateUser(anyString(), anyString(), anyString())).thenReturn(DomainMockData.AUTHENTICATION_JSON);
-
+		when(cacheManager.getCache(anyString())).thenReturn(cache);
 		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER);
+		when(sendEmail.generateOtp(anyString())).thenReturn("1234");
 		when(productService.otpAuthentication(anyString(),anyString(),anyString(), anyString(), anyString()))
 		.thenReturn(otpResponse);
 		
 		Response response = userService.resendPIN(token, confirmPinRequest);
-		
-		
+		assertEquals(HttpStatus.OK, HttpStatus.valueOf(response.getStatus()));
 		JSONObject actualResponse = (JSONObject)response.getEntity();
-		
 		assertThat("Status ", actualResponse.get(UserConstants.STATUS), equalTo("Success"));
 		assertThat("Message ", actualResponse.get(UserConstants.MESSAGE), equalTo(UserConstants.PIN_SEND_SUCCESS));
 	}
@@ -100,23 +110,16 @@ public class ResendPinTest implements PropertyVariables{
 	 * auth token throw bad request
 	 */
 	@Test
-	public void testUserPinConfirmationWhenAuthenticateUserThrowBadRequset() {
+	public void testUserPinConfirmationWhenAuthenticateUserThrowsBadRequest() {
 		
 		String token = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
-		ResendPinRequest confirmPinRequest = DtoMockData.buildResendRequPinReuest();
-		
+		ResendPinRequest confirmPinRequest = DtoMockData.buildResendPinRequest();
 		when(productService.authenticateUser(anyString(), anyString(), anyString())).thenThrow(new BadRequestException(""));
-
 		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER);
-		
-		/*when(productService.otpAuthentication(anyString(), anyString(), anyString(), anyString()))
-		.thenReturn(DomainMockData.EMAIL_OTP);*/
-		
+
 		Response response = userService.resendPIN(token, confirmPinRequest);
-		
-		
+		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		JSONObject actualResponse = (JSONObject)response.getEntity();
-		
 		assertThat("Status ", actualResponse.get(UserConstants.STATUS), equalTo(UserConstants.STATUS_FAILD));
 		assertThat("Message ", actualResponse.get(UserConstants.MESSAGE), equalTo(UserConstants.ERROR_RESEND_PIN));
 		assertThat(response.getStatus(),equalTo(400));
@@ -127,26 +130,18 @@ public class ResendPinTest implements PropertyVariables{
 	 * auth token throw NotFound
 	 */
 	@Test
-	public void testUserPinConfirmationWhenAuthenticateUserThrowNotFound() {
+	public void testUserPinConfirmation_NotFoundException() {
 		
 		String token = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
-		ResendPinRequest confirmPinRequest = DtoMockData.buildResendRequPinReuest();
-		
+		ResendPinRequest confirmPinRequest = DtoMockData.buildResendPinRequest();
 		when(productService.authenticateUser(anyString(), anyString(), anyString())).thenThrow(new NotFoundException(""));
-
 		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER);
 		
-		/*when(productService.otpAuthentication(anyString(), anyString(), anyString(), anyString()))
-		.thenReturn(DomainMockData.EMAIL_OTP);*/
-		
 		Response response = userService.resendPIN(token, confirmPinRequest);
-		
-		
+		assertEquals(HttpStatus.NOT_FOUND, HttpStatus.valueOf(response.getStatus()));
 		JSONObject actualResponse = (JSONObject)response.getEntity();
-		
 		assertThat("Status ", actualResponse.get(UserConstants.STATUS), equalTo(UserConstants.STATUS_FAILD));
 		assertThat("Message ", actualResponse.get(UserConstants.MESSAGE), equalTo(UserConstants.ERROR_RESEND_PIN));
-		assertThat(response.getStatus(),equalTo(404));
 	}
 	
 	/**
@@ -154,23 +149,16 @@ public class ResendPinTest implements PropertyVariables{
 	 * get User throw Bad Request
 	 */
 	@Test
-	public void testUserPinConfirmationWhenGetUserThrowInternalServerException() {
+	public void testUserPinConfirmation_BadRequestException() {
 		
 		String token = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
-		ResendPinRequest confirmPinRequest = DtoMockData.buildResendRequPinReuest();
-		
+		ResendPinRequest confirmPinRequest = DtoMockData.buildResendPinRequest();
 		when(productService.authenticateUser(anyString(), anyString(), anyString())).thenReturn(DomainMockData.AUTHENTICATION_JSON);
-
 		when(productService.getUser(anyString(), anyString())).thenThrow(new BadRequestException(""));
 		
-		/*when(productService.otpAuthentication(anyString(), anyString(), anyString(), anyString()))
-		.thenReturn(DomainMockData.EMAIL_OTP);*/
-		
 		Response response = userService.resendPIN(token, confirmPinRequest);
-		
-		
+		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		JSONObject actualResponse = (JSONObject)response.getEntity();
-		
 		assertThat("Status ", actualResponse.get(UserConstants.STATUS), equalTo(UserConstants.STATUS_FAILD));
 		assertThat("Message ", actualResponse.get(UserConstants.MESSAGE), equalTo(UserConstants.ERROR_RESEND_PIN));
 		assertThat(response.getStatus(),equalTo(400));
@@ -181,23 +169,15 @@ public class ResendPinTest implements PropertyVariables{
 	 * get User throw Bad Request
 	 */
 	@Test
-	public void testUserPinConfirmationWhenGetUserThrowNotFoundException() {
+	public void testUserPinConfirmation_UserNotFoundException() {
 		
 		String token = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
-		ResendPinRequest confirmPinRequest = DtoMockData.buildResendRequPinReuest();
-		
+		ResendPinRequest confirmPinRequest = DtoMockData.buildResendPinRequest();
 		when(productService.authenticateUser(anyString(), anyString(), anyString())).thenReturn(DomainMockData.AUTHENTICATION_JSON);
-
 		when(productService.getUser(anyString(), anyString())).thenThrow(new NotFoundException(""));
 		
-		/*when(productService.otpAuthentication(anyString(), anyString(), anyString(), anyString()))
-		.thenReturn(DomainMockData.EMAIL_OTP);*/
-		
 		Response response = userService.resendPIN(token, confirmPinRequest);
-		
-		
 		JSONObject actualResponse = (JSONObject)response.getEntity();
-		
 		assertThat("Status ", actualResponse.get(UserConstants.STATUS), equalTo(UserConstants.STATUS_FAILD));
 		assertThat("Message ", actualResponse.get(UserConstants.MESSAGE), equalTo(UserConstants.ERROR_RESEND_PIN));
 		assertThat(response.getStatus(),equalTo(404));
