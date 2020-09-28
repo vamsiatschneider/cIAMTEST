@@ -34,6 +34,8 @@ public class UserConstants {
 	
 	public static final String SET_INVITATION_SUCCESS_MESSAGE="Sent invitation successfully";
 	
+	public static final String ALREADY_REGISTERED_MESSAGE = "You have already registered";
+
 	public static final String RESEND_REGEMAIL_SUCCESS_MESSAGE="Resend Registration Email or mobile OTP successful";
 	
 	public static final String RESEND_REGEMOB_SUCCESS_MESSAGE="Resend Registration Email or mobile OTP successful";

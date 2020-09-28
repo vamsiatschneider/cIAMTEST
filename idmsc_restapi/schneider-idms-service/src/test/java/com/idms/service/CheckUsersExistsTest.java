@@ -1,60 +1,33 @@
 package com.idms.service;
 
-import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
+import org.json.simple.JSONObject;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.cache.ehcache.EhCacheCache;
 
-import com.idms.mapper.IdmsMapper;
 import com.idms.product.client.IFWService;
 import com.idms.product.client.OpenAMService;
 import com.idms.product.client.SalesForceService;
-import com.jayway.restassured.path.json.JsonPath;
-import com.jayway.restassured.response.Response;
-import com.se.idms.cache.validate.IValidator;
-import com.se.idms.cache.validate.impl.LengthValidatorImpl;
-import com.se.idms.cache.validate.impl.PickListValidatorImpl;
-import com.se.idms.dto.UserExistsResponse;
-import com.se.idms.util.ValidatingInvocationHandler;
+import com.idms.service.impl.IFWTokenServiceImpl;
+import com.schneider.idms.salesforce.service.SalesforceSyncServiceImpl;
 
 /**
  * Test class for Check user exists endpoint
- * @author Aravindh Kumar
  *
  */
 public class CheckUsersExistsTest {
 	
-	/**
-	 * Class under test.
-	 */
 	@InjectMocks
 	private UserService userService = new UserServiceImpl();
-
-	@Mock
-	private IdmsMapper idmsMapper;
-
-	@Mock
-	private IValidator pickListValidator = new PickListValidatorImpl();;
-
-	@Mock
-	private IValidator multiPickListValidator;
-
-	@Mock
-	private IValidator legthValidator = new LengthValidatorImpl();
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	@Mock
 	private OpenAMService productService;
@@ -66,13 +39,13 @@ public class CheckUsersExistsTest {
 	private EhCacheCache cache;
 	
 	@Mock
-	private SendEmail sendEmail;
-	
-	@Mock
-	private UIMSUserManagerSoapService uimsUserManagerSoapService;
-	
-	@Mock
 	private IFWService ifwService;
+	
+	@Mock
+	private SalesforceSyncServiceImpl sfSyncServiceImpl;
+	
+	@Mock
+	private IFWTokenServiceImpl ifwTokenServiceImpl;
 	
 	@Mock
 	private SalesForceService salesForceService;
@@ -83,87 +56,146 @@ public class CheckUsersExistsTest {
 	@Before
 	public void before() {
 		MockitoAnnotations.initMocks(this);
-		userService = ValidatingInvocationHandler.createValidatingServiceProxy(userService, UserService.class);
-		legthValidator = ValidatingInvocationHandler.createValidatingServiceProxy(legthValidator, IValidator.class);
-		pickListValidator = ValidatingInvocationHandler.createValidatingServiceProxy(pickListValidator,
-				IValidator.class);
-
 	}
 	
 	@Test
-	public void testCheckUserExits() {
+	public void testUserExists_Mobile_WithoutGlobalCheck() {
 		
 		when(productService.authenticateUser(anyString(), anyString(), anyString()))
 		.thenReturn(DomainMockData.AUTHENTICATION_JSON);
-
 		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER);
-
 		when(cacheManager.getCache(anyString())).thenReturn(cache);
-		
 		when(productService.checkUserExistsWithEmailMobile(anyString(), anyString())).thenReturn(DomainMockData.USER_EXISTS);
 		
-		//when(ifwService.getIFWToken(anyString(),anyString(), anyString(), anyString())).thenReturn(DomainMockData.IFW_USER);
-		
-		when(salesForceService.getSalesForceToken(anyString(),anyString(), anyString(),anyString(), anyString(), anyString())).thenReturn(DomainMockData.SALESFORCE_USER);
-		
-		javax.ws.rs.core.Response response =   userService.checkUserExists("", "false", null);
-		
-		UserExistsResponse  actualResponse = (UserExistsResponse)response.getEntity();
-		
-		assertThat("Message ", actualResponse.getMessage(), equalTo("false"));
+		javax.ws.rs.core.Response response = userService.checkUserExists("13655207991", "false", null);
+		JSONObject  actualResponse = (JSONObject)response.getEntity();
+		assertThat("Message ", actualResponse.get("message"), equalTo("false"));
 	}
 	
 	@Test
-	public void testCheckUserExitsWhenAlreadyUserAvailable() {
+	public void testUserExists_Email_WithoutGlobalCheck() {
 		
 		when(productService.authenticateUser(anyString(), anyString(), anyString()))
 		.thenReturn(DomainMockData.AUTHENTICATION_JSON);
-
 		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER);
-
 		when(cacheManager.getCache(anyString())).thenReturn(cache);
+		when(productService.checkUserExistsWithEmailMobile(anyString(), anyString())).thenReturn(DomainMockData.USER_EXISTS);
 		
+		javax.ws.rs.core.Response response = userService.checkUserExists("dummy1@mailinator.com", "false", null);
+		JSONObject  actualResponse = (JSONObject)response.getEntity();
+		assertThat("Message ", actualResponse.get("message"), equalTo("false"));
+	}
+	
+	@Test
+	public void testUserExists_Mobile_WithGlobalCheck() {
+		
+		javax.ws.rs.core.Response ifwResponse = DomainMockData.get404IfwResponse();
+		when(productService.authenticateUser(anyString(), anyString(), anyString()))
+		.thenReturn(DomainMockData.AUTHENTICATION_JSON);
+		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER);
+		when(cacheManager.getCache(anyString())).thenReturn(cache);
+		when(productService.checkUserExistsWithEmailMobile(anyString(), anyString())).thenReturn(DomainMockData.USER_EXISTS);
+		when(ifwTokenServiceImpl.getIFWToken()).thenReturn(DomainMockData.IFW_USER);
+		when(sfSyncServiceImpl.getSFToken()).thenReturn(DomainMockData.SALESFORCE_USER);
+		when(ifwService.checkUserExistsWithMobile(anyString(), anyString(), anyString(), anyString(), anyString(), anyString(),
+				anyString(), anyBoolean())).thenReturn(ifwResponse);
+		
+		javax.ws.rs.core.Response response = userService.checkUserExists("13655207991", "true", null);
+		JSONObject  actualResponse = (JSONObject)response.getEntity();
+		assertThat("Message ", actualResponse.get("message"), equalTo("false"));
+	}
+	
+	@Test
+	public void testUserExists_Email_WithGlobalCheck() {
+		
+		javax.ws.rs.core.Response ifwResponse = DomainMockData.get404IfwResponse();
+		when(productService.authenticateUser(anyString(), anyString(), anyString()))
+		.thenReturn(DomainMockData.AUTHENTICATION_JSON);
+		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER);
+		when(cacheManager.getCache(anyString())).thenReturn(cache);
+		when(productService.checkUserExistsWithEmailMobile(anyString(), anyString())).thenReturn(DomainMockData.USER_EXISTS);
+		when(ifwTokenServiceImpl.getIFWToken()).thenReturn(DomainMockData.IFW_USER);
+		when(sfSyncServiceImpl.getSFToken()).thenReturn(DomainMockData.SALESFORCE_USER);
+		when(ifwService.checkUserExistsWithMobile(anyString(), anyString(), anyString(), anyString(), anyString(), anyString(),
+				anyString(), anyBoolean())).thenReturn(ifwResponse);
+		
+		javax.ws.rs.core.Response response = userService.checkUserExists("dummy1@mailinator.com", "true", null);
+		JSONObject  actualResponse = (JSONObject)response.getEntity();
+		assertThat("Message ", actualResponse.get("message"), equalTo("false"));
+	}
+	
+	@Test
+	public void testUserExists_ExistingMobile_WithoutGlobalCheck() {
+		
+		javax.ws.rs.core.Response ifwResponse = DomainMockData.get404IfwResponse();
+		when(productService.authenticateUser(anyString(), anyString(), anyString()))
+		.thenReturn(DomainMockData.AUTHENTICATION_JSON);
+		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER);
+		when(cacheManager.getCache(anyString())).thenReturn(cache);
+		when(productService.checkUserExistsWithEmailMobile(anyString(), anyString())).thenReturn(DomainMockData.USER_EXISTS);
+		when(ifwTokenServiceImpl.getIFWToken()).thenReturn(DomainMockData.IFW_USER);
+		when(sfSyncServiceImpl.getSFToken()).thenReturn(DomainMockData.SALESFORCE_USER);
+		when(ifwService.checkUserExistsWithMobile(anyString(), anyString(), anyString(), anyString(), anyString(), anyString(),
+				anyString(), anyBoolean())).thenReturn(ifwResponse);
+		
+		javax.ws.rs.core.Response response = userService.checkUserExists("13655207991", "false", null);
+		JSONObject  actualResponse = (JSONObject)response.getEntity();
+		assertThat("Message ", actualResponse.get("message"), equalTo("false"));
+	}
+	
+	@Test
+	public void testUserExists_ExistingEmail_WithoutGlobalCheck() {
+		
+		javax.ws.rs.core.Response ifwResponse = DomainMockData.get404IfwResponse();
+		when(productService.authenticateUser(anyString(), anyString(), anyString()))
+		.thenReturn(DomainMockData.AUTHENTICATION_JSON);
+		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER);
+		when(cacheManager.getCache(anyString())).thenReturn(cache);
+		when(productService.checkUserExistsWithEmailMobile(anyString(), anyString())).thenReturn(DomainMockData.USER_EXISTS);
+		when(ifwTokenServiceImpl.getIFWToken()).thenReturn(DomainMockData.IFW_USER);
+		when(sfSyncServiceImpl.getSFToken()).thenReturn(DomainMockData.SALESFORCE_USER);
+		when(ifwService.checkUserExistsWithMobile(anyString(), anyString(), anyString(), anyString(), anyString(), anyString(),
+				anyString(), anyBoolean())).thenReturn(ifwResponse);
+		
+		javax.ws.rs.core.Response response = userService.checkUserExists("dummy1@mailinator.com", "false", null);
+		JSONObject  actualResponse = (JSONObject)response.getEntity();
+		assertThat("Message ", actualResponse.get("message"), equalTo("false"));
+	}
+	
+	@Test
+	public void testUserExists_ExistingMobile_WithGlobalCheck() {
+		
+		javax.ws.rs.core.Response ifwResponse = DomainMockData.getOkIfwResponse();
+		when(productService.authenticateUser(anyString(), anyString(), anyString()))
+		.thenReturn(DomainMockData.AUTHENTICATION_JSON);
+		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER);
+		when(cacheManager.getCache(anyString())).thenReturn(cache);
 		when(productService.checkUserExistsWithEmailMobile(anyString(), anyString())).thenReturn(DomainMockData.USER_EXISTS_TRUE);
+		when(ifwTokenServiceImpl.getIFWToken()).thenReturn(DomainMockData.IFW_USER);
+		when(sfSyncServiceImpl.getSFToken()).thenReturn(DomainMockData.SALESFORCE_USER);
+		when(ifwService.checkUserExistsWithMobile(anyString(), anyString(), anyString(), anyString(), anyString(), anyString(),
+				anyString(), anyBoolean())).thenReturn(ifwResponse);
 		
-		//when(ifwService.getIFWToken(anyString(),anyString(), anyString(), anyString())).thenReturn(DomainMockData.IFW_USER);
-		
-		when(salesForceService.getSalesForceToken(anyString(),anyString(), anyString(),anyString(), anyString(), anyString())).thenReturn(DomainMockData.SALESFORCE_USER);
-		
-		javax.ws.rs.core.Response response =   userService.checkUserExists("suresh.update.4@mailinator.com", "true", null);
-		
-		UserExistsResponse  actualResponse = (UserExistsResponse)response.getEntity();
-		
-		assertThat("Message ", actualResponse.getMessage(), equalTo("true"));
+		javax.ws.rs.core.Response response = userService.checkUserExists("13655207991", "true", null);
+		JSONObject  actualResponse = (JSONObject)response.getEntity();
+		assertThat("Message ", actualResponse.get("message"), equalTo("true"));
 	}
-
-	final String ROOT_URL = "http://localhost:8080/IDMS/services/apexrest/IDMSUser/";
-
-	@Test
-	public void testCheckUserSuccess() {
+	
+	public void testUserExists_ExistingEmail_WithGlobalCheck() {
 		
-		given().when().get(ROOT_URL + "arvind.test1@mailinator.com").then().statusCode(200);
-
-	}
-
-	@Test
-	public void testCheckUserInvalidUser() {
+		javax.ws.rs.core.Response ifwResponse = DomainMockData.getOkIfwResponse();
+		when(productService.authenticateUser(anyString(), anyString(), anyString()))
+		.thenReturn(DomainMockData.AUTHENTICATION_JSON);
+		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER);
+		when(cacheManager.getCache(anyString())).thenReturn(cache);
+		when(productService.checkUserExistsWithEmailMobile(anyString(), anyString())).thenReturn(DomainMockData.USER_EXISTS_TRUE);
+		when(ifwTokenServiceImpl.getIFWToken()).thenReturn(DomainMockData.IFW_USER);
+		when(sfSyncServiceImpl.getSFToken()).thenReturn(DomainMockData.SALESFORCE_USER);
+		when(ifwService.checkUserExistsWithEmail(anyString(), anyString(), anyString(), anyString(), anyString(), anyString(),
+				anyString(), anyBoolean())).thenReturn(ifwResponse);
 		
-		Response response = given().when().get(ROOT_URL + "INVALID");
-		assertEquals(404, response.getStatusCode());
-		String json = response.asString();
-		
-		JsonPath jsonPath = new JsonPath(json);
-		assertEquals("false", jsonPath.get("message"));
-	}
-
-	@Test
-	public void testCheckUserData() {
-		
-		Response response = given().when().get(ROOT_URL + "arvind.test1@mailinator.com");
-		assertEquals(200, response.getStatusCode());
-		String json = response.asString();
-		
-		JsonPath jsonPath = new JsonPath(json);
-		assertEquals("true", jsonPath.get("message"));
+		javax.ws.rs.core.Response response = userService.checkUserExists("dummyId@mailinator.com", "true", null);
+		JSONObject  actualResponse = (JSONObject)response.getEntity();
+		assertThat("Message ", actualResponse.get("message"), equalTo("true"));
 	}
 }

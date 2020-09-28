@@ -2,6 +2,7 @@ package com.idms.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertNotNull;
 
 import javax.ws.rs.core.Response;
 
@@ -82,26 +83,12 @@ public class IdmsIdpChainingTest {
 	@Test
 	public void testIdmsIDPChainingTest() {
 		
-		String idToken1 = "";
-		
-		String idToken2 = ""; 
-		
-		String idButton = "";
-		
+		String idToken1 = "", idToken2 = "", idButton = "", gotoOnFail = "";
 		String gotoUrl = "aHR0cHM6Ly9pbXMtc3FlLmJ0c2VjLmRldi5zY2huZWlkZXItZWxlY3RyaWMuY29tL29wZW5zc28vaWRwc3NvaW5pdD9tZXRhQWxpYXM9JTJGaWRwJnNwRW50aXR5SUQ9aHR0cHMlM0ElMkYlMkZ1YXRiZm8xLXNlY29tbXVuaXRpZXMuY3MxOC5mb3JjZS5jb20lMkZpZGVudGl0eSUyRndvcmsmUmVsYXlTdGF0ZT1odHRwcyUzQSUyRiUyRmlkZW50aXR5LWludC5zY2huZWlkZXItZWxlY3RyaWMuY29tJTJGdWklMkYlMjMlMjElMkZsb2dpbiUzRmFwcCUzRG9hdXRoU2FtcGxlQXBw";
-		
-		String gotoOnFail = "";
-		
 		String sunQueryParamsString = "c3BFbnRpdHlJRD1odHRwczovL3VhdGJmbzEtc2Vjb21tdW5pdGllcy5jczE4LmZvcmNlLmNvbS9pZGVudGl0eS93b3Jr";
-		
-		String encoded = "true";
-		
-		String  errorMessage = "";
-		
-		String gxCharset = "UTF-8";
+		String encoded = "true", errorMessage = "", gxCharset = "UTF-8";
 
 		Response response = userService.idmsIdpChaning(idToken1, idToken2, idButton, gotoUrl, gotoOnFail, sunQueryParamsString, encoded, errorMessage, gxCharset);
-
 		assertThat("Status ", response.getStatus(), equalTo(301));
 	}
 	
@@ -113,28 +100,14 @@ public class IdmsIdpChainingTest {
 	@Test
 	public void testIdmsIDPChainingTestWhenErrorMessageIsAuthFailed() throws Exception {
 		
-		String idToken1 = "";
-		
-		String idToken2 = ""; 
-		
-		String idButton = "";
-		
+		String idToken1 = "", idToken2 = "", idButton = "", gotoOnFail = "";
 		String gotoUrl = "aHR0cHM6Ly9pbXMtc3FlLmJ0c2VjLmRldi5zY2huZWlkZXItZWxlY3RyaWMuY29tL29wZW5zc28vaWRwc3NvaW5pdD9tZXRhQWxpYXM9JTJGaWRwJnNwRW50aXR5SUQ9aHR0cHMlM0ElMkYlMkZ1YXRiZm8xLXNlY29tbXVuaXRpZXMuY3MxOC5mb3JjZS5jb20lMkZpZGVudGl0eSUyRndvcmsmUmVsYXlTdGF0ZT1odHRwcyUzQSUyRiUyRmlkZW50aXR5LWludC5zY2huZWlkZXItZWxlY3RyaWMuY29tJTJGdWklMkYlMjMlMjElMkZsb2dpbiUzRmFwcCUzRG9hdXRoU2FtcGxlQXBw";
-		
-		String gotoOnFail = "";
-		
 		String sunQueryParamsString = "c3BFbnRpdHlJRD1odHRwczovL3VhdGJmbzEtc2Vjb21tdW5pdGllcy5jczE4LmZvcmNlLmNvbS9pZGVudGl0eS93b3Jr";
-		
-		String encoded = "true";
-		
-		String  errorMessage = "auth.failed";
-		
-		String gxCharset = "UTF-8";
+		String encoded = "true", errorMessage = "auth.failed", gxCharset = "UTF-8";
 
 		Response response = userService.idmsIdpChaning(idToken1, idToken2, idButton, gotoUrl, gotoOnFail, sunQueryParamsString, encoded, errorMessage, gxCharset);
-
 		String location = (String)	response.getHeaderString("Location");
-		
+		assertNotNull(location);
 		assertThat("Status ", response.getStatus(), equalTo(301));
 	}
 	
@@ -146,31 +119,15 @@ public class IdmsIdpChainingTest {
 	@Test
 	public void testIdmsIDPChainingTestWhenUrlIsEmpty() {
 		
-		String idToken1 = "";
-		
-		String idToken2 = ""; 
-		
-		String idButton = "";
-		
-		String gotoUrl = "";
-		
-		String gotoOnFail = "";
-		
+		String idToken1 = "", idToken2 = "", idButton = "", gotoUrl = "";
+		String gotoOnFail = "", encoded = "true";
 		String sunQueryParamsString = "c3BFbnRpdHlJRD1odHRwczovL3VhdGJmbzEtc2Vjb21tdW5pdGllcy5jczE4LmZvcmNlLmNvbS9pZGVudGl0eS93b3Jr";
-		
-		String encoded = "true";
-		
-		String  errorMessage = "auth.failed";
-		
-		String gxCharset = "UTF-8";
+		String errorMessage = "auth.failed", gxCharset = "UTF-8";
 
 		Response response = userService.idmsIdpChaning(idToken1, idToken2, idButton, gotoUrl, gotoOnFail, sunQueryParamsString, encoded, errorMessage, gxCharset);
-		
 		UserServiceResponse actualResponse = (UserServiceResponse) response.getEntity();
-
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
-		assertThat("Message ", actualResponse.getMessage(), equalTo("goto value is mandatory::"));
-		
+		assertThat("Message ", actualResponse.getMessage(), equalTo("goto value is mandatory"));
 	}
 
 	/**
@@ -181,31 +138,14 @@ public class IdmsIdpChainingTest {
 	@Test
 	public void testIdmsIDPChainingTestWhenSunQueryParamsStringIsEmpty() throws Exception {
 		
-		String idToken1 = "";
-		
-		String idToken2 = ""; 
-		
-		String idButton = "";
-		
+		String idToken1 = "", idToken2 = "", idButton = "", gotoOnFail = "";
 		String gotoUrl = "aHR0cHM6Ly9pbXMtc3FlLmJ0c2VjLmRldi5zY2huZWlkZXItZWxlY3RyaWMuY29tL29wZW5zc28vaWRwc3NvaW5pdD9tZXRhQWxpYXM9JTJGaWRwJnNwRW50aXR5SUQ9aHR0cHMlM0ElMkYlMkZ1YXRiZm8xLXNlY29tbXVuaXRpZXMuY3MxOC5mb3JjZS5jb20lMkZpZGVudGl0eSUyRndvcmsmUmVsYXlTdGF0ZT1odHRwcyUzQSUyRiUyRmlkZW50aXR5LWludC5zY2huZWlkZXItZWxlY3RyaWMuY29tJTJGdWklMkYlMjMlMjElMkZsb2dpbiUzRmFwcCUzRG9hdXRoU2FtcGxlQXBw";
+		String sunQueryParamsString = "", encoded = "true";
+		String  errorMessage = "auth.failed", gxCharset = "UTF-8";
 		
-		String gotoOnFail = "";
-		
-		String sunQueryParamsString = "";
-		
-		String encoded = "true";
-		
-		String  errorMessage = "auth.failed";
-		
-		String gxCharset = "UTF-8";
-
 		Response response = userService.idmsIdpChaning(idToken1, idToken2, idButton, gotoUrl, gotoOnFail, sunQueryParamsString, encoded, errorMessage, gxCharset);
-		
 		UserServiceResponse actualResponse = (UserServiceResponse) response.getEntity();
-
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
-		assertThat("Message ", actualResponse.getMessage(), equalTo("sunQueryParamsString value is mandatory::"));
-		
+		assertThat("Message ", actualResponse.getMessage(), equalTo("sunQueryParamsString value is mandatory"));
 	}
-
 }
