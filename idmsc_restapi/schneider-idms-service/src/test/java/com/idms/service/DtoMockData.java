@@ -80,7 +80,7 @@ public class DtoMockData {
     	request.setOperation(DomainMockData.USER_REGISTRATION_OPERATION);
     	request.setIDMS_Profile_update_source(DomainMockData.PROFILE_UPDATE_SOURCE);
     	request.setPinCode(DomainMockData.REGISTRATION_PIN);
-    	
+    	request.setEmail(DomainMockData.EMAIL);
     	
         return request;
     }
@@ -236,7 +236,7 @@ public class DtoMockData {
      *
      * @return the constructed {@link SetPasswordRequest} instance
      */
-    public static SetPasswordRequest buildSetPasswordRequset() {
+    public static SetPasswordRequest buildSetPasswordRequest() {
     	SetPasswordRequest request = new SetPasswordRequest();
     	
     	request.setFederationIdentifier(DomainMockData.FEDERATION_ID);
@@ -245,7 +245,8 @@ public class DtoMockData {
     	request.setIDMS_Profile_update_source(DomainMockData.PROFILE_UPDATE_SOURCE);
     	request.setNewPwd(DomainMockData.PASSWORD);
     	request.setToken(DomainMockData.REGISTRATION_PIN);
-    	
+        request.setUIFlag("true");
+
     	return request;
 }    
     /**
@@ -259,6 +260,7 @@ public class DtoMockData {
     	request.setIDMS_Profile_update_source(DomainMockData.IDMS_Profile_update_source__c);
     	request.setExistingPwd("Password123");
     	request.setNewPwd("Password1234");
+        request.setUIFlag("true");
         return request;
     }
 }

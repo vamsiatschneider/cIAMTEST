@@ -2,7 +2,9 @@ package com.idms.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import javax.ws.rs.core.Response;
@@ -15,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.cache.ehcache.EhCacheCache;
+import org.springframework.http.HttpStatus;
 
 import com.idms.mapper.IdmsMapper;
 import com.idms.product.client.OpenAMService;
@@ -39,7 +42,7 @@ public class SetPasswordTest {
 	private IdmsMapper idmsMapper;
 
 	@Mock
-	private IValidator pickListValidator = new PickListValidatorImpl();;
+	private IValidator pickListValidator = new PickListValidatorImpl();
 
 	@Mock
 	private IValidator multiPickListValidator;
@@ -63,7 +66,7 @@ public class SetPasswordTest {
 	private SendEmail sendEmail;
 	
 	@Mock
-	private UIMSUserManagerSoapService uimsUserManagerSoapService;
+	private UimsSetPasswordSoapService uimsSetPasswordSoapService;
 
 	/**
 	 * Initialize mocks.
@@ -85,26 +88,22 @@ public class SetPasswordTest {
 	@Test
 	public void testSetPassword() throws Exception{
 		
-		SetPasswordRequest setPasswordRequest =	DtoMockData.buildSetPasswordRequset();
-		
+		SetPasswordRequest setPasswordRequest =	DtoMockData.buildSetPasswordRequest();
 		setPasswordRequest.setId("cn002a48ce80-ccc3-4035-a905-e571a5d86505");
-		
 		when(legthValidator.validate(anyString(),anyString())).thenReturn(true);
 		when(pickListValidator.validate(anyString(),anyString())).thenReturn(true);
 		when(multiPickListValidator.validate(anyString(),anyString())).thenReturn(true);
-
 		when(productService.authenticateUser(anyString(), anyString(), anyString()))
 				.thenReturn(DomainMockData.AUTHENTICATION_JSON);
-		
 		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER);
-		
 		when(cacheManager.getCache(anyString())).thenReturn(cache);
-		
 		when(sendEmail.validatePin(anyString(),anyString())).thenReturn(true);
+		when(uimsSetPasswordSoapService.setUIMSPassword(anyString(), anyString(), anyString(), anyString(), anyString(), anyString(), anyString())).thenReturn(true);
 		
 		Response response = userService.setPassword("", "", "", setPasswordRequest);
+		assertEquals(HttpStatus.OK, HttpStatus.valueOf(response.getStatus()));
 		SetPasswordResponse actualResponse = (SetPasswordResponse)response.getEntity();
-		assertThat("Status ", actualResponse.getStatus(), equalTo("success"));
+		assertThat("Status ", actualResponse.getStatus(), equalTo("Success"));
 		assertThat("Message ", actualResponse.getMessage(), equalTo("Password Updated successfully"));
 	}
 	
@@ -113,10 +112,9 @@ public class SetPasswordTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testSetPasswordWhenUpdatesourceIsEmpty() throws Exception{
+	public void testSetPassword_EmptyUpdateSource() throws Exception{
 		
-		SetPasswordRequest setPasswordRequest =	DtoMockData.buildSetPasswordRequset();
-		
+		SetPasswordRequest setPasswordRequest =	DtoMockData.buildSetPasswordRequest();
 		setPasswordRequest.setIDMS_Profile_update_source(null);
 		
 		when(legthValidator.validate(anyString(),anyString())).thenReturn(true);
@@ -124,6 +122,7 @@ public class SetPasswordTest {
 		when(multiPickListValidator.validate(anyString(),anyString())).thenReturn(true);
 
 		Response response = userService.setPassword("", "", "", setPasswordRequest);
+		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		SetPasswordErrorResponse actualResponse = (SetPasswordErrorResponse)response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
 		assertThat("Message ", actualResponse.getMessage(), equalTo(UserConstants.PROFILE_UPDATE_SOURCE));
@@ -134,10 +133,9 @@ public class SetPasswordTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testSetPasswordIDIsEmpty() throws Exception{
+	public void testSetPassword_EmptyId() throws Exception{
 		
-		SetPasswordRequest setPasswordRequest =	DtoMockData.buildSetPasswordRequset();
-		
+		SetPasswordRequest setPasswordRequest =	DtoMockData.buildSetPasswordRequest();
 		setPasswordRequest.setId(null);
 		
 		when(legthValidator.validate(anyString(),anyString())).thenReturn(true);
@@ -145,6 +143,7 @@ public class SetPasswordTest {
 		when(multiPickListValidator.validate(anyString(),anyString())).thenReturn(true);
 
 		Response response = userService.setPassword("", "", "", setPasswordRequest);
+		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		SetPasswordErrorResponse actualResponse = (SetPasswordErrorResponse)response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
 		assertThat("Message ", actualResponse.getMessage(), equalTo(UserConstants.MANDATORY_FEDERATION_ID));
@@ -155,17 +154,16 @@ public class SetPasswordTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testSetPasswordIDIsNotWithValidPrefixEmpty() throws Exception{
+	public void testSetPassword_InvalidId() throws Exception{
 		
-		SetPasswordRequest setPasswordRequest =	DtoMockData.buildSetPasswordRequset();
-		
-		//setPasswordRequest.setId(null);
+		SetPasswordRequest setPasswordRequest =	DtoMockData.buildSetPasswordRequest();
 		
 		when(legthValidator.validate(anyString(),anyString())).thenReturn(true);
 		when(pickListValidator.validate(anyString(),anyString())).thenReturn(true);
 		when(multiPickListValidator.validate(anyString(),anyString())).thenReturn(true);
 
 		Response response = userService.setPassword("", "", "", setPasswordRequest);
+		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		SetPasswordErrorResponse actualResponse = (SetPasswordErrorResponse)response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
 		assertThat("Message ", actualResponse.getMessage(), equalTo("User Id should start with cn00"));
@@ -176,9 +174,9 @@ public class SetPasswordTest {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testSetPasswordWhenPasswordPatternIsNotMatching() throws Exception{
+	public void testSetPassword_InvalidPassword() throws Exception{
 		
-		SetPasswordRequest setPasswordRequest =	DtoMockData.buildSetPasswordRequset();
+		SetPasswordRequest setPasswordRequest =	DtoMockData.buildSetPasswordRequest();
 		setPasswordRequest.setId("cn002a48ce80-ccc3-4035-a905-e571a5d86505");
 		setPasswordRequest.setNewPwd("welcome123");
 		
@@ -187,6 +185,43 @@ public class SetPasswordTest {
 		when(multiPickListValidator.validate(anyString(),anyString())).thenReturn(true);
 
 		Response response = userService.setPassword("", "", "", setPasswordRequest);
+		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
+		SetPasswordErrorResponse actualResponse = (SetPasswordErrorResponse)response.getEntity();
+		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
+		assertThat("Message ", actualResponse.getMessage(), equalTo("New password is not following password policy"));
+	}
+	
+	@Test
+	public void testSetPassword_WithoutUIFlag() throws Exception{
+		
+		SetPasswordRequest setPasswordRequest =	DtoMockData.buildSetPasswordRequest();
+		setPasswordRequest.setId("cn002a48ce80-ccc3-4035-a905-e571a5d86505");
+		setPasswordRequest.setUIFlag("false");
+		
+		when(legthValidator.validate(anyString(),anyString())).thenReturn(true);
+		when(pickListValidator.validate(anyString(),anyString())).thenReturn(true);
+		when(multiPickListValidator.validate(anyString(),anyString())).thenReturn(true);
+
+		Response response = userService.setPassword("", "", "", setPasswordRequest);
+		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
+		SetPasswordErrorResponse actualResponse = (SetPasswordErrorResponse)response.getEntity();
+		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
+		assertThat("Message ", actualResponse.getMessage(), equalTo(UserConstants.OPERATION_BLCOKED));
+	}
+	
+	@Test
+	public void testSetPassword_EmptyPassword() throws Exception{
+		
+		SetPasswordRequest setPasswordRequest =	DtoMockData.buildSetPasswordRequest();
+		setPasswordRequest.setId("cn002a48ce80-ccc3-4035-a905-e571a5d86505");
+		setPasswordRequest.setNewPwd("");
+		
+		when(legthValidator.validate(anyString(),anyString())).thenReturn(true);
+		when(pickListValidator.validate(anyString(),anyString())).thenReturn(true);
+		when(multiPickListValidator.validate(anyString(),anyString())).thenReturn(true);
+
+		Response response = userService.setPassword("", "", "", setPasswordRequest);
+		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		SetPasswordErrorResponse actualResponse = (SetPasswordErrorResponse)response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
 		assertThat("Message ", actualResponse.getMessage(), equalTo("New password is not following password policy"));
