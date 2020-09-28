@@ -170,7 +170,7 @@ public class UserServiceImplTest implements PropertyVariables{
 		
 		when(mapper.map(userRequest, IDMSUserResponse.class)).thenReturn(idmsuserResponse);
 		
-		Response response = userService.userRegistration(anyString(),anyString(),userRequest);
+		Response response = userService.userRegistration(anyString(),anyString(),anyString(),userRequest);
 		
 		CreateUserResponse actualResponse = (CreateUserResponse)response.getEntity();
 		
@@ -216,7 +216,7 @@ public class UserServiceImplTest implements PropertyVariables{
 		
 		when(productService.userRegistration(anyString(), anyString(), anyString())).thenReturn(userRegRes);
 		
-		Response response = userService.userRegistration(anyString(),anyString(),userRequest);
+		Response response = userService.userRegistration(anyString(),anyString(),anyString(),userRequest);
 		
 		UserServiceResponse actualResponse = (UserServiceResponse)response.getEntity();
 		
@@ -256,7 +256,7 @@ public class UserServiceImplTest implements PropertyVariables{
 		
 		when(productService.checkUserExistsWithEmailMobile(anyString(), anyString())).thenReturn(DomainMockData.USER_EXISTS_TRUE);
 		
-		Response response = userService.userRegistration(anyString(),anyString(),userRequest);
+		Response response = userService.userRegistration(anyString(),anyString(),anyString(),userRequest);
 		
 		ErrorResponse actualResponse = (ErrorResponse)response.getEntity();
 		
@@ -277,7 +277,7 @@ public class UserServiceImplTest implements PropertyVariables{
 		
 		userRequest.getUserRecord().setFirstName(null);
 		
-		Response response = userService.userRegistration(anyString(),anyString(),userRequest);
+		Response response = userService.userRegistration(anyString(),anyString(),anyString(),userRequest);
 		
 		ErrorResponse errorResponse = (ErrorResponse)response.getEntity();
 		assertThat("Status ", errorResponse.getStatus(), equalTo("Error"));
@@ -297,7 +297,7 @@ public class UserServiceImplTest implements PropertyVariables{
 		when(phoneValidator.validate(anyString())).thenReturn(true);
 		
 		userRequest.getUserRecord().setLastName(null);
-		Response response = userService.userRegistration(anyString(),anyString(),userRequest);
+		Response response = userService.userRegistration(anyString(),anyString(),anyString(),userRequest);
 		
 		ErrorResponse errorResponse = (ErrorResponse)response.getEntity();
 		assertThat("Status ", errorResponse.getStatus(), equalTo("Error"));
@@ -318,7 +318,7 @@ public class UserServiceImplTest implements PropertyVariables{
 		when(phoneValidator.validate(anyString())).thenReturn(true);
 
 		userRequest.getUserRecord().setIDMS_Registration_Source__c(null);
-		Response response = userService.userRegistration(anyString(), anyString(), userRequest);
+		Response response = userService.userRegistration(anyString(),anyString(), anyString(), userRequest);
 
 		ErrorResponse errorResponse = (ErrorResponse) response.getEntity();
 		assertThat("Status ", errorResponse.getStatus(), equalTo("Error"));
@@ -339,7 +339,7 @@ public class UserServiceImplTest implements PropertyVariables{
 
 		userRequest.getUserRecord().setIDMS_User_Context__c(null);
 
-		Response response = userService.userRegistration(anyString(), anyString(), userRequest);
+		Response response = userService.userRegistration(anyString(),anyString(), anyString(), userRequest);
 
 		ErrorResponse errorResponse = (ErrorResponse) response.getEntity();
 		assertThat("Status ", errorResponse.getStatus(), equalTo("Error"));
@@ -360,7 +360,7 @@ public class UserServiceImplTest implements PropertyVariables{
 
 		userRequest.setPassword("abc");
 
-		Response response = userService.userRegistration(anyString(), anyString(), userRequest);
+		Response response = userService.userRegistration(anyString(),anyString(), anyString(), userRequest);
 
 		ErrorResponse errorResponse = (ErrorResponse) response.getEntity();
 		assertThat("Status ", errorResponse.getStatus(), equalTo("Error"));
@@ -381,7 +381,7 @@ public class UserServiceImplTest implements PropertyVariables{
 		
 		userRequest.getUserRecord().setIDMS_Registration_Source__c("UIMS");
 		
-		Response response = userService.userRegistration(null,null,userRequest);
+		Response response = userService.userRegistration(null,null,null,userRequest);
 		
 		UserServiceResponse actualResponse = (UserServiceResponse)response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));

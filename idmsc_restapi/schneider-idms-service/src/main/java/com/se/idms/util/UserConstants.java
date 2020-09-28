@@ -647,4 +647,10 @@ public class UserConstants {
 	public static final String CAPTCHA_TYPE_SMART="Smart";
 	public static final String CAPTCHA_TYPE_ERROR="Invalid Captcha Type";
 	
+	//adminstatus
+	public static final String ADMIN_VIEW="apiView";
+	public static final String ADMIN_ADMIN="apiAdmins";
+	public static final String ADMIN_UNAUTH="Unauthorized AdminGroup or session expired";
+	public static final String UNAUTHORIZED="Unauthorized";
+	
 }
