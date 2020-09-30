@@ -443,6 +443,8 @@ public class UserServiceImpl implements UserService {
 	String maxEmailLimitPasswordRecovery = null;
 	String maxMobLimitPasswordRecovery = null;
 	
+	@Value("${enableAdminAuthToken}")
+	private String enableAdminAuthToken;
 		
 	@Value("${idmsc.emailUserNameFormat}")
 	private String defaultUserNameFormat;
@@ -941,7 +943,7 @@ public class UserServiceImpl implements UserService {
 	 * java.lang.String, com.idms.model.CreateUserRequest)
 	 */
 	@Override
-	public Response userRegistration(String clientId, String clientSecret, CreateUserRequest userRequest) {
+	public Response userRegistration(String authorizedToken, String clientId, String clientSecret, CreateUserRequest userRequest) {
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
 		DocumentContext productDocCtx = null;
@@ -957,17 +959,19 @@ public class UserServiceImpl implements UserService {
 		Response userCreation = null, checkUserExist = null;
 		String otpinOpendj = null, hexPinMobile = null, otpStatus = null;
 		List<String> accssControlList=null;
-		boolean maintenanceMode=false, stopUIMSFlag = false, isOTPEnabled = false;
+		boolean maintenanceMode=false, stopUIMSFlag = false, isOTPEnabled = false, adminTokenFlag = false;
 		try {
 			objMapper = new ObjectMapper();
 
 			LOGGER.info("Entered userRegistration() -> Start");
 			LOGGER.info("Access Control List:"+maintenanceModeGlobal);
 			LOGGER.info("stopidmstouimsflag : "+stopidmstouimsflag);
+			LOGGER.info("enableAdminAuthToken : "+enableAdminAuthToken);
 			LOGGER.info(
 					"Parameter userRequest -> " + ChinaIdmsUtil.printData(objMapper.writeValueAsString(userRequest)));
 			
 			stopUIMSFlag = ((null != stopidmstouimsflag && !stopidmstouimsflag.isEmpty())?Boolean.valueOf(stopidmstouimsflag):false);
+			adminTokenFlag = ((null != enableAdminAuthToken && !enableAdminAuthToken.isEmpty())?Boolean.valueOf(enableAdminAuthToken):false);
 
 			// Step 1:
 			/**
@@ -992,6 +996,36 @@ public class UserServiceImpl implements UserService {
 					LOGGER.error("Error is :: Registration source is null or empty");
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
+				if (adminTokenFlag) {
+					if (null == authorizedToken || authorizedToken.isEmpty()) {
+						errorResponse.setStatus(errorStatus);
+						errorResponse.setMessage(UserConstants.ADMIN_TOKEN_MANDATORY);
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.error("Error is " + errorResponse.getMessage());
+						LOGGER.info("Time taken by userRegistration() : " + elapsedTime);
+						return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+					} else if (null != authorizedToken && !authorizedToken.isEmpty()) {
+						String adminStatus = getAdminGroupDetails(authorizedToken);
+						LOGGER.info("adminStatus = "+adminStatus);
+						if (adminStatus.equalsIgnoreCase(UserConstants.UNAUTHORIZED)) {
+							errorResponse.setStatus(errorStatus);
+							errorResponse.setMessage(UserConstants.ADMIN_UNAUTH);
+							elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+							LOGGER.error("Error is " + errorResponse.getMessage());
+							LOGGER.info("Time taken by userRegistration() : " + elapsedTime);
+							return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+						}
+						if (!adminStatus.equalsIgnoreCase(UserConstants.ADMIN_ADMIN)) {
+							errorResponse.setStatus(errorStatus);
+							errorResponse.setMessage("AdminToken not having sufficient priviledge");
+							elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+							LOGGER.error("Error is " + errorResponse.getMessage());
+							LOGGER.info("Time taken by userRegistration() : " + elapsedTime);
+							return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+						}
+					}
+				}
+				
 				if(maintenanceModeGlobal!=null)
 					accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
 				if(accssControlList!=null && accssControlList.size()>0 && !(accssControlList.contains("False"))){
@@ -1130,7 +1164,7 @@ public class UserServiceImpl implements UserService {
 						checkRequest.setApplicationName(userRequest.getUserRecord().getIDMS_Registration_Source__c().trim());
 					}
 
-					checkUserExist = idmsCheckUserExists(checkRequest);
+					checkUserExist = idmsCheckUserExists(authorizedToken,checkRequest);
 					LOGGER.info("idmsCheckUserExists reponse ::" + objMapper.writeValueAsString(checkUserExist));
 					org.json.simple.JSONObject checkUserJson = (org.json.simple.JSONObject) checkUserExist.getEntity();
 					String messageUser = checkUserJson.get(UserConstants.MESSAGE_L).toString();
@@ -4061,7 +4095,7 @@ public class UserServiceImpl implements UserService {
 					// creating the user
 					CreateUserRequest createUserRequest = new CreateUserRequest();
 					createUserRequest.setUserRecord(ifwUser);
-					Response userRegistrationResponse = userRegistration("", "", createUserRequest);
+					Response userRegistrationResponse = userRegistration("","", "", createUserRequest);
 					if (200 == userRegistrationResponse.getStatus()) {
 						// confirm the user
 						ConfirmPinRequest confirmPinRequest = new ConfirmPinRequest();
@@ -5343,7 +5377,7 @@ public class UserServiceImpl implements UserService {
 					checkRequest.setMobile(modifiedMobileInRequest);
 					checkRequest.setWithGlobalUsers("false");
 									
-					Response checkUserExist = idmsCheckUserExists(checkRequest);
+					Response checkUserExist = idmsCheckUserExists(null,checkRequest);
 					LOGGER.info("idmsCheckUserExists reponse in updateUser() for mobile check::"
 							+ objMapper.writeValueAsString(checkUserExist));
 
@@ -5391,7 +5425,7 @@ public class UserServiceImpl implements UserService {
 							&& !userRequest.getUserRecord().getIDMS_Profile_update_source__c().isEmpty()) {
 						checkRequest.setApplicationName(userRequest.getUserRecord().getIDMS_Profile_update_source__c().trim());
 					}
-					Response checkUserExist = idmsCheckUserExists(checkRequest);
+					Response checkUserExist = idmsCheckUserExists(null,checkRequest);
 					LOGGER.info("idmsCheckUserExists reponse ::" + objMapper.writeValueAsString(checkUserExist));
 
 					org.json.simple.JSONObject checkUserJson = (org.json.simple.JSONObject) checkUserExist.getEntity();
@@ -8284,7 +8318,7 @@ public class UserServiceImpl implements UserService {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public Response idmsCheckUserExists(CheckUserExistsRequest request) {
+	public Response idmsCheckUserExists(String authorizedToken, CheckUserExistsRequest request) {
 		LOGGER.info("Entered idmsCheckUserExists() -> Start");
 		DocumentContext productDocCtx = null, productDocApp = null;
 		String iPlanetDirectoryKey = null;
@@ -8305,6 +8339,7 @@ public class UserServiceImpl implements UserService {
 		String jsonStr = null;
 		JSONObject jsonCounter = new JSONObject();
 		String UID = null;
+		boolean adminTokenFlag = false;
 	
 
 		try {
@@ -8315,6 +8350,34 @@ public class UserServiceImpl implements UserService {
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+			}
+			
+			adminTokenFlag = ((null != enableAdminAuthToken && !enableAdminAuthToken.isEmpty())?Boolean.valueOf(enableAdminAuthToken):false);
+			if (adminTokenFlag) {
+				if (null == authorizedToken || authorizedToken.isEmpty()) {
+					response.put(UserConstants.MESSAGE_L, UserConstants.ADMIN_TOKEN_MANDATORY);
+					LOGGER.error("Error in idmsCheckUserExists is :: " + UserConstants.ADMIN_TOKEN_MANDATORY);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+				} else if (null != authorizedToken && !authorizedToken.isEmpty()) {
+					String adminStatus = getAdminGroupDetails(authorizedToken);
+					LOGGER.info("adminStatus = " + adminStatus);
+					if (adminStatus.equalsIgnoreCase(UserConstants.UNAUTHORIZED)) {
+						response.put(UserConstants.MESSAGE_L, UserConstants.ADMIN_UNAUTH);
+						LOGGER.error("Error in idmsCheckUserExists is :: " + UserConstants.ADMIN_UNAUTH);
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+						return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
+					}
+					if (!(adminStatus.equalsIgnoreCase(UserConstants.ADMIN_VIEW) || adminStatus.equalsIgnoreCase(UserConstants.ADMIN_ADMIN))) {
+						response.put(UserConstants.MESSAGE_L, "AdminToken not having sufficient priviledge");
+						LOGGER.error("Error in idmsCheckUserExists is :: AdminToken not having sufficient priviledge");
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+						return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
+					}
+				}
 			}
 						
 			if(null != request.getEmail() && !request.getEmail().isEmpty()){
@@ -9043,8 +9106,8 @@ public class UserServiceImpl implements UserService {
 	 * java.lang.String, com.idms.model.CreateUserRequest)
 	 */
 	@Override
-	public Response userRegistration_4_1(String clientId, String clientSecret, CreateUserRequest userRequest) {
-		return this.userRegistration(clientId, clientSecret, userRequest);
+	public Response userRegistration_4_1(String authtoken, String clientId, String clientSecret, CreateUserRequest userRequest) {
+		return this.userRegistration(authtoken, clientId, clientSecret, userRequest);
 	}
 
 	/*
@@ -9230,6 +9293,30 @@ public class UserServiceImpl implements UserService {
 			return false;
 		}
 		return false;
+	}
+	
+	public String getAdminGroupDetails(String authorizationToken) {
+		LOGGER.info("Entered getAdminGroupDetails() -> Start");
+		try {
+			String userInfo = openAMTokenService.getUserDetails(authorizationToken);
+			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+			DocumentContext productDocCtx = JsonPath.using(conf).parse(userInfo);
+			String adminGroup = productDocCtx.read("$.adminGroup");
+			String adminStatus = null;
+
+			if (null != adminGroup && adminGroup.toLowerCase().contains("apiview")) {
+				adminStatus = "apiview";
+				return adminStatus;
+			}
+			if (null != adminGroup && adminGroup.toLowerCase().contains("apiadmin")) {
+				adminStatus = "apiadmins";
+				return adminStatus;
+			}
+		} catch (Exception e) {
+			LOGGER.error("Exception in getTechnicalUserDetails() ::" + e.getMessage(), e);
+			return "Unauthorized";
+		}
+		return "default";
 	}
 
 	/*
@@ -10403,7 +10490,7 @@ public class UserServiceImpl implements UserService {
 			checkRequest.setMobile(mobile);
 			checkRequest.setWithGlobalUsers("false");
 			checkRequest.setApplicationName(regSource);
-			Response checkUserExist = idmsCheckUserExists(checkRequest);
+			Response checkUserExist = idmsCheckUserExists(null,checkRequest);
 			LOGGER.info("idmsCheckUserExists reponse in addmobile()::" + objMapper.writeValueAsString(checkUserExist));
 
 			org.json.simple.JSONObject checkUserJson = (org.json.simple.JSONObject) checkUserExist.getEntity();
@@ -10621,7 +10708,7 @@ public class UserServiceImpl implements UserService {
 			checkRequest.setEmail(email);
 			checkRequest.setWithGlobalUsers("true");
 			checkRequest.setApplicationName(source);
-			Response checkUserExist = idmsCheckUserExists(checkRequest);
+			Response checkUserExist = idmsCheckUserExists(null,checkRequest);
 			LOGGER.info("idmsCheckUserExists reponse in addEmail()::" + objMapper.writeValueAsString(checkUserExist));
 
 			org.json.simple.JSONObject checkUserJson = (org.json.simple.JSONObject) checkUserExist.getEntity();
@@ -11785,6 +11872,14 @@ public class UserServiceImpl implements UserService {
 
 	public void setFrVersion(String frVersion) {
 		this.frVersion = frVersion;
+	}
+
+	public String getEnableAdminAuthToken() {
+		return enableAdminAuthToken;
+	}
+
+	public void setEnableAdminAuthToken(String enableAdminAuthToken) {
+		this.enableAdminAuthToken = enableAdminAuthToken;
 	}
 
 	@Override

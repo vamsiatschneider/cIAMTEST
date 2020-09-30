@@ -74,7 +74,7 @@ public interface UserService {
 	@POST
 	@Path("/apexrest/IDMSUser")
 	@Consumes("application/json")
-	Response userRegistration(@HeaderParam("client_id") String clientId,
+	Response userRegistration(@HeaderParam("Authorization") String token,@HeaderParam("client_id") String clientId,
 			@HeaderParam("client_secret") String clientSecret, @Valid CreateUserRequest userRequest);
 
 	@POST
@@ -89,7 +89,7 @@ public interface UserService {
 
 	@POST
 	@Path("/apexrest/IDMSCheckUser")
-	Response idmsCheckUserExists(@Valid CheckUserExistsRequest request);
+	Response idmsCheckUserExists(@HeaderParam("Authorization") String token,@Valid CheckUserExistsRequest request);
 
 	@POST
 	@Path("/apexrest/IDMSCheckIdentity")
@@ -232,7 +232,7 @@ public interface UserService {
 	@POST
 	@Path("/apexrest/IDMSUserService")
 	@Consumes("application/json")
-	Response userRegistration_4_1(@HeaderParam("client_id") String clientId,
+	Response userRegistration_4_1(@HeaderParam("Authorization") String token, @HeaderParam("client_id") String clientId,
 			@HeaderParam("client_secret") String clientSecret, @Valid CreateUserRequest userRequest);
 
 	@PUT
