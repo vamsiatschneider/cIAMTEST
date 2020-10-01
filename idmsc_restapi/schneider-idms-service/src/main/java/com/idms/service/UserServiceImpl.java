@@ -9364,6 +9364,22 @@ public class UserServiceImpl implements UserService {
 		}
 
 		try {
+			if ((null==userName) ||userName.isEmpty() ) {
+				errorResponse.setStatus(errorStatus);
+				errorResponse.setMessage(UserConstants.MISSING_USERNAME);
+				LOGGER.error("Error :: " + UserConstants.MISSING_USERNAME);
+				return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity(errorResponse).build();
+
+			}
+			
+			if ((null==password) ||password.isEmpty() ) {
+				errorResponse.setStatus(errorStatus);
+				errorResponse.setMessage(UserConstants.MISSING_PASSWORD);
+				LOGGER.error("Error :: " + UserConstants.MISSING_PASSWORD);
+				return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity(errorResponse).build();
+
+			}
+			
 			LOGGER.info("Access Control List:"+maintenanceModeGlobal);
 			if(maintenanceModeGlobal!=null)
 				accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
