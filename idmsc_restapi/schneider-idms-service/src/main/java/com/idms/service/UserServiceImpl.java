@@ -496,6 +496,17 @@ public class UserServiceImpl implements UserService {
 		// productService.authenticateIdmsChinaUser(userName, password, realm);
 
 		try {
+			
+			
+			if (((null==userName) ||userName.isEmpty()) || ((null==password) ||password.isEmpty())) {
+				ErrorResponse errorResponse = new ErrorResponse();
+				errorResponse.setStatus(errorStatus);
+				errorResponse.setMessage(UserConstants.MISSING_USERLOGINDETAILS);
+				LOGGER.error("Error :: " + UserConstants.MISSING_USERLOGINDETAILS);
+				return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity(errorResponse).build();
+
+			}
+			
 			// The below snippet for authentication logs.
 			try {
 				PlanetDirectoryKey = getSSOToken();
@@ -5719,7 +5730,7 @@ public class UserServiceImpl implements UserService {
 			 if((null != userRequest.getUserRecord().getAdminBFOAccoountID() && !userRequest.getUserRecord().getAdminBFOAccoountID().isEmpty())){
 					openAmReq.getInput().getUser().setAdminBFOAccoountID(userRequest.getUserRecord().getAdminBFOAccoountID());
 			 }
-  
+		
 			jsonRequset = objMapper.writeValueAsString(openAmReq.getInput().getUser());
 			jsonRequset = jsonRequset.replace("\"\"", "[]");
 
