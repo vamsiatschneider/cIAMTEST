@@ -58,8 +58,7 @@ public class UserConstants {
 	
 	public static final String COUNTRY_KEY ="Country";
 	
-	public static final String MISSING_USERNAME ="UserName: Email / Phone Number is required";
-	public static final String MISSING_PASSWORD ="Password is required";
+	public static final String MISSING_USERLOGINDETAILS ="Invalid Username/Password combination";
 	
 	public static final String USER_EXISTS ="User Already exists";
 	
