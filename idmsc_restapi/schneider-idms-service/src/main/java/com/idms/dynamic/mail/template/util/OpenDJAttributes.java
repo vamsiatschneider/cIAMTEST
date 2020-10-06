@@ -517,9 +517,9 @@ public class OpenDJAttributes {
 		this._footerCopyrightYear = _footerCopyrightYear;
 	}
 	public String[] get_bodyColorCode() {
-		return _bodyColorCode;
+		return _bodyColorCode.clone();
 	}
 	public void set_bodyColorCode(String[] _bodyColorCode) {
-		this._bodyColorCode = _bodyColorCode;
+		this._bodyColorCode = _bodyColorCode.clone();
 	}
 }
