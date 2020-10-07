@@ -5994,11 +5994,16 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Parameter firstName -> " + firstName + " , lastName -> " + lastName);
 		LOGGER.info("Parameter email -> " + email + " , mobile -> " + mobile);
 
-		if (userPassword.length() < UserConstants.PASSWORD_LENGTH || userPassword.contains(firstName) || userPassword.contains(lastName)
-				|| !userPassword.matches(UserConstants.PASSWORD_REGEX ) || ChinaIdmsUtil.passwordCheck(userPassword,email,mobile))
-			return false;
-		else
-			return true;
+		/*
+		 * if (userPassword.length() < UserConstants.PASSWORD_LENGTH ||
+		 * userPassword.contains(firstName) || userPassword.contains(lastName) ||
+		 * !userPassword.matches(UserConstants.PASSWORD_REGEX ) ||
+		 * ChinaIdmsUtil.passwordCheck(userPassword,email,mobile))
+		 */
+		return !(userPassword.length() < UserConstants.PASSWORD_LENGTH || userPassword.contains(firstName) || userPassword.contains(lastName)
+				|| !userPassword.matches(UserConstants.PASSWORD_REGEX ) || ChinaIdmsUtil.passwordCheck(userPassword,email,mobile));
+		//else
+		//	return true;
 	}
 
 	/*
@@ -6484,10 +6489,10 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Entered validateMobile() -> Start");
 		LOGGER.info("Parameter mobileNumber -> " + mobileNumber);
 
-		if (mobileNumber.matches("\\d{11}")) {
-			return true;
-		}
-		return false;
+		//if (mobileNumber.matches("\\d{11}")) {
+		return mobileNumber.matches("\\d{11}");
+		//}
+		//return false;
 	}
 
 	/**

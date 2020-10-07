@@ -50,12 +50,12 @@ public class MandatoryValidatorImpl  implements IValidator{
 		String[] mandatoryPropertySplitter = mandatoryProperty.split(",");
 		List<String> list = Arrays.asList(mandatoryPropertySplitter);
 		//LOGGER.info("properties from cache::mandatoryProperty="+mandatoryProperty);
-		if(list.contains(value)){
+		//if(list.contains(value)){
 			//LOGGER.info("Mandatory Validation of "+key+":"+value+" is OK! and validate() is Ending");
-			return true;
-		}
+		return list.contains(value);
+		//}
 		//LOGGER.error("Mandatory Validation of "+key+":"+value+" is NOT OK! and validate() is Ending");
-		return false;
+		//return false;
 	}
 
 	public void setIDMS_FIELDSMANDATORY_PROPERTIES_PATH(String iDMS_FIELDSMANDATORY_PROPERTIES_PATH) {

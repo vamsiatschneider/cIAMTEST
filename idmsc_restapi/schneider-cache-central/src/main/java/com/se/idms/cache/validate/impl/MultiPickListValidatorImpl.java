@@ -55,13 +55,13 @@ public class MultiPickListValidatorImpl implements IValidator {
 		List<String> companyMarketServedListValue = new ArrayList<String>(Arrays.asList(multiPickList.split(";")));
 		companyMarketServedListValue.removeAll(companyMarketServedList);
 
-		if (companyMarketServedListValue.size() > 0) {
+		//if (companyMarketServedListValue.size() > 0) {
 			//LOGGER.error("Validation of "+key+":"+value+" is NOT OK! and validate() is Ending");
-			return false;
-		}
+		return !(companyMarketServedListValue.size() > 0);
+		//}
 
 		//LOGGER.info("Validation of "+key+":"+value+" is OK! and validate() is Ending");
-		return true;
+		//return true;
 	}
 
 	public void setIDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH(String iDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH) {

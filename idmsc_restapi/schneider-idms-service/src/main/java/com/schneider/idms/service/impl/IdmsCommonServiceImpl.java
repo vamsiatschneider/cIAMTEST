@@ -937,11 +937,14 @@ public class IdmsCommonServiceImpl {
 		//LOGGER.info("Parameter userPassword -> " + userPassword);
 		//LOGGER.info("Parameter firstName -> " + firstName + " ,lastName" + lastName);
 
-		if (userPassword.contains(firstName) | userPassword.contains(lastName)
-				| !userPassword.matches(UserConstants.PASSWORD_REGEX))
-			return false;
-		else
-			return true;
+		/*
+		 * if (userPassword.contains(firstName) | userPassword.contains(lastName) |
+		 * !userPassword.matches(UserConstants.PASSWORD_REGEX))
+		 */
+		return !(userPassword.contains(firstName) | userPassword.contains(lastName)
+				| !userPassword.matches(UserConstants.PASSWORD_REGEX));
+		//else
+		//	return true;
 	}
 
 	/**
@@ -1082,10 +1085,10 @@ public class IdmsCommonServiceImpl {
 		//LOGGER.info("Entered validateMobile() -> Start");
 		//LOGGER.info("Parameter mobileNumber -> " + mobileNumber);
 
-		if (mobileNumber.matches("\\d{11}")) {
-			return true;
-		}
-		return false;
+		//if (mobileNumber.matches("\\d{11}")) {
+		return mobileNumber.matches("\\d{11}");
+		//}
+		//return false;
 	}
 
 	public String getUserType(String registrationSource) throws IOException {
