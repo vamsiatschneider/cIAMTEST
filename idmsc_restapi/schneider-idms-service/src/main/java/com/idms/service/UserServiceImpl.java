@@ -1955,7 +1955,7 @@ public class UserServiceImpl implements UserService {
 			JSONArray jsonArray = new JSONArray();
 			jsonArray.add(jsonObject);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-			
+			LOGGER.info(GET_USER_BY_TOKEN_TIME_LOG + elapsedTime);
 			LOGGER.error("ECODE-GETUSER-BYTOKEN-ERR : Token not acceptable - Session expired");
 			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonArray).build();
 		} catch (Exception e) {
@@ -1966,12 +1966,13 @@ public class UserServiceImpl implements UserService {
 			JSONArray jsonArray = new JSONArray();
 			jsonArray.add(jsonObject);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-			
+			LOGGER.info(GET_USER_BY_TOKEN_TIME_LOG + elapsedTime);
 			LOGGER.error("ECODE-GETUSER-BYTOKEN-UNAUTH : Token unauthorized");
 			return Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(jsonArray).build();
 
 		}
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+		LOGGER.info(GET_USER_BY_TOKEN_TIME_LOG + elapsedTime);
 		return userResponse;
 	}
 
@@ -3465,7 +3466,7 @@ public class UserServiceImpl implements UserService {
 		String loginIdentifierType = null;
 		String firstName = null;
 		String lastName = null;
-		String amlbcookieValue = null;
+		/* String amlbcookieValue = null; PMD Violation UnusedLocalVariable */
 		String PRODUCT_JSON_STRING = null;
 		String hotpEmailVerification = null;
 		String hotpMobileVerification = null;
@@ -3681,8 +3682,10 @@ public class UserServiceImpl implements UserService {
 				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, uniqueIdentifier,
 						version);
 				LOGGER.info("End: updateUser() of OpenAMService finished for uniqueIdentifier=" + uniqueIdentifier);
-				amlbcookieValue = null != productDocCtx.read("$.amlbcookie")
-						? getValue(productDocCtx.read("$.amlbcookie").toString()) : getDelimeter();
+				/*PMD Violation UnusedLocalVariable
+				 * amlbcookieValue = null != productDocCtx.read("$.amlbcookie") ?
+				 * getValue(productDocCtx.read("$.amlbcookie").toString()) : getDelimeter();
+				 */
 
 				if ("[]".equalsIgnoreCase(productDocCtx.read("$.AuthID[0]"))
 						|| "[]".equalsIgnoreCase(productDocCtx.read("$.authId[0]"))) {
@@ -3712,8 +3715,10 @@ public class UserServiceImpl implements UserService {
 					getUserReponseProv = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, uniqueIdentifier, iPlanetDirectoryKey);
 					LOGGER.info("End: getUser() of OpenAMService finished for uniqueIdentifier=" + uniqueIdentifier);
 					provProductDocCtx = JsonPath.using(conf).parse(getUserReponseProv);
-					amlbcookieValue = null != provProductDocCtx.read("$.amlbcookie")
-							? getValue(provProductDocCtx.read("$.amlbcookie").toString()) : getDelimeter();
+					/*PMD Violation UnusedLocalVariable
+					 * amlbcookieValue = null != provProductDocCtx.read("$.amlbcookie") ?
+					 * getValue(provProductDocCtx.read("$.amlbcookie").toString()) : getDelimeter();
+					 */
 					emailOrMobile = provProductDocCtx.read("$.newmail[0]");
 					loginIdentifierType = UserConstants.EMAIL;
 					if (null == emailOrMobile) {
@@ -4035,6 +4040,7 @@ public class UserServiceImpl implements UserService {
 						isPasswordUpdatedInUIMS = uimsSetPasswordSoapService.setUIMSPassword(
 								UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, uniqueIdentifier, federationID,
 								confirmRequest.getPassword(), vNewCntValue.toString(), loginIdentifierType, emailOrMobile);
+						LOGGER.info("isPasswordUpdatedInUIMS :: UimsSetPasswordSoapService :: " +isPasswordUpdatedInUIMS);
 						LOGGER.info("End: SYNC setUIMSPassword() of UimsSetPasswordSoapService finished for federationID="
 								+ federationID);
 					} else {
@@ -4228,9 +4234,9 @@ public class UserServiceImpl implements UserService {
 		String userId = null;
 		String openamVnew = null;
 		String iPlanetDirectoryKey = null;
-		String userName = "";
+		/* String userName = ""; PMD Violation UnusedLocalVariable */
 		Integer vNewCntValue = 0;
-		List<String> listOfAil_c = null;
+		/* List<String> listOfAil_c = null; PMD Violation UnusedLocalVariable */
 		String PRODUCT_JSON_STRING = "";
 		String usermail = "";
 		// Validate Input Paramenters
@@ -4402,14 +4408,17 @@ public class UserServiceImpl implements UserService {
 							ailMasterRecord.setAilType(ailRequest.getUserAILRecord().getIDMSAclType__c());
 							ailMasterRecord.setAilValue(acl[i]);
 							objMapper = new ObjectMapper();
-							Response response = null;
+							/* Response response = null; PMD Violation UnusedLocalVariable */
 							try {
 								String ailEntryJson = objMapper.writeValueAsString(ailMasterRecord);
 								ailEntryJson = ailEntryJson.replace("\"\"", "[]");
 
-								response = openDJService.createAILMasterEntry(
-										"application/json", "application/json",
-										djUserName, djUserPwd, "create", ailEntryJson);
+								/*PMD Violation UnusedLocalVariable
+								 * response = openDJService.createAILMasterEntry( "application/json",
+								 * "application/json", djUserName, djUserPwd, "create", ailEntryJson);
+								 */
+								openDJService.createAILMasterEntry("application/json", "application/json", djUserName,
+										djUserPwd, "create", ailEntryJson);
 							} catch (Exception ex) {
 								LOGGER.error("Exception in bulkAILUpdate: " + ex.getMessage(),ex);
 							}
@@ -4530,11 +4539,12 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("productDocCtx in updateAil=" + ChinaIdmsUtil.printOpenAMInfo(productDocCtx.jsonString()));
 			IDMSAil__c = productDocCtx.read("$.IDMSAil_c[0]");
 
-			if (null != IDMSAil__c) {
-				listOfAil_c = Arrays.asList(IDMSAil__c.replaceAll("[\\(\\)\\[\\]\\{\\}]", "").split(","));
-			} else {
-				listOfAil_c = new ArrayList<String>();
-			}
+			/*PMD Violation UnusedLocalVariable
+			 *This code block has been commented on account of PMD violations. Adding to that, listOfAil_c variable, which holds the refactored value of IDMSAil__c, is unused 
+			 * if (null != IDMSAil__c) { listOfAil_c =
+			 * Arrays.asList(IDMSAil__c.replaceAll("[\\(\\)\\[\\]\\{\\}]", "").split(","));
+			 * } else { listOfAil_c = new ArrayList<String>(); }
+			 */
 
 				if(("GRANT".equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMSOperation__c()))) {
 					String ail = "";
@@ -4673,7 +4683,7 @@ public class UserServiceImpl implements UserService {
 			idmsUserAIL.setIdmsuser__c(userId);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
-			userName = productDocCtx.read("$.result[0].username");
+			/* userName = productDocCtx.read("$.result[0].username"); PMD Violation UnusedLocalVariable */
 			openamVnew = null != productDocCtx.read("$.V_New[0]") ? getValue(productDocCtx.read("$.V_New[0]"))
 					: getDelimeter();
 
@@ -5013,6 +5023,7 @@ public class UserServiceImpl implements UserService {
 							UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE, UserConstants.LANGUAGE_CODE,
 							UserConstants.REQUEST_ID, ifwAccessToken, UserConstants.ACCEPT_TYPE_APP_JSON,
 							UserConstants.FALSE, json);
+					LOGGER.info("ifwResponse :: ifwService.initiatePasswordRecovery :: "+ifwResponse);
 					LOGGER.info("End: initiatePasswordRecovery() of IFWService finished");
 
 					response.put(UserConstants.STATUS, successStatus);
@@ -5088,7 +5099,8 @@ public class UserServiceImpl implements UserService {
 		userResponse = new UserServiceResponse();
 		userResponse.setStatus(errorStatus);
 		String companyFedIdInRequest = null;
-		boolean updateMobileIdentifierCheck = false, stopUIMSFlag = false ;
+		/* boolean updateMobileIdentifierCheck = false; PMD Violation UnusedLocalVariable */
+		boolean stopUIMSFlag = false ;
 
 		try {
 			LOGGER.info("updateUser -> : Request -> " + objMapper.writeValueAsString(userRequest));
@@ -5098,7 +5110,7 @@ public class UserServiceImpl implements UserService {
 			DocumentContext productDocCtx = null;
 			DocumentContext productDocCtxUser = null;
 			String userId = null;
-			String hotpService = null;
+			/* String hotpService = null; PMD Violation UnusedLocalVariable */
 			String identifierType = null;
 			String jsonRequset = null;
 			String jsonResponse = null;
@@ -5462,7 +5474,7 @@ public class UserServiceImpl implements UserService {
 					if(!modifiedMobileInRequest.equalsIgnoreCase(mobileIdentityInOpenam)){
 						LOGGER.info("modifiedMobileInRequest = "+modifiedMobileInRequest);
 
-						updateMobileIdentifierCheck = true;
+						/* updateMobileIdentifierCheck = true; PMD Violation UnusedLocalVariable */
 						AddMobileRequest addMobileRequest = new AddMobileRequest();
 						addMobileRequest.setAccesstoken(authorizedToken);
 						addMobileRequest.setMobile(modifiedMobileInRequest);
@@ -5523,7 +5535,7 @@ public class UserServiceImpl implements UserService {
 								&& !userRequest.getUserRecord().getMobilePhone().isEmpty())) {
 
 					openAmReq.getInput().getUser().setIdmsuid(fedId);
-					hotpService = UserConstants.HOTP_EMAIL_UPDATE;
+					/* hotpService = UserConstants.HOTP_EMAIL_UPDATE; PMD Violation UnusedLocalVariable */
 					identifierType = UserConstants.EMAIL;
 					user.setMail(userRequest.getUserRecord().getEmail());
 					user.setMobile(userRequest.getUserRecord().getMobilePhone());
@@ -5537,7 +5549,7 @@ public class UserServiceImpl implements UserService {
 						&& (!userRequest.getUserRecord().getEmail().isEmpty())) {
 					user.setMail(userRequest.getUserRecord().getEmail());
 					openAmReq.getInput().getUser().setIdmsuid(fedId);
-					hotpService = UserConstants.HOTP_EMAIL_UPDATE;
+					/* hotpService = UserConstants.HOTP_EMAIL_UPDATE; PMD Violation UnusedLocalVariable */
 					identifierType = UserConstants.EMAIL;
 					loginIdentifier = userRequest.getUserRecord().getEmail();
 					if (null != updatingUser && updatingUser.equalsIgnoreCase(userRequest.getUserRecord().getEmail())) {
@@ -5554,7 +5566,7 @@ public class UserServiceImpl implements UserService {
 					}
 					user.setMobile(userRequest.getUserRecord().getMobilePhone());
 					openAmReq.getInput().getUser().setIdmsuid(fedId);
-					hotpService = UserConstants.HOTP_MOBILE_UPDATE;
+					/* hotpService = UserConstants.HOTP_MOBILE_UPDATE; PMD Violation UnusedLocalVariable */
 					identifierType = UserConstants.MOBILE;
 					loginIdentifier = userRequest.getUserRecord().getMobilePhone();
 					if (null != updatingUser
@@ -5928,8 +5940,10 @@ public class UserServiceImpl implements UserService {
 				? getValue(productDocCtx.read("$.mobile_reg").toString()) : getDelimeter();
 		String email = null != productDocCtx.read("$.mail") ? getValue(productDocCtx.read("$.mail").toString())
 				: getDelimeter();
-		String federationID = null != productDocCtx.read("$.federationID")
-				? getValue(productDocCtx.read("$.federationID").toString()) : getDelimeter();
+		/*PMD Violation UnusedLocalVariable
+		 * String federationID = null != productDocCtx.read("$.federationID") ?
+		 * getValue(productDocCtx.read("$.federationID").toString()) : getDelimeter();
+		 */
 
 		idmsUserRecord.setIdmsPreferredLanguage(idmsPreferredLanguage);
 		idmsUserRecord.setIdmsProfileUpdateSource(idmsProfileUpdateSource);
@@ -6085,7 +6099,7 @@ public class UserServiceImpl implements UserService {
 		String userData = null;
 		String loginIdentifier = null;
 		String tmpPR = null;
-		String PRODUCT_JSON_STRING = null;
+		/* String PRODUCT_JSON_STRING = null; PMD Violation UnusedLocalVariable */
 		String iPlanetDirectoryKey = null;
 		String sendEmailOptType = "";
 		String resendId = "";
@@ -6162,19 +6176,19 @@ public class UserServiceImpl implements UserService {
 						tmpPR = new String(Base64.decodeBase64(tmpPR));
 					}
 
-					String hotpService = null;
-					String userService = null;
+					/* String hotpService = null; PMD Violation UnusedLocalVariable */
+					/* String userService = null; PMD Violation UnusedLocalVariable */
 					if (UserConstants.USER_REGISTRATION.equalsIgnoreCase(resendPinRequest.getOperation())) {
-						hotpService = UserConstants.HOTP_MOBILE_USER_REGISTRATION;
-						userService = UserConstants.CREATE_USER_SERVICE;
+						/* hotpService = UserConstants.HOTP_MOBILE_USER_REGISTRATION; PMD Violation UnusedLocalVariable */
+						/* userService = UserConstants.CREATE_USER_SERVICE; PMD Violation UnusedLocalVariable */
 						sendEmailOptType = EmailConstants.USERREGISTRATION_OPT_TYPE;
 					} else if (UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(resendPinRequest.getOperation())) {
-						hotpService = UserConstants.HOTP_MOBILE_UPDATE;
-						userService = UserConstants.UPDATE_USER_SERVICE;
+						/* hotpService = UserConstants.HOTP_MOBILE_UPDATE; PMD Violation UnusedLocalVariable */
+						/* userService = UserConstants.UPDATE_USER_SERVICE; PMD Violation UnusedLocalVariable */
 						sendEmailOptType = EmailConstants.UPDATEUSERRECORD_OPT_TYPE;
 					} else {
-						hotpService = UserConstants.HOTP_MOBILE_RESET_PR;
-						userService = UserConstants.CREATE_USER_SERVICE;
+						/* hotpService = UserConstants.HOTP_MOBILE_RESET_PR; PMD Violation UnusedLocalVariable */
+						/* userService = UserConstants.CREATE_USER_SERVICE; PMD Violation UnusedLocalVariable */
 						sendEmailOptType = EmailConstants.SETUSERPWD_OPT_TYPE;
 					}
 
@@ -6517,7 +6531,7 @@ public class UserServiceImpl implements UserService {
 		String userId = "";
 		String userData = "";
 		String authId = "";
-		String amlbcookieValue = null;
+		/* String amlbcookieValue = null; PMD Violation UnusedLocalVariable */
 		String openamVnew = null;
 		Integer vNewCntValue = 0;
 		String version = null;
@@ -6805,8 +6819,10 @@ public class UserServiceImpl implements UserService {
 					loginIdentifierType = UserConstants.MOBILE;
 				}
 
-				amlbcookieValue = null != productDocCtx.read("$.amlbcookie")
-						? getValue(productDocCtx.read("$.amlbcookie").toString()) : getDelimeter();
+				/*PMD Violation UnusedLocalVariable
+				 * amlbcookieValue = null != productDocCtx.read("$.amlbcookie") ?
+				 * getValue(productDocCtx.read("$.amlbcookie").toString()) : getDelimeter();
+				 */
 				// amlbcookieValue = UserConstants.AMLB_COOKIE+amlbcookieValue;
 
 				openamVnew = null != productDocCtx.read("$.V_New[0]") ? getValue(productDocCtx.read("$.V_New[0]"))
@@ -9726,7 +9742,13 @@ public class UserServiceImpl implements UserService {
 
 		try {
 			LOGGER.info("Start: updateUserForPassword() of openam for federationId=" + federationId);
-			Response updateResponse = UserServiceUtil.updateUserPasswordBasedOnFRVersion(productService, frVersion,
+			/*PMD Violation UnusedLocalVariable
+			 * Response updateResponse =
+			 * UserServiceUtil.updateUserPasswordBasedOnFRVersion(productService, frVersion,
+			 * UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, federationId,
+			 * jsonData);
+			 */
+			UserServiceUtil.updateUserPasswordBasedOnFRVersion(productService, frVersion,
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, federationId, jsonData);
 			LOGGER.info("End: updateUserForPassword() of openam finished for federationId=" + federationId);
 			//LOGGER.info("Information from OPENAM=" + IOUtils.toString((InputStream) updateResponse.getEntity()));

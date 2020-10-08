@@ -1064,7 +1064,7 @@ public class UIMSUserManagerSoapService {
 
 	public static void main(String[] args) {
 
-		UIMSUserManagerSoapService service = new UIMSUserManagerSoapService();
+		/* UIMSUserManagerSoapService service = new UIMSUserManagerSoapService(); PMD Violation UnusedLocalVariable */
 		com.uims.authenticatedUsermanager.UserV6 user = new com.uims.authenticatedUsermanager.UserV6();
 		user.setFederatedID("123457");
 		String email = UUID.randomUUID().toString() + "@mailinator.com";
@@ -1073,7 +1073,7 @@ public class UIMSUserManagerSoapService {
 		user.setLastName("kumar");
 		user.setLanguageCode("zh");
 		user.setCountryCode("CN");
-		CompanyV3 company = new CompanyV3();
+		/* CompanyV3 company = new CompanyV3(); PMD Violation UnusedLocalVariable*/
 		// service.createUIMSUserAndCompany(CALLER_FID, user,
 		// "@Home", company, null, null, "12345678", null, "Welcome123@");
 	}

@@ -117,15 +117,21 @@ public class UpdateUserTest implements PropertyVariables{
 	@Test
 	public void testUpdateUser() throws Exception {
 		
-		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		/*PMD Violation UnusedLocalVariable
+		 * Configuration conf =
+		 * Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		 * 
+		 * DocumentContext productDocCtx =
+		 * JsonPath.using(conf).parse(DomainMockData.EMAIL_OTP);
+		 * 
+		 * InputStream stream = new
+		 * ByteArrayInputStream(DomainMockData.ENTITY.getBytes(StandardCharsets.UTF_8));
+		 * Response otpResponse =
+		 * Response.status(Response.Status.OK).entity(stream).build();
+		 */
 		
-		DocumentContext productDocCtx = JsonPath.using(conf).parse(DomainMockData.EMAIL_OTP);
 		// Setup
 		UpdateUserRequest userRequest = DtoMockData.buildUpdateUserRequset();
-		
-		InputStream stream = new ByteArrayInputStream(DomainMockData.ENTITY.getBytes(StandardCharsets.UTF_8));
-		Response otpResponse = Response.status(Response.Status.OK).entity(stream).build();
-		
 		OpenAmUserRequest openAmReq = DtoMockData.buildUserRegistrationOpenAmRequset();
 		
 		when(emailValidator.validate(anyString())).thenReturn(true);
@@ -176,9 +182,14 @@ public class UpdateUserTest implements PropertyVariables{
 	@Test
 	public void testUpdateUserWhenUserNotSendingAuthorizationToken() {
 		
-		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		/*PMD Violation UnusedLocalVariable
+		 * Configuration conf =
+		 * Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		 * 
+		 * DocumentContext productDocCtx =
+		 * JsonPath.using(conf).parse(DomainMockData.EMAIL_OTP);
+		 */
 		
-		DocumentContext productDocCtx = JsonPath.using(conf).parse(DomainMockData.EMAIL_OTP);
 		// Setup
 		UpdateUserRequest userRequest = DtoMockData.buildUpdateUserRequset();
 		
