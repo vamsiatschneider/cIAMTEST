@@ -34,6 +34,8 @@ import com.idms.model.ResendPinRequest;
 import com.idms.model.ResendRegEmailRequest;
 import com.idms.model.SendInvitationRequest;
 import com.idms.model.SendOTPRequest;
+import com.idms.model.SocialProfileActivationRequest;
+import com.idms.model.SocialProfileUpdateRequest;
 import com.idms.model.UpdatePasswordRequest;
 import com.idms.model.UpdateUserRequest;
 import com.idms.model.UserDetailByApplicationRequest;
@@ -310,4 +312,19 @@ public interface UserService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	Response captchaValidationService(ValidatePOJO neCaptchaValidate);
 
+	/*
+	 * API to update IDMS social user profile
+	 */
+	@POST
+	@Path("/apexrest/updateSocialProfile")
+	@Consumes("application/json")
+	Response updateSocialProfile(@HeaderParam("Authorization") String token, @Valid SocialProfileUpdateRequest socialProfileRequest);
+
+	/*
+	 * API to activate/merge IDMS social user profile
+	 */
+	@POST
+	@Path("/apexrest/activateSocialProfile")
+	@Consumes("application/json")
+	Response activateSocialProfile(@Valid SocialProfileActivationRequest socialProfileRequest);
 }

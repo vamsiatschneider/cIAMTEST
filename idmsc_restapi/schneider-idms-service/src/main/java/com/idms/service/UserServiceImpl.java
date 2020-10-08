@@ -118,6 +118,9 @@ import com.idms.model.ResendPinRequest;
 import com.idms.model.ResendRegEmailRequest;
 import com.idms.model.SendInvitationRequest;
 import com.idms.model.SendOTPRequest;
+import com.idms.model.SocialProfileActivationRequest;
+import com.idms.model.SocialProfileUpdateRequest;
+import com.idms.model.SocialProfileUpdateResponse;
 import com.idms.model.TransliteratorAttributes;
 import com.idms.model.TransliteratorConversionRequest;
 import com.idms.model.TransliteratorConversionResponse;
@@ -153,6 +156,7 @@ import com.idms.service.uims.sync.UIMSAuthenticatedUserManagerSoapServiceSync;
 import com.idms.service.uims.sync.UIMSUserManagerSoapServiceSync;
 import com.idms.service.util.AsyncUtil;
 import com.idms.service.util.ChinaIdmsUtil;
+import com.idms.service.util.LogMessageUtil;
 import com.idms.service.util.UserServiceUtil;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
@@ -12655,5 +12659,132 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Captcha Validation Completed");
 		return Response.status(200).entity(jsonString).build();
 
+	}
+
+	/*
+	 * API to update IDMS social user profile
+	 */
+	@Override
+	public Response updateSocialProfile(String authorizedToken, SocialProfileUpdateRequest socialProfileRequest) {
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		ErrorResponse errorResponse = new ErrorResponse();
+		OpenAmUser openamUser = new OpenAmUser();
+		String uiFlag = socialProfileRequest.getUIFlag();
+		if (StringUtils.isNotBlank(uiFlag) && UserConstants.FALSE.equalsIgnoreCase(uiFlag)
+				&& !getTechnicalUserDetails(authorizedToken)) {
+			errorResponse.setStatus(HttpStatus.UNAUTHORIZED.toString());
+			errorResponse.setMessage("Unauthorized or session expired");
+			return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+		}
+		IFWUser userRecord = socialProfileRequest.getUserRecord();
+		String fedId = userRecord.getIDMS_Federated_ID__c();
+		String errorMessage = UserServiceUtil.validateAtrributes(userRecord);
+		if (errorMessage != null) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.name());
+			errorResponse.setMessage(errorMessage);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		}
+		UserServiceUtil.populateOpenAMUserAttributes(userRecord, openamUser);
+		String requestJson = null;
+		try {
+			requestJson = new ObjectMapper().writeValueAsString(openamUser);
+		} catch (JsonProcessingException ex) {
+			errorResponse = buildErrorMessage(fedId, ex, UserConstants.JSON_PROCESSING_ERROR);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		}
+		if (requestJson == null) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage(UserConstants.JSON_PROCESSING_ERROR);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		}
+		LogMessageUtil.logInfoMessage("Request Json for userId: ", requestJson);
+
+		// Call OpenAM Profile Update and send email to user
+		Response updateResponse = openAMProfileUpdate(conf, errorResponse, userRecord, fedId, requestJson);
+		return updateResponse;
+	}
+
+	@Override
+	public Response activateSocialProfile(SocialProfileActivationRequest socialProfileRequest) {
+
+       // to be implemented: Social profile merge scenario for common email
+       return null;
+	}
+
+	private Response openAMProfileUpdate(Configuration conf, ErrorResponse errorResponse, IFWUser userRecord,
+			String fedId, String requestJson) {
+		String iPlanetDirectoryKey = null;
+		SocialProfileUpdateResponse spUpdateResponse = new SocialProfileUpdateResponse();
+		int status = HttpStatus.OK.value();
+		try {
+			iPlanetDirectoryKey = getSSOToken();
+		} catch (IOException ex) {
+			String errorMsg = "Unable to get SSO Token: ";
+			errorResponse =  buildErrorMessage(fedId, ex, errorMsg);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		}
+		LogMessageUtil.logInfoMessage("Update Social Profile Openam Call Starts for userId: ", fedId);
+		try {
+			Response response = UserServiceUtil.updateSocialProfileBasedOnFRVersion(productService,
+					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, fedId, requestJson);
+			LOGGER.info("Update Social Profile Openam Call Ends for userId: " + fedId);
+			if (response != null && HttpStatus.OK.equals(HttpStatus.valueOf(response.getStatus()))) {
+				// Send email to the user
+				sendEmailBasedOnAppSettings(conf, userRecord);
+				// send success response
+				spUpdateResponse.setStatus(successStatus);
+				spUpdateResponse.setMessage(UserConstants.SOCIAL_PROFILE_UPDATE_SUCCESS);
+				return Response.status(HttpStatus.OK.value()).entity(spUpdateResponse).build();
+			}
+		} catch (IOException ex) {
+			String errorMsg = "Unable to parse opendj application data: ";
+			status = HttpStatus.BAD_REQUEST.value();
+			errorResponse =  buildErrorMessage(fedId, ex, errorMsg);
+		} catch (BadRequestException ex) {
+			String errorMsg = "BadRequestException during user Registration: ";
+			status = HttpStatus.BAD_REQUEST.value();
+			errorResponse =  buildErrorMessage(fedId, ex, errorMsg);
+		} catch (NotFoundException ex) {
+			String errorMsg = "NotFoundException during user Registration: ";
+			status = HttpStatus.BAD_REQUEST.value();
+			errorResponse =  buildErrorMessage(fedId, ex, errorMsg);
+		} catch (Exception ex) {
+			String errorMsg = "Exception during user Registration: ";
+			status = HttpStatus.INTERNAL_SERVER_ERROR.value();
+			errorResponse =  buildErrorMessage(fedId, ex, errorMsg);
+		}
+		return Response.status(status).entity(errorResponse).build();
+	}
+
+	private ErrorResponse buildErrorMessage(String fedId, Exception e, String errorMsg) {
+		ErrorResponse errorResponse = new ErrorResponse();
+		LogMessageUtil.logErrorMessage(e, errorMsg, e.getMessage());
+		LogMessageUtil.logInfoMessage("Registration failed for user: ", fedId);
+		errorResponse.setStatus(errorStatus);
+		errorResponse.setMessage(UserConstants.ERROR_CREATE_USER);
+		return errorResponse;
+	}
+
+	private void sendEmailBasedOnAppSettings(Configuration conf, IFWUser userRecord)
+			throws Exception {
+		boolean isOTPEnabled = false;
+		Response applicationDetails = openDJService.getUser(djUserName, djUserPwd, userRecord.getIDMS_Registration_Source__c());
+		DocumentContext productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
+
+		String isOTPEnabledForApp = productDJData.read("_isOTPEnabled");
+		if(StringUtils.isNotBlank(isOTPEnabledForApp)) {
+			isOTPEnabled = Boolean.valueOf(isOTPEnabledForApp);
+			LogMessageUtil.logInfoMessage("isOTPEnabled: ", String.valueOf(isOTPEnabled));
+		}
+		String otp = null, token = null, finalPathString = "" ;
+		if(isOTPEnabled){
+			otp = sendEmail.generateOtp(userRecord.getIDMS_Federated_ID__c());
+		} else {
+			token = sendEmail.generateEmailToken(userRecord.getIDMS_Federated_ID__c());
+		}
+		LogMessageUtil.logInfoMessage("Start of SendEmail method of Update SocialProfile for fedId: ", userRecord.getIDMS_Federated_ID__c());
+		sendEmail.sendOpenAmEmail(token, otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userRecord.getIDMS_Federated_ID__c(),
+						userRecord.getIDMS_Registration_Source__c(), finalPathString);
+		LogMessageUtil.logInfoMessage("End of SendEmail method of Update SocialProfile for fedId: ", userRecord.getIDMS_Federated_ID__c());
 	}
 }

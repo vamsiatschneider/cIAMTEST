@@ -657,4 +657,7 @@ public class UserConstants {
 	public static final String ADMIN_UNAUTH="Unauthorized AdminGroup or session expired";
 	public static final String UNAUTHORIZED="Unauthorized";
 	
+	public static final String JSON_PROCESSING_ERROR = "Unable to process request json: ";
+	public static final String SOCIAL_PROFILE_UPDATE_SUCCESS = "Social Profile update is successful.";
+
 }
