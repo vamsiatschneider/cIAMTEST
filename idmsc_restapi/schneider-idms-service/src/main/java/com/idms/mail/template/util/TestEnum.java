@@ -1,23 +1,28 @@
 package com.idms.mail.template.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 public class TestEnum {
+	private static final Logger LOGGER = LoggerFactory.getLogger(TestEnum.class);
 
 	public static void main(String[] args) {
 
 		for(OperationType ot: OperationType.values()) {
-			System.out.println("Key: " + ot.name() +" Value: " +ot.getType());
+			LOGGER.info("Key: " + ot.name() +" Value: " +ot.getType());
 		}
-		System.out.println("------------");
+		LOGGER.info("------------");
 		for(EmailTemplateColor ot: EmailTemplateColor.values()) {
-			System.out.println("Key: " + ot.name() +" Value: " +ot.getColor());
+			LOGGER.info("Key: " + ot.name() +" Value: " +ot.getColor());
 		}
-		System.out.println("------------");
+		LOGGER.info("------------");
 		for(Locale ot: Locale.values()) {
-			System.out.println("Key: " + ot.name() +" Value: " +ot.getLocale());
+			LOGGER.info("Key: " + ot.name() +" Value: " +ot.getLocale());
 		}
-		System.out.println("------------");
+		LOGGER.info("------------");
 		for(PRMTemplateType ot: PRMTemplateType.values()) {
-			System.out.println("Key: " + ot.name() +" Value: " +ot.getType());
+			LOGGER.info("Key: " + ot.name() +" Value: " +ot.getType());
 		}
 	}
 

@@ -13,7 +13,7 @@ public class TestConfig {
 			e.printStackTrace();
 		}
 		String filePath = _instance.getConfiguration("user.registration.withpwd.email.template.cn");
-		System.out.println("FilePath: "+filePath);
+		
 	}
 
 }

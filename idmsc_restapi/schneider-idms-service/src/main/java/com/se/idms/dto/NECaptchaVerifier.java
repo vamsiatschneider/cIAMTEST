@@ -66,7 +66,6 @@ public class NECaptchaVerifier {
         try {
             resp = HttpConnectionUtils.readContentFromPost(VERIFY_API, params);
         } catch (IOException ex) {
-            System.out.println("http connect occur exception,please check !");
             LOGGER.error("http connect occur exception,please check !"+ ex.getMessage(), ex);
             LOGGER.error("Params :: "+ params.toString());
             ex.printStackTrace();
@@ -113,7 +112,7 @@ public class NECaptchaVerifier {
             VerifyResult verifyResult = JSONObject.parseObject(resp, VerifyResult.class);
             return verifyResult;
         } catch (Exception ex) {
-            System.out.println("yidun captcha return error response ,please check!");
+        	LOGGER.error("yidun captcha return error response ,please check!");
             ex.printStackTrace();
             return VerifyResult.fakeTrueResult(resp);
         }

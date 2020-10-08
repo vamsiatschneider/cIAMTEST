@@ -4,6 +4,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -61,6 +62,14 @@ public interface OpenAMService {
 	@Consumes("application/json")
 	String updateCounter(@HeaderParam("Accept-API-Version") String acceptAPIVersion,
 			@HeaderParam("Cookie") String iPlanetDirectoryPro, @PathParam("userId") String userId, String request);
+
+	// Changing to HTTP PUT since PATCH is not supported by Java 1.8 HTTP URL connection.
+	//@PATCH
+	@PUT
+	@Path("/se/users/{userId}")
+	@Consumes("application/json")
+	Response updateSocialProfile(@HeaderParam("Accept-API-Version") String acceptAPIVersion,
+			@HeaderParam("Cookie") String iPlanetDirectoryPro, @PathParam("userId") String userId, String patchRequest);
 
 	// OpenAM 6.5 User REST APIs END here
 
