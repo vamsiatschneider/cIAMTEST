@@ -12457,13 +12457,13 @@ public class UserServiceImpl implements UserService {
 		java.nio.file.Path destination;
 		try {
 			destination = Paths.get(pathTo.toString() + "\\" + fileUploadName);
-			System.out.println("destination = "+destination);
+			LOGGER.info("destination = "+destination);
 			Files.deleteIfExists(destination);
 			InputStream in = attachment.getObject(InputStream.class);
 			Files.copy(in, destination);
 
 			dataFile = ChinaIdmsUtil.getDataFromFile(destination.toString());
-			System.out.println("size of dataFile = " + dataFile.size());
+			LOGGER.info("size of dataFile = " + dataFile.size());
 
 			List<OpenAmUser> listUsers = ChinaIdmsUtil.buildUserObject(dataFile);
 			String ufedid=null;
