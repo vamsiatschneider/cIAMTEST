@@ -113,7 +113,10 @@ public class GoDigitalUserServiceImpl implements GoDigitalUserService {
 				LOGGER.info(":::::::isGodFail value is::::::::"+isGodFail);
 				GoDigitalLog.info("GoDigitalUser Create User Failed  ");
 				productDocCtx = JsonPath.using(conf).parse(userRegistrationInfoRequest);
-				String toAddress =  productDocCtx.read("$.userRegistrationInfoRequest.userDetails.EMAIL");
+				/*PMD Violation UnusedLocalVariable
+				 * String toAddress =
+				 * productDocCtx.read("$.userRegistrationInfoRequest.userDetails.EMAIL");
+				 */
 				LOGGER.info(""+productDocCtx.read("$.userRegistrationInfoRequest.authentication.EMAIL"));
 				sendEmail.emailReadyToSendEmail(supportUser, fromUserName, "GoDigitalUser Registration Failed", userRegistrationInfoRequest);
 			}else{

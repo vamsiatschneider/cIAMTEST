@@ -878,7 +878,7 @@ public class DirectUIMSUserManagerSoapService {
 				public Boolean call() throws Exception {
 
 					// TODO logic to get the federatedId
-					String federatedId = "";
+					/* String federatedId = ""; PMD Violation UnusedLocalVariable*/
 
 					updateUIMSCompany = companyManagerSoapService.updateUIMSCompany(fedId, vnew, company, companyFedId);
 					return updateUIMSCompany;
@@ -1103,7 +1103,10 @@ public class DirectUIMSUserManagerSoapService {
 
 	public static void main(String[] args) {
 
-		DirectUIMSUserManagerSoapService service = new DirectUIMSUserManagerSoapService();
+		/*PMD Violation UnusedLocalVariable
+		 * DirectUIMSUserManagerSoapService service = new
+		 * DirectUIMSUserManagerSoapService();
+		 */
 		com.uims.authenticatedUsermanager.UserV6 user = new com.uims.authenticatedUsermanager.UserV6();
 		user.setFederatedID("123457");
 		String email = UUID.randomUUID().toString() + "@mailinator.com";
@@ -1112,7 +1115,7 @@ public class DirectUIMSUserManagerSoapService {
 		user.setLastName("kumar");
 		user.setLanguageCode("zh");
 		user.setCountryCode("CN");
-		CompanyV3 company = new CompanyV3();
+		/* CompanyV3 company = new CompanyV3(); PMD Violation UnusedLocalVariable */
 		// service.createUIMSUserAndCompany(CALLER_FID, user,
 		// "@Home", company, null, null, "12345678", null, "Welcome123@");
 	}
