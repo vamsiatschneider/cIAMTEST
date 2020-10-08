@@ -5742,7 +5742,22 @@ public class UserServiceImpl implements UserService {
 			 if((null != userRequest.getUserRecord().getAdminBFOAccoountID() && !userRequest.getUserRecord().getAdminBFOAccoountID().isEmpty())){
 					openAmReq.getInput().getUser().setAdminBFOAccoountID(userRequest.getUserRecord().getAdminBFOAccoountID());
 			 }
-		
+				//updating CN
+				if(openAmReq.getInput().getUser().getGivenName()!=null || openAmReq.getInput().getUser().getSn()!=null ) {
+				String cn;
+				if(openAmReq.getInput().getUser().getGivenName()!=null && !openAmReq.getInput().getUser().getGivenName().isEmpty())
+					cn=openAmReq.getInput().getUser().getGivenName();
+				else
+					cn=productDocCtxUser.read("$.givenName[0]");
+				
+				if(openAmReq.getInput().getUser().getSn()!=null && !openAmReq.getInput().getUser().getSn().isEmpty())
+					cn= cn +" "+ openAmReq.getInput().getUser().getSn();
+				else
+					cn=cn+" "+productDocCtxUser.read("$.sn[0]");
+					
+				openAmReq.getInput().getUser().setCn(cn);
+				}
+				
 			jsonRequset = objMapper.writeValueAsString(openAmReq.getInput().getUser());
 			jsonRequset = jsonRequset.replace("\"\"", "[]");
 
