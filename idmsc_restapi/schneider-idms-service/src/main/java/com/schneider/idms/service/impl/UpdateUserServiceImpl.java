@@ -86,7 +86,7 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 			OpenAmUser user = new OpenAmUser();
 			StringBuilder contentBuilder = null;
 			String firstName = null;
-			boolean booleanTrue = true;
+			/* boolean booleanTrue = true; PMD Violation UnusedLocalVariable */
 			String fedId = null;
 			Integer vNewCntValue = 0;
 			String companyFedId="";

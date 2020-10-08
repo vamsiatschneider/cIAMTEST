@@ -29,11 +29,11 @@ public class PhoneValidator {
 		else if (phoneNo.matches("\\d{3}-\\d{3}-\\d{4}\\s(x|(ext))\\d{3,5}"))
 			return true;
 		// validating phone number where area code is in braces ()
-		else if (phoneNo.matches("\\(\\d{3}\\)-\\d{3}-\\d{4}"))
-			return true;
+		//else if (phoneNo.matches("\\(\\d{3}\\)-\\d{3}-\\d{4}"))
+			return phoneNo.matches("\\(\\d{3}\\)-\\d{3}-\\d{4}");
 		// return false if nothing matches the input
-		else
-			return false;
+		//else
+			//return false;
 
 	}
 

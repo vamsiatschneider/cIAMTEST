@@ -25,35 +25,37 @@ public class FieldsMappingValidatorImpl  implements IValidator{
 	
 	@Override
 	public boolean validate(String key, Object value) {
-		//LOGGER.info("Entered validate() -> Start");
-		LOGGER.info("Parameter key -> " + key+" ,value -> "+value);
+		// LOGGER.info("Entered validate() -> Start");
+		LOGGER.info("Parameter key -> " + key + " ,value -> " + value);
 		CacheManagerProvider cacheManagerProvider = new CacheManagerProviderImpl();
-		CacheBuilder cacheBuilder = new CacheBuilder(cacheManagerProvider );
-		//Properties cacheProperties =null;
-		if(IDMS_DEPLOY_ENV.equalsIgnoreCase("DEV"))
-			IDMS_FIELDSMAPPING_PROPERTIES_PATH=IDMS_FIELDSMAPPING_PROPERTIES_PATH.replaceAll("/", "\\\\");
+		CacheBuilder cacheBuilder = new CacheBuilder(cacheManagerProvider);
+		// Properties cacheProperties =null;
+		if (IDMS_DEPLOY_ENV.equalsIgnoreCase("DEV"))
+			IDMS_FIELDSMAPPING_PROPERTIES_PATH = IDMS_FIELDSMAPPING_PROPERTIES_PATH.replaceAll("/", "\\\\");
 		Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSMAPPING_PROPERTIES_PATH);
-		/*if(CacheBuilder.getPropertiesMap().size()>0){
-			CacheBuilder.getPropertiesMap().entrySet().forEach(entry -> {
-				LOGGER.info("Key : " + entry.getKey() + " Value : " + entry.getValue());
-			});  
-			cacheProperties=CacheBuilder.getPropertiesMap().get(IDMS_FIELDSMAPPING_PROPERTIES_PATH);
-		}
-		//Properties cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
-		if(cacheProperties==null){
-		   cacheProperties = cacheBuilder.getProperties(IDMS_FIELDSMAPPING_PROPERTIES_PATH);
-		}*/
+		/*
+		 * if(CacheBuilder.getPropertiesMap().size()>0){
+		 * CacheBuilder.getPropertiesMap().entrySet().forEach(entry -> {
+		 * LOGGER.info("Key : " + entry.getKey() + " Value : " + entry.getValue()); });
+		 * cacheProperties=CacheBuilder.getPropertiesMap().get(
+		 * IDMS_FIELDSMAPPING_PROPERTIES_PATH); } //Properties cacheProperties =
+		 * cacheBuilder.getProperties(IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
+		 * if(cacheProperties==null){ cacheProperties =
+		 * cacheBuilder.getProperties(IDMS_FIELDSMAPPING_PROPERTIES_PATH); }
+		 */
 		String fieldMapProperty = cacheProperties.getProperty(key);
-		
-		//LOGGER.info("properties from cache::fieldMapProperty="+fieldMapProperty);
-		
-		if(value.equals(fieldMapProperty)){
-			//LOGGER.info("Validation of "+key+":"+value+" is OK! and validate() is Ending");
-			return true;
-		}
 
-		//LOGGER.error("Validation of "+key+":"+value+" is NOT OK! and validate() is Ending");
-		return false;
+		// LOGGER.info("properties from cache::fieldMapProperty="+fieldMapProperty);
+
+		// if(value.equals(fieldMapProperty)){
+		// LOGGER.info("Validation of "+key+":"+value+" is OK! and validate() is
+		// Ending");
+		return value.equals(fieldMapProperty);
+		// }
+
+		// LOGGER.error("Validation of "+key+":"+value+" is NOT OK! and validate() is
+		// Ending");
+		// return false;
 	}
 
 	public void setIDMS_FIELDSMAPPING_PROPERTIES_PATH(String iDMS_FIELDSMAPPING_PROPERTIES_PATH) {
