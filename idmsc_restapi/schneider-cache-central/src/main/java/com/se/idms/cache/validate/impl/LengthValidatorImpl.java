@@ -27,7 +27,8 @@ public class LengthValidatorImpl implements IValidator {
 	@Override
 	public boolean validate(String key, Object value) {
 		//LOGGER.info("Entered validate() -> Start");
-		LOGGER.info("Parameter key -> " + key+" ,value -> "+value);
+		if(LOGGER.isInfoEnabled())
+			LOGGER.info("Parameter key -> " + key+" ,value -> "+value);
 		try {
 			CacheManagerProvider cacheManagerProvider = new CacheManagerProviderImpl();
 			CacheBuilder cacheBuilder = new CacheBuilder(cacheManagerProvider);
@@ -57,7 +58,8 @@ public class LengthValidatorImpl implements IValidator {
 			}
 		} catch (Exception e) {
 			//LOGGER.error("Length Validation of "+key+":"+value+" is having error:"+e.getMessage());
-			LOGGER.error("Exception "+e);
+			if(LOGGER.isErrorEnabled())
+				LOGGER.error("Exception "+e);
 		}
 		//LOGGER.error("Length Validation of "+key+":"+value+" is NOT OK! and validate() is Ending");
 		return false;

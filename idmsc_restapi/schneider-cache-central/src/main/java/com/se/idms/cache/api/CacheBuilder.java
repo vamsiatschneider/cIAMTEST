@@ -59,8 +59,9 @@ public class CacheBuilder implements CacheTypes {
 		Ehcache ehcache = cacheManager.getEhcache(cacheName);
 
 		if (ehcache == null) {
-			LOGGER.error("The requested Cache: " + cacheName	+ " was not found.");
-			throw new CacheException("The requested Cache: " + cacheName	+ " was not found.");
+			if (LOGGER.isErrorEnabled())
+				LOGGER.error("The requested Cache: " + cacheName + " was not found.");
+			throw new CacheException("The requested Cache: " + cacheName + " was not found.");
 		}
 
 		return ehcache;
@@ -85,13 +86,14 @@ public class CacheBuilder implements CacheTypes {
 			//LOGGER.info("Size of the property file :: "+element.getKey() + " Value  "+element.getValue());
 			return (Properties) element.getValue();
 		}
-
-		LOGGER.error("propertiesFile:"+propertiesFile+" is Empty or Null");
+		if (LOGGER.isErrorEnabled())
+			LOGGER.error("propertiesFile:" + propertiesFile + " is Empty or Null");
 		throw new CacheException("The input parameter for getProperties() is Empty or Null");
 	}
 	
 	public void refreshCache(String propertiesFile){
-		LOGGER.info(" CacheBuilder::refreshCache() -> Called");
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info(" CacheBuilder::refreshCache() -> Called");
 		 String property="";
 		if (StringUtils.isNotEmpty(propertiesFile)) {
 		/*	try {
@@ -101,7 +103,8 @@ public class CacheBuilder implements CacheTypes {
 				throw new CacheException("The properties file: "+ propertiesFile + " could not be accessed.");
 			}*/
 		if (selfPopulatingPropertiesCache == null){
-			LOGGER.info("propertiesFile="+propertiesFile);
+			if (LOGGER.isInfoEnabled())
+				LOGGER.info("propertiesFile="+propertiesFile);
 			if(propertiesFile.contains("LENGTH")){
 				property="lengthProperties";
 			}
@@ -125,13 +128,15 @@ public class CacheBuilder implements CacheTypes {
 			Ehcache ehcache = getRawCache(property);
 			selfPopulatingPropertiesCache = new SelfPopulatingCache(ehcache, cacheEntryFactory);
 			Element element = selfPopulatingPropertiesCache.refresh(propertiesFile);
-			LOGGER.info("Element value in refresh :"+element.getValue()+"Element Key:"+element.getKey());
+			if (LOGGER.isInfoEnabled())
+				LOGGER.info("Element value in refresh :" + element.getValue() + "Element Key:" + element.getKey());
 			//if(element!=null)
 			//selfPopulatingPropertiesCache.put(element);
 		}
 	}
 	else{
-		LOGGER.error("propertiesFile:"+propertiesFile+" is Empty or Null");
+		if (LOGGER.isErrorEnabled())
+			LOGGER.error("propertiesFile:" + propertiesFile + " is Empty or Null");
 		throw new CacheException("The input parameter for getProperties() is Empty or Null");
 		}
 		
@@ -145,7 +150,8 @@ public class CacheBuilder implements CacheTypes {
 		//LOGGER.info("Entered getPropertiesCache() -> Start");
 		
 		if (selfPopulatingPropertiesCache == null) {
-			LOGGER.info("propertiesFile="+propertiesFile);
+			if (LOGGER.isInfoEnabled())
+				LOGGER.info("propertiesFile="+propertiesFile);
 			if(propertiesFile.contains("LENGTH")){
 				createPropertiesCache("lengthProperties");
 			}

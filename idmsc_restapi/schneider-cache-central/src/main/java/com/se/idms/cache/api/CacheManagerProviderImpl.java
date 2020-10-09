@@ -42,13 +42,16 @@ public class CacheManagerProviderImpl implements CacheTypes, CacheManagerProvide
 		CacheManager manager = null;
 		try {
 			//manager = CacheManager.create(getAppPropertiesDir() + CACHE_CONFIGURATION_FILE);
-			logger.info("cache manager in createManager :"+getAppPropertiesDir());
+			if(logger.isInfoEnabled())
+				logger.info("cache manager in createManager :"+getAppPropertiesDir());
 			manager = CacheManager.create(getAppPropertiesDir());
 		} catch (Exception e) {
-		//catch (CacheException e) {
-			logger.error("Cache-central was not initialized correctly : " + e.getMessage() 
-							+ "\n\t The origin of the problem was: " + e.getCause());	
-			logger.error("Exception >"+e);
+			// catch (CacheException e) {
+			if (logger.isErrorEnabled()) {
+				logger.error("Cache-central was not initialized correctly : " + e.getMessage()
+						+ "\n\t The origin of the problem was: " + e.getCause());
+				logger.error("Exception >" + e);
+			}
 		}		
 		return manager;
 	}
