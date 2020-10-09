@@ -40,11 +40,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.regex.Matcher;
@@ -132,6 +130,7 @@ import com.idms.model.TransliteratorResponse;
 import com.idms.model.UpdatePasswordRequest;
 import com.idms.model.UpdateUserRequest;
 import com.idms.model.UpdateUserResponse;
+import com.idms.model.UserAMProfile;
 import com.idms.model.UserDetailByApplicationRequest;
 import com.idms.model.UserMFADataRequest;
 import com.idms.model.VerifyEmailPinRequest;
@@ -12768,7 +12767,6 @@ public class UserServiceImpl implements UserService {
 			String userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
 					"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(mail.trim(), "UTF-8"), "UTF-8") + "\"");
-
 			LogMessageUtil.logInfoMessage("End: openam checkUserExists finished for mail= ", mail);
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userExists);
 			int resultCount = productDocCtx.read("$.resultCount");
@@ -12776,37 +12774,70 @@ public class UserServiceImpl implements UserService {
 
 			// Merge accounts if multiple accounts exist with same email ids.
 			if (resultCount > 1) {
-				String user2Id = getOtherUserWithSameEmailId(fedId, productDocCtx);
-				String user2Data = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, user2Id,
-						iPlanetDirectoryKey);
-				LogMessageUtil.logInfoMessage("End: getUser() of openamService for userId= ", user2Id);
-				DocumentContext docCtxUser2 = JsonPath.using(conf).parse(user2Data);
-				// to be implemented
-				mergeUserProfiles(docCtxUser1, docCtxUser2);
-
+				return fetchOtherUserDetailsAndMergeAccounts(fedId, iPlanetDirectoryKey, user1Data, productDocCtx);
 			} else if(resultCount == 1) {
 				return invokeConfirmPIN(socialProfileRequest);
 			}
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+		} catch (UnsupportedEncodingException ex) {
+			errorResponse = buildErrorMessage(fedId, ex, UserConstants.UNSUPPORTED_ENCODING_EXCEPTION);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
 		}
-		return null;
+		errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+		errorResponse.setMessage(UserConstants.PROFILES_MERGE_FAILED);
+		return Response.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).entity(errorResponse).build();
 	}
 
-	private void mergeUserProfiles(DocumentContext docCtxUser1, DocumentContext docCtxUser2) {
+	private Response fetchOtherUserDetailsAndMergeAccounts(String fedId, String iPlanetDirectoryKey, String user1Data,
+			DocumentContext productDocCtx) {
+		ObjectMapper mapper = new ObjectMapper();
+		ErrorResponse errorResponse = new ErrorResponse();
+		String user2Id = getOtherUserWithSameEmailId(fedId, productDocCtx);
+		try {
+			UserAMProfile appleUser = mapper.readValue(user1Data, UserAMProfile.class);
+			String mergeJson = UserServiceUtil.buildMergeJson(appleUser);
+		    boolean areProfilesMerged = mergeUserProfiles(iPlanetDirectoryKey, fedId, user2Id, mergeJson);
+		    if(areProfilesMerged) {
+                SocialProfileUpdateResponse successResponse = new SocialProfileUpdateResponse();
+		        successResponse.setStatus(successStatus);
+		        successResponse.setMessage(UserConstants.PIN_VALIDATED_SUCCESS);
+				return Response.status(HttpStatus.OK.value()).entity(successResponse).build();
+		    }else {
+		        errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+				errorResponse.setMessage(UserConstants.PROFILES_MERGE_FAILED);
+				return Response.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).entity(errorResponse).build();
+		    }
+		} catch (IOException ex) {
+			errorResponse = buildErrorMessage(fedId, ex, UserConstants.JSON_PROCESSING_ERROR);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		}
+	}
 
-		String givenName = docCtxUser1.read("$.givenName[0]");
-		String appleId = docCtxUser1.read("$.appleId[0]");
-		String lastName = docCtxUser1.read("$.sn[0]");
-		String cn = docCtxUser1.read("$.cn[0]");
-
+	private boolean mergeUserProfiles(String iPlanetDirectoryKey, String fedId, String user2Id, String mergeJson) {
+		boolean areProfilesMerged = false;
+		// update second profile with merge json
+		LogMessageUtil.logInfoMessage("Start: updateUser() for userId= ", user2Id);
+		String result = UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion,
+				UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, user2Id, mergeJson);
+		LogMessageUtil.logInfoMessage("End: updateUser() for userId= ", user2Id);
+		if (result != null) {
+			// delete temporary apple user
+			LogMessageUtil.logInfoMessage("Start: deleteUser() for userId= ", fedId);
+			Response deleteResult = UserServiceUtil.deleteUserBasedOnFRVersion(productService, frVersion,
+					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, fedId);
+			LogMessageUtil.logInfoMessage("End: deleteUser() for userId= ", fedId);
+			LogMessageUtil.logInfoMessage("Apple Temporary User got deleted:", deleteResult.getStatus() + "");
+			if(HttpStatus.OK.equals(HttpStatus.valueOf(deleteResult.getStatus()))) {
+				areProfilesMerged = true;
+			}
+		}
+		return areProfilesMerged;
 	}
 
 	private String getOtherUserWithSameEmailId(String fedId, DocumentContext productDocCtx) {
 		String otherFedId = null;
 		List<String> userList = getUserList(productDocCtx);
 		for(String userId: userList) {
-			if(fedId != userId) {
+			if(!fedId.equals(userId)) {
 				otherFedId = userId;
 			}
 		}
