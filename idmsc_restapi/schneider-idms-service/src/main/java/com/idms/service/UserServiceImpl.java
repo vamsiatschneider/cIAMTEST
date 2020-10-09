@@ -445,6 +445,9 @@ public class UserServiceImpl implements UserService {
 	
 	@Value("${enableAdminAuthToken}")
 	private String enableAdminAuthToken;
+	
+	@Value("${enableCheckUserToGlobal}")
+	private String enableCheckUserToGlobal;
 		
 	@Value("${idmsc.emailUserNameFormat}")
 	private String defaultUserNameFormat;
@@ -3074,9 +3077,11 @@ public class UserServiceImpl implements UserService {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Response checkUserExists(String loginIdentifier, String withGlobalUsers, String applicationName) {
-		LOGGER.info("Entered checkUserExists() -> Start");
-		LOGGER.info("Parameter loginIdentifier -> " + loginIdentifier + " ,withGlobalUsers -> " + withGlobalUsers);
-		LOGGER.info("Parameter applicationName -> " + applicationName);
+		if(LOGGER.isInfoEnabled()) {
+			LOGGER.info("Entered checkUserExists() -> Start");
+			LOGGER.info("Parameter loginIdentifier -> " + loginIdentifier + " ,withGlobalUsers -> " + withGlobalUsers);
+			LOGGER.info("Parameter applicationName -> " + applicationName);
+		}
 		String PROCESSING_STATE = "UNKNOWN";
 		DocumentContext productDocCtx = null;
 		String iPlanetDirectoryKey = null, otp = null;
@@ -3098,6 +3103,12 @@ public class UserServiceImpl implements UserService {
 				LOGGER.error("Error with GlobalUSerField:" + UserConstants.GLOBAL_USER_BOOLEAN);
 				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 			}
+			
+			if(null != enableCheckUserToGlobal && !enableCheckUserToGlobal.isEmpty() && enableCheckUserToGlobal.equalsIgnoreCase(UserConstants.FALSE)) {
+				withGlobalUsers = "false";
+			}
+			if(LOGGER.isInfoEnabled())
+				LOGGER.info("withGlobalUsers value="+withGlobalUsers);
 
 			if (loginIdentifier.contains("@")) {
 				if (!emailValidator.validate(loginIdentifier.trim())) {
@@ -8335,7 +8346,8 @@ public class UserServiceImpl implements UserService {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Response idmsCheckUserExists(String authorizedToken, CheckUserExistsRequest request) {
-		LOGGER.info("Entered idmsCheckUserExists() -> Start");
+		if(LOGGER.isInfoEnabled())
+			LOGGER.info("Entered idmsCheckUserExists() -> Start");
 		DocumentContext productDocCtx = null, productDocApp = null;
 		String iPlanetDirectoryKey = null;
 		String ifwAccessToken = null, userExists = null;
@@ -8354,12 +8366,14 @@ public class UserServiceImpl implements UserService {
 		String strcurrentMobCounter = UserConstants.ZERO;
 		String jsonStr = null;
 		JSONObject jsonCounter = new JSONObject();
-		String UID = null;
+		String UID = null, checkUserGlobalFlag = "true";
 		boolean adminTokenFlag = false;
 	
 
 		try {
-			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(request));
+			if(LOGGER.isInfoEnabled())
+				LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(request));
+			
 			if(null == request){
 				response.put(UserConstants.MESSAGE_L, "Request body is empty or null");
 				LOGGER.error("Mandatory check: Request body is empty or null");
@@ -8369,6 +8383,16 @@ public class UserServiceImpl implements UserService {
 			}
 			
 			adminTokenFlag = ((null != enableAdminAuthToken && !enableAdminAuthToken.isEmpty())?Boolean.valueOf(enableAdminAuthToken):false);
+			if(null != enableCheckUserToGlobal && !enableCheckUserToGlobal.isEmpty() && enableCheckUserToGlobal.equalsIgnoreCase(UserConstants.FALSE)) {
+				checkUserGlobalFlag = "false";
+				request.setWithGlobalUsers(checkUserGlobalFlag);
+			}
+			
+			if(LOGGER.isInfoEnabled()) {
+				LOGGER.info("value of adminTokenFlag : " + adminTokenFlag);
+				LOGGER.info("value of WithGlobalUsers : " + request.getWithGlobalUsers());
+			}
+			
 			if (adminTokenFlag) {
 				if (null == authorizedToken || authorizedToken.isEmpty()) {
 					response.put(UserConstants.MESSAGE_L, UserConstants.ADMIN_TOKEN_MANDATORY);
@@ -8395,7 +8419,7 @@ public class UserServiceImpl implements UserService {
 					}
 				}
 			}
-						
+			
 			if(null != request.getEmail() && !request.getEmail().isEmpty()){
 				varList.add("true");
 			}
@@ -11906,6 +11930,14 @@ public class UserServiceImpl implements UserService {
 
 	public void setEnableAdminAuthToken(String enableAdminAuthToken) {
 		this.enableAdminAuthToken = enableAdminAuthToken;
+	}
+
+	public String getEnableCheckUserToGlobal() {
+		return enableCheckUserToGlobal;
+	}
+
+	public void setEnableCheckUserToGlobal(String enableCheckUserToGlobal) {
+		this.enableCheckUserToGlobal = enableCheckUserToGlobal;
 	}
 
 	@Override
