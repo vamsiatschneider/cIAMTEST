@@ -194,9 +194,6 @@ public class UserServiceUtil {
 		if(StringUtils.isBlank(socialProfileRequest.getProvider())){
 			errorMessage = "Provider Name cannot be null or empty!";
 		}
-		if(StringUtils.isBlank(socialProfileRequest.getUIFlag())){
-			errorMessage = "UI Flag cannot be null or empty!";
-		}
 		return errorMessage;
 	}
 }

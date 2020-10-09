@@ -40,9 +40,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.regex.Matcher;
@@ -12706,8 +12708,100 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Response activateSocialProfile(SocialProfileActivationRequest socialProfileRequest) {
 
-       // to be implemented: Social profile merge scenario for common email
-       return null;
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		String fedId = socialProfileRequest.getIDMS_Federated_ID__c();
+		ErrorResponse errorResponse = new ErrorResponse();
+		String errorMessage = UserServiceUtil.validateActivationRequest(socialProfileRequest);
+		if (errorMessage != null) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.name());
+			errorResponse.setMessage(errorMessage);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		}
+		String iPlanetDirectoryKey = null;
+		try {
+			iPlanetDirectoryKey = getSSOToken();
+		} catch (IOException ex) {
+			String errorMsg = "Unable to get SSO Token: ";
+			errorResponse = buildErrorMessage(fedId, ex, errorMsg);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		}
+		LogMessageUtil.logInfoMessage("Start: getUser() of openamService for userId= ", fedId);
+		String user1Data = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, fedId,
+				iPlanetDirectoryKey);
+		LogMessageUtil.logInfoMessage("End: getUser() of openamService for userId= ", fedId);
+		DocumentContext docCtxUser1 = JsonPath.using(conf).parse(user1Data);
+		String mail = docCtxUser1.read("$.mail[0]");
+		try {
+			String userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
+					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+					"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(mail.trim(), "UTF-8"), "UTF-8") + "\"");
+
+			LogMessageUtil.logInfoMessage("End: openam checkUserExists finished for mail= ", mail);
+			DocumentContext productDocCtx = JsonPath.using(conf).parse(userExists);
+			int resultCount = productDocCtx.read("$.resultCount");
+			LogMessageUtil.logInfoMessage("resultCount of mail or mobile = ", resultCount + "");
+
+			// Merge accounts if multiple accounts exist with same email ids.
+			if (resultCount > 1) {
+				String user2Id = getOtherUserWithSameEmailId(fedId, productDocCtx);
+				String user2Data = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, user2Id,
+						iPlanetDirectoryKey);
+				LogMessageUtil.logInfoMessage("End: getUser() of openamService for userId= ", user2Id);
+				DocumentContext docCtxUser2 = JsonPath.using(conf).parse(user2Data);
+				// to be implemented
+				mergeUserProfiles(docCtxUser1, docCtxUser2);
+
+			} else if(resultCount == 1) {
+				return invokeConfirmPIN(socialProfileRequest);
+			}
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private void mergeUserProfiles(DocumentContext docCtxUser1, DocumentContext docCtxUser2) {
+
+		String givenName = docCtxUser1.read("$.givenName[0]");
+		String appleId = docCtxUser1.read("$.appleId[0]");
+		String lastName = docCtxUser1.read("$.sn[0]");
+		String cn = docCtxUser1.read("$.cn[0]");
+
+	}
+
+	private String getOtherUserWithSameEmailId(String fedId, DocumentContext productDocCtx) {
+		String otherFedId = null;
+		List<String> userList = getUserList(productDocCtx);
+		for(String userId: userList) {
+			if(fedId != userId) {
+				otherFedId = userId;
+			}
+		}
+		return otherFedId;
+	}
+
+	private List<String> getUserList(DocumentContext productDocCtx) {
+		List<String> userIdList = new ArrayList<String>();
+		net.minidev.json.JSONArray usersArray = productDocCtx.read("$.result");
+		for(Object userObj:usersArray) {
+			if(userObj instanceof HashMap<?, ?>) {
+				HashMap<String, String> userMap = (HashMap<String, String>)userObj;
+				String userId = userMap.get("username");
+				userIdList.add(userId);
+			}
+		}
+		return userIdList;
+	}
+
+	private Response invokeConfirmPIN(SocialProfileActivationRequest socialProfileRequest) {
+		ConfirmPinRequest cPinRequest = new ConfirmPinRequest();
+		cPinRequest.setFederationIdentifier(socialProfileRequest.getIDMS_Federated_ID__c());
+		cPinRequest.setId(socialProfileRequest.getId());
+		cPinRequest.setIDMS_Profile_update_source(socialProfileRequest.getIDMS_Profile_update_source());
+		cPinRequest.setOperation(socialProfileRequest.getOperation());
+		cPinRequest.setPinCode(socialProfileRequest.getPinCode());
+		cPinRequest.setUIFlag(socialProfileRequest.getUIFlag());
+		return userPinConfirmation(cPinRequest);
 	}
 
 	private Response openAMProfileUpdate(Configuration conf, ErrorResponse errorResponse, IFWUser userRecord,
