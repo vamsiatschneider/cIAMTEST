@@ -64,7 +64,7 @@ public class CacheManagerProviderImpl implements CacheTypes, CacheManagerProvide
 	}
 	
 	public static String getAppPropertiesDir() {
-		File resourcesDirectory = new File("src/main/resources");
+		/* File resourcesDirectory = new File("src/main/resources"); PMD Violation UnusedLocalVariable */
 		return APP_PROPERTIES_DIR;
 	}
 

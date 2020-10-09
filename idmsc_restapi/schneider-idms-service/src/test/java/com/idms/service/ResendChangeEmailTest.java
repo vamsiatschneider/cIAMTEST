@@ -147,7 +147,6 @@ public class ResendChangeEmailTest {
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		UserServiceResponse actualResponse = (UserServiceResponse) response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
-		System.out.println(actualResponse.getMessage());
 		assertThat("Message ", actualResponse.getMessage(), equalTo("OldEmail,NewEmail and AppSource are mandatory"));
 	}
 

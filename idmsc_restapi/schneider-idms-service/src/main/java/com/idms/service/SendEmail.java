@@ -63,6 +63,7 @@ import com.idms.product.client.OpenAMService;
 import com.idms.product.client.OpenDjService;
 import com.idms.product.client.SmsService;
 import com.idms.service.util.ChinaIdmsUtil;
+import com.idms.service.util.LogMessageUtil;
 import com.idms.service.util.UserServiceUtil;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
@@ -494,7 +495,11 @@ public class SendEmail {
 					if (null != pathString && !pathString.isEmpty())
 						url = url + "&" + pathString;
 				}
-				
+				String appleProvider = productDocCtxUser.read("$.appleid[0]");
+				LogMessageUtil.logInfoMessage("appleProvider: ", appleProvider);
+				if(StringUtils.isNotBlank(appleProvider)) {
+					url = url + "&provider=Apple";
+				}
 				LOGGER.info("sendOpenAmEmail : URL compiled to : " + url);
 				contentBuilder = new StringBuilder();
 				contentBuilder.setLength(0);

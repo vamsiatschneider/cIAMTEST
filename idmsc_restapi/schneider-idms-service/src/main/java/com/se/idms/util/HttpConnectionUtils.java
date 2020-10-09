@@ -7,7 +7,8 @@
 package com.se.idms.util;
 
 import org.apache.commons.lang3.StringUtils;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -26,7 +27,8 @@ public class HttpConnectionUtils {
     private static final String QP_SEP_A = "&";
     private static final String QP_SEP_S = ";";
     private static final String NAME_VALUE_SEPARATOR = "=";
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpConnectionUtils.class);
+    
     /**
      * 发送GET请求，获取服务器返回结果
      *
@@ -37,7 +39,7 @@ public class HttpConnectionUtils {
     public static String readContentFromGet(String url) throws IOException {
 
         URL getUrl = new URL(url);
-        System.out.println("readContentFromGet URL " + url);
+        LOGGER.info("readContentFromGet URL " + url);
         HttpURLConnection connection = (HttpURLConnection) getUrl.openConnection();
         // 设置从主机读取数据超时（单位：毫秒）
         connection.setReadTimeout(2000);
@@ -56,7 +58,7 @@ public class HttpConnectionUtils {
             inStream.close();
             responseString = sBuffer.toString();
         } else {
-            System.out.println(String.format("connection response code is not correct,code=%s,msg=%s ",
+        	LOGGER.error(String.format("connection response code is not correct,code=%s,msg=%s ",
                     connection.getResponseCode(), connection.getResponseMessage()));
         }
         connection.disconnect();// 断开连接
@@ -102,7 +104,7 @@ public class HttpConnectionUtils {
             inStream.close();
             response = sBuffer.toString();
         } else {
-            System.out.println(String.format("connection response code is not correct,code=%s,msg=%s ",
+        	LOGGER.error(String.format("connection response code is not correct,code=%s,msg=%s ",
                     connection.getResponseCode(), connection.getResponseMessage()));
         }
         connection.disconnect();

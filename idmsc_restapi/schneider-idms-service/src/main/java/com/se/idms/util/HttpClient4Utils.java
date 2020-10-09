@@ -102,7 +102,6 @@ public class HttpClient4Utils {
      */
     public static String sendPost(HttpClient httpClient, String url, Map<String, String> params, Charset encoding) {
         String resp = "";
-        System.out.println("HTTPClientUtils sendPost " + url);
         HttpPost httpPost = new HttpPost(url);
         if (params != null && params.size() > 0) {
             List<NameValuePair> formParams = new ArrayList<NameValuePair>();
@@ -143,8 +142,6 @@ public class HttpClient4Utils {
      */
     public static String sendPost(String url, Map<String, String> params) {
         Charset encoding = Charset.forName("utf8");
-        
-        System.out.println("HTTPClientUtils sendPost 2 " + url);
         return sendPost(defaultClient, url, params, encoding);
     }
 }

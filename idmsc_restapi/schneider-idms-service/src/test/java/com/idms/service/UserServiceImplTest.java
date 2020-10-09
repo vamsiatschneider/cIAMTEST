@@ -115,9 +115,14 @@ public class UserServiceImplTest implements PropertyVariables{
 	@Test
 	public void testUserRegistration() throws Exception {
 		
-		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		/*PMD Violation UnusedLocalVariable
+		 * Configuration conf =
+		 * Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		 * 
+		 * DocumentContext productDocCtx =
+		 * JsonPath.using(conf).parse(DomainMockData.EMAIL_OTP);
+		 */
 		
-		DocumentContext productDocCtx = JsonPath.using(conf).parse(DomainMockData.EMAIL_OTP);;
 		// Setup
 		CreateUserRequest userRequest = DtoMockData.buildUserRegistrationRequset();
 		
@@ -187,9 +192,14 @@ public class UserServiceImplTest implements PropertyVariables{
 	@Test
 	public void testUserRegistrationWhenUserNotSendingAuthorizationToken() {
 		
-		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		/*PMD Violation UnusedLocalVariable
+		 * Configuration conf =
+		 * Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		 * 
+		 * DocumentContext productDocCtx =
+		 * JsonPath.using(conf).parse(DomainMockData.EMAIL_OTP);
+		 */
 		
-		DocumentContext productDocCtx = JsonPath.using(conf).parse(DomainMockData.EMAIL_OTP);
 		// Setup
 		CreateUserRequest userRequest = DtoMockData.buildUserRegistrationRequset();
 		
@@ -232,9 +242,14 @@ public class UserServiceImplTest implements PropertyVariables{
 	@Test
 	public void testUserRegistrationWhenAlreadyUserExists() {
 		
-		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		/*PMD Violation UnusedLocalVariable
+		 * Configuration conf =
+		 * Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		 * 
+		 * DocumentContext productDocCtx =
+		 * JsonPath.using(conf).parse(DomainMockData.EMAIL_OTP);
+		 */
 		
-		DocumentContext productDocCtx = JsonPath.using(conf).parse(DomainMockData.EMAIL_OTP);;
 		// Setup
 		CreateUserRequest userRequest = DtoMockData.buildUserRegistrationRequset();
 		

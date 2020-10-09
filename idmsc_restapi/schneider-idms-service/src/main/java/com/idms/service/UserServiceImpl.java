@@ -40,9 +40,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.regex.Matcher;
@@ -118,6 +120,9 @@ import com.idms.model.ResendPinRequest;
 import com.idms.model.ResendRegEmailRequest;
 import com.idms.model.SendInvitationRequest;
 import com.idms.model.SendOTPRequest;
+import com.idms.model.SocialProfileActivationRequest;
+import com.idms.model.SocialProfileUpdateRequest;
+import com.idms.model.SocialProfileUpdateResponse;
 import com.idms.model.TransliteratorAttributes;
 import com.idms.model.TransliteratorConversionRequest;
 import com.idms.model.TransliteratorConversionResponse;
@@ -153,6 +158,7 @@ import com.idms.service.uims.sync.UIMSAuthenticatedUserManagerSoapServiceSync;
 import com.idms.service.uims.sync.UIMSUserManagerSoapServiceSync;
 import com.idms.service.util.AsyncUtil;
 import com.idms.service.util.ChinaIdmsUtil;
+import com.idms.service.util.LogMessageUtil;
 import com.idms.service.util.UserServiceUtil;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
@@ -1958,7 +1964,7 @@ public class UserServiceImpl implements UserService {
 			JSONArray jsonArray = new JSONArray();
 			jsonArray.add(jsonObject);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-			
+			LOGGER.info(GET_USER_BY_TOKEN_TIME_LOG + elapsedTime);
 			LOGGER.error("ECODE-GETUSER-BYTOKEN-ERR : Token not acceptable - Session expired");
 			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonArray).build();
 		} catch (Exception e) {
@@ -1969,12 +1975,13 @@ public class UserServiceImpl implements UserService {
 			JSONArray jsonArray = new JSONArray();
 			jsonArray.add(jsonObject);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-			
+			LOGGER.info(GET_USER_BY_TOKEN_TIME_LOG + elapsedTime);
 			LOGGER.error("ECODE-GETUSER-BYTOKEN-UNAUTH : Token unauthorized");
 			return Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(jsonArray).build();
 
 		}
 		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+		LOGGER.info(GET_USER_BY_TOKEN_TIME_LOG + elapsedTime);
 		return userResponse;
 	}
 
@@ -3476,7 +3483,7 @@ public class UserServiceImpl implements UserService {
 		String loginIdentifierType = null;
 		String firstName = null;
 		String lastName = null;
-		String amlbcookieValue = null;
+		/* String amlbcookieValue = null; PMD Violation UnusedLocalVariable */
 		String PRODUCT_JSON_STRING = null;
 		String hotpEmailVerification = null;
 		String hotpMobileVerification = null;
@@ -3692,8 +3699,10 @@ public class UserServiceImpl implements UserService {
 				UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, uniqueIdentifier,
 						version);
 				LOGGER.info("End: updateUser() of OpenAMService finished for uniqueIdentifier=" + uniqueIdentifier);
-				amlbcookieValue = null != productDocCtx.read("$.amlbcookie")
-						? getValue(productDocCtx.read("$.amlbcookie").toString()) : getDelimeter();
+				/*PMD Violation UnusedLocalVariable
+				 * amlbcookieValue = null != productDocCtx.read("$.amlbcookie") ?
+				 * getValue(productDocCtx.read("$.amlbcookie").toString()) : getDelimeter();
+				 */
 
 				if ("[]".equalsIgnoreCase(productDocCtx.read("$.AuthID[0]"))
 						|| "[]".equalsIgnoreCase(productDocCtx.read("$.authId[0]"))) {
@@ -3723,8 +3732,10 @@ public class UserServiceImpl implements UserService {
 					getUserReponseProv = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, uniqueIdentifier, iPlanetDirectoryKey);
 					LOGGER.info("End: getUser() of OpenAMService finished for uniqueIdentifier=" + uniqueIdentifier);
 					provProductDocCtx = JsonPath.using(conf).parse(getUserReponseProv);
-					amlbcookieValue = null != provProductDocCtx.read("$.amlbcookie")
-							? getValue(provProductDocCtx.read("$.amlbcookie").toString()) : getDelimeter();
+					/*PMD Violation UnusedLocalVariable
+					 * amlbcookieValue = null != provProductDocCtx.read("$.amlbcookie") ?
+					 * getValue(provProductDocCtx.read("$.amlbcookie").toString()) : getDelimeter();
+					 */
 					emailOrMobile = provProductDocCtx.read("$.newmail[0]");
 					loginIdentifierType = UserConstants.EMAIL;
 					if (null == emailOrMobile) {
@@ -4046,6 +4057,7 @@ public class UserServiceImpl implements UserService {
 						isPasswordUpdatedInUIMS = uimsSetPasswordSoapService.setUIMSPassword(
 								UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, uniqueIdentifier, federationID,
 								confirmRequest.getPassword(), vNewCntValue.toString(), loginIdentifierType, emailOrMobile);
+						LOGGER.info("isPasswordUpdatedInUIMS :: UimsSetPasswordSoapService :: " +isPasswordUpdatedInUIMS);
 						LOGGER.info("End: SYNC setUIMSPassword() of UimsSetPasswordSoapService finished for federationID="
 								+ federationID);
 					} else {
@@ -4239,9 +4251,9 @@ public class UserServiceImpl implements UserService {
 		String userId = null;
 		String openamVnew = null;
 		String iPlanetDirectoryKey = null;
-		String userName = "";
+		/* String userName = ""; PMD Violation UnusedLocalVariable */
 		Integer vNewCntValue = 0;
-		List<String> listOfAil_c = null;
+		/* List<String> listOfAil_c = null; PMD Violation UnusedLocalVariable */
 		String PRODUCT_JSON_STRING = "";
 		String usermail = "";
 		// Validate Input Paramenters
@@ -4413,14 +4425,17 @@ public class UserServiceImpl implements UserService {
 							ailMasterRecord.setAilType(ailRequest.getUserAILRecord().getIDMSAclType__c());
 							ailMasterRecord.setAilValue(acl[i]);
 							objMapper = new ObjectMapper();
-							Response response = null;
+							/* Response response = null; PMD Violation UnusedLocalVariable */
 							try {
 								String ailEntryJson = objMapper.writeValueAsString(ailMasterRecord);
 								ailEntryJson = ailEntryJson.replace("\"\"", "[]");
 
-								response = openDJService.createAILMasterEntry(
-										"application/json", "application/json",
-										djUserName, djUserPwd, "create", ailEntryJson);
+								/*PMD Violation UnusedLocalVariable
+								 * response = openDJService.createAILMasterEntry( "application/json",
+								 * "application/json", djUserName, djUserPwd, "create", ailEntryJson);
+								 */
+								openDJService.createAILMasterEntry("application/json", "application/json", djUserName,
+										djUserPwd, "create", ailEntryJson);
 							} catch (Exception ex) {
 								LOGGER.error("Exception in bulkAILUpdate: " + ex.getMessage(),ex);
 							}
@@ -4541,11 +4556,12 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("productDocCtx in updateAil=" + ChinaIdmsUtil.printOpenAMInfo(productDocCtx.jsonString()));
 			IDMSAil__c = productDocCtx.read("$.IDMSAil_c[0]");
 
-			if (null != IDMSAil__c) {
-				listOfAil_c = Arrays.asList(IDMSAil__c.replaceAll("[\\(\\)\\[\\]\\{\\}]", "").split(","));
-			} else {
-				listOfAil_c = new ArrayList<String>();
-			}
+			/*PMD Violation UnusedLocalVariable
+			 *This code block has been commented on account of PMD violations. Adding to that, listOfAil_c variable, which holds the refactored value of IDMSAil__c, is unused 
+			 * if (null != IDMSAil__c) { listOfAil_c =
+			 * Arrays.asList(IDMSAil__c.replaceAll("[\\(\\)\\[\\]\\{\\}]", "").split(","));
+			 * } else { listOfAil_c = new ArrayList<String>(); }
+			 */
 
 				if(("GRANT".equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMSOperation__c()))) {
 					String ail = "";
@@ -4684,7 +4700,7 @@ public class UserServiceImpl implements UserService {
 			idmsUserAIL.setIdmsuser__c(userId);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
-			userName = productDocCtx.read("$.result[0].username");
+			/* userName = productDocCtx.read("$.result[0].username"); PMD Violation UnusedLocalVariable */
 			openamVnew = null != productDocCtx.read("$.V_New[0]") ? getValue(productDocCtx.read("$.V_New[0]"))
 					: getDelimeter();
 
@@ -5024,6 +5040,7 @@ public class UserServiceImpl implements UserService {
 							UserConstants.APPLICATION_NAME, UserConstants.COUNTRY_CODE, UserConstants.LANGUAGE_CODE,
 							UserConstants.REQUEST_ID, ifwAccessToken, UserConstants.ACCEPT_TYPE_APP_JSON,
 							UserConstants.FALSE, json);
+					LOGGER.info("ifwResponse :: ifwService.initiatePasswordRecovery :: "+ifwResponse);
 					LOGGER.info("End: initiatePasswordRecovery() of IFWService finished");
 
 					response.put(UserConstants.STATUS, successStatus);
@@ -5099,7 +5116,8 @@ public class UserServiceImpl implements UserService {
 		userResponse = new UserServiceResponse();
 		userResponse.setStatus(errorStatus);
 		String companyFedIdInRequest = null;
-		boolean updateMobileIdentifierCheck = false, stopUIMSFlag = false ;
+		/* boolean updateMobileIdentifierCheck = false; PMD Violation UnusedLocalVariable */
+		boolean stopUIMSFlag = false ;
 
 		try {
 			LOGGER.info("updateUser -> : Request -> " + objMapper.writeValueAsString(userRequest));
@@ -5109,7 +5127,7 @@ public class UserServiceImpl implements UserService {
 			DocumentContext productDocCtx = null;
 			DocumentContext productDocCtxUser = null;
 			String userId = null;
-			String hotpService = null;
+			/* String hotpService = null; PMD Violation UnusedLocalVariable */
 			String identifierType = null;
 			String jsonRequset = null;
 			String jsonResponse = null;
@@ -5473,7 +5491,7 @@ public class UserServiceImpl implements UserService {
 					if(!modifiedMobileInRequest.equalsIgnoreCase(mobileIdentityInOpenam)){
 						LOGGER.info("modifiedMobileInRequest = "+modifiedMobileInRequest);
 
-						updateMobileIdentifierCheck = true;
+						/* updateMobileIdentifierCheck = true; PMD Violation UnusedLocalVariable */
 						AddMobileRequest addMobileRequest = new AddMobileRequest();
 						addMobileRequest.setAccesstoken(authorizedToken);
 						addMobileRequest.setMobile(modifiedMobileInRequest);
@@ -5534,7 +5552,7 @@ public class UserServiceImpl implements UserService {
 								&& !userRequest.getUserRecord().getMobilePhone().isEmpty())) {
 
 					openAmReq.getInput().getUser().setIdmsuid(fedId);
-					hotpService = UserConstants.HOTP_EMAIL_UPDATE;
+					/* hotpService = UserConstants.HOTP_EMAIL_UPDATE; PMD Violation UnusedLocalVariable */
 					identifierType = UserConstants.EMAIL;
 					user.setMail(userRequest.getUserRecord().getEmail());
 					user.setMobile(userRequest.getUserRecord().getMobilePhone());
@@ -5548,7 +5566,7 @@ public class UserServiceImpl implements UserService {
 						&& (!userRequest.getUserRecord().getEmail().isEmpty())) {
 					user.setMail(userRequest.getUserRecord().getEmail());
 					openAmReq.getInput().getUser().setIdmsuid(fedId);
-					hotpService = UserConstants.HOTP_EMAIL_UPDATE;
+					/* hotpService = UserConstants.HOTP_EMAIL_UPDATE; PMD Violation UnusedLocalVariable */
 					identifierType = UserConstants.EMAIL;
 					loginIdentifier = userRequest.getUserRecord().getEmail();
 					if (null != updatingUser && updatingUser.equalsIgnoreCase(userRequest.getUserRecord().getEmail())) {
@@ -5565,7 +5583,7 @@ public class UserServiceImpl implements UserService {
 					}
 					user.setMobile(userRequest.getUserRecord().getMobilePhone());
 					openAmReq.getInput().getUser().setIdmsuid(fedId);
-					hotpService = UserConstants.HOTP_MOBILE_UPDATE;
+					/* hotpService = UserConstants.HOTP_MOBILE_UPDATE; PMD Violation UnusedLocalVariable */
 					identifierType = UserConstants.MOBILE;
 					loginIdentifier = userRequest.getUserRecord().getMobilePhone();
 					if (null != updatingUser
@@ -5741,7 +5759,22 @@ public class UserServiceImpl implements UserService {
 			 if((null != userRequest.getUserRecord().getAdminBFOAccoountID() && !userRequest.getUserRecord().getAdminBFOAccoountID().isEmpty())){
 					openAmReq.getInput().getUser().setAdminBFOAccoountID(userRequest.getUserRecord().getAdminBFOAccoountID());
 			 }
-		
+				//updating CN
+				if(openAmReq.getInput().getUser().getGivenName()!=null || openAmReq.getInput().getUser().getSn()!=null ) {
+				String cn;
+				if(openAmReq.getInput().getUser().getGivenName()!=null && !openAmReq.getInput().getUser().getGivenName().isEmpty())
+					cn=openAmReq.getInput().getUser().getGivenName();
+				else
+					cn=productDocCtxUser.read("$.givenName[0]");
+				
+				if(openAmReq.getInput().getUser().getSn()!=null && !openAmReq.getInput().getUser().getSn().isEmpty())
+					cn= cn +" "+ openAmReq.getInput().getUser().getSn();
+				else
+					cn=cn+" "+productDocCtxUser.read("$.sn[0]");
+					
+				openAmReq.getInput().getUser().setCn(cn);
+				}
+				
 			jsonRequset = objMapper.writeValueAsString(openAmReq.getInput().getUser());
 			jsonRequset = jsonRequset.replace("\"\"", "[]");
 
@@ -5939,8 +5972,10 @@ public class UserServiceImpl implements UserService {
 				? getValue(productDocCtx.read("$.mobile_reg").toString()) : getDelimeter();
 		String email = null != productDocCtx.read("$.mail") ? getValue(productDocCtx.read("$.mail").toString())
 				: getDelimeter();
-		String federationID = null != productDocCtx.read("$.federationID")
-				? getValue(productDocCtx.read("$.federationID").toString()) : getDelimeter();
+		/*PMD Violation UnusedLocalVariable
+		 * String federationID = null != productDocCtx.read("$.federationID") ?
+		 * getValue(productDocCtx.read("$.federationID").toString()) : getDelimeter();
+		 */
 
 		idmsUserRecord.setIdmsPreferredLanguage(idmsPreferredLanguage);
 		idmsUserRecord.setIdmsProfileUpdateSource(idmsProfileUpdateSource);
@@ -6096,7 +6131,7 @@ public class UserServiceImpl implements UserService {
 		String userData = null;
 		String loginIdentifier = null;
 		String tmpPR = null;
-		String PRODUCT_JSON_STRING = null;
+		/* String PRODUCT_JSON_STRING = null; PMD Violation UnusedLocalVariable */
 		String iPlanetDirectoryKey = null;
 		String sendEmailOptType = "";
 		String resendId = "";
@@ -6173,19 +6208,19 @@ public class UserServiceImpl implements UserService {
 						tmpPR = new String(Base64.decodeBase64(tmpPR));
 					}
 
-					String hotpService = null;
-					String userService = null;
+					/* String hotpService = null; PMD Violation UnusedLocalVariable */
+					/* String userService = null; PMD Violation UnusedLocalVariable */
 					if (UserConstants.USER_REGISTRATION.equalsIgnoreCase(resendPinRequest.getOperation())) {
-						hotpService = UserConstants.HOTP_MOBILE_USER_REGISTRATION;
-						userService = UserConstants.CREATE_USER_SERVICE;
+						/* hotpService = UserConstants.HOTP_MOBILE_USER_REGISTRATION; PMD Violation UnusedLocalVariable */
+						/* userService = UserConstants.CREATE_USER_SERVICE; PMD Violation UnusedLocalVariable */
 						sendEmailOptType = EmailConstants.USERREGISTRATION_OPT_TYPE;
 					} else if (UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(resendPinRequest.getOperation())) {
-						hotpService = UserConstants.HOTP_MOBILE_UPDATE;
-						userService = UserConstants.UPDATE_USER_SERVICE;
+						/* hotpService = UserConstants.HOTP_MOBILE_UPDATE; PMD Violation UnusedLocalVariable */
+						/* userService = UserConstants.UPDATE_USER_SERVICE; PMD Violation UnusedLocalVariable */
 						sendEmailOptType = EmailConstants.UPDATEUSERRECORD_OPT_TYPE;
 					} else {
-						hotpService = UserConstants.HOTP_MOBILE_RESET_PR;
-						userService = UserConstants.CREATE_USER_SERVICE;
+						/* hotpService = UserConstants.HOTP_MOBILE_RESET_PR; PMD Violation UnusedLocalVariable */
+						/* userService = UserConstants.CREATE_USER_SERVICE; PMD Violation UnusedLocalVariable */
 						sendEmailOptType = EmailConstants.SETUSERPWD_OPT_TYPE;
 					}
 
@@ -6528,7 +6563,7 @@ public class UserServiceImpl implements UserService {
 		String userId = "";
 		String userData = "";
 		String authId = "";
-		String amlbcookieValue = null;
+		/* String amlbcookieValue = null; PMD Violation UnusedLocalVariable */
 		String openamVnew = null;
 		Integer vNewCntValue = 0;
 		String version = null;
@@ -6816,8 +6851,10 @@ public class UserServiceImpl implements UserService {
 					loginIdentifierType = UserConstants.MOBILE;
 				}
 
-				amlbcookieValue = null != productDocCtx.read("$.amlbcookie")
-						? getValue(productDocCtx.read("$.amlbcookie").toString()) : getDelimeter();
+				/*PMD Violation UnusedLocalVariable
+				 * amlbcookieValue = null != productDocCtx.read("$.amlbcookie") ?
+				 * getValue(productDocCtx.read("$.amlbcookie").toString()) : getDelimeter();
+				 */
 				// amlbcookieValue = UserConstants.AMLB_COOKIE+amlbcookieValue;
 
 				openamVnew = null != productDocCtx.read("$.V_New[0]") ? getValue(productDocCtx.read("$.V_New[0]"))
@@ -9750,7 +9787,13 @@ public class UserServiceImpl implements UserService {
 
 		try {
 			LOGGER.info("Start: updateUserForPassword() of openam for federationId=" + federationId);
-			Response updateResponse = UserServiceUtil.updateUserPasswordBasedOnFRVersion(productService, frVersion,
+			/*PMD Violation UnusedLocalVariable
+			 * Response updateResponse =
+			 * UserServiceUtil.updateUserPasswordBasedOnFRVersion(productService, frVersion,
+			 * UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, federationId,
+			 * jsonData);
+			 */
+			UserServiceUtil.updateUserPasswordBasedOnFRVersion(productService, frVersion,
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, federationId, jsonData);
 			LOGGER.info("End: updateUserForPassword() of openam finished for federationId=" + federationId);
 			//LOGGER.info("Information from OPENAM=" + IOUtils.toString((InputStream) updateResponse.getEntity()));
@@ -12452,13 +12495,13 @@ public class UserServiceImpl implements UserService {
 		java.nio.file.Path destination;
 		try {
 			destination = Paths.get(pathTo.toString() + "\\" + fileUploadName);
-			System.out.println("destination = "+destination);
+			LOGGER.info("destination = "+destination);
 			Files.deleteIfExists(destination);
 			InputStream in = attachment.getObject(InputStream.class);
 			Files.copy(in, destination);
 
 			dataFile = ChinaIdmsUtil.getDataFromFile(destination.toString());
-			System.out.println("size of dataFile = " + dataFile.size());
+			LOGGER.info("size of dataFile = " + dataFile.size());
 
 			List<OpenAmUser> listUsers = ChinaIdmsUtil.buildUserObject(dataFile);
 			String ufedid=null;
@@ -12650,5 +12693,224 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Captcha Validation Completed");
 		return Response.status(200).entity(jsonString).build();
 
+	}
+
+	/*
+	 * API to update IDMS social user profile
+	 */
+	@Override
+	public Response updateSocialProfile(String authorizedToken, SocialProfileUpdateRequest socialProfileRequest) {
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		ErrorResponse errorResponse = new ErrorResponse();
+		OpenAmUser openamUser = new OpenAmUser();
+		String uiFlag = socialProfileRequest.getUIFlag();
+		if (StringUtils.isNotBlank(uiFlag) && UserConstants.FALSE.equalsIgnoreCase(uiFlag)
+				&& !getTechnicalUserDetails(authorizedToken)) {
+			errorResponse.setStatus(HttpStatus.UNAUTHORIZED.toString());
+			errorResponse.setMessage("Unauthorized or session expired");
+			return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+		}
+		IFWUser userRecord = socialProfileRequest.getUserRecord();
+		String fedId = userRecord.getIDMS_Federated_ID__c();
+		String errorMessage = UserServiceUtil.validateAtrributes(userRecord);
+		if (errorMessage != null) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.name());
+			errorResponse.setMessage(errorMessage);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		}
+		UserServiceUtil.populateOpenAMUserAttributes(userRecord, openamUser);
+		String requestJson = null;
+		try {
+			requestJson = new ObjectMapper().writeValueAsString(openamUser);
+		} catch (JsonProcessingException ex) {
+			errorResponse = buildErrorMessage(fedId, ex, UserConstants.JSON_PROCESSING_ERROR);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		}
+		if (requestJson == null) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage(UserConstants.JSON_PROCESSING_ERROR);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		}
+		LogMessageUtil.logInfoMessage("Request Json for userId: ", requestJson);
+
+		// Call OpenAM Profile Update and send email to user
+		Response updateResponse = openAMProfileUpdate(conf, errorResponse, userRecord, fedId, requestJson);
+		return updateResponse;
+	}
+
+	@Override
+	public Response activateSocialProfile(SocialProfileActivationRequest socialProfileRequest) {
+
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		String fedId = socialProfileRequest.getIDMS_Federated_ID__c();
+		ErrorResponse errorResponse = new ErrorResponse();
+		String errorMessage = UserServiceUtil.validateActivationRequest(socialProfileRequest);
+		if (errorMessage != null) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.name());
+			errorResponse.setMessage(errorMessage);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		}
+		String iPlanetDirectoryKey = null;
+		try {
+			iPlanetDirectoryKey = getSSOToken();
+		} catch (IOException ex) {
+			String errorMsg = "Unable to get SSO Token: ";
+			errorResponse = buildErrorMessage(fedId, ex, errorMsg);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		}
+		LogMessageUtil.logInfoMessage("Start: getUser() of openamService for userId= ", fedId);
+		String user1Data = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, fedId,
+				iPlanetDirectoryKey);
+		LogMessageUtil.logInfoMessage("End: getUser() of openamService for userId= ", fedId);
+		DocumentContext docCtxUser1 = JsonPath.using(conf).parse(user1Data);
+		String mail = docCtxUser1.read("$.mail[0]");
+		try {
+			String userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
+					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+					"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(mail.trim(), "UTF-8"), "UTF-8") + "\"");
+
+			LogMessageUtil.logInfoMessage("End: openam checkUserExists finished for mail= ", mail);
+			DocumentContext productDocCtx = JsonPath.using(conf).parse(userExists);
+			int resultCount = productDocCtx.read("$.resultCount");
+			LogMessageUtil.logInfoMessage("resultCount of mail or mobile = ", resultCount + "");
+
+			// Merge accounts if multiple accounts exist with same email ids.
+			if (resultCount > 1) {
+				String user2Id = getOtherUserWithSameEmailId(fedId, productDocCtx);
+				String user2Data = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, user2Id,
+						iPlanetDirectoryKey);
+				LogMessageUtil.logInfoMessage("End: getUser() of openamService for userId= ", user2Id);
+				DocumentContext docCtxUser2 = JsonPath.using(conf).parse(user2Data);
+				// to be implemented
+				mergeUserProfiles(docCtxUser1, docCtxUser2);
+
+			} else if(resultCount == 1) {
+				return invokeConfirmPIN(socialProfileRequest);
+			}
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private void mergeUserProfiles(DocumentContext docCtxUser1, DocumentContext docCtxUser2) {
+
+		String givenName = docCtxUser1.read("$.givenName[0]");
+		String appleId = docCtxUser1.read("$.appleId[0]");
+		String lastName = docCtxUser1.read("$.sn[0]");
+		String cn = docCtxUser1.read("$.cn[0]");
+
+	}
+
+	private String getOtherUserWithSameEmailId(String fedId, DocumentContext productDocCtx) {
+		String otherFedId = null;
+		List<String> userList = getUserList(productDocCtx);
+		for(String userId: userList) {
+			if(fedId != userId) {
+				otherFedId = userId;
+			}
+		}
+		return otherFedId;
+	}
+
+	private List<String> getUserList(DocumentContext productDocCtx) {
+		List<String> userIdList = new ArrayList<String>();
+		net.minidev.json.JSONArray usersArray = productDocCtx.read("$.result");
+		for(Object userObj:usersArray) {
+			if(userObj instanceof HashMap<?, ?>) {
+				HashMap<String, String> userMap = (HashMap<String, String>)userObj;
+				String userId = userMap.get("username");
+				userIdList.add(userId);
+			}
+		}
+		return userIdList;
+	}
+
+	private Response invokeConfirmPIN(SocialProfileActivationRequest socialProfileRequest) {
+		ConfirmPinRequest cPinRequest = new ConfirmPinRequest();
+		cPinRequest.setFederationIdentifier(socialProfileRequest.getIDMS_Federated_ID__c());
+		cPinRequest.setId(socialProfileRequest.getId());
+		cPinRequest.setIDMS_Profile_update_source(socialProfileRequest.getIDMS_Profile_update_source());
+		cPinRequest.setOperation(socialProfileRequest.getOperation());
+		cPinRequest.setPinCode(socialProfileRequest.getPinCode());
+		cPinRequest.setUIFlag(socialProfileRequest.getUIFlag());
+		return userPinConfirmation(cPinRequest);
+	}
+
+	private Response openAMProfileUpdate(Configuration conf, ErrorResponse errorResponse, IFWUser userRecord,
+			String fedId, String requestJson) {
+		String iPlanetDirectoryKey = null;
+		SocialProfileUpdateResponse spUpdateResponse = new SocialProfileUpdateResponse();
+		int status = HttpStatus.OK.value();
+		try {
+			iPlanetDirectoryKey = getSSOToken();
+		} catch (IOException ex) {
+			String errorMsg = "Unable to get SSO Token: ";
+			errorResponse =  buildErrorMessage(fedId, ex, errorMsg);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		}
+		LogMessageUtil.logInfoMessage("Update Social Profile Openam Call Starts for userId: ", fedId);
+		try {
+			Response response = UserServiceUtil.updateSocialProfileBasedOnFRVersion(productService,
+					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, fedId, requestJson);
+			LOGGER.info("Update Social Profile Openam Call Ends for userId: " + fedId);
+			if (response != null && HttpStatus.OK.equals(HttpStatus.valueOf(response.getStatus()))) {
+				// Send email to the user
+				sendEmailBasedOnAppSettings(conf, userRecord);
+				// send success response
+				spUpdateResponse.setStatus(successStatus);
+				spUpdateResponse.setMessage(UserConstants.SOCIAL_PROFILE_UPDATE_SUCCESS);
+				return Response.status(HttpStatus.OK.value()).entity(spUpdateResponse).build();
+			}
+		} catch (IOException ex) {
+			String errorMsg = "Unable to parse opendj application data: ";
+			status = HttpStatus.BAD_REQUEST.value();
+			errorResponse =  buildErrorMessage(fedId, ex, errorMsg);
+		} catch (BadRequestException ex) {
+			String errorMsg = "BadRequestException during user Registration: ";
+			status = HttpStatus.BAD_REQUEST.value();
+			errorResponse =  buildErrorMessage(fedId, ex, errorMsg);
+		} catch (NotFoundException ex) {
+			String errorMsg = "NotFoundException during user Registration: ";
+			status = HttpStatus.BAD_REQUEST.value();
+			errorResponse =  buildErrorMessage(fedId, ex, errorMsg);
+		} catch (Exception ex) {
+			String errorMsg = "Exception during user Registration: ";
+			status = HttpStatus.INTERNAL_SERVER_ERROR.value();
+			errorResponse =  buildErrorMessage(fedId, ex, errorMsg);
+		}
+		return Response.status(status).entity(errorResponse).build();
+	}
+
+	private ErrorResponse buildErrorMessage(String fedId, Exception e, String errorMsg) {
+		ErrorResponse errorResponse = new ErrorResponse();
+		LogMessageUtil.logErrorMessage(e, errorMsg, e.getMessage());
+		LogMessageUtil.logInfoMessage("Registration failed for user: ", fedId);
+		errorResponse.setStatus(errorStatus);
+		errorResponse.setMessage(UserConstants.ERROR_CREATE_USER);
+		return errorResponse;
+	}
+
+	private void sendEmailBasedOnAppSettings(Configuration conf, IFWUser userRecord)
+			throws Exception {
+		boolean isOTPEnabled = false;
+		Response applicationDetails = openDJService.getUser(djUserName, djUserPwd, userRecord.getIDMS_Registration_Source__c());
+		DocumentContext productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
+
+		String isOTPEnabledForApp = productDJData.read("_isOTPEnabled");
+		if(StringUtils.isNotBlank(isOTPEnabledForApp)) {
+			isOTPEnabled = Boolean.valueOf(isOTPEnabledForApp);
+			LogMessageUtil.logInfoMessage("isOTPEnabled: ", String.valueOf(isOTPEnabled));
+		}
+		String otp = null, token = null, finalPathString = "" ;
+		if(isOTPEnabled){
+			otp = sendEmail.generateOtp(userRecord.getIDMS_Federated_ID__c());
+		} else {
+			token = sendEmail.generateEmailToken(userRecord.getIDMS_Federated_ID__c());
+		}
+		LogMessageUtil.logInfoMessage("Start of SendEmail method of Update SocialProfile for fedId: ", userRecord.getIDMS_Federated_ID__c());
+		sendEmail.sendOpenAmEmail(token, otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userRecord.getIDMS_Federated_ID__c(),
+						userRecord.getIDMS_Registration_Source__c(), finalPathString);
+		LogMessageUtil.logInfoMessage("End of SendEmail method of Update SocialProfile for fedId: ", userRecord.getIDMS_Federated_ID__c());
 	}
 }

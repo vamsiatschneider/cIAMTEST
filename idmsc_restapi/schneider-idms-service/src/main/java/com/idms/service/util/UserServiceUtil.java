@@ -1,20 +1,23 @@
 package com.idms.service.util;
 
+import static com.se.idms.util.UserConstants.ACCEPT_VERSION_GET_HEADER;
+import static com.se.idms.util.UserConstants.ACCEPT_VERSION_HEADER;
+import static com.se.idms.util.UserConstants.AUTH_VERSION_HEADER;
+import static com.se.idms.util.UserConstants.CONTENT_TYPE_APP_JSON;
+import static com.se.idms.util.UserConstants.FR6_5Version;
+import static com.se.idms.util.UserConstants.SESSION_LOGOUT_VERSION_HEADER;
+import static com.se.idms.util.UserConstants.TOKEN_STATUS_VERSION_HEADER;
+
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.idms.model.IFWUser;
+import com.idms.model.SocialProfileActivationRequest;
 import com.idms.product.client.OpenAMService;
-import com.idms.service.UserServiceImpl;
-
-import static com.se.idms.util.UserConstants.FR6_5Version;
-import static com.se.idms.util.UserConstants.ACCEPT_VERSION_HEADER;
-import static com.se.idms.util.UserConstants.ACCEPT_VERSION_GET_HEADER;
-import static com.se.idms.util.UserConstants.AUTH_VERSION_HEADER;
-import static com.se.idms.util.UserConstants.SESSION_LOGOUT_VERSION_HEADER;
-import static com.se.idms.util.UserConstants.TOKEN_STATUS_VERSION_HEADER;
-import static com.se.idms.util.UserConstants.CONTENT_TYPE_APP_JSON;
+import com.idms.product.model.OpenAmUser;
 
 public class UserServiceUtil {
 
@@ -118,5 +121,79 @@ public class UserServiceUtil {
 			return productService.sessionLogout(cookie, action);
 		}
 	}
+	public static String validateAtrributes(IFWUser userRecord) {
+		String errorMessage = null;
+		if(StringUtils.isBlank(userRecord.getFirstName())){
+			errorMessage = "First Name cannot be null or empty!";
+		}
+		if(StringUtils.isBlank(userRecord.getLastName())){
+			errorMessage = "Last Name cannot be null or empty!";
+		}
+		if(StringUtils.isBlank(userRecord.getEmail())){
+			errorMessage = "Email Id cannot be null or empty!";
+		}
+		if(StringUtils.isBlank(userRecord.getTncFlag())){
+			errorMessage = "T & C flag cannot be null or empty!";
+		}
+		if(StringUtils.isBlank(userRecord.getIDMS_Federated_ID__c())){
+			errorMessage = "Federation ID cannot be null or empty!";
+		}
+		if(StringUtils.isBlank(userRecord.getIDMS_Email_opt_in__c())){
+			errorMessage = "Email Opt In cannot be null or empty!";
+		}
+		return errorMessage;
+	}
 	
+	public static void populateOpenAMUserAttributes(IFWUser userRecord, OpenAmUser openamUser) {
+		openamUser.setMail(userRecord.getEmail());
+		openamUser.setGivenName(userRecord.getFirstName());
+		openamUser.setSn(userRecord.getLastName());
+		openamUser.setTncFlag(userRecord.getTncFlag());
+		openamUser.setIDMSisInternal__c("FALSE");
+		openamUser.setIsActivated("false");
+		openamUser.setEmailOptIn(userRecord.getIDMS_Email_opt_in__c());
+		openamUser.setFederationID(userRecord.getIDMS_Federated_ID__c());
+		openamUser.setRegisterationSource(userRecord.getIDMS_Registration_Source__c());
+		openamUser.setCompanyName(userRecord.getCompanyName());
+		openamUser.setCurrency(userRecord.getDefaultCurrencyIsoCode());
+		openamUser.setCompanyStreet(userRecord.getCompany_Address1__c());
+		openamUser.setCompanyCity(userRecord.getCompany_City__c());
+		openamUser.setCompanyState(userRecord.getCompany_State__c());
+		openamUser.setCompanyPostalCode(userRecord.getCompany_Postal_Code__c());
+		openamUser.setIam1(userRecord.getIDMSClassLevel1__c());
+		openamUser.setIam2(userRecord.getIDMSClassLevel2__c());
+		openamUser.setIndustrySegment(userRecord.getIDMSMarketSegment__c());
+		openamUser.setCompanyCountry(userRecord.getCompany_Country__c());
+		openamUser.setC(userRecord.getCountry());
+		openamUser.setEmployeeType(userRecord.getIDMS_User_Context__c());
+		openamUser.setPreferredlanguage(userRecord.getIDMS_PreferredLanguage__c());
+		openamUser.setCn(userRecord.getFirstName() + " " + userRecord.getLastName());
+	}
+
+	public static Response updateSocialProfileBasedOnFRVersion(OpenAMService productService, String adminToken, String fedId, String requestJson) {
+		LogMessageUtil.logInfoMessage("Update Social Profile Openam Call!");
+		return productService.updateSocialProfile(ACCEPT_VERSION_HEADER, adminToken, fedId, requestJson);
+	}
+	public static String validateActivationRequest(SocialProfileActivationRequest socialProfileRequest) {
+		String errorMessage = null;
+		if(StringUtils.isBlank(socialProfileRequest.getId())){
+			errorMessage = "Id cannot be null or empty!";
+		}
+		if(StringUtils.isBlank(socialProfileRequest.getIDMS_Federated_ID__c())){
+			errorMessage = "Federation ID cannot be null or empty!";
+		}
+		if(StringUtils.isBlank(socialProfileRequest.getIDMS_Profile_update_source())){
+			errorMessage = "Profile Update Source cannot be null or empty!";
+		}
+		if(StringUtils.isBlank(socialProfileRequest.getOperation())){
+			errorMessage = "Operation Type cannot be null or empty!";
+		}
+		if(StringUtils.isBlank(socialProfileRequest.getPinCode())){
+			errorMessage = "Pin cannot be null or empty!";
+		}
+		if(StringUtils.isBlank(socialProfileRequest.getProvider())){
+			errorMessage = "Provider Name cannot be null or empty!";
+		}
+		return errorMessage;
+	}
 }
