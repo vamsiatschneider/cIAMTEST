@@ -4405,7 +4405,7 @@ public class UserServiceImpl implements UserService {
 			String Acl__c = ailRequest.getUserAILRecord().getIDMSAcl__c();
 			String[] acl = Acl__c.split(",");
 			String profileUpdateSource=ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c();
-			if (enableSMLVerification.equalsIgnoreCase("True")) {
+			if (enableSMLVerification!=null && enableSMLVerification.equalsIgnoreCase("True")) {
 			LOGGER.info("Verifying AIL from Master List");
 			for (int i = 0; i < acl.length; i++) {
 					boolean entryFound = false;
