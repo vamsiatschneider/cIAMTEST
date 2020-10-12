@@ -2,7 +2,10 @@ package com.idms.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import javax.ws.rs.core.Response;
@@ -15,11 +18,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.cache.ehcache.EhCacheCache;
+import org.springframework.http.HttpStatus;
 
 import com.idms.mapper.IdmsMapper;
 import com.idms.model.ConfirmPinRequest;
 import com.idms.model.ConfirmPinResponse;
 import com.idms.product.client.OpenAMService;
+import com.schneider.idms.salesforce.service.SaleforceServiceImpl;
 import com.se.idms.cache.validate.IValidator;
 import com.se.idms.cache.validate.impl.LengthValidatorImpl;
 import com.se.idms.cache.validate.impl.PickListValidatorImpl;
@@ -64,6 +69,12 @@ public class UserConfirmPinTest {
 	
 	@Mock
 	private UIMSUserManagerSoapService uimsUserManagerSoapService;
+	
+	@Mock
+	private SaleforceServiceImpl datePopulationSerivce;
+	
+	@Mock
+	private UimsSetPasswordSoapService uimsSetPasswordSoapService;
 
 	/**
 	 * Initialize mocks.
@@ -91,22 +102,19 @@ public class UserConfirmPinTest {
 		when(legthValidator.validate(anyString(),anyString())).thenReturn(true);
 		when(pickListValidator.validate(anyString(),anyString())).thenReturn(true);
 		when(multiPickListValidator.validate(anyString(),anyString())).thenReturn(true);
-
-		when(productService.authenticateUser(anyString(), anyString(), anyString()))
+        when(productService.authenticateUser(anyString(), anyString(), anyString()))
 				.thenReturn(DomainMockData.AUTHENTICATION_JSON);
-		
 		when(cacheManager.getCache(anyString())).thenReturn(cache);
-
-		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER);
-		
+		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_INACTIVE_USER);
 		when(sendEmail.generateOtp(anyString())).thenReturn("1234");
-		
 		when(sendEmail.validatePin(anyString(),anyString())).thenReturn(true);
-
+		doNothing().when(datePopulationSerivce).populatePrmActivationDate(anyString(),anyString());
+		doNothing().when(uimsSetPasswordSoapService).activateUIMSUserConfirmPIN(any(ConfirmPinRequest.class), anyString(),
+				anyString(), anyString(), anyString());
+		
 		Response response = userService.userPinConfirmation(confirmPinRequest);
-
+		assertEquals(HttpStatus.OK, HttpStatus.valueOf(response.getStatus()));
 		PasswordRecoveryResponse actualResponse = (PasswordRecoveryResponse) response.getEntity();
-
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Success"));
 		assertThat("Message ", actualResponse.getMessage(), equalTo(UserConstants.PIN_VALIDATED_SUCCESS));
 	}
@@ -121,13 +129,14 @@ public class UserConfirmPinTest {
 
 		ConfirmPinRequest confirmPinRequest = DtoMockData.buildUserPinConfirmationRequset();
 		confirmPinRequest.setId("");
-
+		confirmPinRequest.setFederationIdentifier("");
+		confirmPinRequest.setIDMS_Federated_ID__c("");
+		
 		Response response = userService.userPinConfirmation(confirmPinRequest);
-
+		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		ConfirmPinResponse actualResponse = (ConfirmPinResponse) response.getEntity();
-
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
-		assertThat("Message ", actualResponse.getMessage(), equalTo(UserConstants.MANDATORY_ID));
+		assertThat("Message ", actualResponse.getMessage(), equalTo(UserConstants.MANDATORY_FEDERATION_ID));
 	}
 
 	/**
@@ -141,9 +150,8 @@ public class UserConfirmPinTest {
 		confirmPinRequest.setPinCode(null);
 
 		Response response = userService.userPinConfirmation(confirmPinRequest);
-
+		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		ConfirmPinResponse actualResponse = (ConfirmPinResponse) response.getEntity();
-
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
 		assertThat("Message ", actualResponse.getMessage(), equalTo(UserConstants.MANDATORY_PINCODE));
 	}
@@ -159,9 +167,8 @@ public class UserConfirmPinTest {
 		confirmPinRequest.setIDMS_Profile_update_source(null);
 
 		Response response = userService.userPinConfirmation(confirmPinRequest);
-
+		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		ConfirmPinResponse actualResponse = (ConfirmPinResponse) response.getEntity();
-
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
 		assertThat("Message ", actualResponse.getMessage(), equalTo(UserConstants.PROFILE_UPDATE_SOURCE));
 	}
@@ -179,20 +186,16 @@ public class UserConfirmPinTest {
 
 		when(legthValidator.validate(anyString(), anyString())).thenReturn(true);
 		when(pickListValidator.validate(anyString(), anyString())).thenReturn(true);
-
 		when(productService.authenticateUser(anyString(), anyString(), anyString()))
 				.thenReturn(DomainMockData.AUTHENTICATION_JSON);
-
 		when(cacheManager.getCache(anyString())).thenReturn(cache);
-		
 		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER);
 		
 		Response response = userService.userPinConfirmation(confirmPinRequest);
-
+		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		ConfirmPinResponse actualResponse = (ConfirmPinResponse) response.getEntity();
-
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
-		assertThat("Message ", actualResponse.getMessage(), equalTo(UserConstants.PR_POLICY));
+		assertThat("Message ", actualResponse.getMessage(), equalTo(UserConstants.OPERATION_BLCOKED));
 	}
 		
 }

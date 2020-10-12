@@ -1,5 +1,6 @@
 package com.idms.service;
 
+import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.idms.model.AILRequest;
 import com.idms.model.ActivateUser;
 import com.idms.model.ActivateUserRequest;
@@ -17,8 +18,8 @@ import com.idms.product.model.OpenAmUser;
 import com.idms.product.model.OpenAmUserInput;
 import com.idms.product.model.OpenAmUserRequest;
 import com.se.idms.dto.SetPasswordRequest;
-import com.uims.authenticatedUsermanager.UserV6;
-import com.uims.companymanager.CompanyV3;
+import com.se.uims.usermanager.UserV6;
+
 
 /**
  * Mock data creation for dto objects in the Service layer.
@@ -125,6 +126,7 @@ public class DtoMockData {
     	request.setUserRecord(userRecord);
         return request;
     }
+  
     
     /**
      * Builds instance of {@link ConfirmPinRequest} with default details.
@@ -169,12 +171,11 @@ public class DtoMockData {
      *
      * @return the constructed {@link UserV6} instance
      */
-    public static CompanyV3 buildCompanyV3Reuest() {
-    	CompanyV3 request = new CompanyV3();
-    	request.setAddInfoAddress("abc");   	
-        return request;
+    public static CompanyV3 buildCompanyRequest() {
+    	CompanyV3 company = new CompanyV3();
+    	company.setAddInfoAddress("abc");
+        return company;
     }
-    
     /**
      * Builds instance of {@link ResendEmailChangeRequest} with default details.
      *
@@ -263,4 +264,6 @@ public class DtoMockData {
         request.setUIFlag("true");
         return request;
     }
+
+	
 }
