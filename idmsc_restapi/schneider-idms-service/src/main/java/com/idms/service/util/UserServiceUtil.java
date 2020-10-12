@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.idms.model.IFWUser;
 import com.idms.model.SocialProfileActivationRequest;
+import com.idms.model.UserAMProfile;
 import com.idms.product.client.OpenAMService;
 import com.idms.product.model.OpenAmUser;
 
@@ -195,5 +196,92 @@ public class UserServiceUtil {
 			errorMessage = "Provider Name cannot be null or empty!";
 		}
 		return errorMessage;
+	}
+	public static String buildMergeJson(UserAMProfile appleUser) {
+
+		StringBuilder mergeJson = new StringBuilder("{");
+		if(StringUtils.isNotBlank(appleUser.getGivenName()[0])) {
+			String gName = "\"givenName\": \"" + appleUser.getGivenName()[0] + "\"";
+			mergeJson.append(gName).append(",");
+		}
+		if(null != appleUser.getPreferredlanguage()) {
+			String preferredlanguage = "\"preferredlanguage\": \"" + appleUser.getPreferredlanguage()[0] + "\"";
+			mergeJson.append(preferredlanguage).append(",");
+		}
+		if(null != appleUser.getSn()) {
+			String sn = "\"sn\": \"" + appleUser.getSn()[0] + "\"";
+			mergeJson.append(sn).append(",");
+		}
+		if(null != appleUser.getCn()) {
+			String cn = "\"cn\": \"" + appleUser.getCn()[0] + "\"";
+			mergeJson.append(cn).append(",");
+		}
+		if(null != appleUser.getMail()) {
+			String mail = "\"mail\": \"" + appleUser.getMail()[0] + "\"";
+			mergeJson.append(mail).append(",");
+		}
+		if(null != appleUser.getEmailOptIn()) {
+			String emailOptIn = "\"emailOptIn\": \"" + appleUser.getEmailOptIn()[0] + "\"";
+			mergeJson.append(emailOptIn).append(",");
+		}
+		if(null != appleUser.getCompanyName()) {
+			String companyName = "\"companyName\": \"" + appleUser.getCompanyName()[0] + "\"";
+			mergeJson.append(companyName).append(",");
+		}
+		if(null != appleUser.getCompanyStreet()) {
+			String companyStreet = "\"companyStreet\": \"" + appleUser.getCompanyStreet()[0] + "\"";
+			mergeJson.append(companyStreet).append(",");
+		}
+		if(null != appleUser.getCompanyCity()) {
+			String companyCity = "\"companyCity\": \"" + appleUser.getCompanyCity()[0] + "\"";
+			mergeJson.append(companyCity).append(",");
+		}
+		if(null != appleUser.getCompanyState()) {
+			String companyState = "\"companyState\": \"" + appleUser.getCompanyState()[0] + "\"";
+			mergeJson.append(companyState).append(",");
+		}
+		if(null != appleUser.getCompanyPostalCode()) {
+			String companyPostalCode = "\"companyPostalCode\": \"" + appleUser.getCompanyPostalCode()[0] + "\"";
+			mergeJson.append(companyPostalCode).append(",");
+		}
+		if(null != appleUser.getCompanyCountry()) {
+			String companyCountry = "\"companyCountry\": \"" + appleUser.getCompanyCountry()[0] + "\"";
+			mergeJson.append(companyCountry).append(",");
+		}
+		if(null != appleUser.getC()) {
+			String country = "\"c\": \"" + appleUser.getC()[0] + "\"";
+			mergeJson.append(country).append(",");
+		}
+		if(null != appleUser.getIam1()) {
+			String iam1 = "\"iam1\": \"" + appleUser.getIam1()[0] + "\"";
+			mergeJson.append(iam1).append(",");
+		}
+		if(null != appleUser.getIam2()) {
+			String iam2 = "\"iam2\": \"" + appleUser.getIam2()[0] + "\"";
+			mergeJson.append(iam2).append(",");
+		}
+		if(null != appleUser.getIndustrySegment()) {
+			String industrySegment = "\"industrySegment\": \"" + appleUser.getIndustrySegment()[0] + "\"";
+			mergeJson.append(industrySegment).append(",");
+		}
+		if(null != appleUser.getTncFlag()) {
+			String tncFlag = "\"tncFlag\": \"" + appleUser.getTncFlag()[0] + "\"";
+			mergeJson.append(tncFlag).append(",");
+		}
+		if(null != appleUser.getUpdateSource()) {
+			String updateSource = "\"updateSource\": \"" + appleUser.getUpdateSource()[0] + "\"";
+			mergeJson.append(updateSource).append(",");
+		}
+		if(null != appleUser.getEmployeeType()) {
+			String employeeType = "\"employeeType\": \"" + appleUser.getEmployeeType()[0] + "\"";
+			mergeJson.append(employeeType).append(",");
+		}
+		if(null != appleUser.getAppleid()) {
+			String aId = "\"appleid\": \"" + appleUser.getAppleid()[0] + "\"";
+			mergeJson.append(aId);
+		}
+		mergeJson.append("}");
+		LogMessageUtil.logInfoMessage("mergeJson= ", mergeJson.toString());
+	    return mergeJson.toString();
 	}
 }

@@ -26,7 +26,8 @@ public class FieldsMappingValidatorImpl  implements IValidator{
 	@Override
 	public boolean validate(String key, Object value) {
 		// LOGGER.info("Entered validate() -> Start");
-		LOGGER.info("Parameter key -> " + key + " ,value -> " + value);
+		if(LOGGER.isInfoEnabled())
+			LOGGER.info("Parameter key -> " + key + " ,value -> " + value);
 		CacheManagerProvider cacheManagerProvider = new CacheManagerProviderImpl();
 		CacheBuilder cacheBuilder = new CacheBuilder(cacheManagerProvider);
 		// Properties cacheProperties =null;

@@ -227,6 +227,8 @@ public class PropertyFileAutoRefresh {
 	
 	private String enableAdminAuthToken;
 	
+	private String enableCheckUserToGlobal;
+	
 	public static PropertyFileAutoRefresh getInstance() {
 		return INSTANCE;
 	}
@@ -371,6 +373,9 @@ public class PropertyFileAutoRefresh {
 			
 			if(!((UserServiceImpl) userService).getEnableAdminAuthToken().equals(enableAdminAuthToken) && enableAdminAuthToken!=null && !enableAdminAuthToken.isEmpty())
 				((UserServiceImpl) userService).setEnableAdminAuthToken(enableAdminAuthToken);
+			
+			if(!((UserServiceImpl) userService).getEnableCheckUserToGlobal().equals(enableCheckUserToGlobal) && enableCheckUserToGlobal!=null && !enableCheckUserToGlobal.isEmpty())
+				((UserServiceImpl) userService).setEnableCheckUserToGlobal(enableCheckUserToGlobal);
 			
 			if(!(goDigitalUserService.getFromUserName().equals(fromUserName)) && fromUserName!=null && !fromUserName.isEmpty())
 			goDigitalUserService.setFromUserName(fromUserName);
@@ -744,6 +749,8 @@ public class PropertyFileAutoRefresh {
 		stopidmstouimsflag=configuration.getProperty("stopidmstouimsflag");
 		
 		enableAdminAuthToken=configuration.getProperty("enableAdminAuthToken");
+		
+		enableCheckUserToGlobal=configuration.getProperty("enableCheckUserToGlobal");
 	}
 
 	public void initilize() throws Exception {

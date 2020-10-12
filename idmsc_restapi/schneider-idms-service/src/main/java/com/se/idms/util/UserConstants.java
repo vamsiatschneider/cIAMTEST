@@ -659,5 +659,7 @@ public class UserConstants {
 	
 	public static final String JSON_PROCESSING_ERROR = "Unable to process request json: ";
 	public static final String SOCIAL_PROFILE_UPDATE_SUCCESS = "Social Profile update is successful.";
+	public static final String UNSUPPORTED_ENCODING_EXCEPTION = "Unsupported Encoding";
+	public static final String PROFILES_MERGE_FAILED = "User profiles merge failed!";
 
 }

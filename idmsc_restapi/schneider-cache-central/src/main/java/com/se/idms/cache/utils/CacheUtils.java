@@ -29,7 +29,8 @@ public class CacheUtils {
 				properties.load(inputStreamReader);
 				return properties;
             }catch (FileNotFoundException e){
-            	logger.error("The file " + propertiesPathFileName + " is missing ", e);
+            	if(logger.isErrorEnabled())
+            		logger.error("The file " + propertiesPathFileName + " is missing ", e);
                 throw new Exception("The properties file: " + propertiesPathFileName
     					+ " could not be accessed.");
             }finally {
@@ -38,8 +39,8 @@ public class CacheUtils {
 					try {
 						inputStream.close();
 					} catch (IOException e) {
-						logger.error(e.getMessage() + "\n The Cause: " + e.getCause());
-						
+						if(logger.isErrorEnabled())
+							logger.error(e.getMessage() + "\n The Cause: " + e.getCause());
 					}
 				}
 			}
