@@ -344,7 +344,10 @@ public class ParseValuesByOauthHomeWorkContextDto {
 			userResponse.setLoginid(null != userProductDocCtx.read("$.loginid")
 					? getValue(userProductDocCtx.read("$.loginid").toString()) : getDelimeter());
 		}
-
+		if(null == userResponse.getAppleid() || userResponse.getAppleid().isEmpty()){
+			userResponse.setAppleid(null != userProductDocCtx.read("$.appleid")
+					? getValue(userProductDocCtx.read("$.appleid").toString()) : getDelimeter());
+		}
 		String emailValue = null != userProductDocCtx.read("$.mail")
 				? getValue(userProductDocCtx.read("$.mail").toString()) : getDelimeter();
 		/*
@@ -510,7 +513,10 @@ public class ParseValuesByOauthHomeWorkContextDto {
 			userResponse.setLoginid(null != userProductDocCtx.read("$.loginid")
 					? getValue(userProductDocCtx.read("$.loginid").toString()) : getDelimeter());
 		}
-
+		if(null == userResponse.getAppleid() || userResponse.getAppleid().isEmpty()){
+			userResponse.setAppleid(null != userProductDocCtx.read("$.appleid")
+					? getValue(userProductDocCtx.read("$.appleid").toString()) : getDelimeter());
+		}
 		String emailValue = null != userProductDocCtx.read("$.mail")
 				? getValue(userProductDocCtx.read("$.mail").toString()) : getDelimeter();
 
