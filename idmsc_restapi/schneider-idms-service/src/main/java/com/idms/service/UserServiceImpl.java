@@ -11755,11 +11755,11 @@ public class UserServiceImpl implements UserService {
 			
 			else if(pfcomm.equalsIgnoreCase("both")) {
 				email = productDocCtx.read("$.mail[0]");
+				mobile = productDocCtx.read("$.mobilereg[0]");
 				storeOTPRequest.setEmailOrMobile(email);
 			}
 			
 			checkOTPStore = storeOTPForVerification(storeOTPRequest);
-			LOGGER.info("checkOTPStore reponse ::" + objMapper.writeValueAsString(checkOTPStore));
 			org.json.simple.JSONObject checkOTPStoreJson = (org.json.simple.JSONObject) checkOTPStore.getEntity();
 			String otpReceived = checkOTPStoreJson.get(UserConstants.MESSAGE_L).toString();
 			LOGGER.info("otpReceived = "+otpReceived);
