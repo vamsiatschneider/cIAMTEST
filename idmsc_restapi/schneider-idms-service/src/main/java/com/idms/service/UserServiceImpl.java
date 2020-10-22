@@ -11740,7 +11740,6 @@ public class UserServiceImpl implements UserService {
 			productDocCtx = JsonPath.using(conf).parse(userData);
 			String pfcomm = productDocCtx.read("$.preferredCommunication[0]");
 			String otpGenerated = RandomStringUtils.random(6, UserConstants.RANDOM_PIN_CHARS);
-			LOGGER.info("otpGenerated = "+otpGenerated);
 			storeOTPRequest.setOtpValue(otpGenerated);
 			
 			if(pfcomm.equalsIgnoreCase("email")) {
@@ -11762,7 +11761,6 @@ public class UserServiceImpl implements UserService {
 			checkOTPStore = storeOTPForVerification(storeOTPRequest);
 			org.json.simple.JSONObject checkOTPStoreJson = (org.json.simple.JSONObject) checkOTPStore.getEntity();
 			String otpReceived = checkOTPStoreJson.get(UserConstants.MESSAGE_L).toString();
-			LOGGER.info("otpReceived = "+otpReceived);
 			if(!otpGenerated.equalsIgnoreCase(otpReceived)) {
 				otpGenerated = otpReceived;
 			}
@@ -11883,10 +11881,10 @@ public class UserServiceImpl implements UserService {
 
 			if (null != tempOtp && !tempOtp.isEmpty() && otpStatus.equalsIgnoreCase(UserConstants.PIN_NOT_VERIFIED)
 					&& Long.parseLong(otpValidityTime) > System.currentTimeMillis()) {
-				LOGGER.info("Got valid otp from OpenDJ :: "+tempOtp);
+				LOGGER.info("Got valid otp from OpenDJ");
 				otpValue = tempOtp;
 			} else {
-				LOGGER.info("using passed otp :: "+otpValue);
+				LOGGER.info("using passed otp");
 				Calendar now = Calendar.getInstance();
 				now.add(Calendar.MINUTE, Integer.parseInt(otpvalidationtimeinminute));
 				long validityTimeStamp = now.getTimeInMillis();

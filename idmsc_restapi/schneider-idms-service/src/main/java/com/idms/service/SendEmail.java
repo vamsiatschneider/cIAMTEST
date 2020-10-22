@@ -1315,11 +1315,9 @@ public class SendEmail {
 		String to = mail ;
 		String subject = "Enable Two-Factor Authentication";
 		
-		String bodyMsg = "Please use the code <font size=\"6\">"+code+"</font> to verify your email address to set up two-factor authentication on your mySchneider account.\r\n" + 
-				"\r\n" + 
-				"Two-factor authentication adds an extra layer of security to your account. We will send a code to your preferred method of communication when you log in to your mySchneider account.\r\n" + 
-				"\r\n" + 
-				"Sincerely,\r\n" + 
+		String bodyMsg = "Please use the code <font size=\"6\">"+code+"</font> to verify your email address to set up two-factor authentication on your mySchneider account.<BR><BR>" + 
+				"Two-factor authentication adds an extra layer of security to your account. We will send a code to your preferred method of communication when you log in to your mySchneider account.<BR><BR>" + 
+				"Sincerely,<BR>>" + 
 				"Schneider Electric Team";
 		emailReadyToSendEmail(to, from, subject, bodyMsg);
 	}
