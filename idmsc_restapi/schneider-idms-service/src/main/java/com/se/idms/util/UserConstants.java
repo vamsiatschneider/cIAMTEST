@@ -282,6 +282,8 @@ public class UserConstants {
 	
 	public static final String FEDID_EMPTY = "federation ID is null or empty";
 	
+	public static final String USERID_EMPTY = "User ID is null or empty";
+	
 	/**
 	 * HOTP Query parametersConstants
 	 * 

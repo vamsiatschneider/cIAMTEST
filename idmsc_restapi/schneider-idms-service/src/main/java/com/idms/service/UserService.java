@@ -32,6 +32,7 @@ import com.idms.model.PasswordRecoveryRequest;
 import com.idms.model.ResendEmailChangeRequest;
 import com.idms.model.ResendPinRequest;
 import com.idms.model.ResendRegEmailRequest;
+import com.idms.model.Send2FAOTPRequest;
 import com.idms.model.SendInvitationRequest;
 import com.idms.model.SendOTPRequest;
 import com.idms.model.SocialProfileActivationRequest;
@@ -327,4 +328,9 @@ public interface UserService {
 	@Path("/apexrest/activateSocialProfile")
 	@Consumes("application/json")
 	Response activateSocialProfile(@Valid SocialProfileActivationRequest socialProfileRequest);
+	
+	@POST
+	@Path("/apexrest/send2FAOTP")
+	@Consumes("application/json")
+	Response send2FAOTP(@Valid Send2FAOTPRequest send2FAOTPRequest);
 }
