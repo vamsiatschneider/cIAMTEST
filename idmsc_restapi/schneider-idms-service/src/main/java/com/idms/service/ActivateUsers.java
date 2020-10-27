@@ -80,7 +80,7 @@ public class ActivateUsers {
 					LOGGER.error("An error occured."+exp.getMessage());		
 					LOGGER.error("Exception >"+exp);}
 
-				if (!"{}".equals(jsonString.toString())) {
+				if (!"{}".equals(jsonString)) {
 					inputRequesr = buildUserRequest(jsonString);
 
 					try {

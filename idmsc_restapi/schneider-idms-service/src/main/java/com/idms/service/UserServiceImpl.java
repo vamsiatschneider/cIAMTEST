@@ -13024,7 +13024,7 @@ public class UserServiceImpl implements UserService {
 			LogMessageUtil.logInfoMessage("End: openam checkUserExists finished for mail= ", mail);
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userExists);
 			int resultCount = productDocCtx.read("$.resultCount");
-			LogMessageUtil.logInfoMessage("resultCount of mail or mobile = ", resultCount + "");
+			LogMessageUtil.logInfoMessage("resultCount of mail or mobile = "+ resultCount);
 
 			// Merge accounts if multiple accounts exist with same email ids.
 			if (resultCount > 1) {
@@ -13079,7 +13079,7 @@ public class UserServiceImpl implements UserService {
 			Response deleteResult = UserServiceUtil.deleteUserBasedOnFRVersion(productService, frVersion,
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, fedId);
 			LogMessageUtil.logInfoMessage("End: deleteUser() for userId= ", fedId);
-			LogMessageUtil.logInfoMessage("Apple Temporary User got deleted:", deleteResult.getStatus() + "");
+			LogMessageUtil.logInfoMessage("Apple Temporary User got deleted:"+deleteResult.getStatus());
 			if(HttpStatus.OK.equals(HttpStatus.valueOf(deleteResult.getStatus()))) {
 				areProfilesMerged = true;
 			}

@@ -250,7 +250,7 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 					modifiedAILValue = aclValue;
 
 				if (null != inOpenAMAILFullValues && !inOpenAMAILFullValues.isEmpty())
-					modifiedAILFullValues = "" + inOpenAMAILFullValues + ",(" + inRequestAILTypeValPair + ")";
+					modifiedAILFullValues = inOpenAMAILFullValues + ",(" + inRequestAILTypeValPair + ")";
 				else
 					modifiedAILFullValues = "(" + inRequestAILTypeValPair + ")";
 
