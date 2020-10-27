@@ -10507,7 +10507,7 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 			
-			if(null != requestType && !requestType.isEmpty() && !requestType.equalsIgnoreCase(UserConstants.OTP_2FA)) {
+			if(null == requestType || requestType.isEmpty()) {
 				LOGGER.info("Start: sendSMS() for mobile user:"+mobile);
 				sendEmail.sendSMS(otpDual, mobile);
 				LOGGER.info("End: sendSMS() finished for  mobile user:"+mobile);
