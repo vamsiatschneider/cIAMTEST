@@ -10367,7 +10367,7 @@ public class UserServiceImpl implements UserService {
 
 		ObjectMapper objMapper = new ObjectMapper();
 		String otpStatus = null, otpValidityTime = null, otpGenDual = null;
-		String mobile = null, RequestType = null, otp2FAPassed = null;
+		String mobile = null, requestType = null, otp2FAPassed = null;
 		String identityValue = null, otpDJValue = null, otpDual = null, otp2FA = null;
 		JSONObject response = new JSONObject();
 
@@ -10375,11 +10375,11 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(otpRequest));
 
 			if (null != otpRequest.getReqType() && !otpRequest.getReqType().isEmpty()) {
-				RequestType = otpRequest.getReqType().trim();
-				LOGGER.info("RequestType = "+RequestType);
+				requestType = otpRequest.getReqType().trim();
+				LOGGER.info("RequestType = "+requestType);
 			}
 			
-			if (null != otpRequest.getOtpValue() && !otpRequest.getOtpValue().isEmpty() && RequestType.equalsIgnoreCase(UserConstants.OTP_2FA)) {
+			if (null != otpRequest.getOtpValue() && !otpRequest.getOtpValue().isEmpty() && requestType.equalsIgnoreCase(UserConstants.OTP_2FA)) {
 				otp2FAPassed = otpRequest.getOtpValue().trim();
 				LOGGER.info("incoming otpValue = "+otp2FAPassed);
 			}
@@ -10387,7 +10387,7 @@ public class UserServiceImpl implements UserService {
 			
 			if (null == otpRequest.getMobile() || otpRequest.getMobile().isEmpty()) {
 				response.put(UserConstants.STATUS, errorStatus);
-				if (RequestType.equalsIgnoreCase(UserConstants.OTP_2FA)){
+				if (null != requestType && !requestType.isEmpty() && requestType.equalsIgnoreCase(UserConstants.OTP_2FA)){
 					response.put(UserConstants.MESSAGE, "email/mobile is null or empty");
 					LOGGER.error("Error in sendOTP() is :: email/mobile is null or empty");
 				} else {
@@ -10448,7 +10448,7 @@ public class UserServiceImpl implements UserService {
 				postMobileRecord.setMobileNumber(identityValue);
 				postMobileRecord.setTokenStatus(UserConstants.PIN_NOT_VERIFIED);
 				
-				if(RequestType.equalsIgnoreCase(UserConstants.OTP_2FA)) {
+				if(null != requestType && !requestType.isEmpty() && requestType.equalsIgnoreCase(UserConstants.OTP_2FA)) {
 					LOGGER.info("using passed otp");
 					otp2FA = otp2FAPassed;
 					postMobileRecord.setOtpToken(otp2FA);
@@ -10507,7 +10507,7 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 			
-			if(!RequestType.equalsIgnoreCase(UserConstants.OTP_2FA)) {
+			if(null != requestType && !requestType.isEmpty() && !requestType.equalsIgnoreCase(UserConstants.OTP_2FA)) {
 				LOGGER.info("Start: sendSMS() for mobile user:"+mobile);
 				sendEmail.sendSMS(otpDual, mobile);
 				LOGGER.info("End: sendSMS() finished for  mobile user:"+mobile);
@@ -10525,7 +10525,7 @@ public class UserServiceImpl implements UserService {
 			}
 			
 			response.put(UserConstants.STATUS, successStatus);
-			if (RequestType.equalsIgnoreCase(UserConstants.OTP_2FA)){
+			if (null != requestType && !requestType.isEmpty() && requestType.equalsIgnoreCase(UserConstants.OTP_2FA)){
 				response.put(UserConstants.MESSAGE_L, otp2FA);
 			} else {
 				response.put(UserConstants.MESSAGE, UserConstants.PIN_SEND_SUCCESS);
