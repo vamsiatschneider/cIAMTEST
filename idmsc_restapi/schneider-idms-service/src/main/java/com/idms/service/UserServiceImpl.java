@@ -10358,6 +10358,10 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
+	
+	/**
+	 * Storing & sending OTP for Dual reg and 2FA option 
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public Response sendOTP(SendOTPRequest otpRequest) throws Exception {
@@ -10366,7 +10370,7 @@ public class UserServiceImpl implements UserService {
 		long elapsedTime;
 
 		ObjectMapper objMapper = new ObjectMapper();
-		String otpStatus = null, otpValidityTime = null, otpGenDual = null;
+		String otpStatus = null, otpValidityTime = null;
 		String mobile = null, requestType = null, otp2FAPassed = null;
 		String identityValue = null, otpDJValue = null, otpDual = null, otp2FA = null;
 		JSONObject response = new JSONObject();
@@ -10381,9 +10385,7 @@ public class UserServiceImpl implements UserService {
 			
 			if (null != otpRequest.getOtpValue() && !otpRequest.getOtpValue().isEmpty() && requestType.equalsIgnoreCase(UserConstants.OTP_2FA)) {
 				otp2FAPassed = otpRequest.getOtpValue().trim();
-				LOGGER.info("incoming otpValue = "+otp2FAPassed);
 			}
-			
 			
 			if (null == otpRequest.getMobile() || otpRequest.getMobile().isEmpty()) {
 				response.put(UserConstants.STATUS, errorStatus);
@@ -10439,7 +10441,7 @@ public class UserServiceImpl implements UserService {
 
 			if (null != otpDJValue && !otpDJValue.isEmpty() && otpStatus.equalsIgnoreCase(UserConstants.PIN_NOT_VERIFIED)
 					&& Long.parseLong(otpValidityTime) > System.currentTimeMillis()) {
-				LOGGER.info("Got valid otp from OpenDJ :"+otpDJValue);
+				LOGGER.info("Got valid otp from OpenDJ");
 				otpDual = otpDJValue;
 				otp2FA = otpDJValue ;
 			} else {
