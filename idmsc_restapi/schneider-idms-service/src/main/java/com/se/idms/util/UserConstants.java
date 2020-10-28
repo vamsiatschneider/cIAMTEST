@@ -667,10 +667,9 @@ public class UserConstants {
 	public static final String PROFILES_MERGE_FAILED = "User profiles merge failed!";
 	
 	public static final String OTP_2FA = "OTP2FA";
-	public static final String MANDATORY_2FA_FLAG ="is2FAEnable Flag is mandatory";
-	public static final String MFA_ENABLE_SUCCESS ="MFA is enabled for you successfully";
-	public static final String MFA_DISABLE_SUCCESS ="MFA is TurnedOff successfully";
-	public static final String MFA_ENABLE_ERROR ="MFA already Enabled for the user";
+	public static final String INVALID_2FA_VALUE ="INVALID is2FA Details";
+	public static final String MFA_SUCCESS ="MFA details updated successfully";
+	public static final String MFA_ERROR ="MFA details already saved for the user";
 	public static final String MANDATORY_USERID ="LoginId is missing";
 
 
