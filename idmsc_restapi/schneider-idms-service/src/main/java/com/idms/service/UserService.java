@@ -336,8 +336,8 @@ public interface UserService {
 	Response send2FAOTP(@Valid Send2FAOTPRequest send2FAOTPRequest);
 	
 	@POST
-	@Path("/apexrest/enableMFA")
+	@Path("/apexrest/enableMFA/users/{userId}")
 	@Consumes("application/json")
-	Response enableMFA(@HeaderParam("authId") String authId,@HeaderParam("loginId") String loginId,MFARequest mfaRequest);
+	Response enableMFA(@PathParam("userId") String userId,@HeaderParam("Authorization") String token,MFARequest mfaRequest);
 
 }
