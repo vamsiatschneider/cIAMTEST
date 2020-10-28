@@ -117,7 +117,7 @@ public class GoDigitalUserServiceImpl implements GoDigitalUserService {
 				 * String toAddress =
 				 * productDocCtx.read("$.userRegistrationInfoRequest.userDetails.EMAIL");
 				 */
-				LOGGER.info(""+productDocCtx.read("$.userRegistrationInfoRequest.authentication.EMAIL"));
+				LOGGER.info(productDocCtx.read("$.userRegistrationInfoRequest.authentication.EMAIL"));
 				sendEmail.emailReadyToSendEmail(supportUser, fromUserName, "GoDigitalUser Registration Failed", userRegistrationInfoRequest);
 			}else{
 				GoDigitalLog.info("GoDigitalUser Created Successfully  ");

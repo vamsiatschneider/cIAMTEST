@@ -238,7 +238,7 @@ public class DomainMockData {
 		user.setIDMSCompanyMarketServed__c(IDMSCompanyMarketServed__c);
 		user.setIDMSCompanyNbrEmployees__c(IDMSCompanyNbrEmployees__c);
 		user.setIDMSCompanyHeadquarters__c(IDMSCompanyHeadquarters__c);
-		user.setIDMSAnnualRevenue__c(IDMSAnnualRevenue__c.toString());
+		user.setIDMSAnnualRevenue__c(IDMSAnnualRevenue__c);
 		user.setIDMSTaxIdentificationNumber__c(IDMSTaxIdentificationNumber__c);
 		user.setIDMSMiddleName__c(IDMSMiddleName__c);
 		user.setCompany_Website__c(Company_Website__c);

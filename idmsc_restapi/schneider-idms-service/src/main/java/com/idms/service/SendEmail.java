@@ -1304,6 +1304,25 @@ public class SendEmail {
 	}
 	
 	/**
+	 * 
+	 * @param code
+	 * @param mail
+	 */
+	public void send2FAEmail(String code, String mail){
+		LOGGER.info("Entered send2FAEmail() -> Start");
+		LOGGER.info("Parameter mail -> "+mail);
+
+		String to = mail ;
+		String subject = "Enable Two-Factor Authentication";
+		
+		String bodyMsg = "Please use the code <font size=\"6\">"+code+"</font> to verify your email address to set up two-factor authentication on your mySchneider account.<BR><BR>" + 
+				"Two-factor authentication adds an extra layer of security to your account. We will send a code to your preferred method of communication when you log in to your mySchneider account.<BR><BR>" + 
+				"Sincerely,<BR>" + 
+				"Schneider Electric Team";
+		emailReadyToSendEmail(to, from, subject, bodyMsg);
+	}
+	
+	/**
 	 * Sending demo email
 	 * @param email
 	 * @throws MessagingException 
@@ -1424,7 +1443,7 @@ public class SendEmail {
 		String sn = "SDK-BBX-010-28365";
 		String password = "EEc1-61E0-4";
 		String SMSPassword = getMD5(sn+password);
-		String smsContent = "【施耐德电气】验证码为："+code+"（请妥善保存，切勿告知他人），在页面输入以完成验证。有效期为15分钟。";
+		String smsContent = "【施耐德电气】验证码为： "+code+" （请妥善保存，切勿告知他人），在页面输入以完成验证。有效期为15分钟。";
 		smsContent   =   java.net.URLEncoder.encode(smsContent,"utf-8");  
 		
 		try {
@@ -1467,7 +1486,7 @@ public class SendEmail {
 			return null;
 		}
 	}
-
+	
 	public void setFrom(String from) {
 		this.from = from;
 	}
@@ -1532,81 +1551,65 @@ public class SendEmail {
 		IDMS_USER_ADD_EMAILTEMPLATE_EN = iDMS_USER_ADD_EMAILTEMPLATE_EN;
 	}
 
-
 	public String getFrom() {
 		return from;
 	}
-
 
 	public String getDjUserName() {
 		return djUserName;
 	}
 
-
 	public String getDjUserPwd() {
 		return djUserPwd;
 	}
-
 
 	public String getIDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN() {
 		return IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN;
 	}
 
-
 	public String getIDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN() {
 		return IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN;
 	}
-
 
 	public String getIDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN() {
 		return IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN;
 	}
 
-
 	public String getIDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN() {
 		return IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN;
 	}
-
 
 	public String getIDMS_USER_UPDATE_EMAILTEMPLATE_CN() {
 		return IDMS_USER_UPDATE_EMAILTEMPLATE_CN;
 	}
 
-
 	public String getIDMS_USER_UPDATE_EMAILTEMPLATE_EN() {
 		return IDMS_USER_UPDATE_EMAILTEMPLATE_EN;
 	}
-
 
 	public String getIDMS_USER_DEFAULT_EMAILTEMPLATE_CN() {
 		return IDMS_USER_DEFAULT_EMAILTEMPLATE_CN;
 	}
 
-
 	public String getIDMS_USER_DEFAULT_EMAILTEMPLATE_EN() {
 		return IDMS_USER_DEFAULT_EMAILTEMPLATE_EN;
 	}
-
 
 	public String getIDMS_SEND_INVITATION_EMAILTEMPLATE_EN() {
 		return IDMS_SEND_INVITATION_EMAILTEMPLATE_EN;
 	}
 
-
 	public String getIDMS_SEND_INVITATION_EMAILTEMPLATE_CN() {
 		return IDMS_SEND_INVITATION_EMAILTEMPLATE_CN;
 	}
-
 
 	public String getIDMS_USER_ADD_EMAILTEMPLATE_CN() {
 		return IDMS_USER_ADD_EMAILTEMPLATE_CN;
 	}
 
-
 	public String getIDMS_USER_ADD_EMAILTEMPLATE_EN() {
 		return IDMS_USER_ADD_EMAILTEMPLATE_EN;
 	}
-
 
 	public String getHotpEmailVerificationURL() {
 		return hotpEmailVerificationURL;
@@ -1617,38 +1620,31 @@ public class SendEmail {
 		return PRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_EN;
 	}
 
-
 	public void setPRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_EN(String pRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_EN) {
 		PRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_EN = pRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_EN;
 	}
 
-
 	public String getPRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_CN() {
 		return PRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_CN;
 	}
-
 
 	public void setPRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_CN(
 			String pRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_CN) {
 		PRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_CN = pRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_CN;
 	}
 
-
 	public String getPRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_EN() {
 		return PRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_EN;
 	}
-
 
 	public void setPRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_EN(
 			String pRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_EN) {
 		PRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_EN = pRM_INTERNAL_USER_REGESTRATION_EMAILTEMPLATE_EN;
 	}
 
-
 	public String getPRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_CN() {
 		return PRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_CN;
 	}
-
 
 	public void setPRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_CN(
 			String pRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_CN) {
@@ -1660,47 +1656,38 @@ public class SendEmail {
 		return PRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_EN;
 	}
 
-
 	public void setPRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_EN(
 			String pRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_EN) {
 		PRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_EN = pRM_ECLIPSE_USER_REGESTRATION_EMAILTEMPLATE_EN;
 	}
 
-
 	public String getPRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_CN() {
 		return PRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_CN;
 	}
-
 
 	public void setPRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_CN(String pRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_CN) {
 		PRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_CN = pRM_SELF_USER_REGESTRATION_EMAILTEMPLATE_CN;
 	}
 
-
 	public String getIDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_CN() {
 		return IDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_CN;
 	}
-
 
 	public void setIDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_CN(String iDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_CN) {
 		IDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_CN = iDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_CN;
 	}
 
-
 	public String getIDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_EN() {
 		return IDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_EN;
 	}
-
 
 	public void setIDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_EN(String iDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_EN) {
 		IDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_EN = iDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_EN;
 	}
 
-
 	public String getIDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_CN() {
 		return IDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_CN;
 	}
-
 
 	public void setIDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_CN(
 			String iDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_CN) {

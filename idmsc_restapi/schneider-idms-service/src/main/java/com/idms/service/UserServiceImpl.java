@@ -116,6 +116,7 @@ import com.idms.model.RegistrationAttributes;
 import com.idms.model.ResendEmailChangeRequest;
 import com.idms.model.ResendPinRequest;
 import com.idms.model.ResendRegEmailRequest;
+import com.idms.model.Send2FAOTPRequest;
 import com.idms.model.SendInvitationRequest;
 import com.idms.model.SendOTPRequest;
 import com.idms.model.SocialProfileActivationRequest;
@@ -10357,6 +10358,10 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
+	
+	/**
+	 * Storing & sending OTP for Dual reg and 2FA option 
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public Response sendOTP(SendOTPRequest otpRequest) throws Exception {
@@ -10365,24 +10370,53 @@ public class UserServiceImpl implements UserService {
 		long elapsedTime;
 
 		ObjectMapper objMapper = new ObjectMapper();
-		String otpMobile = null, otpStatus = null, otpValidityTime = null;
-		String mobile = null;
+		String otpStatus = null, otpValidityTime = null;
+		String mobile = null, requestType = null, otp2FAPassed = null;
+		String identityValue = null, otpDJValue = null, otpDual = null, otp2FA = null;
 		JSONObject response = new JSONObject();
 
 		try {
 			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(otpRequest));
+
+			if (null != otpRequest.getReqType() && !otpRequest.getReqType().isEmpty()) {
+				requestType = otpRequest.getReqType().trim();
+				LOGGER.info("RequestType = "+requestType);
+			}
+			
+			if (null != otpRequest.getOtpValue() && !otpRequest.getOtpValue().isEmpty() && requestType.equalsIgnoreCase(UserConstants.OTP_2FA)) {
+				otp2FAPassed = otpRequest.getOtpValue().trim();
+			}
+			
 			if (null == otpRequest.getMobile() || otpRequest.getMobile().isEmpty()) {
 				response.put(UserConstants.STATUS, errorStatus);
-				response.put(UserConstants.MESSAGE, UserConstants.MOBILE_EMPTY);
-				LOGGER.error("Error in sendOTP() is ::" + UserConstants.MOBILE_EMPTY);
+				if (null != requestType && !requestType.isEmpty() && requestType.equalsIgnoreCase(UserConstants.OTP_2FA)){
+					response.put(UserConstants.MESSAGE, "email/mobile is null or empty");
+					LOGGER.error("Error in sendOTP() is :: email/mobile is null or empty");
+				} else {
+					response.put(UserConstants.MESSAGE, UserConstants.MOBILE_EMPTY);
+					LOGGER.error("Error in sendOTP() is ::" + UserConstants.MOBILE_EMPTY);
+				}
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by sendOTP() : " + elapsedTime);
 				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 			}
+			
 			if (null != otpRequest.getMobile() && !otpRequest.getMobile().isEmpty()) {
-				mobile = ChinaIdmsUtil.mobileTransformation(otpRequest.getMobile().trim());
+				identityValue = otpRequest.getMobile().trim();
+			}
+
+			if (identityValue.contains("@") && !emailValidator.validate(identityValue)) {
+				response.put(UserConstants.MESSAGE_L, "Email validation failed");
+				LOGGER.error("Error in sendOTP is :: Email validation failed.");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by sendOTP() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+			}
+
+			if (!identityValue.contains("@")) {
+				mobile = ChinaIdmsUtil.mobileTransformation(identityValue);
 				if (!ChinaIdmsUtil.mobileValidator(mobile)) {
-					response.put(UserConstants.STATUS, errorStatus);
+					response.put(UserConstants.STATUS_L, errorStatus);
 					response.put(UserConstants.MESSAGE, "Mobile validation failed.");
 					LOGGER.error("Error in sendOTP() is :: Mobile validation failed.");
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
@@ -10390,52 +10424,63 @@ public class UserServiceImpl implements UserService {
 					return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 				}
 			}
-
-			LOGGER.info("Start: getMobileOTPDetails() of OpenDjService for mobile=" + mobile);
-			Response otpDetails = openDJService.getMobileOTPDetails(djUserName, djUserPwd, mobile);
-			LOGGER.info("End: getMobileOTPDetails() of OpenDjService finished for mobile=" + mobile);
+			
+			LOGGER.info("Start: getMobileOTPDetails() of OpenDjService for email/mobile=" + identityValue);
+			Response otpDetails = openDJService.getMobileOTPDetails(djUserName, djUserPwd, identityValue);
+			LOGGER.info("End: getMobileOTPDetails() of OpenDjService finished for email/mobile=" + identityValue);
 			LOGGER.info("Response code from OpenDJ for get call: " + otpDetails.getStatus());
 
 			if (null != otpDetails && 200 == otpDetails.getStatus()) {
 				Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 				DocumentContext productDocCtx = JsonPath.using(conf)
 						.parse(IOUtils.toString((InputStream) otpDetails.getEntity()));
-				otpMobile = productDocCtx.read("otpToken");
+				otpDJValue = productDocCtx.read("otpToken");
 				otpStatus = productDocCtx.read("tokenStatus");
 				otpValidityTime = productDocCtx.read("tokenExpirationTstamp");
 			}
 
-			if (null != otpMobile && !otpMobile.isEmpty() && otpStatus.equalsIgnoreCase(UserConstants.PIN_NOT_VERIFIED)
+			if (null != otpDJValue && !otpDJValue.isEmpty() && otpStatus.equalsIgnoreCase(UserConstants.PIN_NOT_VERIFIED)
 					&& Long.parseLong(otpValidityTime) > System.currentTimeMillis()) {
 				LOGGER.info("Got valid otp from OpenDJ");
+				otpDual = otpDJValue;
+				otp2FA = otpDJValue ;
 			} else {
-				LOGGER.info("creating new otp for mobile : " + mobile);
-				otpMobile = RandomStringUtils.random(6, UserConstants.RANDOM_PIN_CHARS);
+				PostMobileRecord postMobileRecord = new PostMobileRecord();
+				postMobileRecord.set_id(identityValue);
+				postMobileRecord.setMobileNumber(identityValue);
+				postMobileRecord.setTokenStatus(UserConstants.PIN_NOT_VERIFIED);
+				
+				if(null != requestType && !requestType.isEmpty() && requestType.equalsIgnoreCase(UserConstants.OTP_2FA)) {
+					LOGGER.info("using passed otp");
+					otp2FA = otp2FAPassed;
+					postMobileRecord.setOtpToken(otp2FA);
+				} else {
+					LOGGER.info("creating new otp for dual reg mobile : " + mobile);
+					otpDual = RandomStringUtils.random(6, UserConstants.RANDOM_PIN_CHARS);
+					LOGGER.info("new otp :"+otpDual);
+					postMobileRecord.setOtpToken(otpDual);
+				}
+				
 				Calendar now = Calendar.getInstance();
 				now.add(Calendar.MINUTE, Integer.parseInt(otpvalidationtimeinminute));
 				long validityTimeStamp = now.getTimeInMillis();
-
-				PostMobileRecord postMobileRecord = new PostMobileRecord();
-				postMobileRecord.set_id(mobile);
-				postMobileRecord.setMobileNumber(mobile);
-				postMobileRecord.setOtpToken(otpMobile);
-				postMobileRecord.setTokenStatus(UserConstants.PIN_NOT_VERIFIED);
+				
 				postMobileRecord.setTokenExpirationTstamp(String.valueOf(validityTimeStamp));
 
 				String json = objMapper.writeValueAsString(postMobileRecord);
 				json = json.replace("\"\"", "[]");
 
 				if (404 == otpDetails.getStatus()) {
-					LOGGER.info("Start: postMobileOTPDetails() of OpenDjService for mobile=" + mobile);
+					LOGGER.info("Start: postMobileOTPDetails() of OpenDjService for email/mobile=" + identityValue);
 					Response resPost = openDJService.postMobileOTPDetails("application/json", djUserName, djUserPwd,
 							"create", json);
-					LOGGER.info("End: postMobileOTPDetails() of OpenDjService finished for mobile=" + mobile);
+					LOGGER.info("End: postMobileOTPDetails() of OpenDjService finished for email/mobile=" + identityValue);
 					LOGGER.info("Response code from OpenDJ for post call=" + resPost.getStatus());
 
 					if (201 == resPost.getStatus()) {
-						LOGGER.info("OTP details saved into OpenDJ for mobile : " + mobile);
+						LOGGER.info("OTP details saved into OpenDJ for email/mobile : " + identityValue);
 					} else if (412 == resPost.getStatus()) {
-						LOGGER.info("duplicate insertion of mobile is denied by OpenDJ");
+						LOGGER.info("duplicate insertion of email/mobile is denied by OpenDJ");
 					} else {
 						LOGGER.info("Exception in saving OTP details .. StatusCode: " + resPost.getStatus()
 								+ " sent by OpenDJ");
@@ -10446,13 +10491,13 @@ public class UserServiceImpl implements UserService {
 						return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 					}
 				} else {
-					LOGGER.info("Start: putMobileOTPDetails() of OpenDjService for mobile=" + mobile);
+					LOGGER.info("Start: putMobileOTPDetails() of OpenDjService for email/mobile=" + identityValue);
 					Response resPut = openDJService.putMobileOTPDetails("application/json", "*", djUserName, djUserPwd,
-							mobile, json);
-					LOGGER.info("End: putMobileOTPDetails() of OpenDjService finished for mobile=" + mobile);
+							identityValue, json);
+					LOGGER.info("End: putMobileOTPDetails() of OpenDjService finished for email/mobile=" + identityValue);
 					LOGGER.info("Response code from OpenDJ for put call=" + resPut.getStatus());
 					if (200 == resPut.getStatus()) {
-						LOGGER.info("otp details updated into OpenDJ for mobile : " + mobile);
+						LOGGER.info("otp details updated into OpenDJ for email/mobile : " + identityValue);
 					} else if (200 != resPut.getStatus()) {
 						LOGGER.info("Bad request.. Record not updated in OpenDJ");
 						response.put(UserConstants.STATUS, errorStatus);
@@ -10463,22 +10508,30 @@ public class UserServiceImpl implements UserService {
 					}
 				}
 			}
-			LOGGER.info("Start: sendSMS() for mobile user:"+mobile);
-			sendEmail.sendSMS(otpMobile, mobile);
-			LOGGER.info("End: sendSMS() finished for  mobile user:"+mobile);
-			if(Boolean.valueOf(sendOTPOverEmail)){
-				LOGGER.info("Start: sendMobileEmail() for mobile userName:" + mobile);
-				sendEmail.sendMobileEmail(otpMobile, mobile);
-				LOGGER.info("End: sendMobileEmail() finished for  mobile user:" + mobile);
+			
+			if(null == requestType || requestType.isEmpty()) {
+				LOGGER.info("Start: sendSMS() for mobile user:"+mobile);
+				sendEmail.sendSMS(otpDual, mobile);
+				LOGGER.info("End: sendSMS() finished for  mobile user:"+mobile);
+				if(Boolean.valueOf(sendOTPOverEmail)){
+					LOGGER.info("Start: sendMobileEmail() for mobile user:" + mobile);
+					sendEmail.sendMobileEmail(otpDual, mobile);
+					LOGGER.info("End: sendMobileEmail() finished for  mobile user:" + mobile);
+				}
+				else{
+					LOGGER.info("Send Mobile OTP over Email() for mobile user:" + mobile+" disallowed");
+					/**LOGGER.info("Start: sendMobileEmail() for mobile userName:" + mobile);
+					sendEmail.sendMobileEmail(otpMobile, mobile);
+					LOGGER.info("End: sendMobileEmail() finished for  mobile user:" + mobile);*/
+				}
 			}
-			else{
-				LOGGER.info("Send Mobile OTP over Email() for mobile userName:" + mobile+" disallowed");
-				/**LOGGER.info("Start: sendMobileEmail() for mobile userName:" + mobile);
-				sendEmail.sendMobileEmail(otpMobile, mobile);
-				LOGGER.info("End: sendMobileEmail() finished for  mobile user:" + mobile);*/
-			}
+			
 			response.put(UserConstants.STATUS, successStatus);
-			response.put(UserConstants.MESSAGE, UserConstants.PIN_SEND_SUCCESS);
+			if (null != requestType && !requestType.isEmpty() && requestType.equalsIgnoreCase(UserConstants.OTP_2FA)){
+				response.put(UserConstants.MESSAGE_L, otp2FA);
+			} else {
+				response.put(UserConstants.MESSAGE, UserConstants.PIN_SEND_SUCCESS);
+			}
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by sendOTP() : " + elapsedTime);
 			return Response.status(Response.Status.OK).entity(response).build();
@@ -11701,6 +11754,114 @@ public class UserServiceImpl implements UserService {
 		return openAmReq;
 	}
 	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Response send2FAOTP(Send2FAOTPRequest send2FAOTPRequest) {
+		LOGGER.info("Entered send2FAOTP() -> Start");
+		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
+		long elapsedTime;
+
+		ObjectMapper objMapper = new ObjectMapper();
+		DocumentContext productDocCtx = null;
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		String mobile = null, email = null, userData = "", iPlanetDirectoryKey="";
+		JSONObject response = new JSONObject();
+		SendOTPRequest sendOTPRequest = new SendOTPRequest();
+		Response checkOTPStore = null;
+		try {
+			LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(send2FAOTPRequest));
+			if (null == send2FAOTPRequest.getUserid() || send2FAOTPRequest.getUserid().isEmpty()) {
+				response.put(UserConstants.STATUS_L, errorStatus);
+				response.put(UserConstants.MESSAGE_L, UserConstants.USERID_EMPTY);
+				LOGGER.error("Error in send2FAOTP() is ::" + UserConstants.USERID_EMPTY);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by send2FAOTP() : " + elapsedTime);
+				return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+			}
+			try {
+			iPlanetDirectoryKey = getSSOToken();
+		} catch (IOException ioExp) {
+			LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
+			iPlanetDirectoryKey = "";
+		}
+			LOGGER.info("Start: getUser() of openamService for userId="+send2FAOTPRequest.getUserid());
+			userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, send2FAOTPRequest.getUserid().trim(), iPlanetDirectoryKey);
+			LOGGER.info("End: getUser() of openamService finished for userId="+send2FAOTPRequest.getUserid());
+			productDocCtx = JsonPath.using(conf).parse(userData);
+			String pfcomm = productDocCtx.read("$.preferredCommunication[0]");
+			String otpGenerated = RandomStringUtils.random(6, UserConstants.RANDOM_PIN_CHARS);
+			sendOTPRequest.setOtpValue(otpGenerated);
+			sendOTPRequest.setReqType(UserConstants.OTP_2FA);
+			
+			if(pfcomm.equalsIgnoreCase("email")) {
+				email = productDocCtx.read("$.mail[0]");
+				sendOTPRequest.setMobile(email);
+			}
+			
+			else if(pfcomm.equalsIgnoreCase("mobile")) {
+				mobile = productDocCtx.read("$.mobilereg[0]");
+				sendOTPRequest.setMobile(mobile);
+			}
+			
+			else if(pfcomm.equalsIgnoreCase("both")) {
+				email = productDocCtx.read("$.mail[0]");
+				mobile = productDocCtx.read("$.mobilereg[0]");
+				sendOTPRequest.setMobile(email);
+			}
+			
+			checkOTPStore = sendOTP(sendOTPRequest);
+			org.json.simple.JSONObject checkOTPStoreJson = (org.json.simple.JSONObject) checkOTPStore.getEntity();
+			String otpReceived = checkOTPStoreJson.get(UserConstants.MESSAGE_L).toString();
+			if(!otpGenerated.equalsIgnoreCase(otpReceived)) {
+				otpGenerated = otpReceived;
+			}
+			
+			if(pfcomm.equalsIgnoreCase("email")) {
+				LOGGER.info("Start: send2FAEmail() for mail user: " + email);
+				sendEmail.send2FAEmail(otpGenerated, email);
+				LOGGER.info("End: send2FAEmail() finished for  mail user: " + email);
+			}
+			
+			else if(pfcomm.equalsIgnoreCase("mobile")) {
+				LOGGER.info("Start: sendSMS() for mobile user:"+mobile);
+				sendEmail.sendSMS(otpGenerated, mobile);
+				LOGGER.info("End: sendSMS() finished for  mobile user:"+mobile);
+				if(Boolean.valueOf(sendOTPOverEmail)){
+					LOGGER.info("Start: sendMobileEmail() for mobile userName:" + mobile);
+					sendEmail.sendMobileEmail(otpGenerated, mobile);
+					LOGGER.info("End: sendMobileEmail() finished for  mobile user:" + mobile);
+				}
+			}
+			else if(pfcomm.equalsIgnoreCase("both")) {
+				LOGGER.info("Start: send2FAEmail() for mail user: " + email);
+				sendEmail.send2FAEmail(otpGenerated, email);
+				LOGGER.info("End: send2FAEmail() finished for  mail user: " + email);
+				
+				LOGGER.info("Start: sendSMS() for mobile user:"+mobile);
+				sendEmail.sendSMS(otpGenerated, mobile);
+				LOGGER.info("End: sendSMS() finished for  mobile user:"+mobile);
+				if(Boolean.valueOf(sendOTPOverEmail)){
+					LOGGER.info("Start: sendMobileEmail() for mobile userName:" + mobile);
+					sendEmail.sendMobileEmail(otpGenerated, mobile);
+					LOGGER.info("End: sendMobileEmail() finished for  mobile user:" + mobile);
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.error("Exception in send2FAOTP() :: -> " + e.getMessage(),e);
+			response.put(UserConstants.STATUS_L, errorStatus);
+			response.put(UserConstants.MESSAGE_L, e.getMessage());
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by send2FAOTP() : " + elapsedTime);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+		}
+		
+		response.put(UserConstants.STATUS_L, successStatus);
+		response.put(UserConstants.MESSAGE_L, "email or mobile SMS sent successfully");
+		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+		LOGGER.info("Time taken by send2FAOTP() : " + elapsedTime);
+		return Response.status(Response.Status.OK).entity(response).build();
+	}
+	
 	public void setEMAIL_TEMPLATE_DIR(String eMAIL_TEMPLATE_DIR) {
 		EMAIL_TEMPLATE_DIR = eMAIL_TEMPLATE_DIR;
 	}
@@ -12769,7 +12930,7 @@ public class UserServiceImpl implements UserService {
 			LogMessageUtil.logInfoMessage("End: openam checkUserExists finished for mail= ", mail);
 			DocumentContext productDocCtx = JsonPath.using(conf).parse(userExists);
 			int resultCount = productDocCtx.read("$.resultCount");
-			LogMessageUtil.logInfoMessage("resultCount of mail or mobile = ", resultCount + "");
+			LogMessageUtil.logInfoMessage("resultCount of mail or mobile = "+ resultCount);
 
 			// Merge accounts if multiple accounts exist with same email ids.
 			if (resultCount > 1) {
@@ -12824,7 +12985,7 @@ public class UserServiceImpl implements UserService {
 			Response deleteResult = UserServiceUtil.deleteUserBasedOnFRVersion(productService, frVersion,
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, fedId);
 			LogMessageUtil.logInfoMessage("End: deleteUser() for userId= ", fedId);
-			LogMessageUtil.logInfoMessage("Apple Temporary User got deleted:", deleteResult.getStatus() + "");
+			LogMessageUtil.logInfoMessage("Apple Temporary User got deleted:"+deleteResult.getStatus());
 			if(HttpStatus.OK.equals(HttpStatus.valueOf(deleteResult.getStatus()))) {
 				areProfilesMerged = true;
 			}

@@ -28,7 +28,7 @@ public class PhoneValidatorTest {
 
 	@Test
 	public void testPhoneValidatorWithString() {
-		LOGGER.info("" + phoneValidator.validate("abcs"));
+		LOGGER.info("phoneValidator.validate(abcs)");
 		assertEquals(false, phoneValidator.validate("abcs"));
 	}
 
@@ -46,37 +46,37 @@ public class PhoneValidatorTest {
 
 	@Test
 	public void testPhoneValidatorWith10Digits() {
-		LOGGER.info("" + phoneValidator.validate("12345678900"));
+		LOGGER.info("phoneValidator.validate(12345678900)");
 		assertEquals(true, phoneValidator.validate("12345678900"));
 	}
 
 	@Test
 	public void testPhoneValidatorWithHypen() {
-		LOGGER.info("" + phoneValidator.validate("123-456-7890"));
+		LOGGER.info("phoneValidator.validate(123-456-7890)");
 		assertEquals(true, phoneValidator.validate("123-456-7890"));
 	}
 
 	@Test
 	public void testPhoneValidatorWithSpace_1() {
-		LOGGER.info("" + phoneValidator.validate("123 456 7890"));
+		LOGGER.info("phoneValidator.validate(123 456 7890)");
 		assertEquals(true, phoneValidator.validate("123 456 7890"));
 	}
 
 	@Test
 	public void testPhoneValidatorWithoutHypen() {
-		LOGGER.info("" + phoneValidator.validate("123.456.7890"));
+		LOGGER.info("phoneValidator.validate(123.456.7890)");
 		assertEquals(true, phoneValidator.validate("123-456-7890"));
 	}
 
 	@Test
 	public void testPhoneValidatorWithExtension_1() {
-		LOGGER.info("" + phoneValidator.validate("123-456-7890 ext1234"));
+		LOGGER.info("phoneValidator.validate(123-456-7890 ext1234)");
 		assertEquals(true, phoneValidator.validate("123-456-7890 ext1234"));
 	}
 
 	@Test
 	public void testPhoneValidatorWithBrace() {
-		LOGGER.info("" + phoneValidator.validate("(123)-456-7890"));
+		LOGGER.info("phoneValidator.validate((123)-456-7890)");
 		assertEquals(true, phoneValidator.validate("(123)-456-7890"));
 	}
 

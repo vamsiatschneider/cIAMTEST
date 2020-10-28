@@ -243,6 +243,8 @@ public class IFWUser extends BaseEntity {
 	@JsonProperty
 	private String adminBFOAccoountID;
 	
+	private String prefCommnMethod;
+
 	//@JsonProperty
 	//private String IDMSMarketServed__c;
 	
@@ -958,6 +960,14 @@ public class IFWUser extends BaseEntity {
 	@JsonProperty("AdminBFOAccoountID")
 	public void setAdminBFOAccoountID(String adminBFOAccoountID) {
 		this.adminBFOAccoountID = adminBFOAccoountID;
+	}
+
+	public String getPrefCommnMethod() {
+		return prefCommnMethod;
+	}
+
+	public void setPrefCommnMethod(String prefCommnMethod) {
+		this.prefCommnMethod = prefCommnMethod;
 	}
 	
 	/*

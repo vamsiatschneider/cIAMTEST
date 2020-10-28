@@ -282,6 +282,10 @@ public class UserConstants {
 	
 	public static final String FEDID_EMPTY = "federation ID is null or empty";
 	
+	public static final String USERID_EMPTY = "User ID is null or empty";
+	
+	public static final String REQUEST_TYPE_EMPTY = "Request Type is null or empty";
+	
 	/**
 	 * HOTP Query parametersConstants
 	 * 
@@ -661,5 +665,7 @@ public class UserConstants {
 	public static final String SOCIAL_PROFILE_UPDATE_SUCCESS = "Social Profile update is successful.";
 	public static final String UNSUPPORTED_ENCODING_EXCEPTION = "Unsupported Encoding";
 	public static final String PROFILES_MERGE_FAILED = "User profiles merge failed!";
+	
+	public static final String OTP_2FA = "OTP2FA";
 
 }

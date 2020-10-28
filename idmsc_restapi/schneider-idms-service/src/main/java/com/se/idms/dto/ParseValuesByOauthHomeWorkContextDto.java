@@ -2,6 +2,7 @@ package com.se.idms.dto;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.idms.model.GetUserRecordResponse;
@@ -344,10 +345,35 @@ public class ParseValuesByOauthHomeWorkContextDto {
 			userResponse.setLoginid(null != userProductDocCtx.read("$.loginid")
 					? getValue(userProductDocCtx.read("$.loginid").toString()) : getDelimeter());
 		}
-		if(null == userResponse.getAppleid() || userResponse.getAppleid().isEmpty()){
+		// Changes done to get preferred communication method
+		if(StringUtils.isBlank(userResponse.getPrefCommnMethod())){
+			userResponse.setPrefCommnMethod(null != userProductDocCtx.read("$.preferredCommunication")
+					? getValue(userProductDocCtx.read("$.preferredCommunication").toString()) : getDelimeter());
+		}
+		// Changes end to get preferred communication method
+		// Changes done to set social ids in userinfo call
+		if(StringUtils.isBlank(userResponse.getAppleid())){
 			userResponse.setAppleid(null != userProductDocCtx.read("$.appleid")
 					? getValue(userProductDocCtx.read("$.appleid").toString()) : getDelimeter());
 		}
+		if(StringUtils.isBlank(userResponse.getQqid())){
+			userResponse.setQqid(null != userProductDocCtx.read("$.qqid")
+					? getValue(userProductDocCtx.read("$.qqid").toString()) : getDelimeter());
+		}
+		if(StringUtils.isBlank(userResponse.getWeiboid())){
+			userResponse.setWeiboid(null != userProductDocCtx.read("$.weiboid")
+					? getValue(userProductDocCtx.read("$.weiboid").toString()) : getDelimeter());
+		}
+		if(StringUtils.isBlank(userResponse.getWechatpublicid())){
+			userResponse.setWechatpublicid(null != userProductDocCtx.read("$.wechatpublicid")
+					? getValue(userProductDocCtx.read("$.wechatpublicid").toString()) : getDelimeter());
+		}
+		if(StringUtils.isBlank(userResponse.getLinkedinID())){
+			userResponse.setLinkedinID(null != userProductDocCtx.read("$.linkedinID")
+					? getValue(userProductDocCtx.read("$.linkedinID").toString()) : getDelimeter());
+		}
+		// Changes end to set social ids in userinfo call
+
 		String emailValue = null != userProductDocCtx.read("$.mail")
 				? getValue(userProductDocCtx.read("$.mail").toString()) : getDelimeter();
 		/*
@@ -513,10 +539,34 @@ public class ParseValuesByOauthHomeWorkContextDto {
 			userResponse.setLoginid(null != userProductDocCtx.read("$.loginid")
 					? getValue(userProductDocCtx.read("$.loginid").toString()) : getDelimeter());
 		}
-		if(null == userResponse.getAppleid() || userResponse.getAppleid().isEmpty()){
+		// Changes done to get preferred communication method
+		if(StringUtils.isBlank(userResponse.getPrefCommnMethod())){
+			userResponse.setPrefCommnMethod(null != userProductDocCtx.read("$.preferredCommunication")
+							? getValue(userProductDocCtx.read("$.preferredCommunication").toString()) : getDelimeter());
+		}
+		// Changes end to get preferred communication method
+		// Changes done to set social ids in userinfo call
+		if (StringUtils.isBlank(userResponse.getAppleid())) {
 			userResponse.setAppleid(null != userProductDocCtx.read("$.appleid")
 					? getValue(userProductDocCtx.read("$.appleid").toString()) : getDelimeter());
 		}
+		if (StringUtils.isBlank(userResponse.getQqid())) {
+			userResponse.setQqid(null != userProductDocCtx.read("$.qqid")
+					? getValue(userProductDocCtx.read("$.qqid").toString()) : getDelimeter());
+		}
+		if (StringUtils.isBlank(userResponse.getWeiboid())) {
+			userResponse.setWeiboid(null != userProductDocCtx.read("$.weiboid")
+					? getValue(userProductDocCtx.read("$.weiboid").toString()) : getDelimeter());
+		}
+		if (StringUtils.isBlank(userResponse.getWechatpublicid())) {
+			userResponse.setWechatpublicid(null != userProductDocCtx.read("$.wechatpublicid")
+					? getValue(userProductDocCtx.read("$.wechatpublicid").toString()) : getDelimeter());
+		}
+		if (StringUtils.isBlank(userResponse.getLinkedinID())) {
+			userResponse.setLinkedinID(null != userProductDocCtx.read("$.linkedinID")
+					? getValue(userProductDocCtx.read("$.linkedinID").toString()) : getDelimeter());
+		}
+		// Changes end to set social ids in userinfo call
 		String emailValue = null != userProductDocCtx.read("$.mail")
 				? getValue(userProductDocCtx.read("$.mail").toString()) : getDelimeter();
 

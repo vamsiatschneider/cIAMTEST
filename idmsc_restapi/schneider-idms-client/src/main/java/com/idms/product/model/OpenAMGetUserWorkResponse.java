@@ -199,6 +199,16 @@ public class OpenAMGetUserWorkResponse {
 
 	private String appleid;
 
+    private String qqid;
+
+	private String weiboid;
+
+	private String wechatpublicid;
+
+	private String linkedinID;
+
+	private String prefCommnMethod;
+
 	// mobile_reg and login_mobile field is added for dual identifier feature
 	@JsonProperty
 	private String mobile_reg;
@@ -1075,6 +1085,46 @@ public class OpenAMGetUserWorkResponse {
 
 	public void setAppleid(String appleid) {
 		this.appleid = appleid;
+	}
+
+	public String getQqid() {
+		return qqid;
+	}
+
+	public void setQqid(String qqid) {
+		this.qqid = qqid;
+	}
+
+	public String getWeiboid() {
+		return weiboid;
+	}
+
+	public void setWeiboid(String weiboid) {
+		this.weiboid = weiboid;
+	}
+
+	public String getWechatpublicid() {
+		return wechatpublicid;
+	}
+
+	public void setWechatpublicid(String wechatpublicid) {
+		this.wechatpublicid = wechatpublicid;
+	}
+
+	public String getLinkedinID() {
+		return linkedinID;
+	}
+
+	public void setLinkedinID(String linkedinID) {
+		this.linkedinID = linkedinID;
+	}
+
+	public String getPrefCommnMethod() {
+		return prefCommnMethod;
+	}
+
+	public void setPrefCommnMethod(String prefCommnMethod) {
+		this.prefCommnMethod = prefCommnMethod;
 	}
 	
 }
