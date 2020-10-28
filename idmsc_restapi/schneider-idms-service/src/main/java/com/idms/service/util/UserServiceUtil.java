@@ -122,6 +122,10 @@ public class UserServiceUtil {
 			return productService.sessionLogout(cookie, action);
 		}
 	}
+	public static Response updateMFADetailsBasedOnFRVersion(OpenAMService productService, String adminToken, String fedId, String requestJson) {
+		LogMessageUtil.logInfoMessage("Update MFA Details Openam Call!");
+		return productService.updateMFADetails(ACCEPT_VERSION_HEADER, adminToken, fedId, requestJson);
+	}
 	public static String validateAtrributes(IFWUser userRecord) {
 		String errorMessage = null;
 		if(StringUtils.isBlank(userRecord.getFirstName())){

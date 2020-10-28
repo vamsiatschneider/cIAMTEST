@@ -28,6 +28,7 @@ import com.idms.model.CheckUserExistsRequest;
 import com.idms.model.CheckUserIdentityRequest;
 import com.idms.model.ConfirmPinRequest;
 import com.idms.model.CreateUserRequest;
+import com.idms.model.MFARequest;
 import com.idms.model.PasswordRecoveryRequest;
 import com.idms.model.ResendEmailChangeRequest;
 import com.idms.model.ResendPinRequest;
@@ -333,4 +334,10 @@ public interface UserService {
 	@Path("/apexrest/send2FAOTP")
 	@Consumes("application/json")
 	Response send2FAOTP(@Valid Send2FAOTPRequest send2FAOTPRequest);
+	
+	@POST
+	@Path("/apexrest/enableMFA")
+	@Consumes("application/json")
+	Response enableMFA(@HeaderParam("authId") String authId,@HeaderParam("loginId") String loginId,MFARequest mfaRequest);
+
 }

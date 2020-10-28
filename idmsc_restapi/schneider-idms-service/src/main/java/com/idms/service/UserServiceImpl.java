@@ -111,6 +111,8 @@ import com.idms.model.GetUserByApplicationResponse;
 import com.idms.model.GetUserRecordResponse;
 import com.idms.model.IDMSUserResponse;
 import com.idms.model.IFWUser;
+import com.idms.model.MFAEnableResponse;
+import com.idms.model.MFARequest;
 import com.idms.model.PasswordRecoveryRequest;
 import com.idms.model.RegistrationAttributes;
 import com.idms.model.ResendEmailChangeRequest;
@@ -13104,5 +13106,95 @@ public class UserServiceImpl implements UserService {
 		sendEmail.sendOpenAmEmail(token, otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userRecord.getIDMS_Federated_ID__c(),
 						userRecord.getIDMS_Registration_Source__c(), finalPathString);
 		LogMessageUtil.logInfoMessage("End of SendEmail method of Update SocialProfile for fedId: ", userRecord.getIDMS_Federated_ID__c());
+	}
+
+	private ErrorResponse buildErrorResponse(String errorMsg) {
+		ErrorResponse errorResponse = new ErrorResponse();
+		LogMessageUtil.logInfoMessage("Error Message: " + errorMsg);
+		errorResponse.setStatus(errorStatus);
+		errorResponse.setMessage(errorMsg);
+		return errorResponse;
+	}
+	public Response enableMFA(String authId,String loginId, MFARequest mfaRequest) {
+		LogMessageUtil.logInfoMessage("Start of Enable MFA Request");
+		String jsonRequest=null;
+		ObjectMapper objMapper = new ObjectMapper();
+		String iPlanetDirectoryKey = null;
+		String userExists=null;
+		MFAEnableResponse response=new MFAEnableResponse();
+		ErrorResponse errorResponse = new ErrorResponse();
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		
+		
+		if(mfaRequest.getIs2FAEnabled()== null||mfaRequest.getIs2FAEnabled().isEmpty()) {
+			errorResponse=buildErrorResponse(UserConstants.MANDATORY_2FA_FLAG);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		}
+		if(loginId==null||loginId.isEmpty())
+		{
+			errorResponse=buildErrorResponse(UserConstants.MANDATORY_USERID);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+
+		}
+		try {
+			LogMessageUtil.logInfoMessage("Fetching User Details");
+			jsonRequest=objMapper.writeValueAsString(mfaRequest);
+			iPlanetDirectoryKey = getSSOToken();
+			userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
+					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+					"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginId, "UTF-8"), "UTF-8")
+							+ "\" or mobilereg eq " + "\""
+							+ URLEncoder.encode(URLDecoder.decode(loginId, "UTF-8"), "UTF-8") + "\"");
+			
+			} 
+		catch (JsonProcessingException e) {
+			LogMessageUtil.logErrorMessage(e, "Unable to Process JSONReq Token", e.getMessage());
+			errorResponse=buildErrorResponse("Unable to Process JSONReq Token");
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();}
+		catch (UnsupportedEncodingException e) {
+			LogMessageUtil.logErrorMessage(e, "Unable to get User with LoginId", e.getMessage());
+			errorResponse=buildErrorResponse("Unable to get User with LoginId");
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();}
+		catch (IOException e) {
+			LogMessageUtil.logErrorMessage(e, "Unable to get SSO Token", e.getMessage());
+			errorResponse=buildErrorResponse("Unable to get SSO Token");
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();}
+		
+		DocumentContext productDocCtx = JsonPath.using(conf).parse(userExists);
+		String userId = productDocCtx.read("$.result[0].uid[0]");
+		LogMessageUtil.logInfoMessage("userID: "+userId);
+		if(userId==null) {
+			errorResponse=buildErrorResponse(UserConstants.USER_NOT_FOUND);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		}
+		String user2FAEnabled=productDocCtx.read("$.result[0].is2FAEnabled[0]");
+		LogMessageUtil.logInfoMessage("is2FAEnabled status of User in openDJ: "+user2FAEnabled);
+		if(user2FAEnabled!=null && user2FAEnabled.equalsIgnoreCase("true") && mfaRequest.getIs2FAEnabled().equalsIgnoreCase("true")) {
+			errorResponse=buildErrorResponse(UserConstants.MFA_ENABLE_ERROR);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		}
+		String userActiveStatus=productDocCtx.read("$.result[0].isActivated[0]");
+		LogMessageUtil.logInfoMessage("User status openDJ: "+userActiveStatus);
+		if(userActiveStatus.equalsIgnoreCase("false")) {
+			errorResponse=buildErrorResponse(UserConstants.USER_INACTIVE);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		}
+		LogMessageUtil.logInfoMessage("User Details Validated Successfully. FederationId Returned: " + userId);
+		
+			Response enableMFA=UserServiceUtil.updateMFADetailsBasedOnFRVersion(productService,
+			UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,userId, jsonRequest);
+			LogMessageUtil.logInfoMessage("Response from openAM :"+ enableMFA.getStatus());
+			
+			if (enableMFA != null && HttpStatus.OK.equals(HttpStatus.valueOf(enableMFA.getStatus()))) {
+				LogMessageUtil.logInfoMessage("MFA details updated successfully");
+				response.setStatus(successStatus);
+				if(mfaRequest.getIs2FAEnabled().equalsIgnoreCase("true"))
+				response.setMessage(UserConstants.MFA_ENABLE_SUCCESS);
+				else if(mfaRequest.getIs2FAEnabled().equalsIgnoreCase("false"))
+				response.setMessage(UserConstants.MFA_DISABLE_SUCCESS);
+				return Response.status(HttpStatus.OK.value()).entity(response).build();
+			}
+		
+		return enableMFA;
 	}
 }

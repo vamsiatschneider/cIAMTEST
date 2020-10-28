@@ -79,7 +79,7 @@ public interface OpenAMService {
 	String authenticateUser(@HeaderParam("Accept-API-Version") String acceptAPIVersion,
 			@HeaderParam("X-OpenAM-Username") String userName, @HeaderParam("X-OpenAM-Password") String password,
 			@QueryParam("realm") String realm);
-
+	
 	@POST
 	@Path("/authenticate")
 	@Consumes("application/json")
@@ -154,7 +154,12 @@ public interface OpenAMService {
 	@Consumes("application/json")
 	String updateUser(@HeaderParam("Cookie") String iPlanetDirectoryKey, @PathParam("userId") String userId,
 			String authId);
-
+	@PUT
+	@Path("/se/users/{userId}")
+	@Consumes("application/json")
+	Response updateMFADetails(@HeaderParam("Accept-API-Version") String acceptAPIVersion,
+			@HeaderParam("Cookie") String iPlanetDirectoryPro, @PathParam("userId") String userId, String request);
+			
 	@PUT
 	@Path("/se/users/{userId}")
 	@Consumes("application/json")
