@@ -28,6 +28,7 @@ import com.idms.model.CheckUserExistsRequest;
 import com.idms.model.CheckUserIdentityRequest;
 import com.idms.model.ConfirmPinRequest;
 import com.idms.model.CreateUserRequest;
+import com.idms.model.DeviceProfileRequest;
 import com.idms.model.MFARequest;
 import com.idms.model.PasswordRecoveryRequest;
 import com.idms.model.ResendEmailChangeRequest;
@@ -340,4 +341,11 @@ public interface UserService {
 	@Consumes("application/json")
 	Response enableMFA(@PathParam("userId") String userId,@HeaderParam("Authorization") String token,MFARequest mfaRequest);
 
+	/*
+	 * API to save device details in user's profile
+	 */
+	@PUT
+	@Path("/apexrest/users/{userId}/saveDeviceProfile")
+	@Consumes("application/json")
+	Response saveDeviceProfile(@HeaderParam("Authorization") String token, @PathParam("userId") String userId, DeviceProfileRequest deviceProfileRequest);
 }
