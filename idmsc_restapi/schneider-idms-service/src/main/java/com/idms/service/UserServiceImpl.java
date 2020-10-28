@@ -13183,7 +13183,6 @@ public class UserServiceImpl implements UserService {
 			errorResponse.setMessage("Unauthorized or session expired");
 			return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 		}
-		
 		if(mfaRequest.getIs2FAEnabled()== null||mfaRequest.getIs2FAEnabled().isEmpty()) {
 			errorResponse=buildErrorResponse(UserConstants.INVALID_2FA_VALUE);
 			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
@@ -13257,7 +13256,6 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Response saveDeviceProfile(String authorizedToken, String userId, DeviceProfileRequest deviceProfileRequest) {
-		SocialProfileUpdateResponse saveDeviceResponse = new SocialProfileUpdateResponse();
 		ErrorResponse errorResponse = new ErrorResponse();
 		//validate input
 		Response response = validateInput(authorizedToken, userId, deviceProfileRequest, errorResponse);
@@ -13300,18 +13298,45 @@ public class UserServiceImpl implements UserService {
 				dProfile_update_json);
 		LOGGER.info("End: updateUser() to update device profile for user:" + userId);
 		if (StringUtils.isNotBlank(updateResponse)) {
+			// call enable mfa
+			return invokeEnableMFA(authorizedToken, userId);
+		}
+		errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+		errorResponse.setMessage(UserConstants.DEVICE_SAVE_FAILED);
+		return Response.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).entity(errorResponse).build();
+	}
+
+	private Response invokeEnableMFA(String authorizedToken, String userId) {
+		MFARequest mfaRequest = new MFARequest();
+		mfaRequest.setIs2FAEnabled("true");
+		mfaRequest.setIsFirstTimeUser("false");
+		mfaRequest.setUIFlag("true");
+		LOGGER.info("Start: enableMFA call for user:" + userId);
+		Response mfaResponse = enableMFA(userId, authorizedToken, mfaRequest );
+		LOGGER.info("End: enableMFA call for user:" + userId);
+
+		if(HttpStatus.OK !=  HttpStatus.valueOf(mfaResponse.getStatus())) {
+			org.json.simple.JSONObject otpJsonResponse = (org.json.simple.JSONObject) mfaResponse.getEntity();
+			String message = otpJsonResponse.get("Message").toString();
+			JSONObject errJObj = new JSONObject();
+			errJObj.put(UserConstants.STATUS, errorStatus);
+			errJObj.put(UserConstants.MESSAGE, "enableMFA failed: "+ message);
+			LOGGER.error("enableMFA failed for user: ->  " + userId);
+			return Response.status(mfaResponse.getStatus()).entity(errJObj).build();
+		}else {
+			LOGGER.info("enableMFA succeeded for user: " + userId);
 			// send success response
+			SocialProfileUpdateResponse saveDeviceResponse = new SocialProfileUpdateResponse();
 			saveDeviceResponse.setStatus(successStatus);
 			saveDeviceResponse.setMessage(UserConstants.DEVICE_SAVE_SUCCESS);
 			return Response.status(HttpStatus.OK.value()).entity(saveDeviceResponse).build();
 		}
-		return null;
 	}
 
 	private Response validateInput(String authorizedToken, String userId, DeviceProfileRequest deviceProfileRequest,
 			ErrorResponse errorResponse) {
 		Response response  = null;
-		if(StringUtils.isNotBlank(userId)) {
+		if(StringUtils.isBlank(userId)) {
 			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
 			errorResponse.setMessage("UserId is mandatory!!");
 			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
