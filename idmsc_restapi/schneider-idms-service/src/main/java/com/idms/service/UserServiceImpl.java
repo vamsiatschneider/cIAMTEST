@@ -5771,6 +5771,16 @@ public class UserServiceImpl implements UserService {
 				 LOGGER.info("mobileInOpenDJ = " + mobileInOpenDJ);
 				 String mobileInReq = userRequest.getUserRecord().getMobilePhone();
 				 LOGGER.info("mobileInReq = " + mobileInReq);
+				 if(StringUtils.isBlank(mobileInReq)) {
+					errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+					errorResponse.setMessage("2FA Requirement: Mobile cannot be null or empty!!");
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+				 }
+                 if(StringUtils.isBlank(mailInReq)) {
+                    errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+                    errorResponse.setMessage("2FA Requirement: Email cannot be null or empty!!");
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+				 }
 				 // set email and phone
 				 if(StringUtils.isNotBlank(mailInReq)) {
 					 if(StringUtils.isBlank(mailInOpenDJ)){
@@ -5921,17 +5931,26 @@ public class UserServiceImpl implements UserService {
 				Send2FAOTPRequest otpRequest = new Send2FAOTPRequest();
 				otpRequest.setUserid(userId);
 				LOGGER.info("Start: 2FA send otp for user:" + userId);
-				Response otpResponse = send2FAOTP(otpRequest);
-				LOGGER.info("End: 2FA send otp for user:" + userId);
-				if(HttpStatus.OK !=  HttpStatus.valueOf(otpResponse.getStatus())) {
-					org.json.simple.JSONObject otpJsonResponse = (org.json.simple.JSONObject) otpResponse.getEntity();
-					String message = otpJsonResponse.get("Message").toString();
+				try {
+					Response otpResponse = send2FAOTP(otpRequest);
+					LOGGER.info("End: 2FA send otp for user:" + userId);
+					if (HttpStatus.OK != HttpStatus.valueOf(otpResponse.getStatus())) {
+						org.json.simple.JSONObject otpJsonResponse = (org.json.simple.JSONObject) otpResponse
+								.getEntity();
+						String message = otpJsonResponse.get("Message").toString();
+						responseCheck.put(UserConstants.STATUS, errorStatus);
+						responseCheck.put(UserConstants.MESSAGE, "2FA send otp failed: " + message);
+						LOGGER.error("2FA send otp failed for user: ->  " + userId);
+						return Response.status(otpResponse.getStatus()).entity(responseCheck).build();
+					} else {
+						LOGGER.info("2FA send otp succeeded for user: " + userId);
+					}
+				}catch(Exception ex) {
 					responseCheck.put(UserConstants.STATUS, errorStatus);
-					responseCheck.put(UserConstants.MESSAGE, "2FA send otp failed: "+message);
+					responseCheck.put(UserConstants.MESSAGE, "2FA send otp failed with exception: " + ex.getMessage());
+					ex.printStackTrace();
 					LOGGER.error("2FA send otp failed for user: ->  " + userId);
-					return Response.status(otpResponse.getStatus()).entity(responseCheck).build();
-				}else {
-					LOGGER.info("2FA send otp succeeded for user: " + userId);
+					return Response.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).entity(responseCheck).build();
 				}
 			}
 			Response response = getUser(userId);
@@ -13276,8 +13295,10 @@ public class UserServiceImpl implements UserService {
 
 		net.minidev.json.JSONArray dProfiles = docCtxUser.read(JsonConstants.DEVICE_PRINT_PROFILES);
 		List<JsonValue> deviceProfilesList = new ArrayList<>();
-		for(int index = 0; index < dProfiles.size(); index++) {
-			deviceProfilesList.add(JsonValueBuilder.toJsonValue(dProfiles.get(index).toString()));
+		if(dProfiles != null) {
+			for(int index = 0; index < dProfiles.size(); index++) {
+				deviceProfilesList.add(JsonValueBuilder.toJsonValue(dProfiles.get(index).toString()));
+			}
 		}
 		while (deviceProfilesList.size() >= Integer.parseInt(this.maxDeviceProfilesAllowed)) {
 			LOGGER.info("Removing oldest device profile for user :" + userId + " as it has crossed the maximum device profiles limit !!");
