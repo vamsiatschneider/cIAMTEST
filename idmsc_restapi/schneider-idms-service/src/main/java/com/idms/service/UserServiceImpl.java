@@ -11800,13 +11800,13 @@ public class UserServiceImpl implements UserService {
 			}
 			
 			else if(pfcomm.equalsIgnoreCase("mobile")) {
-				mobile = productDocCtx.read("$.mobilereg[0]");
+				mobile = productDocCtx.read("$.mobile[0]");
 				sendOTPRequest.setMobile(mobile);
 			}
 			
 			else if(pfcomm.equalsIgnoreCase("both")) {
 				email = productDocCtx.read("$.mail[0]");
-				mobile = productDocCtx.read("$.mobilereg[0]");
+				mobile = productDocCtx.read("$.mobile[0]");
 				sendOTPRequest.setMobile(email);
 			}
 			
