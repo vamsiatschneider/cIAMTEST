@@ -665,12 +665,15 @@ public class UserConstants {
 	public static final String SOCIAL_PROFILE_UPDATE_SUCCESS = "Social Profile update is successful.";
 	public static final String UNSUPPORTED_ENCODING_EXCEPTION = "Unsupported Encoding";
 	public static final String PROFILES_MERGE_FAILED = "User profiles merge failed!";
+	public static final String DEVICE_SAVE_SUCCESS = "Device Profile is saved successfully";
+	public static final String DEVICE_SAVE_FAILED = "Error while saving Device Profile";
 	
 	public static final String OTP_2FA = "OTP2FA";
 	public static final String INVALID_2FA_VALUE ="INVALID is2FA Details";
 	public static final String MFA_SUCCESS ="MFA details updated successfully";
 	public static final String MFA_ERROR ="MFA details already saved for the user";
 	public static final String MANDATORY_USERID ="LoginId is missing";
+
 
 
 }

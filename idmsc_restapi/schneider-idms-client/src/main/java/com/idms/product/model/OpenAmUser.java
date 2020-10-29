@@ -256,6 +256,10 @@ public class OpenAmUser {
 	@JsonInclude(Include.NON_NULL)
 	private String AdminBFOAccoountID;
 	
+	@JsonInclude(Include.NON_NULL)
+	@JsonProperty("preferredCommunication")
+	private String prefCommnMethod;
+	
 	@JsonProperty("IDMSWorkPhone__c")
 	@JsonInclude(Include.NON_NULL)
 	public String getIDMSWorkPhone__c() {
@@ -1032,5 +1036,15 @@ public class OpenAmUser {
 	@JsonInclude(Include.NON_NULL)
 	public void setAdminBFOAccoountID(String adminBFOAccoountID) {
 		this.AdminBFOAccoountID = adminBFOAccoountID;
+	}
+
+	@JsonProperty("preferredCommunication")
+	public String getPrefCommnMethod() {
+		return prefCommnMethod;
+	}
+
+	@JsonProperty("preferredCommunication")
+	public void setPrefCommnMethod(String prefCommnMethod) {
+		this.prefCommnMethod = prefCommnMethod;
 	}
 }

@@ -44,6 +44,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -107,6 +108,7 @@ import com.idms.model.ConfirmPinRequest;
 import com.idms.model.ConfirmPinResponse;
 import com.idms.model.CreateUserRequest;
 import com.idms.model.CreateUserResponse;
+import com.idms.model.DeviceProfileRequest;
 import com.idms.model.GetUserByApplicationResponse;
 import com.idms.model.GetUserRecordResponse;
 import com.idms.model.IDMSUserResponse;
@@ -139,6 +141,8 @@ import com.idms.model.UserDetailByApplicationRequest;
 import com.idms.model.UserMFADataRequest;
 import com.idms.model.VerifyEmailPinRequest;
 import com.idms.model.VerifyPinRequest;
+import com.idms.model.mfa.JsonValue;
+import com.idms.model.mfa.JsonValueBuilder;
 import com.idms.product.client.IFWService;
 import com.idms.product.client.OpenAMService;
 import com.idms.product.client.OpenAMTokenService;
@@ -403,6 +407,8 @@ public class UserServiceImpl implements UserService {
 	@Value("${frVersion}")
 	private String frVersion;
 
+	@Value("${maxDeviceProfilesAllowed}")
+	private String maxDeviceProfilesAllowed;
 	private static String userAction = "submitRequirements";
 
 	private static String errorStatus = "Error";
@@ -5750,6 +5756,34 @@ public class UserServiceImpl implements UserService {
 					userRecord.setEmail(userRequest.getUserRecord().getEmail());
 				}
 			}
+            boolean is_2faUserUpdate = userRequest.getUserRecord().is_2FAUserUpdate();
+			if(is_2faUserUpdate) {
+				//changes to set preferred communication method for 2FA
+				 if(StringUtils.isNotBlank(userRequest.getUserRecord().getPrefCommnMethod())) {
+					 openAmReq.getInput().getUser().setPrefCommnMethod(userRequest.getUserRecord().getPrefCommnMethod().toLowerCase());
+				 }
+				 String mailInOpenDJ = productDocCtxUser.read(JsonConstants.MAIL_0);
+				 LOGGER.info("mailInOpenDJ = " + mailInOpenDJ);
+				 String mailInReq = userRequest.getUserRecord().getEmail();
+				 LOGGER.info("mailInReq = " + mailInReq);
+
+				 String mobileInOpenDJ = productDocCtxUser.read(JsonConstants.MOBILE_0);
+				 LOGGER.info("mobileInOpenDJ = " + mobileInOpenDJ);
+				 String mobileInReq = userRequest.getUserRecord().getMobilePhone();
+				 LOGGER.info("mobileInReq = " + mobileInReq);
+				 // set email and phone
+				 if(StringUtils.isNotBlank(mailInReq)) {
+					 if(StringUtils.isBlank(mailInOpenDJ)){
+						 openAmReq.getInput().getUser().setMail(mailInReq);
+					 }
+				 }
+				 if(StringUtils.isNotBlank(mobileInReq)){
+					 if(StringUtils.isBlank(mobileInOpenDJ)){
+						 openAmReq.getInput().getUser().setMobile(mobileInReq);
+					 }
+				 }
+			}else {
+
 			// convert Ifw to open am
 			//Senthil if IDMSMarketserved field is not null set in OpenAMUser Object
 			 if (null != userRequest.getUserRecord().getIDMSCompanyMarketServed__c()
@@ -5777,7 +5811,7 @@ public class UserServiceImpl implements UserService {
 					
 				openAmReq.getInput().getUser().setCn(cn);
 				}
-				
+		}
 			jsonRequset = objMapper.writeValueAsString(openAmReq.getInput().getUser());
 			jsonRequset = jsonRequset.replace("\"\"", "[]");
 
@@ -5812,7 +5846,7 @@ public class UserServiceImpl implements UserService {
 			}
 
 			// calling UIMS update user
-			if ((!isUserFromSocialLogin)
+			if ((!isUserFromSocialLogin && !is_2faUserUpdate)
 					&& (null != userRequest.getUserRecord().getIDMS_Profile_update_source__c() && !UserConstants.UIMS
 							.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Profile_update_source__c()))) {
 				// Adding V_New
@@ -5882,6 +5916,24 @@ public class UserServiceImpl implements UserService {
 				// "logout");
 			}
 
+			// logic to send otp for 2FA after user profile update
+			if(is_2faUserUpdate) {
+				Send2FAOTPRequest otpRequest = new Send2FAOTPRequest();
+				otpRequest.setUserid(userId);
+				LOGGER.info("Start: 2FA send otp for user:" + userId);
+				Response otpResponse = send2FAOTP(otpRequest);
+				LOGGER.info("End: 2FA send otp for user:" + userId);
+				if(HttpStatus.OK !=  HttpStatus.valueOf(otpResponse.getStatus())) {
+					org.json.simple.JSONObject otpJsonResponse = (org.json.simple.JSONObject) otpResponse.getEntity();
+					String message = otpJsonResponse.get("Message").toString();
+					responseCheck.put(UserConstants.STATUS, errorStatus);
+					responseCheck.put(UserConstants.MESSAGE, "2FA send otp failed: "+message);
+					LOGGER.error("2FA send otp failed for user: ->  " + userId);
+					return Response.status(otpResponse.getStatus()).entity(responseCheck).build();
+				}else {
+					LOGGER.info("2FA send otp succeeded for user: " + userId);
+				}
+			}
 			Response response = getUser(userId);
 			Object responseObject = response.getEntity();
 
@@ -13130,7 +13182,6 @@ public class UserServiceImpl implements UserService {
 			errorResponse.setMessage("Unauthorized or session expired");
 			return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 		}
-		
 		if(mfaRequest.getIs2FAEnabled()== null||mfaRequest.getIs2FAEnabled().isEmpty()) {
 			errorResponse=buildErrorResponse(UserConstants.INVALID_2FA_VALUE);
 			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
@@ -13201,4 +13252,135 @@ public class UserServiceImpl implements UserService {
 		
 		return enableMFA;
 	}
+
+	@Override
+	public Response saveDeviceProfile(String authorizedToken, String userId, DeviceProfileRequest deviceProfileRequest) {
+		ErrorResponse errorResponse = new ErrorResponse();
+		//validate input
+		Response response = validateInput(authorizedToken, userId, deviceProfileRequest, errorResponse);
+		if(response != null) {
+			return response;
+		}
+		String iPlanetDirectoryKey = null;
+		try {
+			iPlanetDirectoryKey  = getSSOToken();
+		} catch (IOException ioExp) {
+			LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
+			iPlanetDirectoryKey = "";
+		}
+		LOGGER.info("Start: getUser() of OpenAMService for userId:" + userId);
+		String userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userId, iPlanetDirectoryKey);
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		LOGGER.info("userData -> " + ChinaIdmsUtil.printOpenAMInfo(userData));
+		DocumentContext docCtxUser = JsonPath.using(conf).parse(userData);
+
+		net.minidev.json.JSONArray dProfiles = docCtxUser.read(JsonConstants.DEVICE_PRINT_PROFILES);
+		List<JsonValue> deviceProfilesList = new ArrayList<>();
+		for(int index = 0; index < dProfiles.size(); index++) {
+			deviceProfilesList.add(JsonValueBuilder.toJsonValue(dProfiles.get(index).toString()));
+		}
+		while (deviceProfilesList.size() >= Integer.parseInt(this.maxDeviceProfilesAllowed)) {
+			LOGGER.info("Removing oldest device profile for user :" + userId + " as it has crossed the maximum device profiles limit !!");
+		    removeOldestProfile(deviceProfilesList);
+		}
+		JsonNode dPrintNode = deviceProfileRequest.getDevicePrint();
+		LOGGER.info("dProfileNode: " + dPrintNode);
+		// generate device profile
+		Map<String, Object> deviceProfile = generateDeviceProfile(null, dPrintNode);
+		deviceProfilesList.add(JsonValue.json(deviceProfile));
+	    // update user
+		String dProfile_update_json = "{" + "\"devicePrintProfiles\":"
+				+  deviceProfilesList + "}";
+		LOGGER.info("dProfile_update_json: " + dProfile_update_json);
+		LOGGER.info("Start: updateUser() to update device profile for user:" + userId);
+	    String updateResponse = UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userId,
+				dProfile_update_json);
+		LOGGER.info("End: updateUser() to update device profile for user:" + userId);
+		if (StringUtils.isNotBlank(updateResponse)) {
+			// call enable mfa
+			return invokeEnableMFA(authorizedToken, userId);
+		}
+		errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+		errorResponse.setMessage(UserConstants.DEVICE_SAVE_FAILED);
+		return Response.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).entity(errorResponse).build();
+	}
+
+	private Response invokeEnableMFA(String authorizedToken, String userId) {
+		MFARequest mfaRequest = new MFARequest();
+		mfaRequest.setIs2FAEnabled("true");
+		mfaRequest.setIsFirstTimeUser("false");
+		mfaRequest.setUIFlag("true");
+		LOGGER.info("Start: enableMFA call for user:" + userId);
+		Response mfaResponse = enableMFA(userId, authorizedToken, mfaRequest );
+		LOGGER.info("End: enableMFA call for user:" + userId);
+
+		if(HttpStatus.OK !=  HttpStatus.valueOf(mfaResponse.getStatus())) {
+			org.json.simple.JSONObject otpJsonResponse = (org.json.simple.JSONObject) mfaResponse.getEntity();
+			String message = otpJsonResponse.get("Message").toString();
+			JSONObject errJObj = new JSONObject();
+			errJObj.put(UserConstants.STATUS, errorStatus);
+			errJObj.put(UserConstants.MESSAGE, "enableMFA failed: "+ message);
+			LOGGER.error("enableMFA failed for user: ->  " + userId);
+			return Response.status(mfaResponse.getStatus()).entity(errJObj).build();
+		}else {
+			LOGGER.info("enableMFA succeeded for user: " + userId);
+			// send success response
+			SocialProfileUpdateResponse saveDeviceResponse = new SocialProfileUpdateResponse();
+			saveDeviceResponse.setStatus(successStatus);
+			saveDeviceResponse.setMessage(UserConstants.DEVICE_SAVE_SUCCESS);
+			return Response.status(HttpStatus.OK.value()).entity(saveDeviceResponse).build();
+		}
+	}
+
+	private Response validateInput(String authorizedToken, String userId, DeviceProfileRequest deviceProfileRequest,
+			ErrorResponse errorResponse) {
+		Response response  = null;
+		if(StringUtils.isBlank(userId)) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("UserId is mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		if (StringUtils.isNotBlank(deviceProfileRequest.getUiFlag()) && UserConstants.FALSE.equalsIgnoreCase(deviceProfileRequest.getUiFlag())
+				&& !getTechnicalUserDetails(authorizedToken)) {
+			errorResponse.setStatus(HttpStatus.UNAUTHORIZED.toString());
+			errorResponse.setMessage("Unauthorized or session expired!!");
+			response = Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+		}
+		if(deviceProfileRequest.getDevicePrint() == null) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("Device Details are mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		return response;
+	}
+
+	private Map<String, Object> generateDeviceProfile(String deviceName, JsonNode devicePrint) {
+		// Generate device profile
+	    long lastSelectedDate = System.currentTimeMillis();
+		Map<String, Object> profile = new HashMap<>();
+	    profile.put("uuid", UUID.randomUUID().toString());
+	    profile.put("name", StringUtils.isEmpty(deviceName) ?
+	          generateProfileName(new Date(lastSelectedDate)) : deviceName);
+	    profile.put("selectionCounter", Integer.valueOf(1));
+	    profile.put("lastSelectedDate", Long.valueOf(lastSelectedDate));
+	    profile.put("devicePrint", devicePrint);
+	    return profile;
+	}
+
+	private String generateProfileName(Date lastSelectedDate) {
+		return "Profile: " + (new SimpleDateFormat("dd/MM/yyyy HH:mm")).format(lastSelectedDate);
+	}
+	private void removeOldestProfile(List<JsonValue> profiles) {
+	    JsonValue oldestProfile = null;
+	    long oldestDate = System.currentTimeMillis();
+	    for (JsonValue profile : profiles) {
+	      long lastSelectedDate = profile.get("lastSelectedDate").asLong().longValue();
+	      if (lastSelectedDate < oldestDate) {
+	        oldestDate = lastSelectedDate;
+	        oldestProfile = profile;
+	      }
+	    }
+	    if (oldestProfile != null)
+	      profiles.remove(oldestProfile);
+	  }
 }
