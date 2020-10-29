@@ -28,6 +28,8 @@ import com.idms.model.CheckUserExistsRequest;
 import com.idms.model.CheckUserIdentityRequest;
 import com.idms.model.ConfirmPinRequest;
 import com.idms.model.CreateUserRequest;
+import com.idms.model.DeviceProfileRequest;
+import com.idms.model.MFARequest;
 import com.idms.model.PasswordRecoveryRequest;
 import com.idms.model.ResendEmailChangeRequest;
 import com.idms.model.ResendPinRequest;
@@ -333,4 +335,17 @@ public interface UserService {
 	@Path("/apexrest/send2FAOTP")
 	@Consumes("application/json")
 	Response send2FAOTP(@Valid Send2FAOTPRequest send2FAOTPRequest);
+	
+	@POST
+	@Path("/apexrest/users/{userId}/enableMFA")
+	@Consumes("application/json")
+	Response enableMFA(@PathParam("userId") String userId,@HeaderParam("Authorization") String token,MFARequest mfaRequest);
+
+	/*
+	 * API to save device details in user's profile
+	 */
+	@PUT
+	@Path("/apexrest/users/{userId}/saveDeviceProfile")
+	@Consumes("application/json")
+	Response saveDeviceProfile(@HeaderParam("Authorization") String token, @PathParam("userId") String userId, DeviceProfileRequest deviceProfileRequest);
 }

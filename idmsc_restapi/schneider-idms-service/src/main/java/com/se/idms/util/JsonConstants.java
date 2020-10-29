@@ -1,5 +1,7 @@
 package com.se.idms.util;
 
+import com.jayway.jsonpath.JsonPath;
+
 /**
  * JsonConstants for the Openam JSON response.
  * 
@@ -49,4 +51,5 @@ public class JsonConstants {
 	public static final String INDUSTRY_SEGMENT = "$.industrySegment[0]";
 	public static final String BUSINESS_TYPE = "$.iam1[0]";
 	public static final String FEDERATION_ID_0 = "$.federationID[0]";
+	public static final String DEVICE_PRINT_PROFILES = "$.devicePrintProfiles";
 }

@@ -2,6 +2,9 @@ package com.idms.model;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.idms.product.model.Attributes;
 
@@ -243,7 +246,13 @@ public class IFWUser extends BaseEntity {
 	@JsonProperty
 	private String adminBFOAccoountID;
 	
+	@JsonInclude(Include.NON_NULL)
+	@JsonProperty("preferredCommunication")
 	private String prefCommnMethod;
+	
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	@JsonInclude(Include.NON_NULL)
+	private boolean _2FAUserUpdate;
 
 	//@JsonProperty
 	//private String IDMSMarketServed__c;
@@ -961,15 +970,26 @@ public class IFWUser extends BaseEntity {
 	public void setAdminBFOAccoountID(String adminBFOAccoountID) {
 		this.adminBFOAccoountID = adminBFOAccoountID;
 	}
-
+	
+	@JsonProperty("preferredCommunication")
 	public String getPrefCommnMethod() {
 		return prefCommnMethod;
 	}
-
+	
+	@JsonProperty("preferredCommunication")
 	public void setPrefCommnMethod(String prefCommnMethod) {
 		this.prefCommnMethod = prefCommnMethod;
 	}
-	
+
+	public boolean is_2FAUserUpdate() {
+		return _2FAUserUpdate;
+	}
+
+	public void set_2FAUserUpdate(boolean _2faUserUpdate) {
+		_2FAUserUpdate = _2faUserUpdate;
+	}
+
+
 	/*
 	@JsonProperty("IDMSMarketServed__c")
 	public List getIDMSMarketServed__c() {
