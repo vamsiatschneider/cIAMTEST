@@ -5759,8 +5759,15 @@ public class UserServiceImpl implements UserService {
             boolean is_2faUserUpdate = userRequest.getUserRecord().is_2FAUserUpdate();
 			if(is_2faUserUpdate) {
 				//changes to set preferred communication method for 2FA
-				 if(StringUtils.isNotBlank(userRequest.getUserRecord().getPrefCommnMethod())) {
-					 openAmReq.getInput().getUser().setPrefCommnMethod(userRequest.getUserRecord().getPrefCommnMethod().toLowerCase());
+				 if(StringUtils.isNotBlank(userRequest.getUserRecord().getPrefCommnMethod()) &&
+						 "email".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod()) ||
+						 "phone".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod()) ||
+						 "both".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod())) {
+					openAmReq.getInput().getUser().setPrefCommnMethod(userRequest.getUserRecord().getPrefCommnMethod().toLowerCase());
+				 }else {
+					errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+					errorResponse.setMessage("2FA Requirement: Invalid Preferred Communication Value!!");
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				 }
 				 String mailInOpenDJ = productDocCtxUser.read(JsonConstants.MAIL_0);
 				 LOGGER.info("mailInOpenDJ = " + mailInOpenDJ);
@@ -5771,16 +5778,20 @@ public class UserServiceImpl implements UserService {
 				 LOGGER.info("mobileInOpenDJ = " + mobileInOpenDJ);
 				 String mobileInReq = userRequest.getUserRecord().getMobilePhone();
 				 LOGGER.info("mobileInReq = " + mobileInReq);
-				 if(StringUtils.isBlank(mobileInReq)) {
+				if ("both".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod())
+						|| "mobile".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod())
+								&& StringUtils.isBlank(mobileInReq)) {
 					errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
 					errorResponse.setMessage("2FA Requirement: Mobile cannot be null or empty!!");
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-				 }
-                 if(StringUtils.isBlank(mailInReq)) {
-                    errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
-                    errorResponse.setMessage("2FA Requirement: Email cannot be null or empty!!");
+				}
+				if ("both".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod())
+						&& "email".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod())
+						&& StringUtils.isBlank(mailInReq)) {
+					errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+					errorResponse.setMessage("2FA Requirement: Email cannot be null or empty!!");
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-				 }
+				}
 				 // set email and phone
 				 if(StringUtils.isNotBlank(mailInReq)) {
 					 if(StringUtils.isBlank(mailInOpenDJ)){
