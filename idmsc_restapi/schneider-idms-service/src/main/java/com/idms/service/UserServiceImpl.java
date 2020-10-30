@@ -5760,9 +5760,9 @@ public class UserServiceImpl implements UserService {
 			if(is_2faUserUpdate) {
 				//changes to set preferred communication method for 2FA
 				 if(StringUtils.isNotBlank(userRequest.getUserRecord().getPrefCommnMethod()) &&
-						 "email".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod()) ||
+						 ("email".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod()) ||
 						 "phone".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod()) ||
-						 "both".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod())) {
+						 "both".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod()))) {
 					openAmReq.getInput().getUser().setPrefCommnMethod(userRequest.getUserRecord().getPrefCommnMethod().toLowerCase());
 				 }else {
 					errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
