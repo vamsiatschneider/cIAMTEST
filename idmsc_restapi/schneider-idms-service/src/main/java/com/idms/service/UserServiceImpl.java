@@ -13182,13 +13182,13 @@ public class UserServiceImpl implements UserService {
 
 	private ErrorResponse buildErrorResponse(String errorMsg) {
 		ErrorResponse errorResponse = new ErrorResponse();
-		LogMessageUtil.logInfoMessage("Error Message: " + errorMsg);
+		LOGGER.error("Error Message: " + errorMsg);
 		errorResponse.setStatus(errorStatus);
 		errorResponse.setMessage(errorMsg);
 		return errorResponse;
 	}
 	public Response enableMFA(String userId,String authorizedToken, MFARequest mfaRequest) {
-		LogMessageUtil.logInfoMessage("Start of Enable MFA Request");
+		LOGGER.info("Start of Enable MFA Request");
 		String iPlanetDirectoryKey = null;
 		String userExists=null;
 		MFAEnableResponse response=new MFAEnableResponse();
@@ -13202,10 +13202,11 @@ public class UserServiceImpl implements UserService {
 			errorResponse.setMessage("Unauthorized or session expired");
 			return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 		}
-		if(mfaRequest.getIs2FAEnabled()== null||mfaRequest.getIs2FAEnabled().isEmpty()) {
+		if(mfaRequest.getIs2FAEnabled()== null||mfaRequest.getIs2FAEnabled().isEmpty()||!(mfaRequest.getIs2FAEnabled().equalsIgnoreCase("true")||mfaRequest.getIs2FAEnabled().equalsIgnoreCase("false"))) {
 			errorResponse=buildErrorResponse(UserConstants.INVALID_2FA_VALUE);
 			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
 		}
+		
 		if(userId==null||userId.isEmpty())
 		{
 			errorResponse=buildErrorResponse(UserConstants.MANDATORY_USERID);
@@ -13213,7 +13214,7 @@ public class UserServiceImpl implements UserService {
 
 		}
 		try {
-			LogMessageUtil.logInfoMessage("Fetching User Details");
+			LOGGER.info("Fetching User Details");
 			iPlanetDirectoryKey = getSSOToken();
 			userExists = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userId,
 					iPlanetDirectoryKey);
@@ -13221,29 +13222,29 @@ public class UserServiceImpl implements UserService {
 			} 
 		
 		catch (UnsupportedEncodingException e) {
-			LogMessageUtil.logErrorMessage(e, "Unable to get User with LoginId", e.getMessage());
+			LOGGER.error("Unable to get User with LoginId"+ e.getMessage());
 			errorResponse=buildErrorResponse("Unable to get User with LoginId");
 			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();}
 		catch (IOException e) {
-			LogMessageUtil.logErrorMessage(e, "Unable to get SSO Token", e.getMessage());
+			LOGGER.error("Unable to get SSO Token"+ e.getMessage());
 			errorResponse=buildErrorResponse("Unable to get SSO Token");
 			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();}
 		
 		DocumentContext productDocCtx = JsonPath.using(conf).parse(userExists);
 	
 		String userActiveStatus=productDocCtx.read("$.isActivated[0]");
-		LogMessageUtil.logInfoMessage("User status openDJ: "+userActiveStatus);
+		LOGGER.info("User status openDJ: "+userActiveStatus);
 		if(userActiveStatus.equalsIgnoreCase("false")) {
 			errorResponse=buildErrorResponse(UserConstants.USER_INACTIVE);
 			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
 		}
 		String user2FAEnabled=productDocCtx.read("$.is2FAEnabled[0]");
-		LogMessageUtil.logInfoMessage("is2FAEnabled status of User in openDJ: "+user2FAEnabled);
+		LOGGER.info("is2FAEnabled status of User in openDJ: "+user2FAEnabled);
 		if(user2FAEnabled!=null &&  user2FAEnabled.equalsIgnoreCase("true") && user2FAEnabled.equalsIgnoreCase(mfaRequest.getIs2FAEnabled())) {
 			errorResponse=buildErrorResponse(UserConstants.MFA_ERROR);
 			return Response.status(HttpStatus.OK.value()).entity(errorResponse).build();
 		}
-		LogMessageUtil.logInfoMessage("User Details Validated Successfully. FederationId Returned: " + userId);
+		LOGGER.info("User Details Validated Successfully. FederationId Returned: " + userId);
 		
 		MFAUpdate mfaUpdate=new MFAUpdate();
 		mfaUpdate.setIs2FAEnabled(mfaRequest.getIs2FAEnabled());
@@ -13254,16 +13255,16 @@ public class UserServiceImpl implements UserService {
 		try {
 			jsonRequest = objMapper.writeValueAsString(mfaUpdate);
 		} catch (JsonProcessingException e) {
-			LogMessageUtil.logErrorMessage(e, "Unable to Process JSONReq Token", e.getMessage());
+			LOGGER.error("Unable to Process JSONReq Token"+e.getMessage());
 			errorResponse=buildErrorResponse("Unable to Process JSONReq Token");
 			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
 		}
 			Response enableMFA=UserServiceUtil.updateMFADetailsBasedOnFRVersion(productService,
 			UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,userId, jsonRequest);
-			LogMessageUtil.logInfoMessage("Response from openAM :"+ enableMFA.getStatus());
+			LOGGER.info("Response from openAM :"+ enableMFA.getStatus());
 			
 			if (enableMFA != null && HttpStatus.OK.equals(HttpStatus.valueOf(enableMFA.getStatus()))) {
-				LogMessageUtil.logInfoMessage("MFA details updated successfully");
+				LOGGER.info("MFA details updated successfully");
 				response.setStatus(successStatus);
 				response.setMessage(UserConstants.MFA_SUCCESS);
 				
