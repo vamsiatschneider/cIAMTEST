@@ -5778,15 +5778,15 @@ public class UserServiceImpl implements UserService {
 				 LOGGER.info("mobileInOpenDJ = " + mobileInOpenDJ);
 				 String mobileInReq = userRequest.getUserRecord().getMobilePhone();
 				 LOGGER.info("mobileInReq = " + mobileInReq);
-				if ("both".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod())
-						|| "mobile".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod())
+				if (("both".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod())
+						|| "mobile".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod()))
 								&& StringUtils.isBlank(mobileInReq)) {
 					errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
 					errorResponse.setMessage("2FA Requirement: Mobile cannot be null or empty!!");
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
-				if ("both".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod())
-						&& "email".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod())
+				if (("both".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod())
+						|| "email".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod()))
 						&& StringUtils.isBlank(mailInReq)) {
 					errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
 					errorResponse.setMessage("2FA Requirement: Email cannot be null or empty!!");
