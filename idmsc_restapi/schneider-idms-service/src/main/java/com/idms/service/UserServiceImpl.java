@@ -5127,7 +5127,7 @@ public class UserServiceImpl implements UserService {
 		String companyFedIdInRequest = null;
 		/* boolean updateMobileIdentifierCheck = false; PMD Violation UnusedLocalVariable */
 		boolean stopUIMSFlag = false ;
-
+		boolean is_2faUserUpdate = userRequest.getUserRecord().is_2FAUserUpdate();
 		try {
 			LOGGER.info("updateUser -> : Request -> " + objMapper.writeValueAsString(userRequest));
 			stopUIMSFlag = ((null != stopidmstouimsflag && !stopidmstouimsflag.isEmpty())?Boolean.valueOf(stopidmstouimsflag):false);
@@ -5620,7 +5620,7 @@ public class UserServiceImpl implements UserService {
 
 				}
 
-				if ((UserConstants.EMAIL.equalsIgnoreCase(identifierType) && !userUpdateforSameUser)) {
+				if ((UserConstants.EMAIL.equalsIgnoreCase(identifierType) && !userUpdateforSameUser) &&!is_2faUserUpdate) {
 
 					// Step 3:
 					/**
@@ -5720,7 +5720,7 @@ public class UserServiceImpl implements UserService {
 						}
 					}
 
-				} else if (UserConstants.MOBILE.equalsIgnoreCase(identifierType) && !userUpdateforSameUser) {
+				} else if (UserConstants.MOBILE.equalsIgnoreCase(identifierType) && !userUpdateforSameUser && !is_2faUserUpdate) {
 					// for mobile scenarios
 
 					String product_json_string = "{" + "\"newmobile\": \""
@@ -5756,13 +5756,12 @@ public class UserServiceImpl implements UserService {
 					userRecord.setEmail(userRequest.getUserRecord().getEmail());
 				}
 			}
-            boolean is_2faUserUpdate = userRequest.getUserRecord().is_2FAUserUpdate();
 			if(is_2faUserUpdate) {
 				//changes to set preferred communication method for 2FA
 				 if(StringUtils.isNotBlank(userRequest.getUserRecord().getPrefCommnMethod()) &&
-						 "email".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod()) ||
-						 "phone".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod()) ||
-						 "both".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod())) {
+						 ("email".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod()) ||
+						 "mobile".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod()) ||
+						 "both".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod()))) {
 					openAmReq.getInput().getUser().setPrefCommnMethod(userRequest.getUserRecord().getPrefCommnMethod().toLowerCase());
 				 }else {
 					errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
@@ -5782,14 +5781,14 @@ public class UserServiceImpl implements UserService {
 						|| "mobile".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod()))
 								&& StringUtils.isBlank(mobileInReq)) {
 					errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
-					errorResponse.setMessage("2FA Requirement: Mobile cannot be null or empty!!");
+					errorResponse.setMessage("2FA Requirement: Mobile cannot be null or empty if mobile/both is preferred communication method!!");
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 				if (("both".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod())
 						|| "email".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod()))
 						&& StringUtils.isBlank(mailInReq)) {
 					errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
-					errorResponse.setMessage("2FA Requirement: Email cannot be null or empty!!");
+					errorResponse.setMessage("2FA Requirement: Email cannot be null or empty if email/both is preferred communication method!!");
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 				 // set email and phone
