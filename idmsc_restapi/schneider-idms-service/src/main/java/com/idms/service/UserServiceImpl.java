@@ -6488,6 +6488,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("End: getUser() of OpenAMService finished for userId:" + userId);
 				LOGGER.info("userData:" + ChinaIdmsUtil.printOpenAMInfo(userData));
 			}
+						
 			conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 			productDocCtx = JsonPath.using(conf).parse(userData);
 
@@ -6582,6 +6583,10 @@ public class UserServiceImpl implements UserService {
 			jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
 			jsonStr = jsonCounter.toString();			
 			UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userId, jsonStr);
+			
+			//Logging out all active sessions of the user
+			terminateUserSessions(userId);
+			
 			if (isPasswordUpdatedInUIMS) {
 				userResponse.setStatus(successStatus);
 				userResponse.setMessage("User Password updated successfully in IDMS China and UIMS");
@@ -13415,4 +13420,39 @@ public class UserServiceImpl implements UserService {
 	    if (oldestProfile != null)
 	      profiles.remove(oldestProfile);
 	  }
+	
+	private void terminateUserSessions(String userId) {
+		LOGGER.info("Starting Terminate User Sessions for: "+userId);
+		DocumentContext productDocCtx = null;
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		String iPlanetDirectoryKey = null;
+		try {
+			iPlanetDirectoryKey = getSSOToken();
+		} catch (IOException ex) {
+			LOGGER.error("Unable to get SSO Token " + ex.getMessage(),ex);
+		}
+		String userSessions="";
+		try {
+			userSessions = UserServiceUtil.getSessionsWithUserIdBasedOnFRVersion(productService, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey,
+					URLEncoder.encode("username eq "+"\"" + userId +"\""+" and realm eq "+ "\"" + UserConstants.SE_REALM +"\"", "UTF-8").replace("+", "%20"));
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.error("Unable to get User session: "+e.getMessage());
+		}
+		if (userSessions != null ) {
+		
+		productDocCtx = JsonPath.using(conf).parse(userSessions);
+		Integer resultCount= productDocCtx.read(JsonConstants.RESULT_COUNT);
+		
+	    if(resultCount>0)
+		{
+	    List<String> sessions=productDocCtx.read("$.result[*].sessionHandle");
+	    LOGGER.info("Session: "+sessions);
+		String sessionHandles_json = "{" + "\"sessionHandles\":"
+				+  sessions + "}";
+		LOGGER.info("sessionHandles: " + sessionHandles_json);
+		Response terminateSessionResponse=UserServiceUtil.invalidateAllSessionsBasedOnFRVersion(productService,  UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, sessionHandles_json, "logoutByHandle");
+		LOGGER.info("Terminate Session API Response: "+ terminateSessionResponse.getStatus());
+		}
+		}
+	}
 }

@@ -1,11 +1,13 @@
 package com.idms.model.mfa;
 
-import com.idms.mfa.exception.JsonException;
-import com.idms.mfa.exception.JsonValueException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
+import com.idms.mfa.exception.JsonException;
+import com.idms.mfa.exception.JsonValueException;
 
 public final class JsonPatch {
 
@@ -163,8 +165,8 @@ public final class JsonPatch {
                 && !(v1.isBoolean() && v2.isBoolean());
     }
 
-    private static HashMap<String, Object> op(String op, JsonPointer pointer, JsonValue value) {
-        HashMap<String, Object> result = new HashMap<>();
+    private static Map<String, Object> op(String op, JsonPointer pointer, JsonValue value) {
+        Map<String, Object> result = new HashMap<>();
         result.put(OP_PTR.leaf(), op);
         result.put(PATH_PTR.leaf(), pointer.toString());
         if (value != null) {
