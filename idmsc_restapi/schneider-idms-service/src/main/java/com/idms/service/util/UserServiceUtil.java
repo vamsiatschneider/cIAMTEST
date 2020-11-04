@@ -179,6 +179,17 @@ public class UserServiceUtil {
 		LogMessageUtil.logInfoMessage("Update Social Profile Openam Call!");
 		return productService.updateSocialProfile(ACCEPT_VERSION_HEADER, adminToken, fedId, requestJson);
 	}
+	
+	public static String getSessionsWithUserIdBasedOnFRVersion(OpenAMService productService, String adminToken, String query) {
+		LogMessageUtil.logInfoMessage("Get All Sessions based on userId Openam Call!");
+		return productService.getSessionsWithUserId(SESSION_LOGOUT_VERSION_HEADER, adminToken, query);
+	}
+	public static Response invalidateAllSessionsBasedOnFRVersion(OpenAMService productService, String adminToken,String sessionHandles_json, String query) {
+		LogMessageUtil.logInfoMessage("logoutByHandle Openam Call!");
+		return productService.invalidateAllSessions(SESSION_LOGOUT_VERSION_HEADER, adminToken, sessionHandles_json, query);
+		 
+	}
+	
 	public static String validateActivationRequest(SocialProfileActivationRequest socialProfileRequest) {
 		String errorMessage = null;
 		if(StringUtils.isBlank(socialProfileRequest.getId())){

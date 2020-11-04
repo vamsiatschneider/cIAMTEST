@@ -30,6 +30,7 @@ public interface OpenAMService {
 	@Consumes("application/json")
 	String checkUserExistsWithEmailMobile(@HeaderParam("Accept-API-Version") String acceptAPIVersion,
 			@HeaderParam("Cookie") String iPlanetDirectoryKey, @QueryParam("_queryFilter") String emailOrMobile);
+	
 
 	@POST
 	@Path("/se/selfservice/userRegistration")
@@ -69,6 +70,8 @@ public interface OpenAMService {
 	@Consumes("application/json")
 	Response updateSocialProfile(@HeaderParam("Accept-API-Version") String acceptAPIVersion,
 			@HeaderParam("Cookie") String iPlanetDirectoryPro, @PathParam("userId") String userId, String patchRequest);
+	
+	
 
 	// OpenAM 6.5 User REST APIs END here
 
@@ -108,6 +111,20 @@ public interface OpenAMService {
 	@Consumes("application/json")
 	String sessionLogout(@HeaderParam("Accept-API-Version") String acceptAPIVersion,
 			@HeaderParam("Content-Type") String contentType, String token, @QueryParam("_action") String logout);
+	//OpenAM API to get sessions based on userID
+	@GET
+	@Path("/sessions")
+	String getSessionsWithUserId(@HeaderParam("Accept-API-Version") String acceptAPIVersion,
+			@HeaderParam("Cookie") String iPlanetDirectoryKey, @QueryParam("_queryFilter") String userName);
+	//OpenAM API to invalidate all the User Sessions
+	@POST
+	@Path("/sessions/")
+	@Consumes("application/json")
+	Response invalidateAllSessions(@HeaderParam("Accept-API-Version") String acceptAPIVersion,
+		    @HeaderParam("Cookie") String iPlanetDirectoryKey, String sessionHandles_json,@QueryParam("_action") String logoutByHandle);
+	
+	
+	
 	// OpenAM 6.5 Session REST APIs END here
 
 	@GET
@@ -200,5 +217,7 @@ public interface OpenAMService {
 			@HeaderParam("access_token") String accessToken, @QueryParam("service") String service,
 			@QueryParam("authIndexType") String authIndexType, @QueryParam("authIndexValue") String authIndexValue,
 			String auth);
+	
+	
 
 }
