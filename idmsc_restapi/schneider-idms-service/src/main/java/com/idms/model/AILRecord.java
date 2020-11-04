@@ -85,23 +85,30 @@ public class AILRecord {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		AILRecord other = (AILRecord) obj;
 		if (acl == null) {
-			if (other.acl != null)
+			if (other.acl != null) {
 				return false;
-		} else if (!acl.equals(other.acl))
+			}
+		} else if (!acl.equals(other.acl)) {
 			return false;
+		}
 		if (aclType == null) {
-			if (other.aclType != null)
+			if (other.aclType != null) {
 				return false;
-		} else if (!aclType.equals(other.aclType))
+			}
+		} else if (!aclType.equals(other.aclType)) {
 			return false;
+		}
 		return true;
 	}
 
