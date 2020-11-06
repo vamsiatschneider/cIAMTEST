@@ -409,6 +409,10 @@ public class UserServiceImpl implements UserService {
 
 	@Value("${maxDeviceProfilesAllowed}")
 	private String maxDeviceProfilesAllowed;
+
+	@Value("${is2FAEnabled}")
+	private String is2FAEnabled;
+
 	private static String userAction = "submitRequirements";
 
 	private static String errorStatus = "Error";
@@ -712,6 +716,18 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info(GET_USER_TIME_LOG + elapsedTime);
 			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonArray).build();
 		}
+		Response getUserResponse = buildGetUserResponse(startTime, userData);
+		if(getUserResponse != null) {
+			return getUserResponse;
+		}
+		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+		LOGGER.info(GET_USER_TIME_LOG + elapsedTime);
+		LOGGER.error("ECODE-GETUSER-PROC-ERROR : Error processing get user for " + userId);
+		return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).build();
+	}
+
+	private Response buildGetUserResponse(long startTime, String userData) {
+		long elapsedTime;
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		// getting the context
 		DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
@@ -736,10 +752,7 @@ public class UserServiceImpl implements UserService {
 		} else if (null == context || "".equals(context)) {
 			return returnGetUserHomeContext(startTime, userHomeResponse, userProductDocCtx);
 		}
-		elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-		LOGGER.info(GET_USER_TIME_LOG + elapsedTime);
-		LOGGER.error("ECODE-GETUSER-PROC-ERROR : Error processing get user for " + userId);
-		return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).build();
+		return returnGetUserHomeContext(startTime, userHomeResponse, userProductDocCtx);
 	}
 	
 	/**
@@ -3905,6 +3918,17 @@ public class UserServiceImpl implements UserService {
 				PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
 						.concat(",\"updateSource\":\"" + confirmRequest.getIDMS_Profile_update_source() + "\"}");
 
+				// Start: Update firstTimeUser and is2FAEnabled flag for 2FA
+				if (StringUtils.isNotBlank(is2FAEnabled) && is2FAEnabled.equalsIgnoreCase("true")) {
+					PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
+							.concat(",\"isFirstTimeUser\":\"true\"}");
+				} else {
+					PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
+							.concat(",\"isFirstTimeUser\":\"false\"}");
+				}
+				PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
+						.concat(",\"is2FAEnabled\":\"false\"}");
+				// End: Update firstTimeUser and is2FAEnabled flag for 2FA
 				/**
 				 * The below code to activate the IDMSSetActivationDate
 				 * 
@@ -13454,5 +13478,54 @@ public class UserServiceImpl implements UserService {
 		LOGGER.info("Terminate Session API Response: "+ terminateSessionResponse.getStatus());
 		}
 		}
+	}
+
+	@Override
+	public Response getUserBySSOToken(String ssoToken, String userId) {
+		ErrorResponse errorResponse = new ErrorResponse();
+		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
+		LOGGER.info("Start: Get User by SSOToken for userId: " + userId);
+		if(StringUtils.isEmpty(ssoToken)) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("SSOToken is mandatory!");
+			LOGGER.error("Get User Details by SSOToken failed for user: ->  " + userId);
+			return Response.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).entity(errorResponse).build();
+		}
+		if(StringUtils.isEmpty(userId)) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("UserId is mandatory!");
+			LOGGER.error("Get User Details by SSOToken failed for user: ->  " + userId);
+			return Response.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).entity(errorResponse).build();
+		}
+		try {
+			String userDetails = getUserDetails(userId, ssoToken);
+			if (userDetails != null) {
+				Response getUserResponse = buildGetUserResponse(startTime, userDetails);
+				if(getUserResponse != null) {
+					return getUserResponse;
+				}
+			} else {
+				errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+				errorResponse.setMessage("User not found!");
+				LOGGER.error("Get User Details by SSOToken failed for user: ->  " + userId);
+				return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+			}
+		}catch(NotAuthorizedException ex) {
+			errorResponse.setStatus(HttpStatus.UNAUTHORIZED.toString());
+			errorResponse.setMessage("User is not authorized to perform this operation!");
+			LOGGER.error("Get User Details by SSOToken-unauthorized exception for user: ->  " + userId);
+			return Response.status(HttpStatus.UNAUTHORIZED.value()).entity(errorResponse).build();
+		}catch(Exception ex) {
+			errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+			errorResponse.setMessage("Get User Details by SSOToken failed with exception: " + ex);
+			ex.printStackTrace();
+			LOGGER.error("Get User Details by SSOToken failed for user: ->  " + userId);
+			return Response.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).entity(errorResponse).build();
+		}
+		LOGGER.info("End: Get User by SSOToken for userId: " + userId);
+		errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+		errorResponse.setMessage("Get User Details by SSOToken failed");
+		LOGGER.error("Get User Details by SSOToken failed for user: ->  " + userId);
+		return Response.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).entity(errorResponse).build();
 	}
 }

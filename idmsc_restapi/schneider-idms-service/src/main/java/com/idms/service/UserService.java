@@ -170,6 +170,13 @@ public interface UserService {
 	@Path("/oauth2/userinfo/ui")
 	Response getUserByOauthFromUI(@HeaderParam("Authorization") String token, @HeaderParam("Appname") String appName);
 
+	/*
+	 * API to fetch user details if SSOToken and userId values are passed
+	 */
+	@GET
+	@Path("/apexrest/ciamusers/{userId}")
+	Response getUserBySSOToken(@HeaderParam("iPlanetDirectoryPro") String ssoToken, @PathParam("userId") String userId);
+
 	@GET
 	@Path("/apexrest/ActivateBulkUser")
 	@Consumes("application/json")
