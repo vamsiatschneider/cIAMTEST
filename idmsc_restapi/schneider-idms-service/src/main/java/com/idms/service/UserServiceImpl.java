@@ -13489,13 +13489,13 @@ public class UserServiceImpl implements UserService {
 			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
 			errorResponse.setMessage("SSOToken is mandatory!");
 			LOGGER.error("Get User Details by SSOToken failed for user: ->  " + userId);
-			return Response.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).entity(errorResponse).build();
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
 		}
 		if(StringUtils.isEmpty(userId)) {
 			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
 			errorResponse.setMessage("UserId is mandatory!");
 			LOGGER.error("Get User Details by SSOToken failed for user: ->  " + userId);
-			return Response.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).entity(errorResponse).build();
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
 		}
 		try {
 			String userDetails = getUserDetails(userId, ssoToken);
