@@ -345,12 +345,23 @@ public class ParseValuesByOauthHomeWorkContextDto {
 			userResponse.setLoginid(null != userProductDocCtx.read("$.loginid")
 					? getValue(userProductDocCtx.read("$.loginid").toString()) : getDelimeter());
 		}
-		// Changes done to get preferred communication method
-		if(StringUtils.isBlank(userResponse.getPrefCommnMethod())){
+		// Changes done to get 2FA details
+		if (StringUtils.isBlank(userResponse.getPrefCommnMethod())) {
 			userResponse.setPrefCommnMethod(null != userProductDocCtx.read("$.preferredCommunication")
-					? getValue(userProductDocCtx.read("$.preferredCommunication").toString()) : getDelimeter());
+					? getValue(userProductDocCtx.read("$.preferredCommunication").toString())
+					: getDelimeter());
 		}
-		// Changes end to get preferred communication method
+		if (StringUtils.isBlank(userResponse.getFirstTimeUser())) {
+			userResponse.setFirstTimeUser(null != userProductDocCtx.read("$.isFirstTimeUser")
+					? getValue(userProductDocCtx.read("$.isFirstTimeUser").toString())
+					: getDelimeter());
+		}
+		if (StringUtils.isBlank(userResponse.get_2FAEnabled())) {
+			userResponse.set_2FAEnabled(null != userProductDocCtx.read("$.is2FAEnabled")
+					? getValue(userProductDocCtx.read("$.is2FAEnabled").toString())
+					: getDelimeter());
+		}
+		// Changes end to get 2FA details
 		// Changes done to set social ids in userinfo call
 		if(StringUtils.isBlank(userResponse.getAppleid())){
 			userResponse.setAppleid(null != userProductDocCtx.read("$.appleid")
@@ -539,12 +550,21 @@ public class ParseValuesByOauthHomeWorkContextDto {
 			userResponse.setLoginid(null != userProductDocCtx.read("$.loginid")
 					? getValue(userProductDocCtx.read("$.loginid").toString()) : getDelimeter());
 		}
-		// Changes done to get preferred communication method
+		// Changes done to get 2FA details
 		if(StringUtils.isBlank(userResponse.getPrefCommnMethod())){
 			userResponse.setPrefCommnMethod(null != userProductDocCtx.read("$.preferredCommunication")
 							? getValue(userProductDocCtx.read("$.preferredCommunication").toString()) : getDelimeter());
 		}
-		// Changes end to get preferred communication method
+		if(StringUtils.isBlank(userResponse.getFirstTimeUser())){
+			userResponse.setFirstTimeUser(null != userProductDocCtx.read("$.isFirstTimeUser")
+							? getValue(userProductDocCtx.read("$.isFirstTimeUser").toString()) : getDelimeter());
+		}
+		if(StringUtils.isBlank(userResponse.get_2FAEnabled())){
+			userResponse.set_2FAEnabled(null != userProductDocCtx.read("$.is2FAEnabled")
+							? getValue(userProductDocCtx.read("$.is2FAEnabled").toString()) : getDelimeter());
+		}
+		// Changes end to get 2FA details
+
 		// Changes done to set social ids in userinfo call
 		if (StringUtils.isBlank(userResponse.getAppleid())) {
 			userResponse.setAppleid(null != userProductDocCtx.read("$.appleid")

@@ -409,6 +409,10 @@ public class UserServiceImpl implements UserService {
 
 	@Value("${maxDeviceProfilesAllowed}")
 	private String maxDeviceProfilesAllowed;
+
+	@Value("${is2FAEnabled}")
+	private String is2FAEnabled;
+
 	private static String userAction = "submitRequirements";
 
 	private static String errorStatus = "Error";
@@ -3915,9 +3919,13 @@ public class UserServiceImpl implements UserService {
 						.concat(",\"updateSource\":\"" + confirmRequest.getIDMS_Profile_update_source() + "\"}");
 
 				// Start: Update firstTimeUser and is2FAEnabled flag for 2FA
-				PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
-						.concat(",\"isFirstTimeUser\":\"true\"}");
-
+				if (StringUtils.isNotBlank(is2FAEnabled) && is2FAEnabled.equalsIgnoreCase("true")) {
+					PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
+							.concat(",\"isFirstTimeUser\":\"true\"}");
+				} else {
+					PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
+							.concat(",\"isFirstTimeUser\":\"false\"}");
+				}
 				PRODUCT_JSON_STRING = PRODUCT_JSON_STRING.substring(0, PRODUCT_JSON_STRING.length() - 1)
 						.concat(",\"is2FAEnabled\":\"false\"}");
 				// End: Update firstTimeUser and is2FAEnabled flag for 2FA
