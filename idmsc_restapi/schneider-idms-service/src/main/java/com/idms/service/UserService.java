@@ -174,7 +174,7 @@ public interface UserService {
 	 * API to fetch user details if SSOToken and userId values are passed
 	 */
 	@GET
-	@Path("/apexrest/users/{userId}")
+	@Path("/apexrest/ciamusers/{userId}")
 	Response getUserBySSOToken(@HeaderParam("iPlanetDirectoryPro") String ssoToken, @PathParam("userId") String userId);
 
 	@GET

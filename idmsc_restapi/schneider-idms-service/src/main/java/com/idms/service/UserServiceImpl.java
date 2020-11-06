@@ -13503,6 +13503,11 @@ public class UserServiceImpl implements UserService {
 				LOGGER.error("Get User Details by SSOToken failed for user: ->  " + userId);
 				return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
 			}
+		}catch(NotAuthorizedException ex) {
+			errorResponse.setStatus(HttpStatus.UNAUTHORIZED.toString());
+			errorResponse.setMessage("User is not authorized to perform this operation!");
+			LOGGER.error("Get User Details by SSOToken-unauthorized exception for user: ->  " + userId);
+			return Response.status(HttpStatus.UNAUTHORIZED.value()).entity(errorResponse).build();
 		}catch(Exception ex) {
 			errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.toString());
 			errorResponse.setMessage("Get User Details by SSOToken failed with exception: " + ex);
