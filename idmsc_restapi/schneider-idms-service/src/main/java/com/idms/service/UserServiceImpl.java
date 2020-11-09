@@ -1068,8 +1068,9 @@ public class UserServiceImpl implements UserService {
 					}
 				}
 				
-				if(maintenanceModeGlobal!=null)
+				if(maintenanceModeGlobal!=null) {
 					accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
+				}
 				if(accssControlList!=null && accssControlList.size()>0 && !(accssControlList.contains("False"))){
 					if(accssControlList.contains(UserConstants.MAINTENANCE_MODE_COMPLETE) || accssControlList.contains(UserConstants.MAINTENANCE_MODE_REGISTRATION) ){
 						errorResponse.setStatus(errorStatus);
@@ -1210,8 +1211,9 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info("idmsCheckUserExists reponse ::" + objMapper.writeValueAsString(checkUserExist));
 					org.json.simple.JSONObject checkUserJson = (org.json.simple.JSONObject) checkUserExist.getEntity();
 					String messageUser = checkUserJson.get(UserConstants.MESSAGE_L).toString();
-					if(checkUserJson.get("idmsFederatedId")!=null)
-					userName=checkUserJson.get("idmsFederatedId").toString();
+					if (checkUserJson.get("idmsFederatedId") != null) {
+						userName = checkUserJson.get("idmsFederatedId").toString();
+					}
 					if (!messageUser.equalsIgnoreCase(UserConstants.FALSE)) {
 						if (200 != checkUserExist.getStatus()) {
 							errorResponse.setMessage(messageUser);
@@ -3136,8 +3138,9 @@ public class UserServiceImpl implements UserService {
 			if(null != enableCheckUserToGlobal && !enableCheckUserToGlobal.isEmpty() && enableCheckUserToGlobal.equalsIgnoreCase(UserConstants.FALSE)) {
 				withGlobalUsers = "false";
 			}
-			if(LOGGER.isInfoEnabled())
+			if(LOGGER.isInfoEnabled()) {
 				LOGGER.info("withGlobalUsers value="+withGlobalUsers);
+			}
 
 			if (loginIdentifier.contains("@")) {
 				if (!emailValidator.validate(loginIdentifier.trim())) {
@@ -3666,11 +3669,13 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("getUser(): Response :  -> " + ChinaIdmsUtil.printOpenAMInfo(getUserResponse));
 				productDocCtx = JsonPath.using(conf).parse(getUserResponse);
 
-				if (null != productDocCtx.read(JsonConstants.LOGIN_ID_UPPER_0))
+				if (null != productDocCtx.read(JsonConstants.LOGIN_ID_UPPER_0)) {
 					loginIdCheck = getValue(productDocCtx.read(JsonConstants.LOGIN_ID_UPPER_0));
+				}
 
-				if (null == loginIdCheck || loginIdCheck.isEmpty())
+				if (null == loginIdCheck || loginIdCheck.isEmpty()) {
 					loginIdCheck = getValue(productDocCtx.read(JsonConstants.LOGIN_MOBILE_0));
+				}
 				LOGGER.info("loginIdCheck =" + loginIdCheck);
 
 				// Start: New Requirement to check passed email/mobile with
@@ -3859,10 +3864,11 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
 			} catch (Exception e) {
 				errorResponse.setStatus(errorStatus);
-				if(e.getMessage().contains(UserConstants.PIN_CONFIRMATION_ERROR_CODE))
+				if(e.getMessage().contains(UserConstants.PIN_CONFIRMATION_ERROR_CODE)) {
 					errorResponse.setMessage(UserConstants.PIN_CONFIRMATION_ERROR);
-				else
+				} else {
 					errorResponse.setMessage(e.getMessage());
+				}
 				errorResponse.setId(uniqueIdentifier);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by UserServiceImpl.userPinConfirmation() : " + elapsedTime);
@@ -4238,10 +4244,11 @@ public class UserServiceImpl implements UserService {
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by userPinConfirmation() : " + elapsedTime);
 			LOGGER.error("ECODE-USER-PIN-PROC-ERR : Internal server error during user pin confirmation");
-			if(connectionError)
+			if(connectionError) {
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponse).build();
-			else
+			} else {
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+			}
 		}
 
 		Attributes attributes = new Attributes();	
@@ -4299,8 +4306,9 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("UserServiceImpl:updateAIL -> : Request :  -> " + objMapper.writeValueAsString(ailRequest));
 			LOGGER.info("Access Control List:"+maintenanceModeGlobal);
 			LOGGER.info("AuthorizedToken updateAIL()"+authorizedToken);
-			if(maintenanceModeGlobal!=null)
+			if(maintenanceModeGlobal!=null) {
 				accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
+			}
 			if(accssControlList!=null && accssControlList.size()>0 && !(accssControlList.contains("False"))){
 			//if(accssControlList!=null && accssControlList.size()>0){//Through error if maintenance mode is enabled
 				if(accssControlList.contains(UserConstants.MAINTENANCE_MODE_COMPLETE) || accssControlList.contains(UserConstants.MAINTENANCE_MODE_AIL_UPDATE) ){
@@ -4609,20 +4617,19 @@ public class UserServiceImpl implements UserService {
 					}
 
 
-					String acl_appc = productDocCtx.read("$.IDMSAIL_" + idmsAclType_c + "_c[0]");
-					if (acl_appc != null) {
-					List<String> IDMSAIL_app=Arrays.asList(acl_appc.split(","));
+				String acl_appc = productDocCtx.read("$.IDMSAIL_" + idmsAclType_c + "_c[0]");
+				if (acl_appc != null) {
+					List<String> IDMSAIL_app = Arrays.asList(acl_appc.split(","));
 					acl = ailRequest.getUserAILRecord().getIDMSAcl__c().split(",");
 					for (int i = 0; i < acl.length; i++) {
 						if (!IDMSAIL_app.contains(acl[i])) {
-							acl_appc = acl_appc + "," +acl[i];
+							acl_appc = acl_appc + "," + acl[i];
 						}
 					}
-					
-					}
-					else
-						acl_appc = ailRequest.getUserAILRecord().getIDMSAcl__c();
-					PRODUCT_JSON_STRING = "{" + "\"IDMSAIL_" + idmsAclType_c + "_c\": \"" + acl_appc.trim() + "\"" + "}";
+				} else {
+					acl_appc = ailRequest.getUserAILRecord().getIDMSAcl__c();
+				}
+				PRODUCT_JSON_STRING = "{" + "\"IDMSAIL_" + idmsAclType_c + "_c\": \"" + acl_appc.trim() + "\"" + "}";
 			
 				LOGGER.info("Grant Operation: updateAIL : Request -> " + PRODUCT_JSON_STRING);
 				LOGGER.info("Start: updateUser() of OpenAMService for userId=" + userId);
@@ -4630,15 +4637,14 @@ public class UserServiceImpl implements UserService {
 						PRODUCT_JSON_STRING);
 				LOGGER.info("End: updateUser() of OpenAMService finished for userId=" + userId);
 				
-				
 				if(!ail.isEmpty()) {
 				
 				if (null != IDMSAil__c && !IDMSAil__c.isEmpty()){
 					IDMSAil__c = IDMSAil__c + ","+ail;
 				}
-				else
+				else {
 					IDMSAil__c = ail;
-
+				}
 				// Update the IDMSAil__c in OpenAm
 				PRODUCT_JSON_STRING = "{" + "\"IDMSAil_c\": \"" + IDMSAil__c.trim() + "\"" + "}";
 				LOGGER.info("AUDIT:requestingUser->" + userId + "," + "impersonatingUser : amadmin,"
@@ -4666,8 +4672,9 @@ public class UserServiceImpl implements UserService {
 				String revokeValues = ailRequest.getUserAILRecord().getAILvalue(ailRequest.getUserAILRecord().getIDMSAclType__c(),ailRequest.getUserAILRecord().getIDMSAcl__c());
 				LOGGER.info("UniquePair to be Revoked:"+revokeValues);
 				IDMSAil__c = ailRequest.getUserAILRecord().revoke(IDMSAil__c, revokeValues); 
-				if (!(IDMSAil__c == null || IDMSAil__c.length() == 0))
+				if (!(IDMSAil__c == null || IDMSAil__c.length() == 0)) {
 					IDMSAil__c = IDMSAil__c.substring(0, IDMSAil__c.length() - 1);
+				}
 				LOGGER.info("After Revoke UniqueAIL:"+IDMSAil__c);
 				
 				String aclType = productDocCtx.read("$.IDMSAIL_" + idmsAclType_c + "_c[0]");
@@ -4724,10 +4731,11 @@ public class UserServiceImpl implements UserService {
 			idmsUserAIL
 					.setIdms_Profile_update_source__c(ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c());
 			idmsUserAIL.setIdmsaclType__c(ailRequest.getUserAILRecord().getIDMSAclType__c());
-			if ("REVOKE".equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMSOperation__c()))
+			if ("REVOKE".equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMSOperation__c())) {
 				idmsUserAIL.setIdmsisRevokedOperation__c(true);
-			else
+			} else {
 				idmsUserAIL.setIdmsisRevokedOperation__c(false);
+			}
 			idmsUserAIL.setIdmsoperation__c(ailRequest.getUserAILRecord().getIDMSOperation__c());
 			idmsUserAIL.setIdmsacl__c(ailRequest.getUserAILRecord().getIDMSAcl__c());
 			idmsUserAIL.setIdmsuser__c(userId);
@@ -5006,8 +5014,9 @@ public class UserServiceImpl implements UserService {
 					obj.put(UserConstants.MAIL_RATE_COUNTER, intcurrentMailCounter);
 					jsonStr = obj.toString();
 					otp = sendEmail.generateOtp(userName);
-					if(!isOTPEnabled)
-					token = sendEmail.generateEmailToken(userName);
+					if (!isOTPEnabled) {
+						token = sendEmail.generateEmailToken(userName);
+					}
 					LOGGER.info("Successfully OTP generated for " + userName);
 					sendEmail.sendOpenAmEmail(token, otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName, passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c(),finalPathString); /* Reinstate */
 					UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
@@ -5193,8 +5202,9 @@ public class UserServiceImpl implements UserService {
 
 			try {
 				LOGGER.info("Access Control List:"+maintenanceModeGlobal);
-				if(maintenanceModeGlobal!=null)
+				if(maintenanceModeGlobal!=null) {
 					accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
+				}
 				if(accssControlList!=null && accssControlList.size()>0 && !(accssControlList.contains("False"))){
 				//if(accssControlList!=null &&accssControlList.size()>0){//Through error if maintenance mode is enabled
 					if(accssControlList.contains(UserConstants.MAINTENANCE_MODE_COMPLETE) || accssControlList.contains(UserConstants.MAINTENANCE_MODE_PROFILE_UPDATE) ){
@@ -5707,14 +5717,15 @@ public class UserServiceImpl implements UserService {
 						if (null != applicationDetails && 200 != applicationDetails.getStatus()) {
 							emailUserNameFormat = defaultUserNameFormat;
 						}
-						if(emailUserNameFormat.equalsIgnoreCase(UserConstants.FIRST_NAME))
+						if(emailUserNameFormat.equalsIgnoreCase(UserConstants.FIRST_NAME)) {
 							firstName=productDocCtxUser.read("$.givenName[0]");
-						else if(emailUserNameFormat.equalsIgnoreCase(UserConstants.LAST_NAME))
+						} else if(emailUserNameFormat.equalsIgnoreCase(UserConstants.LAST_NAME)) {
 							firstName=productDocCtxUser.read("$.sn[0]");
-						else if(emailUserNameFormat.equalsIgnoreCase(UserConstants.FULL_NAME))
+						} else if(emailUserNameFormat.equalsIgnoreCase(UserConstants.FULL_NAME)) {
 							firstName=productDocCtxUser.read("$.cn[0]");
-						else
+						} else {
 							firstName=productDocCtxUser.read("$.givenName[0]");
+						}
 						LOGGER.info("Update user Email format Name:"+firstName);
 						String templateColor = productDJData.read("_IDMS_Application_CSS");
 
@@ -5843,15 +5854,17 @@ public class UserServiceImpl implements UserService {
 				//updating CN
 				if(openAmReq.getInput().getUser().getGivenName()!=null || openAmReq.getInput().getUser().getSn()!=null ) {
 				String cn;
-				if(openAmReq.getInput().getUser().getGivenName()!=null && !openAmReq.getInput().getUser().getGivenName().isEmpty())
+				if(openAmReq.getInput().getUser().getGivenName()!=null && !openAmReq.getInput().getUser().getGivenName().isEmpty()) {
 					cn=openAmReq.getInput().getUser().getGivenName();
-				else
+				} else {
 					cn=productDocCtxUser.read("$.givenName[0]");
+				}
 				
-				if(openAmReq.getInput().getUser().getSn()!=null && !openAmReq.getInput().getUser().getSn().isEmpty())
+				if(openAmReq.getInput().getUser().getSn()!=null && !openAmReq.getInput().getUser().getSn().isEmpty()) {
 					cn= cn +" "+ openAmReq.getInput().getUser().getSn();
-				else
+				} else {
 					cn=cn+" "+productDocCtxUser.read("$.sn[0]");
+				}
 					
 				openAmReq.getInput().getUser().setCn(cn);
 				}
@@ -7401,12 +7414,13 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private String getIDMSAclType(String aclType) {
-		if (UserConstants.ACLTYPE_APPLICATION.equalsIgnoreCase(aclType))
+		if (UserConstants.ACLTYPE_APPLICATION.equalsIgnoreCase(aclType)) {
 			return UserConstants.ACLTYPE_APPLICATIONS;
-		else if (UserConstants.ACLTYPE_PROGRAM.equalsIgnoreCase(aclType))
+		} else if (UserConstants.ACLTYPE_PROGRAM.equalsIgnoreCase(aclType)) {
 			return UserConstants.ACLTYPE_PROGRAMS;
-		else if (UserConstants.ACLTYPE_FEATURE.equalsIgnoreCase(aclType))
+		} else if (UserConstants.ACLTYPE_FEATURE.equalsIgnoreCase(aclType)) {
 			return UserConstants.ACLTYPE_FEATURES;
+		}
 
 		return null;
 	}
@@ -7514,8 +7528,9 @@ public class UserServiceImpl implements UserService {
 				if (emailValidator.validate(loginIdentifierEmail)) {
 					uimsResponse.put("loginIdentity", "Email");
 				} else if (null != loginIdentifierMobile && !loginIdentifierMobile.isEmpty()) {
-					if (ChinaIdmsUtil.mobileValidator(loginIdentifierMobile))
+					if (ChinaIdmsUtil.mobileValidator(loginIdentifierMobile)) {
 						uimsResponse.put("loginIdentity", "Mobile");
+					}
 				}
 			}
 			uimsResponse.put("userId", userId);
@@ -7544,13 +7559,15 @@ public class UserServiceImpl implements UserService {
 			if (UserConstants.LANGUAGE_CHINA.equalsIgnoreCase(prefferedLanguage)) {
 				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
 					filePath = BLUE_EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_CHINA.html";
-				}else
-				filePath = EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_CHINA.html";
+				}else {
+				    filePath = EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_CHINA.html";
+				}
 			} else {
 				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
 					filePath = BLUE_EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_ENGLISH.html";
-				}else
-				filePath = EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_ENGLISH.html";
+				}else {
+				    filePath = EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_ENGLISH.html";
+				}
 			}
 		} else if (UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(scenarioName)) {
 
@@ -7764,8 +7781,9 @@ public class UserServiceImpl implements UserService {
 				String mail = productDocCtx.read("$.result[0].mail[0]");
 				String mobile = productDocCtx.read("$.result[0].mobile_reg[0]");
 				mailAC = productDocCtx.read(JsonConstants.RESULT_Loginid);
-				if (null == mailAC)
+				if (null == mailAC) {
 					mailAC = productDocCtx.read(JsonConstants.RESULT_Loginid_L);
+				}
 				mobileAC = productDocCtx.read(JsonConstants.RESULTLOGIN_MOBILE);
 				
 				if (userType.equalsIgnoreCase("mail")) {
@@ -8496,8 +8514,9 @@ public class UserServiceImpl implements UserService {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Response idmsCheckUserExists(String authorizedToken, CheckUserExistsRequest request) {
-		if(LOGGER.isInfoEnabled())
+		if(LOGGER.isInfoEnabled()) {
 			LOGGER.info("Entered idmsCheckUserExists() -> Start");
+		}
 		DocumentContext productDocCtx = null, productDocApp = null;
 		String iPlanetDirectoryKey = null;
 		String ifwAccessToken = null, userExists = null;
@@ -8521,9 +8540,9 @@ public class UserServiceImpl implements UserService {
 	
 
 		try {
-			if(LOGGER.isInfoEnabled())
+			if(LOGGER.isInfoEnabled()) {
 				LOGGER.info("Parameter request -> " + objMapper.writeValueAsString(request));
-			
+			}
 			if(null == request){
 				response.put(UserConstants.MESSAGE_L, "Request body is empty or null");
 				LOGGER.error("Mandatory check: Request body is empty or null");
@@ -9564,8 +9583,9 @@ public class UserServiceImpl implements UserService {
 			
 						
 			LOGGER.info("Access Control List:"+maintenanceModeGlobal);
-			if(maintenanceModeGlobal!=null)
+			if(maintenanceModeGlobal!=null) {
 				accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
+			}
 			if(accssControlList!=null && accssControlList.size()>0 && !(accssControlList.contains("False"))){
 				if(accssControlList.contains(UserConstants.MAINTENANCE_MODE_COMPLETE) || accssControlList.contains(UserConstants.MAINTENANCE_MODE_LOGIN) ){
 					errorResponse.setStatus(errorStatus);
@@ -9648,8 +9668,9 @@ public class UserServiceImpl implements UserService {
 					if(UserConstants.CN_USER_ACTIVE.equalsIgnoreCase(jsonObject.get(UserConstants.USER_INFO).toString())){
 						jsonObjectResponse.put("user_store", "CN");
 						jsonObjectResponse.put("user_status", "Registered-Active");
-						if(invalidCount>0)
+						if(invalidCount>0) {
 							jsonObjectResponse.put("user_invalid_attempt", invalidCount);
+						}
 						elapsedTime = (System.currentTimeMillis() - startTime);
 						AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource
 								+ "," + elapsedTime + "ms" + "," + UserConstants.INCORRECT_PASSWORD);
@@ -10046,10 +10067,11 @@ public class UserServiceImpl implements UserService {
 			return Response.status(Response.Status.OK).entity(userResponse).build();
 		} catch (Exception e) {
 			userResponse.setStatus(errorStatus);
-			if(e.getMessage().contains(UserConstants.PIN_CONFIRMATION_ERROR_CODE))
+			if(e.getMessage().contains(UserConstants.PIN_CONFIRMATION_ERROR_CODE)) {
 				userResponse.setMessage(UserConstants.PIN_CONFIRMATION_ERROR);
-			else
+			} else {
 				userResponse.setMessage(e.getMessage());
+			}
 			userResponse.setId(userId);
 			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 			LOGGER.info("Time taken by UserServiceImpl.verifyEmailPIN() : " + elapsedTime);
@@ -10213,8 +10235,9 @@ public class UserServiceImpl implements UserService {
 				location = jsonResponse.getLocation().toString();
 				LOGGER.info("Location info from OpenAM=" + location);
 			}
-			if (!openAMHost.equals(identityServiceHost))
+			if (!openAMHost.equals(identityServiceHost)) {
 				location = location.replaceAll(openAMHost, identityServiceHost);
+			}
 			LOGGER.info("modifiedLocationUrl: " + location);
 			if (302 != jsonResponse.getStatus()) {// Verifying redirect URL
 				errorResponse.setStatus(errorStatus);
@@ -11176,8 +11199,9 @@ public class UserServiceImpl implements UserService {
 			}
 			if (resultCount.intValue() == 1) {
 				mailLoginIdCheck = productDocCtx.read(JsonConstants.RESULT_Loginid);
-				if (null == mailLoginIdCheck)
+				if (null == mailLoginIdCheck) {
 					mailLoginIdCheck = productDocCtx.read(JsonConstants.RESULT_Loginid_L);
+				}
 				LOGGER.info("Loginid in openam = "+mailLoginIdCheck);
 				if(null != mailLoginIdCheck && !mailLoginIdCheck.isEmpty()){
 					response.put(UserConstants.STATUS_L, errorStatus);
@@ -11632,10 +11656,12 @@ public class UserServiceImpl implements UserService {
 							LOGGER.error("Exception as == " + e.getMessage());
 							lhm.put(orgMail,lhm.get(orgMail) + "Sending email failed. " + e.getMessage());
 						}
-						if (status)
+						if (status) {
 							lhm.put(orgMail,lhm.get(orgMail) + "Sending email finished.");
-					} else
+						}
+					} else {
 						lhm.put(orgMail, "Email validation failed.");
+					}
 				}
 			}
 			return Response.status(Response.Status.ACCEPTED).entity(lhm).build();
@@ -11723,10 +11749,12 @@ public class UserServiceImpl implements UserService {
 					  openAmReq.getInput().getUser().setMobilereg(userInfo.getPhoneId());
 				} 
 			}
-			if(userInfo.getGivenNameECS()!=null && !userInfo.getGivenNameECS().isEmpty())
+			if(userInfo.getGivenNameECS()!=null && !userInfo.getGivenNameECS().isEmpty()) {
 				openAmReq.getInput().getUser().setGivenName(userInfo.getGivenNameECS());
-			if(userInfo.getSnECS()!=null && !userInfo.getSnECS().isEmpty())
+			}
+			if(userInfo.getSnECS()!=null && !userInfo.getSnECS().isEmpty()) {
 				openAmReq.getInput().getUser().setSn(userInfo.getSnECS());
+			}
 			openAmReq.getInput().getUser().setUserPassword(generateRamdomPassWord());
 			openAmReq = prepareJsonForAbhagaUIMSUser(openAmReq);
 			String json = objMapper.writeValueAsString(openAmReq);
@@ -12928,14 +12956,13 @@ public class UserServiceImpl implements UserService {
 		String user = null;
 		response.put(UserConstants.MESSAGE, UserConstants.CAPTCHA_TYPE_ERROR);
 		
-		if(captchaType.equalsIgnoreCase(UserConstants.CAPTCHA_TYPE_SLIDER))
+		if(captchaType.equalsIgnoreCase(UserConstants.CAPTCHA_TYPE_SLIDER)) {
 			captchaId = sliderCaptchaId;
-		
-		else if(captchaType.equalsIgnoreCase(UserConstants.CAPTCHA_TYPE_SMART))
+		} else if(captchaType.equalsIgnoreCase(UserConstants.CAPTCHA_TYPE_SMART)) {
 			captchaId = smartCaptchaId;
-		
-		else
+		} else {
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+		}
 		
 		LOGGER.info("Captcha Type chosen :: "+ captchaType);
 		
@@ -12943,10 +12970,11 @@ public class UserServiceImpl implements UserService {
 		String validate = neCaptchaValidate.getNECaptchaValidate();
 		String username = neCaptchaValidate.getUsername();
 		boolean isEmpty = username == null || username.trim().isEmpty();
-		if(isEmpty)
-		user = "{'id':'testuser'}";
-		else
-		user = "{'id':'"+ username +"'}";
+		if (isEmpty) {
+			user = "{'id':'testuser'}";
+		} else {
+			user = "{'id':'" + username + "'}";
+		}
 		VerifyResult verifyResult = verifier.verify(validate, user);
 
 		LOGGER.info(String.format("validate = %s,  isValid = %s , msg = %s ",
@@ -13442,8 +13470,9 @@ public class UserServiceImpl implements UserService {
 	        oldestProfile = profile;
 	      }
 	    }
-	    if (oldestProfile != null)
+	    if (oldestProfile != null) {
 	      profiles.remove(oldestProfile);
+	    }
 	  }
 	
 	private void terminateUserSessions(String userId) {
