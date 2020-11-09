@@ -419,14 +419,15 @@ public class SendEmail {
 				}
 				lang=productDocCtxUser.read("$.preferredlanguage[0]");
 
-				if(emailUserNameFormat.equalsIgnoreCase(UserConstants.FIRST_NAME))
+				if(emailUserNameFormat.equalsIgnoreCase(UserConstants.FIRST_NAME)) {
 					firstName=productDocCtxUser.read("$.givenName[0]");
-				else if(emailUserNameFormat.equalsIgnoreCase(UserConstants.LAST_NAME))
+				} else if(emailUserNameFormat.equalsIgnoreCase(UserConstants.LAST_NAME)) {
 					firstName=productDocCtxUser.read("$.sn[0]");
-				else if(emailUserNameFormat.equalsIgnoreCase(UserConstants.FULL_NAME))
+				} else if(emailUserNameFormat.equalsIgnoreCase(UserConstants.FULL_NAME)) {
 					firstName=productDocCtxUser.read("$.cn[0]");
-				else
+				} else {
 					firstName=productDocCtxUser.read("$.givenName[0]");
+				}
 				LOGGER.info("Email format Name:"+firstName);
 				aLink = productDocCtxUser.read("$.alink[0]");
 				LOGGER.info("sendOpenAmEmail** alink:"+aLink);
@@ -492,8 +493,9 @@ public class SendEmail {
 				else{
 					url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + token + "&operationType="
 							+ hotpOperationType + "&app=" + appid + "&uid=" + userId+linkParam;
-					if (null != pathString && !pathString.isEmpty())
+					if (null != pathString && !pathString.isEmpty()) {
 						url = url + "&" + pathString;
+					}
 				}
 				String appleProvider = productDocCtxUser.read("$.appleid[0]");
 				LogMessageUtil.logInfoMessage("appleProvider: ", appleProvider);
@@ -789,16 +791,17 @@ public class SendEmail {
 			boolean chineseLangCheck) {
 		
 		DynamicEmailTemplateInput input = new DynamicEmailTemplateInput();
-		if (chineseLangCheck)
+		if (chineseLangCheck) {
 			input.setLocale(Locale.CN);
-		else
+		} else {
 			input.setLocale(Locale.EN);
-
+		}
 		input.setOperationType(OperationType.getKey(hotpOperationType));
 		input.setOTPEnabled(isOTPEnabled);
 		input.setEtColor(EmailTemplateColor.getKey(templateColor));
-		if (appName.equalsIgnoreCase(UserConstants.PRM_APP_NAME) && prmTemplate != null)
+		if (appName.equalsIgnoreCase(UserConstants.PRM_APP_NAME) && prmTemplate != null) {
 			input.setPRMApp(true);
+		}
 		input.setPrmTemplateType(PRMTemplateType.getKey(prmTemplate));
 		input.setConfiguration(this);
 		input.setBfoSupportUrl(bfoSupportUrl);
@@ -908,16 +911,17 @@ public class SendEmail {
 		}
 
 		EmailTemplateInput input = new EmailTemplateInput();
-		if (chineseLangCheck)
+		if (chineseLangCheck) {
 			input.setLocale(Locale.CN);
-		else
+		} else {
 			input.setLocale(Locale.EN);
-
+		}
 		input.setOperationType(OperationType.getKey(hotpOperationType));
 		input.setOTPEnabled(isOTPEnabled);
 		input.setEtColor(EmailTemplateColor.getKey(templateColor));
-		if (subject.equalsIgnoreCase(UserConstants.PRM_APP_NAME) && prmTemplate != null)
+		if (subject.equalsIgnoreCase(UserConstants.PRM_APP_NAME) && prmTemplate != null) {
 			input.setPRMApp(true);
+		}
 		input.setPrmTemplateType(PRMTemplateType.getKey(prmTemplate));
 		input.setConfiguration(this);
 		EmailTemplateAbstractFactory factory = new EmailTemplateAbstractFactoryImpl(input);
@@ -926,10 +930,11 @@ public class SendEmail {
 	}
 
 	private String getDefaultTemplateForProfaceAndOTPCombination(boolean chineseLangCheck) {
-		if (chineseLangCheck)
+		if (chineseLangCheck) {
 			return IDMS_USER_DEFAULT_OTP_EMAILTEMPLATE_CN;
-		else
+		} else {
 			return IDMS_USER_DEFAULT_OTP_EMAILTEMPLATE_EN;
+		}
 	}
 
 	private String oldCode(String subject, String hotpOperationType, String prmTemplate, String templateColor,
@@ -940,13 +945,15 @@ public class SendEmail {
 			if (chineseLangCheck) {
 				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
 					filePath = getIDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_CN();
-				}else
-				filePath = IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN;
+				}else {
+				    filePath = IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN;
+				}
 			} else {
 				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
 					filePath = getIDMS_USER_REST_PASSWORD_BLUE_EMAILTEMPLATE_EN();
-				}else
-				filePath = IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN;
+				}else {
+				    filePath = IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN;
+				}				
 			}
 			LOGGER.info("filePath is"+filePath);
 		} else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.USERREGISTRATION_OPT_TYPE)) {
@@ -971,8 +978,9 @@ public class SendEmail {
 				else{					
 					if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
 						filePath = getIDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_CN();
-					}else
-					filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN;
+					}else {
+					    filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN;
+					}
 				}
 			} else {
 				if(subject.equalsIgnoreCase(UserConstants.PRM_APP_NAME) && prmTemplate!=null){
@@ -994,8 +1002,9 @@ public class SendEmail {
 				else{
 					if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
 						filePath = getIDMS_USER_REGESTRATION_WITHPWD_BLUE_EMAILTEMPLATE_EN();
-					}else
-					filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN;
+					}else {
+					    filePath = IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN;
+					}
 				}
 			}
 			LOGGER.info("filePath is"+filePath);
@@ -1004,13 +1013,15 @@ public class SendEmail {
 			if (chineseLangCheck) {
 				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
 					filePath = getIDMS_USER_UPDATE_BLUE_EMAILTEMPLATE_CN();
-				}else
-				filePath = IDMS_USER_UPDATE_EMAILTEMPLATE_CN;
+				}else {
+				    filePath = IDMS_USER_UPDATE_EMAILTEMPLATE_CN;
+				}
 			} else {
 				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
 					filePath = getIDMS_USER_UPDATE_BLUE_EMAILTEMPLATE_EN();
-				}else
-				filePath = IDMS_USER_UPDATE_EMAILTEMPLATE_EN;
+				}else {
+				    filePath = IDMS_USER_UPDATE_EMAILTEMPLATE_EN;
+				}
 			}
 			LOGGER.info("filePath is"+filePath);
 		} else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE)) {
@@ -1018,13 +1029,15 @@ public class SendEmail {
 			if (chineseLangCheck) {
 				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
 					filePath = getIDMS_USER_ADD_BLUE_EMAILTEMPLATE_CN();
-				}else
-				filePath = IDMS_USER_ADD_EMAILTEMPLATE_CN;
+				}else {
+				    filePath = IDMS_USER_ADD_EMAILTEMPLATE_CN;
+				}
 			} else {
 				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
 					filePath = getIDMS_USER_ADD_BLUE_EMAILTEMPLATE_EN();
-				}else
-				filePath = IDMS_USER_ADD_EMAILTEMPLATE_EN;
+				}else {
+				    filePath = IDMS_USER_ADD_EMAILTEMPLATE_EN;
+				}
 			}
 			LOGGER.info("filePath is"+filePath);
 		}else if (hotpOperationType != null && hotpOperationType.equalsIgnoreCase(EmailConstants.SENDINVITATION_OPT_TYPE)) {
@@ -1032,13 +1045,15 @@ public class SendEmail {
 			if (chineseLangCheck) {
 				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
 					filePath = getIDMS_SEND_INVITATION_BLUE_EMAILTEMPLATE_CN();
-				}else
-				filePath = IDMS_SEND_INVITATION_EMAILTEMPLATE_CN;
+				}else {
+				    filePath = IDMS_SEND_INVITATION_EMAILTEMPLATE_CN;
+				}
 			} else {
 				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
 					filePath = getIDMS_SEND_INVITATION_BLUE_EMAILTEMPLATE_EN();
-				}else
-				filePath = IDMS_SEND_INVITATION_EMAILTEMPLATE_EN;
+				}else {
+				    filePath = IDMS_SEND_INVITATION_EMAILTEMPLATE_EN;
+				}
 			}
 			LOGGER.info("filePath is"+filePath);
 		} else {
@@ -1046,13 +1061,15 @@ public class SendEmail {
 			if (chineseLangCheck) {
 				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
 					filePath = getIDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_CN();
-				}else
-				filePath = IDMS_USER_DEFAULT_EMAILTEMPLATE_CN;
+				}else {
+				    filePath = IDMS_USER_DEFAULT_EMAILTEMPLATE_CN;
+				}
 			} else {
 				if(null != templateColor && !templateColor.isEmpty() && templateColor.equalsIgnoreCase("Blue")){
 					filePath = getIDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_EN();
-				}else
-				filePath = IDMS_USER_DEFAULT_EMAILTEMPLATE_EN;
+				}else {
+				    filePath = IDMS_USER_DEFAULT_EMAILTEMPLATE_EN;
+				}
 			}
 			LOGGER.info("filePath is"+filePath);
 		}
