@@ -276,10 +276,11 @@ public class BulkAILUtil {
 		}
 		String idmsAIL_temp = new String();
 		if(!ailValue.isEmpty()) {
-			if (null != idmsAIL_c && !idmsAIL_c.isEmpty())
+			if (null != idmsAIL_c && !idmsAIL_c.isEmpty()) {
 				idmsAIL_temp = idmsAIL_c + "," + ailValue;
-			else
+			} else {
 				idmsAIL_temp = ailValue;
+			}
 		}
 		BulkAILMapValue mapAilcValue = new BulkAILMapValue();
 		if(grantMap.get("IDMSAil_c") != null) {
@@ -328,10 +329,11 @@ public class BulkAILUtil {
 		}
 		String idmsAILValue_temp = new String();
 		if(!ailTypeValue.isEmpty()) {
-			if (null != aclType_c && !aclType_c.isEmpty())
+			if (null != aclType_c && !aclType_c.isEmpty()) {
 				idmsAILValue_temp = aclType_c + "," + ailTypeValue;
-			else
+			} else {
 				idmsAILValue_temp = ailTypeValue;
+			}
 		}
 		String ailType_c = "IDMSAIL_" + idmsAclType_c + "_c";
 		BulkAILMapValue ailTypecMapVal = new BulkAILMapValue() ;
@@ -443,13 +445,13 @@ public class BulkAILUtil {
 		return Response.status(status.value()).entity(response).build();
 	}
 	private static String getIDMSAclType(String aclType) {
-		if (UserConstants.ACLTYPE_APPLICATION.equalsIgnoreCase(aclType))
+		if (UserConstants.ACLTYPE_APPLICATION.equalsIgnoreCase(aclType)) {
 			return UserConstants.ACLTYPE_APPLICATIONS;
-		else if (UserConstants.ACLTYPE_PROGRAM.equalsIgnoreCase(aclType))
+		} else if (UserConstants.ACLTYPE_PROGRAM.equalsIgnoreCase(aclType)) {
 			return UserConstants.ACLTYPE_PROGRAMS;
-		else if (UserConstants.ACLTYPE_FEATURE.equalsIgnoreCase(aclType))
+		} else if (UserConstants.ACLTYPE_FEATURE.equalsIgnoreCase(aclType)) {
 			return UserConstants.ACLTYPE_FEATURES;
-
+		}
 		return null;
 	}
 

@@ -201,10 +201,11 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 
 			// writing business logic - start
 			userId = federatedId.trim();
-			if ("REVOKE".equalsIgnoreCase(userAilRequest.getOperation()))
+			if ("REVOKE".equalsIgnoreCase(userAilRequest.getOperation())) {
 				idmsUserAil.setIdmsisRevokedOperation__c(true);
-			else
+			} else {
 				idmsUserAil.setIdmsisRevokedOperation__c(false);
+			}
 			
 			iPlanetDirectoryKey = getSSOToken();
 
@@ -244,15 +245,17 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 			if ((!listOfAilValues.contains("(" + inRequestAILTypeValPair + ")"))
 					&& ("GRANT".equalsIgnoreCase(aclOperation))) {
 
-				if (!(inOpenAMAILValue == null || inOpenAMAILValue.length() == 0))
+				if (!(inOpenAMAILValue == null || inOpenAMAILValue.length() == 0)) {
 					modifiedAILValue = inOpenAMAILValue + "," + aclValue;
-				else
+				} else {
 					modifiedAILValue = aclValue;
+				}
 
-				if (null != inOpenAMAILFullValues && !inOpenAMAILFullValues.isEmpty())
+				if (null != inOpenAMAILFullValues && !inOpenAMAILFullValues.isEmpty()) {
 					modifiedAILFullValues = inOpenAMAILFullValues + ",(" + inRequestAILTypeValPair + ")";
-				else
+				} else {
 					modifiedAILFullValues = "(" + inRequestAILTypeValPair + ")";
+				}
 
 				PRODUCT_JSON_STRING = "{" + "\"" + inOpenAMAILType + "\": \"" + modifiedAILValue.trim() + "\""
 						+ ",\"IDMSAil_c\": \"" + modifiedAILFullValues.trim() + "\"}";
@@ -400,12 +403,13 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 	}
 
 	private String getIDMSAclType(String aclType) {
-		if (UserConstants.ACLTYPE_APPLICATION.equalsIgnoreCase(aclType))
+		if (UserConstants.ACLTYPE_APPLICATION.equalsIgnoreCase(aclType)) {
 			return UserConstants.ACLTYPE_APPLICATIONS;
-		else if (UserConstants.ACLTYPE_PROGRAM.equalsIgnoreCase(aclType))
+		} else if (UserConstants.ACLTYPE_PROGRAM.equalsIgnoreCase(aclType)) {
 			return UserConstants.ACLTYPE_PROGRAMS;
-		else if (UserConstants.ACLTYPE_FEATURE.equalsIgnoreCase(aclType))
+		} else if (UserConstants.ACLTYPE_FEATURE.equalsIgnoreCase(aclType)) {
 			return UserConstants.ACLTYPE_FEATURES;
+		}
 
 		return null;
 	}
@@ -420,10 +424,11 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 		idmsUserAIL
 				.setIdms_Profile_update_source__c(userAilRequest.getProfileLastUpdateSource());
 		idmsUserAIL.setIdmsaclType__c(userAilRequest.getAclType());
-		if ("REVOKE".equalsIgnoreCase(userAilRequest.getOperation()))
+		if ("REVOKE".equalsIgnoreCase(userAilRequest.getOperation())) {
 			idmsUserAIL.setIdmsisRevokedOperation__c(true);
-		else
+		} else {
 			idmsUserAIL.setIdmsisRevokedOperation__c(false);
+		}
 		idmsUserAIL.setIdmsoperation__c(userAilRequest.getOperation());
 		idmsUserAIL.setIdmsacl__c(userAilRequest.getAcl());
 		idmsUserAIL.setIdmsuser__c(userAilRequest.getFederatedId());

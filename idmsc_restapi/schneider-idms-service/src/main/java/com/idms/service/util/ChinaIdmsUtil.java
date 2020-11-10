@@ -226,9 +226,9 @@ public class ChinaIdmsUtil {
 		String mobileNumber = str.trim();
 		str = mobileNumber.replaceAll("[^0-9]", "");
 		int i = 0;
-		while (str.charAt(i) == '0')
+		while (str.charAt(i) == '0') {
 			i++;
-
+		}
 		str = str.substring(i);
 
 		if (str.startsWith(UserConstants.MOBILE_CHINA_CODE)) {
@@ -407,8 +407,9 @@ public class ChinaIdmsUtil {
 				finalPathString = finalPathString + pathKeyVal + "&";
 			}
 		}
-		if (null != finalPathString && !finalPathString.isEmpty())
+		if (null != finalPathString && !finalPathString.isEmpty()) {
 			finalPathString = finalPathString.substring(0, finalPathString.lastIndexOf("&"));
+		}
 		return finalPathString;
 	}
 	
