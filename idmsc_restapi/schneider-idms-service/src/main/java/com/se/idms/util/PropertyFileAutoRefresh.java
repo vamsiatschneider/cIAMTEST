@@ -269,8 +269,9 @@ public class PropertyFileAutoRefresh {
 			initializeProperties();
 			
 			// Update all properties file entries
-			if(!((UserServiceImpl) userService).getCALLER_FID().equals(CALLER_FID) && CALLER_FID!=null && !CALLER_FID.isEmpty())
+			if(!((UserServiceImpl) userService).getCALLER_FID().equals(CALLER_FID) && CALLER_FID!=null && !CALLER_FID.isEmpty()) {
 				((UserServiceImpl) userService).setCALLER_FID(CALLER_FID);
+			}
 			
 			/*if(!((UserServiceImpl) userService).getLOGIN_ERROR().equals(LOGIN_ERROR) && LOGIN_ERROR!=null && !LOGIN_ERROR.isEmpty())
 			((UserServiceImpl) userService).setLOGIN_ERROR(LOGIN_ERROR);*/
@@ -278,349 +279,455 @@ public class PropertyFileAutoRefresh {
 			//LOGGER.info("Userservice email template dir:##"+((UserServiceImpl) userService).getEMAIL_TEMPLATE_DIR());
 			//LOGGER.info("Config  email template dir:##"+EMAIL_TEMPLATE_DIR);
 			
-			if(!((UserServiceImpl) userService).getEMAIL_TEMPLATE_DIR().equals(EMAIL_TEMPLATE_DIR) && EMAIL_TEMPLATE_DIR!=null && !EMAIL_TEMPLATE_DIR.isEmpty())
-			((UserServiceImpl) userService).setEMAIL_TEMPLATE_DIR(EMAIL_TEMPLATE_DIR);
+			if(!((UserServiceImpl) userService).getEMAIL_TEMPLATE_DIR().equals(EMAIL_TEMPLATE_DIR) && EMAIL_TEMPLATE_DIR!=null && !EMAIL_TEMPLATE_DIR.isEmpty()) {
+			    ((UserServiceImpl) userService).setEMAIL_TEMPLATE_DIR(EMAIL_TEMPLATE_DIR);
+		    }
 			
-			if(!((UserServiceImpl) userService).getBLUE_EMAIL_TEMPLATE_DIR().equals(BLUE_EMAIL_TEMPLATE_DIR) && BLUE_EMAIL_TEMPLATE_DIR!=null && !BLUE_EMAIL_TEMPLATE_DIR.isEmpty())
+			if(!((UserServiceImpl) userService).getBLUE_EMAIL_TEMPLATE_DIR().equals(BLUE_EMAIL_TEMPLATE_DIR) && BLUE_EMAIL_TEMPLATE_DIR!=null && !BLUE_EMAIL_TEMPLATE_DIR.isEmpty()) {
 				((UserServiceImpl) userService).setBLUE_EMAIL_TEMPLATE_DIR(BLUE_EMAIL_TEMPLATE_DIR);
+			}
 			
-			if(!((UserServiceImpl) userService).getAuthCsvPath().equals(authCsvPath) && authCsvPath!=null && !authCsvPath.isEmpty())
-			((UserServiceImpl) userService).setAuthCsvPath(authCsvPath);
+			if(!((UserServiceImpl) userService).getAuthCsvPath().equals(authCsvPath) && authCsvPath!=null && !authCsvPath.isEmpty()) {
+			    ((UserServiceImpl) userService).setAuthCsvPath(authCsvPath);
+		    }
 			
-			if(!((UserServiceImpl) userService).getRegistrationCsvPath().equals(registrationCsvPath) && registrationCsvPath!=null && !registrationCsvPath.isEmpty())
-			((UserServiceImpl) userService).setRegistrationCsvPath(registrationCsvPath);
+			if(!((UserServiceImpl) userService).getRegistrationCsvPath().equals(registrationCsvPath) && registrationCsvPath!=null && !registrationCsvPath.isEmpty()) {
+			    ((UserServiceImpl) userService).setRegistrationCsvPath(registrationCsvPath);
+			}
 			
-			if(!((UserServiceImpl) userService).getAdminUserName().equals(adminUserName) && adminUserName!=null && !adminUserName.isEmpty())
-			((UserServiceImpl) userService).setAdminUserName(adminUserName);
+			if(!((UserServiceImpl) userService).getAdminUserName().equals(adminUserName) && adminUserName!=null && !adminUserName.isEmpty()) {
+			    ((UserServiceImpl) userService).setAdminUserName(adminUserName);
+			}
 			
-			if(!((UserServiceImpl) userService).getAdminPassword().equals(adminPassword) && adminPassword!=null && !adminPassword.isEmpty())
-			((UserServiceImpl) userService).setAdminPassword(adminPassword);
+			if(!((UserServiceImpl) userService).getAdminPassword().equals(adminPassword) && adminPassword!=null && !adminPassword.isEmpty()) {
+			    ((UserServiceImpl) userService).setAdminPassword(adminPassword);
+			}
 			
-			if(!((UserServiceImpl) userService).getIfwClientId().equals(ifwClientId) && ifwClientId!=null && !ifwClientId.isEmpty())
-			((UserServiceImpl) userService).setIfwClientId(ifwClientId);
+			if(!((UserServiceImpl) userService).getIfwClientId().equals(ifwClientId) && ifwClientId!=null && !ifwClientId.isEmpty()) {
+			    ((UserServiceImpl) userService).setIfwClientId(ifwClientId);
+			}
 			
-			if(!((UserServiceImpl) userService).getIfwClientSecret().equals(ifwClientSecret) && ifwClientSecret!=null && !ifwClientSecret.isEmpty())
-			((UserServiceImpl) userService).setIfwClientSecret(ifwClientSecret);
+			if(!((UserServiceImpl) userService).getIfwClientSecret().equals(ifwClientSecret) && ifwClientSecret!=null && !ifwClientSecret.isEmpty()) {
+			    ((UserServiceImpl) userService).setIfwClientSecret(ifwClientSecret);
+			}
 			
-			if(!((UserServiceImpl) userService).getSalesForceClientId().equals(salesForceClientId) && salesForceClientId!=null && !salesForceClientId.isEmpty())
-			((UserServiceImpl) userService).setSalesForceClientId(salesForceClientId);
+			if(!((UserServiceImpl) userService).getSalesForceClientId().equals(salesForceClientId) && salesForceClientId!=null && !salesForceClientId.isEmpty()) {
+			    ((UserServiceImpl) userService).setSalesForceClientId(salesForceClientId);
+			}
 			
-			if(!((UserServiceImpl) userService).getSalesForceClientSecret().equals(salesForceClientSecret) && salesForceClientSecret!=null && !salesForceClientSecret.isEmpty())
-			((UserServiceImpl) userService)
-					.setSalesForceClientSecret(salesForceClientSecret);
+			if(!((UserServiceImpl) userService).getSalesForceClientSecret().equals(salesForceClientSecret) && salesForceClientSecret!=null && !salesForceClientSecret.isEmpty()) {
+			    ((UserServiceImpl) userService).setSalesForceClientSecret(salesForceClientSecret);
+			}
 			
-			if(!((UserServiceImpl) userService).getSalesForceUserName().equals(salesForceUserName) && salesForceUserName!=null && !salesForceUserName.isEmpty())
-			((UserServiceImpl) userService).setSalesForceUserName(salesForceUserName);
+			if(!((UserServiceImpl) userService).getSalesForceUserName().equals(salesForceUserName) && salesForceUserName!=null && !salesForceUserName.isEmpty()) {
+			    ((UserServiceImpl) userService).setSalesForceUserName(salesForceUserName);
+			}
 			
-			if(!((UserServiceImpl) userService).getSalesForcePassword().equals(salesForcePassword) && salesForcePassword!=null && !salesForcePassword.isEmpty())
-			((UserServiceImpl) userService).setSalesForcePassword(salesForcePassword);
+			if(!((UserServiceImpl) userService).getSalesForcePassword().equals(salesForcePassword) && salesForcePassword!=null && !salesForcePassword.isEmpty()) {
+			    ((UserServiceImpl) userService).setSalesForcePassword(salesForcePassword);
+			}
 			
-			if(!((UserServiceImpl) userService).getHa_mode().equals(ha_mode) && ha_mode!=null && !ha_mode.isEmpty())
-			((UserServiceImpl) userService).setHa_mode(ha_mode);
+			if(!((UserServiceImpl) userService).getHa_mode().equals(ha_mode) && ha_mode!=null && !ha_mode.isEmpty()) {
+			    ((UserServiceImpl) userService).setHa_mode(ha_mode);
+			}
 			
-			if(!((UserServiceImpl) userService).getFromUserName().equals(fromUserName) && fromUserName!=null && !fromUserName.isEmpty())
-			((UserServiceImpl) userService).setFromUserName(fromUserName);
+			if(!((UserServiceImpl) userService).getFromUserName().equals(fromUserName) && fromUserName!=null && !fromUserName.isEmpty()) {
+			    ((UserServiceImpl) userService).setFromUserName(fromUserName);
+			}
 			
-			if(!((UserServiceImpl) userService).getGoDitalToken().equals(goDitalToken) && goDitalToken!=null && !goDitalToken.isEmpty())
-			((UserServiceImpl) userService).setGoDitalToken(goDitalToken);
+			if(!((UserServiceImpl) userService).getGoDitalToken().equals(goDitalToken) && goDitalToken!=null && !goDitalToken.isEmpty()) {
+			    ((UserServiceImpl) userService).setGoDitalToken(goDitalToken);
+			}
 			
-			if(!((UserServiceImpl) userService).getGoDigitalValue().equals(goDigitalValue) && goDigitalValue!=null && !goDigitalValue.isEmpty())
-			((UserServiceImpl) userService).setGoDigitalValue(goDigitalValue);
+			if(!((UserServiceImpl) userService).getGoDigitalValue().equals(goDigitalValue) && goDigitalValue!=null && !goDigitalValue.isEmpty()) {
+			    ((UserServiceImpl) userService).setGoDigitalValue(goDigitalValue);
+			}
 			
-			if(!((UserServiceImpl) userService).getUimsClientId().equals(uimsClientId) && uimsClientId!=null && !uimsClientId.isEmpty())
-			((UserServiceImpl) userService).setUimsClientId(uimsClientId);
+			if(!((UserServiceImpl) userService).getUimsClientId().equals(uimsClientId) && uimsClientId!=null && !uimsClientId.isEmpty()) {
+			    ((UserServiceImpl) userService).setUimsClientId(uimsClientId);
+			}
 			
-			if(!((UserServiceImpl) userService).getUimsClientSecret().equals(uimsClientSecret) && uimsClientSecret!=null && !uimsClientSecret.isEmpty())
-			((UserServiceImpl) userService).setUimsClientSecret(uimsClientSecret);
+			if(!((UserServiceImpl) userService).getUimsClientSecret().equals(uimsClientSecret) && uimsClientSecret!=null && !uimsClientSecret.isEmpty()) {
+			    ((UserServiceImpl) userService).setUimsClientSecret(uimsClientSecret);
+			}
 			
-			if(!((UserServiceImpl) userService).getRedirectUri().equals(redirectUri) && redirectUri!=null && !redirectUri.isEmpty())
-			((UserServiceImpl) userService).setRedirectUri(redirectUri);
+			if(!((UserServiceImpl) userService).getRedirectUri().equals(redirectUri) && redirectUri!=null && !redirectUri.isEmpty()) {
+			    ((UserServiceImpl) userService).setRedirectUri(redirectUri);
+			}
 			
-			if(!((UserServiceImpl) userService).getPrefixStartUrl().equals(prefixStartUrl) && prefixStartUrl!=null && !prefixStartUrl.isEmpty())
-			((UserServiceImpl) userService).setPrefixStartUrl(prefixStartUrl);
+			if(!((UserServiceImpl) userService).getPrefixStartUrl().equals(prefixStartUrl) && prefixStartUrl!=null && !prefixStartUrl.isEmpty()) {
+			    ((UserServiceImpl) userService).setPrefixStartUrl(prefixStartUrl);
+			}
 			
-			if(!((UserServiceImpl) userService).getPrefixIdentityUrl().equals(prefixIdentityUrl) && prefixIdentityUrl!=null && !prefixIdentityUrl.isEmpty())
-			((UserServiceImpl) userService).setPrefixIdentityUrl(prefixIdentityUrl);
+			if(!((UserServiceImpl) userService).getPrefixIdentityUrl().equals(prefixIdentityUrl) && prefixIdentityUrl!=null && !prefixIdentityUrl.isEmpty()) {
+			    ((UserServiceImpl) userService).setPrefixIdentityUrl(prefixIdentityUrl);
+			}
 			
-			if(!((UserServiceImpl) userService).getRegisterPRMUserIdp().equals(registerPRMUserIdp) && registerPRMUserIdp!=null && !registerPRMUserIdp.isEmpty())
-			((UserServiceImpl) userService).setRegisterPRMUserIdp(registerPRMUserIdp);
+			if(!((UserServiceImpl) userService).getRegisterPRMUserIdp().equals(registerPRMUserIdp) && registerPRMUserIdp!=null && !registerPRMUserIdp.isEmpty()) {
+			    ((UserServiceImpl) userService).setRegisterPRMUserIdp(registerPRMUserIdp);
+			}
 			
-			if(!((UserServiceImpl) userService).getOtpvalidationtimeinminute().equals(otpvalidationtimeinminute) && otpvalidationtimeinminute!=null && !otpvalidationtimeinminute.isEmpty())
-			((UserServiceImpl) userService)
+			if(!((UserServiceImpl) userService).getOtpvalidationtimeinminute().equals(otpvalidationtimeinminute) && otpvalidationtimeinminute!=null && !otpvalidationtimeinminute.isEmpty()) {
+			    ((UserServiceImpl) userService)
 					.setOtpvalidationtimeinminute(otpvalidationtimeinminute);
+			}
 			
-			if(!((UserServiceImpl) userService).getDjUserName().equals(djUserName) && djUserName!=null && !djUserName.isEmpty())
-			((UserServiceImpl) userService).setDjUserName(djUserName);
+			if(!((UserServiceImpl) userService).getDjUserName().equals(djUserName) && djUserName!=null && !djUserName.isEmpty()) {
+			    ((UserServiceImpl) userService).setDjUserName(djUserName);
+			}
 			
-			if(!((UserServiceImpl) userService).getDjUserPwd().equals(djUserPwd) && djUserPwd!=null && !djUserPwd.isEmpty())
-			((UserServiceImpl) userService).setDjUserPwd(djUserPwd);
+			if(!((UserServiceImpl) userService).getDjUserPwd().equals(djUserPwd) && djUserPwd!=null && !djUserPwd.isEmpty()) {
+			    ((UserServiceImpl) userService).setDjUserPwd(djUserPwd);
+			}
 			
-			if(!((UserServiceImpl) userService).getSendOTPOverEmail().equals(sendOTPOverEmail) && sendOTPOverEmail!=null && !sendOTPOverEmail.isEmpty())
-			((UserServiceImpl) userService).setSendOTPOverEmail(sendOTPOverEmail);
+			if(!((UserServiceImpl) userService).getSendOTPOverEmail().equals(sendOTPOverEmail) && sendOTPOverEmail!=null && !sendOTPOverEmail.isEmpty()) {
+			    ((UserServiceImpl) userService).setSendOTPOverEmail(sendOTPOverEmail);
+			}
 			
-			if(!((UserServiceImpl) userService).getEnableTestMailDomain().equals(enableTestMailDomain) && enableTestMailDomain!=null && !enableTestMailDomain.isEmpty())
-			((UserServiceImpl) userService).setEnableTestMailDomain(enableTestMailDomain);
+			if(!((UserServiceImpl) userService).getEnableTestMailDomain().equals(enableTestMailDomain) && enableTestMailDomain!=null && !enableTestMailDomain.isEmpty()) {
+			    ((UserServiceImpl) userService).setEnableTestMailDomain(enableTestMailDomain);
+			}
 			
-			if(!((UserServiceImpl) userService).getMaintenanceModeGlobal().equals(maintenanceModeGlobal) && maintenanceModeGlobal!=null && !maintenanceModeGlobal.isEmpty())
+			if(!((UserServiceImpl) userService).getMaintenanceModeGlobal().equals(maintenanceModeGlobal) && maintenanceModeGlobal!=null && !maintenanceModeGlobal.isEmpty()) {
 				((UserServiceImpl) userService).setMaintenanceModeGlobal(maintenanceModeGlobal);
+			}
 			
 			 //SML Verification
-			if(enableSMLVerification!=null && !enableSMLVerification.isEmpty())
-				((UserServiceImpl) userService).setEnableTestMailDomain(enableSMLVerification);	
+			if(enableSMLVerification!=null && !enableSMLVerification.isEmpty()) {
+				((UserServiceImpl) userService).setEnableTestMailDomain(enableSMLVerification);
+		    }	
 			
-			if(!((UserServiceImpl) userService).getStopidmstouimsflag().equals(stopidmstouimsflag) && stopidmstouimsflag!=null && !stopidmstouimsflag.isEmpty())
+			if(!((UserServiceImpl) userService).getStopidmstouimsflag().equals(stopidmstouimsflag) && stopidmstouimsflag!=null && !stopidmstouimsflag.isEmpty()) {
 				((UserServiceImpl) userService).setStopidmstouimsflag(stopidmstouimsflag);
+			}
 			
-			if(!((UserServiceImpl) userService).getEnableAdminAuthToken().equals(enableAdminAuthToken) && enableAdminAuthToken!=null && !enableAdminAuthToken.isEmpty())
+			if(!((UserServiceImpl) userService).getEnableAdminAuthToken().equals(enableAdminAuthToken) && enableAdminAuthToken!=null && !enableAdminAuthToken.isEmpty()) {
 				((UserServiceImpl) userService).setEnableAdminAuthToken(enableAdminAuthToken);
+			}
 			
-			if(!((UserServiceImpl) userService).getEnableCheckUserToGlobal().equals(enableCheckUserToGlobal) && enableCheckUserToGlobal!=null && !enableCheckUserToGlobal.isEmpty())
+			if(!((UserServiceImpl) userService).getEnableCheckUserToGlobal().equals(enableCheckUserToGlobal) && enableCheckUserToGlobal!=null && !enableCheckUserToGlobal.isEmpty()) {
 				((UserServiceImpl) userService).setEnableCheckUserToGlobal(enableCheckUserToGlobal);
+			}
 			
-			if(!(goDigitalUserService.getFromUserName().equals(fromUserName)) && fromUserName!=null && !fromUserName.isEmpty())
-			goDigitalUserService.setFromUserName(fromUserName);
+			if(!(goDigitalUserService.getFromUserName().equals(fromUserName)) && fromUserName!=null && !fromUserName.isEmpty()) {
+			    goDigitalUserService.setFromUserName(fromUserName);
+			}
 			
-			if(!(goDigitalUserService.getSupportUser().equals(supportUser)) && supportUser!=null && !supportUser.isEmpty())
-			goDigitalUserService.setSupportUser(supportUser);
+			if(!(goDigitalUserService.getSupportUser().equals(supportUser)) && supportUser!=null && !supportUser.isEmpty()) {
+			    goDigitalUserService.setSupportUser(supportUser);
+			}
 			
-			if(!(emailService.getFrom().equals(fromUserName)) && fromUserName!=null && !fromUserName.isEmpty())
-			emailService.setFrom(fromUserName);
+			if(!(emailService.getFrom().equals(fromUserName)) && fromUserName!=null && !fromUserName.isEmpty()) {
+			    emailService.setFrom(fromUserName);
+			}
 			
-			if(!(emailService.getDjUserName().equals(djUserName)) && djUserName!=null && !djUserName.isEmpty())
-			emailService.setDjUserName(djUserName);
+			if(!(emailService.getDjUserName().equals(djUserName)) && djUserName!=null && !djUserName.isEmpty()) {
+			    emailService.setDjUserName(djUserName);
+			}
 			
-			if(!(emailService.getDjUserPwd().equals(djUserPwd)) && djUserPwd!=null && !djUserPwd.isEmpty())
-			emailService.setDjUserPwd(djUserPwd);
+			if(!(emailService.getDjUserPwd().equals(djUserPwd)) && djUserPwd!=null && !djUserPwd.isEmpty()) {
+ 			    emailService.setDjUserPwd(djUserPwd);
+			}
 			
-			if(!(emailService.getHotpEmailVerificationURL().equals(hotpEmailVerificationURL)) && hotpEmailVerificationURL!=null && !hotpEmailVerificationURL.isEmpty())
-			emailService.setHotpEmailVerificationURL(hotpEmailVerificationURL);
+			if(!(emailService.getHotpEmailVerificationURL().equals(hotpEmailVerificationURL)) && hotpEmailVerificationURL!=null && !hotpEmailVerificationURL.isEmpty()) {
+			    emailService.setHotpEmailVerificationURL(hotpEmailVerificationURL);
+			}
 			
-			if(!(emailService.getIDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN().equals(IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN)) && IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN!=null && !IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN.isEmpty())
-			emailService.setIDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN(
+			if(!(emailService.getIDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN().equals(IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN)) && IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN!=null && !IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN.isEmpty()) {
+			    emailService.setIDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN(
 					IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_CN);
+			}
 			
-			if(!(emailService.getIDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN().equals(IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN)) && IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN!=null && !IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN.isEmpty())
-			emailService.setIDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN(
+			if(!(emailService.getIDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN().equals(IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN)) && IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN!=null && !IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN.isEmpty()) {
+			    emailService.setIDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN(
 					IDMS_USER_REST_PASSWORD_EMAILTEMPLATE_EN);
+			}
 			
-			if(!(emailService.getIDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN().equals(IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN)) && IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN!=null && !IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN.isEmpty())
-			emailService.setIDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN(
+			if(!(emailService.getIDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN().equals(IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN)) && IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN!=null && !IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN.isEmpty()) {
+			    emailService.setIDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN(
 					IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_CN);
+			}
 			
-			if(!(emailService.getIDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN().equals(IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN)) && IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN!=null && !IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN.isEmpty())
-			emailService.setIDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN(
+			if(!(emailService.getIDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN().equals(IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN)) && IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN!=null && !IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN.isEmpty()) {
+			    emailService.setIDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN(
 					IDMS_USER_REGESTRATION_WITHPWD_EMAILTEMPLATE_EN);
+			}
 			
-			if(!(emailService.getIDMS_USER_UPDATE_EMAILTEMPLATE_CN().equals(IDMS_USER_UPDATE_EMAILTEMPLATE_CN)) && IDMS_USER_UPDATE_EMAILTEMPLATE_CN!=null && !IDMS_USER_UPDATE_EMAILTEMPLATE_CN.isEmpty())
-			emailService
+			if(!(emailService.getIDMS_USER_UPDATE_EMAILTEMPLATE_CN().equals(IDMS_USER_UPDATE_EMAILTEMPLATE_CN)) && IDMS_USER_UPDATE_EMAILTEMPLATE_CN!=null && !IDMS_USER_UPDATE_EMAILTEMPLATE_CN.isEmpty()) {
+			    emailService
 					.setIDMS_USER_UPDATE_EMAILTEMPLATE_CN(IDMS_USER_UPDATE_EMAILTEMPLATE_CN);
+			}
 			
-			if(!(emailService.getIDMS_USER_UPDATE_EMAILTEMPLATE_EN().equals(IDMS_USER_UPDATE_EMAILTEMPLATE_EN)) && IDMS_USER_UPDATE_EMAILTEMPLATE_EN!=null && !IDMS_USER_UPDATE_EMAILTEMPLATE_EN.isEmpty())
-			emailService
+			if(!(emailService.getIDMS_USER_UPDATE_EMAILTEMPLATE_EN().equals(IDMS_USER_UPDATE_EMAILTEMPLATE_EN)) && IDMS_USER_UPDATE_EMAILTEMPLATE_EN!=null && !IDMS_USER_UPDATE_EMAILTEMPLATE_EN.isEmpty()) {
+			    emailService
 					.setIDMS_USER_UPDATE_EMAILTEMPLATE_EN(IDMS_USER_UPDATE_EMAILTEMPLATE_EN);
+			}
 			
-			if(!(emailService.getIDMS_USER_DEFAULT_EMAILTEMPLATE_CN().equals(IDMS_USER_DEFAULT_EMAILTEMPLATE_CN)) && IDMS_USER_DEFAULT_EMAILTEMPLATE_CN!=null && !IDMS_USER_DEFAULT_EMAILTEMPLATE_CN.isEmpty())
+			if(!(emailService.getIDMS_USER_DEFAULT_EMAILTEMPLATE_CN().equals(IDMS_USER_DEFAULT_EMAILTEMPLATE_CN)) && IDMS_USER_DEFAULT_EMAILTEMPLATE_CN!=null && !IDMS_USER_DEFAULT_EMAILTEMPLATE_CN.isEmpty()) {
 			emailService
 					.setIDMS_USER_DEFAULT_EMAILTEMPLATE_CN(IDMS_USER_DEFAULT_EMAILTEMPLATE_CN);
+			}
 			
-			if(!(emailService.getIDMS_USER_DEFAULT_EMAILTEMPLATE_EN().equals(IDMS_USER_DEFAULT_EMAILTEMPLATE_EN)) && IDMS_USER_DEFAULT_EMAILTEMPLATE_EN!=null && !IDMS_USER_DEFAULT_EMAILTEMPLATE_EN.isEmpty())
+			if(!(emailService.getIDMS_USER_DEFAULT_EMAILTEMPLATE_EN().equals(IDMS_USER_DEFAULT_EMAILTEMPLATE_EN)) && IDMS_USER_DEFAULT_EMAILTEMPLATE_EN!=null && !IDMS_USER_DEFAULT_EMAILTEMPLATE_EN.isEmpty()) {
 			emailService
 					.setIDMS_USER_DEFAULT_EMAILTEMPLATE_EN(IDMS_USER_DEFAULT_EMAILTEMPLATE_EN);
+			}
 			
-			if(!(emailService.getIDMS_SEND_INVITATION_EMAILTEMPLATE_EN().equals(IDMS_SEND_INVITATION_EMAILTEMPLATE_EN)) && IDMS_SEND_INVITATION_EMAILTEMPLATE_EN!=null && !IDMS_SEND_INVITATION_EMAILTEMPLATE_EN.isEmpty())
+			if(!(emailService.getIDMS_SEND_INVITATION_EMAILTEMPLATE_EN().equals(IDMS_SEND_INVITATION_EMAILTEMPLATE_EN)) && IDMS_SEND_INVITATION_EMAILTEMPLATE_EN!=null && !IDMS_SEND_INVITATION_EMAILTEMPLATE_EN.isEmpty()) {
 			emailService.setIDMS_SEND_INVITATION_EMAILTEMPLATE_EN(
 					IDMS_SEND_INVITATION_EMAILTEMPLATE_EN);
+			}
 			
-			if(!(emailService.getIDMS_SEND_INVITATION_EMAILTEMPLATE_CN().equals(IDMS_SEND_INVITATION_EMAILTEMPLATE_CN)) && IDMS_SEND_INVITATION_EMAILTEMPLATE_CN!=null && !IDMS_SEND_INVITATION_EMAILTEMPLATE_CN.isEmpty())
+			if(!(emailService.getIDMS_SEND_INVITATION_EMAILTEMPLATE_CN().equals(IDMS_SEND_INVITATION_EMAILTEMPLATE_CN)) && IDMS_SEND_INVITATION_EMAILTEMPLATE_CN!=null && !IDMS_SEND_INVITATION_EMAILTEMPLATE_CN.isEmpty()) {
 			emailService.setIDMS_SEND_INVITATION_EMAILTEMPLATE_CN(
 					IDMS_SEND_INVITATION_EMAILTEMPLATE_CN);
+			}
 			
-			if(!(emailService.getIDMS_USER_ADD_EMAILTEMPLATE_CN().equals(IDMS_USER_ADD_EMAILTEMPLATE_CN)) && IDMS_USER_ADD_EMAILTEMPLATE_CN!=null && !IDMS_USER_ADD_EMAILTEMPLATE_CN.isEmpty())
+			if(!(emailService.getIDMS_USER_ADD_EMAILTEMPLATE_CN().equals(IDMS_USER_ADD_EMAILTEMPLATE_CN)) && IDMS_USER_ADD_EMAILTEMPLATE_CN!=null && !IDMS_USER_ADD_EMAILTEMPLATE_CN.isEmpty()) {
 			emailService.setIDMS_USER_ADD_EMAILTEMPLATE_CN(IDMS_USER_ADD_EMAILTEMPLATE_CN);
+			}
 			
-			if(!(emailService.getIDMS_USER_ADD_EMAILTEMPLATE_EN().equals(IDMS_USER_ADD_EMAILTEMPLATE_EN)) && IDMS_USER_ADD_EMAILTEMPLATE_EN!=null && !IDMS_USER_ADD_EMAILTEMPLATE_EN.isEmpty())
+			if(!(emailService.getIDMS_USER_ADD_EMAILTEMPLATE_EN().equals(IDMS_USER_ADD_EMAILTEMPLATE_EN)) && IDMS_USER_ADD_EMAILTEMPLATE_EN!=null && !IDMS_USER_ADD_EMAILTEMPLATE_EN.isEmpty()) {
 			emailService.setIDMS_USER_ADD_EMAILTEMPLATE_EN(IDMS_USER_ADD_EMAILTEMPLATE_EN);
+			}
 			
-			if(!(emailService.getDefaultUserNameFormat().equals(emailUserNameFormat)) && emailUserNameFormat!=null && !emailUserNameFormat.isEmpty())
+			if(!(emailService.getDefaultUserNameFormat().equals(emailUserNameFormat)) && emailUserNameFormat!=null && !emailUserNameFormat.isEmpty()) {
 				emailService.setDefaultUserNameFormat(emailUserNameFormat);
+		    }
 			
-			if(!(uimsCompManagSoapService.getCALLER_FID().equals(CALLER_FID)) && CALLER_FID!=null && !CALLER_FID.isEmpty())
+			if(!(uimsCompManagSoapService.getCALLER_FID().equals(CALLER_FID)) && CALLER_FID!=null && !CALLER_FID.isEmpty()) {
 			uimsCompManagSoapService.setCALLER_FID(CALLER_FID);
+			}
 			
-			if(!(uimsSetPasswordSoapService.getCALLER_FID().equals(CALLER_FID)) && CALLER_FID!=null && !CALLER_FID.isEmpty())
+			if(!(uimsSetPasswordSoapService.getCALLER_FID().equals(CALLER_FID)) && CALLER_FID!=null && !CALLER_FID.isEmpty()) {
 			uimsSetPasswordSoapService.setCALLER_FID(CALLER_FID);
+			}
 			
-			if(!(uimsSetPasswordSoapService.getFromUserName().equals(fromUserName)) && fromUserName!=null && !fromUserName.isEmpty())
+			if(!(uimsSetPasswordSoapService.getFromUserName().equals(fromUserName)) && fromUserName!=null && !fromUserName.isEmpty()) {
 			uimsSetPasswordSoapService.setFromUserName(fromUserName);
+			}
 			
-			if(!(uimsSetPasswordSoapService.getSupportUser().equals(supportUser)) && supportUser!=null && !supportUser.isEmpty())
+			if(!(uimsSetPasswordSoapService.getSupportUser().equals(supportUser)) && supportUser!=null && !supportUser.isEmpty()) {
 			uimsSetPasswordSoapService.setSupportUser(supportUser);
+			}
 			
-			if(!(uimsUserManagSoapService.getCALLER_FID().equals(CALLER_FID)) && CALLER_FID!=null && !CALLER_FID.isEmpty())
+			if(!(uimsUserManagSoapService.getCALLER_FID().equals(CALLER_FID)) && CALLER_FID!=null && !CALLER_FID.isEmpty()) {
 			uimsUserManagSoapService.setCALLER_FID(CALLER_FID);
+			}
 			
-			if(!(uimsUserManagSoapService.getFromUserName().equals(fromUserName)) && fromUserName!=null && !fromUserName.isEmpty())
+			if(!(uimsUserManagSoapService.getFromUserName().equals(fromUserName)) && fromUserName!=null && !fromUserName.isEmpty()) {
 			uimsUserManagSoapService.setFromUserName(fromUserName);
+			}
 			
-			if(!(uimsUserManagSoapService.getSupportUser().equals(supportUser)) && supportUser!=null && !supportUser.isEmpty())
+			if(!(uimsUserManagSoapService.getSupportUser().equals(supportUser)) && supportUser!=null && !supportUser.isEmpty()) {
 			uimsUserManagSoapService.setSupportUser(supportUser);
+			}
 			
-			if(!(uimsUserManagSoapService.getGoDigitalValue().equals(goDigitalValue)) && goDigitalValue!=null && !goDigitalValue.isEmpty())
+			if(!(uimsUserManagSoapService.getGoDigitalValue().equals(goDigitalValue)) && goDigitalValue!=null && !goDigitalValue.isEmpty()) {
 			uimsUserManagSoapService.setGoDigitalValue(goDigitalValue);
+			}
 			
-			if(!(uimsUserManagSoapService.getGoDitalToken().equals(goDitalToken)) && goDitalToken!=null && !goDitalToken.isEmpty())
+			if(!(uimsUserManagSoapService.getGoDitalToken().equals(goDitalToken)) && goDitalToken!=null && !goDitalToken.isEmpty()) {
 			uimsUserManagSoapService.setGoDitalToken(goDitalToken);
+			}
 			
-			if(!(saleforceService.getSalesForceClientId().equals(salesForceClientId)) && salesForceClientId!=null && !salesForceClientId.isEmpty())
+			if(!(saleforceService.getSalesForceClientId().equals(salesForceClientId)) && salesForceClientId!=null && !salesForceClientId.isEmpty()) {
 			saleforceService.setSalesForceClientId(salesForceClientId);
+			}
 			
-			if(!(saleforceService.getSalesForceClientSecret().equals(salesForceClientSecret)) && salesForceClientSecret!=null && !salesForceClientSecret.isEmpty())
+			if(!(saleforceService.getSalesForceClientSecret().equals(salesForceClientSecret)) && salesForceClientSecret!=null && !salesForceClientSecret.isEmpty()) {
 			saleforceService.setSalesForceClientSecret(salesForceClientSecret);
+			}
 			
-			if(!(saleforceService.getSalesForcePassword().equals(salesForcePassword)) && salesForcePassword!=null && !salesForcePassword.isEmpty())
+			if(!(saleforceService.getSalesForcePassword().equals(salesForcePassword)) && salesForcePassword!=null && !salesForcePassword.isEmpty()) {
 			saleforceService.setSalesForcePassword(salesForcePassword);
+			}
 			
-			if(!(saleforceService.getSalesForceUserName().equals(salesForceUserName)) && salesForceUserName!=null && !salesForceUserName.isEmpty())
+			if(!(saleforceService.getSalesForceUserName().equals(salesForceUserName)) && salesForceUserName!=null && !salesForceUserName.isEmpty()) {
 			saleforceService.setSalesForceUserName(salesForceUserName);
+			}
 			
-			if(!(saleforceSynService.getSalesForceClientId().equals(salesForceClientId)) && salesForceClientId!=null && !salesForceClientId.isEmpty())
+			if(!(saleforceSynService.getSalesForceClientId().equals(salesForceClientId)) && salesForceClientId!=null && !salesForceClientId.isEmpty()) {
 			saleforceSynService.setSalesForceClientId(salesForceClientId);
+			}
 			
-			if(!(saleforceSynService.getSalesForceClientSecret().equals(salesForceClientSecret)) && salesForceClientSecret!=null && !salesForceClientSecret.isEmpty())
+			if(!(saleforceSynService.getSalesForceClientSecret().equals(salesForceClientSecret)) && salesForceClientSecret!=null && !salesForceClientSecret.isEmpty()) {
 			saleforceSynService.setSalesForceClientSecret(salesForceClientSecret);
+			}
 			
-			if(!(saleforceSynService.getSalesForcePassword().equals(salesForcePassword)) && salesForcePassword!=null && !salesForcePassword.isEmpty())
+			if(!(saleforceSynService.getSalesForcePassword().equals(salesForcePassword)) && salesForcePassword!=null && !salesForcePassword.isEmpty()) {
 			saleforceSynService.setSalesForcePassword(salesForcePassword);
+			}
 			
-			if(!(saleforceSynService.getSalesForceUserName().equals(salesForceUserName)) && salesForceUserName!=null && !salesForceUserName.isEmpty())
+			if(!(saleforceSynService.getSalesForceUserName().equals(salesForceUserName)) && salesForceUserName!=null && !salesForceUserName.isEmpty()) {
 			saleforceSynService.setSalesForceUserName(salesForceUserName);
+			}
 			
-			if(!(saleforceSynService.getSftokentimeinminute().equals(sftokentimeinminute)) && sftokentimeinminute!=null && !sftokentimeinminute.isEmpty())
+			if(!(saleforceSynService.getSftokentimeinminute().equals(sftokentimeinminute)) && sftokentimeinminute!=null && !sftokentimeinminute.isEmpty()) {
 			saleforceSynService.setSftokentimeinminute(sftokentimeinminute);
+			}
 			
-			if(!(createUserService.getCALLER_FID().equals(CALLER_FID)) && CALLER_FID!=null && !CALLER_FID.isEmpty())
+			if(!(createUserService.getCALLER_FID().equals(CALLER_FID)) && CALLER_FID!=null && !CALLER_FID.isEmpty()) {
 			createUserService.setCALLER_FID(CALLER_FID);
+			}
 			
-			if(!(commonService.getSalesForceClientId().equals(salesForceClientId)) && salesForceClientId!=null && !salesForceClientId.isEmpty())
+			if(!(commonService.getSalesForceClientId().equals(salesForceClientId)) && salesForceClientId!=null && !salesForceClientId.isEmpty()) {
 			commonService.setSalesForceClientId(salesForceClientId);
+			}
 			
-			if(!(commonService.getSalesForceClientSecret().equals(salesForceClientSecret)) && salesForceClientSecret!=null && !salesForceClientSecret.isEmpty())
+			if(!(commonService.getSalesForceClientSecret().equals(salesForceClientSecret)) && salesForceClientSecret!=null && !salesForceClientSecret.isEmpty()) {
 			commonService.setSalesForceClientSecret(salesForceClientSecret);
+			}
 			
-			if(!(commonService.getSalesForcePassword().equals(salesForcePassword)) && salesForcePassword!=null && !salesForcePassword.isEmpty())
+			if(!(commonService.getSalesForcePassword().equals(salesForcePassword)) && salesForcePassword!=null && !salesForcePassword.isEmpty()) {
 			commonService.setSalesForcePassword(salesForcePassword);
+			}
 			
-			if(!(commonService.getSalesForceUserName().equals(salesForceUserName)) && salesForceUserName!=null && !salesForceUserName.isEmpty())
+			if(!(commonService.getSalesForceUserName().equals(salesForceUserName)) && salesForceUserName!=null && !salesForceUserName.isEmpty()) {
 			commonService.setSalesForceUserName(salesForceUserName);
+			}
 			
-			if(!(commonService.getAdminUserName().equals(adminUserName)) && adminUserName!=null && !adminUserName.isEmpty())
+			if(!(commonService.getAdminUserName().equals(adminUserName)) && adminUserName!=null && !adminUserName.isEmpty()) {
 			commonService.setAdminUserName(adminUserName);
+			}
 			
-			if(!(commonService.getAdminPassword().equals(adminPassword)) && adminPassword!=null && !adminPassword.isEmpty())
+			if(!(commonService.getAdminPassword().equals(adminPassword)) && adminPassword!=null && !adminPassword.isEmpty()) {
 			commonService.setAdminPassword(adminPassword);
+			}
 			
-			if(!(commonService.getAuthCsvPath().equals(authCsvPath)) && authCsvPath!=null && !authCsvPath.isEmpty())
+			if(!(commonService.getAuthCsvPath().equals(authCsvPath)) && authCsvPath!=null && !authCsvPath.isEmpty()) {
 			commonService.setAuthCsvPath(authCsvPath);
+			}
 			
-			if(!(commonService.getRegistrationCsvPath().equals(registrationCsvPath)) && registrationCsvPath!=null && !registrationCsvPath.isEmpty())
+			if(!(commonService.getRegistrationCsvPath().equals(registrationCsvPath)) && registrationCsvPath!=null && !registrationCsvPath.isEmpty()) {
 			commonService.setRegistrationCsvPath(registrationCsvPath);
+			}
 			
-			if(!(commonService.getDirectApiSecretToken().equals(directApiSecretToken)) && directApiSecretToken!=null && !directApiSecretToken.isEmpty())
+			if(!(commonService.getDirectApiSecretToken().equals(directApiSecretToken)) && directApiSecretToken!=null && !directApiSecretToken.isEmpty()) {
 			commonService.setDirectApiSecretToken(directApiSecretToken);
+			}
 			
-			if(!(commonService.getEMAIL_TEMPLATE_DIR().equals(EMAIL_TEMPLATE_DIR)) && EMAIL_TEMPLATE_DIR!=null && !EMAIL_TEMPLATE_DIR.isEmpty())
+			if(!(commonService.getEMAIL_TEMPLATE_DIR().equals(EMAIL_TEMPLATE_DIR)) && EMAIL_TEMPLATE_DIR!=null && !EMAIL_TEMPLATE_DIR.isEmpty()) {
 			commonService.setEMAIL_TEMPLATE_DIR(EMAIL_TEMPLATE_DIR);
+			}
 			
-			if(!commonService.getFromUserName().equals(fromUserName) && fromUserName!=null && !fromUserName.isEmpty())
+			if(!commonService.getFromUserName().equals(fromUserName) && fromUserName!=null && !fromUserName.isEmpty()) {
 			commonService.setFromUserName(fromUserName);
+			}
 			
-			if(!commonService.getGoDigitalValue().equals(goDigitalValue) && goDigitalValue!=null && !goDigitalValue.isEmpty())
+			if(!commonService.getGoDigitalValue().equals(goDigitalValue) && goDigitalValue!=null && !goDigitalValue.isEmpty()) {
 			commonService.setGoDigitalValue(goDigitalValue);
+			}
 			
-			if(!commonService.getGoDitalToken().equals(goDitalToken) && goDitalToken!=null && !goDitalToken.isEmpty())
+			if(!commonService.getGoDitalToken().equals(goDitalToken) && goDitalToken!=null && !goDitalToken.isEmpty()) {
 			commonService.setGoDitalToken(goDitalToken);
+			}
 			
-			if(!commonService.getHa_mode().equals(ha_mode) && ha_mode!=null && !ha_mode.isEmpty())
+			if(!commonService.getHa_mode().equals(ha_mode) && ha_mode!=null && !ha_mode.isEmpty()) {
 			commonService.setHa_mode(ha_mode);
+			}
 			
-			if(!commonService.getIfwClientId().equals(ifwClientId) && ifwClientId!=null && !ifwClientId.isEmpty())
+			if(!commonService.getIfwClientId().equals(ifwClientId) && ifwClientId!=null && !ifwClientId.isEmpty()) {
 			commonService.setIfwClientId(ifwClientId);
+			}
 			
-			if(!commonService.getIfwClientSecret().equals(ifwClientSecret) && ifwClientSecret!=null && !ifwClientSecret.isEmpty())
+			if(!commonService.getIfwClientSecret().equals(ifwClientSecret) && ifwClientSecret!=null && !ifwClientSecret.isEmpty()) {
 			commonService.setIfwClientSecret(ifwClientSecret);
+			}
 			
-			if(!(commonService.getOpenDJUserName().equals(djUserName)) && djUserName!=null && !djUserName.isEmpty())
+			if(!(commonService.getOpenDJUserName().equals(djUserName)) && djUserName!=null && !djUserName.isEmpty()) {
 			commonService.setOpenDJUserName(djUserName);
+			}
 			
-			if(!(commonService.getOpenDJUserPassword().equals(djUserPwd)) && djUserPwd!=null && !djUserPwd.isEmpty())
+			if(!(commonService.getOpenDJUserPassword().equals(djUserPwd)) && djUserPwd!=null && !djUserPwd.isEmpty()) {
 			commonService.setOpenDJUserPassword(djUserPwd);
+			}
 			
-			if(!commonService.getRedirectUri().equals(redirectUri) && redirectUri!=null && !redirectUri.isEmpty())
-			commonService.setRedirectUri(redirectUri);
+			if (!commonService.getRedirectUri().equals(redirectUri) && redirectUri != null && !redirectUri.isEmpty()) {
+				commonService.setRedirectUri(redirectUri);
+			}
 			
-			if(!commonService.getUimsClientId().equals(uimsClientId) && uimsClientId!=null && !uimsClientId.isEmpty())
+			if(!commonService.getUimsClientId().equals(uimsClientId) && uimsClientId!=null && !uimsClientId.isEmpty()) {
 			commonService.setUimsClientId(uimsClientId);
+			}
 			
-			if(!commonService.getUimsClientSecret().equals(uimsClientSecret) && uimsClientSecret!=null && !uimsClientSecret.isEmpty())
+			if(!commonService.getUimsClientSecret().equals(uimsClientSecret) && uimsClientSecret!=null && !uimsClientSecret.isEmpty()) {
 			commonService.setUimsClientSecret(uimsClientSecret);
+			}
 			
-			if(!commonService.getPrefixStartUrl().equals(prefixStartUrl) && prefixStartUrl!=null && !prefixStartUrl.isEmpty())
+			if(!commonService.getPrefixStartUrl().equals(prefixStartUrl) && prefixStartUrl!=null && !prefixStartUrl.isEmpty()) {
 			commonService.setPrefixStartUrl(prefixStartUrl);
+			}
 			
-			if(!(directUIMSUserManagerSoapService.getCALLER_FID().equals(CALLER_FID)) && CALLER_FID!=null && !CALLER_FID.isEmpty())
+			if(!(directUIMSUserManagerSoapService.getCALLER_FID().equals(CALLER_FID)) && CALLER_FID!=null && !CALLER_FID.isEmpty()) {
 			directUIMSUserManagerSoapService.setCALLER_FID(CALLER_FID);
+			}
 			
-			if(!directUIMSUserManagerSoapService.getFromUserName().equals(fromUserName) && fromUserName!=null && !fromUserName.isEmpty())
+			if(!directUIMSUserManagerSoapService.getFromUserName().equals(fromUserName) && fromUserName!=null && !fromUserName.isEmpty()) {
 			directUIMSUserManagerSoapService.setFromUserName(fromUserName);
+			}
 			
-			if(!directUIMSUserManagerSoapService.getGoDigitalValue().equals(goDigitalValue) && goDigitalValue!=null && !goDigitalValue.isEmpty())
+			if(!directUIMSUserManagerSoapService.getGoDigitalValue().equals(goDigitalValue) && goDigitalValue!=null && !goDigitalValue.isEmpty()) {
 			directUIMSUserManagerSoapService.setGoDigitalValue(goDigitalValue);
+			}
 			
-			if(!directUIMSUserManagerSoapService.getGoDitalToken().equals(goDitalToken) && goDitalToken!=null && !goDitalToken.isEmpty())
+			if(!directUIMSUserManagerSoapService.getGoDitalToken().equals(goDitalToken) && goDitalToken!=null && !goDitalToken.isEmpty()) {
 			directUIMSUserManagerSoapService.setGoDitalToken(goDitalToken);
+			}
 			
-			if(!(directUIMSUserManagerSoapService.getSupportUser().equals(supportUser)) && supportUser!=null && !supportUser.isEmpty())
+			if(!(directUIMSUserManagerSoapService.getSupportUser().equals(supportUser)) && supportUser!=null && !supportUser.isEmpty()) {
 			directUIMSUserManagerSoapService.setSupportUser(supportUser);
+			}
 			
-			if(!samlAssertionTokenService.getSamlAssertionKeyPassword().equals(samlAssertionKeyPassword) && samlAssertionKeyPassword!=null && !samlAssertionKeyPassword.isEmpty())
+			if(!samlAssertionTokenService.getSamlAssertionKeyPassword().equals(samlAssertionKeyPassword) && samlAssertionKeyPassword!=null && !samlAssertionKeyPassword.isEmpty()) {
 			samlAssertionTokenService.setSamlAssertionKeyPassword(
 					samlAssertionKeyPassword);
+			}
 			
-			if(!samlAssertionTokenService.getSamlAssertionKeystorePassword().equals(samlAssertionKeystorePassword)&& samlAssertionKeystorePassword!=null && !samlAssertionKeystorePassword.isEmpty() )
+			if(!samlAssertionTokenService.getSamlAssertionKeystorePassword().equals(samlAssertionKeystorePassword)&& samlAssertionKeystorePassword!=null && !samlAssertionKeystorePassword.isEmpty() ) {
 			samlAssertionTokenService.setSamlAssertionKeystorePassword(
 					samlAssertionKeystorePassword);
+			}
 			
-			if(!samlAssertionTokenService.getSamlAssertionSigningAlgo().equals(samlAssertionSigningAlgo) && samlAssertionSigningAlgo!=null && !samlAssertionSigningAlgo.isEmpty())
+			if(!samlAssertionTokenService.getSamlAssertionSigningAlgo().equals(samlAssertionSigningAlgo) && samlAssertionSigningAlgo!=null && !samlAssertionSigningAlgo.isEmpty()) {
 			samlAssertionTokenService
 					.setSamlAssertionSigningAlgo(samlAssertionSigningAlgo);
+			}
 			
-			if(!samlAssertionTokenService.getSamlAssertionSigningCert().equals(samlAssertionSigningCert) && samlAssertionSigningCert!=null && !samlAssertionSigningCert.isEmpty())
+			if(!samlAssertionTokenService.getSamlAssertionSigningCert().equals(samlAssertionSigningCert) && samlAssertionSigningCert!=null && !samlAssertionSigningCert.isEmpty()) {
 			samlAssertionTokenService.setSamlAssertionSigningCert(
 					samlAssertionSigningCert);
+			}
 			
-			if(!samlAssertionTokenService.getSamlAssertionSigningKeystore().equals(samlAssertionSigningKeystore) && samlAssertionSigningKeystore!=null && !samlAssertionSigningKeystore.isEmpty())
+			if(!samlAssertionTokenService.getSamlAssertionSigningKeystore().equals(samlAssertionSigningKeystore) && samlAssertionSigningKeystore!=null && !samlAssertionSigningKeystore.isEmpty()) {
 			samlAssertionTokenService
 					.setSamlAssertionSigningKeystore(samlAssertionSigningKeystore);
+			}
 			
 			//pickListValidator.setIDMS_DEPLOY_ENV(configuration.getProperty("idms.env"));
-			if(!pickListValidator.getIDMS_FIELDSPICKLIST_PROPERTIES_PATH().equals(IDMS_FIELDSPICKLIST_PROPERTIES_PATH) && IDMS_FIELDSPICKLIST_PROPERTIES_PATH!=null && !IDMS_FIELDSPICKLIST_PROPERTIES_PATH.isEmpty())
+			if(!pickListValidator.getIDMS_FIELDSPICKLIST_PROPERTIES_PATH().equals(IDMS_FIELDSPICKLIST_PROPERTIES_PATH) && IDMS_FIELDSPICKLIST_PROPERTIES_PATH!=null && !IDMS_FIELDSPICKLIST_PROPERTIES_PATH.isEmpty()) {
 				pickListValidator.setIDMS_FIELDSPICKLIST_PROPERTIES_PATH(IDMS_FIELDSPICKLIST_PROPERTIES_PATH);
+			}
 			
 			//multiPickListValidator.setIDMS_DEPLOY_ENV(configuration.getProperty("idms.env"));
-			if(!multiPickListValidator.getIDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH().equals(IDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH) && IDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH!=null && !IDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH.isEmpty())
+			if(!multiPickListValidator.getIDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH().equals(IDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH) && IDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH!=null && !IDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH.isEmpty()) {
 				multiPickListValidator.setIDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH(IDMS_FIELDSMULTI_PICKLIST_PROPERTIES_PATH);
+			}
 			
 			//mandatoryValidator.setIDMS_DEPLOY_ENV(configuration.getProperty("idms.env"));
-			if(!mandatoryValidator.getIDMS_FIELDSMANDATORY_PROPERTIES_PATH().equals(IDMS_FIELDSMANDATORY_PROPERTIES_PATH) && IDMS_FIELDSMANDATORY_PROPERTIES_PATH!=null && !IDMS_FIELDSMANDATORY_PROPERTIES_PATH.isEmpty())
+			if(!mandatoryValidator.getIDMS_FIELDSMANDATORY_PROPERTIES_PATH().equals(IDMS_FIELDSMANDATORY_PROPERTIES_PATH) && IDMS_FIELDSMANDATORY_PROPERTIES_PATH!=null && !IDMS_FIELDSMANDATORY_PROPERTIES_PATH.isEmpty()) {
 				mandatoryValidator.setIDMS_FIELDSMANDATORY_PROPERTIES_PATH(IDMS_FIELDSMANDATORY_PROPERTIES_PATH);
+			}
 			
 			//legthValidator.setIDMS_DEPLOY_ENV(configuration.getProperty("idms.env"));
-			if(!legthValidator.getIDMS_FIELDSLENGTH_PROPERTIES_PATH().equals(IDMS_FIELDSLENGTH_PROPERTIES_PATH) && IDMS_FIELDSLENGTH_PROPERTIES_PATH!=null && !IDMS_FIELDSLENGTH_PROPERTIES_PATH.isEmpty())
+			if(!legthValidator.getIDMS_FIELDSLENGTH_PROPERTIES_PATH().equals(IDMS_FIELDSLENGTH_PROPERTIES_PATH) && IDMS_FIELDSLENGTH_PROPERTIES_PATH!=null && !IDMS_FIELDSLENGTH_PROPERTIES_PATH.isEmpty()) {
 				legthValidator.setIDMS_FIELDSLENGTH_PROPERTIES_PATH(IDMS_FIELDSLENGTH_PROPERTIES_PATH);
+			}
 			
 			//fieldsMappingValidator.setIDMS_DEPLOY_ENV(configuration.getProperty("idms.env"));
-			if(!fieldsMappingValidator.getIDMS_FIELDSMAPPING_PROPERTIES_PATH().equals(IDMS_FIELDSMAPPING_PROPERTIES_PATH) && IDMS_FIELDSMAPPING_PROPERTIES_PATH!=null && !IDMS_FIELDSMAPPING_PROPERTIES_PATH.isEmpty())
+			if(!fieldsMappingValidator.getIDMS_FIELDSMAPPING_PROPERTIES_PATH().equals(IDMS_FIELDSMAPPING_PROPERTIES_PATH) && IDMS_FIELDSMAPPING_PROPERTIES_PATH!=null && !IDMS_FIELDSMAPPING_PROPERTIES_PATH.isEmpty()) {
 				fieldsMappingValidator.setIDMS_FIELDSMAPPING_PROPERTIES_PATH(IDMS_FIELDSMAPPING_PROPERTIES_PATH);
+			}
 			
 			LOGGER.info("initilize(final String file) end");
 		} catch (IOException e) {
