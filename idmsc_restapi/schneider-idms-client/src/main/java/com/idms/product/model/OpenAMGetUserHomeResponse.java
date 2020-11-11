@@ -153,6 +153,10 @@ public class OpenAMGetUserHomeResponse {
 
 	private String prefCommnMethod;
 
+	private String firstTimeUser;
+
+	private String _2FAEnabled;
+
 	// mobile_reg and login_mobile field is added for dual identifier feature
 	@JsonProperty
 	private String mobile_reg;
@@ -719,5 +723,21 @@ public class OpenAMGetUserHomeResponse {
 
 	public void setPrefCommnMethod(String prefCommnMethod) {
 		this.prefCommnMethod = prefCommnMethod;
+	}
+
+	public String getFirstTimeUser() {
+		return firstTimeUser;
+	}
+
+	public void setFirstTimeUser(String firstTimeUser) {
+		this.firstTimeUser = firstTimeUser;
+	}
+
+	public String get_2FAEnabled() {
+		return _2FAEnabled;
+	}
+
+	public void set_2FAEnabled(String _2faEnabled) {
+		_2FAEnabled = _2faEnabled;
 	}
 }
