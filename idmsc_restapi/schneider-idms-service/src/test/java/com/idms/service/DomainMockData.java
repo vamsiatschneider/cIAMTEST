@@ -10,6 +10,7 @@ import org.json.simple.JSONObject;
 
 import com.idms.model.IFWUser;
 import com.idms.product.model.OpenAmUser;
+import org.springframework.http.HttpStatus;
 
 /**
  * Prepare mock data for domain classes. Note: Do NOT use Mock Data class for
@@ -53,7 +54,7 @@ public class DomainMockData {
 
 	public static final String IDMS_POBOX__C = "IDMS_POBOX__C";
 
-	public static final String IDMS_Federated_ID__c = "IDMS_Federated_ID__c";
+	public static final String IDMS_Federated_ID__c = "cn00IDMS_Federated_ID__c";
 
 	public static final String IDMS_Registration_Source__c = "IDMS_Registration_Source__c";
 
@@ -124,7 +125,8 @@ public class DomainMockData {
 	public static final String IDMSCOMPANYCOUNTY__C = "IDMSCOMPANYCOUNTY__C";
 	
 	
-	
+	public static final String APP_DETAIL = "{\"_id\":\"AutomationHome\",\"_isOTPEnabled\":\"false\",\"status\":{\"success\":true},\"additions\":{}}";
+			
 	public static final String AUTHENTICATION_JSON = "{\"tokenId\":\"AQIC5wM2LY4SfcysPQTDKWWZ0R9pEMb68DRr1cZASWa3VmA.*AAJTSQACMDEAAlNLABQtNTc0NjUwNzAxODcxMTc0OTkzMgACUzEAAA..*\",\"successUrl\":\"/accessmanager/console\"}";
 	
 	public static final String USER_EXISTS = "{\"result\":[],\"resultCount\":0,\"pagedResultsCookie\":null,\"totalPagedResultsPolicy\":\"NONE\",\"totalPagedResults\":-1,\"remainingPagedResults\":-1}";
