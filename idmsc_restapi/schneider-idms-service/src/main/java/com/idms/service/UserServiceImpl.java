@@ -5188,7 +5188,7 @@ public class UserServiceImpl implements UserService {
 	 * java.lang.String, java.lang.String, com.idms.model.UpdateUserRequest)
 	 */
 	@SuppressWarnings("unchecked")
-	public Response updateUser(String authorizedToken, String clientId, String clientSecret,
+	public Response updateUser(String adminAuthToken, String authorizedToken, String clientId, String clientSecret,
 			UpdateUserRequest userRequest) {
 		LOGGER.info("Entered updateUser() -> Start");
 		LOGGER.info("Parameter authorizedToken -> " + authorizedToken);
@@ -5239,32 +5239,71 @@ public class UserServiceImpl implements UserService {
 			boolean maintenanceMode=false, isOTPEnabled = false;
 			ErrorResponse errorResponse = new ErrorResponse();
 			List<String> accssControlList =null;
+			boolean adminAuthTokenFlagInProps = false;
 
 			/**
 			 * Check mandatory values and user type (home/work)
 			 */
 
 			try {
-				LOGGER.info("Access Control List:"+maintenanceModeGlobal);
-				if(maintenanceModeGlobal!=null) {
+				LOGGER.info("Access Control List:" + maintenanceModeGlobal);
+				if (maintenanceModeGlobal != null) {
 					accssControlList = Arrays.asList(maintenanceModeGlobal.split(","));
 				}
-				if(accssControlList!=null && accssControlList.size()>0 && !(accssControlList.contains("False"))){
-				//if(accssControlList!=null &&accssControlList.size()>0){//Through error if maintenance mode is enabled
-					if(accssControlList.contains(UserConstants.MAINTENANCE_MODE_COMPLETE) || accssControlList.contains(UserConstants.MAINTENANCE_MODE_PROFILE_UPDATE) ){
+				if (accssControlList != null && accssControlList.size() > 0 && !(accssControlList.contains("False"))) {
+					// if(accssControlList!=null &&accssControlList.size()>0){//Through error if
+					// maintenance mode is enabled
+					if (accssControlList.contains(UserConstants.MAINTENANCE_MODE_COMPLETE)
+							|| accssControlList.contains(UserConstants.MAINTENANCE_MODE_PROFILE_UPDATE)) {
 						errorResponse.setStatus(errorStatus);
 						errorResponse.setMessage(UserConstants.MAINTENANCE_MODE_MESSAGE);
 						LOGGER.error("Error :: Maintenance mode in progress");
-						maintenanceMode=true;
-					 }
-				//Consider  exclusions for maintenance mode as below
-				if(maintenanceMode){
-					maintenanceMode = excludeMaintenanceMode(userRequest.getUserRecord().getIDMS_Profile_update_source__c(),  UserConstants.MAINTENANCE_MODE_PROFILE_UPDATE);
+						maintenanceMode = true;
+					}
+					// Consider exclusions for maintenance mode as below
+					if (maintenanceMode) {
+						maintenanceMode = excludeMaintenanceMode(
+								userRequest.getUserRecord().getIDMS_Profile_update_source__c(),
+								UserConstants.MAINTENANCE_MODE_PROFILE_UPDATE);
+					}
+					if (maintenanceMode) {
+						return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
+					}
 				}
-				if(maintenanceMode){
-					return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
+
+				adminAuthTokenFlagInProps = ((null != enableAdminAuthToken && !enableAdminAuthToken.isEmpty())
+						? Boolean.valueOf(enableAdminAuthToken)
+						: false);
+				
+				if (adminAuthTokenFlagInProps) {
+					if (null == authorizedToken || authorizedToken.isEmpty()) {
+						errorResponse.setStatus(errorStatus);
+						errorResponse.setMessage(UserConstants.ADMIN_TOKEN_MANDATORY);
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.error("Error is " + errorResponse.getMessage());
+						LOGGER.info("Time taken by updateUser() : " + elapsedTime);
+						return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+					} else if (null != authorizedToken && !authorizedToken.isEmpty()) {
+						String adminStatus = getAdminGroupDetails(authorizedToken);
+						LOGGER.info("adminStatus = "+adminStatus);
+						if (adminStatus.equalsIgnoreCase(UserConstants.UNAUTHORIZED)) {
+							errorResponse.setStatus(errorStatus);
+							errorResponse.setMessage(UserConstants.ADMIN_UNAUTH);
+							elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+							LOGGER.error("Error is " + errorResponse.getMessage());
+							LOGGER.info("Time taken by updateUser() : " + elapsedTime);
+							return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+						}
+						if (!adminStatus.equalsIgnoreCase(UserConstants.ADMIN_ADMIN)) {
+							errorResponse.setStatus(errorStatus);
+							errorResponse.setMessage("AdminToken not having sufficient priviledge");
+							elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+							LOGGER.error("Error is " + errorResponse.getMessage());
+							LOGGER.info("Time taken by updateUser() : " + elapsedTime);
+							return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+						}
+					}
 				}
-			}
 				
 				try {
 					iPlanetDirectoryKey = getSSOToken();
@@ -9476,9 +9515,9 @@ public class UserServiceImpl implements UserService {
 	 * java.lang.String, java.lang.String, com.idms.model.UpdateUserRequest)
 	 */
 	@Override
-	public Response updateIDMSUserService(String authorizedToken, String clientId, String clientSecret,
+	public Response updateIDMSUserService(String adminAuthToken, String authorizedToken, String clientId, String clientSecret,
 			UpdateUserRequest userRequest) {
-		return this.updateUser(authorizedToken, clientId, clientSecret, userRequest);
+		return this.updateUser(adminAuthToken, authorizedToken, clientId, clientSecret, userRequest);
 	}
 
 	/*
