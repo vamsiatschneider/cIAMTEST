@@ -124,7 +124,7 @@ public interface UserService {
 	@PUT
 	@Path("/apexrest/IDMSUser")
 	@Consumes("application/json")
-	Response updateUser(@HeaderParam("Authorization") String authorizedToken, @HeaderParam("client_id") String clientId,
+	Response updateUser(@HeaderParam("AdminAuthToken") String roleToken, @HeaderParam("Authorization") String authorizedToken, @HeaderParam("client_id") String clientId,
 			@HeaderParam("client_secret") String clientSecret, UpdateUserRequest userRequest);
 
 	@PUT
@@ -250,7 +250,7 @@ public interface UserService {
 	@PUT
 	@Path("/apexrest/IDMSUserService")
 	@Consumes("application/json")
-	Response updateIDMSUserService(@HeaderParam("Authorization") String authorizedToken,
+	Response updateIDMSUserService(@HeaderParam("AdminAuthToken") String roleToken, @HeaderParam("Authorization") String authorizedToken,
 			@HeaderParam("client_id") String clientId, @HeaderParam("client_secret") String clientSecret,
 			UpdateUserRequest userRequest);
 

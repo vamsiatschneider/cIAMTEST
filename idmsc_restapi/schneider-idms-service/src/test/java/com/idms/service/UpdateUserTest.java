@@ -151,7 +151,7 @@ public class UpdateUserTest implements PropertyVariables{
 		when(cacheManager.getCache(anyString())).thenReturn(cache);
 		when(sendEmail.generateOtp(anyString())).thenReturn(anyString());	
 		
-		Response response = userService.updateUser("Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20",null,null, userRequest);
+		Response response = userService.updateUser(anyString(),"Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20",null,null, userRequest);
 		assertEquals(HttpStatus.OK, HttpStatus.valueOf(response.getStatus()));
 		UpdateUserResponse actualResponse = (UpdateUserResponse)response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Success"));
@@ -183,7 +183,7 @@ public class UpdateUserTest implements PropertyVariables{
 		when(productService.authenticateUser(anyString(), anyString(), anyString())).thenReturn(DomainMockData.AUTHENTICATION_JSON);
 		when(openAMTokenService.getUserInfoByAccessToken(anyString(), anyString())).thenThrow(new NotAuthorizedException("HTTP 401 Unauthorized",Response.Status.UNAUTHORIZED));
 		
-		Response response = userService.updateUser("Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20",null,null, userRequest);
+		Response response = userService.updateUser(anyString(),"Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20",null,null, userRequest);
 		assertEquals(HttpStatus.UNAUTHORIZED, HttpStatus.valueOf(response.getStatus()));
 		UserServiceResponse actualResponse = (UserServiceResponse)response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
@@ -216,7 +216,7 @@ public class UpdateUserTest implements PropertyVariables{
 		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER);
 		when(provisionalService.userRegistration(anyString(), anyString(), anyString())).thenThrow(new BadRequestException());
 		
-		Response response = userService.updateUser("Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20",null,null, userRequest);
+		Response response = userService.updateUser(anyString(),"Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20",null,null, userRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		UserServiceResponse actualResponse = (UserServiceResponse)response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
@@ -249,7 +249,7 @@ public class UpdateUserTest implements PropertyVariables{
 		//when(provisionalService.otpAuthentication(anyString(), anyString(), anyString(), anyString())).thenReturn(DomainMockData.EMAIL_OTP);
 		
 
-		Response response = userService.updateUser("Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20",null,null, userRequest);
+		Response response = userService.updateUser(anyString(),"Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20",null,null, userRequest);
 		assertEquals(HttpStatus.CONFLICT, HttpStatus.valueOf(response.getStatus()));
 		JSONObject actualResponse = (JSONObject) response.getEntity();
 		//UserServiceResponse actualResponse = (UserServiceResponse)
