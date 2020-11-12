@@ -92,7 +92,7 @@ public class GetUserTest {
 		}).when(valuesByOauthHomeWorkContext).parseValuesWorkContext(any(OpenAMGetUserWorkResponse.class), any(DocumentContext.class));
 
 		String userId = "cn00Nfbt-XRzP-zytK-VE68-THyztdBHxvg8";
-		javax.ws.rs.core.Response response = userService.getUser("Bearer 8rcWmUAB_-iRhprn4JH49rbMgW4", userId);
+		javax.ws.rs.core.Response response = userService.getUser(anyString(),"Bearer 8rcWmUAB_-iRhprn4JH49rbMgW4", userId);
 		assertEquals(HttpStatus.OK, HttpStatus.valueOf(response.getStatus()));
 		OpenAMGetUserWorkResponse  actualResponse = (OpenAMGetUserWorkResponse)response.getEntity();
 		assertThat("Message ", actualResponse.getUsername(), equalTo("TestUser"));
@@ -107,7 +107,7 @@ public class GetUserTest {
 		when(openAMService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_INVALID_USER);
 
 		String userId = null;
-		javax.ws.rs.core.Response response = userService.getUser("Bearer 8rcWmUAB_-iRhprn4JH49rbMgW4", userId);
+		javax.ws.rs.core.Response response = userService.getUser(anyString(),"Bearer 8rcWmUAB_-iRhprn4JH49rbMgW4", userId);
 		assertEquals(HttpStatus.NOT_FOUND, HttpStatus.valueOf(response.getStatus()));
 		JSONArray jsonArray = (JSONArray)response.getEntity();
 		JSONObject actualResponse = (JSONObject)jsonArray.get(0);
@@ -124,7 +124,7 @@ public class GetUserTest {
 		when(openAMService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_INVALID_USER);
 
 		String userId = "";
-		javax.ws.rs.core.Response response = userService.getUser("Bearer 8rcWmUAB_-iRhprn4JH49rbMgW4", userId);
+		javax.ws.rs.core.Response response = userService.getUser(anyString(),"Bearer 8rcWmUAB_-iRhprn4JH49rbMgW4", userId);
 		assertEquals(HttpStatus.NOT_FOUND, HttpStatus.valueOf(response.getStatus()));
 		JSONArray jsonArray = (JSONArray)response.getEntity();
 		JSONObject actualResponse = (JSONObject)jsonArray.get(0);
@@ -141,7 +141,7 @@ public class GetUserTest {
 		when(openAMService.getUser(anyString(), anyString())).thenThrow(new NotFoundException());
 
 		String userId = "cn00Nfbt-XRzP-zytK-VE68-THyztdBHabc8";
-		javax.ws.rs.core.Response response = userService.getUser("Bearer 8rcWmUAB_-iRhprn4JH49rbMgW4", userId);
+		javax.ws.rs.core.Response response = userService.getUser(anyString(),"Bearer 8rcWmUAB_-iRhprn4JH49rbMgW4", userId);
 		assertEquals(HttpStatus.UNAUTHORIZED, HttpStatus.valueOf(response.getStatus()));
 		JSONArray jsonArray = (JSONArray)response.getEntity();
 		JSONObject actualResponse = (JSONObject)jsonArray.get(0);

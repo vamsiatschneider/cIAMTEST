@@ -59,27 +59,27 @@ public interface UserService {
 
 	@GET
 	@Path("/apexrest/users/IDMS_Federated_ID__c/{federationId}")
-	Response getUserByFederationId(@HeaderParam("Authorization") String authorizationToken,
+	Response getUserByFederationId(@HeaderParam("AdminAuthToken") String roleToken, @HeaderParam("Authorization") String authorizationToken,
 			@PathParam("federationId") String federationId);
 
 	@GET
 	@Path("/apexrest/users/{userId}")
-	Response getUser(@HeaderParam("Authorization") String authorizationToken, @PathParam("userId") String userId);
+	Response getUser(@HeaderParam("AdminAuthToken") String roleToken, @HeaderParam("Authorization") String authorizationToken, @PathParam("userId") String userId);
 
 	// Response getUser(String userId);
 
 	@GET
 	@Path("/oauth2/userinfo")
-	Response getUserByOauth(@HeaderParam("Authorization") String token);
+	Response getUserByOauth(@HeaderParam("AdminAuthToken") String roleToken, @HeaderParam("Authorization") String token);
 
 	@GET
 	@Path("/apexrest/users")
-	Response getUserbyToken(@HeaderParam("Authorization") String token);
+	Response getUserbyToken(@HeaderParam("AdminAuthToken") String roleToken, @HeaderParam("Authorization") String token);
 
 	@POST
 	@Path("/apexrest/IDMSUser")
 	@Consumes("application/json")
-	Response userRegistration(@HeaderParam("Authorization") String token,@HeaderParam("client_id") String clientId,
+	Response userRegistration(@HeaderParam("AdminAuthToken") String roleToken,@HeaderParam("client_id") String clientId,
 			@HeaderParam("client_secret") String clientSecret, @Valid CreateUserRequest userRequest);
 
 	@POST
@@ -94,7 +94,7 @@ public interface UserService {
 
 	@POST
 	@Path("/apexrest/IDMSCheckUser")
-	Response idmsCheckUserExists(@HeaderParam("Authorization") String token,@Valid CheckUserExistsRequest request);
+	Response idmsCheckUserExists(@HeaderParam("AdminAuthToken") String roleToken,@Valid CheckUserExistsRequest request);
 
 	@POST
 	@Path("/apexrest/IDMSCheckIdentity")
@@ -164,11 +164,11 @@ public interface UserService {
 
 	@GET
 	@Path("/apexrest/GetIDMSUser/{loginIdentifier}")
-	Response getUserByLoginIdentifier(@PathParam("loginIdentifier") String loginIdentifier);
+	Response getUserByLoginIdentifier(@HeaderParam("AdminAuthToken") String roleToken, @PathParam("loginIdentifier") String loginIdentifier);
 
 	@GET
 	@Path("/oauth2/userinfo/ui")
-	Response getUserByOauthFromUI(@HeaderParam("Authorization") String token, @HeaderParam("Appname") String appName);
+	Response getUserByOauthFromUI(@HeaderParam("AdminAuthToken") String roleToken, @HeaderParam("Authorization") String token, @HeaderParam("Appname") String appName);
 
 	/*
 	 * API to fetch user details if SSOToken and userId values are passed
@@ -301,7 +301,7 @@ public interface UserService {
 
 	@POST
 	@Path("/apexrest/GetUserDetailByApplication")
-	Response getUserDetailByApplication(@HeaderParam("Authorization") String authorizationToken,
+	Response getUserDetailByApplication(@HeaderParam("AdminAuthToken") String roleToken, @HeaderParam("Authorization") String authorizationToken,
 			@HeaderParam("Content-Type") String type, UserDetailByApplicationRequest userDetailByApplicationRequest);
 	
 	@POST
