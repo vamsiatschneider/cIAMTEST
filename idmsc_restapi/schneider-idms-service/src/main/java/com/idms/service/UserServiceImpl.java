@@ -6150,8 +6150,7 @@ public class UserServiceImpl implements UserService {
 	private Response passwordRecoverySuccessResponse(String userName, long startTime) {
 		LOGGER.info("Entered passwordRecoverySuccessResponse() -> Start");
 		LOGGER.info("Parameter userName -> " + userName);
-		PasswordRecoveryResponse passwordRecoveryResponse;
-		passwordRecoveryResponse = new PasswordRecoveryResponse();
+		PasswordRecoveryResponse passwordRecoveryResponse = new PasswordRecoveryResponse();
 		passwordRecoveryResponse.setStatus(successStatus);
 		passwordRecoveryResponse.setMessage("Reset Password Done successfully.");
 		long elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
