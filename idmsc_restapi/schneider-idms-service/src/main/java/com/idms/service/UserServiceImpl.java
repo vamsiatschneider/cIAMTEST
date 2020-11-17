@@ -5178,7 +5178,7 @@ public class UserServiceImpl implements UserService {
 			LOGGER.error("ECODE-PWD-RECOVERY-PROC-ERR : Generic exception");
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
-		return passwordRecoverySuccessResponse(userName, startTime, userData, strCurrentCounter, identifierType);
+		return passwordRecoverySuccessResponse(userName, startTime);
 	}
 
 	/*
@@ -6147,67 +6147,13 @@ public class UserServiceImpl implements UserService {
 		return Response.status(Response.Status.OK).entity(sucessRespone).build();
 	}
 
-	private Response passwordRecoverySuccessResponse(String userName, long startTime, String userData, String strcurrentCounter, String identifierType) {
+	private Response passwordRecoverySuccessResponse(String userName, long startTime) {
 		LOGGER.info("Entered passwordRecoverySuccessResponse() -> Start");
 		LOGGER.info("Parameter userName -> " + userName);
-		LOGGER.info("Parameter userData -> " + ChinaIdmsUtil.printOpenAMInfo(userData));
 		PasswordRecoveryResponse passwordRecoveryResponse;
-		Attributes attributes = new Attributes();
-		IDMSUserRecord idmsUserRecord = new IDMSUserRecord();
-		CounterResponse counterResponse = new CounterResponse();
-
-		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
-		DocumentContext productDocCtx = JsonPath.using(conf).parse(userData);
-
-		idmsUserRecord.setAttributes(attributes);
-		idmsUserRecord.setId(userName);
-
-		String idmsPreferredLanguage = null != productDocCtx.read("$.preferredlanguage")
-				? getValue(productDocCtx.read("$.preferredlanguage").toString()) : getDelimeter();
-		String idmsProfileUpdateSource = null != productDocCtx.read("$.updateSource")
-				? getValue(productDocCtx.read("$.updateSource").toString()) : getDelimeter();
-		String idmsRegistrationSource = null != productDocCtx.read("$.registerationSource")
-				? getValue(productDocCtx.read("$.registerationSource").toString()) : getDelimeter();
-		String username = null != productDocCtx.read("$.uid") ? getValue(productDocCtx.read("$.uid").toString())
-				: getDelimeter();
-		String name = null != productDocCtx.read("$.givenName") ? getValue(productDocCtx.read("$.givenName").toString())
-				: getDelimeter();
-		String mobilePhone = null != productDocCtx.read("$.mobile_reg")
-				? getValue(productDocCtx.read("$.mobile_reg").toString()) : getDelimeter();
-		String email = null != productDocCtx.read("$.mail") ? getValue(productDocCtx.read("$.mail").toString())
-				: getDelimeter();
-		/*PMD Violation UnusedLocalVariable
-		 * String federationID = null != productDocCtx.read("$.federationID") ?
-		 * getValue(productDocCtx.read("$.federationID").toString()) : getDelimeter();
-		 */
-
-		idmsUserRecord.setIdmsPreferredLanguage(idmsPreferredLanguage);
-		idmsUserRecord.setIdmsProfileUpdateSource(idmsProfileUpdateSource);
-		idmsUserRecord.setIdmsRegistrationSource(idmsRegistrationSource);
-		idmsUserRecord.setUsername(username);
-		idmsUserRecord.setName(name);
-		idmsUserRecord.setMobilePhone(mobilePhone);
-		idmsUserRecord.setEmail(email);
-		idmsUserRecord.setIdmsIdentityType("");
-		idmsUserRecord.setIDMS_Federated_ID__c(username);
-
-		passwordRecoveryResponse = new PasswordRecoveryResponse(idmsUserRecord);
+		passwordRecoveryResponse = new PasswordRecoveryResponse();
 		passwordRecoveryResponse.setStatus(successStatus);
 		passwordRecoveryResponse.setMessage("Reset Password Done successfully.");
-		
-		if(identifierType.equalsIgnoreCase(UserConstants.EMAIL))
-		{
-		counterResponse.setMaxEmailLimit(maxEmailLimitPasswordRecovery);
-		counterResponse.setStrcurrentMailCounter(strcurrentCounter);
-		}
-		else if(identifierType.equalsIgnoreCase(UserConstants.MOBILE))
-		{
-			counterResponse.setMaxMobLimit(maxMobLimitPasswordRecovery);
-			counterResponse.setStrcurrentMobCounter(strcurrentCounter);
-		}
-		
-		passwordRecoveryResponse.setCounterResponse(counterResponse);
-
 		long elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 		LOGGER.info("Time taken by UserServiceImpl.passwordRecovery() : " + elapsedTime);
 		return Response.status(Response.Status.OK).entity(passwordRecoveryResponse).build();

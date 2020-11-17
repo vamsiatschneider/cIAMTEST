@@ -22,6 +22,7 @@ public class PasswordRecoveryResponse {
 	private String message;
 	
 	@JsonProperty("IDMSUserRecord")
+	@JsonInclude(Include.NON_NULL)
 	@Inject
 	private IDMSUserRecord idmsUserRecord;
 	
