@@ -396,9 +396,7 @@ public class UpdateAILServiceImpl extends IdmsCommonServiceImpl implements Updat
 			directUIMSUserManagerSoapService.updateUIMSUserAIL(userAilRequest, idmsUserAIL,vNewCntValue.toString(),productService,
 					UserConstants.CHINA_IDMS_TOKEN +iPlanetDirectoryKey, usermail);
 			LOGGER.info("End: updateUIMSUserAIL() of DirectUIMSUserManagerSoapService finished for usermail="+usermail);
-		} else {
-			//to nothing
-		}
+		} 
 		LOGGER.info("Inside updateInUIMS() --> End");
 	}
 

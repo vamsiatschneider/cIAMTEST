@@ -24,7 +24,7 @@ import com.idms.model.ActivateUserRequest;
 import com.idms.product.client.OpenAMService;
 import com.se.idms.util.UserConstants;
 
-public class ActivateUserTest implements PropertyVariables{
+public class ActivateUserTest extends PropertyVariables{
 
 	/**
 	 * Class under test.

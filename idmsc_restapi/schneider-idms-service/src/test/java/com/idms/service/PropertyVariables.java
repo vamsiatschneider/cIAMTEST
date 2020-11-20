@@ -1,6 +1,6 @@
 package com.idms.service;
 
-public interface PropertyVariables {
+public class PropertyVariables {
 
 	String Email = "Email";
 	String MobilePhone = "MobilePhone";

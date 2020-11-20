@@ -47,7 +47,7 @@ import com.se.idms.util.PhoneValidator;
 import com.se.idms.util.UserConstants;
 import com.se.idms.util.ValidatingInvocationHandler;
 
-public class UserServiceImplTest implements PropertyVariables{
+public class UserServiceImplTest extends PropertyVariables{
 
 	/**
 	 * Class under test.

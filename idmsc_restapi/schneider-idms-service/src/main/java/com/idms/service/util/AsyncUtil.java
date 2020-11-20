@@ -33,19 +33,27 @@ public class AsyncUtil {
 	public static boolean generateCSV(String filePath, String recordString){
 		boolean csvAppended = false;
 		
-		 CSVWriter writer;
+		 CSVWriter writer=null;
 		try {
 			writer = new CSVWriter(new FileWriter(filePath, true));
 			String [] record = recordString.split(",");
-			
 			writer.writeNext(record);
-			
 			writer.close();
 		} catch (IOException e) {
 			LOGGER.error("AsyncUtil.generateCSV: "+ e.getMessage());
 			LOGGER.error("Exception >"+e);
 		}
-	        
+		finally {
+			if(writer!=null) {
+				try {
+					writer.close();
+				} catch (IOException e) {
+					LOGGER.error("Exception in writing to csv file::"+e.getMessage());
+				}
+			}
+		}
+		
+		 
 		return csvAppended;
 		
 	}

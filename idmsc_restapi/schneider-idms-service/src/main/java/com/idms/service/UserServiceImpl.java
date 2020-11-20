@@ -632,7 +632,7 @@ public class UserServiceImpl implements UserService {
 		cache = (EhCacheCache) cacheManager.getCache("iPlanetToken");
 
 		// final Ehcache cacahe = cacheManger.getCache("iPlanetToken");
-		if (null != cache) {
+		//if (null != cache) {
 			// LOGGER.info("cacahe NotNull");
 
 			// cache.evictExpiredElements();
@@ -652,7 +652,7 @@ public class UserServiceImpl implements UserService {
 			 * } } }
 			 */
 			// cacahe.flush();
-		}
+	//	}
 
 		String tokenResponse = UserServiceUtil.authenticateUserBasedOnFRVersion(productService, frVersion, adminUserName, adminPassword, UserConstants.REALM);
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
@@ -1392,9 +1392,9 @@ public class UserServiceImpl implements UserService {
 						.setRegistrationAttributes__c(objMapper.writeValueAsString(userRequest.getAttributes()));
 
 				List<RegistrationAttributes> attributeList = userRequest.getAttributes();
-				for (int i = 0; i < attributeList.size(); i++) {
-					String KeyName = attributeList.get(i).getKeyName();
-					String KeyValue = attributeList.get(i).getKeyValue();
+				for (RegistrationAttributes regAttribute:attributeList) {
+					String KeyName = regAttribute.getKeyName();
+					String KeyValue = regAttribute.getKeyValue();
 					LOGGER.info("KeyName = " + KeyName + " and KeyValue =" + KeyValue);
 					if (KeyName.equalsIgnoreCase("alink") && null != KeyValue && !KeyValue.isEmpty()) {
 						LOGGER.info("inside alink block");
@@ -4493,9 +4493,9 @@ public class UserServiceImpl implements UserService {
 			String profileUpdateSource=ailRequest.getUserAILRecord().getIDMS_Profile_update_source__c();
 			if (enableSMLVerification!=null && enableSMLVerification.equalsIgnoreCase("True")) {
 			LOGGER.info("Verifying AIL from Master List");
-			for (int i = 0; i < acl.length; i++) {
+			for (String aclValue:acl) {
 					boolean entryFound = false;
-					String ail = ailRequest.getUserAILRecord().getIDMSAclType__c() + "_" + acl[i];
+					String ail = ailRequest.getUserAILRecord().getIDMSAclType__c() + "_" + aclValue;
 
 					Response ailEntry = openDJService.verifyAIL(djUserName, djUserPwd, ail);
 					if (null != ailEntry && 200 == ailEntry.getStatus()) {
@@ -4508,7 +4508,7 @@ public class UserServiceImpl implements UserService {
 							ailMasterRecord.setId(ail);
 							ailMasterRecord.setAilStatus(AILStatus.ACTIVE.getStatus());
 							ailMasterRecord.setAilType(ailRequest.getUserAILRecord().getIDMSAclType__c());
-							ailMasterRecord.setAilValue(acl[i]);
+							ailMasterRecord.setAilValue(aclValue);
 							objMapper = new ObjectMapper();
 							/* Response response = null; PMD Violation UnusedLocalVariable */
 							try {
@@ -4528,7 +4528,7 @@ public class UserServiceImpl implements UserService {
 						}	
 						else {
 						errorResponse.setStatus(errorStatus);
-						errorResponse.setMessage(UserConstants.INVALID_AIL + " for " + acl[i]);
+						errorResponse.setMessage(UserConstants.INVALID_AIL + " for " +aclValue);
 						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 						LOGGER.error("Error is " + errorResponse.getMessage());
 						LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
@@ -4543,7 +4543,7 @@ public class UserServiceImpl implements UserService {
 						if(AILStatus.INACTIVE.getStatus().equalsIgnoreCase(ailStatus)) {
 							LOGGER.info("AIL in SML is inactive for ail value: " + ail);
 							errorResponse.setStatus(errorStatus);
-							errorResponse.setMessage(BulkAILConstants.INVALID_ACL_TYPE + " for " + acl[i]);
+							errorResponse.setMessage(BulkAILConstants.INVALID_ACL_TYPE + " for " + aclValue);
 							elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 							LOGGER.error("Error is " + errorResponse.getMessage());
 							LOGGER.info("Time taken by updateAIL() : " + elapsedTime);
@@ -4558,7 +4558,7 @@ public class UserServiceImpl implements UserService {
 			String appLevelValidation=null;
 			if(productDJData.read("_isAILValidation")!=null) {
 				appLevelValidation=productDJData.read("_isAILValidation");
-			};
+			}
 			LOGGER.info("App Level AIL Validation: " + appLevelValidation);			
 			if (null!=appLevelValidation && appLevelValidation.equalsIgnoreCase("True")  && !isAILApp(authorizedToken,appUser)) 
 				{
@@ -4650,12 +4650,12 @@ public class UserServiceImpl implements UserService {
 
 				if(("GRANT".equalsIgnoreCase(ailRequest.getUserAILRecord().getIDMSOperation__c()))) {
 					String ail = "";
-					for (int i = 0; i < acl.length; i++) {
-						if (IDMSAil__c==null||!IDMSAil__c.contains("(" + ailRequest.getUserAILRecord().getIDMSAclType__c() + ";" + acl[i] + ")")) {
+					for (String aclV:acl) {
+						if (IDMSAil__c==null||!IDMSAil__c.contains("(" + ailRequest.getUserAILRecord().getIDMSAclType__c() + ";" + aclV + ")")) {
 							if (ail.isEmpty()) {
-								ail = "(" + ailRequest.getUserAILRecord().getIDMSAclType__c() + ";" + acl[i] + ")";
+								ail = "(" + ailRequest.getUserAILRecord().getIDMSAclType__c() + ";" + aclV + ")";
 							} else {
-								ail = ail + ",(" + ailRequest.getUserAILRecord().getIDMSAclType__c() + ";" + acl[i] + ")";
+								ail = ail + ",(" + ailRequest.getUserAILRecord().getIDMSAclType__c() + ";" + aclV + ")";
 							}
 						}
 					}
@@ -4665,9 +4665,9 @@ public class UserServiceImpl implements UserService {
 				if (acl_appc != null) {
 					List<String> IDMSAIL_app = Arrays.asList(acl_appc.split(","));
 					acl = ailRequest.getUserAILRecord().getIDMSAcl__c().split(",");
-					for (int i = 0; i < acl.length; i++) {
-						if (!IDMSAIL_app.contains(acl[i])) {
-							acl_appc = acl_appc + "," + acl[i];
+					for (String aclValue:acl) {
+						if (!IDMSAIL_app.contains(aclValue)) {
+							acl_appc = acl_appc + "," + aclValue;
 						}
 					}
 				} else {
@@ -4812,10 +4812,10 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info(
 							"End: updateUIMSUserAIL() of UIMSAccessManagerSoapService finished for usermail=" + usermail);
 				}
-			} else {
+			}/* else {
 				// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
 				// "logout");
-			}
+			}*/
 			return updateAILSuccessResponse(idmsUserAIL);
 		} catch (NotFoundException e) {
 			errorResponse.setStatus(errorStatus);
@@ -5856,10 +5856,10 @@ public class UserServiceImpl implements UserService {
 
 					sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userId,
 							userRequest.getUserRecord().getIDMS_Profile_update_source__c());
-					if (null != updatingUser) {
+					/*if (null != updatingUser) {
 						// Need to check whether do we need to send message to
 						// existing mobile number
-					}
+					}*/
 				}
 
 				openAmReq = mapper.map(userRequest, OpenAmUserRequest.class);
@@ -6003,9 +6003,9 @@ public class UserServiceImpl implements UserService {
 				// Setting publicVisibility value to company.publicVisibility
 				if (null != userRequest.getAttributes() && userRequest.getAttributes().size() > 0) {
 					List<RegistrationAttributes> attributeList = userRequest.getAttributes();
-					for (int i = 0; i < attributeList.size(); i++) {
-						String KeyName = attributeList.get(i).getKeyName();
-						String KeyValue = attributeList.get(i).getKeyValue();
+					for (RegistrationAttributes regAttribute:attributeList) {
+						String KeyName = regAttribute.getKeyName();
+						String KeyValue = regAttribute.getKeyValue();
 						LOGGER.info("KeyName = " + KeyName + " and KeyValue = " + KeyValue);
 
 						if (KeyName.equalsIgnoreCase("publicVisibility") && null != KeyValue && !KeyValue.isEmpty()) {
@@ -6051,10 +6051,10 @@ public class UserServiceImpl implements UserService {
 							companyFedIdInRequest, usermail);
 					LOGGER.info("End: ASYNC updateUIMSUserAndCompany() finished for userId:" + userId);
 				}
-			} else {
+			}/* else {
 				// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
 				// "logout");
-			}
+			}*/
 
 			// logic to send otp for 2FA after user profile update
 			if(is_2faUserUpdate) {
@@ -7090,10 +7090,10 @@ public class UserServiceImpl implements UserService {
 						}
 					}
 					updateOpenamDetails(iPlanetDirectoryKey, federationID, PRODUCT_JSON_STRING);
-				} else {
+				} /*else {
 					// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
 					// "logout");
-				}
+				}*/
 			} catch (Exception e) {
 				LOGGER.error("Exception in setUIMSPassword UIMS API:: ->" + e.getMessage(),e);
 			}
@@ -7336,10 +7336,10 @@ public class UserServiceImpl implements UserService {
 							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, loginIdentifierType, emailOrMobile);
 					LOGGER.info("End: activateIdentityNoPassword() of UIMS finished for emailOrMobile:" + emailOrMobile);
 				}
-			} else {
+			}/* else {
 				// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
 				// "logout");
-			}
+			}*/
 		} catch (BadRequestException e) {
 			response.put(UserConstants.STATUS, errorStatus);
 			response.put(UserConstants.MESSAGE, UserConstants.USER_NOT_FOUND);
@@ -7672,11 +7672,11 @@ public class UserServiceImpl implements UserService {
 				    filePath = EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_ENGLISH.html";
 				}
 			}
-		} else if (UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(scenarioName)) {
+		} /*else if (UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(scenarioName)) {
 
 		} else if (UserConstants.SET_USER_PR.equalsIgnoreCase(scenarioName)) {
 
-		}
+		}*/
 		try {
 
 			file = new FileReader(filePath);
@@ -7691,7 +7691,14 @@ public class UserServiceImpl implements UserService {
 		} catch (IOException e) {
 			throw new FileNotFoundException("Email template not found in the location");
 		}
-
+		finally {
+			if(in!=null) {
+				in.close();
+			}
+			if(file!=null) {
+				file.close();
+			}
+		}
 		return contentBuilder;
 	}
 
@@ -8448,43 +8455,43 @@ public class UserServiceImpl implements UserService {
 
 				listResponse = new ArrayList<Object>();
 
-				for (int index = 0; index < requestList.size(); index++) {
-
-					if (null != requestList.get(index).getSourceLanguage()) {
-						sourceLanguagesList.add(requestList.get(index).getSourceLanguage());
+				for (TransliteratorRequest req:requestList) {
+					
+					if (null != req.getSourceLanguage()) {
+						sourceLanguagesList.add(req.getSourceLanguage());
 					}
 
-					srcNtargetId = requestList.get(index).getSourceLanguage() + "-"
-							+ requestList.get(index).getTargetLanguage();
-					if (null == requestList.get(index).getSource() || requestList.get(index).getSource().isEmpty()) {
+					srcNtargetId = req.getSourceLanguage() + "-"
+							+ req.getTargetLanguage();
+					if (null == req.getSource() || req.getSource().isEmpty()) {
 						errorResponse = new JSONObject();
 						errorResponse.put("code", "MISSING_SOURCE");
 						errorResponse.put("message", "Source is missing");
 						//LOGGER.error("Source is missing");
 						listResponse.add(errorResponse);
-					} else if (null == requestList.get(index).getSourceLanguage()
-							|| requestList.get(index).getSourceLanguage().isEmpty()) {
+					} else if (null == req.getSourceLanguage()
+							|| req.getSourceLanguage().isEmpty()) {
 						errorResponse = new JSONObject();
 						errorResponse.put("code", "MISSING_SOURCE_LANGUAGE");
 						errorResponse.put("message", "SourceLanguage is missing");
 						//LOGGER.error("SourceLanguage is missing");
 						listResponse.add(errorResponse);
-					} else if (null == requestList.get(index).getTargetLanguage()
-							|| requestList.get(index).getTargetLanguage().isEmpty()) {
+					} else if (null == req.getTargetLanguage()
+							|| req.getTargetLanguage().isEmpty()) {
 						errorResponse = new JSONObject();
 						errorResponse.put("code", "MISSING_TARGET_LANGUAGE");
 						errorResponse.put("message", "TargetLanguage is missing");
 						//LOGGER.error("TargetLanguage is missing");
 						listResponse.add(errorResponse);
-					} else if (supportedLanguages.contains(srcNtargetId) && (null != requestList.get(index).getSource()
-							&& !requestList.get(index).getSource().isEmpty())) {
-						result = Transliterator.getInstance(srcNtargetId).transform(requestList.get(index).getSource());
+					} else if (supportedLanguages.contains(srcNtargetId) && (null != req.getSource()
+							&& !req.getSource().isEmpty())) {
+						result = Transliterator.getInstance(srcNtargetId).transform(req.getSource());
 
 						response = new TransliteratorResponse();
-						response.setSource(requestList.get(index).getSource());
+						response.setSource(req.getSource());
 						response.setTarget(result);
-						response.setSourceLanguage(requestList.get(index).getSourceLanguage());
-						response.setTargetLanguage(requestList.get(index).getTargetLanguage());
+						response.setSourceLanguage(req.getSourceLanguage());
+						response.setTargetLanguage(req.getTargetLanguage());
 						listResponse.add(response);
 					} else {
 						errorResponse = new JSONObject();
@@ -8631,7 +8638,7 @@ public class UserServiceImpl implements UserService {
 					prefix.append(prefixIdentityUrl).append(startUrl).append("&login_error=L9101");
 				}
 			} catch (UnsupportedEncodingException e1) {
-
+				LOGGER.error("Login Exception occured ::" + e1.getMessage(), e1);
 			}
 
 			response = rb.header("Location", prefix.toString()).build();
@@ -9157,58 +9164,58 @@ public class UserServiceImpl implements UserService {
 
 				List<TransliteratorConversionRequest> conversionList = requestList;
 
-				for (int index = 0; index < conversionList.size(); index++) {
+				for (TransliteratorConversionRequest conversion:conversionList) {
 
-					if (null != conversionList.get(index).getSourceLanguage()) {
-						sourceLanguagesList.add(conversionList.get(index).getSourceLanguage());
+					if (null != conversion.getSourceLanguage()) {
+						sourceLanguagesList.add(conversion.getSourceLanguage());
 					}
 
-					srcNtargetId = conversionList.get(index).getSourceLanguage() + "-"
-							+ conversionList.get(index).getTargetLanguage();
+					srcNtargetId = conversion.getSourceLanguage() + "-"
+							+ conversion.getTargetLanguage();
 
-					if (null == conversionList.get(index).getIdentifier()
-							|| conversionList.get(index).getIdentifier().isEmpty()) {
+					if (null == conversion.getIdentifier()
+							|| conversion.getIdentifier().isEmpty()) {
 						transErrorResponse = new TransliteratorErrorResponse();
 						transErrorResponse.setCode("MISSING_IDENTIFIER");
 						transErrorResponse.setMessage("Identifier is missing");
 						listResponse.add(transErrorResponse);
-					} else if (null == conversionList.get(index).getSourceLanguage()
-							|| conversionList.get(index).getSourceLanguage().isEmpty()) {
+					} else if (null == conversion.getSourceLanguage()
+							|| conversion.getSourceLanguage().isEmpty()) {
 						transErrorResponse = new TransliteratorErrorResponse();
-						transErrorResponse.setKey(conversionList.get(index).getIdentifier());
+						transErrorResponse.setKey(conversion.getIdentifier());
 						transErrorResponse.setCode("MISSING_SOURCE_LANGUAGE");
 						transErrorResponse.setMessage("SourceLanguage is missing");
 						listResponse.add(transErrorResponse);
-					} else if (null == conversionList.get(index).getTargetLanguage()
-							|| conversionList.get(index).getTargetLanguage().isEmpty()) {
+					} else if (null == conversion.getTargetLanguage()
+							|| conversion.getTargetLanguage().isEmpty()) {
 						transErrorResponse = new TransliteratorErrorResponse();
-						transErrorResponse.setKey(conversionList.get(index).getIdentifier());
+						transErrorResponse.setKey(conversion.getIdentifier());
 						transErrorResponse.setCode("MISSING_TARGET_LANGUAGE");
 						transErrorResponse.setMessage("TargetLanguage is missing");
 						listResponse.add(transErrorResponse);
-					} else if (null == conversionList.get(index).getAttributes()
-							|| conversionList.get(index).getAttributes().isEmpty()) {
+					} else if (null == conversion.getAttributes()
+							|| conversion.getAttributes().isEmpty()) {
 						transErrorResponse = new TransliteratorErrorResponse();
-						transErrorResponse.setKey(conversionList.get(index).getIdentifier());
+						transErrorResponse.setKey(conversion.getIdentifier());
 						transErrorResponse.setCode("MISSING_ATTRIBUTES");
 						transErrorResponse.setMessage("Attributes are missing");
 						listResponse.add(errorResponse);
-					} else if ((null != conversionList.get(index).getAttributes()
-							&& conversionList.get(index).getAttributes().size() > 0)
+					} else if ((null != conversion.getAttributes()
+							&& conversion.getAttributes().size() > 0)
 							&& (supportedLanguages.contains(srcNtargetId))) {
 
 						// List<TransliteratorAttributes> attributes = new
 						// ArrayList<TransliteratorAttributes>();
 						List<Object> attributes = new ArrayList<Object>();
 						response = new TransliteratorConversionResponse();
-						response.setIdentifier(conversionList.get(index).getIdentifier());
-						response.setSourceLanguage(conversionList.get(index).getSourceLanguage());
-						response.setTargetLanguage(conversionList.get(index).getTargetLanguage());
+						response.setIdentifier(conversion.getIdentifier());
+						response.setSourceLanguage(conversion.getSourceLanguage());
+						response.setTargetLanguage(conversion.getTargetLanguage());
 
 						response.setAttributes(attributes);
 
 						listResponse.add(response);
-						for (TransliteratorAttributes attribute : conversionList.get(index).getAttributes()) {
+						for (TransliteratorAttributes attribute : conversion.getAttributes()) {
 
 							TransliteratorAttributes attribueResponse = null;// new
 																				// TransliteratorAttributes();
@@ -9295,7 +9302,7 @@ public class UserServiceImpl implements UserService {
 						 * }
 						 */ else {
 						transErrorResponse = new TransliteratorErrorResponse();
-						transErrorResponse.setKey(conversionList.get(index).getIdentifier());
+						transErrorResponse.setKey(conversion.getIdentifier());
 						transErrorResponse.setCode("INVALID_LANGUAGE");
 						transErrorResponse.setMessage("Language is invalid");
 						//LOGGER.error("Language is invalid");
@@ -9490,9 +9497,9 @@ public class UserServiceImpl implements UserService {
 		// Setting publicVisibility value to company.publicVisibility
 		if (null != userRequest.getAttributes() && userRequest.getAttributes().size() > 0) {
 			List<RegistrationAttributes> attributeList = userRequest.getAttributes();
-			for (int i = 0; i < attributeList.size(); i++) {
-				String KeyName = attributeList.get(i).getKeyName();
-				String KeyValue = attributeList.get(i).getKeyValue();
+			for (RegistrationAttributes regAttribute:attributeList) {
+				String KeyName = regAttribute.getKeyName();
+				String KeyValue = regAttribute.getKeyValue();
 				if (KeyName.equalsIgnoreCase("publicVisibility") && null != KeyValue && !KeyValue.isEmpty()) {
 					company.setPublicVisibility(Boolean.parseBoolean(KeyValue));
 				}
@@ -9949,6 +9956,7 @@ public class UserServiceImpl implements UserService {
 			}
 			if (null == userMFADataRequest.getStageData() || userMFADataRequest.getStageData().isEmpty()) {
 				if (stageNameFromUI.equalsIgnoreCase("ResendOTPStage")) {
+					LOGGER.info("ResendOTPStage");
 				} else {
 					errorResponse.setStatus(ErrorCodeConstants.ERROR);
 					errorResponse.setMessage(UserConstants.DEVICEDATA_EMPTY);
@@ -11850,9 +11858,9 @@ public class UserServiceImpl implements UserService {
 			String[] listEmailIds = emailRequest.getEmailOrMobile().split(";");
 			LOGGER.info("number of email ids = " + listEmailIds.length);
 			// changing user mailid to testmail
-			for (int i = 0; i < listEmailIds.length; i++) {
-				if (null != listEmailIds[i] && !listEmailIds[i].isEmpty()) {
-					String orgMail = listEmailIds[i].trim();
+			for (String Emailid:listEmailIds) {
+				if (null != Emailid && !Emailid.isEmpty()) {
+					String orgMail = Emailid.trim();
 					if(orgMail.contains("@")){
 						orgMail = "testmail"+orgMail.substring(orgMail.indexOf('@'));
 					}
@@ -13002,11 +13010,12 @@ public class UserServiceImpl implements UserService {
 		//java.nio.file.Path pathTo = Paths.get("c:\\santosh\\");
 		java.nio.file.Path pathTo = Paths.get("/home/ec2-user/santosh/");
 		java.nio.file.Path destination;
+		InputStream in =null;
 		try {
 			destination = Paths.get(pathTo.toString() + "\\" + fileUploadName);
 			LOGGER.info("destination = "+destination);
 			Files.deleteIfExists(destination);
-			InputStream in = attachment.getObject(InputStream.class);
+			in = attachment.getObject(InputStream.class);
 			Files.copy(in, destination);
 
 			dataFile = ChinaIdmsUtil.getDataFromFile(destination.toString());
@@ -13153,6 +13162,14 @@ public class UserServiceImpl implements UserService {
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		finally {
+			if(in!=null) {
+			try {
+				in.close();
+			} catch (IOException e) {
+				LOGGER.error("Error is :: "+e.getMessage(),e);
+			}}
 		}
 		return Response.status(Response.Status.OK).entity(responseList).build();
 	}

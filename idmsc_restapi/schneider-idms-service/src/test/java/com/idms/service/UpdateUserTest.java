@@ -50,7 +50,7 @@ import com.se.idms.util.UserConstants;
 import com.se.idms.util.ValidatingInvocationHandler;
 import com.se.uims.usermanager.UserV6;
 
-public class UpdateUserTest implements PropertyVariables{
+public class UpdateUserTest extends PropertyVariables{
 
 	/**
 	 * Class under test.

@@ -227,8 +227,8 @@ public class UIMSAccessManagerSoapService {
 						iPlanetDirectoryKey, usermail);}
 				else {
 					String[] multipleID=access.getId().split(",");
-					for(int i=0;i<multipleID.length;i++) {
-						access.setId(multipleID[i]);
+					for(String id:multipleID) {
+						access.setId(id);
 						grantAccessControlToUser(CALLER_FID,
 								ailRequest.getUserAILRecord().getIDMSUser__c(),
 								ailRequest.getUserAILRecord().getIDMSUser__c(), access, vNewCntValue, productService,
@@ -245,8 +245,8 @@ public class UIMSAccessManagerSoapService {
 							iPlanetDirectoryKey, usermail);}
 					else {
 						String[] multipleID=access.getId().split(",");
-						for(int i=0;i<multipleID.length;i++) {
-							access.setId(multipleID[i]);
+						for(String id:multipleID) {
+							access.setId(id);
 							revokeAccessControlToUser(CALLER_FID,
 									ailRequest.getUserAILRecord().getIDMSUser__c(),
 									ailRequest.getUserAILRecord().getIDMSUser__c(), access, vNewCntValue, productService,

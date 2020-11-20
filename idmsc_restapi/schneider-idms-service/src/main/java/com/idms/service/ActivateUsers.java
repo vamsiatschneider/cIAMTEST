@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -50,9 +51,7 @@ public class ActivateUsers {
 			}
 
 		} catch (Exception e) {
-
-
-
+			LOGGER.error("Unable to read data from csv file");
 		}
 
 	}
@@ -76,7 +75,6 @@ public class ActivateUsers {
 				try {
 					jsonString = executeRequestApi(hostname + "/services/apexrest/GetIDMSUser/" + user, "GET", null);
 				} catch (Exception exp) {
-					// TODO Auto-generated catch block
 					LOGGER.error("An error occured."+exp.getMessage());		
 					LOGGER.error("Exception >"+exp);}
 
@@ -86,7 +84,6 @@ public class ActivateUsers {
 					try {
 						jsonString = executeRequestApi(hostname + "/services/apexrest/ActivateUser", "PUT", inputRequesr);
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
 						LOGGER.error("An error occured."+e.getMessage());
 						LOGGER.error("Exception >"+e);
 					}
@@ -179,27 +176,33 @@ public class ActivateUsers {
 			conn.setRequestProperty("Accept", "application/json");
 			conn.setRequestProperty("Content-Type", "application/json");
 			conn.connect();
-
+			OutputStream os = conn.getOutputStream();
+			BufferedReader br = null;
+			try {
 			if (null != inputData) {
-				OutputStream os = conn.getOutputStream();
 				os.write(inputData.getBytes());
 				os.flush();
-
 			}
 
 			if (conn.getResponseCode() != 200) {
 				throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
 			}
-
-			BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+			
+			br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
 
 			LOGGER.info("Output from Server .... \n");
 			while ((output = br.readLine()) != null) {
 				LOGGER.info(output);
 				jsonString = output;
 			}
-
+			br.close();
 			conn.disconnect();
+			}
+			finally {
+				os.close();
+				if(br!=null) {
+				br.close();}
+			}
 			return jsonString;
 
 		} catch (MalformedURLException e) {

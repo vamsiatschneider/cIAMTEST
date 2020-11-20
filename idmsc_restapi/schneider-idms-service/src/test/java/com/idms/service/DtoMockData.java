@@ -25,7 +25,7 @@ import com.se.uims.usermanager.UserV6;
  * Mock data creation for dto objects in the Service layer.
  * Note: It uses the core layer {@link DomainMockData} which is available across layers.
  */
-public class DtoMockData {
+public final class DtoMockData {
 
 	/**
      * Private default constructor to prevent external instantiation.

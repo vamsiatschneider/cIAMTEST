@@ -84,11 +84,12 @@ public class UserAILRecord {
 	public String getAILvalue(String ailType, String ailValue) {
 		String[] acl = ailValue.split(",");
 		String ail = "";
-		for (int i = 0; i < acl.length; i++) {
-			if (ail.isEmpty()) {
-				ail = "(" + ailType + ";" + acl[i] + ")";
+		for(String ailt:acl)
+		//for (int i = 0; i < acl.length; i++) {
+		{	if (ail.isEmpty()) {
+				ail = "(" + ailType + ";" + ailt + ")";
 			} else {
-				ail = ail + ",(" + ailType + ";" + acl[i] + ")";
+				ail = ail + ",(" + ailType + ";" + ailt + ")";
 			}
 		}
 		return ail;

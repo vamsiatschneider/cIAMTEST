@@ -218,6 +218,10 @@ public class ApplicationPropertiesWatcher implements Runnable {
 				}
 			} catch (Exception e) {
 				LOGGER.error("InterruptedException: " + e.getMessage(),e);
+				
+			}
+			finally {
+				watchService.close();
 			}
 		}
 	}

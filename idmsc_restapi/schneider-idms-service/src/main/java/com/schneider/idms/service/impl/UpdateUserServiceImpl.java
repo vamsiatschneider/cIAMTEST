@@ -356,7 +356,7 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				if (UserConstants.EMAIL.equalsIgnoreCase(identifierType) && null != updatingUser) {
 					String prefferedLanguage = null != productDocCtxUser.read("$.preferredlanguage")
 							? getValue(productDocCtxUser.read("$.preferredlanguage").toString()) : getDelimeter();
-					;
+					
 
 					/**
 					 * Adding for social lgoin
@@ -404,10 +404,10 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 
 				sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userId,
 						userRequest.getProfileLastUpdateSource());
-				if (null != updatingUser) {
+				/*if (null != updatingUser) {
 					// Need to check whether do we need to send message to
 					// existing mobile number
-				}
+				}*/
 
 			}
 
