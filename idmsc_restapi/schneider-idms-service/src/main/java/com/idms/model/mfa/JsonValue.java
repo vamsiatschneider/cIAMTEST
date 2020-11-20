@@ -14,12 +14,16 @@ import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.idms.mfa.exception.JsonValueException;
 import com.idms.model.mfa.Function;
+import com.idms.service.UserServiceImpl;
 
 
 public class JsonValue implements Cloneable, Iterable<JsonValue> {
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(JsonValue.class);
     /**
      * Returns a mutable JSON array containing the provided objects. This method
      * is provided as a convenience method for constructing JSON arrays. Example
@@ -995,8 +999,12 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
                 public boolean contains(final Object o) {
                     boolean result = false;
                     if (o instanceof String) {
+                    		try {
                             result = range.contains(Integer.valueOf((String) o));
-                        
+                    		}
+                    		catch (final NumberFormatException nfe) {
+                    			LOGGER.error("Exception "+nfe.getMessage());
+                    		}
                     }
                     return result;
                 }

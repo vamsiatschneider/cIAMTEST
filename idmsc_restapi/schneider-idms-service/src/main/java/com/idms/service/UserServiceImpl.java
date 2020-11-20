@@ -632,7 +632,10 @@ public class UserServiceImpl implements UserService {
 		cache = (EhCacheCache) cacheManager.getCache("iPlanetToken");
 
 		// final Ehcache cacahe = cacheManger.getCache("iPlanetToken");
-		//if (null != cache) {
+		//Commented for PMD: EmptyIfStmt Rule
+		 //if (null != cache) {
+		 
+		/*
 			// LOGGER.info("cacahe NotNull");
 
 			// cache.evictExpiredElements();
@@ -652,7 +655,7 @@ public class UserServiceImpl implements UserService {
 			 * } } }
 			 */
 			// cacahe.flush();
-	//	}
+		//}
 
 		String tokenResponse = UserServiceUtil.authenticateUserBasedOnFRVersion(productService, frVersion, adminUserName, adminPassword, UserConstants.REALM);
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
@@ -4812,7 +4815,9 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info(
 							"End: updateUIMSUserAIL() of UIMSAccessManagerSoapService finished for usermail=" + usermail);
 				}
-			}/* else {
+			}
+			//Commented for PMD: EmptyIfStmt Rule
+			/* else {
 				// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
 				// "logout");
 			}*/
@@ -5856,6 +5861,7 @@ public class UserServiceImpl implements UserService {
 
 					sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userId,
 							userRequest.getUserRecord().getIDMS_Profile_update_source__c());
+					//Commented for PMD: EmptyIfStmt Rule
 					/*if (null != updatingUser) {
 						// Need to check whether do we need to send message to
 						// existing mobile number
@@ -6051,7 +6057,9 @@ public class UserServiceImpl implements UserService {
 							companyFedIdInRequest, usermail);
 					LOGGER.info("End: ASYNC updateUIMSUserAndCompany() finished for userId:" + userId);
 				}
-			}/* else {
+			}
+			//Commented for PMD: EmptyIfStmt Rule
+			/* else {
 				// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
 				// "logout");
 			}*/
@@ -7090,7 +7098,9 @@ public class UserServiceImpl implements UserService {
 						}
 					}
 					updateOpenamDetails(iPlanetDirectoryKey, federationID, PRODUCT_JSON_STRING);
-				} /*else {
+				}
+				//Commented for PMD: EmptyIfStmt Rule
+				/*else {
 					// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
 					// "logout");
 				}*/
@@ -7336,7 +7346,9 @@ public class UserServiceImpl implements UserService {
 							UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, loginIdentifierType, emailOrMobile);
 					LOGGER.info("End: activateIdentityNoPassword() of UIMS finished for emailOrMobile:" + emailOrMobile);
 				}
-			}/* else {
+			}
+			//Commented for PMD: EmptyIfStmt Rule
+			/* else {
 				// productService.sessionLogout(UserConstants.IPLANET_DIRECTORY_PRO+iPlanetDirectoryKey,
 				// "logout");
 			}*/
@@ -7672,7 +7684,9 @@ public class UserServiceImpl implements UserService {
 				    filePath = EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_ENGLISH.html";
 				}
 			}
-		} /*else if (UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(scenarioName)) {
+		} 
+		//Commented for PMD: EmptyIfStmt Rule
+		/*else if (UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(scenarioName)) {
 
 		} else if (UserConstants.SET_USER_PR.equalsIgnoreCase(scenarioName)) {
 

@@ -54,9 +54,9 @@ public class HttpConnectionUtils {
             StringBuffer sBuffer = new StringBuffer();
             byte[] buf = new byte[1024];
             
-            
-            for (int n; (n = inStream.read(buf)) != -1; ) {
-                sBuffer.append(new String(buf, 0, n, "UTF-8"));
+            int count= inStream.read(buf);
+            for (int n; count!= -1; ) {
+                sBuffer.append(new String(buf, 0, count, "UTF-8"));
             }
            
             responseString = sBuffer.toString();
@@ -105,8 +105,9 @@ public class HttpConnectionUtils {
             // 发送数据到服务器并使用Reader读取返回的数据
             StringBuffer sBuffer = new StringBuffer();
             byte[] buf = new byte[1024];
-            for (int n; (n = inStream.read(buf)) != -1; ) {
-                sBuffer.append(new String(buf, 0, n, "UTF-8"));
+            int count=inStream.read(buf);
+            for (int n; count != -1; ) {
+                sBuffer.append(new String(buf, 0, count, "UTF-8"));
             }
             // 断开连接
             

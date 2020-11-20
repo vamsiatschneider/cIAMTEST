@@ -404,6 +404,7 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 
 				sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userId,
 						userRequest.getProfileLastUpdateSource());
+				//Commented for PMD: EmptyIfStmt Rule
 				/*if (null != updatingUser) {
 					// Need to check whether do we need to send message to
 					// existing mobile number
