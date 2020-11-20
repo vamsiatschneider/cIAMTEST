@@ -1047,8 +1047,6 @@ public class IdmsCommonServiceImpl {
 		//LOGGER.info("Parameter scenarioName -> " + scenarioName);
 		//LOGGER.info("Parameter prefferedLanguage -> " + prefferedLanguage);
 		StringBuilder contentBuilder = new StringBuilder();
-		BufferedReader in = null;
-		FileReader file = null;
 		String filePath = null;
 
 		// Need to check the scenario //UPDATE EMAIL NOTIFICATION
@@ -1058,26 +1056,27 @@ public class IdmsCommonServiceImpl {
 			} else {
 				filePath = EMAIL_TEMPLATE_DIR + "Schneider_Electric-Email_Change_Notification_ENGLISH.html";
 			}
-		} else if (UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(scenarioName)) {
+		} /*else if (UserConstants.UPDATE_USER_RECORD.equalsIgnoreCase(scenarioName)) {
 
 		} else if (UserConstants.SET_USER_PR.equalsIgnoreCase(scenarioName)) {
 
-		}
+		}*/
+		FileReader file = new FileReader(filePath);
+
+		BufferedReader in = new BufferedReader(file);
 		try {
-
-			file = new FileReader(filePath);
-
-			in = new BufferedReader(file);
 			String str;
 			while ((str = in.readLine()) != null) {
 				contentBuilder.append(str);
 			}
-			in.close();
-			file.close();
+			
 		} catch (IOException e) {
 			throw new FileNotFoundException("Email template not found in the location");
 		}
-
+		finally {
+			in.close();
+			file.close();
+		}
 		return contentBuilder;
 	}
 

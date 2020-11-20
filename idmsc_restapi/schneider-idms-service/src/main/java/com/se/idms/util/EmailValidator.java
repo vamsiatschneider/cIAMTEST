@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
  *
  */
 
-public class EmailValidator {
+public  class EmailValidator {
 
 	private static EmailValidator emailValidator = null;
 
@@ -22,8 +22,8 @@ public class EmailValidator {
 	static {
 		emailValidator = new EmailValidator();
 	}
-
-	private EmailValidator() {
+//Removing private for PMD
+	 EmailValidator() {
 
 	}
 

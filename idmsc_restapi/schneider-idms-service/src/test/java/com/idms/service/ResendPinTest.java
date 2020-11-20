@@ -34,7 +34,7 @@ import com.se.idms.cache.validate.impl.PickListValidatorImpl;
 import com.se.idms.util.UserConstants;
 import com.se.idms.util.ValidatingInvocationHandler;
 
-public class ResendPinTest implements PropertyVariables{
+public class ResendPinTest extends PropertyVariables{
 
 	/**
 	 * Class under test.

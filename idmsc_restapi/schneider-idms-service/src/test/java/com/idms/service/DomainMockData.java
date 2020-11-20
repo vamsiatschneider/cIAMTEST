@@ -16,7 +16,7 @@ import org.springframework.http.HttpStatus;
  * Prepare mock data for domain classes. Note: Do NOT use Mock Data class for
  * Integration Tests. All values here are dummy.
  */
-public class DomainMockData {
+public final class DomainMockData {
 
 	// Note: No Java doc necessary for constants UNLESS it is not
 	// self-documenting. If in doubt, provide the Java doc.

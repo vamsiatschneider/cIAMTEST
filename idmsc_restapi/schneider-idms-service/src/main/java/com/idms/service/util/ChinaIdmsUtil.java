@@ -76,13 +76,18 @@ public class ChinaIdmsUtil {
 
 		StringBuffer result = new StringBuffer();
 		String line = "";
+		try {
 		while ((line = rd.readLine()) != null) {
 			result.append(line);
 		}
 		if (401 == response.getStatusLine().getStatusCode()) {
 			return Response.status(Response.Status.UNAUTHORIZED).entity(result.toString()).build();
 		}
-		
+		}
+		finally {
+			rd.close();
+			
+		}
 		return Response.status(response.getStatusLine().getStatusCode()).entity(result.toString()).build();
 	}
 	
@@ -93,11 +98,11 @@ public class ChinaIdmsUtil {
 	public static String generateFedId(){		 
 		
         String fedId = "cn00";
-        fedId += RandomStringUtils.random(4, UserConstants.RANDOM_CHARS);; 
-        fedId += '-' + RandomStringUtils.random(4, UserConstants.RANDOM_CHARS);;
-        fedId += '-' + RandomStringUtils.random(4, UserConstants.RANDOM_CHARS);;
-        fedId += '-' + RandomStringUtils.random(4, UserConstants.RANDOM_CHARS);;
-        fedId += '-' + RandomStringUtils.random(12, UserConstants.RANDOM_CHARS);;
+        fedId += RandomStringUtils.random(4, UserConstants.RANDOM_CHARS);
+        fedId += '-' + RandomStringUtils.random(4, UserConstants.RANDOM_CHARS);
+        fedId += '-' + RandomStringUtils.random(4, UserConstants.RANDOM_CHARS);
+        fedId += '-' + RandomStringUtils.random(4, UserConstants.RANDOM_CHARS);
+        fedId += '-' + RandomStringUtils.random(12, UserConstants.RANDOM_CHARS);
         return fedId;
     }
 	
@@ -114,7 +119,6 @@ public class ChinaIdmsUtil {
         	String chars = rawData.substring(i, y);
         	newrawdata = rawData.replace(chars, "");
         	
-        }else{
         }
         return newrawdata;
     }
@@ -311,21 +315,25 @@ public class ChinaIdmsUtil {
 			}
 			HttpResponse response = client.execute(request);
 			BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
+			
 			StringBuffer result = new StringBuffer();
 			String line = "";
+			try {
 			while ((line = rd.readLine()) != null) {
 				result.append(line);
 			}
 			if (401 == response.getStatusLine().getStatusCode()) {
 				return Response.status(Response.Status.UNAUTHORIZED).entity(result.toString()).build();
+			}}
+			finally {
+			rd.close();
 			}
 			return Response.status(response.getStatusLine().getStatusCode()).entity(result.toString()).build();
 		}
 		ErrorResponse errorResponse = new ErrorResponse();
 		errorResponse.setStatus(ErrorCodeConstants.ERROR);
 		errorResponse.setMessage("Device/OTP Info JSON string is unavailable. Please contact support team.");
-		
+	
 		return Response.status(Response.Status.NO_CONTENT).entity(errorResponse).build();		
 	}
 	
@@ -417,14 +425,18 @@ public class ChinaIdmsUtil {
 		BufferedReader reader;
 		List<String> lines = new ArrayList<>();
 		String line = null;
-		try {
-			reader = new BufferedReader(new FileReader(filename));
+		reader = new BufferedReader(new FileReader(filename));
+			
+			try {
 			while ((line = reader.readLine()) != null) {
 				lines.add(line);
 			}
 
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+		finally {
+			reader.close();
 		}
 		checkFileData(lines);
 		return lines;

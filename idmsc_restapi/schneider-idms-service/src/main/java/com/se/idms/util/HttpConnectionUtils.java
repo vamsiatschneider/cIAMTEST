@@ -47,21 +47,27 @@ public class HttpConnectionUtils {
         connection.setConnectTimeout(2000);
         connection.connect();
         String responseString = "";
+        InputStream inStream = connection.getInputStream();
+        try {
         if (connection.getResponseCode() == 200) {
             // 发送数据到服务器并使用Reader读取返回的数据
             StringBuffer sBuffer = new StringBuffer();
             byte[] buf = new byte[1024];
-            InputStream inStream = connection.getInputStream();
+            
+            
             for (int n; (n = inStream.read(buf)) != -1; ) {
                 sBuffer.append(new String(buf, 0, n, "UTF-8"));
             }
-            inStream.close();
+           
             responseString = sBuffer.toString();
         } else {
         	LOGGER.error(String.format("connection response code is not correct,code=%s,msg=%s ",
                     connection.getResponseCode(), connection.getResponseMessage()));
         }
         connection.disconnect();// 断开连接
+        }finally {
+        	inStream.close();
+        }
         return responseString;
     }
 
@@ -88,26 +94,33 @@ public class HttpConnectionUtils {
         // 建立与服务器的连接，并未发送数据
         connection.connect();
         OutputStreamWriter outputStreamWriter = new OutputStreamWriter(connection.getOutputStream(), "utf-8");
+        InputStream inStream = connection.getInputStream();
+        String response = "";
+        try {
         outputStreamWriter.write(data);
         outputStreamWriter.flush();
-        outputStreamWriter.close();
-        String response = "";
+        
+        
         if (connection.getResponseCode() == 200) {
             // 发送数据到服务器并使用Reader读取返回的数据
             StringBuffer sBuffer = new StringBuffer();
             byte[] buf = new byte[1024];
-            InputStream inStream = connection.getInputStream();
             for (int n; (n = inStream.read(buf)) != -1; ) {
                 sBuffer.append(new String(buf, 0, n, "UTF-8"));
             }
             // 断开连接
-            inStream.close();
+            
             response = sBuffer.toString();
         } else {
         	LOGGER.error(String.format("connection response code is not correct,code=%s,msg=%s ",
                     connection.getResponseCode(), connection.getResponseMessage()));
         }
         connection.disconnect();
+        }
+        finally {
+        	outputStreamWriter.close();
+        	inStream.close();
+        }
         return response;
     }
 

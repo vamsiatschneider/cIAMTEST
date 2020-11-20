@@ -3,19 +3,12 @@ package com.idms.service;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeTrue;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import com.se.uims.usermanager.UserV6;
-import java.io.ByteArrayInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Writer;
 
-import javax.ws.rs.BadRequestException;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
 
@@ -32,32 +25,29 @@ import org.springframework.http.HttpStatus;
 import com.idms.mapper.IdmsMapper;
 import com.idms.model.CreateUserRequest;
 import com.idms.model.CreateUserResponse;
-import com.idms.service.util.AsyncUtil;
-import com.opencsv.CSVWriter;
 import com.idms.model.IDMSUserResponse;
 import com.idms.product.client.IFWService;
 import com.idms.product.client.OpenAMService;
 import com.idms.product.client.OpenAMTokenService;
 import com.idms.product.client.OpenDjService;
+import com.idms.product.model.OpenAmUserRequest;
 import com.idms.service.impl.IFWTokenServiceImpl;
 import com.idms.service.uims.sync.UIMSAuthenticatedUserManagerSoapServiceSync;
 import com.idms.service.uims.sync.UIMSUserManagerSoapServiceSync;
 import com.schneider.idms.salesforce.service.SaleforceServiceImpl;
 import com.schneider.idms.salesforce.service.SalesforceSyncServiceImpl;
 import com.se.idms.cache.validate.IValidator;
+import com.se.idms.cache.validate.impl.LengthValidatorImpl;
+import com.se.idms.cache.validate.impl.PickListValidatorImpl;
 import com.se.idms.dto.ErrorResponse;
 import com.se.idms.dto.UIMSResponse;
 import com.se.idms.dto.UserServiceResponse;
 import com.se.idms.util.EmailValidator;
 import com.se.idms.util.PhoneValidator;
 import com.se.idms.util.UserConstants;
-import com.idms.product.model.OpenAmUserRequest;
-import com.se.idms.cache.validate.impl.LengthValidatorImpl;
-import com.se.idms.cache.validate.impl.PickListValidatorImpl;
 import com.se.idms.util.ValidatingInvocationHandler;
-import com.schneider.ims.service.uimsv2.CompanyV3;
 
-public class UserServiceImplTest implements PropertyVariables{
+public class UserServiceImplTest extends PropertyVariables{
 
 	/**
 	 * Class under test.
@@ -207,7 +197,7 @@ public class UserServiceImplTest implements PropertyVariables{
 				anyString(), company,  anyString(), anyString(), anyString(), anyString(), anyString(), userRequest)).thenReturn(anyString());*/
 		
 	
-		Response response = userService.userRegistration(anyString(),anyString(),anyString(),userRequest);
+		Response response = userService.userRegistration("","client", "clientPwd", userRequest);
 		CreateUserResponse actualResponse = (CreateUserResponse)response.getEntity();
 		
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Success"));
@@ -233,7 +223,7 @@ public class UserServiceImplTest implements PropertyVariables{
 		when(productService.authenticateUser(anyString(), anyString(), anyString())).thenThrow(new NotAuthorizedException("HTTP 401 Unauthorized",Response.Status.UNAUTHORIZED));
 		when(openDJService.getUser(anyString(), anyString(),anyString())).thenReturn(DomainMockData.getAppDetails());
 		//Mocking Id 
-		Response response = userService.userRegistration(anyString(),anyString(),anyString(),userRequest);
+		Response response = userService.userRegistration("","client", "clientPwd", userRequest);
 		assertEquals(HttpStatus.UNAUTHORIZED, HttpStatus.valueOf(response.getStatus()));
 		ErrorResponse actualResponse = (ErrorResponse)response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
@@ -264,7 +254,7 @@ public class UserServiceImplTest implements PropertyVariables{
 		when(mapper.map(userRequest, OpenAmUserRequest.class)).thenReturn(openAMRequest);
 		when(cacheManager.getCache(anyString())).thenReturn(cache);
 		
-		Response response = userService.userRegistration(anyString(),anyString(),anyString(),userRequest);
+		Response response = userService.userRegistration("","client", "clientPwd", userRequest);
 		ErrorResponse actualResponse = (ErrorResponse)response.getEntity();
 		assertEquals(HttpStatus.CONFLICT, HttpStatus.valueOf(response.getStatus()));
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
@@ -288,7 +278,7 @@ public class UserServiceImplTest implements PropertyVariables{
 		when(productService.authenticateUser(anyString(), anyString(), anyString())).thenReturn(DomainMockData.AUTHENTICATION_JSON);
 		
 		userRequest.getUserRecord().setFirstName(null);
-		Response response = userService.userRegistration(anyString(),anyString(),anyString(),userRequest);
+		Response response = userService.userRegistration("","client", "clientPwd", userRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		ErrorResponse errorResponse = (ErrorResponse)response.getEntity();
 		assertThat("Status ", errorResponse.getStatus(), equalTo("Error"));
@@ -312,7 +302,7 @@ public class UserServiceImplTest implements PropertyVariables{
 		when(productService.authenticateUser(anyString(), anyString(), anyString())).thenReturn(DomainMockData.AUTHENTICATION_JSON);
 		userRequest.getUserRecord().setLastName(null);
 		
-		Response response = userService.userRegistration(anyString(),anyString(),anyString(),userRequest);
+		Response response = userService.userRegistration("","client", "clientPwd", userRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		ErrorResponse errorResponse = (ErrorResponse)response.getEntity();
 		assertThat("Status ", errorResponse.getStatus(), equalTo("Error"));
@@ -331,7 +321,7 @@ public class UserServiceImplTest implements PropertyVariables{
 		when(phoneValidator.validate(anyString())).thenReturn(true);
 		userRequest.getUserRecord().setIDMS_Registration_Source__c(null);
 		
-		Response response = userService.userRegistration(anyString(),anyString(), anyString(), userRequest);
+		Response response = userService.userRegistration("","client", "clientPwd", userRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		ErrorResponse errorResponse = (ErrorResponse) response.getEntity();
 		assertThat("Status ", errorResponse.getStatus(), equalTo("Error"));
@@ -353,9 +343,11 @@ public class UserServiceImplTest implements PropertyVariables{
 		when(productService.authenticateUser(anyString(), anyString(), anyString())).thenReturn(DomainMockData.AUTHENTICATION_JSON);
 		
 		userRequest.getUserRecord().setIDMS_User_Context__c(null);
-		Response response = userService.userRegistration(anyString(),anyString(), anyString(), userRequest);
+		Response response = userService.userRegistration("","client", "clientPwd", userRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		ErrorResponse errorResponse = (ErrorResponse) response.getEntity();
+		System.out.println("Status: "+ errorResponse.getStatus());
+		System.out.println("Message: "+ errorResponse.getMessage());
 		assertThat("Status ", errorResponse.getStatus(), equalTo("Error"));
 		assertThat("Message ", errorResponse.getMessage(), equalTo("Required Fields Missing - IDMS_User_Context__c"));
 	}
@@ -375,7 +367,7 @@ public class UserServiceImplTest implements PropertyVariables{
 		when(productService.authenticateUser(anyString(), anyString(), anyString())).thenReturn(DomainMockData.AUTHENTICATION_JSON);
 
 		userRequest.setPassword("abc");
-		Response response = userService.userRegistration(anyString(),anyString(), anyString(), userRequest);
+		Response response = userService.userRegistration("","client", "clientPwd", userRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		ErrorResponse errorResponse = (ErrorResponse) response.getEntity();
 		assertThat("Status ", errorResponse.getStatus(), equalTo("Error"));

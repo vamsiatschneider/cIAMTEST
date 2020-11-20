@@ -15,9 +15,11 @@ import com.idms.service.ResendPinTest;
 import com.idms.service.ResendRegEmailTest;
 import com.idms.service.SendInvitationTest;
 import com.idms.service.SetPasswordTest;
+import com.idms.service.SoapTest;
 import com.idms.service.UpdatePasswordTest;
 import com.idms.service.UpdateUserTest;
 import com.idms.service.UserConfirmPinTest;
+import com.idms.service.UserServiceImplTest;
 import com.idms.service.UserUpdateAILTest;
 import com.se.idms.util.EmailValidatorTest;
 import com.se.idms.util.PhoneValidatorTest;
@@ -38,7 +40,9 @@ import com.se.idms.util.PhoneValidatorTest;
 	UserConfirmPinTest.class,
 	UserUpdateAILTest.class,
 	EmailValidatorTest.class,
-	PhoneValidatorTest.class
+	PhoneValidatorTest.class,
+	UserServiceImplTest.class
+	
 })
 public class IDMSServiceTests {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IDMSServiceTests.class);

@@ -1045,7 +1045,7 @@ public class DirectUIMSUserManagerSoapService {
 				
 				LOGGER.error("Retry failed while calling the grantAccessControlToUser::" + e.getMessage());
 			} catch (ExecutionException e) {
-				
+				LOGGER.error("Execution Exception while calling the grantAccessControlToUser::" + e.getMessage());
 			}
 			/*if(!isgrantresult) {
 				LOGGER.info("UIMS UpdateAIL Grant Access got failed -----> ::sending mail notification::");
@@ -1087,7 +1087,7 @@ public class DirectUIMSUserManagerSoapService {
 				
 				LOGGER.error("Retry failed while calling the revokeAccessControlToUser::" + e.getMessage());
 			} catch (ExecutionException e) {
-				
+				LOGGER.error("Execution Error while calling revokeAccessControlToUser ::" + e.getMessage());
 			}
 			/*if(!isrevokeresult) {
 				LOGGER.info("UIMS UpdateAIL revoke access got failed -----> ::sending mail notification::");

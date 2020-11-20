@@ -77,7 +77,7 @@ public class SamlAssertionTokenGenerator {
 	
 	private KeyPair getKeyPairFromKeyStore(String alias) throws Exception {
 		FileInputStream is = new FileInputStream(ResourceUtils.getFile(this.samlAssertionSigningKeystore));
-
+		try {
 		KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
 		keystore.load(is, samlAssertionKeystorePassword.toCharArray());
 
@@ -88,9 +88,12 @@ public class SamlAssertionTokenGenerator {
 
 			// Get public key
 			PublicKey publicKey = cert.getPublicKey();
-
+			
 			// Return a key pair
 			return new KeyPair(publicKey, (PrivateKey) key);
+		}}
+		finally {
+			is.close();
 		}
 		
 		return null;

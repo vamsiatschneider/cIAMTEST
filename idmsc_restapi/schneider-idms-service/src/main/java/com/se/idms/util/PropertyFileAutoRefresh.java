@@ -31,7 +31,7 @@ import com.se.idms.cache.validate.impl.FieldsMappingValidatorImpl;
 import com.se.idms.cache.validate.impl.LengthValidatorImpl;
 import com.se.idms.cache.validate.impl.MandatoryValidatorImpl;
 import com.se.idms.cache.validate.impl.MultiPickListValidatorImpl;
-import com.se.idms.cache.validate.impl.PickListValidatorImpl;;
+import com.se.idms.cache.validate.impl.PickListValidatorImpl;
 
 @Service("propertyFileAutoRefresh")
 public class PropertyFileAutoRefresh {
@@ -736,6 +736,15 @@ public class PropertyFileAutoRefresh {
 		catch (Exception ex) {
 			LOGGER.error("Exception in property file  initilizing"+ex.getMessage(), ex);
 		}
+		finally {
+			if(in!=null) {
+				try {
+					in.close();
+				} catch (IOException e) {
+					LOGGER.error("Error in closing connection");
+				}
+			}
+		}
 	}
 
 	private void initializeProperties() {
@@ -893,6 +902,11 @@ public class PropertyFileAutoRefresh {
 
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+		finally {
+			if(in!=null) {
+				in.close();
+			}
 		}
 	}
 

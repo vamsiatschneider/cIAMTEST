@@ -298,7 +298,7 @@ public class SendEmail {
 	
 	boolean sslEnabled = true;
 	
-	StringBuilder mailBuilder = null;
+	//StringBuilder mailBuilder = null;
 	
 	Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 	DocumentContext productDocCtxUser = null, productDJData = null;
@@ -439,9 +439,9 @@ public class SendEmail {
 						ObjectMapper mapper = new ObjectMapper();
 						//Convert JSON array to List of RegistrationAttributes objects
 						List<RegistrationAttributes> attributeList = Arrays.asList(mapper.readValue(attribute, RegistrationAttributes[].class));
-						for (int i = 0; i < attributeList.size(); i++) {
-							String KeyName = attributeList.get(i).getKeyName();
-							String KeyValue = attributeList.get(i).getKeyValue();
+						for (RegistrationAttributes regAttribute:attributeList) {
+							String KeyName = regAttribute.getKeyName();
+							String KeyValue = regAttribute.getKeyValue();
 							LOGGER.info("KeyName = " + KeyName + " and KeyValue =" + KeyValue);
 							if (KeyName.equalsIgnoreCase("prmRegEmailType") && null != KeyValue && !KeyValue.isEmpty()) {
 								LOGGER.info("inside prmRegEmailType  block");
@@ -1490,12 +1490,12 @@ public class SendEmail {
 			md5.update(temp);
 			// resultStr = new String(md5.digest());
 			byte[] b = md5.digest();
-			for (int i = 0; i < b.length; i++) {
+			for (byte bb:b) {
 				char[] digit = { '0', '1', '2', '3', '4', '5', '6', '7', '8',
 						'9', 'A', 'B', 'C', 'D', 'E', 'F' };
 				char[] ob = new char[2];
-				ob[0] = digit[(b[i] >>> 4) & 0X0F];
-				ob[1] = digit[b[i] & 0X0F];
+				ob[0] = digit[(bb >>> 4) & 0X0F];
+				ob[1] = digit[bb & 0X0F];
 				resultStr += new String(ob);
 			}
 			return resultStr;

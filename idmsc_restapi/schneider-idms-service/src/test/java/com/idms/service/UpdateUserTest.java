@@ -50,7 +50,7 @@ import com.se.idms.util.UserConstants;
 import com.se.idms.util.ValidatingInvocationHandler;
 import com.se.uims.usermanager.UserV6;
 
-public class UpdateUserTest implements PropertyVariables{
+public class UpdateUserTest extends PropertyVariables{
 
 	/**
 	 * Class under test.
@@ -151,7 +151,7 @@ public class UpdateUserTest implements PropertyVariables{
 		when(cacheManager.getCache(anyString())).thenReturn(cache);
 		when(sendEmail.generateOtp(anyString())).thenReturn(anyString());	
 		
-		Response response = userService.updateUser(anyString(),"Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20",null,null, userRequest);
+		Response response = userService.updateUser("","Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20",null,null, userRequest);
 		assertEquals(HttpStatus.OK, HttpStatus.valueOf(response.getStatus()));
 		UpdateUserResponse actualResponse = (UpdateUserResponse)response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Success"));

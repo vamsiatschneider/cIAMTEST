@@ -17,6 +17,10 @@ import org.apache.http.impl.client.StandardHttpRequestRetryHandler;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.idms.service.UserServiceImpl;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -33,8 +37,9 @@ import java.util.concurrent.TimeUnit;
  * @version 2016年2月3日
  */
 public class HttpClient4Utils {
+	private static final Logger LOGGER = LoggerFactory.getLogger(HttpClient4Utils.class);
     private static HttpClient defaultClient = createHttpClient(20, 20, 5000, 5000, 3000);
-
+  
     /**
      * 实例化HttpClient
      *
@@ -51,7 +56,7 @@ public class HttpClient4Utils {
                 .setSocketTimeout(socketTimeout)
                 .setConnectTimeout(connectTimeout)
                 .setConnectionRequestTimeout(connectionRequestTimeout).build();
-
+        //we can ignore for PMD this is getting closed with different method
         PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
         cm.setMaxTotal(maxTotal);
         cm.setDefaultMaxPerRoute(maxPerRoute);
@@ -82,7 +87,7 @@ public class HttpClient4Utils {
                         // log.info("closing expired & idle connections, stat={}", cm.getTotalStats());
                         TimeUnit.SECONDS.sleep(10);
                     } catch (Exception e) {
-                        // ignore exceptoin
+                    	LOGGER.error("Error in Closing Connections");
                     }
                 }
             }
