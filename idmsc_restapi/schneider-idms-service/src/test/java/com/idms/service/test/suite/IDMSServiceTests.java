@@ -15,8 +15,9 @@ import com.idms.service.ResendPinTest;
 import com.idms.service.ResendRegEmailTest;
 import com.idms.service.SendInvitationTest;
 import com.idms.service.SetPasswordTest;
-import com.idms.service.SoapTest;
+import com.idms.service.TwoFactorAuthenticationTest;
 import com.idms.service.UpdatePasswordTest;
+import com.idms.service.UpdateSocialProfileTest;
 import com.idms.service.UpdateUserTest;
 import com.idms.service.UserConfirmPinTest;
 import com.idms.service.UserServiceImplTest;
@@ -41,7 +42,9 @@ import com.se.idms.util.PhoneValidatorTest;
 	UserUpdateAILTest.class,
 	EmailValidatorTest.class,
 	PhoneValidatorTest.class,
-	UserServiceImplTest.class
+	UserServiceImplTest.class,
+	UpdateSocialProfileTest.class,
+	TwoFactorAuthenticationTest.class
 	
 })
 public class IDMSServiceTests {
