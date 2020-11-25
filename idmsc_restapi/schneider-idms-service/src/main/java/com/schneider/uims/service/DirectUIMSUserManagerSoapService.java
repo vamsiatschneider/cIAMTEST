@@ -26,7 +26,6 @@ import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.google.common.base.Predicates;
 import com.idms.mapper.IdmsMapper;
-import com.idms.model.AILRequest;
 import com.idms.model.UserRegistrationInfoRequest;
 import com.idms.model.digital.Authentication;
 import com.idms.product.client.OpenAMService;

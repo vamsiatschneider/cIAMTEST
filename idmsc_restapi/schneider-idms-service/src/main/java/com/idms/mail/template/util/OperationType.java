@@ -16,7 +16,7 @@ public enum OperationType {
 	private String type;
 	private String openDJType;
 
-	private OperationType(String operationType, String openDJType) {
+	OperationType(String operationType, String openDJType) {
 		this.type = operationType;
 		this.openDJType = openDJType;
 	}

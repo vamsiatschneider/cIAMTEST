@@ -49,7 +49,6 @@ import com.schneider.idms.common.UserContext;
 import com.schneider.idms.model.IdmsUserRequest;
 import com.schneider.idms.salesforce.service.SalesforceSyncServiceImpl;
 import com.schneider.uims.service.DirectUIMSUserManagerSoapService;
-import com.se.idms.cache.CacheTypes;
 import com.se.idms.cache.validate.IValidator;
 import com.se.idms.dto.ParseValuesByOauthHomeWorkContextDto;
 import com.se.idms.dto.UserServiceResponse;

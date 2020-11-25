@@ -20,7 +20,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.idms.mapper.IdmsMapper;
-import com.idms.model.ResendEmailChangeRequest;
 import com.idms.model.ResendRegEmailRequest;
 import com.idms.product.client.OpenAMService;
 import com.idms.product.client.OpenDjService;

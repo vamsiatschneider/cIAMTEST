@@ -4,7 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import javax.ws.rs.core.Response;
@@ -29,7 +28,6 @@ import com.se.idms.cache.validate.impl.LengthValidatorImpl;
 import com.se.idms.cache.validate.impl.PickListValidatorImpl;
 import com.se.idms.dto.AILResponse;
 import com.se.idms.dto.ErrorResponse;
-import com.se.idms.dto.UserServiceResponse;
 import com.se.idms.util.UserConstants;
 import com.se.idms.util.ValidatingInvocationHandler;
 

@@ -26,7 +26,6 @@ import com.schneider.ims.service.company.impl.uimsv2.UnexpectedLdapResponseExcep
 import com.schneider.ims.service.company.impl.uimsv2.UnexpectedRuntimeImsException;
 import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.util.SamlAssertionTokenGenerator;
-import com.se.idms.util.UimsConstants;
 import com.uims.companymanager.CompanyManagerUIMSV2;
 
 /**

@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.stereotype.Component;
 
 import com.github.rholder.retry.RetryException;
 import com.github.rholder.retry.Retryer;
@@ -32,8 +31,6 @@ import com.idms.model.AILRequest;
 import com.idms.product.client.OpenAMService;
 import com.idms.service.util.UserServiceUtil;
 import com.se.idms.dto.IDMSUserAIL;
-import com.se.idms.util.UimsConstants;
-import com.se.idms.util.UserConstants;
 import com.uims.accessmanager.AccessElement;
 import com.uims.accessmanager.Type;
 import com.uims.accessmanager.UserAccessManagerUIMSV2;

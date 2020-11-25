@@ -9,10 +9,8 @@ import com.idms.model.GetUserRecordResponse;
 import com.idms.product.model.OpenAMGetUserHomeResponse;
 import com.idms.product.model.OpenAMGetUserWorkResponse;
 import com.jayway.jsonpath.DocumentContext;
-import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.util.JsonConstants;
 import com.se.idms.util.UserConstants;
-import com.uims.authenticatedUsermanager.UserV6;
 
 /**
  * 

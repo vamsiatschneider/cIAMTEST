@@ -7,7 +7,7 @@ public enum Locale {
 	CN("CN"), EN("EN"), INVALID("Invalid");
 	
 	private String locale;
-	private Locale(String locale) {
+	Locale(String locale) {
 		this.locale = locale;
 	}
 	public String getLocale() {

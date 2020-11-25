@@ -10,7 +10,7 @@ public enum PRMTemplateType {
 	INVALID("Invalid");
 	
 	private String type;
-	private PRMTemplateType(String operationType) {
+	PRMTemplateType(String operationType) {
 		this.type = operationType;
 	}
 	public String getType() {

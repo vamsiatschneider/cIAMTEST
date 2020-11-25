@@ -2,15 +2,10 @@ package com.idms.service;
 
 import static org.junit.Assert.assertEquals;
 
-import java.net.URL;
 import java.util.UUID;
-
-import javax.xml.namespace.QName;
-import javax.xml.ws.Service;
 
 import org.junit.Test;
 
-import com.se.uims.usermanager.UserManagerUIMSV22;
 import com.uims.authenticatedUsermanager.AuthenticatedUserManagerUIMSV22;
 import com.uims.authenticatedUsermanager.CreatedIdentityReport;
 import com.uims.authenticatedUsermanager.UserV6;

@@ -46,7 +46,6 @@ import com.schneider.idms.service.ICreateUserService;
 import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.cache.utils.EmailConstants;
 import com.se.idms.util.JsonConstants;
-import com.se.idms.util.UimsConstants;
 import com.se.idms.util.UserConstants;
 import com.uims.authenticatedUsermanager.UserV6;
 

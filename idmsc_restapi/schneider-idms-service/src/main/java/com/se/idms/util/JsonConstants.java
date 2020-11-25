@@ -1,7 +1,5 @@
 package com.se.idms.util;
 
-import com.jayway.jsonpath.JsonPath;
-
 /**
  * JsonConstants for the Openam JSON response.
  * 

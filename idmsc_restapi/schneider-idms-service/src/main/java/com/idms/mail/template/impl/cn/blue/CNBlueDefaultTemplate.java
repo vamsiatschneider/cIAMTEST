@@ -6,7 +6,8 @@ import com.idms.mail.template.util.EmailTemplateInput;
 public class CNBlueDefaultTemplate {
 	
 	//@Value("${user.default.email.template.blue.cn}")
-	private String IDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_CN;
+	/* Commented for PMD violation fix for unused variable rule*/
+	//private String IDMS_USER_DEFAULT_BLUE_EMAILTEMPLATE_CN;
 	
 	protected EmailTemplateInput input;
 	
