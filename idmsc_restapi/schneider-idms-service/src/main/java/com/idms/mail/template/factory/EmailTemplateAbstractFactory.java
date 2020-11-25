@@ -4,5 +4,5 @@ import com.idms.mail.template.util.EmailTemplate;
 
 public interface EmailTemplateAbstractFactory {
 
-	public EmailTemplate getEmailTemplateFactory();
+	EmailTemplate getEmailTemplateFactory();
 }

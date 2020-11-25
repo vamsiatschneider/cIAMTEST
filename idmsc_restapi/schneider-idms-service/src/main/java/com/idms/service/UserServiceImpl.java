@@ -179,7 +179,6 @@ import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.cache.utils.EmailConstants;
 import com.se.idms.cache.validate.IValidator;
 import com.se.idms.dto.AILResponse;
-import com.se.idms.dto.CounterResponse;
 import com.se.idms.dto.ErrorResponse;
 import com.se.idms.dto.GetUserHomeByOauthResponse;
 import com.se.idms.dto.GetUserWorkByOauthResponse;

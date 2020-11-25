@@ -9,7 +9,7 @@ public enum EmailTemplateColor {
 	INVALID("Invalid");
 	
 	private String color;
-	private EmailTemplateColor(String color) {
+	EmailTemplateColor(String color) {
 		this.color = color;
 	}
 	public String getColor() {

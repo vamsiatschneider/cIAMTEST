@@ -4,5 +4,5 @@ import com.idms.dynamic.mail.template.placeholder.substitutor.TemplatePlaceholde
 
 public interface DynamicTemplatePHSubstitutorFactory {
 
-	public TemplatePlaceholderSubstitutor getTemplatePlaceholderSubstitutor();
+	TemplatePlaceholderSubstitutor getTemplatePlaceholderSubstitutor();
 }

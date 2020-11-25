@@ -1,7 +1,6 @@
 package com.idms.model;
 
 import java.io.Serializable;
-import java.util.List;
 
 import org.springframework.stereotype.Component;
 

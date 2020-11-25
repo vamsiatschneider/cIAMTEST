@@ -8,7 +8,6 @@ import com.schneider.idms.model.IdmsUpdateUserRequest;
 import com.schneider.idms.model.IdmsUpdateUserResponse;
 import com.schneider.idms.model.IdmsUserRequest;
 import com.schneider.ims.service.uimsv2.CompanyV3;
-import com.se.idms.util.UserConstants;
 import com.uims.authenticatedUsermanager.UserV6;
 
 import ma.glasnost.orika.MapperFactory;

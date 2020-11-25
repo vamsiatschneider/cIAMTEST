@@ -56,7 +56,7 @@ public enum TemplatePlaceholderEnum {
 	INVALID("Invalid");
 	
 	private String value;
-	private TemplatePlaceholderEnum(String value) {
+	TemplatePlaceholderEnum(String value) {
 		this.value = value;
 	}
 
