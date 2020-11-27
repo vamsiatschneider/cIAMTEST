@@ -150,61 +150,7 @@ public class UserServiceImplTest extends PropertyVariables{
 			e.printStackTrace();
 		}
 	}
-	/**
-	 * Test creation of new task when taskQueueName and taskSubQueueName are
-	 * provided - when no duplicate task exists.
-	 * @throws Exception 
-	 */
-	@Test
-	public void testUserRegistration() throws Exception {
-		
-		// Setup
-		CreateUserRequest userRequest = DtoMockData.buildUserRegistrationRequset();
-		OpenAmUserRequest openAmReq = DtoMockData.buildUserRegistrationOpenAmRequset();
-		//CompanyV3 company=DtoMockData.buildCompanyRequest();
-		//UserV6 identity=DtoMockData.buildUserV6Reuest();
-		when(legthValidator.validate(anyString(), anyString())).thenReturn(true);
-		when(pickListValidator.validate(anyString(), anyString())).thenReturn(true);
-		when(multiPickListValidator.validate(anyString(), anyString())).thenReturn(true);
-		when(phoneValidator.validate(anyString())).thenReturn(true);
-		when(mapper.map(userRequest, OpenAmUserRequest.class)).thenReturn(openAmReq);
-		
-		InputStream is = new ByteArrayInputStream(DomainMockData.USER_REGISTRATION.getBytes());
-		Response userRegRes = Response.status(Response.Status.OK).entity(is).build();
-		when(productService.userRegistration(anyString(), anyString(), anyString())).thenReturn(userRegRes);
-		when(openDJService.getUser(anyString(), anyString(),anyString())).thenReturn(DomainMockData.getAppDetails());
-		when(productService.checkUserExistsWithEmailMobile(anyString(), anyString())).thenReturn(DomainMockData.USER_EXISTS);
-		when(productService.authenticateUser(anyString(), anyString(), anyString())).thenReturn(DomainMockData.AUTHENTICATION_JSON);
-		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_MAIL_USER);
-		//when(emailValidator.validate(anyString())).thenReturn(true);
-		when(cacheManager.getCache(anyString())).thenReturn(cache);
-		when(sendEmail.generateOtp(anyString())).thenReturn("1234");
-		when(sendEmail.validatePin(anyString(),anyString())).thenReturn(true);
-		when(mapper.map(userRequest, IDMSUserResponse.class)).thenReturn(idmsuserResponse);
-		
-		
-		/*when(mapper.map(userRequest, CompanyV3.class)).thenReturn(companyV3);
-		
-		when(mapper.map(userRequest, UserV6.class)).thenReturn(userV6);
-		
-		CompanyV3 company = mapper.map(userRequest, CompanyV3.class);
-		UserV6 identity = mapper.map(userRequest, UserV6.class);*/
-		
-		/*String createUIMSResponse = uimsUserManagerSoapService.createUIMSUserAndCompany(anyString(), identity,
-				anyString(), company,  anyString(), anyString(), anyString(), anyString(), anyString(), userRequest);
-		
-		when(uimsUserManagerSoapService.createUIMSUserAndCompany(anyString(), identity,
-				anyString(), company,  anyString(), anyString(), anyString(), anyString(), anyString(), userRequest)).thenReturn(anyString());*/
-		
-	
-		Response response = userService.userRegistration("","client", "clientPwd", userRequest);
-		CreateUserResponse actualResponse = (CreateUserResponse)response.getEntity();
-		
-		assertThat("Status ", actualResponse.getStatus(), equalTo("Success"));
-		assertThat("Message ", actualResponse.getMessage(), equalTo(UserConstants.CREATE_USER_SUCCESS_MESSAGE));
-		
-		
-	}
+
 
 	/**
 	 * Test creation of new task when taskQueueName and taskSubQueueName are
