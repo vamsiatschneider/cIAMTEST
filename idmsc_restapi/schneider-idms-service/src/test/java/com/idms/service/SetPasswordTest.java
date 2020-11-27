@@ -99,7 +99,7 @@ public class SetPasswordTest {
 		when(sendEmail.validatePin(anyString(),anyString())).thenReturn(true);
 		when(uimsSetPasswordSoapService.setUIMSPassword(anyString(), anyString(), anyString(), anyString(), anyString(), anyString(), anyString())).thenReturn(true);
 		
-		Response response = userService.setPassword("", "", "", setPasswordRequest);
+		Response response = userService.setPassword("","", "", "", setPasswordRequest);
 		assertEquals(HttpStatus.OK, HttpStatus.valueOf(response.getStatus()));
 		SetPasswordResponse actualResponse = (SetPasswordResponse)response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Success"));
@@ -120,7 +120,7 @@ public class SetPasswordTest {
 		when(pickListValidator.validate(anyString(),anyString())).thenReturn(true);
 		when(multiPickListValidator.validate(anyString(),anyString())).thenReturn(true);
 
-		Response response = userService.setPassword("", "", "", setPasswordRequest);
+		Response response = userService.setPassword("","", "", "", setPasswordRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		SetPasswordErrorResponse actualResponse = (SetPasswordErrorResponse)response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
@@ -141,7 +141,7 @@ public class SetPasswordTest {
 		when(pickListValidator.validate(anyString(),anyString())).thenReturn(true);
 		when(multiPickListValidator.validate(anyString(),anyString())).thenReturn(true);
 
-		Response response = userService.setPassword("", "", "", setPasswordRequest);
+		Response response = userService.setPassword("","", "", "", setPasswordRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		SetPasswordErrorResponse actualResponse = (SetPasswordErrorResponse)response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
@@ -161,7 +161,7 @@ public class SetPasswordTest {
 		when(pickListValidator.validate(anyString(),anyString())).thenReturn(true);
 		when(multiPickListValidator.validate(anyString(),anyString())).thenReturn(true);
 
-		Response response = userService.setPassword("", "", "", setPasswordRequest);
+		Response response = userService.setPassword("","", "", "", setPasswordRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		SetPasswordErrorResponse actualResponse = (SetPasswordErrorResponse)response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
@@ -183,7 +183,7 @@ public class SetPasswordTest {
 		when(pickListValidator.validate(anyString(),anyString())).thenReturn(true);
 		when(multiPickListValidator.validate(anyString(),anyString())).thenReturn(true);
 
-		Response response = userService.setPassword("", "", "", setPasswordRequest);
+		Response response = userService.setPassword("","", "", "", setPasswordRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		SetPasswordErrorResponse actualResponse = (SetPasswordErrorResponse)response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
@@ -201,7 +201,7 @@ public class SetPasswordTest {
 		when(pickListValidator.validate(anyString(),anyString())).thenReturn(true);
 		when(multiPickListValidator.validate(anyString(),anyString())).thenReturn(true);
 
-		Response response = userService.setPassword("", "", "", setPasswordRequest);
+		Response response = userService.setPassword("","", "", "", setPasswordRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		SetPasswordErrorResponse actualResponse = (SetPasswordErrorResponse)response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
@@ -219,7 +219,7 @@ public class SetPasswordTest {
 		when(pickListValidator.validate(anyString(),anyString())).thenReturn(true);
 		when(multiPickListValidator.validate(anyString(),anyString())).thenReturn(true);
 
-		Response response = userService.setPassword("", "", "", setPasswordRequest);
+		Response response = userService.setPassword("","", "", "", setPasswordRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		SetPasswordErrorResponse actualResponse = (SetPasswordErrorResponse)response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));

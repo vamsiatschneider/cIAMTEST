@@ -3537,7 +3537,8 @@ public class UserServiceImpl implements UserService {
 	 * @see com.idms.service.UserServiceImpl#userPinConfirmation(com.idms.model.
 	 * ConfirmPinRequest)
 	 */
-	public Response userPinConfirmation(ConfirmPinRequest confirmRequest) {
+	@SuppressWarnings("unchecked")
+	public Response userPinConfirmation(String adminAuthToken,ConfirmPinRequest confirmRequest) {
 		LOGGER.info("Entered userPinConfirmation() -> Start");
 
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
@@ -3573,11 +3574,43 @@ public class UserServiceImpl implements UserService {
 		String strcurrentMobCounter = UserConstants.ZERO;
 		String jsonStr = null;
 		JSONObject jsonCounter = new JSONObject();
+		boolean adminAuthTokenFlagInProps = false;
+		JSONObject errorResponseAPI = new JSONObject();
 		
 		try {
 			LOGGER.info("Parameter confirmRequest -> "
 					+ ChinaIdmsUtil.printInfo(ChinaIdmsUtil.printData(objMapper.writeValueAsString(confirmRequest))));
 			stopUIMSFlag = ((null != stopidmstouimsflag && !stopidmstouimsflag.isEmpty())?Boolean.valueOf(stopidmstouimsflag):false);
+			adminAuthTokenFlagInProps = ((null != enableAdminAuthToken && !enableAdminAuthToken.isEmpty())?Boolean.valueOf(enableAdminAuthToken):false);
+			LOGGER.info("adminAuthTokenFlagInProps = "+adminAuthTokenFlagInProps);
+			
+			if (adminAuthTokenFlagInProps) {
+				if (null == adminAuthToken || adminAuthToken.isEmpty()) {
+					errorResponseAPI.put(UserConstants.MESSAGE_L, UserConstants.ADMIN_TOKEN_MANDATORY);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.error("Error is " + errorResponse.getMessage());
+					LOGGER.info("Time taken by userPinConfirmation() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseAPI).build();
+				} else if (null != adminAuthToken && !adminAuthToken.isEmpty()) {
+					String adminStatus = getAdminGroupDetails(adminAuthToken);
+					LOGGER.info("adminStatus = "+adminStatus);
+					if (adminStatus.equalsIgnoreCase(UserConstants.UNAUTHORIZED)) {
+						errorResponseAPI.put(UserConstants.MESSAGE_L, UserConstants.ADMIN_UNAUTH);
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.error("Error is " + errorResponse.getMessage());
+						LOGGER.info("Time taken by userPinConfirmation() : " + elapsedTime);
+						return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseAPI).build();
+					}
+					if (!adminStatus.equalsIgnoreCase(UserConstants.ADMIN_ADMIN)) {
+						errorResponseAPI.put(UserConstants.MESSAGE_L, "AdminToken not having sufficient privilege");
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.error("Error is " + errorResponse.getMessage());
+						LOGGER.info("Time taken by userPinConfirmation() : " + elapsedTime);
+						return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseAPI).build();
+					}
+				}
+			}
+			
 
 			if (null == confirmRequest.getPinCode() || confirmRequest.getPinCode().isEmpty()) {
 				response.setStatus(errorStatus);
@@ -4227,7 +4260,7 @@ public class UserServiceImpl implements UserService {
 						confirmPinRequest.setPinCode(confirmRequest.getPinCode());
 						confirmPinRequest.setTncFlag(confirmRequest.getTncFlag());
 						confirmPinRequest.setUIFlag("true");
-						userPinConfirmation(confirmPinRequest);
+						userPinConfirmation(adminAuthToken, confirmPinRequest);
 					} else {
 						return userRegistrationResponse;
 					}
@@ -6277,9 +6310,8 @@ public class UserServiceImpl implements UserService {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public Response resendPIN(String token, ResendPinRequest resendPinRequest) {
+	public Response resendPIN(String adminAuthToken, String token, ResendPinRequest resendPinRequest) {
 		LOGGER.info("Entered resendPIN() -> Start");
-		LOGGER.info("Parameter token -> " + token);
 
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		JSONObject response = new JSONObject();
@@ -6296,13 +6328,48 @@ public class UserServiceImpl implements UserService {
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
 		long elapsedTime;
 		response.put(UserConstants.STATUS, UserConstants.STATUS_FAILD);
+		boolean adminAuthTokenFlagInProps = false;
+		JSONObject errorResponse = new JSONObject();
 		try {
 			LOGGER.info("resendPinRequest  -> " + objMapper.writeValueAsString(resendPinRequest));
+			adminAuthTokenFlagInProps = ((null != enableAdminAuthToken && !enableAdminAuthToken.isEmpty())
+					? Boolean.valueOf(enableAdminAuthToken)
+					: false);
+			LOGGER.info("adminAuthTokenFlagInProps = "+adminAuthTokenFlagInProps);
+			
 			try {
 				iPlanetDirectoryKey = getSSOToken();
 			} catch (IOException ioExp) {
 				LOGGER.error("Unable to get SSO Token " + ioExp.getMessage(),ioExp);
 				iPlanetDirectoryKey = "";
+			}
+			
+			if (adminAuthTokenFlagInProps) {
+				if (null == adminAuthToken || adminAuthToken.isEmpty()) {
+					errorResponse.put(UserConstants.MESSAGE_L,UserConstants.ADMIN_TOKEN_MANDATORY);
+					LOGGER.error("Error in resendPIN is :: " + UserConstants.ADMIN_TOKEN_MANDATORY);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by resendPIN() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+				} else if (null != adminAuthToken && !adminAuthToken.isEmpty()) {
+					String adminStatus = getAdminGroupDetails(adminAuthToken);
+					LOGGER.info("adminStatus = " + adminStatus);
+					if (adminStatus.equalsIgnoreCase(UserConstants.UNAUTHORIZED)) {
+						errorResponse.put(UserConstants.MESSAGE_L,UserConstants.ADMIN_UNAUTH);
+						LOGGER.error("Error in resendPIN is :: " + UserConstants.ADMIN_UNAUTH);
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.info("Time taken by resendPIN() : " + elapsedTime);
+						return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+					}
+					if (!(adminStatus.equalsIgnoreCase(UserConstants.ADMIN_VIEW)
+							|| adminStatus.equalsIgnoreCase(UserConstants.ADMIN_ADMIN))) {
+						errorResponse.put(UserConstants.MESSAGE_L,"AdminToken not having sufficient privilege");
+						LOGGER.error("Error in resendPIN is :: AdminToken not having sufficient privilege");
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.info("Time taken by resendPIN() : " + elapsedTime);
+						return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+					}
+				}
 			}
 
 			if ((null == resendPinRequest.getIdmsUserId() || resendPinRequest.getIdmsUserId().isEmpty())
@@ -6447,7 +6514,7 @@ public class UserServiceImpl implements UserService {
 	 * 
 	 */
 	@Override
-	public Response updatePassword(String token, UpdatePasswordRequest updatePasswordRequest) {
+	public Response updatePassword(String adminAuthToken, String token, UpdatePasswordRequest updatePasswordRequest) {
 		LOGGER.info("Entered updatePassword() -> Start");
 		LOGGER.info("Parameter token -> " + token);
 		LOGGER.info("Source -> " + updatePasswordRequest.getIDMS_Profile_update_source());
@@ -6473,9 +6540,43 @@ public class UserServiceImpl implements UserService {
 		String strcurrentMobCounter = UserConstants.ZERO;
 		String jsonStr = null;
 		JSONObject jsonCounter = new JSONObject();
+		boolean adminAuthTokenFlagInProps = false;
 		try {
-			// Fetching the userid from the Authorization Token
-
+			adminAuthTokenFlagInProps = ((null != enableAdminAuthToken && !enableAdminAuthToken.isEmpty())
+					? Boolean.valueOf(enableAdminAuthToken)
+					: false);
+			LOGGER.info("adminAuthTokenFlagInProps = "+adminAuthTokenFlagInProps);
+			
+			if (adminAuthTokenFlagInProps) {
+				if (null == adminAuthToken || adminAuthToken.isEmpty()) {
+					errorResponse.setStatus(errorStatus);
+					errorResponse.setMessage(UserConstants.ADMIN_TOKEN_MANDATORY);
+					LOGGER.error("Error in updatePassword is :: " + UserConstants.ADMIN_TOKEN_MANDATORY);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by updatePassword() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+				} else if (null != adminAuthToken && !adminAuthToken.isEmpty()) {
+					String adminStatus = getAdminGroupDetails(adminAuthToken);
+					LOGGER.info("adminStatus = " + adminStatus);
+					if (adminStatus.equalsIgnoreCase(UserConstants.UNAUTHORIZED)) {
+						errorResponse.setStatus(errorStatus);
+						errorResponse.setMessage(UserConstants.ADMIN_UNAUTH);
+						LOGGER.error("Error in updatePassword is :: " + UserConstants.ADMIN_UNAUTH);
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.info("Time taken by updatePassword() : " + elapsedTime);
+						return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+					}
+					if (!adminStatus.equalsIgnoreCase(UserConstants.ADMIN_ADMIN)) {
+						errorResponse.setStatus(errorStatus);
+						errorResponse.setMessage("AdminToken not having sufficient privilege");
+						LOGGER.error("Error in updatePassword is :: AdminToken not having sufficient privilege");
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.info("Time taken by updatePassword() : " + elapsedTime);
+						return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+					}
+				}
+			}
+			
 			if ((null == updatePasswordRequest.getUIFlag()
 					|| !UserConstants.TRUE.equalsIgnoreCase(updatePasswordRequest.getUIFlag()))
 					&& (!UserConstants.UIMS.equalsIgnoreCase(updatePasswordRequest.getIDMS_Profile_update_source()))) {
@@ -6496,6 +6597,7 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 
+			// Fetching the userid from the Authorization Token
 			LOGGER.info("Start: getUserInfoByAccessToken() of openam");
 			String userInfoByAccessToken = openAMTokenService.getUserInfoByAccessToken(token, "/se");
 			LOGGER.info("End: getUserInfoByAccessToken() of openam finished");
@@ -6707,7 +6809,7 @@ public class UserServiceImpl implements UserService {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public Response setPassword(String authorizedToken, String clientId, String clientSecret,
+	public Response setPassword(String adminAuthToken, String authorizedToken, String clientId, String clientSecret,
 			SetPasswordRequest setPasswordRequest) {
 		LOGGER.info("Entered setPassword() -> Start");
 		LOGGER.info("id -> " + setPasswordRequest.getId() + " ,FederationIdentifier -> "
@@ -6734,8 +6836,44 @@ public class UserServiceImpl implements UserService {
 		String emailOrMobile = null;
 		String loginIdentifierType = null;
 		String PRODUCT_JSON_STRING = null;
+		boolean adminAuthTokenFlagInProps = false;
 
 		try {
+			adminAuthTokenFlagInProps = ((null != enableAdminAuthToken && !enableAdminAuthToken.isEmpty())
+					? Boolean.valueOf(enableAdminAuthToken)
+					: false);
+			LOGGER.info("adminAuthTokenFlagInProps = "+adminAuthTokenFlagInProps);
+			
+			if (adminAuthTokenFlagInProps) {
+				if (null == adminAuthToken || adminAuthToken.isEmpty()) {
+					response.setStatus(errorStatus);
+					response.setMessage(UserConstants.ADMIN_TOKEN_MANDATORY);
+					LOGGER.error("Error in setPassword is :: " + UserConstants.ADMIN_TOKEN_MANDATORY);
+					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+					LOGGER.info("Time taken by setPassword() : " + elapsedTime);
+					return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+				} else if (null != adminAuthToken && !adminAuthToken.isEmpty()) {
+					String adminStatus = getAdminGroupDetails(adminAuthToken);
+					LOGGER.info("adminStatus = " + adminStatus);
+					if (adminStatus.equalsIgnoreCase(UserConstants.UNAUTHORIZED)) {
+						response.setStatus(errorStatus);
+						response.setMessage(UserConstants.ADMIN_UNAUTH);
+						LOGGER.error("Error in setPassword is :: " + UserConstants.ADMIN_UNAUTH);
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.info("Time taken by setPassword() : " + elapsedTime);
+						return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
+					}
+					if (!adminStatus.equalsIgnoreCase(UserConstants.ADMIN_ADMIN)) {
+						response.setStatus(errorStatus);
+						response.setMessage("AdminToken not having sufficient privilege");
+						LOGGER.error("Error in setPassword is :: AdminToken not having sufficient privilege");
+						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+						LOGGER.info("Time taken by setPassword() : " + elapsedTime);
+						return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
+					}
+				}
+			}
+			
 			if ((!UserConstants.UIMS.equalsIgnoreCase(setPasswordRequest.getIDMS_Profile_update_source()))
 					&& (null == setPasswordRequest.getUIFlag()
 							|| !UserConstants.TRUE.equalsIgnoreCase(setPasswordRequest.getUIFlag()))) {
@@ -13405,7 +13543,7 @@ public class UserServiceImpl implements UserService {
 		cPinRequest.setOperation(socialProfileRequest.getOperation());
 		cPinRequest.setPinCode(socialProfileRequest.getPinCode());
 		cPinRequest.setUIFlag(socialProfileRequest.getUIFlag());
-		return userPinConfirmation(cPinRequest);
+		return userPinConfirmation(null,cPinRequest);
 	}
 
 	private Response openAMProfileUpdate(Configuration conf, ErrorResponse errorResponse, IFWUser userRecord,
