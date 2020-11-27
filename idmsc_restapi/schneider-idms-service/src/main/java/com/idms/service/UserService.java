@@ -85,7 +85,7 @@ public interface UserService {
 	@POST
 	@Path("/apexrest/ConfirmPIN")
 	@Consumes("application/json")
-	Response userPinConfirmation(@Valid ConfirmPinRequest confirmPIN);
+	Response userPinConfirmation(@HeaderParam("AdminAuthToken") String roleToken,@Valid ConfirmPinRequest confirmPIN);
 
 	@GET
 	@Path("/apexrest/IDMSUser/{loginIdentifier}")
@@ -118,7 +118,7 @@ public interface UserService {
 	@PUT
 	@Path("/apexrest/IDMSPassword")
 	@Consumes("application/json")
-	Response updatePassword(@HeaderParam("Authorization") String token,
+	Response updatePassword(@HeaderParam("AdminAuthToken") String roleToken, @HeaderParam("Authorization") String token,
 			@Valid UpdatePasswordRequest updatePasswordRequest);
 
 	@PUT
@@ -142,14 +142,14 @@ public interface UserService {
 	@POST
 	@Path("/apexrest/IDMSPassword")
 	@Consumes("application/json")
-	Response setPassword(@HeaderParam("Authorization") String authorizedToken,
+	Response setPassword(@HeaderParam("AdminAuthToken") String roleToken, @HeaderParam("Authorization") String authorizedToken,
 			@HeaderParam("client_id") String clientId, @HeaderParam("client_secret") String clientSecret,
 			SetPasswordRequest setPasswordRequest);
 
 	@PUT
 	@Path("/apexrest/ResendPinCode")
 	@Consumes("application/json")
-	Response resendPIN(@HeaderParam("Authorization") String token, @Valid ResendPinRequest resendPinRequest);
+	Response resendPIN(@HeaderParam("AdminAuthToken") String roleToken, @HeaderParam("Authorization") String token, @Valid ResendPinRequest resendPinRequest);
 
 	@PUT
 	@Path("/apexrest/ActivateUser")

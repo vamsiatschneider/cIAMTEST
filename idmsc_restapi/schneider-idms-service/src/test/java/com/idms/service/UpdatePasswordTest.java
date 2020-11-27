@@ -114,6 +114,7 @@ public class UpdatePasswordTest {
 	@Test
 	public void testUpdatePwd_Success_UIMSSync() throws Exception {
 		String token = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
+		String adminAuthToken = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
 		UpdatePasswordRequest updatePasswordRequest = DtoMockData.buildUpdatePasswordRequest();
 		updatePasswordRequest.setIDMS_Profile_update_source("IDMSWork");
 		
@@ -129,7 +130,7 @@ public class UpdatePasswordTest {
 		when(mapper.map(updatePasswordRequest, IDMSUserRecordUpdatePassword.class)).thenReturn(idmsUserRecord);
 		when(uimsSetPasswordSoapService.updateUIMSPassword(anyString(), anyString(), anyString(), anyString(), anyString(), anyString())).thenReturn(true);
 		
-		Response response = userService.updatePassword(token, updatePasswordRequest);
+		Response response = userService.updatePassword(adminAuthToken,token, updatePasswordRequest);
 		assertEquals(HttpStatus.OK, HttpStatus.valueOf(response.getStatus()));
 		UserServiceResponse updatePasswordResponse = (UserServiceResponse)response.getEntity();
 		assertThat("Status ", updatePasswordResponse.getStatus(), equalTo("Success"));
@@ -139,6 +140,7 @@ public class UpdatePasswordTest {
 	@Test
 	public void testUpdatePwd_Success_WithoutUIMSSync() throws Exception {
 		String token = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
+		String adminAuthToken = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
 		UpdatePasswordRequest updatePasswordRequest = DtoMockData.buildUpdatePasswordRequest();
 		updatePasswordRequest.setIDMS_Profile_update_source("IDMSWork");
 		
@@ -154,7 +156,7 @@ public class UpdatePasswordTest {
 		when(mapper.map(updatePasswordRequest, IDMSUserRecordUpdatePassword.class)).thenReturn(idmsUserRecord);
 		doNothing().when(uimsUserManagerSoapService).updateUIMSPassword(anyString(), anyString(), anyString(), anyString(), anyString(), anyString());
 		
-		Response response = userService.updatePassword(token, updatePasswordRequest);
+		Response response = userService.updatePassword(adminAuthToken,token, updatePasswordRequest);
 		assertEquals(HttpStatus.OK, HttpStatus.valueOf(response.getStatus()));
 		UserServiceResponse updatePasswordResponse = (UserServiceResponse)response.getEntity();
 		assertThat("Status ", updatePasswordResponse.getStatus(), equalTo("Success"));
@@ -164,6 +166,7 @@ public class UpdatePasswordTest {
 	@Test
 	public void testUpdatePwd_EmptyToken() {
 		String token = "";
+		String adminAuthToken = "";
 		UpdatePasswordRequest updatePasswordRequest = DtoMockData.buildUpdatePasswordRequest();
 		updatePasswordRequest.setIDMS_Profile_update_source("IDMSWork");
 		
@@ -174,7 +177,7 @@ public class UpdatePasswordTest {
 		when(productService.updateUser(anyString(), anyString(), anyString())).thenReturn("");
 		when(mapper.map(updatePasswordRequest, IDMSUserRecordUpdatePassword.class)).thenReturn(idmsUserRecord);
 		
-		Response response = userService.updatePassword(token, updatePasswordRequest);
+		Response response = userService.updatePassword(adminAuthToken,token, updatePasswordRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		ErrorResponse errorResponse = (ErrorResponse)response.getEntity();
 		assertThat("Status ", errorResponse.getStatus(), equalTo("Error"));
@@ -184,6 +187,7 @@ public class UpdatePasswordTest {
 	@Test
 	public void testUpdatePwd_EmptyUpdateSource() {
 		String token = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
+		String adminAuthToken = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
 		UpdatePasswordRequest updatePasswordRequest = DtoMockData.buildUpdatePasswordRequest();
 		updatePasswordRequest.setIDMS_Profile_update_source("");
 		
@@ -194,7 +198,7 @@ public class UpdatePasswordTest {
 		when(productService.updateUser(anyString(), anyString(), anyString())).thenReturn("");
 		when(mapper.map(updatePasswordRequest, IDMSUserRecordUpdatePassword.class)).thenReturn(idmsUserRecord);
 		
-		Response response = userService.updatePassword(token, updatePasswordRequest);
+		Response response = userService.updatePassword(adminAuthToken,token, updatePasswordRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		ErrorResponse errorResponse = (ErrorResponse)response.getEntity();
 		assertThat("Status ", errorResponse.getStatus(), equalTo("Error"));
@@ -204,6 +208,7 @@ public class UpdatePasswordTest {
 	@Test
 	public void testUpdatePwd_NullOldAndNewPwd() {
 		String token = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
+		String adminAuthToken = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
 		UpdatePasswordRequest updatePasswordRequest = DtoMockData.buildUpdatePasswordRequest();
 		updatePasswordRequest.setIDMS_Profile_update_source("IDMSWork");
 		updatePasswordRequest.setExistingPwd("");
@@ -216,7 +221,7 @@ public class UpdatePasswordTest {
 		when(productService.updateUser(anyString(), anyString(), anyString())).thenReturn("");
 		when(mapper.map(updatePasswordRequest, IDMSUserRecordUpdatePassword.class)).thenReturn(idmsUserRecord);
 		
-		Response response = userService.updatePassword(token, updatePasswordRequest);
+		Response response = userService.updatePassword(adminAuthToken,token, updatePasswordRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		PasswordRecoveryResponse passwordEmptyResponse = (PasswordRecoveryResponse)response.getEntity();
 		assertThat("Status ", passwordEmptyResponse.getStatus(), equalTo("Error"));
@@ -226,6 +231,7 @@ public class UpdatePasswordTest {
 	@Test
 	public void testUpdatePwd_SameOldAndNewPwd() {
 		String token = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
+		String adminAuthToken = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
 		UpdatePasswordRequest updatePasswordRequest = DtoMockData.buildUpdatePasswordRequest();
 		updatePasswordRequest.setIDMS_Profile_update_source("IDMSWork");
 		updatePasswordRequest.setExistingPwd("Welcome123");
@@ -238,7 +244,7 @@ public class UpdatePasswordTest {
 		when(productService.updateUser(anyString(), anyString(), anyString())).thenReturn("");
 		when(mapper.map(updatePasswordRequest, IDMSUserRecordUpdatePassword.class)).thenReturn(idmsUserRecord);
 		
-		Response response = userService.updatePassword(token, updatePasswordRequest);
+		Response response = userService.updatePassword(adminAuthToken,token, updatePasswordRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		ErrorResponse errorResponse = (ErrorResponse)response.getEntity();
 		assertThat("Status ", errorResponse.getStatus(), equalTo("Error"));
@@ -248,6 +254,7 @@ public class UpdatePasswordTest {
 	@Test
 	public void testUpdatePwd_PwdComplexityNotMet() {
 		String token = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
+		String adminAuthToken = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
 		UpdatePasswordRequest updatePasswordRequest = DtoMockData.buildUpdatePasswordRequest();
 		updatePasswordRequest.setIDMS_Profile_update_source("IDMSWork");
 		updatePasswordRequest.setNewPwd("password");
@@ -259,7 +266,7 @@ public class UpdatePasswordTest {
 		when(productService.updateUser(anyString(), anyString(), anyString())).thenReturn("");
 		when(mapper.map(updatePasswordRequest, IDMSUserRecordUpdatePassword.class)).thenReturn(idmsUserRecord);
 		
-		Response response = userService.updatePassword(token, updatePasswordRequest);
+		Response response = userService.updatePassword(adminAuthToken,token, updatePasswordRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		ErrorResponse errorResponse = (ErrorResponse)response.getEntity();
 		assertThat("Status ", errorResponse.getStatus(), equalTo("Error"));
@@ -270,6 +277,7 @@ public class UpdatePasswordTest {
 	public void testUpdatePwd_NotAuthorizedException() {
 		
 		String token = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
+		String adminAuthToken = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
 		UpdatePasswordRequest updatePasswordRequest = DtoMockData.buildUpdatePasswordRequest();
 		updatePasswordRequest.setIDMS_Profile_update_source("IDMSWork");
 		
@@ -280,7 +288,7 @@ public class UpdatePasswordTest {
 		when(productService.updateUser(anyString(), anyString(), anyString())).thenReturn("");
 		when(mapper.map(updatePasswordRequest, IDMSUserRecordUpdatePassword.class)).thenReturn(idmsUserRecord);
 
-		Response response = userService.updatePassword(token, updatePasswordRequest);
+		Response response = userService.updatePassword(adminAuthToken,token, updatePasswordRequest);
 		assertEquals(HttpStatus.UNAUTHORIZED, HttpStatus.valueOf(response.getStatus()));
 		UserServiceResponse userResponse = (UserServiceResponse)response.getEntity();
 		assertThat("Status ", userResponse.getStatus(), equalTo("INVALID_SESSION_ID"));
@@ -291,6 +299,7 @@ public class UpdatePasswordTest {
 	public void testUpdatePwd_BadRequestException() {
 		
 		String token = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
+		String adminAuthToken = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
 		UpdatePasswordRequest updatePasswordRequest = DtoMockData.buildUpdatePasswordRequest();
 		updatePasswordRequest.setIDMS_Profile_update_source("IDMSWork");
 		
@@ -301,7 +310,7 @@ public class UpdatePasswordTest {
 		when(productService.updateUser(anyString(), anyString(), anyString())).thenReturn("");
 		when(mapper.map(updatePasswordRequest, IDMSUserRecordUpdatePassword.class)).thenReturn(idmsUserRecord);
 		
-		Response response = userService.updatePassword(token, updatePasswordRequest);
+		Response response = userService.updatePassword(adminAuthToken,token, updatePasswordRequest);
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.valueOf(response.getStatus()));
 		ErrorResponse errorResponse = (ErrorResponse)response.getEntity();
 		assertThat("Status ", errorResponse.getStatus(), equalTo("Error"));
@@ -311,6 +320,7 @@ public class UpdatePasswordTest {
 	@Test
 	public void testUpdatePwd_NotFoundException() {
 		String token = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
+		String adminAuthToken = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
 		UpdatePasswordRequest updatePasswordRequest = DtoMockData.buildUpdatePasswordRequest();
 		updatePasswordRequest.setIDMS_Profile_update_source("IDMSWork");
 		
@@ -321,7 +331,7 @@ public class UpdatePasswordTest {
 		when(productService.updateUser(anyString(), anyString(), anyString())).thenReturn("");
 		when(mapper.map(updatePasswordRequest, IDMSUserRecordUpdatePassword.class)).thenReturn(idmsUserRecord);
 
-		Response response = userService.updatePassword(token, updatePasswordRequest);
+		Response response = userService.updatePassword(adminAuthToken,token, updatePasswordRequest);
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.valueOf(response.getStatus()));
 		ErrorResponse errorResponse = (ErrorResponse)response.getEntity();
 		assertThat("Status ", errorResponse.getStatus(), equalTo("Error"));

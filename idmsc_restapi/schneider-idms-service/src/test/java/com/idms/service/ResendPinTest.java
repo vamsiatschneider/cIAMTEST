@@ -87,6 +87,7 @@ public class ResendPinTest extends PropertyVariables{
 	public void testUserPinConfirmation() throws Exception {
 		
 		String token = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
+		String adminAuthToken = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea2";
 		ResendPinRequest confirmPinRequest = DtoMockData.buildResendPinRequest();
 		
 		InputStream stream = new ByteArrayInputStream(DomainMockData.ENTITY.getBytes(StandardCharsets.UTF_8));
@@ -98,7 +99,7 @@ public class ResendPinTest extends PropertyVariables{
 		when(productService.otpAuthentication(anyString(),anyString(),anyString(), anyString(), anyString()))
 		.thenReturn(otpResponse);
 		
-		Response response = userService.resendPIN(token, confirmPinRequest);
+		Response response = userService.resendPIN(adminAuthToken, token, confirmPinRequest);
 		assertEquals(HttpStatus.OK, HttpStatus.valueOf(response.getStatus()));
 		JSONObject actualResponse = (JSONObject)response.getEntity();
 		assertThat("Status ", actualResponse.get(UserConstants.STATUS), equalTo("Success"));
@@ -113,11 +114,12 @@ public class ResendPinTest extends PropertyVariables{
 	public void testUserPinConfirmationWhenAuthenticateUserThrowsBadRequest() {
 		
 		String token = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
+		String adminAuthToken = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea2";
 		ResendPinRequest confirmPinRequest = DtoMockData.buildResendPinRequest();
 		when(productService.authenticateUser(anyString(), anyString(), anyString())).thenThrow(new BadRequestException(""));
 		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER);
 
-		Response response = userService.resendPIN(token, confirmPinRequest);
+		Response response = userService.resendPIN(adminAuthToken, token, confirmPinRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		JSONObject actualResponse = (JSONObject)response.getEntity();
 		assertThat("Status ", actualResponse.get(UserConstants.STATUS), equalTo(UserConstants.STATUS_FAILD));
@@ -133,11 +135,12 @@ public class ResendPinTest extends PropertyVariables{
 	public void testUserPinConfirmation_NotFoundException() {
 		
 		String token = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
+		String adminAuthToken = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea2";
 		ResendPinRequest confirmPinRequest = DtoMockData.buildResendPinRequest();
 		when(productService.authenticateUser(anyString(), anyString(), anyString())).thenThrow(new NotFoundException(""));
 		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER);
 		
-		Response response = userService.resendPIN(token, confirmPinRequest);
+		Response response = userService.resendPIN(adminAuthToken, token, confirmPinRequest);
 		assertEquals(HttpStatus.NOT_FOUND, HttpStatus.valueOf(response.getStatus()));
 		JSONObject actualResponse = (JSONObject)response.getEntity();
 		assertThat("Status ", actualResponse.get(UserConstants.STATUS), equalTo(UserConstants.STATUS_FAILD));
@@ -152,11 +155,12 @@ public class ResendPinTest extends PropertyVariables{
 	public void testUserPinConfirmation_BadRequestException() {
 		
 		String token = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
+		String adminAuthToken = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea2";
 		ResendPinRequest confirmPinRequest = DtoMockData.buildResendPinRequest();
 		when(productService.authenticateUser(anyString(), anyString(), anyString())).thenReturn(DomainMockData.AUTHENTICATION_JSON);
 		when(productService.getUser(anyString(), anyString())).thenThrow(new BadRequestException(""));
 		
-		Response response = userService.resendPIN(token, confirmPinRequest);
+		Response response = userService.resendPIN(adminAuthToken, token, confirmPinRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		JSONObject actualResponse = (JSONObject)response.getEntity();
 		assertThat("Status ", actualResponse.get(UserConstants.STATUS), equalTo(UserConstants.STATUS_FAILD));
@@ -172,11 +176,12 @@ public class ResendPinTest extends PropertyVariables{
 	public void testUserPinConfirmation_UserNotFoundException() {
 		
 		String token = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
+		String adminAuthToken = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea2";
 		ResendPinRequest confirmPinRequest = DtoMockData.buildResendPinRequest();
 		when(productService.authenticateUser(anyString(), anyString(), anyString())).thenReturn(DomainMockData.AUTHENTICATION_JSON);
 		when(productService.getUser(anyString(), anyString())).thenThrow(new NotFoundException(""));
 		
-		Response response = userService.resendPIN(token, confirmPinRequest);
+		Response response = userService.resendPIN(adminAuthToken, token, confirmPinRequest);
 		JSONObject actualResponse = (JSONObject)response.getEntity();
 		assertThat("Status ", actualResponse.get(UserConstants.STATUS), equalTo(UserConstants.STATUS_FAILD));
 		assertThat("Message ", actualResponse.get(UserConstants.MESSAGE), equalTo(UserConstants.ERROR_RESEND_PIN));

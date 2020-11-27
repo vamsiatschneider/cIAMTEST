@@ -98,6 +98,7 @@ public class UserConfirmPinTest {
 	public void testUserPinConfirmation() throws Exception {
 
 		ConfirmPinRequest confirmPinRequest = DtoMockData.buildUserPinConfirmationRequset();
+		String adminAuthToken = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
 		
 		when(legthValidator.validate(anyString(),anyString())).thenReturn(true);
 		when(pickListValidator.validate(anyString(),anyString())).thenReturn(true);
@@ -112,7 +113,7 @@ public class UserConfirmPinTest {
 		doNothing().when(uimsSetPasswordSoapService).activateUIMSUserConfirmPIN(any(ConfirmPinRequest.class), anyString(),
 				anyString(), anyString(), anyString());
 		
-		Response response = userService.userPinConfirmation(confirmPinRequest);
+		Response response = userService.userPinConfirmation(adminAuthToken,confirmPinRequest);
 		assertEquals(HttpStatus.OK, HttpStatus.valueOf(response.getStatus()));
 		PasswordRecoveryResponse actualResponse = (PasswordRecoveryResponse) response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Success"));
@@ -131,8 +132,9 @@ public class UserConfirmPinTest {
 		confirmPinRequest.setId("");
 		confirmPinRequest.setFederationIdentifier("");
 		confirmPinRequest.setIDMS_Federated_ID__c("");
+		String adminAuthToken = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
 		
-		Response response = userService.userPinConfirmation(confirmPinRequest);
+		Response response = userService.userPinConfirmation(adminAuthToken,confirmPinRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		ConfirmPinResponse actualResponse = (ConfirmPinResponse) response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
@@ -149,7 +151,8 @@ public class UserConfirmPinTest {
 		ConfirmPinRequest confirmPinRequest = DtoMockData.buildUserPinConfirmationRequset();
 		confirmPinRequest.setPinCode(null);
 
-		Response response = userService.userPinConfirmation(confirmPinRequest);
+		String adminAuthToken = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
+		Response response = userService.userPinConfirmation(adminAuthToken,confirmPinRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		ConfirmPinResponse actualResponse = (ConfirmPinResponse) response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
@@ -166,7 +169,8 @@ public class UserConfirmPinTest {
 		ConfirmPinRequest confirmPinRequest = DtoMockData.buildUserPinConfirmationRequset();
 		confirmPinRequest.setIDMS_Profile_update_source(null);
 
-		Response response = userService.userPinConfirmation(confirmPinRequest);
+		String adminAuthToken = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
+		Response response = userService.userPinConfirmation(adminAuthToken,confirmPinRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		ConfirmPinResponse actualResponse = (ConfirmPinResponse) response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
@@ -183,6 +187,7 @@ public class UserConfirmPinTest {
 
 		ConfirmPinRequest confirmPinRequest = DtoMockData.buildUserPinConfirmationRequset();
 		confirmPinRequest.setPassword("Password");
+		String adminAuthToken = "Bearer 989d8f87-54da-40f1-9d89-2c285ad5ea20";
 
 		when(legthValidator.validate(anyString(), anyString())).thenReturn(true);
 		when(pickListValidator.validate(anyString(), anyString())).thenReturn(true);
@@ -191,7 +196,7 @@ public class UserConfirmPinTest {
 		when(cacheManager.getCache(anyString())).thenReturn(cache);
 		when(productService.getUser(anyString(), anyString())).thenReturn(DomainMockData.GET_USER);
 		
-		Response response = userService.userPinConfirmation(confirmPinRequest);
+		Response response = userService.userPinConfirmation(adminAuthToken,confirmPinRequest);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		ConfirmPinResponse actualResponse = (ConfirmPinResponse) response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
