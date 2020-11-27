@@ -38,8 +38,8 @@ public class HttpConnectionUtils {
      */
     public static String readContentFromGet(String url) throws IOException {
 
-        URL getUrl = new URL(url);
-        LOGGER.info("readContentFromGet URL " + url);
+    	URL getUrl = new URL(url);
+    	LOGGER.info("readContentFromGet URL " + url);
         HttpURLConnection connection = (HttpURLConnection) getUrl.openConnection();
         // 设置从主机读取数据超时（单位：毫秒）
         connection.setReadTimeout(2000);
@@ -47,30 +47,26 @@ public class HttpConnectionUtils {
         connection.setConnectTimeout(2000);
         connection.connect();
         String responseString = "";
-        InputStream inStream = connection.getInputStream();
-        try {
         if (connection.getResponseCode() == 200) {
             // 发送数据到服务器并使用Reader读取返回的数据
             StringBuffer sBuffer = new StringBuffer();
             byte[] buf = new byte[1024];
+            InputStream inStream = connection.getInputStream();
             
-            
-            for (int n; (n = inStream.read(buf)) != -1; ) {
+            int n=0;
+            while((n = inStream.read(buf)) != -1) {
                 sBuffer.append(new String(buf, 0, n, "UTF-8"));
             }
-           
+            inStream.close();
             responseString = sBuffer.toString();
         } else {
-        	LOGGER.error(String.format("connection response code is not correct,code=%s,msg=%s ",
+        	LOGGER.info(String.format("connection response code is not correct,code=%s,msg=%s ",
                     connection.getResponseCode(), connection.getResponseMessage()));
         }
         connection.disconnect();// 断开连接
-        }finally {
-        	inStream.close();
-        }
         return responseString;
     }
-
+    
     /**
      * 发送POST请求，获取服务器返回结果
      *
@@ -80,7 +76,7 @@ public class HttpConnectionUtils {
      * @throws IOException
      */
     public static String readContentFromPost(String url, Map<String, String> paramMap) throws IOException {
-        String data = getUrlParamsByMap(paramMap);
+    	String data = getUrlParamsByMap(paramMap);
         URL postUrl = new URL(url);
         HttpURLConnection connection = (HttpURLConnection) postUrl.openConnection();
         // 设置从主机读取数据超时（单位：毫秒）
@@ -94,33 +90,27 @@ public class HttpConnectionUtils {
         // 建立与服务器的连接，并未发送数据
         connection.connect();
         OutputStreamWriter outputStreamWriter = new OutputStreamWriter(connection.getOutputStream(), "utf-8");
-        InputStream inStream = connection.getInputStream();
-        String response = "";
-        try {
         outputStreamWriter.write(data);
         outputStreamWriter.flush();
-        
-        
+        outputStreamWriter.close();
+        String response = "";
         if (connection.getResponseCode() == 200) {
             // 发送数据到服务器并使用Reader读取返回的数据
             StringBuffer sBuffer = new StringBuffer();
             byte[] buf = new byte[1024];
-            for (int n; (n = inStream.read(buf)) != -1; ) {
+            InputStream inStream = connection.getInputStream();
+            int n=0;
+            while((n = inStream.read(buf)) != -1) {
                 sBuffer.append(new String(buf, 0, n, "UTF-8"));
             }
             // 断开连接
-            
+            inStream.close();
             response = sBuffer.toString();
         } else {
-        	LOGGER.error(String.format("connection response code is not correct,code=%s,msg=%s ",
+        	LOGGER.info(String.format("connection response code is not correct,code=%s,msg=%s ",
                     connection.getResponseCode(), connection.getResponseMessage()));
         }
         connection.disconnect();
-        }
-        finally {
-        	outputStreamWriter.close();
-        	inStream.close();
-        }
         return response;
     }
 
