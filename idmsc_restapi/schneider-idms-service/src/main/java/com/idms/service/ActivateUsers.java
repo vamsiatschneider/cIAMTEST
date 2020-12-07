@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -51,7 +50,7 @@ public class ActivateUsers {
 			}
 
 		} catch (Exception e) {
-			LOGGER.error("Unable to read data from csv file");
+			LOGGER.error("Unable to read data from csv file"+e.getMessage(),e);
 		}
 
 	}

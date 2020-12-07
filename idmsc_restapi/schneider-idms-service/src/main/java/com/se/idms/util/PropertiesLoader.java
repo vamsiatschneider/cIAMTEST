@@ -1,17 +1,12 @@
 package com.se.idms.util;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.ResourceUtils;
 
 public class PropertiesLoader {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesLoader.class);
 
+	/*
 	private static String getProps(String key) {
 		Properties prop = new Properties();
 		InputStream input = null;
@@ -38,5 +33,5 @@ public class PropertiesLoader {
 			}
 		}
 		return null;
-	}
+	}*/
 }

@@ -6,9 +6,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
 
@@ -24,7 +21,6 @@ import org.springframework.http.HttpStatus;
 
 import com.idms.mapper.IdmsMapper;
 import com.idms.model.CreateUserRequest;
-import com.idms.model.CreateUserResponse;
 import com.idms.model.IDMSUserResponse;
 import com.idms.product.client.IFWService;
 import com.idms.product.client.OpenAMService;
@@ -160,7 +156,7 @@ public class UserServiceImplTest extends PropertyVariables{
 	public void testUserRegistrationWhenUserNotSendingAuthorizationToken() throws Exception {
 	
 		CreateUserRequest userRequest = DtoMockData.buildUserRegistrationRequset();
-		OpenAmUserRequest openAmReq = DtoMockData.buildUserRegistrationOpenAmRequset();
+		//OpenAmUserRequest openAmReq = DtoMockData.buildUserRegistrationOpenAmRequset();
 		when(legthValidator.validate(anyString(), anyString())).thenReturn(true);
 		when(pickListValidator.validate(anyString(), anyString())).thenReturn(true);
 		when(multiPickListValidator.validate(anyString(), anyString())).thenReturn(true);
@@ -212,8 +208,8 @@ public class UserServiceImplTest extends PropertyVariables{
 	public void testUserRegistrationWhenFirstNameIsEmpty() {
 		// Setup
 		CreateUserRequest userRequest = DtoMockData.buildUserRegistrationRequset();
-		InputStream is = new ByteArrayInputStream(DomainMockData.USER_REGISTRATION.getBytes());
-		Response userRegRes = Response.status(Response.Status.OK).entity(is).build();
+		//InputStream is = new ByteArrayInputStream(DomainMockData.USER_REGISTRATION.getBytes());
+		//Response userRegRes = Response.status(Response.Status.OK).entity(is).build();
 		when(legthValidator.validate(anyString(), anyString())).thenReturn(true);
 		when(pickListValidator.validate(anyString(), anyString())).thenReturn(true);
 		when(multiPickListValidator.validate(anyString(), anyString())).thenReturn(true);
