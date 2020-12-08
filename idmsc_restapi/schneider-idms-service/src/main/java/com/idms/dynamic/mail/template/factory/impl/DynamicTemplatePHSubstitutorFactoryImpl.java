@@ -46,6 +46,9 @@ public class DynamicTemplatePHSubstitutorFactoryImpl implements DynamicTemplateP
 		if(OperationType.CHANGE_EMAIL_NOTIFICATION.getType().equals(input.getOperationType().getType())) {
 			return new LinkTemplatePlaceholderENSubstitutor(input, openDJAttributes);
 		}
+		if(OperationType.TWO_FACTOR_AUTHENTICATION.getType().equals(input.getOperationType().getType())) {
+			return new OTPTemplatePlaceholderENSubstitutor(input, openDJAttributes);
+		}
 		TemplatePlaceholderSubstitutor substitutor;
 		if (input.isOTPEnabled()) {
 			substitutor = new OTPTemplatePlaceholderENSubstitutor(input, openDJAttributes);
@@ -66,6 +69,9 @@ public class DynamicTemplatePHSubstitutorFactoryImpl implements DynamicTemplateP
 	private TemplatePlaceholderSubstitutor getOTPOrLinkCNSubstitutor() {
 		if(OperationType.CHANGE_EMAIL_NOTIFICATION.getType().equals(input.getOperationType().getType())) {
 			return new LinkTemplatePlaceholderCNSubstitutor(input, openDJAttributes);
+		}
+		if(OperationType.TWO_FACTOR_AUTHENTICATION.getType().equals(input.getOperationType().getType())) {
+			return new OTPTemplatePlaceholderCNSubstitutor(input, openDJAttributes);
 		}
 		TemplatePlaceholderSubstitutor substitutor;
 		if (input.isOTPEnabled()) {
