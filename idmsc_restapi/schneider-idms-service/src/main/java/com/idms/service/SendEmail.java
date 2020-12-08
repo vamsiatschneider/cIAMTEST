@@ -262,6 +262,9 @@ public class SendEmail {
 	@Value("${user.change.email.notification.template}")
 	private String IDMS_USER_CHANGE_EMAILTEMPLATE;
 	
+	@Value("${user.twofactorauth.email.template}")
+	private String IDMS_USER_2FA_EMAILTEMPLATE;
+	
 	public String getDefaultUserNameFormat() {
 		return defaultUserNameFormat;
 	}
@@ -344,180 +347,195 @@ public class SendEmail {
 	}
 	
 	
-	public void  sendOpenAmEmail(String token, String code, String hotpOperationType,String userId, String appid, String pathString){
+	public void sendOpenAmEmail(String token, String code, String hotpOperationType, String userId, String appid,
+			String pathString, String _2FAIdentifier) {
 		LOGGER.info("Entered sendOpenAmEmail() -> Start");
-		LOGGER.info("Parameter hotpOperationType -> "+hotpOperationType+" ,userId -> "+userId);
+		LOGGER.info("Parameter hotpOperationType -> " + hotpOperationType + " ,userId -> " + userId);
 		LOGGER.info("Parameter appid -> " + appid);
-			
+
 		String userData = "";
-		String to = "" ;
+		String to = "";
 		String subject = "";
-		String lang= "";
+		String lang = "";
 		String firstName = "";
-		String aLink="";
-		String linkParam="";
+		String aLink = "";
+		String linkParam = "";
 		String emailUserNameFormat = null;
-		String attribute="";
-		String appNameParam="";
-		String prmTemplate=null;
+		String attribute = "";
+		String appNameParam = "";
+		String prmTemplate = null;
 		boolean isOTPEnabled = false;
 		boolean isDynamicEmailEnabled = false;
-			try {
-				encodedHOTPcode = code;
-				LOGGER.info("Start: getUser() of openamService for userId="+userId);
-				userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userId, userService.getSSOToken());
-				LOGGER.info("End: getUser() of openamService finished for userId="+userId);
-				productDocCtxUser = JsonPath.using(conf).parse(userData);
-				
-				// read support link url by passing appid
-				LOGGER.info("Start: getUser() of OpenDjService for appId="+appid);
-				Response applicationDetails = openDJService.getUser(djUserName, djUserPwd, appid);
-				LOGGER.info("End: getUser() of OpenDjService finished for appId="+appid);
-				
-				
-				productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
-				String bfoSupportUrl = productDJData.read(JsonConstants.BFO_SUPPORT_URL);
-				LOGGER.info("bfoSupportUrl = "+bfoSupportUrl);
-				
-				String templateColor = productDJData.read("_IDMS_Application_CSS");
-				LOGGER.info("templateColor: "+templateColor);
-				// For email name configuration 
-				if (null != applicationDetails && 200 == applicationDetails.getStatus()) {
-					String userNameFormatOpenDJ = productDJData.read("_userNameFormat");
-					LOGGER.info("userNameFormatOpenDJ:"+userNameFormatOpenDJ);
-					LOGGER.info("defaultUserNameFormat:"+defaultUserNameFormat);
-					if(null != userNameFormatOpenDJ && !userNameFormatOpenDJ.isEmpty()){
-						emailUserNameFormat = userNameFormatOpenDJ;
-					} else{
-						emailUserNameFormat = defaultUserNameFormat;
-					}
-					//check if otp option is enabled for app
-					String isOTPEnabledForApp = productDJData.read("_isOTPEnabled");
-					if(null!=isOTPEnabledForApp && !isOTPEnabledForApp.equals("")) {
-						isOTPEnabled = Boolean.valueOf(isOTPEnabledForApp);
-						LOGGER.info("isOTPEnabled: "+ isOTPEnabled);
-					}
-					//check if dynamic email template is enabled for app
-					String isDynamicEmailEnabledForApp = productDJData.read("_isDynamicEmailEnabled");
-					if(null!=isDynamicEmailEnabledForApp && !isDynamicEmailEnabledForApp.equals("")) {
-						isDynamicEmailEnabled = Boolean.valueOf(isDynamicEmailEnabledForApp);
-						LOGGER.info("isDynamicEmailEnabled: "+ isDynamicEmailEnabled);
-					}
+		try {
+			encodedHOTPcode = code;
+			LOGGER.info("Start: getUser() of openamService for userId=" + userId);
+			userData = UserServiceUtil.getUserBasedOnFRVersion(productService, frVersion, userId,
+					userService.getSSOToken());
+			LOGGER.info("End: getUser() of openamService finished for userId=" + userId);
+			productDocCtxUser = JsonPath.using(conf).parse(userData);
+
+			boolean _2FAFlow = EmailConstants.TWO_FACTOR_AUTHENTICATION.equals(hotpOperationType);
+			if (_2FAFlow) {
+				appid = productDocCtxUser.read("$.registerationSource[0]");
+			}
+			// read support link url by passing appid
+			LOGGER.info("Start: getUser() of OpenDjService for appId=" + appid);
+			Response applicationDetails = openDJService.getUser(djUserName, djUserPwd, appid);
+			LOGGER.info("End: getUser() of OpenDjService finished for appId=" + appid);
+
+			productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) applicationDetails.getEntity()));
+			String bfoSupportUrl = productDJData.read(JsonConstants.BFO_SUPPORT_URL);
+			LOGGER.info("bfoSupportUrl = " + bfoSupportUrl);
+
+			String templateColor = productDJData.read("_IDMS_Application_CSS");
+			LOGGER.info("templateColor: " + templateColor);
+			// For email name configuration
+			if (null != applicationDetails && 200 == applicationDetails.getStatus()) {
+				String userNameFormatOpenDJ = productDJData.read("_userNameFormat");
+				LOGGER.info("userNameFormatOpenDJ:" + userNameFormatOpenDJ);
+				LOGGER.info("defaultUserNameFormat:" + defaultUserNameFormat);
+				if (null != userNameFormatOpenDJ && !userNameFormatOpenDJ.isEmpty()) {
+					emailUserNameFormat = userNameFormatOpenDJ;
+				} else {
+					emailUserNameFormat = defaultUserNameFormat;
 				}
+				// check if otp option is enabled for app
+				String isOTPEnabledForApp = productDJData.read("_isOTPEnabled");
+				if (null != isOTPEnabledForApp && !isOTPEnabledForApp.equals("")) {
+					isOTPEnabled = Boolean.valueOf(isOTPEnabledForApp);
+					LOGGER.info("isOTPEnabled: " + isOTPEnabled);
+				}
+				// check if dynamic email template is enabled for app
+				String isDynamicEmailEnabledForApp = productDJData.read("_isDynamicEmailEnabled");
+				if (null != isDynamicEmailEnabledForApp && !isDynamicEmailEnabledForApp.equals("")) {
+					isDynamicEmailEnabled = Boolean.valueOf(isDynamicEmailEnabledForApp);
+					LOGGER.info("isDynamicEmailEnabled: " + isDynamicEmailEnabled);
+				}
+			}
+			if (_2FAFlow && !isDynamicEmailEnabled) {
+				send2FAEmail(code, _2FAIdentifier, userId);
+			} else {
 				if (null != applicationDetails && 200 != applicationDetails.getStatus()) {
 					emailUserNameFormat = defaultUserNameFormat;
 				}
-			    if(hotpOperationType.equalsIgnoreCase(EmailConstants.UPDATEUSERRECORD_OPT_TYPE)){
-					subject=appid;
+				if (_2FAFlow && StringUtils.isNotBlank(_2FAIdentifier)) {
+					subject = appid;
+					to = _2FAIdentifier;
+				} else if (hotpOperationType.equalsIgnoreCase(EmailConstants.UPDATEUSERRECORD_OPT_TYPE)) {
+					subject = appid;
 					to = productDocCtxUser.read("$.newmail[0]");
-				}else if(hotpOperationType.equalsIgnoreCase(EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE)){
-					subject=appid;
+				} else if (hotpOperationType.equalsIgnoreCase(EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE)) {
+					subject = appid;
 					to = productDocCtxUser.read("$.mail[0]");
 				} else {
-					subject=productDocCtxUser.read("$.registerationSource[0]");
+					subject = productDocCtxUser.read("$.registerationSource[0]");
 					to = productDocCtxUser.read("$.mail[0]");
 				}
-				lang=productDocCtxUser.read("$.preferredlanguage[0]");
+				lang = productDocCtxUser.read("$.preferredlanguage[0]");
 
-				if(emailUserNameFormat.equalsIgnoreCase(UserConstants.FIRST_NAME)) {
-					firstName=productDocCtxUser.read("$.givenName[0]");
-				} else if(emailUserNameFormat.equalsIgnoreCase(UserConstants.LAST_NAME)) {
-					firstName=productDocCtxUser.read("$.sn[0]");
-				} else if(emailUserNameFormat.equalsIgnoreCase(UserConstants.FULL_NAME)) {
-					firstName=productDocCtxUser.read("$.cn[0]");
+				if (emailUserNameFormat.equalsIgnoreCase(UserConstants.FIRST_NAME)) {
+					firstName = productDocCtxUser.read("$.givenName[0]");
+				} else if (emailUserNameFormat.equalsIgnoreCase(UserConstants.LAST_NAME)) {
+					firstName = productDocCtxUser.read("$.sn[0]");
+				} else if (emailUserNameFormat.equalsIgnoreCase(UserConstants.FULL_NAME)) {
+					firstName = productDocCtxUser.read("$.cn[0]");
 				} else {
-					firstName=productDocCtxUser.read("$.givenName[0]");
+					firstName = productDocCtxUser.read("$.givenName[0]");
 				}
-				LOGGER.info("Email format Name:"+firstName);
+				LOGGER.info("Email format Name:" + firstName);
 				aLink = productDocCtxUser.read("$.alink[0]");
-				LOGGER.info("sendOpenAmEmail** alink:"+aLink);
-				//for PRM - mySchneiderPartnerPortal user
-				if(subject.equalsIgnoreCase(UserConstants.PRM_APP_NAME)){
-					attribute=productDocCtxUser.read("$.RegistrationAttributes__c[0]");
-					firstName=productDocCtxUser.read("$.cn[0]");//In case of mySchneiderPartnerPortal
-					if(attribute!=null && !attribute.isEmpty()){
+				LOGGER.info("sendOpenAmEmail** alink:" + aLink);
+				// for PRM - mySchneiderPartnerPortal user
+				if (subject.equalsIgnoreCase(UserConstants.PRM_APP_NAME)) {
+					attribute = productDocCtxUser.read("$.RegistrationAttributes__c[0]");
+					firstName = productDocCtxUser.read("$.cn[0]");// In case of mySchneiderPartnerPortal
+					if (attribute != null && !attribute.isEmpty()) {
 						ObjectMapper mapper = new ObjectMapper();
-						//Convert JSON array to List of RegistrationAttributes objects
-						List<RegistrationAttributes> attributeList = Arrays.asList(mapper.readValue(attribute, RegistrationAttributes[].class));
-						for (RegistrationAttributes regAttribute:attributeList) {
+						// Convert JSON array to List of RegistrationAttributes objects
+						List<RegistrationAttributes> attributeList = Arrays
+								.asList(mapper.readValue(attribute, RegistrationAttributes[].class));
+						for (RegistrationAttributes regAttribute : attributeList) {
 							String KeyName = regAttribute.getKeyName();
 							String KeyValue = regAttribute.getKeyValue();
 							LOGGER.info("KeyName = " + KeyName + " and KeyValue =" + KeyValue);
-							if (KeyName.equalsIgnoreCase("prmRegEmailType") && null != KeyValue && !KeyValue.isEmpty()) {
+							if (KeyName.equalsIgnoreCase("prmRegEmailType") && null != KeyValue
+									&& !KeyValue.isEmpty()) {
 								LOGGER.info("inside prmRegEmailType  block");
-								prmTemplate=KeyValue;
-							}
-							else if (KeyName.equalsIgnoreCase("prmAppName") && null != KeyValue && !KeyValue.isEmpty()) {
+								prmTemplate = KeyValue;
+							} else if (KeyName.equalsIgnoreCase("prmAppName") && null != KeyValue
+									&& !KeyValue.isEmpty()) {
 								LOGGER.info("inside prmAppName  block");
-								appNameParam="&appName="+KeyValue;
+								appNameParam = "&appName=" + KeyValue;
 							}
 						}
-						if(prmTemplate==null){
-							prmTemplate=UserConstants.PRM_SELF_REG_EMAIL;
+						if (prmTemplate == null) {
+							prmTemplate = UserConstants.PRM_SELF_REG_EMAIL;
 						}
-					}
-					else{
-						//select default self registration template.Pass the template to emailContentTemplate method or have one global variable and assign it the value 
-						//of prmTemplate
-						prmTemplate=UserConstants.PRM_SELF_REG_EMAIL;
+					} else {
+						// select default self registration template.Pass the template to
+						// emailContentTemplate method or have one global variable and assign it the
+						// value
+						// of prmTemplate
+						prmTemplate = UserConstants.PRM_SELF_REG_EMAIL;
 					}
 				}
-				//Setting aLink in case of User Registration
-				if(hotpOperationType.equalsIgnoreCase(EmailConstants.USERREGISTRATION_OPT_TYPE)){
-					linkParam=(aLink==null | aLink =="") ? "" : ("&alink="+aLink);
-					linkParam=linkParam+appNameParam;//Appending appName parameter for mySchneiderPartnerPortal.
+				// Setting aLink in case of User Registration
+				if (hotpOperationType.equalsIgnoreCase(EmailConstants.USERREGISTRATION_OPT_TYPE)) {
+					linkParam = (aLink == null | aLink == "") ? "" : ("&alink=" + aLink);
+					linkParam = linkParam + appNameParam;// Appending appName parameter for mySchneiderPartnerPortal.
 				}
-				LOGGER.info("linkParam: "+linkParam);
-				
-				if(isOTPEnabled){
+				LOGGER.info("linkParam: " + linkParam);
+
+				if (isOTPEnabled) {
 					token = code;
 				}
-				if(!(hotpOperationType.equalsIgnoreCase(EmailConstants.SETUSERPWD_OPT_TYPE)
+				if (!(hotpOperationType.equalsIgnoreCase(EmailConstants.SETUSERPWD_OPT_TYPE)
 						|| hotpOperationType.equalsIgnoreCase(EmailConstants.USERREGISTRATION_OPT_TYPE)
 						|| hotpOperationType.equalsIgnoreCase(EmailConstants.UPDATEUSERRECORD_OPT_TYPE)
-						|| hotpOperationType.equalsIgnoreCase(EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE))){
+						|| hotpOperationType.equalsIgnoreCase(EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE))) {
 					token = code;
 				}
 
 				String mailDomain = to.substring(to.indexOf("@") + 1);
 
 				LOGGER.info("mailDomain in sendOpenAmEmail= " + mailDomain);
-				if(mailDomain.contains(UserConstants.YOP_MAIL)){
+				if (mailDomain.contains(UserConstants.YOP_MAIL)) {
 					url = hotpEmailVerificationURL + "?userid=" + userId + "&amp;pin=" + token + "&amp;operationType="
-							+ hotpOperationType + "&amp;app=" + appid + "&amp;uid=" + userId+linkParam;
-					if (null != pathString && !pathString.isEmpty()){
+							+ hotpOperationType + "&amp;app=" + appid + "&amp;uid=" + userId + linkParam;
+					if (null != pathString && !pathString.isEmpty()) {
 						pathString = pathString.replaceAll("&", "&amp;");
 						url = url + "&amp;" + pathString;
 					}
-				}
-				else{
+				} else {
 					url = hotpEmailVerificationURL + "?userid=" + userId + "&pin=" + token + "&operationType="
-							+ hotpOperationType + "&app=" + appid + "&uid=" + userId+linkParam;
+							+ hotpOperationType + "&app=" + appid + "&uid=" + userId + linkParam;
 					if (null != pathString && !pathString.isEmpty()) {
 						url = url + "&" + pathString;
 					}
 				}
 				String appleProvider = productDocCtxUser.read("$.appleid[0]");
 				LogMessageUtil.logInfoMessage("appleProvider: ", appleProvider);
-				if(StringUtils.isNotBlank(appleProvider)) {
+				if (StringUtils.isNotBlank(appleProvider)) {
 					url = url + "&provider=Apple";
 				}
 				LOGGER.info("sendOpenAmEmail : URL compiled to : " + url);
 				contentBuilder = new StringBuilder();
 				contentBuilder.setLength(0);
-				LOGGER.info("Before emailContentTemplate call first name:"+firstName);
+				LOGGER.info("Before emailContentTemplate call first name:" + firstName);
 				// if section for chinese user
-				if ((lang != null
-					&& (lang.equalsIgnoreCase("zh") || lang.equalsIgnoreCase("zh_cn") || lang.equalsIgnoreCase("zh_tw")))
-					|| (hotpLanguage != null && (hotpLanguage.equalsIgnoreCase("zh")
-							|| hotpLanguage.equalsIgnoreCase("zh_cn") || hotpLanguage.equalsIgnoreCase("zh_tw")))) {
-					LOGGER.info("sendOpenAmEmail :  Building Chinese email content..for.."+to);
-					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN,hotpOperationType,firstName,bfoSupportUrl,prmTemplate,templateColor, isOTPEnabled, isDynamicEmailEnabled);
+				if ((lang != null && (lang.equalsIgnoreCase("zh") || lang.equalsIgnoreCase("zh_cn")
+						|| lang.equalsIgnoreCase("zh_tw")))
+						|| (hotpLanguage != null && (hotpLanguage.equalsIgnoreCase("zh")
+								|| hotpLanguage.equalsIgnoreCase("zh_cn") || hotpLanguage.equalsIgnoreCase("zh_tw")))) {
+					LOGGER.info("sendOpenAmEmail :  Building Chinese email content..for.." + to);
+					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_CN, hotpOperationType,
+							firstName, bfoSupportUrl, prmTemplate, templateColor, isOTPEnabled, isDynamicEmailEnabled);
 				}
 				// Else section for English user
 				else {
-					LOGGER.info("sendOpenAmEmail :  Building English email content..for.."+to);
-					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN,hotpOperationType,firstName,bfoSupportUrl,prmTemplate,templateColor, isOTPEnabled, isDynamicEmailEnabled);
+					LOGGER.info("sendOpenAmEmail :  Building English email content..for.." + to);
+					subject = emailContentTemplate(to, subject, EmailConstants.HOTP_LAN_EN, hotpOperationType,
+							firstName, bfoSupportUrl, prmTemplate, templateColor, isOTPEnabled, isDynamicEmailEnabled);
 
 				}
 
@@ -534,10 +552,11 @@ public class SendEmail {
 				if (LOGGER.isDebugEnabled()) {
 					LOGGER.info("sendOpenAmEmail : " + "HOTP sent to : " + to + ".");
 				}
-			} catch (Exception e) {
-				LOGGER.error("ECODE-MAIL-DESPATCH-OAM-FAILED : Error sending OpenAM Email");
-				LOGGER.info("Exception in sendOpenAmEmail() => "+e.getMessage(),e);
 			}
+		} catch (Exception e) {
+			LOGGER.error("ECODE-MAIL-DESPATCH-OAM-FAILED : Error sending OpenAM Email");
+			LOGGER.info("Exception in sendOpenAmEmail() => " + e.getMessage(), e);
+		}
 	}
 	
 	public String generateOtp(String userId) throws Exception {
@@ -834,7 +853,7 @@ public class SendEmail {
 			LOGGER.info("SearchList length: "+ searchList.length);
 			LOGGER.info("ReplacementList length: "+ replacementList.length);
 			String updatedContent = StringUtils.replaceEach(fileContentString, searchList, replacementList);
-//			System.out.println("dynamicEmailContent: \n "+ updatedContent);
+			System.out.println("dynamicEmailContent: \n "+ updatedContent);
 			content = updatedContent;
 		} catch (IOException e) {
 			LOGGER.error("ECODE-OPENDJ-DATA-RETREIVAL-FAILED : Error fetching OpenDJ Data");
@@ -880,10 +899,14 @@ public class SendEmail {
 		
 		TemplatePlaceholderCreator placeHolder = new LinkTemplatePlaceholderCreator();
 		boolean isEmailNotificationType = false;
+		boolean is2FAType = false;
 		if(OperationType.CHANGE_EMAIL_NOTIFICATION.getType().equals(input.getOperationType().getType())) {
 			isEmailNotificationType = true;
 		}
-		if(!isEmailNotificationType && input.isOTPEnabled()) {
+		if(OperationType.TWO_FACTOR_AUTHENTICATION.getType().equals(input.getOperationType().getType())) {
+			is2FAType = true;
+		}
+		if((!isEmailNotificationType && input.isOTPEnabled()) || is2FAType) {
 			placeHolder = new OTPTemplatePlaceholderCreator();
 		}
 		if(!isEmailNotificationType && input.isPRMApp() && PRMTemplateType.PRM_INTERNAL_REGISTRATION.equals(input.getPrmTemplateType())) {
@@ -1324,18 +1347,19 @@ public class SendEmail {
 	 * 
 	 * @param code
 	 * @param mail
+	 * @param userId 
 	 */
-	public void send2FAEmail(String code, String mail){
+	public void send2FAEmail(String code, String mail, String userId) {
 		LOGGER.info("Entered send2FAEmail() -> Start");
-		LOGGER.info("Parameter mail -> "+mail);
+		LOGGER.info("Parameter mail -> " + mail);
 
-		String to = mail ;
+		String to = mail;
 		String subject = "Enable Two-Factor Authentication";
-		
-		String bodyMsg = "Please use the code <font size=\"6\">"+code+"</font> to verify your email address to set up two-factor authentication on your mySchneider account.<BR><BR>" + 
-				"Two-factor authentication adds an extra layer of security to your account. We will send a code to your preferred method of communication when you log in to your mySchneider account.<BR><BR>" + 
-				"Sincerely,<BR>" + 
-				"Schneider Electric Team";
+
+		String bodyMsg = "Please use the code <font size=\"6\">" + code
+				+ "</font> to verify your email address to set up two-factor authentication on your mySchneider account.<BR><BR>"
+				+ "Two-factor authentication adds an extra layer of security to your account. We will send a code to your preferred method of communication when you log in to your mySchneider account.<BR><BR>"
+				+ "Sincerely,<BR>" + "Schneider Electric Team";
 		emailReadyToSendEmail(to, from, subject, bodyMsg);
 	}
 	
@@ -1995,5 +2019,13 @@ public class SendEmail {
 
 	public void setFrVersion(String frVersion) {
 		this.frVersion = frVersion;
+	}
+
+	public String getIDMS_USER_2FA_EMAILTEMPLATE() {
+		return IDMS_USER_2FA_EMAILTEMPLATE;
+	}
+
+	public void setIDMS_USER_2FA_EMAILTEMPLATE(String iDMS_USER_2FA_EMAILTEMPLATE) {
+		IDMS_USER_2FA_EMAILTEMPLATE = iDMS_USER_2FA_EMAILTEMPLATE;
 	}
 }

@@ -1,6 +1,8 @@
 package com.idms.mail.template.factory.impl;
 
+import com.idms.dynamic.mail.template.impl.Dynamic2FAUserTemplate;
 import com.idms.mail.template.factory.EmailTemplateFactory;
+import com.idms.mail.template.impl.cn.green.CNGreen2FAUserTemplate;
 import com.idms.mail.template.impl.cn.green.CNGreenAddEmailUserRecordOTPTemplate;
 import com.idms.mail.template.impl.cn.green.CNGreenDefaultOTPTemplate;
 import com.idms.mail.template.impl.cn.green.CNGreenSendInvitationTemplate;
@@ -38,6 +40,9 @@ public class CNOTPEmailTemplateGreenThemeFactoryImpl implements EmailTemplateFac
 				break;
 			case ADD_EMAIL_USER_RECORD:
 				emailTemplate = new CNGreenAddEmailUserRecordOTPTemplate(input).getTemplate();
+				break;
+			case TWO_FACTOR_AUTHENTICATION:
+				emailTemplate = new CNGreen2FAUserTemplate(input).getTemplate();
 				break;
 			case SEND_INVITATION:
 				emailTemplate = new CNGreenSendInvitationTemplate(input).getTemplate();
