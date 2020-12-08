@@ -11,6 +11,7 @@ public enum OperationType {
 	CHANGE_EMAIL("ChangeEmail", "ChangeEmail"), 
 	SEND_INVITATION("sendInvitation", "SendInvitation"),
 	CHANGE_EMAIL_NOTIFICATION("changeEmailNotification", "ChangeEmail"),
+	TWO_FACTOR_AUTHENTICATION("twoFactorAuthentication","TwoFactorAuthentication"),
 	INVALID("Invalid", "Invalid");
 
 	private String type;

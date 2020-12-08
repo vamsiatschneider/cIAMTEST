@@ -1,6 +1,8 @@
 package com.idms.mail.template.factory.impl;
 
 import com.idms.mail.template.factory.EmailTemplateFactory;
+import com.idms.mail.template.impl.cn.green.CNGreen2FAUserTemplate;
+import com.idms.mail.template.impl.en.blue.ENBlue2FAUserTemplate;
 import com.idms.mail.template.impl.en.blue.ENBlueAddEmailUserRecordTemplate;
 import com.idms.mail.template.impl.en.blue.ENBlueDefaultTemplate;
 import com.idms.mail.template.impl.en.blue.ENBlueSendInvitationTemplate;
@@ -37,6 +39,9 @@ public class ENEmailTemplateBlueThemeFactoryImpl implements EmailTemplateFactory
 				break;
 			case ADD_EMAIL_USER_RECORD:
 				emailTemplate = new ENBlueAddEmailUserRecordTemplate(input).getTemplate();
+				break;
+			case TWO_FACTOR_AUTHENTICATION:
+				emailTemplate = new ENBlue2FAUserTemplate(input).getTemplate();
 				break;
 			case SEND_INVITATION:
 				emailTemplate = new ENBlueSendInvitationTemplate(input).getTemplate();
