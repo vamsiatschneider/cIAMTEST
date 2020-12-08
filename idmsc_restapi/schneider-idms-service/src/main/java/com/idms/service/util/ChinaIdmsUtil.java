@@ -13,7 +13,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import javax.naming.InvalidNameException;
 import javax.naming.SizeLimitExceededException;
@@ -114,7 +113,7 @@ public class ChinaIdmsUtil {
 	 */
 	public static String printData(String rawData){	
 		String newrawdata = rawData;
-        if (rawData.toLowerCase().contains("Password".toLowerCase(Locale.US))){
+        if (rawData.toLowerCase().contains("Password".toLowerCase())){
         	int i = rawData.indexOf(",\"Password");
         	int y = rawData.indexOf(",", i+1);
         	String chars = rawData.substring(i, y);
@@ -131,13 +130,13 @@ public class ChinaIdmsUtil {
 	 */
 	public static String printInfo(String rawData){
 		String newrawdata = rawData;
-        if (rawData.toLowerCase().contains(",\"PinCode".toLowerCase(Locale.US))){
+        if (rawData.toLowerCase().contains(",\"PinCode".toLowerCase())){
         	int i = rawData.indexOf(",\"PinCode");
         	int y = rawData.indexOf(",", i+1);
         	String chars = rawData.substring(i, y);
         	newrawdata = rawData.replace(chars, "");
         }
-        if (newrawdata.toLowerCase(Locale.US).contains(",\"pin")) {
+        if (newrawdata.toLowerCase().contains(",\"pin")) {
 			int i = newrawdata.indexOf(",\"pin");
 			int y = newrawdata.lastIndexOf("\"");
 			String chars = newrawdata.substring(i, y+1);
@@ -153,13 +152,13 @@ public class ChinaIdmsUtil {
 	 */
 	public static String printOpenAMInfo(String rawData) {
 		String newrawdata = rawData;
-		if (rawData.toLowerCase().contains("userPassword".toLowerCase(Locale.US))) {
+		if (rawData.toLowerCase().contains("userPassword".toLowerCase())) {
 			int i = rawData.indexOf(",\"userPassword");
 			int y = rawData.indexOf(",", i + 1);
 			String chars = rawData.substring(i, y);
 			newrawdata = rawData.replace(chars, "");
 		}
-		if (newrawdata.toLowerCase().contains("tmp_password".toLowerCase(Locale.US))) {
+		if (newrawdata.toLowerCase().contains("tmp_password".toLowerCase())) {
 			int i = newrawdata.indexOf(",\"tmp_password");
 			int y = newrawdata.indexOf(",", i + 1);
 			String chars = newrawdata.substring(i, y);
@@ -275,7 +274,7 @@ public class ChinaIdmsUtil {
 		StringBuilder sbMaskString = new StringBuilder(maskLength);
 
 		if (null != strToken && !strToken.isEmpty()) {
-			if(strToken.trim().toLowerCase(Locale.US).contains("bearer")){
+			if(strToken.trim().toLowerCase().contains("bearer")){
 				startPoint = 12;
 			}
 			strLength = strToken.trim().length();

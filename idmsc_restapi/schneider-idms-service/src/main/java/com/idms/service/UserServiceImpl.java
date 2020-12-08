@@ -42,7 +42,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -1532,7 +1531,7 @@ public class UserServiceImpl implements UserService {
 
 			if ((!UserConstants.UIMS.equalsIgnoreCase(userRequest.getUserRecord().getIDMS_Registration_Source__c()))
 					&& (!pickListValidator.validate(UserConstants.APPLICATIONS,
-							userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase(Locale.US)))
+							userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase()))
 					&& (null == userRequest.getUserRecord().getIDMS_Federated_ID__c()
 							|| userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty())) {
 				userName = ChinaIdmsUtil.generateFedId();
@@ -1594,7 +1593,7 @@ public class UserServiceImpl implements UserService {
 			if ((!pickListValidator.validate(UserConstants.IDMS_BFO_profile,
 					userRequest.getUserRecord().getIDMS_Registration_Source__c()))
 					&& ((pickListValidator.validate(UserConstants.APPLICATIONS,
-							userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase(Locale.US)))
+							userRequest.getUserRecord().getIDMS_Registration_Source__c().toUpperCase()))
 							|| ((null != userRequest.getUserRecord().getIDMS_Federated_ID__c()
 									&& !userRequest.getUserRecord().getIDMS_Federated_ID__c().isEmpty())
 									&& !UserConstants.UIMS.equalsIgnoreCase(
@@ -2084,7 +2083,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		if (null != userRequest.getIDMS_Registration_Source__c() && ((pickListValidator
-				.validate(UserConstants.APPLICATIONS, userRequest.getIDMS_Registration_Source__c().toUpperCase(Locale.US)))
+				.validate(UserConstants.APPLICATIONS, userRequest.getIDMS_Registration_Source__c().toUpperCase()))
 				|| UserConstants.UIMS.equalsIgnoreCase(userRequest.getIDMS_Registration_Source__c()))) {
 			if ((checkMandatoryFields) && (null == userRequest.getIDMS_Federated_ID__c()
 					|| userRequest.getIDMS_Federated_ID__c().isEmpty())) {
@@ -2266,7 +2265,7 @@ public class UserServiceImpl implements UserService {
 		} else if ((null != userRequest.getIDMS_PreferredLanguage__c()
 				&& !userRequest.getIDMS_PreferredLanguage__c().isEmpty())
 				&& !pickListValidator.validate(UserConstants.PREFERRED_LANGUAGE,
-						userRequest.getIDMS_PreferredLanguage__c().toLowerCase(Locale.US))) {
+						userRequest.getIDMS_PreferredLanguage__c().toLowerCase())) {
 			userResponse.setMessage(UserConstants.INVALID_VALUE_IDMS + UserConstants.PREFERRED_LANGUAGE);
 			LOGGER.error(UserConstants.INVALID_VALUE_IDMS + UserConstants.PREFERRED_LANGUAGE);
 			return true;
@@ -5022,10 +5021,10 @@ public class UserServiceImpl implements UserService {
 		String jsonStr = null;
 		String strcurrentMailCounter = null;		  
 		int intcurrentMailCounter=0;
-		//String identifierType= null;
+		String identifierType= null;
 		String strcurrentMobCounter = null;
 		int intcurrentMobCounter=0;
-		//String strCurrentCounter=null;
+		String strCurrentCounter=null;
 		JSONObject obj = new JSONObject();
 		maxEmailLimitPasswordRecovery = Integer.toString((Integer.parseInt(maxEmailLimit) + UserConstants.ONE));
 		maxMobLimitPasswordRecovery = Integer.toString((Integer.parseInt(maxMobLimit) + UserConstants.ONE));
@@ -5073,7 +5072,7 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info("isOTPEnabled: "+ isOTPEnabled);
 				}
 				if (UserConstants.HOTP_EMAIL_RESET_PR.equalsIgnoreCase(hotpService)) {
-					//identifierType=UserConstants.EMAIL;
+					identifierType=UserConstants.EMAIL;
 					/* Counter */
 					if(userExists.contains(UserConstants.MAIL_RATE_COUNTER)) {
 						strcurrentMailCounter = productDocCtx.read("$.result[0].mailRateCounter[0]");
@@ -5104,10 +5103,10 @@ public class UserServiceImpl implements UserService {
 					UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
 					LOGGER.info("Counter updated for " + userName);
 					strcurrentMailCounter = Integer.toString(intcurrentMailCounter);
-					//strCurrentCounter = strcurrentMailCounter;
+					strCurrentCounter = strcurrentMailCounter;
 					
 				} else if (UserConstants.HOTP_MOBILE_RESET_PR.equalsIgnoreCase(hotpService)) {
-					//identifierType=UserConstants.MOBILE;
+					identifierType=UserConstants.MOBILE;
 					if(userExists.contains(UserConstants.MOBILE_RATE_COUNTER)){
 								strcurrentMobCounter = productDocCtx.read("$.result[0].mobileRateCounter[0]");
 									if(null != strcurrentMobCounter && !strcurrentMobCounter.isEmpty()){	
@@ -5147,7 +5146,7 @@ public class UserServiceImpl implements UserService {
 				UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
 				LOGGER.info("Counter updated for " + userName);
 				strcurrentMobCounter=Integer.toString(intcurrentMobCounter);
-				//strCurrentCounter=strcurrentMobCounter;
+				strCurrentCounter=strcurrentMobCounter;
 			} 
 		} else if (resultCount.intValue() < 1) {
 				if (UserConstants.TRUE.equalsIgnoreCase(withGlobalUsers)) {
@@ -5919,7 +5918,7 @@ public class UserServiceImpl implements UserService {
 						 ("email".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod()) ||
 						 "mobile".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod()) ||
 						 "both".equalsIgnoreCase(userRequest.getUserRecord().getPrefCommnMethod()))) {
-					openAmReq.getInput().getUser().setPrefCommnMethod(userRequest.getUserRecord().getPrefCommnMethod().toLowerCase(Locale.US));
+					openAmReq.getInput().getUser().setPrefCommnMethod(userRequest.getUserRecord().getPrefCommnMethod().toLowerCase());
 				 }else {
 					errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
 					errorResponse.setMessage("2FA Requirement: Invalid Preferred Communication Value!!");
@@ -6035,7 +6034,7 @@ public class UserServiceImpl implements UserService {
 				// mapping IFW request to UserCompany
 				CompanyV3 company = mapper.map(userRequest, CompanyV3.class);
 				if (null != company.getLanguageCode()) {
-					company.setLanguageCode(company.getLanguageCode().toLowerCase(Locale.US));
+					company.setLanguageCode(company.getLanguageCode().toLowerCase());
 				}
 				company.setFederatedId(companyFedIdInOpenAM);
 
@@ -6079,7 +6078,7 @@ public class UserServiceImpl implements UserService {
 
 				com.se.uims.usermanager.UserV6 identity = mapper.map(userRequest, com.se.uims.usermanager.UserV6.class);
 				if (null != identity.getLanguageCode()) {
-					identity.setLanguageCode(identity.getLanguageCode().toLowerCase(Locale.US));
+					identity.setLanguageCode(identity.getLanguageCode().toLowerCase());
 				}
 				if(!stopUIMSFlag){
 					// calling Async method updateUIMSUserAndCompany
@@ -9644,7 +9643,7 @@ public class UserServiceImpl implements UserService {
 		// mapping IFW request to UserCompany
 		CompanyV3 company = mapper.map(userRequest, CompanyV3.class);
 		if (null != company.getLanguageCode() && !company.getLanguageCode().isEmpty()) {
-			company.setLanguageCode(company.getLanguageCode().toLowerCase(Locale.US));
+			company.setLanguageCode(company.getLanguageCode().toLowerCase());
 		}
 		// Setting publicVisibility value to company.publicVisibility
 		if (null != userRequest.getAttributes() && userRequest.getAttributes().size() > 0) {
@@ -9660,7 +9659,7 @@ public class UserServiceImpl implements UserService {
 
 		UserV6 identity = mapper.map(userRequest, UserV6.class);
 		if (null != identity.getLanguageCode() && !identity.getLanguageCode().isEmpty()) {
-			identity.setLanguageCode(identity.getLanguageCode().toLowerCase(Locale.US));
+			identity.setLanguageCode(identity.getLanguageCode().toLowerCase());
 		}
 
 		/**
@@ -9805,11 +9804,11 @@ public class UserServiceImpl implements UserService {
 			String adminGroup = productDocCtx.read("$.adminGroup");
 			String adminStatus = null;
 
-			if (null != adminGroup && adminGroup.toLowerCase(Locale.US).contains("apiview")) {
+			if (null != adminGroup && adminGroup.toLowerCase().contains("apiview")) {
 				adminStatus = "apiview";
 				return adminStatus;
 			}
-			if (null != adminGroup && adminGroup.toLowerCase(Locale.US).contains("apiadmin")) {
+			if (null != adminGroup && adminGroup.toLowerCase().contains("apiadmin")) {
 				adminStatus = "apiadmins";
 				return adminStatus;
 			}
@@ -11919,7 +11918,7 @@ public class UserServiceImpl implements UserService {
 				if(null != appAIL && !appAIL.isEmpty()){
 					List<String> appAILList = Arrays.asList(appAIL.split(","));
 					for(String appName:appAILList){
-						if(appName.toLowerCase(Locale.US).equalsIgnoreCase(appNameInOpenDJ.toLowerCase(Locale.US))){
+						if(appName.toLowerCase().equalsIgnoreCase(appNameInOpenDJ.toLowerCase())){
 							LOGGER.info("application is found in User AIL");
 							appFound = true;
 							break;
@@ -13181,12 +13180,12 @@ public class UserServiceImpl implements UserService {
 				ufedid = listUsers.get(i).getFederationID();
 				com.se.uims.usermanager.UserV6 identity = mapper.map(listUsers.get(i), com.se.uims.usermanager.UserV6.class);
 				if (null != identity.getLanguageCode()) {
-					identity.setLanguageCode(identity.getLanguageCode().toLowerCase(Locale.US));
+					identity.setLanguageCode(identity.getLanguageCode().toLowerCase());
 				}
 
 				CompanyV3 company = mapper.map(listUsers.get(i), CompanyV3.class);
 				if (null != company.getLanguageCode()) {
-					company.setLanguageCode(company.getLanguageCode().toLowerCase(Locale.US));
+					company.setLanguageCode(company.getLanguageCode().toLowerCase());
 				}
 
 				Class<?> c = company.getClass();
@@ -13251,12 +13250,12 @@ public class UserServiceImpl implements UserService {
 					ufedid = listUsers.get(icount).getFederationID();
 					com.se.uims.usermanager.UserV6 identity = mapper.map(listUsers.get(icount), com.se.uims.usermanager.UserV6.class);
 					if (null != identity.getLanguageCode()) {
-						identity.setLanguageCode(identity.getLanguageCode().toLowerCase(Locale.US));
+						identity.setLanguageCode(identity.getLanguageCode().toLowerCase());
 					}
 
 					CompanyV3 company = mapper.map(listUsers.get(icount), CompanyV3.class);
 					if (null != company.getLanguageCode()) {
-						company.setLanguageCode(company.getLanguageCode().toLowerCase(Locale.US));
+						company.setLanguageCode(company.getLanguageCode().toLowerCase());
 					}
 
 					identityUpdateStatus = uimsUserManagerSync.updateUIMSUser(ufedid, identity, "123");

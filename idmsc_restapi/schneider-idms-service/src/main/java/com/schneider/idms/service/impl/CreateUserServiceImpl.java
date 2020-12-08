@@ -14,7 +14,6 @@ import java.io.InputStream;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Date;
-import java.util.Locale;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -349,7 +348,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			
 			//delete records from OPENAM if application is PRM
 			if ((resultCountCheck.intValue() > 0) && (null != userRequest.getRegistrationSource() && pickListValidator
-					.validate(UserConstants.APPLICATIONS, userRequest.getRegistrationSource().toUpperCase(Locale.US)))) {
+					.validate(UserConstants.APPLICATIONS, userRequest.getRegistrationSource().toUpperCase()))) {
 				for (int i = 0; i < resultCountCheck.intValue(); i++) {
 					String isActivated = productDocCtxCheck.read("$.result[" + i + "].isActivated[0]");
 					if (!Boolean.valueOf(isActivated)) {
@@ -402,7 +401,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 
 				if ((!UserConstants.UIMS.equalsIgnoreCase(userRequest.getRegistrationSource()))
 						&& (!pickListValidator.validate(UserConstants.APPLICATIONS,
-								userRequest.getRegistrationSource().toUpperCase(Locale.US)))
+								userRequest.getRegistrationSource().toUpperCase()))
 						&& (null == userRequest.getFederationId()
 								|| userRequest.getFederationId().isEmpty())) {
 
@@ -453,7 +452,7 @@ public class CreateUserServiceImpl extends IdmsCommonServiceImpl implements ICre
 			if ((!pickListValidator.validate(UserConstants.IDMS_BFO_profile,
 					userRequest.getRegistrationSource()))
 					&& ((pickListValidator.validate(UserConstants.APPLICATIONS,
-							userRequest.getRegistrationSource().toUpperCase(Locale.US)))
+							userRequest.getRegistrationSource().toUpperCase()))
 							|| ((null != userRequest.getFederationId()
 									&& !userRequest.getFederationId().isEmpty())
 									&& !UserConstants.UIMS.equalsIgnoreCase(

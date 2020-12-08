@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
@@ -463,7 +464,7 @@ public class SendEmail {
 				}
 				//Setting aLink in case of User Registration
 				if(hotpOperationType.equalsIgnoreCase(EmailConstants.USERREGISTRATION_OPT_TYPE)){
-					linkParam=(aLink==null | aLink.isEmpty()) ? "" : ("&alink="+aLink);
+					linkParam=(aLink==null | aLink =="") ? "" : ("&alink="+aLink);
 					linkParam=linkParam+appNameParam;//Appending appName parameter for mySchneiderPartnerPortal.
 				}
 				LOGGER.info("linkParam: "+linkParam);
@@ -1094,7 +1095,6 @@ public class SendEmail {
 		return tmpPr;
 	}
 	
-	/*
 	private boolean checkTimeStamp(long localDTInMilli, String loginIdentifierType) {
 		LOGGER.info("Entered checkTimeStamp() -> Start");
 		LOGGER.info("Parameter localDTInMilli() ->"+ localDTInMilli);
@@ -1123,7 +1123,7 @@ public class SendEmail {
 		}
 		LOGGER.info("validation status="+validateTimeStamp);
 		return validateTimeStamp;
-	}*/
+	}
 	
 	@SuppressWarnings("unused")
 	public void sendInvitationEmail(String hotpOperationType,String redirectUrl, String email,String invitationId)throws Exception{

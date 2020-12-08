@@ -6,6 +6,7 @@ import com.idms.model.CreateUserRequest;
 import com.idms.model.IDMSUserResponse;
 import com.idms.model.IFWUser;
 import com.idms.model.PasswordRecoveryRequest;
+import com.idms.model.UIMSCompanyRequest;
 import com.idms.model.UpdateUserRequest;
 import com.idms.model.UserRegistrationInfoRequest;
 import com.idms.product.model.OpenAMPasswordRecoveryInput;
@@ -534,7 +535,6 @@ public class IdmsMapper extends ConfigurableMapper{
         .register();
     }
 	
-	/*
 	private void configureOpenAmUserRequestToUimsUserRequest(MapperFactory mapperFactory) {
         mapperFactory.classMap(OpenAmUserRequest.class,UimsUserRequest.class)
         .field("input.user.mail","input.email")
@@ -622,10 +622,9 @@ public class IdmsMapper extends ConfigurableMapper{
         .field("input.user.tmp_password", "input.")
         .byDefault()
         .register();
-    }
-    */
+    }	
 	
-	/*
+	
 	private void configureIFWUserRequestToUIMSCompanyRequest(MapperFactory mapperFactory) {
         mapperFactory.classMap(CreateUserRequest.class,UIMSCompanyRequest.class)
         .field("userRecord.IDMSCompanyFederationIdentifier__c", "uimscompany.federatedID")
@@ -648,7 +647,6 @@ public class IdmsMapper extends ConfigurableMapper{
         .byDefault()
         .register();
     }
-	*/
 	
 	/**
 	 * GoDigital Registration

@@ -10,7 +10,6 @@ import static com.se.idms.util.UserConstants.AUDIT_REQUESTING_USER;
 
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.Locale;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -458,14 +457,14 @@ public class UpdateUserServiceImpl extends IdmsCommonServiceImpl implements IUpd
 				CompanyV3 company = mapper.map(userRequest, CompanyV3.class);
 
 				if (null != company.getLanguageCode()) {
-					company.setLanguageCode(company.getLanguageCode().toLowerCase(Locale.US));
+					company.setLanguageCode(company.getLanguageCode().toLowerCase());
 				}
 				company.setFederatedId(companyFedId);
 				
 				com.se.uims.usermanager.UserV6 identity = mapper.map(userRequest, com.se.uims.usermanager.UserV6.class);
 
 				if (null != identity.getLanguageCode()) {
-					identity.setLanguageCode(identity.getLanguageCode().toLowerCase(Locale.US));
+					identity.setLanguageCode(identity.getLanguageCode().toLowerCase());
 				}
 
 				// calling Async method updateUIMSUserAndCompany
