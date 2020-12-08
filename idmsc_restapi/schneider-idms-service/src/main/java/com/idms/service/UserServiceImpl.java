@@ -1664,7 +1664,7 @@ public class UserServiceImpl implements UserService {
 						}
 						LOGGER.info("Start: sendOpenAmEmail() of SendEmail for non-PRM, userName:" + userName);
 						sendEmail.sendOpenAmEmail(token, otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userName,
-								userRequest.getUserRecord().getIDMS_Registration_Source__c(), finalPathString);
+								userRequest.getUserRecord().getIDMS_Registration_Source__c(), finalPathString, null);
 						LOGGER.info("End: sendOpenAmEmail() of SendEmail finished for non-PRM, userName:" + userName);
 					} else if (null != userRequest.getUserRecord().getIDMS_Registration_Source__c()
 							&& (pickListValidator.validate(UserConstants.IDMS_BFO_profile,
@@ -3260,7 +3260,7 @@ public class UserServiceImpl implements UserService {
 							if(pwdSetFirstLoginString.equalsIgnoreCase("false")){
 								if(loginIdentifier.contains("@")){
 									otp = sendEmail.generateOtp(userName);
-									sendEmail.sendOpenAmEmail(null, otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName, applicationName, null);
+									sendEmail.sendOpenAmEmail(null, otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName, applicationName, null, null);
 								} else {
 									otp = sendEmail.generateOtp(userName);
 									sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName, applicationName);
@@ -5099,7 +5099,7 @@ public class UserServiceImpl implements UserService {
 						token = sendEmail.generateEmailToken(userName);
 					}
 					LOGGER.info("Successfully OTP generated for " + userName);
-					sendEmail.sendOpenAmEmail(token, otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName, passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c(),finalPathString); /* Reinstate */
+					sendEmail.sendOpenAmEmail(token, otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName, passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c(),finalPathString, null); /* Reinstate */
 					UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
 					LOGGER.info("Counter updated for " + userName);
 					strcurrentMailCounter = Integer.toString(intcurrentMailCounter);
@@ -5135,7 +5135,7 @@ public class UserServiceImpl implements UserService {
 						otp = sendEmail.generateOtp(userName);
 					}
 					sendEmail.sendOpenAmEmail(token, otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,
-							passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c(), finalPathString);
+							passwordRecoveryRequest.getUserRecord().getIDMS_Profile_update_source__c(), finalPathString, null);
 				} else if (UserConstants.HOTP_MOBILE_RESET_PR.equalsIgnoreCase(hotpService)) {
 					otp = sendEmail.generateOtp(userName);
 					sendEmail.sendOpenAmMobileEmail(otp, EmailConstants.SETUSERPWD_OPT_TYPE, userName,
@@ -5804,7 +5804,7 @@ public class UserServiceImpl implements UserService {
 
 					LOGGER.info("Successfully OTP generated for " + userId);
 					sendEmail.sendOpenAmEmail(token, otp, EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userId,
-							userRequest.getUserRecord().getIDMS_Profile_update_source__c(), null);
+							userRequest.getUserRecord().getIDMS_Profile_update_source__c(), null, null);
 
 					if (UserConstants.EMAIL.equalsIgnoreCase(identifierType) && null != updatingUser) {
 						String prefferedLanguage = null != productDocCtxUser.read("$.preferredlanguage")
@@ -5858,7 +5858,7 @@ public class UserServiceImpl implements UserService {
 						}
 						if(isDynamicEmailEnabled){
 							sendEmail.sendOpenAmEmail(null, otp, EmailConstants.CHANGE_EMAIL_NOTIFICATION, userId,
-									userRequest.getUserRecord().getIDMS_Profile_update_source__c(), null);
+									userRequest.getUserRecord().getIDMS_Profile_update_source__c(), null, null);
 						}else{
 							contentBuilder = getContentFromTemplate(UserConstants.UPDATE_EMAIL_NOTIFICATION,
 									prefferedLanguage, templateColor);
@@ -8158,7 +8158,7 @@ public class UserServiceImpl implements UserService {
 							token = sendEmail.generateEmailToken(userCName);
 						}
 						sendEmail.sendOpenAmEmail(token, otp, optType, userCName, regSource,
-								finalPathString); /* Reinstate */
+								finalPathString, null); /* Reinstate */
 						LOGGER.info("resendRegEmail :: Update mail counter :: Start");
 						UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion,
 								UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, userCName, jsonStr);
@@ -8425,7 +8425,7 @@ public class UserServiceImpl implements UserService {
 								} else {
 									token = sendEmail.generateEmailToken(userName);
 								}
-								sendEmail.sendOpenAmEmail(token, otp,EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userName, appSource, finalPathString); /* Reinstate */
+								sendEmail.sendOpenAmEmail(token, otp,EmailConstants.UPDATEUSERRECORD_OPT_TYPE, userName, appSource, finalPathString, null); /* Reinstate */
 								LOGGER.info("resendChangeEmail :: Update mail counter :: Start");
 								UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, userName, jsonStr);
 								LOGGER.info("resendChangeEmail :: Update mail counter :: Finish");
@@ -9243,7 +9243,7 @@ public class UserServiceImpl implements UserService {
 						} else {
 							String token = sendEmail.generateEmailToken(federationId);
 							sendEmail.sendOpenAmEmail(token, null, EmailConstants.USERREGISTRATION_OPT_TYPE, federationId,
-									regestrationSource, null);
+									regestrationSource, null, null);
 						}
 
 						mailCount = mailCount + 1;
@@ -11382,7 +11382,7 @@ public class UserServiceImpl implements UserService {
 					token = sendEmail.generateEmailToken(fedid);
 				}
 				LOGGER.info("sending mail notification to added email");
-				sendEmail.sendOpenAmEmail(token, otp, EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE, fedid, source, null);
+				sendEmail.sendOpenAmEmail(token, otp, EmailConstants.ADDEMAILUSERRECORD_OPT_TYPE, fedid, source, null, null);
 
 				response.put(UserConstants.STATUS_L, successStatus);
 				response.put(UserConstants.MESSAGE_L, UserConstants.ADD_EMAIL_PROFILE);
@@ -12304,19 +12304,14 @@ public class UserServiceImpl implements UserService {
 			if(pfcomm.equalsIgnoreCase("email")) {
 				email = productDocCtx.read("$.mail[0]");
 				sendOTPRequest.setMobile(email);
-			}
-			
-			else if(pfcomm.equalsIgnoreCase("mobile")) {
+			} else if(pfcomm.equalsIgnoreCase("mobile")) {
 				mobile = productDocCtx.read("$.mobile[0]");
 				sendOTPRequest.setMobile(mobile);
-			}
-			
-			else if(pfcomm.equalsIgnoreCase("both")) {
+			} else if(pfcomm.equalsIgnoreCase("both")) {
 				email = productDocCtx.read("$.mail[0]");
 				mobile = productDocCtx.read("$.mobile[0]");
 				sendOTPRequest.setMobile(email);
 			}
-			
 			checkOTPStore = sendOTP(sendOTPRequest);
 			org.json.simple.JSONObject checkOTPStoreJson = (org.json.simple.JSONObject) checkOTPStore.getEntity();
 			String otpReceived = checkOTPStoreJson.get(UserConstants.MESSAGE_L).toString();
@@ -12326,11 +12321,9 @@ public class UserServiceImpl implements UserService {
 			
 			if(pfcomm.equalsIgnoreCase("email")) {
 				LOGGER.info("Start: send2FAEmail() for mail user: " + email);
-				sendEmail.send2FAEmail(otpGenerated, email);
+				sendEmail.sendOpenAmEmail(null, otpGenerated, EmailConstants.TWO_FACTOR_AUTHENTICATION, send2FAOTPRequest.getUserid(), null, null, email);
 				LOGGER.info("End: send2FAEmail() finished for  mail user: " + email);
-			}
-			
-			else if(pfcomm.equalsIgnoreCase("mobile")) {
+			} else if(pfcomm.equalsIgnoreCase("mobile")) {
 				LOGGER.info("Start: sendSMS() for mobile user:"+mobile);
 				sendEmail.sendSMS(otpGenerated, mobile);
 				LOGGER.info("End: sendSMS() finished for  mobile user:"+mobile);
@@ -12339,10 +12332,9 @@ public class UserServiceImpl implements UserService {
 					sendEmail.sendMobileEmail(otpGenerated, mobile);
 					LOGGER.info("End: sendMobileEmail() finished for  mobile user:" + mobile);
 				}
-			}
-			else if(pfcomm.equalsIgnoreCase("both")) {
+			} else if(pfcomm.equalsIgnoreCase("both")) {
 				LOGGER.info("Start: send2FAEmail() for mail user: " + email);
-				sendEmail.send2FAEmail(otpGenerated, email);
+				sendEmail.sendOpenAmEmail(null, otpGenerated, EmailConstants.TWO_FACTOR_AUTHENTICATION, send2FAOTPRequest.getUserid(), null, null, email);
 				LOGGER.info("End: send2FAEmail() finished for  mail user: " + email);
 				
 				LOGGER.info("Start: sendSMS() for mobile user:"+mobile);
@@ -13618,7 +13610,7 @@ public class UserServiceImpl implements UserService {
 		}
 		LogMessageUtil.logInfoMessage("Start of SendEmail method of Update SocialProfile for fedId: ", userRecord.getIDMS_Federated_ID__c());
 		sendEmail.sendOpenAmEmail(token, otp, EmailConstants.USERREGISTRATION_OPT_TYPE, userRecord.getIDMS_Federated_ID__c(),
-						userRecord.getIDMS_Registration_Source__c(), finalPathString);
+						userRecord.getIDMS_Registration_Source__c(), finalPathString, null);
 		LogMessageUtil.logInfoMessage("End of SendEmail method of Update SocialProfile for fedId: ", userRecord.getIDMS_Federated_ID__c());
 	}
 
