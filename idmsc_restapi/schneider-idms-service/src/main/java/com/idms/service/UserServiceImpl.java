@@ -9840,13 +9840,12 @@ public class UserServiceImpl implements UserService {
 		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
 		/* Counter */
 		String userExists = null;
-		String UID = null;
+		String uid = null;
 		String strcurrentMailCounter = UserConstants.ZERO;
 		String strcurrentMobCounter = UserConstants.ZERO;
 		String jsonStr = null;
 		JSONObject jsonCounter = new JSONObject();
 		String iPlanetDirectoryKey = null;
-		String loginId = null;
 		
 		if ((app == null || app.equalsIgnoreCase("undefined"))) {
 			regSource = UserConstants.LOGZ_IO_DEFAULT_APP;
@@ -9892,30 +9891,30 @@ public class UserServiceImpl implements UserService {
 					return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(errorResponse).build();
 				}
 			}
-			LOGGER.info("Start: aunthenticate User of OPENAMService for username=" + userName);
+
+			iPlanetDirectoryKey = getSSOToken();
+			LOGGER.info("Start: SecuredLogin checkUserExistsWithEmailMobile() of openam for loginId=" + userName);
+			userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
+					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+					"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(userName, "UTF-8"), "UTF-8")
+							+ "\" or mobilereg eq " + "\""
+							+ URLEncoder.encode(URLDecoder.decode(userName, "UTF-8"), "UTF-8") + "\"");
+			LOGGER.info("End: SecuredLogin checkUserExistsWithEmailMobile() of openam finished for loginId=" + userName);
+			productDocCtx = JsonPath.using(conf).parse(userExists);
+			uid = productDocCtx.read("$.result[0].uid[0]");
+			if(StringUtils.isNotBlank(uid)) {
+				userName = uid;
+			}
+
+			LOGGER.info("Start: SecuredLogin authenticate User of OPENAMService for username=" + userName);
 			Response authenticateResponse = ChinaIdmsUtil.executeHttpClient(frVersion, prefixStartUrl, realm, userName, password);
-			LOGGER.info("End: aunthenticate User of OPENAMService for username=" + userName);
+			LOGGER.info("End: SecuredLogin authenticate User of OPENAMService for username=" + userName);
 			successResponse = (String) authenticateResponse.getEntity();
-			LOGGER.info("Response code from OPENAMService: " + authenticateResponse.getStatus());
+			LOGGER.info("SecuredLogin Response code from OPENAMService: " + authenticateResponse.getStatus());
 			
 			productDocCtx = JsonPath.using(conf).parse(successResponse);
 			String authIdSecuredLogin = productDocCtx.read("$.authId");
 			String stage = productDocCtx.read("$.stage");
-			
-			/* Counter */
-			if(200 == authenticateResponse.getStatus()) {
-				iPlanetDirectoryKey = getSSOToken();
-				loginId = userName;
-				LOGGER.info("Start: checkUserExistsWithEmailMobile() of openam for loginId=" + loginId);
-				userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
-						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-						"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(loginId, "UTF-8"), "UTF-8")
-								+ "\" or mobilereg eq " + "\""
-								+ URLEncoder.encode(URLDecoder.decode(loginId, "UTF-8"), "UTF-8") + "\"");
-				LOGGER.info("End: checkUserExistsWithEmailMobile() of openam finished for loginId=" + loginId);
-				productDocCtx = JsonPath.using(conf).parse(userExists);
-				UID = productDocCtx.read("$.result[0].uid[0]");
-			}
 			
 			if (401 == authenticateResponse.getStatus() && successResponse.contains(UserConstants.ACCOUNT_BLOCKED)) {
 				jsonObjectResponse.put("message", UserConstants.ACCOUNT_BLOCKED);
@@ -10025,7 +10024,7 @@ public class UserServiceImpl implements UserService {
 				jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
 				jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
 				jsonStr = jsonCounter.toString();			
-				UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, UID, jsonStr);
+				UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, uid, jsonStr);
 				LOGGER.info("securedLogin() -> Ending");
 				return Response.status(Response.Status.OK.getStatusCode()).entity(response).build();
 			}
@@ -10048,7 +10047,7 @@ public class UserServiceImpl implements UserService {
 		jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
 		jsonCounter.put(UserConstants.MOBILE_RATE_COUNTER, strcurrentMobCounter);
 		jsonStr = jsonCounter.toString();			
-		UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, UID, jsonStr);
+		UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, uid, jsonStr);
 		LOGGER.info("securedLogin() -> Ending");
 		return Response.status(Response.Status.OK.getStatusCode()).entity(successResponse).build();
 	}
