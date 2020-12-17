@@ -30,6 +30,7 @@ import com.idms.model.ConfirmPinRequest;
 import com.idms.model.CreateUserRequest;
 import com.idms.model.DeviceProfileRequest;
 import com.idms.model.MFARequest;
+import com.idms.model.OAuth2ClientRequest;
 import com.idms.model.PasswordRecoveryRequest;
 import com.idms.model.ResendEmailChangeRequest;
 import com.idms.model.ResendPinRequest;
@@ -355,4 +356,9 @@ public interface UserService {
 	@Path("/apexrest/users/{userId}/saveDeviceProfile")
 	@Consumes("application/json")
 	Response saveDeviceProfile(@HeaderParam("Authorization") String token, @PathParam("userId") String userId, DeviceProfileRequest deviceProfileRequest);
+
+	@POST
+	@Path("/sscOnboarding/oauth2client")
+	@Consumes("application/json")
+	Response createOAuth2Client(@HeaderParam("Authorization") String token, @Valid OAuth2ClientRequest userRequest);
 }

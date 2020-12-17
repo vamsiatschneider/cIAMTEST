@@ -127,6 +127,15 @@ public interface OpenAMService {
 	
 	// OpenAM 6.5 Session REST APIs END here
 
+    // SSC APIs
+	@PUT
+	@Path("/realms/{realm}/realm-config/agents/OAuth2Client/{clientId}")
+	@Consumes("application/json")
+	Response createOauthClient(@HeaderParam("Accept-API-Version") String acceptVersionHeader, @PathParam("realm") String realm,
+			@HeaderParam("Cookie") String iPlanetDirectoryKey,  @PathParam("clientId") String clientId, String requestJson);
+
+	// SSC APIs end
+
 	@GET
 	// @Path("/se/users")
 	String getUserString();
