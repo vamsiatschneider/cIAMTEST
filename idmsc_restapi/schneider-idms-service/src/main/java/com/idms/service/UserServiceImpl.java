@@ -116,6 +116,7 @@ import com.idms.model.IFWUser;
 import com.idms.model.MFAEnableResponse;
 import com.idms.model.MFARequest;
 import com.idms.model.MFAUpdate;
+import com.idms.model.OAuth2ClientRequest;
 import com.idms.model.PasswordRecoveryRequest;
 import com.idms.model.RegistrationAttributes;
 import com.idms.model.ResendEmailChangeRequest;
@@ -150,6 +151,7 @@ import com.idms.product.client.OpenDjService;
 import com.idms.product.model.Attributes;
 import com.idms.product.model.OpenAMGetUserHomeResponse;
 import com.idms.product.model.OpenAMGetUserWorkResponse;
+import com.idms.product.model.OpenAMOAuth2Client;
 import com.idms.product.model.OpenAmUser;
 import com.idms.product.model.OpenAmUserInput;
 import com.idms.product.model.OpenAmUserRequest;
@@ -13924,5 +13926,37 @@ public class UserServiceImpl implements UserService {
 		errorResponse.setMessage("Get User Details by SSOToken failed");
 		LOGGER.error("Get User Details by SSOToken failed for user: ->  " + userId);
 		return Response.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).entity(errorResponse).build();
+	}
+
+	@Override
+	public Response createOAuth2Client(String authorizedToken, OAuth2ClientRequest createClientRequest) {
+		ErrorResponse errorResponse = new ErrorResponse();
+		if (!createClientRequest.isOnboardingCall() && (StringUtils.isBlank(authorizedToken) || !getTechnicalUserDetails(authorizedToken))) {
+			errorResponse.setStatus(HttpStatus.UNAUTHORIZED.toString());
+			errorResponse.setMessage("Unauthorized or session expired!!");
+			return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+		}
+		Response response = UserServiceUtil.validateClientRequestAttributes(createClientRequest, errorResponse);
+		if(response != null) {
+			return response;
+		}
+		OpenAMOAuth2Client openamOAuth2Client = new OpenAMOAuth2Client();
+		UserServiceUtil.populateOpenAMClientAttributes(createClientRequest, openamOAuth2Client);
+		String requestJson = null;
+		try {
+			requestJson = new ObjectMapper().writeValueAsString(openamOAuth2Client);
+		} catch (JsonProcessingException ex) {
+			errorResponse = buildErrorMessage(createClientRequest.getClientId(), ex, UserConstants.JSON_PROCESSING_ERROR);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		}
+		String iPlanetDirectoryKey = null;
+		try {
+			iPlanetDirectoryKey = getSSOToken();
+		} catch (IOException ex) {
+			String errorMsg = "Unable to get SSO Token";
+			errorResponse = buildErrorMessage(createClientRequest.getClientId(), ex, errorMsg);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		}
+	   return UserServiceUtil.createOpenamClient(productService, "se", UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, createClientRequest.getClientId(), requestJson);
 	}
 }
