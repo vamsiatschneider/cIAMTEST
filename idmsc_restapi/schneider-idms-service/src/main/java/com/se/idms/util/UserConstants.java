@@ -642,6 +642,8 @@ public class UserConstants {
 	public static final String ACCEPT_VERSION_HEADER ="resource=1.0, protocol=1.0";
 	// Accept API Version Header for GET, QUERY
 	public static final String ACCEPT_VERSION_GET_HEADER ="resource=3.0, protocol=1.0";
+	// Accept API Version Header for OpenAM Oauth2 Client APIs
+	public static final String OAUTH_VERSION_CREATE_HEADER = "resource=1.0,protocol=2.0";
 
 	// Accept API Version Header for OpenAM Authenticate APIs
 	public static final String AUTH_VERSION_HEADER="resource=2.0, protocol=1.0";

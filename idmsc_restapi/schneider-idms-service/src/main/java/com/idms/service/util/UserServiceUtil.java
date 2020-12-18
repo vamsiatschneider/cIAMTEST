@@ -3,6 +3,7 @@ package com.idms.service.util;
 import static com.se.idms.util.UserConstants.ACCEPT_VERSION_GET_HEADER;
 import static com.se.idms.util.UserConstants.ACCEPT_VERSION_HEADER;
 import static com.se.idms.util.UserConstants.AUTH_VERSION_HEADER;
+import static com.se.idms.util.UserConstants.OAUTH_VERSION_CREATE_HEADER;
 import static com.se.idms.util.UserConstants.CONTENT_TYPE_APP_JSON;
 import static com.se.idms.util.UserConstants.FR6_5Version;
 import static com.se.idms.util.UserConstants.SESSION_LOGOUT_VERSION_HEADER;
@@ -13,12 +14,21 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 
 import com.idms.model.IFWUser;
+import com.idms.model.OAuth2ClientRequest;
 import com.idms.model.SocialProfileActivationRequest;
 import com.idms.model.UserAMProfile;
+import com.idms.model.ssc.GrantType;
+import com.idms.model.ssc.ResponseType;
+import com.idms.model.ssc.TokenEndpointAuthMethod;
 import com.idms.product.client.OpenAMService;
+import com.idms.product.model.AdvancedOAuth2ClientConfig;
+import com.idms.product.model.CoreOAuth2ClientConfig;
+import com.idms.product.model.OpenAMOAuth2Client;
 import com.idms.product.model.OpenAmUser;
+import com.se.idms.dto.ErrorResponse;
 
 public class UserServiceUtil {
 
@@ -298,5 +308,95 @@ public class UserServiceUtil {
 		mergeJson.append("}");
 		LogMessageUtil.logInfoMessage("mergeJson= ", mergeJson.toString());
 	    return mergeJson.toString();
+	}
+
+	public static Response validateClientRequestAttributes(OAuth2ClientRequest createClientRequest, ErrorResponse errorResponse) {
+		Response response  = null;
+		if(StringUtils.isBlank(createClientRequest.getClientId())) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("Client Id is mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		if(StringUtils.isBlank(createClientRequest.getClientSecret())) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("Client Secret is mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		if( null != createClientRequest.getRedirectionUris() && createClientRequest.getRedirectionUris().size() == 0) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("Redirection URI is mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		if( null != createClientRequest.getScopes() && createClientRequest.getScopes().size() == 0) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("Scope is mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		if( null == createClientRequest.getGrantTypes() || createClientRequest.getGrantTypes().size() == 0) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("Grant Type is mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		} else {
+			for(String type: createClientRequest.getGrantTypes()) {
+				if(GrantType.INVALID.equals(GrantType.getKey(type))) {
+					errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+					errorResponse.setMessage("Invalid grant type: " + type);
+					response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+					break;
+				}
+			}
+		}
+		if( null == createClientRequest.getResponseTypes() || createClientRequest.getResponseTypes().size() == 0) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("Response Type is mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		} else {
+			for(String type: createClientRequest.getResponseTypes()) {
+				if(ResponseType.INVALID.equals(ResponseType.getKey(type))) {
+					errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+					errorResponse.setMessage("Invalid response type: " + type);
+					response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+					break;
+				}
+			}
+		}
+		if( null == createClientRequest.getTokenEndpointAuthMethod() || createClientRequest.getTokenEndpointAuthMethod().size() == 0) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("Token Endpoint Authentication Method is mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		} else {
+			for(String type: createClientRequest.getTokenEndpointAuthMethod()) {
+				if(TokenEndpointAuthMethod.INVALID.equals(TokenEndpointAuthMethod.getKey(type))) {
+					errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+					errorResponse.setMessage("Invalid Token Endpoint Authentication Method: " + type);
+					response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+					break;
+				}
+			}
+		}
+		if(!createClientRequest.isConsentImplied()) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("Implied Consent must be set to true");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		return response;
+	}
+	public static Response createOpenamClient(OpenAMService openamService, String realm, String adminToken, String clientId, String requestJson) {
+		LogMessageUtil.logInfoMessage("Create OAuth2 Client Openam Call!");
+		return openamService.createOauthClient(OAUTH_VERSION_CREATE_HEADER, realm, adminToken, clientId, requestJson);
+	}
+	public static void populateOpenAMClientAttributes(OAuth2ClientRequest createClientRequest,
+			OpenAMOAuth2Client openamOAuth2Client) {
+		openamOAuth2Client.setCoreOAuth2ClientConfig(new CoreOAuth2ClientConfig());
+		openamOAuth2Client.getCoreOAuth2ClientConfig().setUserpassword(createClientRequest.getClientSecret());
+		openamOAuth2Client.getCoreOAuth2ClientConfig().setDefaultScopes(createClientRequest.getDefaultScopes());
+		openamOAuth2Client.getCoreOAuth2ClientConfig().setScopes(createClientRequest.getScopes());
+		openamOAuth2Client.getCoreOAuth2ClientConfig().setRedirectionUris(createClientRequest.getRedirectionUris());
+
+		openamOAuth2Client.setAdvancedOAuth2ClientConfig(new AdvancedOAuth2ClientConfig());
+		openamOAuth2Client.getAdvancedOAuth2ClientConfig().setGrantTypes(createClientRequest.getGrantTypes());
+		openamOAuth2Client.getAdvancedOAuth2ClientConfig().setConsentImplied(createClientRequest.isConsentImplied());
+		openamOAuth2Client.getAdvancedOAuth2ClientConfig().setResponseTypes(createClientRequest.getResponseTypes());
+		openamOAuth2Client.getAdvancedOAuth2ClientConfig().setTokenEndpointAuthMethod(createClientRequest.getTokenEndpointAuthMethod());
 	}
 }
