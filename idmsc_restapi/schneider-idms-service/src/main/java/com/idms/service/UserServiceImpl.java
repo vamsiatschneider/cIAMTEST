@@ -6226,21 +6226,39 @@ public class UserServiceImpl implements UserService {
 	 * the user.
 	 * 
 	 */
-	private boolean checkPasswordPolicy(String userPassword, String firstName, String lastName, String email, String mobile) {
+	public boolean checkPasswordPolicy(String userPassword, String firstName, String lastName, String email, String mobile) {
 		LOGGER.info("Entered checkPasswordPolicy() -> Start");
 		LOGGER.info("Parameter firstName -> " + firstName + " , lastName -> " + lastName);
 		LOGGER.info("Parameter email -> " + email + " , mobile -> " + mobile);
 
-		/*
-		 * if (userPassword.length() < UserConstants.PASSWORD_LENGTH ||
-		 * userPassword.contains(firstName) || userPassword.contains(lastName) ||
-		 * !userPassword.matches(UserConstants.PASSWORD_REGEX ) ||
-		 * ChinaIdmsUtil.passwordCheck(userPassword,email,mobile))
-		 */
-		return !(userPassword.length() < UserConstants.PASSWORD_LENGTH || userPassword.contains(firstName) || userPassword.contains(lastName)
-				|| !userPassword.matches(UserConstants.PASSWORD_REGEX ) || ChinaIdmsUtil.passwordCheck(userPassword,email,mobile));
-		//else
-		//	return true;
+		boolean isPwdLengthInvalid = userPassword.length() < UserConstants.PASSWORD_LENGTH;
+		boolean containsFName = userPassword.contains(firstName);
+		boolean containsLName = userPassword.contains(lastName);
+		boolean containsEmailOrMobile = ChinaIdmsUtil.passwordCheck(userPassword,email,mobile);
+
+		boolean containsCheck = isPwdLengthInvalid || containsFName || containsLName || containsEmailOrMobile;
+		// fail password policy check if any of the contains check fails.
+		if(containsCheck) {
+			LOGGER.info("Contains check Failed!");
+			return false;
+		}
+		// Match all the regex with given password one by one
+		boolean minLengthCheck = Pattern.matches(UserConstants.MIN_LENGTH_REGEX, userPassword);
+		boolean wSpaceCheck = !Pattern.matches(UserConstants.WSPACE_REGEX, userPassword);
+		boolean upperCaseMatch = Pattern.matches(UserConstants.UPPER_CASE_REGEX, userPassword);
+		boolean lowerCaseMatch = Pattern.matches(UserConstants.LOWER_CASE_REGEX, userPassword);
+		boolean numberMatch = Pattern.matches(UserConstants.NUMBER_REGEX, userPassword);
+		boolean specialCharMatch = Pattern.matches(UserConstants.SPECIAL_CHARS_REGEX, userPassword);
+
+		//Check for all permutations and combinations of given password
+		boolean combination1 = upperCaseMatch && lowerCaseMatch && numberMatch;
+		boolean combination2 = upperCaseMatch && lowerCaseMatch && specialCharMatch;
+		boolean combination3 = lowerCaseMatch && numberMatch && specialCharMatch;
+		boolean combination4 = upperCaseMatch && numberMatch && specialCharMatch;
+
+		boolean isPwdPolicyCompliant = minLengthCheck && wSpaceCheck && (combination1 || combination2 || combination3 || combination4);
+		LOGGER.info("isPwdPolicyCompliant: " + isPwdPolicyCompliant);
+		return isPwdPolicyCompliant;
 	}
 
 	/*
@@ -9898,8 +9916,8 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Start: SecuredLogin checkUserExistsWithEmailMobile() of openam for loginId=" + userName);
 			userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
 					UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
-					"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(userName, "UTF-8"), "UTF-8")
-							+ "\" or mobilereg eq " + "\""
+					"loginid eq " + "\"" + URLEncoder.encode(URLDecoder.decode(userName, "UTF-8"), "UTF-8")
+							+ "\" or loginmobile eq " + "\""
 							+ URLEncoder.encode(URLDecoder.decode(userName, "UTF-8"), "UTF-8") + "\"");
 			LOGGER.info("End: SecuredLogin checkUserExistsWithEmailMobile() of openam finished for loginId=" + userName);
 			productDocCtx = JsonPath.using(conf).parse(userExists);
