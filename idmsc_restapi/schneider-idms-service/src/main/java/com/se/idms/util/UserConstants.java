@@ -20,8 +20,16 @@ public class UserConstants {
 	public static final String PASSWORD_REGEX = "^((?=.*?[A-Z]+)(?=.*?[a-z])(?=.*?[0-9])|(?=.*?[a-z]+)(?=.*?[A-Z])(?=.*?[^\\w])|(?=.*?[0-9]+)(?=.*?[a-z])(?=.*?[^\\w])|(?=.*?[^\\w]+)(?=.*?[A-Z]+)(?=.*?[0-9])).{8,532}$";
 	
 	public static final String PR_REGEX = "^((([^<>()\\[\\];:\\s@]([^<>()\\[\\]\\.;:\\s@])*)|(\".+\"))+@(([0-9]{1,3}+\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})|([a-zA-Z&#45;0-9]+\\.[a-zA-Z]{2,})))$";
+
+	public static final String MIN_LENGTH_REGEX = "^[\\s\\S]{8,532}$";
+	public static final String WSPACE_REGEX = "(.*[\\s].*)";
+	public static final String UPPER_CASE_REGEX = "(.*[A-Z].*)";
+	public static final String LOWER_CASE_REGEX = "(.*[a-z].*)";
+	public static final String NUMBER_REGEX = "(.*[0-9].*)";
+	public static final String SPECIAL_CHARS_REGEX = "(.*[^A-Za-z0-9].*)";
+
 	/**
-	 * Token constanst 
+	 * Token constants
 	 * 
 	 * */
 	public static final String EMAIL ="email";
