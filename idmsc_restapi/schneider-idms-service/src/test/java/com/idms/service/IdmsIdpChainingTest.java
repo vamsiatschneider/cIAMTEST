@@ -13,10 +13,6 @@ import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.cache.ehcache.EhCacheCache;
-
-import com.idms.mapper.IdmsMapper;
-import com.idms.product.client.OpenAMService;
 import com.se.idms.cache.validate.IValidator;
 import com.se.idms.cache.validate.impl.LengthValidatorImpl;
 import com.se.idms.cache.validate.impl.PickListValidatorImpl;
@@ -32,13 +28,7 @@ public class IdmsIdpChainingTest {
 	private UserService userService = new UserServiceImpl();
 
 	@Mock
-	private IdmsMapper idmsMapper;
-
-	@Mock
 	private IValidator pickListValidator = new PickListValidatorImpl();;
-
-	@Mock
-	private IValidator multiPickListValidator;
 
 	@Mock
 	private IValidator legthValidator = new LengthValidatorImpl();
@@ -46,20 +36,7 @@ public class IdmsIdpChainingTest {
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	@Mock
-	private OpenAMService productService;
-	
-	@Mock
-	private org.springframework.cache.ehcache.EhCacheCacheManager cacheManager;// = new EhCacheCacheManager();
-	
-	@Mock
-	private EhCacheCache cache;
-	
-	@Mock
-	private SendEmail sendEmail;
-	
-	@Mock
-	private UIMSUserManagerSoapService uimsUserManagerSoapService;
+
 
 	
 	/**

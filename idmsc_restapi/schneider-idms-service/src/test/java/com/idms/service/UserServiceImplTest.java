@@ -6,9 +6,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
 
@@ -24,24 +21,15 @@ import org.springframework.http.HttpStatus;
 
 import com.idms.mapper.IdmsMapper;
 import com.idms.model.CreateUserRequest;
-import com.idms.model.CreateUserResponse;
-import com.idms.model.IDMSUserResponse;
-import com.idms.product.client.IFWService;
+
 import com.idms.product.client.OpenAMService;
-import com.idms.product.client.OpenAMTokenService;
 import com.idms.product.client.OpenDjService;
 import com.idms.product.model.OpenAmUserRequest;
-import com.idms.service.impl.IFWTokenServiceImpl;
-import com.idms.service.uims.sync.UIMSAuthenticatedUserManagerSoapServiceSync;
-import com.idms.service.uims.sync.UIMSUserManagerSoapServiceSync;
-import com.schneider.idms.salesforce.service.SaleforceServiceImpl;
-import com.schneider.idms.salesforce.service.SalesforceSyncServiceImpl;
 import com.se.idms.cache.validate.IValidator;
 import com.se.idms.cache.validate.impl.LengthValidatorImpl;
 import com.se.idms.cache.validate.impl.PickListValidatorImpl;
 import com.se.idms.dto.ErrorResponse;
 import com.se.idms.dto.UIMSResponse;
-import com.se.idms.dto.UserServiceResponse;
 import com.se.idms.util.EmailValidator;
 import com.se.idms.util.PhoneValidator;
 import com.se.idms.util.UserConstants;
@@ -81,15 +69,6 @@ public class UserServiceImplTest extends PropertyVariables{
 	@Mock
 	private OpenAMService productService;
 	
-	@Mock
-	private OpenAMTokenService openAMTokenService;
-	
-	@Mock
-	private IDMSUserResponse idmsuserResponse;
-	
-	@Mock
-	private UserServiceResponse userResponse;
-	
 	//@Resource//(name="cacheManager")
 	@Mock
 	private org.springframework.cache.ehcache.EhCacheCacheManager cacheManager;// = new EhCacheCacheManager();
@@ -97,42 +76,11 @@ public class UserServiceImplTest extends PropertyVariables{
 	@Mock
 	private EhCacheCache cache;
 	
-	@Mock
-	private SendEmail sendEmail;
-	
-	@Mock
-	private UIMSUserManagerSoapService uimsUserManagerSoapService;
-	
-	@Mock
-	private IFWService ifwService;
-
-	@Mock
-	private UIMSCompanyManagerSoapService companyManagerSoapService;
-
-	@Mock
-	private UIMSAccessManagerSoapService uimsAccessManagerSoapService;
-
-	@Mock
-	private UimsSetPasswordSoapService uimsSetPasswordSoapService;
-
-	@Mock
-	private UIMSUserManagerSoapServiceSync uimsUserManagerSync;
-
-	@Mock
-	private UIMSAuthenticatedUserManagerSoapServiceSync uimsAuthenticatedUserManagerSoapServiceSync;
-
-	@Mock
-	private SaleforceServiceImpl datePopulationSerivce;
 
 	@Mock
 	protected OpenDjService openDJService;
 
-	@Mock
-	private SalesforceSyncServiceImpl sfSyncServiceImpl;
 
-	@Mock
-	private IFWTokenServiceImpl ifwTokenServiceImpl;
-	
 	
 
 	/**
@@ -160,7 +108,6 @@ public class UserServiceImplTest extends PropertyVariables{
 	public void testUserRegistrationWhenUserNotSendingAuthorizationToken() throws Exception {
 	
 		CreateUserRequest userRequest = DtoMockData.buildUserRegistrationRequset();
-		OpenAmUserRequest openAmReq = DtoMockData.buildUserRegistrationOpenAmRequset();
 		when(legthValidator.validate(anyString(), anyString())).thenReturn(true);
 		when(pickListValidator.validate(anyString(), anyString())).thenReturn(true);
 		when(multiPickListValidator.validate(anyString(), anyString())).thenReturn(true);
@@ -212,8 +159,6 @@ public class UserServiceImplTest extends PropertyVariables{
 	public void testUserRegistrationWhenFirstNameIsEmpty() {
 		// Setup
 		CreateUserRequest userRequest = DtoMockData.buildUserRegistrationRequset();
-		InputStream is = new ByteArrayInputStream(DomainMockData.USER_REGISTRATION.getBytes());
-		Response userRegRes = Response.status(Response.Status.OK).entity(is).build();
 		when(legthValidator.validate(anyString(), anyString())).thenReturn(true);
 		when(pickListValidator.validate(anyString(), anyString())).thenReturn(true);
 		when(multiPickListValidator.validate(anyString(), anyString())).thenReturn(true);

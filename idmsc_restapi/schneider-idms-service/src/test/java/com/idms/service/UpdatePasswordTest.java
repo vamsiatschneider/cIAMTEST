@@ -26,7 +26,6 @@ import com.idms.mapper.IdmsMapper;
 import com.idms.model.UpdatePasswordRequest;
 import com.idms.product.client.OpenAMService;
 import com.idms.product.client.OpenAMTokenService;
-import com.idms.product.model.Attributes;
 import com.se.idms.cache.validate.IValidator;
 import com.se.idms.cache.validate.impl.LengthValidatorImpl;
 import com.se.idms.cache.validate.impl.PickListValidatorImpl;
@@ -82,22 +81,11 @@ public class UpdatePasswordTest {
 	private IDMSUserRecordUpdatePassword idmsUserRecord;
 	
 	@Mock
-	private Attributes attributes;
-	
-	@Mock
-	private ErrorResponse errorResponse;
-
-	@Mock
 	private UIMSUserManagerSoapService uimsUserManagerSoapService;
 	
 	@Mock
 	private UimsSetPasswordSoapService uimsSetPasswordSoapService;
 	
-	@Mock
-	private PasswordRecoveryResponse passwordEmptyResponse;
-	
-	@Mock
-	private UserServiceResponse userResponse;
 
 	/**
 	 * Initialize mocks.

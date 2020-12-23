@@ -188,7 +188,6 @@ public class DirectApiConstants {
 	public static final String SUBCHANNEL = "subChannel";
 
 	
-	private boolean isActive;
 	
 	public static final String EMAIL_VALIDATION = "Email error - ";
 	

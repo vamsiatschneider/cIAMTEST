@@ -19,17 +19,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.springframework.cache.ehcache.EhCacheCache;
 import org.springframework.http.HttpStatus;
 
-import com.idms.product.client.IFWService;
 import com.idms.product.client.OpenAMService;
 import com.idms.product.client.OpenAMTokenService;
-import com.idms.product.client.SalesForceService;
 import com.idms.product.model.OpenAMGetUserWorkResponse;
-import com.idms.service.impl.IFWTokenServiceImpl;
 import com.jayway.jsonpath.DocumentContext;
-import com.schneider.idms.salesforce.service.SalesforceSyncServiceImpl;
 import com.se.idms.dto.ParseValuesByOauthHomeWorkContextDto;
 
 /**
@@ -51,20 +46,6 @@ public class GetUserTest {
 	@Mock
 	private org.springframework.cache.ehcache.EhCacheCacheManager cacheManager;
 	
-	@Mock
-	private EhCacheCache cache;
-	
-	@Mock
-	private IFWService ifwService;
-	
-	@Mock
-	private SalesforceSyncServiceImpl sfSyncServiceImpl;
-	
-	@Mock
-	private IFWTokenServiceImpl ifwTokenServiceImpl;
-	
-	@Mock
-	private SalesForceService salesForceService;
 	
 	@Mock
 	private ParseValuesByOauthHomeWorkContextDto valuesByOauthHomeWorkContext;

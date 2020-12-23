@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import com.idms.mfa.exception.JsonValueException;
 import com.idms.model.mfa.Function;
-import com.idms.service.UserServiceImpl;
 
 
 public class JsonValue implements Cloneable, Iterable<JsonValue> {

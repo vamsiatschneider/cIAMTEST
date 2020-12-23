@@ -20,7 +20,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.cache.ehcache.EhCacheCache;
 import org.springframework.http.HttpStatus;
 
-import com.idms.mapper.IdmsMapper;
 import com.idms.model.ConfirmPinRequest;
 import com.idms.model.ConfirmPinResponse;
 import com.idms.product.client.OpenAMService;
@@ -39,9 +38,6 @@ public class UserConfirmPinTest {
 	 */
 	@InjectMocks
 	private UserService userService = new UserServiceImpl();
-
-	@Mock
-	private IdmsMapper idmsMapper;
 
 	@Mock
 	private IValidator pickListValidator = new PickListValidatorImpl();;
@@ -66,9 +62,6 @@ public class UserConfirmPinTest {
 	
 	@Mock
 	private SendEmail sendEmail;
-	
-	@Mock
-	private UIMSUserManagerSoapService uimsUserManagerSoapService;
 	
 	@Mock
 	private SaleforceServiceImpl datePopulationSerivce;

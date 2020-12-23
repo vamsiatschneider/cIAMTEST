@@ -207,7 +207,6 @@ import com.se.idms.dto.VerifyResult;
 import com.se.idms.util.EmailValidator;
 import com.se.idms.util.JsonConstants;
 import com.se.idms.util.LangSupportUtil;
-import com.se.idms.util.PhoneValidator;
 import com.se.idms.util.UserConstants;
 import com.uims.authenticatedUsermanager.UserV6;
 
@@ -291,9 +290,9 @@ public class UserServiceImpl implements UserService {
 	 * @Qualifier("emailValidator") private EmailValidator emailValidator;
 	 */
 
-	@Inject
-	@Qualifier("phoneValidator")
-	private PhoneValidator phoneValidator;
+//	@Inject
+//	@Qualifier("phoneValidator")
+//	private PhoneValidator phoneValidator;
 
 	@Inject
 	@Qualifier("emailService")

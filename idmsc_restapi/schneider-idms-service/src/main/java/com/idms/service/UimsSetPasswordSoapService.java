@@ -43,9 +43,9 @@ public class UimsSetPasswordSoapService {
 	
 	@Inject
 	private SamlAssertionTokenGenerator samlTokenService;
-	
-	@Autowired
-	private UIMSUserManagerSoapService userManagerSoapService;
+	//PMD:UnusedPrivateField
+	//@Autowired
+	//private UIMSUserManagerSoapService userManagerSoapService;
 	
 	@Inject
 	private OpenAMService productService;

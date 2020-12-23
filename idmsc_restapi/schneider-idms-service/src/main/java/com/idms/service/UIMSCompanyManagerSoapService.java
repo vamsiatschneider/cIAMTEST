@@ -3,7 +3,7 @@ package com.idms.service;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import javax.inject.Inject;
+//import javax.inject.Inject;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 
@@ -25,7 +25,7 @@ import com.schneider.ims.service.company.impl.uimsv2.SecuredImsException;
 import com.schneider.ims.service.company.impl.uimsv2.UnexpectedLdapResponseException;
 import com.schneider.ims.service.company.impl.uimsv2.UnexpectedRuntimeImsException;
 import com.schneider.ims.service.uimsv2.CompanyV3;
-import com.se.idms.util.SamlAssertionTokenGenerator;
+//import com.se.idms.util.SamlAssertionTokenGenerator;
 import com.uims.companymanager.CompanyManagerUIMSV2;
 
 /**
@@ -48,9 +48,9 @@ public class UIMSCompanyManagerSoapService {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(UIMSUserManagerSoapService.class);
 	private static final Logger UIMSSYNCLOGGER = LoggerFactory.getLogger("uimsSyncErrorLogger");
-	
-	@Inject
-	private SamlAssertionTokenGenerator samlTokenService;
+//PMD:Unused PrivateField
+//	@Inject
+//	private SamlAssertionTokenGenerator samlTokenService;
 
 	@Value("${uimsCompanyManagerWsdl}")
 	private String uimsCompanyManagerWsdl;

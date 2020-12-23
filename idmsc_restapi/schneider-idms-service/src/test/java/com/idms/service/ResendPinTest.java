@@ -25,12 +25,9 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.cache.ehcache.EhCacheCache;
 import org.springframework.http.HttpStatus;
 
-import com.idms.mapper.IdmsMapper;
+
 import com.idms.model.ResendPinRequest;
 import com.idms.product.client.OpenAMService;
-import com.se.idms.cache.validate.IValidator;
-import com.se.idms.cache.validate.impl.LengthValidatorImpl;
-import com.se.idms.cache.validate.impl.PickListValidatorImpl;
 import com.se.idms.util.UserConstants;
 import com.se.idms.util.ValidatingInvocationHandler;
 
@@ -42,17 +39,6 @@ public class ResendPinTest extends PropertyVariables{
 	@InjectMocks
 	private UserService userService = new UserServiceImpl();
 
-	@Mock
-	private IdmsMapper idmsMapper;
-
-	@Mock
-	private IValidator pickListValidator = new PickListValidatorImpl();
-
-	@Mock
-	private IValidator multiPickListValidator;
-
-	@Mock
-	private IValidator legthValidator = new LengthValidatorImpl();
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();

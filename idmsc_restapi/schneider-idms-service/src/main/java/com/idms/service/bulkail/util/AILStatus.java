@@ -7,7 +7,7 @@ public enum AILStatus {
 	
 	private String status;
 	
-	private AILStatus(String status) {
+	 AILStatus(String status) {
 		this.status = status;
 	}
 

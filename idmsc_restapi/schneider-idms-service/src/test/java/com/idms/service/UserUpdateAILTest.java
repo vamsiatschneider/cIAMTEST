@@ -15,11 +15,8 @@ import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.ehcache.EhCacheCache;
 import org.springframework.http.HttpStatus;
-
-import com.idms.mapper.IdmsMapper;
 import com.idms.model.AILRequest;
 import com.idms.product.client.OpenAMService;
 import com.idms.product.client.OpenAMTokenService;
@@ -42,8 +39,6 @@ public class UserUpdateAILTest {
 	@Mock
 	private UserServiceImpl userServiceImpl = new UserServiceImpl();
 	
-	@Mock
-	private IdmsMapper idmsMapper;
 
 	@Mock
 	private OpenAMTokenService openAMTokenService;
@@ -64,26 +59,19 @@ public class UserUpdateAILTest {
 	private OpenAMService productService;
 	
 	@Mock
-	private org.springframework.cache.ehcache.EhCacheCacheManager cacheManager;// = new EhCacheCacheManager();
+	private org.springframework.cache.ehcache.EhCacheCacheManager cacheManager;
 	
 	@Mock
 	private EhCacheCache cache;
 	
 	@Mock
-	private SendEmail sendEmail;
-	
-	@Mock
-	private UIMSUserManagerSoapService uimsUserManagerSoapService;
-	
-	@Mock
 	private UIMSAccessManagerSoapService uimsAccessManagerSoapService;
+	
 	
 	private String clientId ="uimsClientId";
 	
 	private String clientSecret ="clientSecret";
 	
-	@Value("${uimsClientId}")
-	private String uimsClientId;
 
 	/**
 	 * Initialize mocks.
