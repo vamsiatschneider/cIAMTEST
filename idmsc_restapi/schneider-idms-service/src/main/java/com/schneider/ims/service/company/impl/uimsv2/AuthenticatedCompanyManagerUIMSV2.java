@@ -44,7 +44,7 @@ public interface AuthenticatedCompanyManagerUIMSV2 {
     @WebResult(name = "company", targetNamespace = "")
     @RequestWrapper(localName = "getCompanyByGoldenId", targetNamespace = "http://uimsv2.service.ims.schneider.com/", className = "com.schneider.ims.service.uimsv2.GetCompanyByGoldenId")
     @ResponseWrapper(localName = "getCompanyByGoldenIdResponse", targetNamespace = "http://uimsv2.service.ims.schneider.com/", className = "com.schneider.ims.service.uimsv2.GetCompanyByGoldenIdResponse")
-    public CompanyV3 getCompanyByGoldenId(
+     CompanyV3 getCompanyByGoldenId(
         @WebParam(name = "callerFid", targetNamespace = "")
         String callerFid,
         @WebParam(name = "federatedId", targetNamespace = "")
@@ -69,7 +69,7 @@ public interface AuthenticatedCompanyManagerUIMSV2 {
     @WebResult(name = "companies", targetNamespace = "")
     @RequestWrapper(localName = "searchPublicCompany", targetNamespace = "http://uimsv2.service.ims.schneider.com/", className = "com.schneider.ims.service.uimsv2.SearchPublicCompany")
     @ResponseWrapper(localName = "searchPublicCompanyResponse", targetNamespace = "http://uimsv2.service.ims.schneider.com/", className = "com.schneider.ims.service.uimsv2.SearchPublicCompanyResponse")
-    public List<CompanyV3> searchPublicCompany(
+     List<CompanyV3> searchPublicCompany(
         @WebParam(name = "callerFid", targetNamespace = "")
         String callerFid,
         @WebParam(name = "template", targetNamespace = "")
@@ -95,7 +95,7 @@ public interface AuthenticatedCompanyManagerUIMSV2 {
     @WebResult(name = "company", targetNamespace = "")
     @RequestWrapper(localName = "getCompany", targetNamespace = "http://uimsv2.service.ims.schneider.com/", className = "com.schneider.ims.service.uimsv2.GetCompany")
     @ResponseWrapper(localName = "getCompanyResponse", targetNamespace = "http://uimsv2.service.ims.schneider.com/", className = "com.schneider.ims.service.uimsv2.GetCompanyResponse")
-    public CompanyV3 getCompany(
+     CompanyV3 getCompany(
         @WebParam(name = "callerFid", targetNamespace = "")
         String callerFid,
         @WebParam(name = "userFederatedId", targetNamespace = "")
@@ -124,7 +124,7 @@ public interface AuthenticatedCompanyManagerUIMSV2 {
     @WebResult(name = "companyId", targetNamespace = "")
     @RequestWrapper(localName = "createCompany", targetNamespace = "http://uimsv2.service.ims.schneider.com/", className = "com.schneider.ims.service.uimsv2.CreateCompany")
     @ResponseWrapper(localName = "createCompanyResponse", targetNamespace = "http://uimsv2.service.ims.schneider.com/", className = "com.schneider.ims.service.uimsv2.CreateCompanyResponse")
-    public String createCompany(
+     String createCompany(
         @WebParam(name = "callerFid", targetNamespace = "")
         String callerFid,
         @WebParam(name = "federatedId", targetNamespace = "")
@@ -153,7 +153,7 @@ public interface AuthenticatedCompanyManagerUIMSV2 {
     @WebResult(name = "company", targetNamespace = "")
     @RequestWrapper(localName = "getCompanyByInvitationUid", targetNamespace = "http://uimsv2.service.ims.schneider.com/", className = "com.schneider.ims.service.uimsv2.GetCompanyByInvitationUid")
     @ResponseWrapper(localName = "getCompanyByInvitationUidResponse", targetNamespace = "http://uimsv2.service.ims.schneider.com/", className = "com.schneider.ims.service.uimsv2.GetCompanyByInvitationUidResponse")
-    public CompanyV3 getCompanyByInvitationUid(
+     CompanyV3 getCompanyByInvitationUid(
         @WebParam(name = "callerFid", targetNamespace = "")
         String callerFid,
         @WebParam(name = "federatedId", targetNamespace = "")
@@ -185,7 +185,7 @@ public interface AuthenticatedCompanyManagerUIMSV2 {
     @WebResult(name = "companyId", targetNamespace = "")
     @RequestWrapper(localName = "createCompanyForceIdmsId", targetNamespace = "http://uimsv2.service.ims.schneider.com/", className = "com.schneider.ims.service.uimsv2.CreateCompanyForceIdmsId")
     @ResponseWrapper(localName = "createCompanyForceIdmsIdResponse", targetNamespace = "http://uimsv2.service.ims.schneider.com/", className = "com.schneider.ims.service.uimsv2.CreateCompanyForceIdmsIdResponse")
-    public String createCompanyForceIdmsId(
+     String createCompanyForceIdmsId(
         @WebParam(name = "callerFid", targetNamespace = "")
         String callerFid,
         @WebParam(name = "federatedId", targetNamespace = "")
@@ -215,7 +215,7 @@ public interface AuthenticatedCompanyManagerUIMSV2 {
     @WebResult(name = "companies", targetNamespace = "")
     @RequestWrapper(localName = "searchCompany", targetNamespace = "http://uimsv2.service.ims.schneider.com/", className = "com.schneider.ims.service.uimsv2.SearchCompany")
     @ResponseWrapper(localName = "searchCompanyResponse", targetNamespace = "http://uimsv2.service.ims.schneider.com/", className = "com.schneider.ims.service.uimsv2.SearchCompanyResponse")
-    public List<CompanyV3> searchCompany(
+     List<CompanyV3> searchCompany(
         @WebParam(name = "callerFid", targetNamespace = "")
         String callerFid,
         @WebParam(name = "userFederatedId", targetNamespace = "")
@@ -245,7 +245,7 @@ public interface AuthenticatedCompanyManagerUIMSV2 {
     @WebResult(name = "success", targetNamespace = "")
     @RequestWrapper(localName = "updateCompany", targetNamespace = "http://uimsv2.service.ims.schneider.com/", className = "com.schneider.ims.service.uimsv2.UpdateCompany")
     @ResponseWrapper(localName = "updateCompanyResponse", targetNamespace = "http://uimsv2.service.ims.schneider.com/", className = "com.schneider.ims.service.uimsv2.UpdateCompanyResponse")
-    public boolean updateCompany(
+     boolean updateCompany(
         @WebParam(name = "callerFid", targetNamespace = "")
         String callerFid,
         @WebParam(name = "federatedId", targetNamespace = "")

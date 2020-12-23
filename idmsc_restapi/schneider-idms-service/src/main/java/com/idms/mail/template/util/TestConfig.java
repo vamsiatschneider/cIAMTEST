@@ -12,7 +12,8 @@ public class TestConfig {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		String filePath = _instance.getConfiguration("user.registration.withpwd.email.template.cn");
+		//PMD: UnusedLocalVariable
+		//String filePath = _instance.getConfiguration("user.registration.withpwd.email.template.cn");
 		
 	}
 

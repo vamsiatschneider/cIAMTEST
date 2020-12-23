@@ -14,7 +14,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 
 import com.idms.model.SendInvitationRequest;
-import com.idms.product.client.OpenAMTokenService;
 import com.se.idms.cache.utils.EmailConstants;
 import com.se.idms.dto.UserServiceResponse;
 import com.se.idms.util.UserConstants;
@@ -24,9 +23,6 @@ public class SendInvitationTest {
 	
 	@InjectMocks
 	private UserService userService = new UserServiceImpl();
-	
-	@Mock
-	private OpenAMTokenService openAMTokenService;
 	
 	@Mock
 	private SendEmail sendEmail;

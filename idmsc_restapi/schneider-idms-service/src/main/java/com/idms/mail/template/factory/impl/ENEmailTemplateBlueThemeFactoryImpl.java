@@ -1,7 +1,6 @@
 package com.idms.mail.template.factory.impl;
 
 import com.idms.mail.template.factory.EmailTemplateFactory;
-import com.idms.mail.template.impl.cn.green.CNGreen2FAUserTemplate;
 import com.idms.mail.template.impl.en.blue.ENBlue2FAUserTemplate;
 import com.idms.mail.template.impl.en.blue.ENBlueAddEmailUserRecordTemplate;
 import com.idms.mail.template.impl.en.blue.ENBlueDefaultTemplate;

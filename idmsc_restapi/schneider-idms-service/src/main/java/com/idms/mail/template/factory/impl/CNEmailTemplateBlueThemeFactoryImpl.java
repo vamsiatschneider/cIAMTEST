@@ -8,7 +8,6 @@ import com.idms.mail.template.impl.cn.blue.CNBlueSendInvitationTemplate;
 import com.idms.mail.template.impl.cn.blue.CNBlueSetUserPasswordTemplate;
 import com.idms.mail.template.impl.cn.blue.CNBlueUpdateUserRecordTemplate;
 import com.idms.mail.template.impl.cn.blue.CNBlueUserRegistrationTemplate;
-import com.idms.mail.template.impl.cn.green.CNGreen2FAUserTemplate;
 import com.idms.mail.template.util.EmailTemplate;
 import com.idms.mail.template.util.EmailTemplateInput;
 

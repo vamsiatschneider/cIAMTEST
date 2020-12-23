@@ -1,6 +1,5 @@
 package com.se.idms.util;
 
-import com.idms.service.util.ChinaIdmsUtil;
 
 public class TestClient {
 

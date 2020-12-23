@@ -7,7 +7,7 @@ public enum AILOperationType {
 	
 	private String type;
 	
-	private AILOperationType(String type) {
+	AILOperationType(String type) {
 		this.type = type;
 	}
 

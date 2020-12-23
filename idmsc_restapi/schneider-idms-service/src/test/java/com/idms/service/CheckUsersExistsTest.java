@@ -16,7 +16,6 @@ import org.springframework.cache.ehcache.EhCacheCache;
 
 import com.idms.product.client.IFWService;
 import com.idms.product.client.OpenAMService;
-import com.idms.product.client.SalesForceService;
 import com.idms.service.impl.IFWTokenServiceImpl;
 import com.schneider.idms.salesforce.service.SalesforceSyncServiceImpl;
 
@@ -47,8 +46,6 @@ public class CheckUsersExistsTest {
 	@Mock
 	private IFWTokenServiceImpl ifwTokenServiceImpl;
 	
-	@Mock
-	private SalesForceService salesForceService;
 
 	/**
 	 * Initialize mocks.

@@ -18,8 +18,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.cache.ehcache.EhCacheCache;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import com.idms.mapper.IdmsMapper;
 import com.idms.model.ResendEmailChangeRequest;
 import com.idms.product.client.OpenAMService;
 import com.idms.product.client.OpenDjService;
@@ -38,9 +36,6 @@ public class ResendChangeEmailTest {
 	 */
 	@InjectMocks
 	private UserServiceImpl userService = new UserServiceImpl();
-
-	@Mock
-	private IdmsMapper idmsMapper;
 
 	@Mock
 	private IValidator pickListValidator = new PickListValidatorImpl();
@@ -72,9 +67,6 @@ public class ResendChangeEmailTest {
 	@Mock
 	private UserServiceResponseMailCounter userResponseMailCounter = new UserServiceResponseMailCounter() ;
 	
-	@Mock
-	private UIMSUserManagerSoapService uimsUserManagerSoapService;
-
 	
 	/**
 	 * Initialize mocks.

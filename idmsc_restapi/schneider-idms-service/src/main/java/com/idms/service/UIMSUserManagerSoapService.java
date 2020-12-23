@@ -81,10 +81,10 @@ public class UIMSUserManagerSoapService {
 	
 	@Inject
 	private OpenAMService productService;
-	
-	@Inject
-	@Qualifier("pickListValidator")
-	private IValidator pickListValidator;
+//PMD :UnusedPrivateField	
+//	@Inject
+//	@Qualifier("pickListValidator")
+//	private IValidator pickListValidator;
 	
 	private SendEmail sendEmail;
 	

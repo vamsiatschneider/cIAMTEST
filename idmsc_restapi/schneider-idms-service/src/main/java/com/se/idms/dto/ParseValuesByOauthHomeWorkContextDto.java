@@ -20,9 +20,9 @@ import com.se.idms.util.UserConstants;
 
 @Component("parseValuesByOauthHomeWorkContext")
 public class ParseValuesByOauthHomeWorkContextDto {
-
-	@Inject
-	private CompanyDetails companydetails;
+	//PMD:UnusedPrivateField
+	//@Inject
+	//private CompanyDetails companydetails;
 
 	public void parseValuesByOauthWorkContext(GetUserWorkByOauthResponse userResponse,
 			DocumentContext userProductDocCtx) {

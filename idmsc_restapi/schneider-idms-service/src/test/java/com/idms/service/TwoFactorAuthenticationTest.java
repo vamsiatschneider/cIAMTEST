@@ -6,8 +6,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-
 import javax.ws.rs.core.Response;
 
 import org.junit.Before;
@@ -19,14 +17,12 @@ import org.springframework.cache.ehcache.EhCacheCache;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.idms.model.DeviceProfileRequest;
 import com.idms.model.MFAEnableResponse;
 import com.idms.model.MFARequest;
 import com.idms.model.SocialProfileUpdateResponse;
 import com.idms.product.client.OpenAMService;
 import com.idms.product.client.OpenAMTokenService;
-import com.idms.product.client.OpenDjService;
 import com.se.idms.dto.ErrorResponse;
 import com.se.idms.util.UserConstants;
 
@@ -38,9 +34,7 @@ public class TwoFactorAuthenticationTest {
 	@Mock
 	private OpenAMService openAMService;
 	
-	@Mock
-	private OpenDjService openDJService;
-	
+
 	@Mock
 	private OpenAMTokenService openAMTokenService;
 	
