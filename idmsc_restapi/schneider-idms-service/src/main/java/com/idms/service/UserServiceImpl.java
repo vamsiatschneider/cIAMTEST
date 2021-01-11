@@ -13838,7 +13838,16 @@ public class UserServiceImpl implements UserService {
 	          generateProfileName(new Date(lastSelectedDate)) : deviceName);
 	    profile.put("selectionCounter", Integer.valueOf(1));
 	    profile.put("lastSelectedDate", Long.valueOf(lastSelectedDate));
-	    profile.put("devicePrint", devicePrint);
+		try {
+			String formattedDevicePrint = ChinaIdmsUtil.removeEscapeCharacter(devicePrint.toString());
+			StringBuilder devicePrintSB = new StringBuilder(formattedDevicePrint);
+	        devicePrintSB.deleteCharAt(formattedDevicePrint.length() - 1);
+	        devicePrintSB.deleteCharAt(0);
+			JsonNode formattedJsonNode = new ObjectMapper().readTree(devicePrintSB.toString());
+			profile.put("devicePrint", formattedJsonNode);
+		} catch (IOException ex) {
+			LOGGER.info("IOException in formatting Json node: " + ex.getMessage());
+		}
 	    return profile;
 	}
 
