@@ -391,4 +391,5 @@ public final class DomainMockData {
 		deviceProfileRequest.setDevicePrint(jsonNode);
 		return deviceProfileRequest;
 	}
+	
 }
