@@ -264,6 +264,24 @@ public final class DtoMockData {
         request.setUIFlag("true");
         return request;
     }
+    
+    public static CreateUserRequest buildUIMSRegistrationRequest() {
+    	CreateUserRequest request = new CreateUserRequest();
+    	IFWUser userRecord = DomainMockData.buildUser();
+    	userRecord.setIDMS_Registration_Source__c("UIMS");
+    	userRecord.setIDMS_Federated_ID__c("iDMS_Federated_ID__c");
+    	request.setUserRecord(userRecord);
+        return request;
+    }
 
+    public static OpenAmUserRequest buildOpenAmRequset() {
+    	OpenAmUserRequest request = new OpenAmUserRequest();
+    	OpenAmUserInput input = new OpenAmUserInput();
+    	OpenAmUser user = DomainMockData.buildOpenAmUser(); 
+    	user.setRegisterationSource("UIMS");
+    	input.setUser(user);
+    	request.setInput(input);
+        return request;
+    }
 	
 }
