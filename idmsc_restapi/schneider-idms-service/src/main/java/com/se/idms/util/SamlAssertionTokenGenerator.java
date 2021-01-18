@@ -15,7 +15,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
-import sun.misc.BASE64Encoder;
+/*import sun.misc.BASE64Encoder; java upgrade*/
+import java.util.Base64;
 
 /**
  * SAML assertion token generator
@@ -115,7 +116,10 @@ public class SamlAssertionTokenGenerator {
 
 		sig.verify(signatureBytes);
 
-		return new BASE64Encoder().encode(signatureBytes);
+		/* return new BASE64Encoder().encode(signatureBytes); java upgrade*/
+		
+		Base64.Encoder mimeEncoder = java.util.Base64.getMimeEncoder(); 
+		return mimeEncoder.encodeToString(signatureBytes);
 	}
 
 	public void setSamlAssertionSigningKeystore(String samlAssertionSigningKeystore) {
