@@ -43,6 +43,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.LongAdder;
@@ -95,6 +96,8 @@ import com.idms.model.ActivateUser;
 import com.idms.model.ActivateUserRequest;
 import com.idms.model.AddEmailRequest;
 import com.idms.model.AddMobileRequest;
+import com.idms.model.AppOnboardingRequest;
+import com.idms.model.AppOnboardingResponse;
 import com.idms.model.BulkAILMapValue;
 import com.idms.model.BulkAILRecord;
 import com.idms.model.BulkAILRequest;
@@ -155,6 +158,7 @@ import com.idms.product.model.OpenAMOAuth2Client;
 import com.idms.product.model.OpenAmUser;
 import com.idms.product.model.OpenAmUserInput;
 import com.idms.product.model.OpenAmUserRequest;
+import com.idms.product.model.OpenDJAppOnboardingAttributes;
 import com.idms.product.model.PasswordRecoveryUser;
 import com.idms.product.model.PostMobileRecord;
 import com.idms.service.bulkail.util.AILMasterRecord;
@@ -180,6 +184,7 @@ import com.schneider.idms.salesforce.service.SalesforceSyncServiceImpl;
 import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.cache.utils.EmailConstants;
 import com.se.idms.cache.validate.IValidator;
+import com.se.idms.cache.validate.PropertyLoader;
 import com.se.idms.dto.AILResponse;
 import com.se.idms.dto.ErrorResponse;
 import com.se.idms.dto.GetUserHomeByOauthResponse;
@@ -272,6 +277,14 @@ public class UserServiceImpl implements UserService {
 	@Qualifier("legthValidator")
 	private IValidator legthValidator;
 
+	@Inject
+	@Qualifier("appOnboardingFieldsValidator")
+	private IValidator onboardingFieldsValidator;
+	
+	@Inject
+	@Qualifier("appOnboardingConstantsPropLoader")
+	private PropertyLoader onboardingConstantsPropLoader;
+	
 	@Autowired
 	private ParseValuesByOauthHomeWorkContextDto valuesByOauthHomeWorkContext;
 
@@ -1517,9 +1530,9 @@ public class UserServiceImpl implements UserService {
 			} else {
 				if (null != userRequest.getUserRecord().getIDMS_Federated_ID__c() && !userRequest.getUserRecord()
 						.getIDMS_Federated_ID__c().startsWith(UserConstants.SOCIAL_LOGIN_PREFIX)) {
-					openAmReq.getInput().getUser().setUserPassword(generateRamdomPassWord());
+					openAmReq.getInput().getUser().setUserPassword(generateRandomPassWord());
 				} else if (null == userRequest.getUserRecord().getIDMS_Federated_ID__c()) {
-					openAmReq.getInput().getUser().setUserPassword(generateRamdomPassWord());
+					openAmReq.getInput().getUser().setUserPassword(generateRandomPassWord());
 				}
 			}
 
@@ -6214,7 +6227,7 @@ public class UserServiceImpl implements UserService {
 	 * 
 	 */
 
-	private String generateRamdomPassWord() {
+	private String generateRandomPassWord() {
 		LOGGER.info("Entered generateRamdomPassWord() -> Start");
 		String tmpPr = RandomStringUtils.random(10, UserConstants.RANDOM_PR_CHARS);
 		return tmpPr;
@@ -6445,7 +6458,7 @@ public class UserServiceImpl implements UserService {
 
 					tmpPR = productDocCtx.read("$.tmp_password[0]");
 					if (null == tmpPR || tmpPR.isEmpty()) {
-						tmpPR = generateRamdomPassWord();
+						tmpPR = generateRandomPassWord();
 					} else {
 						tmpPR = new String(Base64.decodeBase64(tmpPR));
 					}
@@ -12140,7 +12153,7 @@ public class UserServiceImpl implements UserService {
 			if(userInfo.getSnECS()!=null && !userInfo.getSnECS().isEmpty()) {
 				openAmReq.getInput().getUser().setSn(userInfo.getSnECS());
 			}
-			openAmReq.getInput().getUser().setUserPassword(generateRamdomPassWord());
+			openAmReq.getInput().getUser().setUserPassword(generateRandomPassWord());
 			openAmReq = prepareJsonForAbhagaUIMSUser(openAmReq);
 			String json = objMapper.writeValueAsString(openAmReq);
 			json = json.replace("\"\"", "[]");
@@ -13984,5 +13997,76 @@ public class UserServiceImpl implements UserService {
 			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
 		}
 	   return UserServiceUtil.createOpenamClient(productService, "se", UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, createClientRequest.getClientId(), requestJson);
+	}
+
+	@Override
+	public Response createAndUpdateApplication(String authorizedToken, AppOnboardingRequest appOnboardingRequest) {
+		if (StringUtils.isBlank(authorizedToken) || !getTechnicalUserDetails(authorizedToken)) {
+			ErrorResponse errorResponse = new ErrorResponse();
+			errorResponse.setStatus(HttpStatus.UNAUTHORIZED.toString());
+			errorResponse.setMessage("Unauthorized or session expired!!");
+			return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+		}
+		Response response = UserServiceUtil.validateOnboardingRequestAttributes(onboardingFieldsValidator, appOnboardingRequest);
+		if(response != null) {
+			return response;
+		}
+		OpenDJAppOnboardingAttributes appOnboardingDJAttributes = new OpenDJAppOnboardingAttributes();
+		UserServiceUtil.populateOpenDJAppOnboardingAttributes(appOnboardingRequest, appOnboardingDJAttributes);
+		
+		String requestJson = null;
+		try {
+			requestJson = new ObjectMapper().writeValueAsString(appOnboardingDJAttributes);
+			
+			Properties properties = onboardingConstantsPropLoader.getProperties();
+			for (String key: properties.stringPropertyNames()) {
+				ObjectMapper mapper = new ObjectMapper();
+				Map<String, String> map = (Map<String, String>) mapper.readValue(requestJson, Map.class);
+				map.put(key, properties.getProperty(key));
+				requestJson = mapper.writeValueAsString(map);
+//				LOGGER.info("Key: " + key + " Value: " + properties.getProperty(key));
+	        }
+		} catch (JsonProcessingException ex) {
+			ErrorResponse errorResponse = new ErrorResponse();
+			errorResponse = buildErrorMessage(appOnboardingRequest.getClientName(), ex, UserConstants.JSON_PROCESSING_ERROR);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		} catch (IOException ex) {
+			ErrorResponse errorResponse = new ErrorResponse();
+			errorResponse = buildErrorMessage(appOnboardingRequest.getClientName(), ex, UserConstants.JSON_PROCESSING_ERROR);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		}
+	    Response appResponse = openDJService.createAndUpdateApplication("application/json", "application/json", djUserName, djUserPwd, "create", requestJson);
+	    if(201 == appResponse.getStatus() || 200 == appResponse.getStatus()){
+	    	AppOnboardingResponse appOnboardingResponse = new AppOnboardingResponse();
+		    appOnboardingResponse.setClientName(appOnboardingRequest.getClientName());
+
+		    LOGGER.info("Oauth client creation call !!");
+	    	OAuth2ClientRequest createClientRequest = new OAuth2ClientRequest();
+	    	createClientRequest.setClientId(appOnboardingRequest.getClientName());
+	    	String pwd = generateRandomPassWord();
+			createClientRequest.setClientSecret(pwd);
+	    	createClientRequest.setConsentImplied(true);
+	    	createClientRequest.setOnboardingCall(true);
+	    	createClientRequest.setGrantTypes(appOnboardingRequest.getGrantTypes());
+	    	createClientRequest.setRedirectionUris(appOnboardingRequest.getRedirectionUris());
+	    	createClientRequest.setResponseTypes(appOnboardingRequest.getResponseTypes());
+	    	createClientRequest.setScopes(appOnboardingRequest.getScope());
+	    	createClientRequest.setTokenEndpointAuthMethod(appOnboardingRequest.getTokenEndpointAuthMethod());
+			Response createClientResponse = createOAuth2Client(authorizedToken, createClientRequest);
+			if(201 == createClientResponse.getStatus() || 200 == appResponse.getStatus()){
+				appOnboardingResponse.setClientId(appOnboardingRequest.getClientName());
+				appOnboardingResponse.setClientSecret(pwd);
+			}
+			int value = HttpStatus.CREATED.value();
+			if(200 == createClientResponse.getStatus()) {
+				value = HttpStatus.OK.value();
+			}
+			return Response.status(value).entity(appOnboardingResponse).build();
+	    } else {
+	    	ErrorResponse errorResponse = new ErrorResponse();
+	    	errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+			errorResponse.setMessage(UserConstants.APP_ONBOARDING_FAILED);
+			return Response.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).entity(errorResponse).build();
+	    }
 	}
 }

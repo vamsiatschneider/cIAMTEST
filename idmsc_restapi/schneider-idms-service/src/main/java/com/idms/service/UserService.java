@@ -23,6 +23,7 @@ import com.idms.model.AILRequest;
 import com.idms.model.ActivateUserRequest;
 import com.idms.model.AddEmailRequest;
 import com.idms.model.AddMobileRequest;
+import com.idms.model.AppOnboardingRequest;
 import com.idms.model.BulkAILRequest;
 import com.idms.model.CheckUserExistsRequest;
 import com.idms.model.CheckUserIdentityRequest;
@@ -361,4 +362,9 @@ public interface UserService {
 	@Path("/sscOnboarding/oauth2client")
 	@Consumes("application/json")
 	Response createOAuth2Client(@HeaderParam("Authorization") String token, @Valid OAuth2ClientRequest userRequest);
+
+	@PUT
+	@Path("/sscOnboarding/application")
+	@Consumes("application/json")
+	Response createAndUpdateApplication(@HeaderParam("Authorization") String token, @Valid AppOnboardingRequest userRequest);
 }

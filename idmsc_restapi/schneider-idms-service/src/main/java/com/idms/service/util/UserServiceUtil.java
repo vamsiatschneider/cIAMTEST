@@ -3,9 +3,9 @@ package com.idms.service.util;
 import static com.se.idms.util.UserConstants.ACCEPT_VERSION_GET_HEADER;
 import static com.se.idms.util.UserConstants.ACCEPT_VERSION_HEADER;
 import static com.se.idms.util.UserConstants.AUTH_VERSION_HEADER;
-import static com.se.idms.util.UserConstants.OAUTH_VERSION_CREATE_HEADER;
 import static com.se.idms.util.UserConstants.CONTENT_TYPE_APP_JSON;
 import static com.se.idms.util.UserConstants.FR6_5Version;
+import static com.se.idms.util.UserConstants.OAUTH_VERSION_CREATE_HEADER;
 import static com.se.idms.util.UserConstants.SESSION_LOGOUT_VERSION_HEADER;
 import static com.se.idms.util.UserConstants.TOKEN_STATUS_VERSION_HEADER;
 
@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 
+import com.idms.model.AppOnboardingRequest;
 import com.idms.model.IFWUser;
 import com.idms.model.OAuth2ClientRequest;
 import com.idms.model.SocialProfileActivationRequest;
@@ -28,7 +29,10 @@ import com.idms.product.model.AdvancedOAuth2ClientConfig;
 import com.idms.product.model.CoreOAuth2ClientConfig;
 import com.idms.product.model.OpenAMOAuth2Client;
 import com.idms.product.model.OpenAmUser;
+import com.idms.product.model.OpenDJAppOnboardingAttributes;
+import com.se.idms.cache.validate.IValidator;
 import com.se.idms.dto.ErrorResponse;
+import com.se.idms.util.AppOnboardingConstants;
 
 public class UserServiceUtil {
 
@@ -398,5 +402,181 @@ public class UserServiceUtil {
 		openamOAuth2Client.getAdvancedOAuth2ClientConfig().setConsentImplied(createClientRequest.isConsentImplied());
 		openamOAuth2Client.getAdvancedOAuth2ClientConfig().setResponseTypes(createClientRequest.getResponseTypes());
 		openamOAuth2Client.getAdvancedOAuth2ClientConfig().setTokenEndpointAuthMethod(createClientRequest.getTokenEndpointAuthMethod());
+	}
+	
+	public static Response validateOnboardingRequestAttributes(IValidator onboardingFieldsValidator, AppOnboardingRequest appOnboardingRequest) {
+		Response response  = null;
+		ErrorResponse errorResponse = new ErrorResponse();
+		if(StringUtils.isBlank(appOnboardingRequest.getClientName())) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("Client/Application Name attribute is mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		if(StringUtils.isBlank(appOnboardingRequest.getSeClientBackgroundImage())) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("Client Background Image attribute is mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		if(StringUtils.isBlank(appOnboardingRequest.getSeClientDescription())) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("Client Description attribute is mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		if(StringUtils.isBlank(appOnboardingRequest.getSeClientFooter())) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("Client Footer attribute is mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		if(StringUtils.isBlank(appOnboardingRequest.getLogoUri())) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("Logo URI attribute is mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		if(StringUtils.isBlank(appOnboardingRequest.getSeClientTabName())) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("SE Client Tab Name attribute is mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		if( null == appOnboardingRequest.getSeAilFeature() || appOnboardingRequest.getSeAilFeature().size() == 0 ) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("SE AIL Feature attribute is mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		if( StringUtils.isBlank(appOnboardingRequest.getFrontchannelLogoutUri())) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("SE Front Channel Logout URI attribute is mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		if( StringUtils.isBlank(appOnboardingRequest.getSeProfileUpgradeRedirectUri())) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("SE Profile Upgrade Redirect URI attribute is mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		if( StringUtils.isBlank(appOnboardingRequest.getSeProfileUpdateRedirectUri())) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("SE Profile Update Redirect URI attribute is mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		if( null == appOnboardingRequest.getApplicationType() || appOnboardingRequest.getApplicationType().size() == 0 ) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("Application Type attribute is mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+//		if( null == appOnboardingRequest.getContacts() || appOnboardingRequest.getContacts().size() == 0 ) {
+//			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+//			errorResponse.setMessage("Contacts attribute is mandatory!!");
+//			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+//		}
+		if( null == appOnboardingRequest.getSeClientContext() || appOnboardingRequest.getSeClientContext().size() == 0 ) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("SE Client Context attribute is mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		} else {
+			if( null == appOnboardingRequest.getSeRegistrationLevel() || appOnboardingRequest.getSeRegistrationLevel().size() == 0 ) {
+				errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+				errorResponse.setMessage("SE Registration level attribute is mandatory!!");
+				response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+			}
+		}
+		if( null == appOnboardingRequest.getSeSocialProviders() || appOnboardingRequest.getSeSocialProviders().size() == 0 ) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("SE Social Providers attribute is mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		if(response == null) {
+			response = validateOnboardingFieldsWithValidator(onboardingFieldsValidator, appOnboardingRequest, response);
+		}
+		return response;
+	}
+	
+	public static Response validateOnboardingFieldsWithValidator(IValidator onboardingFieldsValidator,
+			AppOnboardingRequest appOnboardingRequest, Response response) {
+		ErrorResponse errorResponse = new ErrorResponse();
+		for( String context : appOnboardingRequest.getSeClientContext()) {
+			if (!onboardingFieldsValidator.validate(AppOnboardingConstants.SE_CLIENT_CONTEXT, context)) {
+				errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+				errorResponse.setMessage("SE Client Context value is invalid!!");
+				response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+			}
+			if(response == null && "B2B".equalsIgnoreCase(context)) {
+				for( String regLevel : appOnboardingRequest.getSeRegistrationLevel()) {
+					if (!onboardingFieldsValidator.validate(AppOnboardingConstants.SE_REGISTRATION_LEVEL, regLevel)) {
+						errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+						errorResponse.setMessage("SE Registration Level value is invalid!!");
+						response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+					}
+				}
+			}
+		}
+		for( String socialProvider : appOnboardingRequest.getSeSocialProviders()) {
+			if (!onboardingFieldsValidator.validate(AppOnboardingConstants.SE_SOCIAL_PROVIDERS, socialProvider)) {
+				errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+				errorResponse.setMessage("SE Social Provider value is invalid!!");
+				response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+			}
+		}
+		for( String applnType : appOnboardingRequest.getApplicationType()) {
+			if (!onboardingFieldsValidator.validate(AppOnboardingConstants.APPLICATION_TYPE, applnType)) {
+				errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+				errorResponse.setMessage("Application Type value is invalid!!");
+				response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+			}
+			if (response == null && "native".equalsIgnoreCase(applnType)) {
+				if (null != appOnboardingRequest.getSeApiEnabled() && appOnboardingRequest.getSeApiEnabled().size() > 0) {
+					errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+					errorResponse.setMessage("SE API Enabled list should be empty for "+  applnType +"  application type!!");
+					response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+				}
+			}
+			if (response == null && !"native".equalsIgnoreCase(applnType)) {
+				if (null == appOnboardingRequest.getSeApiEnabled() || appOnboardingRequest.getSeApiEnabled().size() == 0) {
+					errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+					errorResponse.setMessage("SE API Enabled list cannot be empty for "+  applnType +" application type!!");
+					response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+				}
+			}
+		}
+		return response;
+	}
+	public static void populateOpenDJAppOnboardingAttributes(AppOnboardingRequest appOnboardingRequest,
+			OpenDJAppOnboardingAttributes appOnboardingDJAttributes) {
+
+		appOnboardingDJAttributes.setAppSource(appOnboardingRequest.getClientName());
+		appOnboardingDJAttributes.setAppName(appOnboardingRequest.getClientName());
+		appOnboardingDJAttributes.setAppNameEN(appOnboardingRequest.getSeClientTabName());
+		appOnboardingDJAttributes.setAppNameZH(appOnboardingRequest.getSeClientTabName());
+		appOnboardingDJAttributes.setAppBackgroundImage(appOnboardingRequest.getSeClientBackgroundImage());
+		appOnboardingDJAttributes.setAppDescriptionEN(appOnboardingRequest.getSeClientDescription());
+		appOnboardingDJAttributes.setAppDescriptionZH(appOnboardingRequest.getSeClientDescription());
+		appOnboardingDJAttributes.setAppFooter(appOnboardingRequest.getSeClientFooter());
+		appOnboardingDJAttributes.setAppLogo(appOnboardingRequest.getLogoUri());
+//		appOnboardingDJAttributes.setAILValidation(appOnboardingRequest.getSeAilFeature());
+		appOnboardingDJAttributes.setContext(appOnboardingRequest.getSeClientContext().get(0));
+		appOnboardingDJAttributes.setRegistrationLevel(appOnboardingRequest.getSeRegistrationLevel().get(0));
+		appOnboardingDJAttributes.setUrlForLogOff(appOnboardingRequest.getFrontchannelLogoutUri());
+		appOnboardingDJAttributes.setUrlForLogoffPC(appOnboardingRequest.getFrontchannelLogoutUri());
+		appOnboardingDJAttributes.setUrlRedirectAfterReg(appOnboardingRequest.getSeProfileUpgradeRedirectUri());
+		appOnboardingDJAttributes.setUrlRedirectAfterProfileUpdate(appOnboardingRequest.getSeProfileUpdateRedirectUri());
+		//ping, qq, weibo, linkedin, wechat, apple
+		for( String socialProvider : appOnboardingRequest.getSeSocialProviders()) {
+			if ("linkedin".equalsIgnoreCase(socialProvider)) {
+				appOnboardingDJAttributes.setLinkedinEnabled(true);
+			}
+			if ("apple".equalsIgnoreCase(socialProvider)) {
+				appOnboardingDJAttributes.setAppleEnabled(true);
+			}
+			if ("qq".equalsIgnoreCase(socialProvider)) {
+				appOnboardingDJAttributes.setQqEnabled(true);
+			}
+			if ("wechat".equalsIgnoreCase(socialProvider)) {
+				appOnboardingDJAttributes.setWeChatEnabled(true);
+			}
+			if ("weibo".equalsIgnoreCase(socialProvider)) {
+				appOnboardingDJAttributes.setWeiboEnabled(true);
+			}
+			if ("ping".equalsIgnoreCase(socialProvider)) {
+				appOnboardingDJAttributes.setPingEnabled(true);
+			}
+		}
 	}
 }
