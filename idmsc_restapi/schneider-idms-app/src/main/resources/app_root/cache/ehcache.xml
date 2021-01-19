@@ -331,6 +331,15 @@
              timeToLiveSeconds="18000"
              memoryStoreEvictionPolicy="LFU">
       </cache>
+      
+      <cache name="onboardingProperties"
+             maxElementsInMemory="20000"
+             maxElementsOnDisk="0"
+             eternal="false"
+             timeToIdleSeconds="0"
+             timeToLiveSeconds="18000"
+             memoryStoreEvictionPolicy="LFU">
+      </cache>
      <!-- <cache name="labelProperties" 
              maxElementsInMemory="20000" 
              maxElementsOnDisk="0" 

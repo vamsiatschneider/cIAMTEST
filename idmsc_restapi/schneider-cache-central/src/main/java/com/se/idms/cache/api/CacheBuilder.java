@@ -172,6 +172,9 @@ public class CacheBuilder implements CacheTypes {
 				createPropertiesCache("pickListProperties");
 			}
 			
+			if(propertiesFile.contains("ONBOARDING")){
+				createPropertiesCache("onboardingProperties");
+			}
 		}
 		//LOGGER.info("getPropertiesCache() -> End");
 		return new CacheAdapter(selfPopulatingPropertiesCache);

@@ -53,4 +53,9 @@ public interface OpenDjService {
 	@POST
 	@Path("/AILMaster")
 	Response createAILMasterEntry(@HeaderParam("Content-Type") String contentType, @HeaderParam("Accept") String acceptHeader, @HeaderParam("X-OpenIDM-Username") String userName,@HeaderParam("X-OpenIDM-Password") String password, @QueryParam("_action") String action, String ailEntryJson);
+
+	//SSC APIs
+	@POST
+	@Path("/applications")
+	Response createAndUpdateApplication(@HeaderParam("Content-Type") String contentType, @HeaderParam("Accept") String acceptHeader, @HeaderParam("X-OpenIDM-Username") String userName,@HeaderParam("X-OpenIDM-Password") String password, @QueryParam("_action") String action, String requestJson);
 }
