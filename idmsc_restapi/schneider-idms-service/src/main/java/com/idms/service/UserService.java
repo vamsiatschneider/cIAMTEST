@@ -367,4 +367,9 @@ public interface UserService {
 	@Path("/sscOnboarding/application")
 	@Consumes("application/json")
 	Response createAndUpdateApplication(@HeaderParam("Authorization") String token, @Valid AppOnboardingRequest userRequest);
+
+	@PUT
+	@Path("/sscOnboarding/technicaluser")
+	@Consumes("application/json")
+	Response createTechnicalUser(@HeaderParam("Authorization") String token, @Valid AppOnboardingRequest request);
 }

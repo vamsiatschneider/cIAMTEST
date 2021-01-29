@@ -134,6 +134,19 @@ public interface OpenAMService {
 	Response createOauthClient(@HeaderParam("Accept-API-Version") String acceptVersionHeader, @PathParam("realm") String realm,
 			@HeaderParam("Cookie") String iPlanetDirectoryKey,  @PathParam("clientId") String clientId, String requestJson);
 
+	/*API for updating users group memberships */
+	@POST
+	@Path("/realms/root/realms/{realm}/users/{userId}/groups")
+	@Consumes("application/json")
+	Response updateUserGroupMemberships(@HeaderParam("Accept-API-Version") String acceptVersionHeader, @PathParam("realm") String realm,
+			@HeaderParam("iPlanetDirectoryPro") String sessionToken,  @PathParam("userId") String userId, @QueryParam("_action") String action, String requestJson);
+
+	/*API for adding users to a group*/
+	@PUT
+	@Path("/realms/root/realms/{realm}/groups/{groupName}")
+	@Consumes("application/json")
+	Response addUserToGroup(@HeaderParam("Accept-API-Version") String acceptVersionHeader, @PathParam("realm") String realm,
+			@HeaderParam("iPlanetDirectoryPro") String sessionToken,  @PathParam("groupName") String groupName, String requestJson);
 	// SSC APIs end
 
 	@GET
