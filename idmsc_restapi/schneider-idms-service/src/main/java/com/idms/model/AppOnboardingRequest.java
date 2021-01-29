@@ -98,6 +98,9 @@ public class AppOnboardingRequest {
 	
 	@JsonProperty
 	private String seProfileUpgradeRedirectUri;
+
+	@JsonProperty
+	private boolean isOnboardingCall;
 	
 	public List<String> getRedirectionUris() {
 		return redirectionUris;
@@ -345,5 +348,13 @@ public class AppOnboardingRequest {
 
 	public void setSeProfileUpgradeRedirectUri(String seProfileUpgradeRedirectUri) {
 		this.seProfileUpgradeRedirectUri = seProfileUpgradeRedirectUri;
+	}
+
+	public boolean isOnboardingCall() {
+		return isOnboardingCall;
+	}
+
+	public void setOnboardingCall(boolean isOnboardingCall) {
+		this.isOnboardingCall = isOnboardingCall;
 	}
 }

@@ -428,6 +428,8 @@ public class UserServiceImpl implements UserService {
 
 	private static String userAction = "submitRequirements";
 
+	private static final String UPDATEMEMBERSHIPS = "updateMemberships";
+
 	private static String errorStatus = "Error";
 
 	private static String successStatus = "Success";
@@ -13618,7 +13620,7 @@ public class UserServiceImpl implements UserService {
 		LogMessageUtil.logErrorMessage(e, errorMsg, e.getMessage());
 		LogMessageUtil.logInfoMessage("Registration failed for user: ", fedId);
 		errorResponse.setStatus(errorStatus);
-		errorResponse.setMessage(UserConstants.ERROR_CREATE_USER);
+		errorResponse.setMessage(errorMsg);
 		return errorResponse;
 	}
 
@@ -14061,11 +14063,97 @@ public class UserServiceImpl implements UserService {
 				value = HttpStatus.OK.value();
 			}
 			return Response.status(value).entity(appOnboardingResponse).build();
-	    } else {
-	    	ErrorResponse errorResponse = new ErrorResponse();
-	    	errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+		} else {
+			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+			DocumentContext productDJData;
+			try {
+				productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) appResponse.getEntity()));
+				String message = productDJData.read("message");
+				LOGGER.info("Entity Message: " + message);
+			} catch (IOException ex) {
+				LOGGER.error("Exception: " + ex);
+			}
+			ErrorResponse errorResponse = new ErrorResponse();
+			errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.toString());
 			errorResponse.setMessage(UserConstants.APP_ONBOARDING_FAILED);
 			return Response.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).entity(errorResponse).build();
-	    }
+		}
+	}
+
+	@Override
+	public Response createTechnicalUser(String authorizedToken, AppOnboardingRequest request) {
+		ErrorResponse errorResponse = new ErrorResponse();
+		if (!request.isOnboardingCall() && (StringUtils.isBlank(authorizedToken) || !getTechnicalUserDetails(authorizedToken))) {
+			errorResponse.setStatus(HttpStatus.UNAUTHORIZED.toString());
+			errorResponse.setMessage("Unauthorized or session expired!!");
+			return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+		}
+		if (StringUtils.isBlank(request.getClientName())) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("App Name is mandatory!!");
+			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		String iPlanetDirectoryKey = null;
+		try {
+			iPlanetDirectoryKey = getSSOToken();
+		} catch (IOException ex) {
+			String errorMsg = "Unable to get SSO Token";
+			errorResponse = buildErrorMessage(request.getClientName(), ex, errorMsg);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		}
+        try {
+			ObjectMapper objMapper = new ObjectMapper();
+			String technicalUserPwd = RandomStringUtils.random(25, UserConstants.RANDOM_PR_CHARS);
+			StringBuilder sb = new StringBuilder(request.getClientName().toLowerCase());
+			sb.append("TechnicalUser");
+			String technicalUser = sb.toString();
+
+			String json = UserServiceUtil.populateOpenAMInput(request, technicalUserPwd, objMapper, technicalUser);
+			LOGGER.info("technical user creation:  Request -> " + ChinaIdmsUtil.printOpenAMInfo(json));
+			LOGGER.info("Start: technical user creation, userAction: " + userAction);
+
+			Response userResponse = UserServiceUtil.userRegistrationBasedOnFRVersion(productService, frVersion,
+					iPlanetDirectoryKey, userAction, json);
+			LOGGER.info("End: technical user creation, Status code: " + userResponse.getStatus());
+			if (userResponse.getStatus() == 200) {
+				LOGGER.info("Technical user created successfully in OpenAM!! ");
+
+				// Add the technical user to API Admin Group
+				String requestJson = "{\"groups\":[\"apiAdmins\"]}";
+				Response addUserResponse = UserServiceUtil.updateUserGroupMemberships(productService, frVersion, "se",
+						iPlanetDirectoryKey, technicalUser, UPDATEMEMBERSHIPS, requestJson);
+				boolean isUserAddedToGroup = false;
+				if (addUserResponse.getStatus() == 200) {
+					isUserAddedToGroup = true;
+					LOGGER.info("Technical user added to admin group successfully in OpenAM!! ");
+				}
+				// Update amlbcookie and 2FA attributes of the user
+				String updateJson = "{\"is2FAEnabled\": \"false\",\"isFirstTimeUser\": \"false\",\"amlbcookie\": \"technicaluser\"}";
+				LOGGER.info("Start: updateUser() to update technical user: " + technicalUser);
+				String updateResponse = UserServiceUtil.updateUserBasedOnFRVersion(productService, frVersion,
+						UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, technicalUser, updateJson);
+				LOGGER.info("End: updateUser() to update technical user: " + technicalUser);
+
+				if (isUserAddedToGroup && StringUtils.isNotBlank(updateResponse)) {
+					AppOnboardingResponse onboardingResponse = new AppOnboardingResponse();
+					onboardingResponse.setSeServiceAccountUsername(technicalUser);
+					onboardingResponse.setSeServiceAccountUserPassword(technicalUserPwd);
+					return Response.status(HttpStatus.OK.value()).entity(onboardingResponse).build();
+				}
+				errorResponse.setMessage("Exception while creating technical user!");
+				errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+				return Response.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).entity(errorResponse).build();
+
+			} else {
+				return userResponse;
+			}
+		} catch (JsonProcessingException ex) {
+			String errorMsg = "Exception while parsing json input!";
+			errorResponse = buildErrorMessage(request.getClientName(), ex, errorMsg);
+		} catch (Exception ex) {
+			String errorMsg = "Exception while creating technical user!";
+			errorResponse = buildErrorMessage(request.getClientName(), ex, errorMsg);
+		}
+		return Response.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).entity(errorResponse).build();
 	}
 }

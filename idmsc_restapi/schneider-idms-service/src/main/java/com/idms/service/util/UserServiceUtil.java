@@ -8,6 +8,7 @@ import static com.se.idms.util.UserConstants.FR6_5Version;
 import static com.se.idms.util.UserConstants.OAUTH_VERSION_CREATE_HEADER;
 import static com.se.idms.util.UserConstants.SESSION_LOGOUT_VERSION_HEADER;
 import static com.se.idms.util.UserConstants.TOKEN_STATUS_VERSION_HEADER;
+import static com.se.idms.util.UserConstants.ADDUSER_GROUP_VERSION_HEADER;
 
 import javax.ws.rs.core.Response;
 
@@ -16,6 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.idms.model.AppOnboardingRequest;
 import com.idms.model.IFWUser;
 import com.idms.model.OAuth2ClientRequest;
@@ -29,6 +32,8 @@ import com.idms.product.model.AdvancedOAuth2ClientConfig;
 import com.idms.product.model.CoreOAuth2ClientConfig;
 import com.idms.product.model.OpenAMOAuth2Client;
 import com.idms.product.model.OpenAmUser;
+import com.idms.product.model.OpenAmUserInput;
+import com.idms.product.model.OpenAmUserRequest;
 import com.idms.product.model.OpenDJAppOnboardingAttributes;
 import com.se.idms.cache.validate.IValidator;
 import com.se.idms.dto.ErrorResponse;
@@ -194,6 +199,11 @@ public class UserServiceUtil {
 		return productService.updateSocialProfile(ACCEPT_VERSION_HEADER, adminToken, fedId, requestJson);
 	}
 	
+	public static Response updateUserGroupMemberships(OpenAMService productService, String frVersion, String realm, String sessionToken,
+			String technicalUser, String action, String requestJson) {
+		LOGGER.info("Add User to Group version : " + frVersion);
+		return productService.updateUserGroupMemberships(ADDUSER_GROUP_VERSION_HEADER, realm, sessionToken, technicalUser, action, requestJson);
+	}
 	public static String getSessionsWithUserIdBasedOnFRVersion(OpenAMService productService, String adminToken, String query) {
 		LogMessageUtil.logInfoMessage("Get All Sessions based on userId Openam Call!");
 		return productService.getSessionsWithUserId(SESSION_LOGOUT_VERSION_HEADER, adminToken, query);
@@ -578,5 +588,22 @@ public class UserServiceUtil {
 				appOnboardingDJAttributes.setPingEnabled(true);
 			}
 		}
+	}
+
+	public static String populateOpenAMInput(AppOnboardingRequest request, String password, ObjectMapper objMapper, String technicalUser) throws JsonProcessingException {
+		OpenAmUserRequest userReq = new OpenAmUserRequest();
+		OpenAmUserInput openamInput = new OpenAmUserInput();
+		OpenAmUser openamUser = new OpenAmUser();
+		openamUser.setUsername(technicalUser);
+		openamUser.setUserPassword(password);
+		openamUser.setGivenName(request.getClientName());
+		openamUser.setSn("TechnicalUser");
+		openamUser.setIsActivated("true");
+		openamUser.setCn(request.getClientName().concat(" ").concat(openamUser.getSn()));
+		openamInput.setUser(openamUser);
+		userReq.setInput(openamInput);
+		String json = objMapper.writeValueAsString(userReq);
+		json = json.replace("\"\"", "[]");
+		return json;
 	}
 }

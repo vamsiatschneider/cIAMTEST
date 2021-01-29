@@ -139,6 +139,14 @@ public class AppOnboardingResponse {
 	@JsonInclude(Include.NON_NULL)
 	@JsonProperty
 	private String seProfileUpgradeRedirectUri;
+
+	@JsonInclude(Include.NON_NULL)
+	@JsonProperty
+	private String seServiceAccountUsername;
+
+	@JsonInclude(Include.NON_NULL)
+	@JsonProperty
+	private String seServiceAccountUserPassword;
 	
 	public List<String> getRedirectionUris() {
 		return redirectionUris;
@@ -402,5 +410,21 @@ public class AppOnboardingResponse {
 
 	public void setClientSecret(String clientSecret) {
 		this.clientSecret = clientSecret;
+	}
+
+	public String getSeServiceAccountUsername() {
+		return seServiceAccountUsername;
+	}
+
+	public void setSeServiceAccountUsername(String seServiceAccountUsername) {
+		this.seServiceAccountUsername = seServiceAccountUsername;
+	}
+
+	public String getSeServiceAccountUserPassword() {
+		return seServiceAccountUserPassword;
+	}
+
+	public void setSeServiceAccountUserPassword(String seServiceAccountUserPassword) {
+		this.seServiceAccountUserPassword = seServiceAccountUserPassword;
 	}
 }
