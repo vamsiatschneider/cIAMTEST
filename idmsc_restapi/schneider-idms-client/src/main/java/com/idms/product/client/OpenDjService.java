@@ -58,4 +58,9 @@ public interface OpenDjService {
 	@POST
 	@Path("/applications")
 	Response createAndUpdateApplication(@HeaderParam("Content-Type") String contentType, @HeaderParam("Accept") String acceptHeader, @HeaderParam("X-OpenIDM-Username") String userName,@HeaderParam("X-OpenIDM-Password") String password, @QueryParam("_action") String action, String requestJson);
+
+	// PATCH for updating user in opendj
+//	@PATCH
+//	@Path("/users/{userId}")
+	Response updateUser(@HeaderParam("Content-Type") String type, @HeaderParam("If-Match") String matchstr, @HeaderParam("X-OpenIDM-Username") String userName,@HeaderParam("X-OpenIDM-Password") String password, @PathParam("userId") String userId, String userJson);
 }

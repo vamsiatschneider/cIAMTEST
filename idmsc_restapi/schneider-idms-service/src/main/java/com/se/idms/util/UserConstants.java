@@ -648,6 +648,7 @@ public class UserConstants {
 	public static final String FR6_5Version ="6.5";
 	// Accept API Version Header for POST, PUT, DELETE
 	public static final String ACCEPT_VERSION_HEADER ="resource=1.0, protocol=1.0";
+	public static final String ADDUSER_GROUP_VERSION_HEADER = "protocol=2.1,resource=1.0";
 	// Accept API Version Header for GET, QUERY
 	public static final String ACCEPT_VERSION_GET_HEADER ="resource=3.0, protocol=1.0";
 	// Accept API Version Header for OpenAM Oauth2 Client APIs
