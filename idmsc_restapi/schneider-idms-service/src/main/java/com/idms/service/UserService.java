@@ -372,4 +372,9 @@ public interface UserService {
 	@Path("/sscOnboarding/technicaluser")
 	@Consumes("application/json")
 	Response createTechnicalUser(@HeaderParam("Authorization") String token, @Valid AppOnboardingRequest request);
+
+	@PUT
+	@Path("/sscOnboarding/updatePicklist")
+	@Consumes("application/json")
+	Response updatePicklistProperties(@HeaderParam("Authorization") String token, @Valid AppOnboardingRequest request);
 }
