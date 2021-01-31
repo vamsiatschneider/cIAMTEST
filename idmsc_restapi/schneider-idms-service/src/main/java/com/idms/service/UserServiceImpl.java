@@ -184,6 +184,7 @@ import com.schneider.idms.salesforce.service.SalesforceSyncServiceImpl;
 import com.schneider.ims.service.uimsv2.CompanyV3;
 import com.se.idms.cache.utils.EmailConstants;
 import com.se.idms.cache.validate.IValidator;
+import com.se.idms.cache.validate.PickListUpdate;
 import com.se.idms.cache.validate.PropertyLoader;
 import com.se.idms.dto.AILResponse;
 import com.se.idms.dto.ErrorResponse;
@@ -264,6 +265,10 @@ public class UserServiceImpl implements UserService {
 
 	@Inject
 	private IdmsMapper mapper;
+
+	@Inject
+	@Qualifier("pickListUpdateComponent")
+	private PickListUpdate pickListUpdater;
 
 	@Inject
 	@Qualifier("pickListValidator")
@@ -13915,7 +13920,36 @@ public class UserServiceImpl implements UserService {
 		}
 		return Response.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).entity(errorResponse).build();
 	}
-	
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Response updatePicklistProperties(String authorizedToken, AppOnboardingRequest request) {
+
+		ErrorResponse errorResponse = new ErrorResponse();
+		if (!request.isOnboardingCall()
+				&& (StringUtils.isBlank(authorizedToken) || !getTechnicalUserDetails(authorizedToken))) {
+			errorResponse.setStatus(HttpStatus.UNAUTHORIZED.toString());
+			errorResponse.setMessage("Unauthorized or session expired!!");
+			return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
+		}
+		if (StringUtils.isBlank(request.getClientName())) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("App Name is mandatory!!");
+			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		boolean isUpdated = pickListUpdater.update(UserConstants.UPDATE_SOURCE, request.getClientName());
+		if (isUpdated) {
+			JSONObject successObj = new JSONObject();
+			successObj.put(UserConstants.STATUS, successStatus);
+			successObj.put(UserConstants.MESSAGE, "Picklist value updated successfully!");
+			return Response.status(HttpStatus.OK.value()).entity(successObj).build();
+		} else {
+			errorResponse.setMessage("Error while updating picklist values !!");
+			errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+		}
+		return Response.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).entity(errorResponse).build();
+	}
+
 	public Response validateAdminToken(boolean adminAuthTokenFlagInProps, String adminAuthToken) {
 		JSONObject response = new JSONObject();
 		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
