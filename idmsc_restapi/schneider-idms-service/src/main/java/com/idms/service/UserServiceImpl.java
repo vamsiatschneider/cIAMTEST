@@ -1056,34 +1056,9 @@ public class UserServiceImpl implements UserService {
 					LOGGER.error("Error is :: Registration source is null or empty");
 					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
-				if (adminAuthTokenFlagInProps) {
-					if (null == adminAuthToken || adminAuthToken.isEmpty()) {
-						errorResponse.setStatus(errorStatus);
-						errorResponse.setMessage(UserConstants.ADMIN_TOKEN_MANDATORY);
-						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-						LOGGER.error("Error is " + errorResponse.getMessage());
-						LOGGER.info("Time taken by userRegistration() : " + elapsedTime);
-						return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-					} else if (null != adminAuthToken && !adminAuthToken.isEmpty()) {
-						String adminStatus = getAdminGroupDetails(adminAuthToken);
-						LOGGER.info("adminStatus = "+adminStatus);
-						if (adminStatus.equalsIgnoreCase(UserConstants.UNAUTHORIZED)) {
-							errorResponse.setStatus(errorStatus);
-							errorResponse.setMessage(UserConstants.ADMIN_UNAUTH);
-							elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-							LOGGER.error("Error is " + errorResponse.getMessage());
-							LOGGER.info("Time taken by userRegistration() : " + elapsedTime);
-							return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
-						}
-						if (!adminStatus.equalsIgnoreCase(UserConstants.ADMIN_ADMIN)) {
-							errorResponse.setStatus(errorStatus);
-							errorResponse.setMessage("AdminToken not having sufficient privilege");
-							elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-							LOGGER.error("Error is " + errorResponse.getMessage());
-							LOGGER.info("Time taken by userRegistration() : " + elapsedTime);
-							return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
-						}
-					}
+				Response validationResponse=validateAdminToken(adminAuthTokenFlagInProps, adminAuthToken);
+				if(validationResponse!=null) {
+					return validationResponse;
 				}
 				
 				if(maintenanceModeGlobal!=null) {
@@ -3600,31 +3575,9 @@ public class UserServiceImpl implements UserService {
 			adminAuthTokenFlagInProps = ((null != enableAdminAuthToken && !enableAdminAuthToken.isEmpty())?Boolean.valueOf(enableAdminAuthToken):false);
 			LOGGER.info("adminAuthTokenFlagInProps = "+adminAuthTokenFlagInProps);
 			
-			if (adminAuthTokenFlagInProps) {
-				if (null == adminAuthToken || adminAuthToken.isEmpty()) {
-					errorResponseAPI.put(UserConstants.MESSAGE_L, UserConstants.ADMIN_TOKEN_MANDATORY);
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.error("Error is " + errorResponse.getMessage());
-					LOGGER.info("Time taken by userPinConfirmation() : " + elapsedTime);
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseAPI).build();
-				} else if (null != adminAuthToken && !adminAuthToken.isEmpty()) {
-					String adminStatus = getAdminGroupDetails(adminAuthToken);
-					LOGGER.info("adminStatus = "+adminStatus);
-					if (adminStatus.equalsIgnoreCase(UserConstants.UNAUTHORIZED)) {
-						errorResponseAPI.put(UserConstants.MESSAGE_L, UserConstants.ADMIN_UNAUTH);
-						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-						LOGGER.error("Error is " + errorResponse.getMessage());
-						LOGGER.info("Time taken by userPinConfirmation() : " + elapsedTime);
-						return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseAPI).build();
-					}
-					if (!adminStatus.equalsIgnoreCase(UserConstants.ADMIN_ADMIN)) {
-						errorResponseAPI.put(UserConstants.MESSAGE_L, "AdminToken not having sufficient privilege");
-						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-						LOGGER.error("Error is " + errorResponse.getMessage());
-						LOGGER.info("Time taken by userPinConfirmation() : " + elapsedTime);
-						return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseAPI).build();
-					}
-				}
+			Response validationResponse=validateAdminToken(adminAuthTokenFlagInProps, adminAuthToken);
+			if(validationResponse!=null) {
+				return validationResponse;
 			}
 			
 
@@ -5328,34 +5281,9 @@ public class UserServiceImpl implements UserService {
 						? Boolean.valueOf(enableAdminAuthToken)
 						: false);
 				
-				if (adminAuthTokenFlagInProps) {
-					if (null == authorizedToken || authorizedToken.isEmpty()) {
-						errorResponse.setStatus(errorStatus);
-						errorResponse.setMessage(UserConstants.ADMIN_TOKEN_MANDATORY);
-						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-						LOGGER.error("Error is " + errorResponse.getMessage());
-						LOGGER.info("Time taken by updateUser() : " + elapsedTime);
-						return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-					} else if (null != authorizedToken && !authorizedToken.isEmpty()) {
-						String adminStatus = getAdminGroupDetails(authorizedToken);
-						LOGGER.info("adminStatus = "+adminStatus);
-						if (adminStatus.equalsIgnoreCase(UserConstants.UNAUTHORIZED)) {
-							errorResponse.setStatus(errorStatus);
-							errorResponse.setMessage(UserConstants.ADMIN_UNAUTH);
-							elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-							LOGGER.error("Error is " + errorResponse.getMessage());
-							LOGGER.info("Time taken by updateUser() : " + elapsedTime);
-							return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
-						}
-						if (!adminStatus.equalsIgnoreCase(UserConstants.ADMIN_ADMIN)) {
-							errorResponse.setStatus(errorStatus);
-							errorResponse.setMessage("AdminToken not having sufficient priviledge");
-							elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-							LOGGER.error("Error is " + errorResponse.getMessage());
-							LOGGER.info("Time taken by updateUser() : " + elapsedTime);
-							return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
-						}
-					}
+				Response validationResponse=validateAdminToken(adminAuthTokenFlagInProps, adminAuthToken);
+				if(validationResponse!=null) {
+					return validationResponse;
 				}
 				
 				try {
@@ -6378,32 +6306,9 @@ public class UserServiceImpl implements UserService {
 				iPlanetDirectoryKey = "";
 			}
 			
-			if (adminAuthTokenFlagInProps) {
-				if (null == adminAuthToken || adminAuthToken.isEmpty()) {
-					errorResponse.put(UserConstants.MESSAGE_L,UserConstants.ADMIN_TOKEN_MANDATORY);
-					LOGGER.error("Error in resendPIN is :: " + UserConstants.ADMIN_TOKEN_MANDATORY);
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.info("Time taken by resendPIN() : " + elapsedTime);
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-				} else if (null != adminAuthToken && !adminAuthToken.isEmpty()) {
-					String adminStatus = getAdminGroupDetails(adminAuthToken);
-					LOGGER.info("adminStatus = " + adminStatus);
-					if (adminStatus.equalsIgnoreCase(UserConstants.UNAUTHORIZED)) {
-						errorResponse.put(UserConstants.MESSAGE_L,UserConstants.ADMIN_UNAUTH);
-						LOGGER.error("Error in resendPIN is :: " + UserConstants.ADMIN_UNAUTH);
-						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-						LOGGER.info("Time taken by resendPIN() : " + elapsedTime);
-						return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
-					}
-					if (!(adminStatus.equalsIgnoreCase(UserConstants.ADMIN_VIEW)
-							|| adminStatus.equalsIgnoreCase(UserConstants.ADMIN_ADMIN))) {
-						errorResponse.put(UserConstants.MESSAGE_L,"AdminToken not having sufficient privilege");
-						LOGGER.error("Error in resendPIN is :: AdminToken not having sufficient privilege");
-						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-						LOGGER.info("Time taken by resendPIN() : " + elapsedTime);
-						return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
-					}
-				}
+			Response validationResponse=validateAdminToken(adminAuthTokenFlagInProps, adminAuthToken);
+			if(validationResponse!=null) {
+				return validationResponse;
 			}
 
 			if ((null == resendPinRequest.getIdmsUserId() || resendPinRequest.getIdmsUserId().isEmpty())
@@ -6581,34 +6486,9 @@ public class UserServiceImpl implements UserService {
 					: false);
 			LOGGER.info("adminAuthTokenFlagInProps = "+adminAuthTokenFlagInProps);
 			
-			if (adminAuthTokenFlagInProps) {
-				if (null == adminAuthToken || adminAuthToken.isEmpty()) {
-					errorResponse.setStatus(errorStatus);
-					errorResponse.setMessage(UserConstants.ADMIN_TOKEN_MANDATORY);
-					LOGGER.error("Error in updatePassword is :: " + UserConstants.ADMIN_TOKEN_MANDATORY);
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.info("Time taken by updatePassword() : " + elapsedTime);
-					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-				} else if (null != adminAuthToken && !adminAuthToken.isEmpty()) {
-					String adminStatus = getAdminGroupDetails(adminAuthToken);
-					LOGGER.info("adminStatus = " + adminStatus);
-					if (adminStatus.equalsIgnoreCase(UserConstants.UNAUTHORIZED)) {
-						errorResponse.setStatus(errorStatus);
-						errorResponse.setMessage(UserConstants.ADMIN_UNAUTH);
-						LOGGER.error("Error in updatePassword is :: " + UserConstants.ADMIN_UNAUTH);
-						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-						LOGGER.info("Time taken by updatePassword() : " + elapsedTime);
-						return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
-					}
-					if (!adminStatus.equalsIgnoreCase(UserConstants.ADMIN_ADMIN)) {
-						errorResponse.setStatus(errorStatus);
-						errorResponse.setMessage("AdminToken not having sufficient privilege");
-						LOGGER.error("Error in updatePassword is :: AdminToken not having sufficient privilege");
-						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-						LOGGER.info("Time taken by updatePassword() : " + elapsedTime);
-						return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
-					}
-				}
+			Response validationResponse=validateAdminToken(adminAuthTokenFlagInProps, adminAuthToken);
+			if(validationResponse!=null) {
+				return validationResponse;
 			}
 			
 			if ((null == updatePasswordRequest.getUIFlag()
@@ -6878,34 +6758,9 @@ public class UserServiceImpl implements UserService {
 					: false);
 			LOGGER.info("adminAuthTokenFlagInProps = "+adminAuthTokenFlagInProps);
 			
-			if (adminAuthTokenFlagInProps) {
-				if (null == adminAuthToken || adminAuthToken.isEmpty()) {
-					response.setStatus(errorStatus);
-					response.setMessage(UserConstants.ADMIN_TOKEN_MANDATORY);
-					LOGGER.error("Error in setPassword is :: " + UserConstants.ADMIN_TOKEN_MANDATORY);
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.info("Time taken by setPassword() : " + elapsedTime);
-					return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
-				} else if (null != adminAuthToken && !adminAuthToken.isEmpty()) {
-					String adminStatus = getAdminGroupDetails(adminAuthToken);
-					LOGGER.info("adminStatus = " + adminStatus);
-					if (adminStatus.equalsIgnoreCase(UserConstants.UNAUTHORIZED)) {
-						response.setStatus(errorStatus);
-						response.setMessage(UserConstants.ADMIN_UNAUTH);
-						LOGGER.error("Error in setPassword is :: " + UserConstants.ADMIN_UNAUTH);
-						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-						LOGGER.info("Time taken by setPassword() : " + elapsedTime);
-						return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
-					}
-					if (!adminStatus.equalsIgnoreCase(UserConstants.ADMIN_ADMIN)) {
-						response.setStatus(errorStatus);
-						response.setMessage("AdminToken not having sufficient privilege");
-						LOGGER.error("Error in setPassword is :: AdminToken not having sufficient privilege");
-						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-						LOGGER.info("Time taken by setPassword() : " + elapsedTime);
-						return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
-					}
-				}
+			Response validationResponse=validateAdminToken(adminAuthTokenFlagInProps, adminAuthToken);
+			if(validationResponse!=null) {
+				return validationResponse;
 			}
 			
 			if ((!UserConstants.UIMS.equalsIgnoreCase(setPasswordRequest.getIDMS_Profile_update_source()))
@@ -7924,38 +7779,15 @@ public class UserServiceImpl implements UserService {
 		boolean adminAuthTokenFlagInProps = false;
 		adminAuthTokenFlagInProps = ((null != enableAdminAuthToken && !enableAdminAuthToken.isEmpty())?Boolean.valueOf(enableAdminAuthToken):false);
 
-		if (adminAuthTokenFlagInProps) {
-			if (null == adminAuthToken || adminAuthToken.isEmpty()) {
-				errorResponse.put(UserConstants.MESSAGE_L, UserConstants.ADMIN_TOKEN_MANDATORY);
-				LOGGER.error("Error in getUserByFederationId is :: " + UserConstants.ADMIN_TOKEN_MANDATORY);
-				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.info("Time taken by getUserByFederationId() : " + elapsedTime);
-				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-			} else if (null != adminAuthToken && !adminAuthToken.isEmpty()) {
-				String adminStatus = getAdminGroupDetails(adminAuthToken);
-				LOGGER.info("adminStatus = " + adminStatus);
-				if (adminStatus.equalsIgnoreCase(UserConstants.UNAUTHORIZED)) {
-					errorResponse.put(UserConstants.MESSAGE_L, UserConstants.ADMIN_UNAUTH);
-					LOGGER.error("Error in getUserByFederationId is :: " + UserConstants.ADMIN_UNAUTH);
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.info("Time taken by getUserByFederationId() : " + elapsedTime);
-					return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
-				}
-				if (!(adminStatus.equalsIgnoreCase(UserConstants.ADMIN_VIEW)
-						|| adminStatus.equalsIgnoreCase(UserConstants.ADMIN_ADMIN))) {
-					errorResponse.put(UserConstants.MESSAGE_L, "AdminToken not having sufficient privilege");
-					LOGGER.error("Error in getUserByFederationId is :: AdminToken not having sufficient privilege");
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.info("Time taken by getUserByFederationId() : " + elapsedTime);
-					return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
-				}
-			}
-		} else {
+		Response validationResponse=validateAdminToken(adminAuthTokenFlagInProps, adminAuthToken);
+		if(validationResponse!=null) {
+			return validationResponse;
+		}
 			if (!getTechnicalUserDetails(authorizationToken)) {
 				errorResponse.put(UserConstants.MESSAGE, ErrorCodeConstants.BADREQUEST_MESSAGE);
 				return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 			}
-		}
+		
 		
 		String iPlanetDirectoryKey = null;
 		try {
@@ -8886,34 +8718,10 @@ public class UserServiceImpl implements UserService {
 				LOGGER.info("value of adminTokenFlag : " + adminAuthTokenFlagInProps);
 				LOGGER.info("value of WithGlobalUsers : " + request.getWithGlobalUsers());
 			}
-			
-			if (adminAuthTokenFlagInProps) {
-				if (null == adminAuthToken || adminAuthToken.isEmpty()) {
-					response.put(UserConstants.MESSAGE_L, UserConstants.ADMIN_TOKEN_MANDATORY);
-					LOGGER.error("Error in idmsCheckUserExists is :: " + UserConstants.ADMIN_TOKEN_MANDATORY);
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
-					return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
-				} else if (null != adminAuthToken && !adminAuthToken.isEmpty()) {
-					String adminStatus = getAdminGroupDetails(adminAuthToken);
-					LOGGER.info("adminStatus = " + adminStatus);
-					if (adminStatus.equalsIgnoreCase(UserConstants.UNAUTHORIZED)) {
-						response.put(UserConstants.MESSAGE_L, UserConstants.ADMIN_UNAUTH);
-						LOGGER.error("Error in idmsCheckUserExists is :: " + UserConstants.ADMIN_UNAUTH);
-						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-						LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
-						return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
-					}
-					if (!(adminStatus.equalsIgnoreCase(UserConstants.ADMIN_VIEW) || adminStatus.equalsIgnoreCase(UserConstants.ADMIN_ADMIN))) {
-						response.put(UserConstants.MESSAGE_L, "AdminToken not having sufficient privilege");
-						LOGGER.error("Error in idmsCheckUserExists is :: AdminToken not having sufficient privilege");
-						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-						LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
-						return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
-					}
-				}
+			Response validationResponse=validateAdminToken(adminAuthTokenFlagInProps, adminAuthToken);
+			if(validationResponse!=null) {
+				return validationResponse;
 			}
-			
 			if(null != request.getEmail() && !request.getEmail().isEmpty()){
 				varList.add("true");
 			}
@@ -10326,38 +10134,15 @@ public class UserServiceImpl implements UserService {
 				: false);
 		LOGGER.info("adminAuthTokenFlagInProps = "+adminAuthTokenFlagInProps);
 
-		if (adminAuthTokenFlagInProps) {
-			if (null == adminAuthToken || adminAuthToken.isEmpty()) {
-				errorResponse.put(UserConstants.MESSAGE_L, UserConstants.ADMIN_TOKEN_MANDATORY);
-				LOGGER.error("Error in getUser is :: " + UserConstants.ADMIN_TOKEN_MANDATORY);
-				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-				LOGGER.info("Time taken by getUser() : " + elapsedTime);
-				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-			} else if (null != adminAuthToken && !adminAuthToken.isEmpty()) {
-				String adminStatus = getAdminGroupDetails(adminAuthToken);
-				LOGGER.info("adminStatus = " + adminStatus);
-				if (adminStatus.equalsIgnoreCase(UserConstants.UNAUTHORIZED)) {
-					errorResponse.put(UserConstants.MESSAGE_L, UserConstants.ADMIN_UNAUTH);
-					LOGGER.error("Error in getUser is :: " + UserConstants.ADMIN_UNAUTH);
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.info("Time taken by getUser() : " + elapsedTime);
-					return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
-				}
-				if (!(adminStatus.equalsIgnoreCase(UserConstants.ADMIN_VIEW)
-						|| adminStatus.equalsIgnoreCase(UserConstants.ADMIN_ADMIN))) {
-					errorResponse.put(UserConstants.MESSAGE_L, "AdminToken not having sufficient privilege");
-					LOGGER.error("Error in getUser is :: AdminToken not having sufficient privilege");
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.info("Time taken by getUser() : " + elapsedTime);
-					return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
-				}
-			}
-		} else {
+		Response validationResponse=validateAdminToken(adminAuthTokenFlagInProps, adminAuthToken);
+		if(validationResponse!=null) {
+			return validationResponse;
+		}
 			if (!getTechnicalUserDetails(authorizationToken)) {
 				errorResponse.put(UserConstants.MESSAGE, "Unauthorized or session expired");
 				return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 			}
-		}
+		
 		response = getUser(userId);
 		return response;
 	}
@@ -11815,36 +11600,10 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 			
-			if (adminAuthTokenFlagInProps) {
-				if (null == adminAuthToken || adminAuthToken.isEmpty()) {
-					userResponse.setStatus(errorStatus);
-					userResponse.setMessage(UserConstants.ADMIN_TOKEN_MANDATORY);
-					LOGGER.error("Error in idmsCheckUserExists is :: " + UserConstants.ADMIN_TOKEN_MANDATORY);
-					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-					LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
-					return Response.status(Response.Status.BAD_REQUEST).entity(userResponse).build();
-				} else if (null != adminAuthToken && !adminAuthToken.isEmpty()) {
-					String adminStatus = getAdminGroupDetails(adminAuthToken);
-					LOGGER.info("adminStatus = " + adminStatus);
-					if (adminStatus.equalsIgnoreCase(UserConstants.UNAUTHORIZED)) {
-						userResponse.setStatus(errorStatus);
-						userResponse.setMessage(UserConstants.ADMIN_UNAUTH);
-						LOGGER.error("Error in idmsCheckUserExists is :: " + UserConstants.ADMIN_UNAUTH);
-						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-						LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
-						return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
-					}
-					if (!(adminStatus.equalsIgnoreCase(UserConstants.ADMIN_VIEW)
-							|| adminStatus.equalsIgnoreCase(UserConstants.ADMIN_ADMIN))) {
-						userResponse.setStatus(errorStatus);
-						userResponse.setMessage("AdminToken not having sufficient privilege");
-						LOGGER.error("Error in idmsCheckUserExists is :: AdminToken not having sufficient privilege");
-						elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
-						LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
-						return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
-					}
-				}
-			} else {
+			Response validationResponse=validateAdminToken(adminAuthTokenFlagInProps, adminAuthToken);
+			if(validationResponse!=null) {
+				return validationResponse;
+			}
 				if (!getTechnicalUserDetails(authorizationToken)) {
 					userResponse.setStatus(errorStatus);
 					userResponse.setMessage("Unauthorized or session expired");
@@ -11853,7 +11612,7 @@ public class UserServiceImpl implements UserService {
 					LOGGER.info("Time taken by getUserDetailByApplication() : " + elapsedTime);
 					return Response.status(Response.Status.UNAUTHORIZED).entity(userResponse).build();
 				}
-			}
+			
 			if (null != userDetailByApplicationRequest.getAppHash()
 					&& !userDetailByApplicationRequest.getAppHash().isEmpty()) {
 				String appHash = userDetailByApplicationRequest.getAppHash().trim();
@@ -14155,5 +13914,38 @@ public class UserServiceImpl implements UserService {
 			errorResponse = buildErrorMessage(request.getClientName(), ex, errorMsg);
 		}
 		return Response.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).entity(errorResponse).build();
+	}
+	
+	public Response validateAdminToken(boolean adminAuthTokenFlagInProps, String adminAuthToken) {
+		JSONObject response = new JSONObject();
+		long startTime = UserConstants.TIME_IN_MILLI_SECONDS;
+		long elapsedTime;
+		if ((adminAuthTokenFlagInProps) && (null == adminAuthToken || adminAuthToken.isEmpty())) {
+			response.put(UserConstants.MESSAGE_L, UserConstants.ADMIN_TOKEN_MANDATORY);
+			LOGGER.error("Error in idmsCheckUserExists is :: " + UserConstants.ADMIN_TOKEN_MANDATORY);
+			elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+			LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+		}
+		if (null != adminAuthToken && !adminAuthToken.isEmpty()) {
+			String adminStatus = getAdminGroupDetails(adminAuthToken);
+			LOGGER.info("adminStatus = " + adminStatus);
+			if (adminStatus.equalsIgnoreCase(UserConstants.UNAUTHORIZED)) {
+				response.put(UserConstants.MESSAGE_L, UserConstants.ADMIN_UNAUTH);
+				LOGGER.error("Error in idmsCheckUserExists is :: " + UserConstants.ADMIN_UNAUTH);
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+				return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
+			}
+			if (!(adminStatus.equalsIgnoreCase(UserConstants.ADMIN_VIEW)
+					|| adminStatus.equalsIgnoreCase(UserConstants.ADMIN_ADMIN))) {
+				response.put(UserConstants.MESSAGE_L, "AdminToken not having sufficient privilege");
+				LOGGER.error("Error in idmsCheckUserExists is :: AdminToken not having sufficient privilege");
+				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
+				LOGGER.info("Time taken by idmsCheckUserExists() : " + elapsedTime);
+				return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
+			}
+		}
+		return null;
 	}
 }
