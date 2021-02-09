@@ -1,34 +1,33 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
 		<groupId>com.schneider</groupId>
-		<artifactId>schneider-idms</artifactId>
+  		<artifactId>schneider-idms</artifactId>
 		<version>1.0</version>
 		<relativePath>../schneider-idms/pom.xml</relativePath>
-	</parent>
+ 	</parent>
 	<properties>
-		<maven.test.skip>true</maven.test.skip>
+    <maven.test.skip>true</maven.test.skip>
 	</properties>
-
-	<groupId>com.schneider.idms</groupId>
-	<artifactId>schneider-idms-cache-central</artifactId>
-	<!-- <version>${idms.version}</version> -->
-	<packaging>jar</packaging>
-	<!-- <name>cache-central</name> -->
-
-	<dependencies>
+  
+  <groupId>com.schneider.idms</groupId>
+  <artifactId>schneider-idms-cache-central</artifactId>
+  <!-- <version>${idms.version}</version> -->
+  <packaging>jar</packaging>
+  <!-- <name>cache-central</name> -->
+  
+ 	<dependencies>
 		<dependency>
 			<groupId>net.sf.ehcache</groupId>
 			<artifactId>ehcache</artifactId>
 			<version>2.10.4</version>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
+		   <dependency>
+		   	<groupId>org.apache.commons</groupId>
+		   	<artifactId>commons-lang3</artifactId>
 		</dependency>
-
+		
 		<!-- Spring framework -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -57,18 +56,18 @@
 			<artifactId>cxf-rt-rs-service-description</artifactId>
 			<version>${cxf.version}</version>
 		</dependency>
-
+		
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+		    <groupId>junit</groupId>
+		    <artifactId>junit</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
 		</dependency>
-
+		
 	</dependencies>
-
-
-
+	
+	
+			
 </project>
