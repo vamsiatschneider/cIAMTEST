@@ -147,6 +147,14 @@ public class AppOnboardingResponse {
 	@JsonInclude(Include.NON_NULL)
 	@JsonProperty
 	private String seServiceAccountUserPassword;
+
+	@JsonInclude(Include.NON_NULL)
+	@JsonProperty
+	private String seAilApplication;
+
+	@JsonInclude(Include.NON_NULL)
+	@JsonProperty
+	private String appHash;
 	
 	public List<String> getRedirectionUris() {
 		return redirectionUris;
@@ -395,7 +403,7 @@ public class AppOnboardingResponse {
 	public void setSeProfileUpgradeRedirectUri(String seProfileUpgradeRedirectUri) {
 		this.seProfileUpgradeRedirectUri = seProfileUpgradeRedirectUri;
 	}
-
+	@JsonProperty("client_id")
 	public String getClientId() {
 		return clientId;
 	}
@@ -403,7 +411,7 @@ public class AppOnboardingResponse {
 	public void setClientId(String clientId) {
 		this.clientId = clientId;
 	}
-
+	@JsonProperty("client_secret")
 	public String getClientSecret() {
 		return clientSecret;
 	}
@@ -411,7 +419,7 @@ public class AppOnboardingResponse {
 	public void setClientSecret(String clientSecret) {
 		this.clientSecret = clientSecret;
 	}
-
+	@JsonProperty("se_technical_user_username")
 	public String getSeServiceAccountUsername() {
 		return seServiceAccountUsername;
 	}
@@ -419,12 +427,29 @@ public class AppOnboardingResponse {
 	public void setSeServiceAccountUsername(String seServiceAccountUsername) {
 		this.seServiceAccountUsername = seServiceAccountUsername;
 	}
-
+	@JsonProperty("se_technical_user_password")
 	public String getSeServiceAccountUserPassword() {
 		return seServiceAccountUserPassword;
 	}
 
 	public void setSeServiceAccountUserPassword(String seServiceAccountUserPassword) {
 		this.seServiceAccountUserPassword = seServiceAccountUserPassword;
+	}
+
+	@JsonProperty("se_ail_application")
+	public String getSeAilApplication() {
+		return seAilApplication;
+	}
+
+	public void setSeAilApplication(String seAilApplication) {
+		this.seAilApplication = seAilApplication;
+	}
+	@JsonProperty("apphash")
+	public String getAppHash() {
+		return appHash;
+	}
+
+	public void setAppHash(String appHash) {
+		this.appHash = appHash;
 	}
 }

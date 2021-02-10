@@ -100,8 +100,24 @@ public class AppOnboardingRequest {
 	private String seProfileUpgradeRedirectUri;
 
 	@JsonProperty
+	private String clientId;
+
+	@JsonProperty
+	private String clientSecret;
+
+	@JsonProperty
+	private String seTechnicalUserName;
+
+	@JsonProperty
+	private String seTechnicalUserPassword;
+
+	@JsonProperty
+	private String seAilApplication;
+
+	@JsonProperty
 	private boolean isOnboardingCall;
 	
+	@JsonProperty("redirect_uris")
 	public List<String> getRedirectionUris() {
 		return redirectionUris;
 	}
@@ -110,6 +126,7 @@ public class AppOnboardingRequest {
 		this.redirectionUris = redirectionUris;
 	}
 
+	@JsonProperty("token_endpoint_auth_method")
 	public List<String> getTokenEndpointAuthMethod() {
 		return tokenEndpointAuthMethod;
 	}
@@ -118,6 +135,7 @@ public class AppOnboardingRequest {
 		this.tokenEndpointAuthMethod = tokenEndpointAuthMethod;
 	}
 
+	@JsonProperty("response_types")
 	public List<String> getResponseTypes() {
 		return responseTypes;
 	}
@@ -126,6 +144,7 @@ public class AppOnboardingRequest {
 		this.responseTypes = responseTypes;
 	}
 
+	@JsonProperty("grant_types")
 	public List<String> getGrantTypes() {
 		return grantTypes;
 	}
@@ -134,6 +153,7 @@ public class AppOnboardingRequest {
 		this.grantTypes = grantTypes;
 	}
 
+	@JsonProperty("client_name")
 	public String getClientName() {
 		return clientName;
 	}
@@ -142,6 +162,7 @@ public class AppOnboardingRequest {
 		this.clientName = clientName;
 	}
 
+	@JsonProperty("application_type")
 	public List<String> getApplicationType() {
 		return applicationType;
 	}
@@ -158,6 +179,7 @@ public class AppOnboardingRequest {
 		this.contacts = contacts;
 	}
 
+	@JsonProperty("logo_uri")
 	public String getLogoUri() {
 		return logoUri;
 	}
@@ -166,6 +188,7 @@ public class AppOnboardingRequest {
 		this.logoUri = logoUri;
 	}
 
+	@JsonProperty("client_uri")
 	public String getClientUri() {
 		return clientUri;
 	}
@@ -174,6 +197,7 @@ public class AppOnboardingRequest {
 		this.clientUri = clientUri;
 	}
 
+	@JsonProperty("policy_uri")
 	public String getPolicyUri() {
 		return policyUri;
 	}
@@ -182,6 +206,7 @@ public class AppOnboardingRequest {
 		this.policyUri = policyUri;
 	}
 
+	@JsonProperty("tos_uri")
 	public String getTosUri() {
 		return tosUri;
 	}
@@ -198,6 +223,7 @@ public class AppOnboardingRequest {
 		this.scope = scope;
 	}
 
+	@JsonProperty("frontchannel_logout_uri")
 	public String getFrontchannelLogoutUri() {
 		return frontchannelLogoutUri;
 	}
@@ -206,6 +232,7 @@ public class AppOnboardingRequest {
 		this.frontchannelLogoutUri = frontchannelLogoutUri;
 	}
 
+	@JsonProperty("post_logout_redirect_uris")
 	public List<String> getPostLogoutRedirectUris() {
 		return postLogoutRedirectUris;
 	}
@@ -214,6 +241,7 @@ public class AppOnboardingRequest {
 		this.postLogoutRedirectUris = postLogoutRedirectUris;
 	}
 
+	@JsonProperty("initiate_login_uri")
 	public String getInitiateLoginUri() {
 		return initiateLoginUri;
 	}
@@ -222,6 +250,7 @@ public class AppOnboardingRequest {
 		this.initiateLoginUri = initiateLoginUri;
 	}
 
+	@JsonProperty("se_client_context")
 	public List<String> getSeClientContext() {
 		return seClientContext;
 	}
@@ -230,6 +259,7 @@ public class AppOnboardingRequest {
 		this.seClientContext = seClientContext;
 	}
 
+	@JsonProperty("se_client_background_image")
 	public String getSeClientBackgroundImage() {
 		return seClientBackgroundImage;
 	}
@@ -238,6 +268,7 @@ public class AppOnboardingRequest {
 		this.seClientBackgroundImage = seClientBackgroundImage;
 	}
 
+	@JsonProperty("se_client_description")
 	public String getSeClientDescription() {
 		return seClientDescription;
 	}
@@ -246,6 +277,7 @@ public class AppOnboardingRequest {
 		this.seClientDescription = seClientDescription;
 	}
 
+	@JsonProperty("se_client_tab_name")
 	public String getSeClientTabName() {
 		return seClientTabName;
 	}
@@ -254,6 +286,7 @@ public class AppOnboardingRequest {
 		this.seClientTabName = seClientTabName;
 	}
 
+	@JsonProperty("se_client_footer")
 	public String getSeClientFooter() {
 		return seClientFooter;
 	}
@@ -262,6 +295,7 @@ public class AppOnboardingRequest {
 		this.seClientFooter = seClientFooter;
 	}
 
+	@JsonProperty("se_social_providers")
 	public List<String> getSeSocialProviders() {
 		return seSocialProviders;
 	}
@@ -270,6 +304,7 @@ public class AppOnboardingRequest {
 		this.seSocialProviders = seSocialProviders;
 	}
 
+	@JsonProperty("se_support_uri")
 	public String getSeSupportUri() {
 		return seSupportUri;
 	}
@@ -278,6 +313,7 @@ public class AppOnboardingRequest {
 		this.seSupportUri = seSupportUri;
 	}
 
+	@JsonProperty("se_registration_level")
 	public List<String> getSeRegistrationLevel() {
 		return seRegistrationLevel;
 	}
@@ -286,6 +322,7 @@ public class AppOnboardingRequest {
 		this.seRegistrationLevel = seRegistrationLevel;
 	}
 
+	@JsonProperty("se_registration_email_description")
 	public String getSeRegistrationEmailDescription() {
 		return seRegistrationEmailDescription;
 	}
@@ -294,6 +331,7 @@ public class AppOnboardingRequest {
 		this.seRegistrationEmailDescription = seRegistrationEmailDescription;
 	}
 
+	@JsonProperty("se_profile_update_redirect_uri")
 	public String getSeProfileUpdateRedirectUri() {
 		return seProfileUpdateRedirectUri;
 	}
@@ -302,6 +340,7 @@ public class AppOnboardingRequest {
 		this.seProfileUpdateRedirectUri = seProfileUpdateRedirectUri;
 	}
 
+	@JsonProperty("se_ail_feature")
 	public List<String> getSeAilFeature() {
 		return seAilFeature;
 	}
@@ -310,6 +349,7 @@ public class AppOnboardingRequest {
 		this.seAilFeature = seAilFeature;
 	}
 
+	@JsonProperty("se_ail_program")
 	public List<String> getSeAilProgram() {
 		return seAilProgram;
 	}
@@ -318,6 +358,7 @@ public class AppOnboardingRequest {
 		this.seAilProgram = seAilProgram;
 	}
 
+	@JsonProperty("se_api_enabled")
 	public List<String> getSeApiEnabled() {
 		return seApiEnabled;
 	}
@@ -326,6 +367,7 @@ public class AppOnboardingRequest {
 		this.seApiEnabled = seApiEnabled;
 	}
 
+	@JsonProperty("se_email_app_name")
 	public String getSeEmailAppName() {
 		return seEmailAppName;
 	}
@@ -334,6 +376,7 @@ public class AppOnboardingRequest {
 		this.seEmailAppName = seEmailAppName;
 	}
 
+	@JsonProperty("se_profile_upgrate_level")
 	public List<String> getSeProfileUpgradeLevel() {
 		return seProfileUpgradeLevel;
 	}
@@ -341,7 +384,8 @@ public class AppOnboardingRequest {
 	public void setSeProfileUpgradeLevel(List<String> seProfileUpgradeLevel) {
 		this.seProfileUpgradeLevel = seProfileUpgradeLevel;
 	}
-
+	
+	@JsonProperty("se_profile_upgrade_redirect_uri")
 	public String getSeProfileUpgradeRedirectUri() {
 		return seProfileUpgradeRedirectUri;
 	}
@@ -356,5 +400,50 @@ public class AppOnboardingRequest {
 
 	public void setOnboardingCall(boolean isOnboardingCall) {
 		this.isOnboardingCall = isOnboardingCall;
+	}
+
+	@JsonProperty("client_id")
+	public String getClientId() {
+		return clientId;
+	}
+
+	public void setClientId(String clientId) {
+		this.clientId = clientId;
+	}
+
+	@JsonProperty("client_secret")
+	public String getClientSecret() {
+		return clientSecret;
+	}
+
+	public void setClientSecret(String clientSecret) {
+		this.clientSecret = clientSecret;
+	}
+
+	@JsonProperty("se_technical_user_username")
+	public String getSeTechnicalUserName() {
+		return seTechnicalUserName;
+	}
+
+	public void setSeTechnicalUserName(String seTechnicalUserName) {
+		this.seTechnicalUserName = seTechnicalUserName;
+	}
+
+	@JsonProperty("se_technical_user_password")
+	public String getSeTechnicalUserPassword() {
+		return seTechnicalUserPassword;
+	}
+
+	public void setSeTechnicalUserPassword(String seTechnicalUserPassword) {
+		this.seTechnicalUserPassword = seTechnicalUserPassword;
+	}
+
+	@JsonProperty("se_ail_application")
+	public String getSeAilApplication() {
+		return seAilApplication;
+	}
+
+	public void setSeAilApplication(String seAilApplication) {
+		this.seAilApplication = seAilApplication;
 	}
 }

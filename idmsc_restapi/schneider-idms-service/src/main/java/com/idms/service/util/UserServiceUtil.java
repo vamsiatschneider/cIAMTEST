@@ -8,6 +8,13 @@ import static com.se.idms.util.UserConstants.FR6_5Version;
 import static com.se.idms.util.UserConstants.OAUTH_VERSION_CREATE_HEADER;
 import static com.se.idms.util.UserConstants.SESSION_LOGOUT_VERSION_HEADER;
 import static com.se.idms.util.UserConstants.TOKEN_STATUS_VERSION_HEADER;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static com.se.idms.util.UserConstants.ADDUSER_GROUP_VERSION_HEADER;
 
 import javax.ws.rs.core.Response;
@@ -38,6 +45,7 @@ import com.idms.product.model.OpenDJAppOnboardingAttributes;
 import com.se.idms.cache.validate.IValidator;
 import com.se.idms.dto.ErrorResponse;
 import com.se.idms.util.AppOnboardingConstants;
+import com.se.idms.util.UserConstants;
 
 public class UserServiceUtil {
 
@@ -324,8 +332,9 @@ public class UserServiceUtil {
 	    return mergeJson.toString();
 	}
 
-	public static Response validateClientRequestAttributes(OAuth2ClientRequest createClientRequest, ErrorResponse errorResponse) {
+	public static Response validateClientRequestAttributes(OAuth2ClientRequest createClientRequest) {
 		Response response  = null;
+		ErrorResponse errorResponse = new ErrorResponse();
 		if(StringUtils.isBlank(createClientRequest.getClientId())) {
 			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
 			errorResponse.setMessage("Client Id is mandatory!!");
@@ -395,6 +404,28 @@ public class UserServiceUtil {
 		}
 		return response;
 	}
+	public static Response validateTechnicalUserAttributes(AppOnboardingRequest request){
+		Response response  = null;
+		ErrorResponse errorResponse = new ErrorResponse();
+		if (StringUtils.isBlank(request.getSeTechnicalUserName())) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("Technical User Name is mandatory!!");
+			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		if (StringUtils.isBlank(request.getSeTechnicalUserPassword())) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("Technical User Password is mandatory!!");
+			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}else {
+			if(!checkPasswordPolicy(request.getSeTechnicalUserPassword(), request.getClientName(), "TechnicalUser", "", "")) {
+				errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+				errorResponse.setMessage("Technical User Password must match password policy!!");
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+			}
+		}
+		return response;
+    }
+
 	public static Response createOpenamClient(OpenAMService openamService, String realm, String adminToken, String clientId, String requestJson) {
 		LogMessageUtil.logInfoMessage("Create OAuth2 Client Openam Call!");
 		return openamService.createOauthClient(OAUTH_VERSION_CREATE_HEADER, realm, adminToken, clientId, requestJson);
@@ -422,11 +453,6 @@ public class UserServiceUtil {
 			errorResponse.setMessage("Client/Application Name attribute is mandatory!!");
 			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 		}
-		if(StringUtils.isBlank(appOnboardingRequest.getSeClientBackgroundImage())) {
-			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
-			errorResponse.setMessage("Client Background Image attribute is mandatory!!");
-			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-		}
 		if(StringUtils.isBlank(appOnboardingRequest.getSeClientDescription())) {
 			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
 			errorResponse.setMessage("Client Description attribute is mandatory!!");
@@ -437,66 +463,80 @@ public class UserServiceUtil {
 			errorResponse.setMessage("Client Footer attribute is mandatory!!");
 			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 		}
-		if(StringUtils.isBlank(appOnboardingRequest.getLogoUri())) {
-			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
-			errorResponse.setMessage("Logo URI attribute is mandatory!!");
-			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-		}
-		if(StringUtils.isBlank(appOnboardingRequest.getSeClientTabName())) {
-			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
-			errorResponse.setMessage("SE Client Tab Name attribute is mandatory!!");
-			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-		}
-		if( null == appOnboardingRequest.getSeAilFeature() || appOnboardingRequest.getSeAilFeature().size() == 0 ) {
-			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
-			errorResponse.setMessage("SE AIL Feature attribute is mandatory!!");
-			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-		}
-		if( StringUtils.isBlank(appOnboardingRequest.getFrontchannelLogoutUri())) {
-			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
-			errorResponse.setMessage("SE Front Channel Logout URI attribute is mandatory!!");
-			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-		}
-		if( StringUtils.isBlank(appOnboardingRequest.getSeProfileUpgradeRedirectUri())) {
-			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
-			errorResponse.setMessage("SE Profile Upgrade Redirect URI attribute is mandatory!!");
-			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-		}
-		if( StringUtils.isBlank(appOnboardingRequest.getSeProfileUpdateRedirectUri())) {
-			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
-			errorResponse.setMessage("SE Profile Update Redirect URI attribute is mandatory!!");
-			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-		}
 		if( null == appOnboardingRequest.getApplicationType() || appOnboardingRequest.getApplicationType().size() == 0 ) {
 			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
 			errorResponse.setMessage("Application Type attribute is mandatory!!");
 			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 		}
-//		if( null == appOnboardingRequest.getContacts() || appOnboardingRequest.getContacts().size() == 0 ) {
-//			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
-//			errorResponse.setMessage("Contacts attribute is mandatory!!");
-//			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
-//		}
-		if( null == appOnboardingRequest.getSeClientContext() || appOnboardingRequest.getSeClientContext().size() == 0 ) {
+		if(StringUtils.isBlank(appOnboardingRequest.getSeAilApplication())) {
+			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+			errorResponse.setMessage("AIL Application attribute is mandatory!!");
+			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		}
+		if (null == appOnboardingRequest.getSeClientContext()
+				|| appOnboardingRequest.getSeClientContext().size() == 0) {
 			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
 			errorResponse.setMessage("SE Client Context attribute is mandatory!!");
 			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 		} else {
-			if( null == appOnboardingRequest.getSeRegistrationLevel() || appOnboardingRequest.getSeRegistrationLevel().size() == 0 ) {
+			if ((appOnboardingRequest.getSeClientContext().contains("B2B")
+					|| appOnboardingRequest.getSeClientContext().contains("b2b"))
+					&& null == appOnboardingRequest.getSeRegistrationLevel()
+					|| appOnboardingRequest.getSeRegistrationLevel().size() == 0) {
 				errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
-				errorResponse.setMessage("SE Registration level attribute is mandatory!!");
+				errorResponse.setMessage("SE Registration level attribute is mandatory for B2B!!");
 				response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
-		}
-		if( null == appOnboardingRequest.getSeSocialProviders() || appOnboardingRequest.getSeSocialProviders().size() == 0 ) {
-			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
-			errorResponse.setMessage("SE Social Providers attribute is mandatory!!");
-			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 		}
 		if(response == null) {
 			response = validateOnboardingFieldsWithValidator(onboardingFieldsValidator, appOnboardingRequest, response);
 		}
 		return response;
+//		if(StringUtils.isBlank(appOnboardingRequest.getSeClientBackgroundImage())) {
+//			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+//			errorResponse.setMessage("Client Background Image attribute is mandatory!!");
+//			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+//		}
+//		if(StringUtils.isBlank(appOnboardingRequest.getLogoUri())) {
+//			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+//			errorResponse.setMessage("Logo URI attribute is mandatory!!");
+//			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+//		}
+//		if(StringUtils.isBlank(appOnboardingRequest.getSeClientTabName())) {
+//			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+//			errorResponse.setMessage("SE Client Tab Name attribute is mandatory!!");
+//			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+//		}
+//		if( null == appOnboardingRequest.getSeAilFeature() || appOnboardingRequest.getSeAilFeature().size() == 0 ) {
+//			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+//			errorResponse.setMessage("SE AIL Feature attribute is mandatory!!");
+//			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+//		}
+//		if( StringUtils.isBlank(appOnboardingRequest.getFrontchannelLogoutUri())) {
+//			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+//			errorResponse.setMessage("SE Front Channel Logout URI attribute is mandatory!!");
+//			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+//		}
+//		if( StringUtils.isBlank(appOnboardingRequest.getSeProfileUpgradeRedirectUri())) {
+//			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+//			errorResponse.setMessage("SE Profile Upgrade Redirect URI attribute is mandatory!!");
+//			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+//		}
+//		if( StringUtils.isBlank(appOnboardingRequest.getSeProfileUpdateRedirectUri())) {
+//			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+//			errorResponse.setMessage("SE Profile Update Redirect URI attribute is mandatory!!");
+//			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+//		}
+//		if( null == appOnboardingRequest.getContacts() || appOnboardingRequest.getContacts().size() == 0 ) {
+//			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+//			errorResponse.setMessage("Contacts attribute is mandatory!!");
+//			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+//		}
+//		if( null == appOnboardingRequest.getSeSocialProviders() || appOnboardingRequest.getSeSocialProviders().size() == 0 ) {
+//			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+//			errorResponse.setMessage("SE Social Providers attribute is mandatory!!");
+//			response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+//		}
 	}
 	
 	public static Response validateOnboardingFieldsWithValidator(IValidator onboardingFieldsValidator,
@@ -518,11 +558,14 @@ public class UserServiceUtil {
 				}
 			}
 		}
-		for( String socialProvider : appOnboardingRequest.getSeSocialProviders()) {
-			if (!onboardingFieldsValidator.validate(AppOnboardingConstants.SE_SOCIAL_PROVIDERS, socialProvider)) {
-				errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
-				errorResponse.setMessage("SE Social Provider value is invalid!!");
-				response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		if (null == appOnboardingRequest.getSeSocialProviders()
+				|| appOnboardingRequest.getSeSocialProviders().size() == 0) {
+			for (String socialProvider : appOnboardingRequest.getSeSocialProviders()) {
+				if (!onboardingFieldsValidator.validate(AppOnboardingConstants.SE_SOCIAL_PROVIDERS, socialProvider)) {
+					errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
+					errorResponse.setMessage("SE Social Provider value is invalid!!");
+					response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+				}
 			}
 		}
 		for( String applnType : appOnboardingRequest.getApplicationType()) {
@@ -605,5 +648,62 @@ public class UserServiceUtil {
 		String json = objMapper.writeValueAsString(userReq);
 		json = json.replace("\"\"", "[]");
 		return json;
+	}
+
+	public static OAuth2ClientRequest createClientRequest(AppOnboardingRequest appOnboardingRequest) {
+		OAuth2ClientRequest createClientRequest = new OAuth2ClientRequest();
+		createClientRequest.setClientId(appOnboardingRequest.getClientId());
+		createClientRequest.setClientSecret(appOnboardingRequest.getClientSecret());
+		createClientRequest.setConsentImplied(true);
+		createClientRequest.setOnboardingCall(true);
+		createClientRequest.setGrantTypes(appOnboardingRequest.getGrantTypes());
+		createClientRequest.setRedirectionUris(appOnboardingRequest.getRedirectionUris());
+		createClientRequest.setResponseTypes(appOnboardingRequest.getResponseTypes());
+		createClientRequest.setScopes(appOnboardingRequest.getScope());
+		createClientRequest.setTokenEndpointAuthMethod(appOnboardingRequest.getTokenEndpointAuthMethod());
+		return createClientRequest;
+	}
+	public static String generateAppHash(AppOnboardingRequest appOnboardingRequest) throws NoSuchAlgorithmException {
+		MessageDigest md = MessageDigest.getInstance("SHA-256");
+	    md.update(appOnboardingRequest.getClientName().getBytes());
+		String hashStr = Base64.getEncoder().encodeToString(md.digest());
+		Pattern nonAlphanumeric = Pattern.compile("[^a-zA-Z0-9]");
+		Matcher matcher = nonAlphanumeric.matcher(hashStr);
+		String strFinalHash = matcher.replaceAll("");
+		return strFinalHash;
+	}
+	private static boolean checkPasswordPolicy(String userPassword, String firstName, String lastName, String email, String mobile) {
+		LOGGER.info("Entered checkPasswordPolicy() -> Start");
+		LOGGER.info("Parameter firstName -> " + firstName + " , lastName -> " + lastName);
+		LOGGER.info("Parameter email -> " + email + " , mobile -> " + mobile);
+
+		boolean isPwdLengthInvalid = userPassword.length() < UserConstants.PASSWORD_LENGTH;
+		boolean containsFName = userPassword.contains(firstName);
+		boolean containsLName = userPassword.contains(lastName);
+		boolean containsEmailOrMobile = ChinaIdmsUtil.passwordCheck(userPassword,email,mobile);
+
+		boolean containsCheck = isPwdLengthInvalid || containsFName || containsLName || containsEmailOrMobile;
+		// fail password policy check if any of the contains check fails.
+		if(containsCheck) {
+			LOGGER.info("Contains check Failed!");
+			return false;
+		}
+		// Match all the regex with given password one by one
+		boolean minLengthCheck = Pattern.matches(UserConstants.MIN_LENGTH_REGEX, userPassword);
+		boolean wSpaceCheck = !Pattern.matches(UserConstants.WSPACE_REGEX, userPassword);
+		boolean upperCaseMatch = Pattern.matches(UserConstants.UPPER_CASE_REGEX, userPassword);
+		boolean lowerCaseMatch = Pattern.matches(UserConstants.LOWER_CASE_REGEX, userPassword);
+		boolean numberMatch = Pattern.matches(UserConstants.NUMBER_REGEX, userPassword);
+		boolean specialCharMatch = Pattern.matches(UserConstants.SPECIAL_CHARS_REGEX, userPassword);
+
+		//Check for all permutations and combinations of given password
+		boolean combination1 = upperCaseMatch && lowerCaseMatch && numberMatch;
+		boolean combination2 = upperCaseMatch && lowerCaseMatch && specialCharMatch;
+		boolean combination3 = lowerCaseMatch && numberMatch && specialCharMatch;
+		boolean combination4 = upperCaseMatch && numberMatch && specialCharMatch;
+
+		boolean isPwdPolicyCompliant = minLengthCheck && wSpaceCheck && (combination1 || combination2 || combination3 || combination4);
+		LOGGER.info("isPwdPolicyCompliant: " + isPwdPolicyCompliant);
+		return isPwdPolicyCompliant;
 	}
 }
