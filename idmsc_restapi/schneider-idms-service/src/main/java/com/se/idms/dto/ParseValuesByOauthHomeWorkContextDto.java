@@ -200,8 +200,8 @@ public class ParseValuesByOauthHomeWorkContextDto {
 		userResponse.getCustomAttributes().setUserContext(null != userProductDocCtx.read(JsonConstants.EMPLOYEE_TYPE)
 				? getValue(userProductDocCtx.read(JsonConstants.EMPLOYEE_TYPE).toString()) : getDelimeter());
 
-		userResponse.getCustomAttributes().setZipCode(null != userProductDocCtx.read("$.postOfficeBox")
-				? getValue(userProductDocCtx.read("$.postOfficeBox").toString()) : getDelimeter());
+		userResponse.getCustomAttributes().setZipCode(null != userProductDocCtx.read("$.postalCode")
+				? getValue(userProductDocCtx.read("$.postalCode").toString()) : getDelimeter());
 		userResponse.getCustomAttributes().setTrustedAdmin(null != userProductDocCtx.read("$.trustedAdmin")
 				? getValue(userProductDocCtx.read("$.trustedAdmin").toString()) : getDelimeter());
 
@@ -220,6 +220,8 @@ public class ParseValuesByOauthHomeWorkContextDto {
 				? getValue(userProductDocCtx.read("$.mobile_reg").toString()) : getDelimeter());
 		userResponse.getCustomAttributes().setLoginid(null != userProductDocCtx.read("$.Loginid")
 				? getValue(userProductDocCtx.read("$.Loginid").toString()) : getDelimeter());
+		userResponse.getCustomAttributes().setpOBox(null != userProductDocCtx.read("$.postOfficeBox")
+				? getValue(userProductDocCtx.read("$.postOfficeBox").toString()) : getDelimeter());
 		if(null == userResponse.getCustomAttributes().getLoginid() || userResponse.getCustomAttributes().getLoginid().isEmpty()){
 			userResponse.getCustomAttributes().setLoginid(null != userProductDocCtx.read("$.loginid")
 					? getValue(userProductDocCtx.read("$.loginid").toString()) : getDelimeter());
@@ -310,8 +312,8 @@ public class ParseValuesByOauthHomeWorkContextDto {
 				? getValue(userProductDocCtx.read(JsonConstants.EMPLOYEE_TYPE).toString()) : getDelimeter());
 		userResponse.getCustomAttributes().setUserId(null != userProductDocCtx.read("$.uid")
 				? getValue(userProductDocCtx.read("$.uid").toString()) : getDelimeter());
-		userResponse.getCustomAttributes().setZipCode(null != userProductDocCtx.read("$.postOfficeBox")
-				? getValue(userProductDocCtx.read("$.postOfficeBox").toString()) : getDelimeter());
+		userResponse.getCustomAttributes().setZipCode(null != userProductDocCtx.read("$.postalCode")
+				? getValue(userProductDocCtx.read("$.postalCode").toString()) : getDelimeter());
 
 		userResponse.getCustomAttributes().setTrustedAdmin(null != userProductDocCtx.read("$.trustedAdmin")
 				? getValue(userProductDocCtx.read("$.trustedAdmin").toString()) : getDelimeter());
