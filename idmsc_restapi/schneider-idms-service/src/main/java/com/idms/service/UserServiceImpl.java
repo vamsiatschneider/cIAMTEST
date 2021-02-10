@@ -13987,11 +13987,18 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Response registerLogicalGroupUser(String token, String bfoAuthorization, LogicalGroupUserRequest request) {
+	public Response registerLogicalGroupUser(String authorizationToken, String bfoAuthorization, LogicalGroupUserRequest request) {
 		LOGGER.info("Entered registerLogicalGroupUser() Start");
 		LOGGER.info("LogicalGroupUserRequest :: " + request);
-		LogicalGroupUserResponse response;
+		LogicalGroupUserResponse response=new LogicalGroupUserResponse();
 		try {
+			
+		if (!getTechnicalUserDetails(authorizationToken)) {
+			response.setUserMessage("Unauthorized or session expired");
+			response.setDeveloperMessage("Invalid Authorization Token");
+			return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
+		}
+			
 		response=validateLogicalGroupRequest(request);
 		if(response!=null) {
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
@@ -14055,7 +14062,7 @@ public class UserServiceImpl implements UserService {
 		}
 		
 		}catch(Exception e) {
-			response= new LogicalGroupUserResponse();
+			
 			LOGGER.error("Error in processing request:: "+e.getMessage());
 			response.setUserMessage("An Exception has Occurred. Please Contact Support");
 			response.setCode("LG008");
