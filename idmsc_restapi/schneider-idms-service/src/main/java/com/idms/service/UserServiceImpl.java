@@ -116,6 +116,8 @@ import com.idms.model.GetUserByApplicationResponse;
 import com.idms.model.GetUserRecordResponse;
 import com.idms.model.IDMSUserResponse;
 import com.idms.model.IFWUser;
+import com.idms.model.LogicalGroupUserRequest;
+import com.idms.model.LogicalGroupUserResponse;
 import com.idms.model.MFAEnableResponse;
 import com.idms.model.MFARequest;
 import com.idms.model.MFAUpdate;
@@ -13981,6 +13983,161 @@ public class UserServiceImpl implements UserService {
 				return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
 			}
 		}
+		return null;
+	}
+
+	@Override
+	public Response registerLogicalGroupUser(String authorizationToken, String bfoAuthorization, LogicalGroupUserRequest request) {
+		LOGGER.info("Entered registerLogicalGroupUser() Start");
+		LOGGER.info("LogicalGroupUserRequest :: " + request);
+		LogicalGroupUserResponse response=new LogicalGroupUserResponse();
+		try {
+			
+		if (!getTechnicalUserDetails(authorizationToken)) {
+			response.setUserMessage("Unauthorized or session expired");
+			response.setDeveloperMessage("Invalid Authorization Token");
+			return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
+		}
+			
+		response=validateLogicalGroupRequest(request);
+		if(response!=null) {
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+		}
+		JSONObject jsonObject = new JSONObject();
+		String mail=request.getEmail();
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		String iPlanetDirectoryKey = "";
+		
+		try {
+			iPlanetDirectoryKey = getSSOToken();
+		} catch (IOException ioExp) {
+			LOGGER.error("Unable to get SSO Token" + ioExp.getMessage(),ioExp);
+		}
+
+		LOGGER.info("Start: checkUserExistsWithEmail() for user:" + mail);
+		String userExists = UserServiceUtil.checkUserExistsBasedOnFRVersion(productService, frVersion,
+				UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey,
+				"mail eq " + "\"" + URLEncoder.encode(URLDecoder.decode(mail.trim(), "UTF-8"), "UTF-8") + "\"");
+		LOGGER.info("End: checkUserExistsWithEmail() for user:" + mail);
+		DocumentContext productDocCtx = JsonPath.using(conf).parse(userExists);
+		String fedid = productDocCtx.read(JsonConstants.RESULT);
+		LOGGER.info("Federation_id ::" + fedid);
+		if(fedid!=null) {
+			jsonObject.put("federatedId",fedid);
+			return Response.status(HttpStatus.OK.value()).entity(jsonObject).build();
+		}
+		OpenAmUserRequest userReq = new OpenAmUserRequest();
+		OpenAmUserInput openamInput = new OpenAmUserInput();
+		ObjectMapper objMapper = new ObjectMapper();
+		OpenAmUser openamUser = new OpenAmUser();
+		fedid=ChinaIdmsUtil.generateFedId();
+		openamUser.setUsername(fedid);
+		openamUser.setFederationID(fedid);
+		openamUser.setGivenName(request.getFirstName());
+		openamUser.setCn(request.getFirstName()+" "+request.getLastName());
+		openamUser.setSn(request.getLastName());
+		openamUser.setMail(request.getEmail());
+		openamUser.setRegisterationSource(request.getAppName());
+		openamUser.setIdmsuid(fedid);
+		openamUser.setUserPassword(generateRandomPassWord());
+		openamUser.setIsActivated("false");
+		if(request.getCountry()!=null && !request.getCountry().isEmpty()) {
+			openamUser.setCounty(request.getCountry());
+		}
+		if(request.getLanguage()!=null && !request.getLanguage().isEmpty()) {
+			openamUser.setPreferredlanguage(request.getLanguage());
+		}
+		openamInput.setUser(openamUser);
+		userReq.setInput(openamInput);
+		String json = objMapper.writeValueAsString(userReq);
+		json = json.replace("\"\"", "[]");
+		LOGGER.info("Logical Group Create UserRequest ::" + ChinaIdmsUtil.printOpenAMInfo(json));
+		
+		Response userCreation = UserServiceUtil.userRegistrationBasedOnFRVersion(productService, frVersion, iPlanetDirectoryKey, userAction, json);
+		LOGGER.info("End: userRegistration() of OpenAMService finished with status code: "
+				+ userCreation.getStatus());
+		if(userCreation.getStatus() == 200) {
+			jsonObject.put("federatedId",fedid);
+			return Response.status(HttpStatus.OK.value()).entity(jsonObject).build();
+		}
+		
+		}catch(Exception e) {
+			
+			LOGGER.error("Error in processing request:: "+e.getMessage());
+			response.setUserMessage("An Exception has Occurred. Please Contact Support");
+			response.setCode("LG008");
+			response.setDeveloperMessage("Internal Server Error");
+			return Response.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).entity(response).build();
+		}
+		response.setUserMessage("An Exception has Occurred. Please Contact Support");
+		response.setCode("LG008");
+		response.setDeveloperMessage("Internal Server Error");
+		return Response.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).entity(response).build();
+	}
+	
+	private LogicalGroupUserResponse validateLogicalGroupRequest(LogicalGroupUserRequest request) {
+		LogicalGroupUserResponse response=new LogicalGroupUserResponse(); 
+		
+		if(request.getEmail()==null || request.getEmail().isEmpty()) {
+			response.setUserMessage(UserConstants.MISSING_MANDATORY_FIELD);
+			response.setCode("LG001");
+			response.setDeveloperMessage("Email is required");
+			LOGGER.info("Email is required");
+			return response;
+		}
+		else if(!emailValidator.validate(request.getEmail())) {
+			response.setUserMessage("Invalid Email");
+			response.setCode("LG005");
+			response.setDeveloperMessage("Email address has invalid format");
+			LOGGER.info("Email address has invalid format");
+			return response;
+		}
+		else if(request.getFirstName()==null || request.getFirstName().isEmpty()) {
+			response.setUserMessage(UserConstants.MISSING_MANDATORY_FIELD);
+			response.setCode("LG002");
+			response.setDeveloperMessage("FirstName is required");
+			LOGGER.info("FirstName is required");
+			return response;
+		}
+		else if(request.getLastName()==null || request.getLastName().isEmpty()) {
+			response.setUserMessage(UserConstants.MISSING_MANDATORY_FIELD);
+			response.setCode("LG003");
+			response.setDeveloperMessage("LastName is required");
+			LOGGER.info("LastName is required");
+			return response;
+		}
+		
+		else if(request.getAppName()==null || request.getAppName().isEmpty()) {
+			response.setUserMessage(UserConstants.MISSING_MANDATORY_FIELD);
+			response.setCode("LG004");
+			response.setDeveloperMessage("appName is required");
+			LOGGER.info("appName is required");
+			return response;
+		}
+		
+		else if(request.getAppName()!=null || !request.getAppName().isEmpty()) {
+			Response applicationDetails = openDJService.getUser(djUserName, djUserPwd, request.getAppName());
+			if (applicationDetails!=null && applicationDetails.getStatus()!=200)
+			{
+				response.setUserMessage("Invalid appName");
+				response.setCode("LG007");
+				response.setDeveloperMessage("appName does not exist");
+				LOGGER.info("appName does not exist");
+				return response;
+			}
+		else {
+			boolean fnameValidation=Pattern.matches(UserConstants.SPECIAL_CHARS_REGEX, request.getFirstName());
+			boolean lnameValidation=Pattern.matches(UserConstants.SPECIAL_CHARS_REGEX, request.getLastName());
+			if(fnameValidation || lnameValidation ) {
+				response.setUserMessage("Invalid firstName/lastName");
+				response.setCode("LG006");
+				response.setDeveloperMessage("FirstName/LastName has special characters");
+				LOGGER.info("FirstName/LastName has special characters");
+				return response;
+			}
+			}
+		}
+		
 		return null;
 	}
 }

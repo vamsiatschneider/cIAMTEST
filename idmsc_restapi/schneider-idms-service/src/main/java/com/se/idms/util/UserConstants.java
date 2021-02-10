@@ -686,5 +686,6 @@ public class UserConstants {
 	public static final String MANDATORY_USERID ="LoginId is missing";
 
 	public static final String APP_ONBOARDING_FAILED = "Error while onboarding the application";
+	public static final String MISSING_MANDATORY_FIELD="Missing mandatory fields";
 
 }

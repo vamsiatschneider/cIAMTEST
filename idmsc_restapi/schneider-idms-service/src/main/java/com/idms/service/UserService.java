@@ -30,6 +30,7 @@ import com.idms.model.CheckUserIdentityRequest;
 import com.idms.model.ConfirmPinRequest;
 import com.idms.model.CreateUserRequest;
 import com.idms.model.DeviceProfileRequest;
+import com.idms.model.LogicalGroupUserRequest;
 import com.idms.model.MFARequest;
 import com.idms.model.OAuth2ClientRequest;
 import com.idms.model.PasswordRecoveryRequest;
@@ -377,4 +378,10 @@ public interface UserService {
 	@Path("/sscOnboarding/updatePicklist")
 	@Consumes("application/json")
 	Response updatePicklistProperties(@HeaderParam("Authorization") String token, @Valid AppOnboardingRequest request);
+	
+//	Logical Group API to create User 	
+	@POST
+	@Path("/apexrest/logicalgroupcreation")
+	@Consumes("application/json")
+	Response registerLogicalGroupUser(@HeaderParam("Authorization") String token, @HeaderParam("X-BFO-Authorization") String bfoAuthorization, @Valid LogicalGroupUserRequest request);
 }
