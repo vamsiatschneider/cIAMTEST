@@ -9751,12 +9751,15 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("End: SecuredLogin checkUserExistsWithEmailMobile() of openam finished for loginId=" + userName);
 			productDocCtx = JsonPath.using(conf).parse(userExists);
 			uid = productDocCtx.read("$.result[0].uid[0]");
+			String loginIdentifier = null;
 			if(StringUtils.isNotBlank(uid)) {
-				userName = uid;
+				loginIdentifier = uid;
+			} else {
+				loginIdentifier = userName;
 			}
 
 			LOGGER.info("Start: SecuredLogin authenticate User of OPENAMService for username=" + userName);
-			Response authenticateResponse = ChinaIdmsUtil.executeHttpClient(frVersion, prefixStartUrl, realm, userName, password);
+			Response authenticateResponse = ChinaIdmsUtil.executeHttpClient(frVersion, prefixStartUrl, realm, loginIdentifier, password);
 			LOGGER.info("End: SecuredLogin authenticate User of OPENAMService for username=" + userName);
 			successResponse = (String) authenticateResponse.getEntity();
 			LOGGER.info("SecuredLogin Response code from OPENAMService: " + authenticateResponse.getStatus());
@@ -13742,7 +13745,7 @@ public class UserServiceImpl implements UserService {
 			errorResponse.setMessage("Unauthorized or session expired!!");
 			return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 		}
-		Response response = UserServiceUtil.validateClientRequestAttributes(createClientRequest, errorResponse);
+		Response response = UserServiceUtil.validateClientRequestAttributes(createClientRequest);
 		if(response != null) {
 			return response;
 		}
@@ -13766,6 +13769,7 @@ public class UserServiceImpl implements UserService {
 	   return UserServiceUtil.createOpenamClient(productService, "se", UserConstants.CHINA_IDMS_TOKEN + iPlanetDirectoryKey, createClientRequest.getClientId(), requestJson);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Response createAndUpdateApplication(String authorizedToken, AppOnboardingRequest appOnboardingRequest) {
 		if (StringUtils.isBlank(authorizedToken) || !getTechnicalUserDetails(authorizedToken)) {
@@ -13774,25 +13778,39 @@ public class UserServiceImpl implements UserService {
 			errorResponse.setMessage("Unauthorized or session expired!!");
 			return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 		}
+        //validate all the required inputs
 		Response response = UserServiceUtil.validateOnboardingRequestAttributes(onboardingFieldsValidator, appOnboardingRequest);
+		if(response != null) {
+			return response;
+		}
+		OAuth2ClientRequest createClientRequest = UserServiceUtil.createClientRequest(appOnboardingRequest);
+		response = UserServiceUtil.validateClientRequestAttributes(createClientRequest);
+		if(response != null) {
+			return response;
+		}
+		response = UserServiceUtil.validateTechnicalUserAttributes(appOnboardingRequest);
 		if(response != null) {
 			return response;
 		}
 		OpenDJAppOnboardingAttributes appOnboardingDJAttributes = new OpenDJAppOnboardingAttributes();
 		UserServiceUtil.populateOpenDJAppOnboardingAttributes(appOnboardingRequest, appOnboardingDJAttributes);
-		
 		String requestJson = null;
+		String appHash = null;
+		AppOnboardingResponse appOnboardingResponse = new AppOnboardingResponse();
 		try {
-			requestJson = new ObjectMapper().writeValueAsString(appOnboardingDJAttributes);
-			
+			ObjectMapper mapper = new ObjectMapper();
+			requestJson = mapper.writeValueAsString(appOnboardingDJAttributes);
 			Properties properties = onboardingConstantsPropLoader.getProperties();
+			Map<String, String> map = (Map<String, String>) mapper.readValue(requestJson, Map.class);
 			for (String key: properties.stringPropertyNames()) {
-				ObjectMapper mapper = new ObjectMapper();
-				Map<String, String> map = (Map<String, String>) mapper.readValue(requestJson, Map.class);
 				map.put(key, properties.getProperty(key));
-				requestJson = mapper.writeValueAsString(map);
 //				LOGGER.info("Key: " + key + " Value: " + properties.getProperty(key));
 	        }
+			appHash = UserServiceUtil.generateAppHash(appOnboardingRequest);
+			map.put("_ApplicationHash", appHash);
+			requestJson = mapper.writeValueAsString(map);
+			appOnboardingResponse.setSeAilApplication(appOnboardingRequest.getSeAilApplication());
+			appOnboardingResponse.setAppHash(appHash);
 		} catch (JsonProcessingException ex) {
 			ErrorResponse errorResponse = new ErrorResponse();
 			errorResponse = buildErrorMessage(appOnboardingRequest.getClientName(), ex, UserConstants.JSON_PROCESSING_ERROR);
@@ -13801,37 +13819,44 @@ public class UserServiceImpl implements UserService {
 			ErrorResponse errorResponse = new ErrorResponse();
 			errorResponse = buildErrorMessage(appOnboardingRequest.getClientName(), ex, UserConstants.JSON_PROCESSING_ERROR);
 			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
+		} catch (NoSuchAlgorithmException ex) {
+			ErrorResponse errorResponse = new ErrorResponse();
+			errorResponse = buildErrorMessage(appOnboardingRequest.getClientName(), ex, UserConstants.NO_SUCH_ALGO_ERROR);
+			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
 		}
+		Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
+		DocumentContext productDJData = null;
 	    Response appResponse = openDJService.createAndUpdateApplication("application/json", "application/json", djUserName, djUserPwd, "create", requestJson);
-	    if(201 == appResponse.getStatus() || 200 == appResponse.getStatus()){
-	    	AppOnboardingResponse appOnboardingResponse = new AppOnboardingResponse();
-		    appOnboardingResponse.setClientName(appOnboardingRequest.getClientName());
-
+	    if(HttpStatus.CREATED.value() == appResponse.getStatus()){
+//		    appOnboardingResponse.setClientName(appOnboardingRequest.getClientName());
 		    LOGGER.info("Oauth client creation call !!");
-	    	OAuth2ClientRequest createClientRequest = new OAuth2ClientRequest();
-	    	createClientRequest.setClientId(appOnboardingRequest.getClientName());
-	    	String pwd = generateRandomPassWord();
-			createClientRequest.setClientSecret(pwd);
-	    	createClientRequest.setConsentImplied(true);
-	    	createClientRequest.setOnboardingCall(true);
-	    	createClientRequest.setGrantTypes(appOnboardingRequest.getGrantTypes());
-	    	createClientRequest.setRedirectionUris(appOnboardingRequest.getRedirectionUris());
-	    	createClientRequest.setResponseTypes(appOnboardingRequest.getResponseTypes());
-	    	createClientRequest.setScopes(appOnboardingRequest.getScope());
-	    	createClientRequest.setTokenEndpointAuthMethod(appOnboardingRequest.getTokenEndpointAuthMethod());
 			Response createClientResponse = createOAuth2Client(authorizedToken, createClientRequest);
-			if(201 == createClientResponse.getStatus() || 200 == appResponse.getStatus()){
-				appOnboardingResponse.setClientId(appOnboardingRequest.getClientName());
-				appOnboardingResponse.setClientSecret(pwd);
+			if(201 == createClientResponse.getStatus() || 200 == createClientResponse.getStatus()){
+				appOnboardingResponse.setClientId(appOnboardingRequest.getClientId());
+				appOnboardingResponse.setClientSecret(appOnboardingRequest.getClientSecret());
+			}
+			LOGGER.info("Technical User creation call !!");
+			Response createTUResponse = createTechnicalUser(authorizedToken, appOnboardingRequest);
+			if(200 == createTUResponse.getStatus()){
+				AppOnboardingResponse aoResponse = (AppOnboardingResponse) createTUResponse.getEntity();
+				appOnboardingResponse.setSeServiceAccountUsername(aoResponse.getSeServiceAccountUsername());
+				appOnboardingResponse.setSeServiceAccountUserPassword(aoResponse.getSeServiceAccountUserPassword());
+			}
+			Response updateResponse = updatePicklistProperties(authorizedToken, appOnboardingRequest);
+			if(200 == updateResponse.getStatus()){
+				LOGGER.info("Picklist update for " + appOnboardingRequest.getClientName() + " application is successful!!");
 			}
 			int value = HttpStatus.CREATED.value();
-			if(200 == createClientResponse.getStatus()) {
+			if(200 == appResponse.getStatus()) {
 				value = HttpStatus.OK.value();
 			}
 			return Response.status(value).entity(appOnboardingResponse).build();
+		} else if(HttpStatus.PRECONDITION_FAILED.value() == appResponse.getStatus()) {
+			JSONObject errorObj = new JSONObject();
+			errorObj.put(UserConstants.STATUS, errorStatus);
+			errorObj.put(UserConstants.MESSAGE, "Application already exists!!");
+			return Response.status(HttpStatus.CONFLICT.value()).entity(errorObj).build();
 		} else {
-			Configuration conf = Configuration.builder().options(Option.SUPPRESS_EXCEPTIONS).build();
-			DocumentContext productDJData;
 			try {
 				productDJData = JsonPath.using(conf).parse(IOUtils.toString((InputStream) appResponse.getEntity()));
 				String message = productDJData.read("message");
@@ -13854,10 +13879,9 @@ public class UserServiceImpl implements UserService {
 			errorResponse.setMessage("Unauthorized or session expired!!");
 			return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponse).build();
 		}
-		if (StringUtils.isBlank(request.getClientName())) {
-			errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());
-			errorResponse.setMessage("App Name is mandatory!!");
-			return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+		Response response = UserServiceUtil.validateTechnicalUserAttributes(request);
+		if(response != null) {
+			return response;
 		}
 		String iPlanetDirectoryKey = null;
 		try {
@@ -13868,12 +13892,13 @@ public class UserServiceImpl implements UserService {
 			return Response.status(HttpStatus.BAD_REQUEST.value()).entity(errorResponse).build();
 		}
         try {
+//			String technicalUserPwd = RandomStringUtils.random(25, UserConstants.RANDOM_PR_CHARS);
+//			StringBuilder sb = new StringBuilder(request.getClientName().toLowerCase());
+//			sb.append("TechnicalUser");
+//			String technicalUser = sb.toString();
 			ObjectMapper objMapper = new ObjectMapper();
-			String technicalUserPwd = RandomStringUtils.random(25, UserConstants.RANDOM_PR_CHARS);
-			StringBuilder sb = new StringBuilder(request.getClientName().toLowerCase());
-			sb.append("TechnicalUser");
-			String technicalUser = sb.toString();
-
+			String technicalUser = request.getSeTechnicalUserName();
+			String technicalUserPwd = request.getSeTechnicalUserPassword();
 			String json = UserServiceUtil.populateOpenAMInput(request, technicalUserPwd, objMapper, technicalUser);
 			LOGGER.info("technical user creation:  Request -> " + ChinaIdmsUtil.printOpenAMInfo(json));
 			LOGGER.info("Start: technical user creation, userAction: " + userAction);
