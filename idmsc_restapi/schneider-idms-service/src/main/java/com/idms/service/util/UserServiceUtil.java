@@ -558,8 +558,8 @@ public class UserServiceUtil {
 				}
 			}
 		}
-		if (null == appOnboardingRequest.getSeSocialProviders()
-				|| appOnboardingRequest.getSeSocialProviders().size() == 0) {
+		if (null != appOnboardingRequest.getSeSocialProviders()
+				|| appOnboardingRequest.getSeSocialProviders().size() != 0) {
 			for (String socialProvider : appOnboardingRequest.getSeSocialProviders()) {
 				if (!onboardingFieldsValidator.validate(AppOnboardingConstants.SE_SOCIAL_PROVIDERS, socialProvider)) {
 					errorResponse.setStatus(HttpStatus.BAD_REQUEST.toString());

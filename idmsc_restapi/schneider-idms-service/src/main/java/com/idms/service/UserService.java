@@ -15,6 +15,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -313,7 +314,7 @@ public interface UserService {
 	
 	@POST
 	@Path("/apexrest/securedLoginNext")
-	Response securedLoginNext(UserMFADataRequest userMFADataRequest);
+	Response securedLoginNext(@HeaderParam("Cookie") NewCookie cookie, UserMFADataRequest userMFADataRequest);
 	
 	@POST
 	@Path("/apexrest/fileSyncToUIMS")
