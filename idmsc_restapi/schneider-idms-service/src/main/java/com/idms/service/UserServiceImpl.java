@@ -9921,7 +9921,7 @@ public class UserServiceImpl implements UserService {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public Response securedLoginNext(NewCookie cookie, UserMFADataRequest userMFADataRequest) {
+	public Response securedLoginNext(UserMFADataRequest userMFADataRequest) {
 		LOGGER.info("Entered securedLoginNext() -> Start");
 		LOGGER.info("Parameter loginUser -> " + userMFADataRequest.getLoginUser());
 		LOGGER.info("Parameter appName -> " + userMFADataRequest.getAppName());
@@ -9939,8 +9939,13 @@ public class UserServiceImpl implements UserService {
 		String fileNameOTP = "DeviceOTPInformation.txt";
 		String fileNameResendOTP = "ResendOTPInformation.txt";
 		String stageData = null;
+		NewCookie cookie = null;
 
 		try {
+			if(userMFADataRequest.getCookie() != null) {
+				cookie = userMFADataRequest.getCookie();
+				LOGGER.info("Cookie in securedLoginNext set to: " +cookie);
+			}
 			if (null == userMFADataRequest.getAuthId() || userMFADataRequest.getAuthId().isEmpty()) {
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
 				errorResponse.setMessage(UserConstants.AUTHID_EMPTY);
@@ -10010,7 +10015,6 @@ public class UserServiceImpl implements UserService {
 				stageData = ChinaIdmsUtil.removeEscapeCharacter(userMFADataRequest.getStageData());
 				LOGGER.info("without escaped stageData = "+ stageData);
 			}
-			
 			LOGGER.info("Start: checkDeviceInfo of OPENAMService for username="+userMFADataRequest.getLoginUser());
 			Response authenticateResponse = ChinaIdmsUtil.executeHttpDeviceClient(frVersion, prefixStartUrl, "se", userMFADataRequest.getAuthId(),
 					ChinaIdmsUtil.removeEscapeCharacter(userMFADataRequest.getStageData()), fileName, cookie);
