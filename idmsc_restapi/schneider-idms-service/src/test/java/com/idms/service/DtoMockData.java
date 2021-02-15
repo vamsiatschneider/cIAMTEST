@@ -14,6 +14,7 @@ import com.idms.model.SendInvitationRequest;
 import com.idms.model.UpdatePasswordRequest;
 import com.idms.model.UpdateUserRequest;
 import com.idms.model.UserAILRecord;
+import com.idms.model.UserMFADataRequest;
 import com.idms.product.model.OpenAmUser;
 import com.idms.product.model.OpenAmUserInput;
 import com.idms.product.model.OpenAmUserRequest;
@@ -284,4 +285,5 @@ public final class DtoMockData {
         return request;
     }
 	
+  
 }

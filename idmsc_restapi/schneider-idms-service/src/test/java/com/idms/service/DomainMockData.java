@@ -131,9 +131,12 @@ public final class DomainMockData {
 
 	public static final String IDMSCOMPANYCOUNTY__C = "IDMSCOMPANYCOUNTY__C";
 	
+	public static final String MFA_AUTHENTICATION_JSON = "{\"authId\":\"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJvdGsiOiJtdDdqbzh0dXM3b3BlOGhoY3JkZDdsODQzIiwicmVhbG0iOi\",\"stage\":\"DeviceIdMatch2\"}";
 	
 	public static final String APP_DETAIL = "{\"_id\":\"AutomationHome\",\"_isOTPEnabled\":\"false\",\"status\":{\"success\":true},\"additions\":{}}";
-			
+	
+	public static final String AUTHENTICATE_JSON = "{\"tokenId\":\"AQIC5wM2LY4SfcysPQTDKWWZ0R9pEMb68DRr1cZASWa3VmA.*AAJTSQACMDEAAlNLABQtNTc0NjUwNzAxODcxMTc0OTkzMgACUzEAAA..*\",\"successUrl\":\"/accessmanager/console\",\"is2FAEnabled\":\"false\"}";
+	
 	public static final String AUTHENTICATION_JSON = "{\"tokenId\":\"AQIC5wM2LY4SfcysPQTDKWWZ0R9pEMb68DRr1cZASWa3VmA.*AAJTSQACMDEAAlNLABQtNTc0NjUwNzAxODcxMTc0OTkzMgACUzEAAA..*\",\"successUrl\":\"/accessmanager/console\"}";
 	
 	public static final String USER_EXISTS = "{\"result\":[],\"resultCount\":0,\"pagedResultsCookie\":null,\"totalPagedResultsPolicy\":\"NONE\",\"totalPagedResults\":-1,\"remainingPagedResults\":-1}";
