@@ -9881,6 +9881,7 @@ public class UserServiceImpl implements UserService {
 				JSONObject response = new JSONObject();
 				response.put("authID", authIdSecuredLogin);
 				response.put("stage", stage);
+				response.put("Cookie", amlbNewCookie.toString());
 				/* Set counter to 0 */				
 				LOGGER.info("securedLogin :: Update counter to ZERO");
 				jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
@@ -10038,6 +10039,7 @@ public class UserServiceImpl implements UserService {
 				response.put("authID", authIdSecuredLogin);
 				response.put("stage", stage);
 				response.put("header", header);
+				response.put("Cookie", cookie.toString());
 				LOGGER.info("securedLoginNext() -> Ending");
 				return Response.status(Response.Status.OK.getStatusCode()).cookie(cookie).entity(response).build();
 			}
