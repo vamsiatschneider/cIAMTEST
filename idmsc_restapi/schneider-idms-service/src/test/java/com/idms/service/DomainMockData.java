@@ -131,7 +131,7 @@ public final class DomainMockData {
 
 	public static final String IDMSCOMPANYCOUNTY__C = "IDMSCOMPANYCOUNTY__C";
 	
-	public static final String MFA_AUTHENTICATION_JSON = "{\"authId\":\"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJvdGsiOiJtdDdqbzh0dXM3b3BlOGhoY3JkZDdsODQzIiwicmVhbG0iOi\",\"stage\":\"DeviceIdMatch2\"}";
+	public static final String MFA_AUTHENTICATION_JSON = "{\"authId\":\"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJvdGsiOiJtdDdqbzh0dXM3b3BlOGhoY3JkZDdsODQzIiwicmVhbG0iOi\",\"stage\":\"DeviceIdMatch2\",\"Cookie\":\"amlbcookie=01;Domain=identity-int.schneider-electric.com;Path=/;Version=1\"}";
 	
 	public static final String APP_DETAIL = "{\"_id\":\"AutomationHome\",\"_isOTPEnabled\":\"false\",\"status\":{\"success\":true},\"additions\":{}}";
 	

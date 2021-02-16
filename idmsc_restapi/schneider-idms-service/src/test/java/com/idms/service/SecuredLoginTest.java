@@ -7,11 +7,13 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CookieStore;
 import org.json.simple.JSONObject;
 //import org.powermock.core.classloader.annotations.PrepareForTest;  
 //import org.powermock.modules.junit4.PowerMockRunner;  
@@ -23,7 +25,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.cache.ehcache.EhCacheCache;
 import org.springframework.http.HttpStatus;
-
+import javax.ws.rs.core.Cookie;
 import com.idms.model.UserMFADataRequest;
 import com.idms.product.client.OpenAMService;
 import com.idms.product.client.OpenAMTokenService;
@@ -74,7 +76,7 @@ public class SecuredLoginTest {
 	public void securedLoginNextTestWhenAuthIDIsNull() {
 		UserMFADataRequest userMfaDataReq=new UserMFADataRequest();
 		userMfaDataReq.setAuthId("");
-		Response response = userService.securedLoginNext(amlbNewCookie,userMfaDataReq);
+		Response response = userService.securedLoginNext(userMfaDataReq);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		ErrorResponse actualResponse = (ErrorResponse) response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
@@ -86,7 +88,7 @@ public class SecuredLoginTest {
 		UserMFADataRequest userMfaDataReq=new UserMFADataRequest();
 		userMfaDataReq.setAuthId("efjjitaaqwaeretfyguuiuiikktt");
 		userMfaDataReq.setStageName("");
-		Response response = userService.securedLoginNext(amlbNewCookie,userMfaDataReq);
+		Response response = userService.securedLoginNext(userMfaDataReq);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		ErrorResponse actualResponse = (ErrorResponse) response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
@@ -98,7 +100,7 @@ public class SecuredLoginTest {
 		userMfaDataReq.setAuthId("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.caaDzs8OeN68_sZhFxMX_4MJsbqUyxQcvOLuUF1n3aE");
 		userMfaDataReq.setStageName("deviceStage");
 		userMfaDataReq.setStageData("DeviceIdMatch");
-		Response response = userService.securedLoginNext(amlbNewCookie,userMfaDataReq);
+		Response response = userService.securedLoginNext(userMfaDataReq);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		ErrorResponse actualResponse = (ErrorResponse) response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
@@ -111,7 +113,7 @@ public class SecuredLoginTest {
 		userMfaDataReq.setStageName("deviceStage");
 		userMfaDataReq.setStageData("DeviceIdMatch");
 		userMfaDataReq.setLoginUser("testUser@gmail.com");
-		Response response = userService.securedLoginNext(amlbNewCookie,userMfaDataReq);
+		Response response = userService.securedLoginNext(userMfaDataReq);
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
 		ErrorResponse actualResponse = (ErrorResponse) response.getEntity();
 		assertThat("Status ", actualResponse.getStatus(), equalTo("Error"));
@@ -160,7 +162,8 @@ public class SecuredLoginTest {
 		String password="Password1";
 		String realm="/se";
 		String appName="AutomationHome";
-		
+		javax.ws.rs.core.Cookie jaxrsCookie = new javax.ws.rs.core.Cookie("amlbcookie","01");
+		amlbNewCookie=new NewCookie(jaxrsCookie);
 		when(openAMService.authenticateUser(anyString(), anyString(), anyString())).thenReturn(DomainMockData.AUTHENTICATION_JSON);
 		when(openAMService.checkUserExistsWithEmailMobile(anyString(), anyString())).thenReturn(DomainMockData.USER_EXISTS_TRUE);
 		new MockUp<ChinaIdmsUtil>() {
@@ -168,7 +171,7 @@ public class SecuredLoginTest {
 	        public Response executeHttpClient(String frVersion, String uri, String realm, String userName, String password)
 	    			throws ClientProtocolException, IOException
 	        {
-	            return Response.status(Response.Status.OK).entity(DomainMockData.MFA_AUTHENTICATION_JSON).build();
+	            return Response.status(Response.Status.OK).entity(DomainMockData.MFA_AUTHENTICATION_JSON).cookie(amlbNewCookie).build();
 	        }
 	    };
 	    
@@ -207,7 +210,7 @@ public class SecuredLoginTest {
 	        }
 	    };
 	   
-		Response response = userService.securedLoginNext(amlbNewCookie, userMfaDataReq);
+		Response response = userService.securedLoginNext(userMfaDataReq);
 		assertEquals(HttpStatus.OK, HttpStatus.valueOf(response.getStatus()));
 	}
 	
