@@ -14132,6 +14132,16 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("Email address has invalid format");
 			return response;
 		}
+		else if (request.getEmail().contains(UserConstants.SE_MAIL)
+				|| request.getEmail().contains(UserConstants.NON_SE_MAIL)
+				|| request.getEmail().contains(UserConstants.SCHNEIDER_MAIL)
+				|| request.getEmail().contains(UserConstants.NON_SCHNEIDER_MAIL)) {
+			response.setUserMessage(UserConstants.EMAIL_VALIDATION_INTERNALUSER + request.getEmail());
+			LOGGER.error(UserConstants.EMAIL_VALIDATION_INTERNALUSER + request.getEmail());
+			response.setCode("LG005");
+			response.setDeveloperMessage("Internal User");
+			return response;
+		}
 		else if(request.getFirstName()==null || request.getFirstName().isEmpty()) {
 			response.setUserMessage(UserConstants.MISSING_MANDATORY_FIELD);
 			response.setCode("LG002");
