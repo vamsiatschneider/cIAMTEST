@@ -314,7 +314,7 @@ public interface UserService {
 	
 	@POST
 	@Path("/apexrest/securedLoginNext")
-	Response securedLoginNext(@HeaderParam("Cookie") NewCookie cookie, UserMFADataRequest userMFADataRequest);
+	Response securedLoginNext(UserMFADataRequest userMFADataRequest);
 	
 	@POST
 	@Path("/apexrest/fileSyncToUIMS")

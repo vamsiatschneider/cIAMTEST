@@ -527,6 +527,7 @@ public class UserServiceImpl implements UserService {
 		String strcurrentMobCounter = UserConstants.ZERO;
 		String jsonStr = null;
 		JSONObject jsonCounter = new JSONObject();
+		NewCookie amlbNewCookie = null;
 
 		LOGGER.info(AUDIT_REQUESTING_USER.concat(userName).concat(AUDIT_IMPERSONATING_USER).concat(AUDIT_API_ADMIN)
 				.concat(AUDIT_OPENAM_API).concat(AUDIT_OPENAM_AUTHENTICATE_CALL).concat(AUDIT_LOG_CLOSURE));
@@ -583,11 +584,15 @@ public class UserServiceImpl implements UserService {
 			LOGGER.info("End: aunthenticate User of OPENAMService finished for username=" + userName);
 			successResponse = (String) authenticateResponse.getEntity();
 			LOGGER.info("Authentication status code from OPENAMService:" + authenticateResponse.getStatus());
+
+			Map<String, NewCookie> cookies = authenticateResponse.getCookies();
+			amlbNewCookie = cookies.get("amlbcookie");
+
 			if (401 == authenticateResponse.getStatus() && successResponse.contains(UserConstants.ACCOUNT_BLOCKED)) {
 				jsonObject.put("message", UserConstants.ACCOUNT_BLOCKED);
 				AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource);
 				LOGGER.error("ECODE-AUTHUSER-ACCT-BLOCKED : Account blocked for user : " + userName);
-				return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
+				return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).cookie(amlbNewCookie).entity(jsonObject).build();
 
 			} else if (401 == authenticateResponse.getStatus()) {
 				checkUserExistsResponse = checkUserExists(userName, UserConstants.FALSE, null);
@@ -598,7 +603,7 @@ public class UserServiceImpl implements UserService {
 					AsyncUtil.generateCSV(authCsvPath,
 							new Date() + "," + userName + "," + errorStatus + "," + regSource);
 					LOGGER.error("ECODE-AUTHUSER-UNAUTH-LOCAL : User (china) unauthorized : " + userName);
-					return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
+					return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).cookie(amlbNewCookie).entity(jsonObject).build();
 				} else {
 					checkUserExistsResponse = checkUserExists(userName, UserConstants.TRUE, null);
 					checkUserExistsFlag = (UserExistsResponse) checkUserExistsResponse.getEntity();
@@ -608,13 +613,13 @@ public class UserServiceImpl implements UserService {
 						AsyncUtil.generateCSV(authCsvPath,
 								new Date() + "," + userName + "," + errorStatus + "," + regSource);
 						LOGGER.error("ECODE-AUTHUSER-UNAUTH-GLOBAL : User (global) unauthorized : " + userName);
-						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
+						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).cookie(amlbNewCookie).entity(jsonObject).build();
 					} else {
 						jsonObject.put("user_store", "None");
 						AsyncUtil.generateCSV(authCsvPath,
 								new Date() + "," + userName + "," + errorStatus + "," + regSource);
 						LOGGER.error("ECODE-AUTHUSER-UNAUTH-UNKNOWN : User (Unknown) unauthorized : " + userName);
-						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
+						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).cookie(amlbNewCookie).entity(jsonObject).build();
 					}
 				}
 			}
@@ -626,7 +631,7 @@ public class UserServiceImpl implements UserService {
 			jsonObject.put("user_store", "None");
 			AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + successStatus + "," + regSource);
 			LOGGER.error("ECODE-AUTHUSER-PROC-ERROR : Error authenticating user : " + userName);
-			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
+			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).cookie(amlbNewCookie).entity(jsonObject).build();
 		}
 		/* Set counter to 0 */	
 		UID = productDocCtx.read("$.result[0].uid[0]");
@@ -637,7 +642,7 @@ public class UserServiceImpl implements UserService {
 		UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+PlanetDirectoryKey, UID, jsonStr);
 		AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + successStatus + "," + regSource);
 		LOGGER.info("authenticateUser() -> Ending");
-		return Response.status(Response.Status.OK.getStatusCode()).entity(successResponse).build();
+		return Response.status(Response.Status.OK.getStatusCode()).cookie(amlbNewCookie).entity(successResponse).build();
 	}
 
 	/**
@@ -9876,6 +9881,7 @@ public class UserServiceImpl implements UserService {
 				JSONObject response = new JSONObject();
 				response.put("authID", authIdSecuredLogin);
 				response.put("stage", stage);
+				response.put("Cookie", amlbNewCookie.toString());
 				/* Set counter to 0 */				
 				LOGGER.info("securedLogin :: Update counter to ZERO");
 				jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
@@ -9915,7 +9921,7 @@ public class UserServiceImpl implements UserService {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public Response securedLoginNext(NewCookie cookie, UserMFADataRequest userMFADataRequest) {
+	public Response securedLoginNext(UserMFADataRequest userMFADataRequest) {
 		LOGGER.info("Entered securedLoginNext() -> Start");
 		LOGGER.info("Parameter loginUser -> " + userMFADataRequest.getLoginUser());
 		LOGGER.info("Parameter appName -> " + userMFADataRequest.getAppName());
@@ -9933,8 +9939,13 @@ public class UserServiceImpl implements UserService {
 		String fileNameOTP = "DeviceOTPInformation.txt";
 		String fileNameResendOTP = "ResendOTPInformation.txt";
 		String stageData = null;
+		NewCookie cookie = null;
 
 		try {
+			if(userMFADataRequest.getCookie() != null) {
+				cookie = userMFADataRequest.getCookie();
+				LOGGER.info("Cookie in securedLoginNext set to: " +cookie);
+			}
 			if (null == userMFADataRequest.getAuthId() || userMFADataRequest.getAuthId().isEmpty()) {
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
 				errorResponse.setMessage(UserConstants.AUTHID_EMPTY);
@@ -10004,7 +10015,6 @@ public class UserServiceImpl implements UserService {
 				stageData = ChinaIdmsUtil.removeEscapeCharacter(userMFADataRequest.getStageData());
 				LOGGER.info("without escaped stageData = "+ stageData);
 			}
-			
 			LOGGER.info("Start: checkDeviceInfo of OPENAMService for username="+userMFADataRequest.getLoginUser());
 			Response authenticateResponse = ChinaIdmsUtil.executeHttpDeviceClient(frVersion, prefixStartUrl, "se", userMFADataRequest.getAuthId(),
 					ChinaIdmsUtil.removeEscapeCharacter(userMFADataRequest.getStageData()), fileName, cookie);
@@ -10033,6 +10043,7 @@ public class UserServiceImpl implements UserService {
 				response.put("authID", authIdSecuredLogin);
 				response.put("stage", stage);
 				response.put("header", header);
+				response.put("Cookie", cookie.toString());
 				LOGGER.info("securedLoginNext() -> Ending");
 				return Response.status(Response.Status.OK.getStatusCode()).cookie(cookie).entity(response).build();
 			}
