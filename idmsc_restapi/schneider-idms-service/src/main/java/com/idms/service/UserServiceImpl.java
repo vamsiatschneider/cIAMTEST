@@ -527,7 +527,6 @@ public class UserServiceImpl implements UserService {
 		String strcurrentMobCounter = UserConstants.ZERO;
 		String jsonStr = null;
 		JSONObject jsonCounter = new JSONObject();
-		NewCookie amlbNewCookie = null;
 
 		LOGGER.info(AUDIT_REQUESTING_USER.concat(userName).concat(AUDIT_IMPERSONATING_USER).concat(AUDIT_API_ADMIN)
 				.concat(AUDIT_OPENAM_API).concat(AUDIT_OPENAM_AUTHENTICATE_CALL).concat(AUDIT_LOG_CLOSURE));
@@ -585,14 +584,11 @@ public class UserServiceImpl implements UserService {
 			successResponse = (String) authenticateResponse.getEntity();
 			LOGGER.info("Authentication status code from OPENAMService:" + authenticateResponse.getStatus());
 
-			Map<String, NewCookie> cookies = authenticateResponse.getCookies();
-			amlbNewCookie = cookies.get("amlbcookie");
-
 			if (401 == authenticateResponse.getStatus() && successResponse.contains(UserConstants.ACCOUNT_BLOCKED)) {
 				jsonObject.put("message", UserConstants.ACCOUNT_BLOCKED);
 				AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + errorStatus + "," + regSource);
 				LOGGER.error("ECODE-AUTHUSER-ACCT-BLOCKED : Account blocked for user : " + userName);
-				return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).cookie(amlbNewCookie).entity(jsonObject).build();
+				return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
 
 			} else if (401 == authenticateResponse.getStatus()) {
 				checkUserExistsResponse = checkUserExists(userName, UserConstants.FALSE, null);
@@ -603,7 +599,7 @@ public class UserServiceImpl implements UserService {
 					AsyncUtil.generateCSV(authCsvPath,
 							new Date() + "," + userName + "," + errorStatus + "," + regSource);
 					LOGGER.error("ECODE-AUTHUSER-UNAUTH-LOCAL : User (china) unauthorized : " + userName);
-					return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).cookie(amlbNewCookie).entity(jsonObject).build();
+					return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
 				} else {
 					checkUserExistsResponse = checkUserExists(userName, UserConstants.TRUE, null);
 					checkUserExistsFlag = (UserExistsResponse) checkUserExistsResponse.getEntity();
@@ -613,13 +609,13 @@ public class UserServiceImpl implements UserService {
 						AsyncUtil.generateCSV(authCsvPath,
 								new Date() + "," + userName + "," + errorStatus + "," + regSource);
 						LOGGER.error("ECODE-AUTHUSER-UNAUTH-GLOBAL : User (global) unauthorized : " + userName);
-						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).cookie(amlbNewCookie).entity(jsonObject).build();
+						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
 					} else {
 						jsonObject.put("user_store", "None");
 						AsyncUtil.generateCSV(authCsvPath,
 								new Date() + "," + userName + "," + errorStatus + "," + regSource);
 						LOGGER.error("ECODE-AUTHUSER-UNAUTH-UNKNOWN : User (Unknown) unauthorized : " + userName);
-						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).cookie(amlbNewCookie).entity(jsonObject).build();
+						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
 					}
 				}
 			}
@@ -631,7 +627,7 @@ public class UserServiceImpl implements UserService {
 			jsonObject.put("user_store", "None");
 			AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + successStatus + "," + regSource);
 			LOGGER.error("ECODE-AUTHUSER-PROC-ERROR : Error authenticating user : " + userName);
-			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).cookie(amlbNewCookie).entity(jsonObject).build();
+			return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObject).build();
 		}
 		/* Set counter to 0 */	
 		UID = productDocCtx.read("$.result[0].uid[0]");
@@ -642,7 +638,7 @@ public class UserServiceImpl implements UserService {
 		UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+PlanetDirectoryKey, UID, jsonStr);
 		AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userName + "," + successStatus + "," + regSource);
 		LOGGER.info("authenticateUser() -> Ending");
-		return Response.status(Response.Status.OK.getStatusCode()).cookie(amlbNewCookie).entity(successResponse).build();
+		return Response.status(Response.Status.OK.getStatusCode()).entity(successResponse).build();
 	}
 
 	/**
@@ -9701,7 +9697,6 @@ public class UserServiceImpl implements UserService {
 		String jsonStr = null;
 		JSONObject jsonCounter = new JSONObject();
 		String iPlanetDirectoryKey = null;
-		NewCookie amlbNewCookie = null;
 		
 		if ((app == null || app.equalsIgnoreCase("undefined"))) {
 			regSource = UserConstants.LOGZ_IO_DEFAULT_APP;
@@ -9771,9 +9766,6 @@ public class UserServiceImpl implements UserService {
 			successResponse = (String) authenticateResponse.getEntity();
 			LOGGER.info("SecuredLogin Response code from OPENAMService: " + authenticateResponse.getStatus());
 			
-			Map<String, NewCookie> cookies = authenticateResponse.getCookies();
-			amlbNewCookie = cookies.get("amlbcookie");
-
 			productDocCtx = JsonPath.using(conf).parse(successResponse);
 			String authIdSecuredLogin = productDocCtx.read("$.authId");
 			String stage = productDocCtx.read("$.stage");
@@ -9785,7 +9777,7 @@ public class UserServiceImpl implements UserService {
 						+ "," + elapsedTime + "ms" + "," + UserConstants.ACCOUNT_BLOCKED);
 				LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
 				LOGGER.error("ECODE-SECLOGIN-ACCT-BLOCKED : Account blocked for user : " + userName);
-				return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).cookie(amlbNewCookie).entity(jsonObjectResponse).build();
+				return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObjectResponse).build();
 
 			} else if (401 == authenticateResponse.getStatus()) {
 				LOGGER.info("Checking checkUserExists China");
@@ -9802,7 +9794,7 @@ public class UserServiceImpl implements UserService {
 					elapsedTime = (System.currentTimeMillis() - startTime);
 					LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
 					LOGGER.error("ECODE-SECLOGIN-BAD-REQUEST : Bad request in secured login for user : " + userName);
-					return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).cookie(amlbNewCookie).entity(jsonObject).build();
+					return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity(jsonObject).build();
 				}
 				
 				if(jsonObject.get(UserConstants.MESSAGE_L).toString().contains(UserConstants.PWD_NOT_SET_IN_IDMS)){
@@ -9813,7 +9805,7 @@ public class UserServiceImpl implements UserService {
 							+ "," + elapsedTime + "ms" + "," + "Password not set in OpenDJ");
 					LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
 					LOGGER.error("ECODE-SECLOGIN-UNAUTH-ACTIVE-FIRSTLOGIN-FAILED-LOCAL : First Login Unauthorized China User : " + userName);
-					return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).cookie(amlbNewCookie).entity(jsonObjectResponse).build();
+					return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObjectResponse).build();
 				}
 
 				if (UserConstants.TRUE.equalsIgnoreCase(jsonObject.get(UserConstants.MESSAGE_L).toString())) {
@@ -9828,7 +9820,7 @@ public class UserServiceImpl implements UserService {
 								+ "," + elapsedTime + "ms" + "," + UserConstants.INCORRECT_PASSWORD);
 						LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
 						LOGGER.error("ECODE-SECLOGIN-UNAUTH-ACTIVE-LOCAL : Unauthorized China Active User : " + userName);
-						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).cookie(amlbNewCookie).entity(jsonObjectResponse).build();
+						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObjectResponse).build();
 					}
 					if(UserConstants.CN_USER_INACTIVE.equalsIgnoreCase(jsonObject.get(UserConstants.USER_INFO).toString())){
 						jsonObjectResponse.put("user_store", "CN");
@@ -9838,7 +9830,7 @@ public class UserServiceImpl implements UserService {
 								+ "," + elapsedTime + "ms" + "," + UserConstants.USER_INACTIVE);
 						LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
 						LOGGER.error("ECODE-SECLOGIN-UNAUTH-LOCAL-NOT-ACTIVE : Unauthorized Non active China User : " + userName);
-						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).cookie(amlbNewCookie).entity(jsonObjectResponse).build();
+						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObjectResponse).build();
 					}
 					if(UserConstants.CN_USER_MULTIPLE_EXIST.equalsIgnoreCase(jsonObject.get(UserConstants.USER_INFO).toString())){
 						jsonObjectResponse.put("user_store", "CN");
@@ -9848,7 +9840,7 @@ public class UserServiceImpl implements UserService {
 								+ "," + elapsedTime + "ms" + "," + UserConstants.CN_USER_MULTIPLE_EXIST);
 						LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
 						LOGGER.error("ECODE-SECLOGIN-UNAUTH-LOCAL-MULTIPLE-USER-EXISTS : Multiple Registered Users for user : " + userName);
-						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).cookie(amlbNewCookie).entity(jsonObjectResponse).build();
+						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObjectResponse).build();
 					}					
 				} else {
 					LOGGER.info("Checking checkUserExists Global");
@@ -9863,7 +9855,7 @@ public class UserServiceImpl implements UserService {
 								+ regSource + "," + elapsedTime + "ms" + "," + UserConstants.INCORRECT_PASSWORD);
 						LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
 						LOGGER.error("ECODE-SECLOGIN-UNAUTH-GLOBAL-USER : Unauthorized Global User : " + userName);
-						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).cookie(amlbNewCookie).entity(jsonObjectResponse).build();
+						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObjectResponse).build();
 					} else {
 						jsonObjectResponse.put("user_store", "None");
 						elapsedTime = (System.currentTimeMillis() - startTime);
@@ -9871,7 +9863,7 @@ public class UserServiceImpl implements UserService {
 								+ regSource + "," + elapsedTime + "ms" + "," + UserConstants.USER_NOT_EXISTS);
 						LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
 						LOGGER.error("ECODE-SECLOGIN-USER-NOT-EXISTS : User doesn't exists with user name : " + userName);
-						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).cookie(amlbNewCookie).entity(jsonObjectResponse).build();
+						return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).entity(jsonObjectResponse).build();
 					}
 				}
 			} else if (200 == authenticateResponse.getStatus() && (null != stage && !stage.isEmpty()) 
@@ -9881,7 +9873,6 @@ public class UserServiceImpl implements UserService {
 				JSONObject response = new JSONObject();
 				response.put("authID", authIdSecuredLogin);
 				response.put("stage", stage);
-				response.put("Cookie", amlbNewCookie.toString());
 				/* Set counter to 0 */				
 				LOGGER.info("securedLogin :: Update counter to ZERO");
 				jsonCounter.put(UserConstants.MAIL_RATE_COUNTER, strcurrentMailCounter);
@@ -9889,7 +9880,7 @@ public class UserServiceImpl implements UserService {
 				jsonStr = jsonCounter.toString();			
 				UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, uid, jsonStr);
 				LOGGER.info("securedLogin() -> Ending");
-				return Response.status(Response.Status.OK.getStatusCode()).cookie(amlbNewCookie).entity(response).build();
+				return Response.status(Response.Status.OK.getStatusCode()).entity(response).build();
 			}
 		} catch (Exception e) {
 			LOGGER.error("Problem in securedLogin():" + e.getMessage(),e);
@@ -9899,7 +9890,7 @@ public class UserServiceImpl implements UserService {
 					+ elapsedTime + "ms" + "," + UserConstants.SERVER_ERROR);
 			LOGGER.info("Time taken by securedLogin() : " + elapsedTime);
 			LOGGER.error("ECODE-SECLOGIN-PROC-ERROR : Error processing authentication request");
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).cookie(amlbNewCookie).entity(jsonObjectResponse).build();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).entity(jsonObjectResponse).build();
 		}
 
 		elapsedTime = (System.currentTimeMillis() - startTime);
@@ -9912,7 +9903,7 @@ public class UserServiceImpl implements UserService {
 		jsonStr = jsonCounter.toString();			
 		UserServiceUtil.updateCounterBasedOnFRVersion(productService, frVersion, UserConstants.CHINA_IDMS_TOKEN+iPlanetDirectoryKey, uid, jsonStr);
 		LOGGER.info("securedLogin() -> Ending");
-		return Response.status(Response.Status.OK.getStatusCode()).cookie(amlbNewCookie).entity(successResponse).build();
+		return Response.status(Response.Status.OK.getStatusCode()).entity(successResponse).build();
 	}
 	
 	/**
@@ -9939,20 +9930,15 @@ public class UserServiceImpl implements UserService {
 		String fileNameOTP = "DeviceOTPInformation.txt";
 		String fileNameResendOTP = "ResendOTPInformation.txt";
 		String stageData = null;
-		NewCookie cookie = null;
 
 		try {
-			if(userMFADataRequest.getCookie() != null) {
-				cookie = userMFADataRequest.getCookie();
-				LOGGER.info("Cookie in securedLoginNext set to: " +cookie);
-			}
 			if (null == userMFADataRequest.getAuthId() || userMFADataRequest.getAuthId().isEmpty()) {
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
 				errorResponse.setMessage(UserConstants.AUTHID_EMPTY);
 				LOGGER.error(UserConstants.AUTHID_EMPTY);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
-				return Response.status(Response.Status.BAD_REQUEST).cookie(cookie).entity(errorResponse).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 			if (null == userMFADataRequest.getStageName() || userMFADataRequest.getStageName().isEmpty()) {
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
@@ -9960,7 +9946,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.error(UserConstants.STAGENAME_EMPTY);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
-				return Response.status(Response.Status.BAD_REQUEST).cookie(cookie).entity(errorResponse).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 			stageNameFromUI = userMFADataRequest.getStageName();
 			if(!(stageNameFromUI.equals("deviceStage") || stageNameFromUI.equals("OTPStage") 
@@ -9970,7 +9956,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.error(UserConstants.STAGENAME_INCORRECT);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
-				return Response.status(Response.Status.BAD_REQUEST).cookie(cookie).entity(errorResponse).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 			if (null == userMFADataRequest.getStageData() || userMFADataRequest.getStageData().isEmpty()) {
 				if (stageNameFromUI.equalsIgnoreCase("ResendOTPStage")) {
@@ -9981,7 +9967,7 @@ public class UserServiceImpl implements UserService {
 					LOGGER.error(UserConstants.DEVICEDATA_EMPTY);
 					elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 					LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
-					return Response.status(Response.Status.BAD_REQUEST).cookie(cookie).entity(errorResponse).build();
+					return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 				}
 			}
 			if (null == userMFADataRequest.getLoginUser() || userMFADataRequest.getLoginUser().isEmpty()) {
@@ -9990,7 +9976,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.error(UserConstants.USER_EMPTY);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
-				return Response.status(Response.Status.BAD_REQUEST).cookie(cookie).entity(errorResponse).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 			if (null == userMFADataRequest.getAppName() || userMFADataRequest.getAppName().isEmpty()) {
 				errorResponse.setStatus(ErrorCodeConstants.ERROR);
@@ -9998,7 +9984,7 @@ public class UserServiceImpl implements UserService {
 				LOGGER.error(UserConstants.APPNAME_EMPTY);
 				elapsedTime = UserConstants.TIME_IN_MILLI_SECONDS - startTime;
 				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
-				return Response.status(Response.Status.BAD_REQUEST).cookie(cookie).entity(errorResponse).build();
+				return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
 			}
 			
 			if(stageNameFromUI.equalsIgnoreCase("deviceStage")){
@@ -10017,7 +10003,7 @@ public class UserServiceImpl implements UserService {
 			}
 			LOGGER.info("Start: checkDeviceInfo of OPENAMService for username="+userMFADataRequest.getLoginUser());
 			Response authenticateResponse = ChinaIdmsUtil.executeHttpDeviceClient(frVersion, prefixStartUrl, "se", userMFADataRequest.getAuthId(),
-					ChinaIdmsUtil.removeEscapeCharacter(userMFADataRequest.getStageData()), fileName, cookie);
+					ChinaIdmsUtil.removeEscapeCharacter(userMFADataRequest.getStageData()), fileName);
 			LOGGER.info("End: checkDeviceInfo of OPENAMService for username="+userMFADataRequest.getLoginUser());
 			successResponse = (String) authenticateResponse.getEntity();
 			LOGGER.info("Response code from OPENAMService: " + authenticateResponse.getStatus());
@@ -10032,7 +10018,7 @@ public class UserServiceImpl implements UserService {
 				jsonObjectResponse.put("message", productDocCtx.read("$.message"));
 				elapsedTime = (System.currentTimeMillis() - startTime);
 				LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
-				return Response.status(authenticateResponse.getStatus()).cookie(cookie).entity(jsonObjectResponse).build();
+				return Response.status(authenticateResponse.getStatus()).entity(jsonObjectResponse).build();
 			}
 			if (200 == authenticateResponse.getStatus() && (null != stage && !stage.isEmpty())
 					&& stage.equalsIgnoreCase(UserConstants.STAGE_HOTP2)) {
@@ -10043,9 +10029,8 @@ public class UserServiceImpl implements UserService {
 				response.put("authID", authIdSecuredLogin);
 				response.put("stage", stage);
 				response.put("header", header);
-				response.put("Cookie", cookie.toString());
 				LOGGER.info("securedLoginNext() -> Ending");
-				return Response.status(Response.Status.OK.getStatusCode()).cookie(cookie).entity(response).build();
+				return Response.status(Response.Status.OK.getStatusCode()).entity(response).build();
 			}
 		} catch (Exception e) {
 			LOGGER.error("Problem in securedLoginDevice():" + e.getMessage(), e);
@@ -10055,7 +10040,7 @@ public class UserServiceImpl implements UserService {
 			AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userMFADataRequest.getLoginUser() + "," + errorStatus
 					+ "," + userMFADataRequest.getAppName() + "," + elapsedTime + "ms" + "," + e.getMessage());
 			LOGGER.info("Time taken by securedLoginNext() : " + elapsedTime);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).cookie(cookie).entity(jsonObjectResponse)
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).entity(jsonObjectResponse)
 					.build();
 		}
 
@@ -10063,7 +10048,7 @@ public class UserServiceImpl implements UserService {
 		AsyncUtil.generateCSV(authCsvPath, new Date() + "," + userMFADataRequest.getLoginUser() + "," + successStatus + ","
 				+ userMFADataRequest.getAppName() + "," + elapsedTime + "ms" + "," + UserConstants.LOGIN_SUCCESS);
 		LOGGER.info("securedLoginNext() -> Ending");
-		return Response.status(Response.Status.OK.getStatusCode()).cookie(cookie).entity(successResponse).build();
+		return Response.status(Response.Status.OK.getStatusCode()).entity(successResponse).build();
 	}
 
 	/*

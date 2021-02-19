@@ -3,8 +3,6 @@
  */
 package com.idms.model;
 
-import javax.ws.rs.core.NewCookie;
-
 /**
  * User MFA Device Info 
  * @author Santosh Kumar
@@ -22,7 +20,6 @@ public class UserMFADataRequest {
 	private String stageName;
 	private String loginUser;
 	private String appName;
-	private NewCookie cookie;
 	
 	public String getAuthId() {
 		return authId;
@@ -53,12 +50,6 @@ public class UserMFADataRequest {
 	}
 	public void setAppName(String appName) {
 		this.appName = appName;
-	}
-	public NewCookie getCookie() {
-		return cookie;
-	}
-	public void setCookie(NewCookie cookie) {
-		this.cookie = cookie;
 	}
 
 }
