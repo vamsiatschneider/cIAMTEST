@@ -16,7 +16,6 @@ import java.util.List;
 
 import javax.naming.InvalidNameException;
 import javax.naming.SizeLimitExceededException;
-import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.codec.binary.Hex;
@@ -24,14 +23,10 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,8 +62,6 @@ public class ChinaIdmsUtil {
 	
 	public static Response executeHttpClient(String frVersion, String uri, String realm, String userName, String password)
 			throws ClientProtocolException, IOException {
-//		HttpClient client = new DefaultHttpClient();
-//		HttpPost request = new HttpPost(uri + "/accessmanager/json/authenticate?realm=" + realm+"&authIndexType=service&authIndexValue=NewMFA");
 		CloseableHttpClient client = HttpClients.createDefault();
 		HttpClientContext context = HttpClientContext.create();
 		HttpPost request = new HttpPost(uri + "/accessmanager/json/authenticate?realm=" + realm);
@@ -81,19 +74,6 @@ public class ChinaIdmsUtil {
 		HttpResponse response = client.execute(request, context);
 		BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 
-		NewCookie amlbNewCookie = null;
-		CookieStore cookieStore = context.getCookieStore();
-		List<Cookie> cookies = cookieStore.getCookies();
-		for(Cookie cookie : cookies) {
-			LOGGER.info("Cookie Name: "+ cookie.getName());
-			LOGGER.info("Cookie Value: "+ cookie.getValue());
-			if("amlbcookie".equalsIgnoreCase(cookie.getName())) {
-                javax.ws.rs.core.Cookie jaxrsCookie = new javax.ws.rs.core.Cookie(cookie.getName(), cookie.getValue(), cookie.getPath(), cookie.getDomain());
-                //newCookie = new NewCookie(cookie.getName(), cookie.getValue());
-				amlbNewCookie = new NewCookie(jaxrsCookie);
-				break;
-			}
-		}
 		StringBuffer result = new StringBuffer();
 		String line = "";
 		try {
@@ -101,12 +81,12 @@ public class ChinaIdmsUtil {
 				result.append(line);
 			}
 			if (401 == response.getStatusLine().getStatusCode()) {
-				return Response.status(Response.Status.UNAUTHORIZED).cookie(amlbNewCookie).entity(result.toString()).build();
+				return Response.status(Response.Status.UNAUTHORIZED).entity(result.toString()).build();
 			}
 		} finally {
 			rd.close();
 		}
-		return Response.status(response.getStatusLine().getStatusCode()).cookie(amlbNewCookie).entity(result.toString()).build();
+		return Response.status(response.getStatusLine().getStatusCode()).entity(result.toString()).build();
 	}
 	
 	/**
@@ -321,8 +301,6 @@ public class ChinaIdmsUtil {
 		String jsonString = formJsonRequest(authId,deviceOrOTPData,fileName);
 		
 		if(null != jsonString && !jsonString.isEmpty()){
-//			HttpClient client = new DefaultHttpClient();
-//			HttpPost request = new HttpPost(uri + "/accessmanager/json/authenticate?realm=" + realm + "&authIndexType=service&authIndexValue=NewMFA");
 			CloseableHttpClient client = HttpClients.createDefault();
 			HttpPost request = new HttpPost(uri + "/accessmanager/json/authenticate?realm=" + realm);
 			StringEntity entity = new StringEntity(jsonString);
