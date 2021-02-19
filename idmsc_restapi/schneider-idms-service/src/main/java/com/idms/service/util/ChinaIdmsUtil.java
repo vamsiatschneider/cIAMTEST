@@ -316,7 +316,7 @@ public class ChinaIdmsUtil {
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	public static Response executeHttpDeviceClient(String frVersion, String uri, String realm, String authId, String deviceOrOTPData, String fileName, NewCookie cookie)
+	public static Response executeHttpDeviceClient(String frVersion, String uri, String realm, String authId, String deviceOrOTPData, String fileName)
 			throws ClientProtocolException, IOException {
 		String jsonString = formJsonRequest(authId,deviceOrOTPData,fileName);
 		
@@ -327,7 +327,6 @@ public class ChinaIdmsUtil {
 			HttpPost request = new HttpPost(uri + "/accessmanager/json/authenticate?realm=" + realm);
 			StringEntity entity = new StringEntity(jsonString);
 			request.setEntity(entity);
-			request.setHeader("Cookie", cookie.toString());
 			request.setHeader("Accept", "application/json");
 			request.setHeader("Content-type", "application/json");
 			LOGGER.info("Execute http device client for version : " + frVersion);
@@ -344,18 +343,18 @@ public class ChinaIdmsUtil {
 				result.append(line);
 			}
 			if (401 == response.getStatusLine().getStatusCode()) {
-				return Response.status(Response.Status.UNAUTHORIZED).cookie(cookie).entity(result.toString()).build();
+				return Response.status(Response.Status.UNAUTHORIZED).entity(result.toString()).build();
 			}}
 			finally {
 			rd.close();
 			}
-			return Response.status(response.getStatusLine().getStatusCode()).cookie(cookie).entity(result.toString()).build();
+			return Response.status(response.getStatusLine().getStatusCode()).entity(result.toString()).build();
 		}
 		ErrorResponse errorResponse = new ErrorResponse();
 		errorResponse.setStatus(ErrorCodeConstants.ERROR);
 		errorResponse.setMessage("Device/OTP Info JSON string is unavailable. Please contact support team.");
 	
-		return Response.status(Response.Status.NO_CONTENT).cookie(cookie).entity(errorResponse).build();
+		return Response.status(Response.Status.NO_CONTENT).entity(errorResponse).build();
 	}
 	
 	/**
