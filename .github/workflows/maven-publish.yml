@@ -23,3 +23,8 @@ jobs:
         java-version: 1.8
     - name: Build with Maven
       run: mvn -B package --file idmsc_restapi/schneider-idms/pom.xml
+    - name: Upload IDMS.war
+      uses: actions/upload-artifact@v2
+      with:
+        path: /home/runner/work/cIAMTEST/cIAMTEST/idmsc_restapi/schneider-idms-service/target/IDMS.war
+      
