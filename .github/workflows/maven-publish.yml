@@ -27,12 +27,14 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         path: /home/runner/work/cIAMTEST/cIAMTEST/idmsc_restapi/schneider-idms-service/target/IDMS.war
-    - name: Establish remote ssh connection using password
-      uses: appleboy/ssh-action@master
+    - name: Deploy the package to the remote server
+      uses: garygrossgarten/github-action-scp@release
       with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        password: ${{ secrets.PASSWORD }}
-        port: ${{ secrets.PORT }}
-        script: whoami
+       local: /home/runner/work/cIAMTEST/cIAMTEST/idmsc_restapi/schneider-idms-service/target/IDMS.war
+       remote: /home/sesa571469/ # My remote directory
+       host: ${{ secrets.HOST }}
+       username: ${{ secrets.USERNAME }}
+       password: ${{ secrets.PASSWORD }}
+       port: ${{ secrets.PORT }}
+      
       
