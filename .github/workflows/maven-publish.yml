@@ -27,4 +27,12 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         path: /home/runner/work/cIAMTEST/cIAMTEST/idmsc_restapi/schneider-idms-service/target/IDMS.war
+    - name: Establish remote ssh connection using password
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        script: whoami
       
